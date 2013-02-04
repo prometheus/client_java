@@ -58,7 +58,7 @@ public class Histogram extends StatefulGenerator<Histogram.Vector> {
         final JsonObject values = new JsonObject();
         for (final float percentile : vector.reportablePercentiles) {
           values.add(Float.valueOf(percentile).toString(),
-              context.serialize(Float.valueOf(vector.percentile(percentile)).toString()));
+              context.serialize(vector.percentile(percentile)));
         }
         element.add("value", values);
         value.add(element);

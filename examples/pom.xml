@@ -7,7 +7,7 @@
     <groupId>io.prometheus.client</groupId>
     <artifactId>examples</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.0a</version>
+    <version>0.0.0b</version>
     <name>${project.artifactId}</name>
     <modules>
         <module>random</module>

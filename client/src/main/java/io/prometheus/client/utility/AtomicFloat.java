@@ -136,7 +136,7 @@ public class AtomicFloat {
     @Override
     public JsonElement serialize(final AtomicFloat src, final Type typeOfSrc,
         final JsonSerializationContext context) {
-      return new JsonPrimitive(Float.valueOf(src.floatValue()).toString());
+      return new JsonPrimitive(src.floatValue());
     }
   }
 }
