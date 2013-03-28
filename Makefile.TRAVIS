@@ -1,0 +1,17 @@
+all: test
+
+build: client utility examples
+
+client:
+	$(MAKE) -C client -f Makefile.TRAVIS
+
+utility: client
+	$(MAKE) -C utility -f Makefile.TRAVIS
+
+examples: client
+	$(MAKE) -C examples -f Makefile.TRAVIS
+
+test: build
+	mvn test
+
+.PHONY: build client examples test utility

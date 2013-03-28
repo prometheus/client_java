@@ -1,0 +1,7 @@
+language: java
+
+before_install:
+- make -f Makefile.TRAVIS build
+
+script:
+- make -f Makefile.TRAVIS test
