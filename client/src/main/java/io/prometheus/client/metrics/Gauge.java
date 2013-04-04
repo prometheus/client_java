@@ -17,8 +17,8 @@ package io.prometheus.client.metrics;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.*;
-import io.prometheus.client.utility.AtomicFloat;
 
 /**
  * <p>
@@ -39,7 +39,7 @@ public class Gauge extends StatelessGenerator<Gauge.Vector> {
    *        as that will introduce computational inefficiencies.
    * @param value The new target value.
    */
-  public void set(final Map<String, String> labels, final float value) {
+  public void set(final Map<String, String> labels, final double value) {
     final Vector vector = forLabels(labels);
     vector.value().set(value);
   }
@@ -73,11 +73,11 @@ public class Gauge extends StatelessGenerator<Gauge.Vector> {
     }
   }
 
-  protected class Vector implements StatelessGenerator.Vector<AtomicFloat> {
-    private final AtomicFloat value = new AtomicFloat();
+  protected class Vector implements StatelessGenerator.Vector<AtomicDouble> {
+    private final AtomicDouble value = new AtomicDouble();
 
     @Override
-    public AtomicFloat value() {
+    public AtomicDouble value() {
       return value;
     }
 

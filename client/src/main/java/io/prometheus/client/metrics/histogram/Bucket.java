@@ -18,11 +18,11 @@ package io.prometheus.client.metrics.histogram;
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
 public interface Bucket {
-  public void add(final float value);
+  public void add(final double value);
 
   public int observations();
 
   public void reset();
 
-  public float valueForIndex(final int index);
+  public double valueForIndex(final int index);
 }

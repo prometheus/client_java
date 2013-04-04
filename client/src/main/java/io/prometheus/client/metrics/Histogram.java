@@ -16,6 +16,7 @@ package io.prometheus.client.metrics;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
@@ -39,7 +40,7 @@ public class Histogram extends StatefulGenerator<Histogram.Vector> {
     this.bucketBuilder = bucketBuilder;
   }
 
-  public void add(final Map<String, String> labels, final float sample) {
+  public void add(final Map<String, String> labels, final double sample) {
     final Vector vector = forLabels(labels);
 
     vector.add(sample);
@@ -57,7 +58,7 @@ public class Histogram extends StatefulGenerator<Histogram.Vector> {
         final Vector vector = src.vectors.get(labelSet);
         final JsonObject values = new JsonObject();
         for (final float percentile : vector.reportablePercentiles) {
-          values.add(Float.valueOf(percentile).toString(),
+          values.add(String.format(Locale.US, "%6f", percentile),
               context.serialize(vector.percentile(percentile)));
         }
         element.add("value", values);
@@ -92,7 +93,7 @@ public class Histogram extends StatefulGenerator<Histogram.Vector> {
       this.reportablePercentiles = reportablePercentiles;
     }
 
-    private synchronized void add(final float sample) {
+    private synchronized void add(final double sample) {
       int lastIndex = 0;
       for (int i = 0; i < bucketStarts.size(); i++) {
         if (sample < bucketStarts.get(i)) {
@@ -184,7 +185,7 @@ public class Histogram extends StatefulGenerator<Histogram.Vector> {
       return new Offset(buckets.get(0), 0);
     }
 
-    private float percentile(final float percentile) {
+    private double percentile(final float percentile) {
       final Offset offset = bucketForPercentile(percentile);
       return offset.bucket.valueForIndex(offset.index);
     }
