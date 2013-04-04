@@ -27,33 +27,33 @@ import org.apache.commons.math3.stat.descriptive.rank.Min;
 public class ReductionMethods {
   public static ReductionMethod minimum = new ReductionMethod() {
     @Override
-    public float reduce(final List<Float> values) {
+    public double reduce(final List<Double> values) {
       final Min minimum = new Min();
-      for (final Float value : values) {
+      for (final Double value : values) {
         minimum.increment(value);
       }
 
-      return (float) minimum.getResult();
+      return (double) minimum.getResult();
     }
   };
 
   public static ReductionMethod maximum = new ReductionMethod() {
     @Override
-    public float reduce(final List<Float> values) {
+    public double reduce(final List<Double> values) {
       final Max maximum = new Max();
-      for (final Float value : values) {
+      for (final Double value : values) {
         maximum.increment(value);
       }
 
-      return (float) maximum.getResult();
+      return (double) maximum.getResult();
     }
   };
 
   public static ReductionMethod average = new ReductionMethod() {
     @Override
-    public float reduce(final List<Float> values) {
+    public double reduce(final List<Double> values) {
       final Mean mean = new Mean();
-      for (final Float value : values) {
+      for (final Double value : values) {
         mean.increment(value);
       }
 
@@ -63,14 +63,13 @@ public class ReductionMethods {
 
   public static ReductionMethod median = new ReductionMethod() {
     @Override
-    public float reduce(final List<Float> values) {
+    public double reduce(final List<Double> values) {
       final Median median = new Median();
-      final double[] asDoubles = new double[values.size()];
+      final double[] asArray = new double[values.size()];
       for (int i = 0; i < values.size(); i++) {
-        asDoubles[i] = values.get(i);
+        asArray[i] = values.get(i);
       }
-
-      return (float) median.evaluate(asDoubles);
+      return (float) median.evaluate(asArray);
     }
   };
 }

@@ -20,5 +20,5 @@ import java.util.List;
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
 public interface ReductionMethod {
-  public float reduce(final List<Float> values);
+  public double reduce(final List<Double> values);
 }

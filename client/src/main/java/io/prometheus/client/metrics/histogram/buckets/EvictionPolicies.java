@@ -24,7 +24,7 @@ public class EvictionPolicies {
   public static AccumulatingBucket.EvictionPolicy evictOldest(final int count) {
     return new AccumulatingBucket.EvictionPolicy() {
       @Override
-      public void evict(final List<Float> values) {
+      public void evict(final List<Double> values) {
         final int valueCount = values.size();
 
         if (count > valueCount) {
@@ -43,7 +43,7 @@ public class EvictionPolicies {
       final ReductionMethod reducer) {
     return new AccumulatingBucket.EvictionPolicy() {
       @Override
-      public void evict(final List<Float> values) {
+      public void evict(final List<Double> values) {
         final int valueCount = values.size();
 
         if (count > valueCount) {

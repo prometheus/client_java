@@ -17,34 +17,35 @@ package io.prometheus.client.metrics;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.*;
-import io.prometheus.client.utility.AtomicFloat;
+
 
 /**
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
 public class Counter extends StatelessGenerator<Counter.Vector> {
-  public void set(final Map<String, String> labels, final float value) {
+  public void set(final Map<String, String> labels, final double value) {
     final Vector vector = forLabels(labels);
     vector.value().getAndSet(value);
   }
 
   public void increment(final Map<String, String> labels) {
     final Vector vector = forLabels(labels);
-    vector.value().incrementAndGet();
+    vector.value().addAndGet(1);
   }
 
   public void decrement(final Map<String, String> labels) {
     final Vector vector = forLabels(labels);
-    vector.value().decrementAndGet();
+    vector.value().addAndGet(-1);
   }
 
-  public void incrementBy(final Map<String, String> labels, final float delta) {
+  public void incrementBy(final Map<String, String> labels, final double delta) {
     final Vector vector = forLabels(labels);
     vector.value().addAndGet(delta);
   }
 
-  public void decrementBy(final Map<String, String> labels, final float delta) {
+  public void decrementBy(final Map<String, String> labels, final double delta) {
     final Vector vector = forLabels(labels);
     vector.value().addAndGet(-1 * delta);
   }
@@ -54,11 +55,11 @@ public class Counter extends StatelessGenerator<Counter.Vector> {
     return new Vector();
   }
 
-  protected class Vector implements StatelessGenerator.Vector<AtomicFloat> {
-    private final AtomicFloat value = new AtomicFloat();
+  protected class Vector implements StatelessGenerator.Vector<AtomicDouble> {
+    private final AtomicDouble value = new AtomicDouble();
 
     @Override
-    public AtomicFloat value() {
+    public AtomicDouble value() {
       return value;
     }
 

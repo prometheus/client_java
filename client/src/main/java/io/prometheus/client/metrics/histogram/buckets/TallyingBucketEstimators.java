@@ -29,10 +29,10 @@ public class TallyingBucketEstimators {
         public TallyingBucket.Estimator apply(final @Nullable TallyingBucket.Estimator input) {
           return new TallyingBucket.Estimator() {
             @Override
-            public float estimateFor(final float minimum, final float maximum, final int index,
+            public double estimateFor(final double minimum, final double maximum, final int index,
                 final int observations) {
               if (observations == 0) {
-                return Float.NaN;
+                return Double.NaN;
               } else {
                 return input.estimateFor(maximum, maximum, index, observations);
               }
@@ -44,7 +44,7 @@ public class TallyingBucketEstimators {
   public static TallyingBucket.Estimator minimum = emptyFilter
       .apply(new TallyingBucket.Estimator() {
         @Override
-        public float estimateFor(final float minimum, final float maximum, final int index,
+        public double estimateFor(final double minimum, final double maximum, final int index,
             final int observations) {
           return minimum;
         }
@@ -53,7 +53,7 @@ public class TallyingBucketEstimators {
   public static TallyingBucket.Estimator maximum = emptyFilter
       .apply(new TallyingBucket.Estimator() {
         @Override
-        public float estimateFor(final float minimum, final float maximum, final int index,
+        public double estimateFor(final double minimum, final double maximum, final int index,
             final int observations) {
           return maximum;
         }
@@ -63,7 +63,7 @@ public class TallyingBucketEstimators {
       .apply(new TallyingBucket.Estimator() {
         // XXX: Rename averageOfExtrema
         @Override
-        public float estimateFor(final float minimum, final float maximum, final int index,
+        public double estimateFor(final double minimum, final double maximum, final int index,
             final int observations) {
           return (float) (new Mean().evaluate(new double[] {minimum, maximum}));
         }
@@ -76,7 +76,7 @@ public class TallyingBucketEstimators {
         private float upperThird = 2f / 3f;
 
         @Override
-        public float estimateFor(final float minimum, final float maximum, final int index,
+        public double estimateFor(final double minimum, final double maximum, final int index,
             final int observations) {
           if (observations == 1) {
             return minimum;

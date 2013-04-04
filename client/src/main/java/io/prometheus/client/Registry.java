@@ -19,12 +19,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.*;
-import io.prometheus.client.metrics.Counter;
-import io.prometheus.client.metrics.Gauge;
-import io.prometheus.client.metrics.Histogram;
-import io.prometheus.client.metrics.Metric;
-import io.prometheus.client.utility.AtomicFloat;
+import io.prometheus.client.metrics.*;
 import io.prometheus.client.utility.Clock;
 import io.prometheus.client.utility.SystemClock;
 import io.prometheus.client.utility.labels.Reserved;
@@ -143,7 +140,7 @@ public class Registry {
         new GsonBuilder().registerTypeAdapter(Vector.class, new EntrySerializer())
             .registerTypeAdapter(Gauge.class, new Gauge.Serializer())
             .registerTypeAdapter(Counter.class, new Counter.Serializer())
-            .registerTypeAdapter(AtomicFloat.class, new AtomicFloat.Serializer())
+            .registerTypeAdapter(AtomicDouble.class, new AtomicDoubleSerializer())
             .registerTypeAdapter(Histogram.class, new Histogram.Serializer()).create();
   }
 
