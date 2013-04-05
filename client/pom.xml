@@ -6,7 +6,7 @@
 
     <groupId>io.prometheus</groupId>
     <artifactId>client</artifactId>
-    <version>0.0.0b</version>
+    <version>0.0.0c</version>
     <dependencies>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>

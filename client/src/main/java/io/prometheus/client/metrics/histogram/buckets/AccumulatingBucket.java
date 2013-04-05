@@ -28,17 +28,17 @@ public class AccumulatingBucket implements Bucket {
   private final EvictionPolicy evictionPolicy;
   private final AtomicInteger observations = new AtomicInteger(0);
   private final int capacity;
-  private final List<Float> samples;
+  private final List<Double> samples;
 
   public AccumulatingBucket(final EvictionPolicy evictionPolicy, final int capacity) {
     this.evictionPolicy = evictionPolicy;
     this.capacity = capacity;
 
-    samples = new ArrayList<Float>(capacity);
+    samples = new ArrayList<Double>(capacity);
   }
 
   @Override
-  public synchronized void add(final float value) {
+  public synchronized void add(final double value) {
     observations.incrementAndGet();
 
     final int size = samples.size() + 1;
@@ -61,14 +61,14 @@ public class AccumulatingBucket implements Bucket {
   }
 
   @Override
-  public synchronized float valueForIndex(final int index) {
+  public synchronized double valueForIndex(final int index) {
     final int sampleCount = samples.size();
 
     if (sampleCount == 0) {
       return Float.NaN;
     }
 
-    final ArrayList<Float> temporary = new ArrayList<Float>(samples);
+    final ArrayList<Double> temporary = new ArrayList<Double>(samples);
     Collections.sort(temporary);
 
     final int targetIndex =
@@ -78,7 +78,7 @@ public class AccumulatingBucket implements Bucket {
   }
 
   public static interface EvictionPolicy {
-    public void evict(final List<Float> values);
+    public void evict(final List<Double> values);
   }
 
   public static class BucketBuilder implements io.prometheus.client.metrics.histogram.BucketBuilder {

@@ -16,8 +16,8 @@ package io.prometheus.client.metrics.histogram.buckets;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import io.prometheus.client.metrics.histogram.Bucket;
-import io.prometheus.client.utility.AtomicFloat;
 
 /**
  * @author matt.proud@gmail.com (Matt T. Proud)
@@ -25,8 +25,8 @@ import io.prometheus.client.utility.AtomicFloat;
 public class TallyingBucket implements Bucket {
   // XXX: Purposely implemented without locking.
 
-  private final AtomicFloat largestObserved = new AtomicFloat(Float.MIN_VALUE);
-  private final AtomicFloat smallestObserved = new AtomicFloat(Float.MAX_VALUE);
+  private final AtomicDouble largestObserved = new AtomicDouble(Float.MIN_VALUE);
+  private final AtomicDouble smallestObserved = new AtomicDouble(Float.MAX_VALUE);
   private final AtomicInteger observations = new AtomicInteger(0);
 
   private final Estimator estimator;
@@ -36,7 +36,7 @@ public class TallyingBucket implements Bucket {
   }
 
   @Override
-  public void add(final float value) {
+  public void add(final double value) {
     observations.incrementAndGet();
 
     if (largestObserved.get() < value) {
@@ -61,13 +61,13 @@ public class TallyingBucket implements Bucket {
   }
 
   @Override
-  public float valueForIndex(final int index) {
+  public double valueForIndex(final int index) {
     return estimator.estimateFor(smallestObserved.get(), largestObserved.get(), index,
         observations.get());
   }
 
   public static interface Estimator {
-    float estimateFor(final float minimum, final float maximum, final int index,
+    double estimateFor(final double minimum, final double maximum, final int index,
         final int observations);
   }
 

@@ -11,7 +11,7 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>client</artifactId>
-            <version>0.0.0b</version>
+            <version>0.0.0c</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
