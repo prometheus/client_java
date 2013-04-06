@@ -276,6 +276,8 @@ public class Registry {
   public void dumpToWriter(final Writer writer) throws IOException {
     final Instant start = clock.now();
 
+    Telemetry.updateStandard();
+
     boolean erroneous = true;
     try {
       final JsonArray array = new JsonArray();
