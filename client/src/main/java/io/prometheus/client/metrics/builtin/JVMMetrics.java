@@ -209,11 +209,11 @@ public class JVMMetrics {
           (Long) mBeanServer.getAttribute(onDirect, "MemoryUsed"));
 
       bufferPoolsMappedCapacity.set(emptyLabels(),
-          (Long) mBeanServer.getAttribute(onDirect, "TotalCapacity"));
+          (Long) mBeanServer.getAttribute(onMapped, "TotalCapacity"));
       bufferPoolsMappedCount.set(emptyLabels(),
-          (Long) mBeanServer.getAttribute(onDirect, "Count"));
+          (Long) mBeanServer.getAttribute(onMapped, "Count"));
       bufferPoolsMappedMem.set(emptyLabels(),
-          (Long) mBeanServer.getAttribute(onDirect, "MemoryUsed"));
+          (Long) mBeanServer.getAttribute(onMapped, "MemoryUsed"));
     } catch (JMException ignored) {
       log.debug("Buffer Pool metrics unavailable (Java 6?)");
     }
