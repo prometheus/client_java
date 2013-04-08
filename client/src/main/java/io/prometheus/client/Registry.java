@@ -102,7 +102,7 @@ public class Registry {
    * no labels.
    * </p>
    */
-  private static final Map<String, String> EMPTY_LABELS = ImmutableMap.<String, String> of();
+  private static final Map<String, String> EMPTY_LABELS = ImmutableMap.of();
   /**
    * <p>
    * A Java properties key that if set to {@code TRUE} will cause the telemetry
@@ -275,6 +275,8 @@ public class Registry {
    */
   public void dumpToWriter(final Writer writer) throws IOException {
     final Instant start = clock.now();
+
+    Telemetry.updateStandard();
 
     boolean erroneous = true;
     try {
