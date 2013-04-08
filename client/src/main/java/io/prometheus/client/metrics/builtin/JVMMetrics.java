@@ -2,6 +2,8 @@ package io.prometheus.client.metrics.builtin;
 
 import com.google.common.collect.ImmutableMap;
 import io.prometheus.client.Register;
+import io.prometheus.client.Registry;
+import static io.prometheus.client.Registry.emptyLabels;
 import io.prometheus.client.metrics.Gauge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +29,63 @@ public class JVMMetrics {
   private static final Pattern WHITESPACE = Pattern.compile("[\\s]+");
   private static final Pattern CAMEL_CASE = Pattern.compile("([a-z\\d])([A-Z])");
 
-  @Register(name = "jvm_metrics",
-            docstring = "JVM Metrics via MXBeans",
-            baseLabels = {})
-  private static final Gauge jvmMetrics = new Gauge();
+  @Register(name = "memory_usage_heap_total", 
+      docstring = "Overall JVM heap memory usage", baseLabels = {})
+  private static final Gauge heapMemTotal = new Gauge();
+
+  @Register(name = "memory_usage_non_heap_total",
+      docstring = "Overall JVM non-heap memory usage", baseLabels = {})
+  private static final Gauge nonHeapMemTotal = new Gauge();
+
+  @Register(name = "memory_pools_usage",
+      docstring = "JVM memory usage by memory pool", baseLabels = {})
+  private static final Gauge memPools = new Gauge();
+
+  @Register(name = "garbage_collectors",
+      docstring = "JVM Garbage Collector runs and timing by collector",
+      baseLabels = {})
+  private static final Gauge gc = new Gauge();
+
+  @Register(name = "open_file_descriptors",
+      docstring = "Number of open file descriptors held by this JVM instance",
+      baseLabels = {})
+  private static final Gauge openFDs = new Gauge();
+
+  @Register(name = "max_file_descriptors",
+      docstring = "Maximum number of file descriptors this JVM instance could" +
+          " open (constant value)",
+      baseLabels = {})
+  private final static Gauge maxFDs = new Gauge();
+
+  @Register(name = "buffer_pools_direct_count",
+      docstring = "Number of direct NIO buffer pools allocated",
+      baseLabels = {})
+  private final static Gauge bufferPoolsDirectCount = new Gauge();
+
+  @Register(name = "buffer_pools_mapped_count",
+      docstring = "Number of mapped NIO buffer pools allocated",
+      baseLabels = {})
+  private final static Gauge bufferPoolsMappedCount = new Gauge();
+
+  @Register(name = "buffer_pools_direct_memory_used",
+      docstring = "Cumulative memory usage of direct NIO buffer pools",
+      baseLabels = {})
+  private final static Gauge bufferPoolsDirectMem = new Gauge();
+
+  @Register(name = "buffer_pools_mapped_memory_used",
+      docstring = "Cumulative memory usage of mapped NIO buffer pools",
+      baseLabels = {})
+  private final static Gauge bufferPoolsMappedMem = new Gauge();
+
+  @Register(name = "buffer_pools_direct_total_capacity",
+      docstring = "Total capacity of direct NIO buffer pools",
+      baseLabels = {})
+  private final static Gauge bufferPoolsDirectCapacity = new Gauge();
+
+  @Register(name = "buffer_pools_mapped_total_capacity",
+      docstring = "Total capacity of mapped NIO buffer pools",
+      baseLabels = {})
+  private final static Gauge bufferPoolsMappedCapacity = new Gauge();
 
   private static final MBeanServer mBeanServer =
       ManagementFactory.getPlatformMBeanServer();
@@ -43,87 +98,91 @@ public class JVMMetrics {
   private static final Collection<MemoryPoolMXBean> poolBeans =
       ManagementFactory.getMemoryPoolMXBeans();
 
-  private static final String[] BUFFER_POOLS_ATTRS =
-      {"Count", "MemoryUsed", "TotalCapacity"};
-  private static final String[] BUFFER_POOLS_POOLS =
-      {"direct", "mapped"};
-
   public static void update() {
-    jvmMetrics.set(ImmutableMap.of("bean", "memory_usage", "arena", "heap",
-        "attribute", "init", "unit", "bytes"),
+    updateMemoryUsageMetrics();
+    updateMemoryPoolMetrics();
+    updateGCMetrics();
+    updateFileDescriptorMetrics();
+    updateBufferPoolsMetrics();
+  }
+
+  private static void updateMemoryUsageMetrics() {
+    heapMemTotal.set(ImmutableMap.of("attribute", "init"),
         memBean.getHeapMemoryUsage().getInit());
-    jvmMetrics.set(ImmutableMap.of("bean", "memory_usage", "arena", "heap",
-        "attribute", "used", "unit", "bytes"),
+    heapMemTotal.set(ImmutableMap.of("attribute", "used"),
         memBean.getHeapMemoryUsage().getUsed());
-    jvmMetrics.set(ImmutableMap.of("bean", "memory_usage", "arena", "heap",
-        "attribute", "max", "unit", "bytes"),
+    heapMemTotal.set(ImmutableMap.of("attribute", "max"),
         memBean.getHeapMemoryUsage().getMax());
-    jvmMetrics.set(ImmutableMap.of("bean", "memory_usage", "arena", "heap",
-        "attribute", "committed", "unit", "bytes"),
+    heapMemTotal.set(ImmutableMap.of("attribute", "committed"),
         memBean.getHeapMemoryUsage().getCommitted());
 
-    jvmMetrics.set(ImmutableMap.of("bean", "memory_usage", "arena", "non_heap",
-        "attribute", "init", "unit", "bytes"),
+    nonHeapMemTotal.set(ImmutableMap.of("attribute", "init"),
         memBean.getNonHeapMemoryUsage().getInit());
-    jvmMetrics.set(ImmutableMap.of("bean", "memory_usage", "arena", "non_heap",
-        "attribute", "used", "unit", "bytes"),
+    nonHeapMemTotal.set(ImmutableMap.of("attribute", "used"),
         memBean.getNonHeapMemoryUsage().getUsed());
-    jvmMetrics.set(ImmutableMap.of("bean", "memory_usage", "arena", "non_heap",
-        "attribute", "max", "unit", "bytes"),
+    nonHeapMemTotal.set(ImmutableMap.of("attribute", "max"),
         memBean.getNonHeapMemoryUsage().getMax());
-    jvmMetrics.set(ImmutableMap.of("bean", "memory_usage", "arena", "non_heap",
-        "attribute", "committed", "unit", "bytes"),
+    nonHeapMemTotal.set(ImmutableMap.of("attribute", "committed"),
         memBean.getNonHeapMemoryUsage().getCommitted());
+  }
 
+  private static void updateMemoryPoolMetrics() {
     for (final MemoryPoolMXBean pool : poolBeans) {
       final String name = sanitize(pool.getName());
-      jvmMetrics.set(ImmutableMap.of("bean", "memory_pool", "pool", name,
-          "attribute", "init", "unit", "bytes"),
+      memPools.set(ImmutableMap.of("pool", name, "attribute", "init"),
           pool.getUsage().getInit());
-      jvmMetrics.set(ImmutableMap.of("bean", "memory_pool", "pool", name,
-          "attribute", "used", "unit", "bytes"),
+      memPools.set(ImmutableMap.of("pool", name, "attribute", "used"),
           pool.getUsage().getUsed());
-      jvmMetrics.set(ImmutableMap.of("bean", "memory_pool", "pool", name,
-          "attribute", "max", "unit", "bytes"),
+      memPools.set(ImmutableMap.of("pool", name, "attribute", "max"),
           pool.getUsage().getMax());
-      jvmMetrics.set(ImmutableMap.of("bean", "memory_pool", "pool", name,
-          "attribute", "committed", "unit", "bytes"),
+      memPools.set(ImmutableMap.of("pool", name, "attribute", "committed"),
           pool.getUsage().getCommitted());
     }
+  }
 
+  private static void updateGCMetrics() {
     for (final GarbageCollectorMXBean bean : gcBeans) {
       final String name = sanitize(bean.getName());
-      jvmMetrics.set(ImmutableMap.of("bean", "garbage_collector",
-          "collector", name, "attribute", "count"),
+      gc.set(ImmutableMap.of("collector", name, "attribute", "collection_count"),
           bean.getCollectionCount());
-      jvmMetrics.set(ImmutableMap.of("bean", "garbage_collector",
-          "collector", name, "attribute", "time", "unit", "milliseconds"),
+      gc.set(ImmutableMap.of("collector", name, "attribute", "collection_time_ms"),
           bean.getCollectionTime());
     }
+  }
 
+  private static void updateFileDescriptorMetrics() {
     try {
-      jvmMetrics.set(ImmutableMap.of("bean", "operating_system",
-          "attribute", "open_file_descriptor_count"),
+      openFDs.set(emptyLabels(),
           osBeanAttribute("getOpenFileDescriptorCount"));
-      jvmMetrics.set(ImmutableMap.of("bean", "operating_system",
-          "attribute", "max_file_descriptor_count"),
+      maxFDs.set(emptyLabels(),
           osBeanAttribute("getMaxFileDescriptorCount"));
     } catch (Exception ignored) {
       log.debug("File descriptor counts unavailable");
     }
+  }
 
-    for (String pool : BUFFER_POOLS_POOLS) {
-      for (final String attribute : BUFFER_POOLS_ATTRS) {
-        try {
-          final ObjectName on = new ObjectName("java.nio:type=BufferPool,name=" + pool);
-          mBeanServer.getMBeanInfo(on);
-          jvmMetrics.set(ImmutableMap.of("bean", "buffer_pool","pool", pool,
-              "attribute", sanitize(attribute)),
-              (Long) mBeanServer.getAttribute(on, attribute));
-        } catch (JMException ignored) {
-          log.debug("Buffer Pool metrics unavailable (Java 6?)");
-        }
-      }
+  private static void updateBufferPoolsMetrics() {
+    try {
+      final ObjectName onDirect = new ObjectName("java.nio:type=BufferPool," +
+          "name=direct");
+      final ObjectName onMapped = new ObjectName("java.nio:type=BufferPool," +
+          "name=mapped");
+
+      bufferPoolsDirectCapacity.set(emptyLabels(),
+          (Long) mBeanServer.getAttribute(onDirect, "TotalCapacity"));
+      bufferPoolsDirectCount.set(emptyLabels(),
+          (Long) mBeanServer.getAttribute(onDirect, "Count"));
+      bufferPoolsDirectMem.set(emptyLabels(),
+          (Long) mBeanServer.getAttribute(onDirect, "MemoryUsed"));
+
+      bufferPoolsMappedCapacity.set(emptyLabels(),
+          (Long) mBeanServer.getAttribute(onDirect, "TotalCapacity"));
+      bufferPoolsMappedCount.set(emptyLabels(),
+          (Long) mBeanServer.getAttribute(onDirect, "Count"));
+      bufferPoolsMappedMem.set(emptyLabels(),
+          (Long) mBeanServer.getAttribute(onDirect, "MemoryUsed"));
+    } catch (JMException ignored) {
+      log.debug("Buffer Pool metrics unavailable (Java 6?)");
     }
   }
 
