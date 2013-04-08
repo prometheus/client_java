@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
  *
  * @author kim.altintop@gmail.com (Kim Altintop)
  */
-public class JvmMetrics {
-  private static final Logger log = LoggerFactory.getLogger(JvmMetrics.class);
+public class JVMMetrics {
+  private static final Logger log = LoggerFactory.getLogger(JVMMetrics.class);
   private static final Pattern WHITESPACE = Pattern.compile("[\\s]+");
   private static final Pattern CAMEL_CASE = Pattern.compile("([a-z\\d])([A-Z])");
 

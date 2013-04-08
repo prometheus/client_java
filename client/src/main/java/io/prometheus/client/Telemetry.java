@@ -17,7 +17,7 @@ package io.prometheus.client;
 import io.prometheus.client.metrics.Counter;
 import io.prometheus.client.metrics.Gauge;
 import io.prometheus.client.metrics.Histogram;
-import io.prometheus.client.metrics.builtin.JvmMetrics;
+import io.prometheus.client.metrics.builtin.JVMMetrics;
 import io.prometheus.client.metrics.histogram.Bucket;
 import io.prometheus.client.metrics.histogram.BucketBuilder;
 import io.prometheus.client.metrics.histogram.buckets.AccumulatingBucket;
@@ -56,6 +56,6 @@ public class Telemetry {
   }
 
   public static final void updateStandard() {
-    JvmMetrics.update();
+    JVMMetrics.update();
   }
 }
