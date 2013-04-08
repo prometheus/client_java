@@ -41,10 +41,16 @@ public class JVMMetrics {
       docstring = "JVM memory usage by memory pool", baseLabels = {})
   private static final Gauge memPools = new Gauge();
 
-  @Register(name = "garbage_collectors",
-      docstring = "JVM Garbage Collector runs and timing by collector",
+  @Register(name = "garbage_collectors_runs",
+      docstring = "JVM Garbage Collector runs by collector",
       baseLabels = {})
-  private static final Gauge gc = new Gauge();
+  private static final Gauge gcRuns = new Gauge();
+
+  @Register(name = "garbage_collectors_timings_ms",
+      docstring = "JVM Garbage Collector timings by collector (in " +
+          "milliseconds)",
+      baseLabels = {})
+  private static final Gauge gcTimings = new Gauge();
 
   @Register(name = "open_file_descriptors",
       docstring = "Number of open file descriptors held by this JVM instance",
@@ -170,9 +176,9 @@ public class JVMMetrics {
   private static void updateGCMetrics() {
     for (final GarbageCollectorMXBean bean : gcBeans) {
       final String name = sanitize(bean.getName());
-      gc.set(ImmutableMap.of("collector", name, "attribute", "collection_count"),
+      gcRuns.set(ImmutableMap.of("collector", name),
           bean.getCollectionCount());
-      gc.set(ImmutableMap.of("collector", name, "attribute", "collection_time_ms"),
+      gcTimings.set(ImmutableMap.of("collector", name),
           bean.getCollectionTime());
     }
   }
