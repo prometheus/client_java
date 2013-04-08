@@ -87,6 +87,22 @@ public class JVMMetrics {
       baseLabels = {})
   private final static Gauge bufferPoolsMappedCapacity = new Gauge();
 
+  @Register(name = "thread_count",
+      docstring = "Number of live threads",
+      baseLabels = {})
+  private final static Gauge threadCount = new Gauge();
+
+  @Register(name = "thread_daemon_count",
+      docstring = "Number of live daemon threads",
+      baseLabels = {})
+  private final static Gauge daemonThreadCount = new Gauge();
+
+  @Register(name = "thread_deadlocks_count",
+      docstring = "Number of deadlocked threads",
+      baseLabels = {})
+  private final static Gauge deadlockedThreadsCount = new Gauge();
+
+
   private static final MBeanServer mBeanServer =
       ManagementFactory.getPlatformMBeanServer();
   private static final OperatingSystemMXBean osBean =
@@ -97,6 +113,8 @@ public class JVMMetrics {
       ManagementFactory.getMemoryMXBean();
   private static final Collection<MemoryPoolMXBean> poolBeans =
       ManagementFactory.getMemoryPoolMXBeans();
+  private static final ThreadMXBean threadsBean =
+      ManagementFactory.getThreadMXBean();
 
   public static void update() {
     updateMemoryUsageMetrics();
@@ -104,6 +122,15 @@ public class JVMMetrics {
     updateGCMetrics();
     updateFileDescriptorMetrics();
     updateBufferPoolsMetrics();
+    updateThreadsMetrics();
+  }
+
+  private static void updateThreadsMetrics() {
+    threadCount.set(emptyLabels(), threadsBean.getThreadCount());
+    daemonThreadCount.set(emptyLabels(), threadsBean.getDaemonThreadCount());
+    final long[] deadlocked = threadsBean.findDeadlockedThreads();
+    final long numDeadlocked = deadlocked == null ? 0L : deadlocked.length;
+    deadlockedThreadsCount.set(emptyLabels(), numDeadlocked);
   }
 
   private static void updateMemoryUsageMetrics() {
