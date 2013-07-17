@@ -6,17 +6,17 @@
 
     <groupId>io.prometheus.client.examples</groupId>
     <artifactId>simple</artifactId>
-    <version>0.0.0b</version>
+    <version>0.0.0d</version>
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>client</artifactId>
-            <version>0.0.0c</version>
+            <version>0.0.0d</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus.client.utility</groupId>
             <artifactId>servlet</artifactId>
-            <version>0.0.0b</version>
+            <version>0.0.0d</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>

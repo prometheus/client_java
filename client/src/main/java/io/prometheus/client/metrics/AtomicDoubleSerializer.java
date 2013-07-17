@@ -13,12 +13,13 @@ import java.lang.reflect.Type;
  * A {@link JsonSerializer} for converting {@link AtomicDouble} into an
  * acceptable value for {@link com.google.gson.Gson}.
  * </p>
- *
+ * 
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
 public class AtomicDoubleSerializer implements JsonSerializer<AtomicDouble> {
   @Override
-  public JsonElement serialize(final AtomicDouble src, final Type typeOfSrc, final JsonSerializationContext context) {
+  public JsonElement serialize(final AtomicDouble src, final Type typeOfSrc,
+      final JsonSerializationContext context) {
     return new JsonPrimitive(src.doubleValue());
   }
 }

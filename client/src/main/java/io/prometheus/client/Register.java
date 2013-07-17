@@ -21,40 +21,22 @@ import java.lang.annotation.Target;
 
 /**
  * <p>
- * Provide a quick way for registering {@link Metric} with the system.
+ * Register {@link Metric} and their derivatives with the {@link Prometheus} registrar across
+ * all runtime libraries and their dependencies.
  * </p>
- * 
+ *
+ * <p>
+ *     The purpose of this <em>runtime</em> annotation is to provide a common fragment to search for across
+ *     an entire server's classpath for metrics to export.  Due to nuances in the underlying Java Virtual
+ *     Machine implementations, not every class referenced in an application's transitive closure will be
+ *     loaded.  <em>This can prevent telemetry from being found and registered!</em>  Each {@link Metric}
+ *     decorated with {@link Metric} will be found and registered for exposition across all libraries your
+ *     server depends on.
+ * </p>
+ *
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
 @Target(value = {ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Register {
-  /**
-   * <p>
-   * The {@link Metric} name.
-   * </p>
-   */
-  public String name();
-
-  /**
-   * <p>
-   * The human-readable documentation string for the {@link Metric}.
-   * </p>
-   */
-  public String docstring();
-
-  /**
-   * <p>
-   * Base labels to be associated with the {@link Metric}.
-   * </p>
-   * <p>
-   * They must be done in the following manner due to the limitation of Java
-   * Annotations:
-   * <ul>
-   * <li>An even number of elements,</li>
-   * <li>{@code k1, v1, k2, v2}}</li>
-   * </ul>
-   * </p>
-   */
-  public String[] baseLabels() default {};
 }

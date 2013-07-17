@@ -14,18 +14,19 @@
 
 package io.prometheus.client.examples.simple;
 
-import io.prometheus.client.Registry;
-import io.prometheus.client.utility.servlet.MetricsServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
+import io.prometheus.client.Prometheus;
+import io.prometheus.client.utility.servlet.MetricsServlet;
 
 /**
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
 public class Main {
   public static void main(String[] arguments) {
-    Registry.defaultInitialize();
+    Prometheus.defaultInitialize();
     final Server server = new Server(8181);
     final ServletContextHandler context = new ServletContextHandler();
     context.setContextPath("/");
