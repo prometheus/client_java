@@ -14,25 +14,57 @@
 
 package io.prometheus.client.utility.servlet;
 
-import io.prometheus.client.Registry;
-import io.prometheus.client.utility.Preamble;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import com.matttproud.accepts.Accept;
+import com.matttproud.accepts.Parser;
+import io.prometheus.client.Prometheus;
 
 /**
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
 public class MetricsServlet extends HttpServlet {
+  private void dumpJson(final HttpServletResponse resp) throws IOException {
+    resp.setContentType("application/json; schema=\"prometheus/telemetry\"; version=0.0.2");
+    Prometheus.defaultDumpJson(resp.getWriter());
+  }
+
+  private void dumpProto(final HttpServletResponse resp) throws IOException {
+    resp.setContentType("application/vnd.google.protobuf; proto=\"io.prometheus.client.MetricFamily\"; encoding=\"delimited\"");
+    final BufferedOutputStream buf = new BufferedOutputStream(resp.getOutputStream());
+    Prometheus.defaultDumpProto(buf);
+    buf.close();
+  }
+
   @Override
   protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
       throws ServletException, IOException {
     resp.setStatus(HttpServletResponse.SC_OK);
-    resp.setContentType("application/json");
-    resp.setHeader(Preamble.getWebApiVersionResponseHeader(), Preamble.getWebApiVersionResponse());
-    Registry.defaultDumpToWriter(resp.getWriter());
+    boolean dispensed = false;
+    try {
+      for (final Accept spec : Parser.parse(req)) {
+        if ("application".equals(spec.getType()) && "vnd.google.protobuf".equals(spec.getSubtype())) {
+          final Map<String, String> params = spec.getParams();
+          if ("io.prometheus.client.MetricFamily".equals(params.get("proto"))
+              && "delimited".equals(params.get("encoding"))) {
+            dumpProto(resp);
+            dispensed = true;
+            break;
+          }
+        }
+      }
+    } catch (final IllegalArgumentException e) {
+    } finally {
+      if (!dispensed) {
+        dumpJson(resp);
+      }
+    }
   }
 }
