@@ -4,3 +4,6 @@
 *.jar
 *.war
 *.ear
+
+.idea
+

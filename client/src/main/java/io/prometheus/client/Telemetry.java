@@ -16,12 +16,7 @@ package io.prometheus.client;
 
 import io.prometheus.client.metrics.Counter;
 import io.prometheus.client.metrics.Gauge;
-import io.prometheus.client.metrics.Histogram;
-import io.prometheus.client.metrics.histogram.Bucket;
-import io.prometheus.client.metrics.histogram.BucketBuilder;
-import io.prometheus.client.metrics.histogram.buckets.AccumulatingBucket;
-import io.prometheus.client.metrics.histogram.buckets.Distributions;
-import io.prometheus.client.metrics.histogram.buckets.EvictionPolicies;
+import io.prometheus.client.metrics.Summary;
 
 /**
  * <p>
@@ -31,26 +26,29 @@ import io.prometheus.client.metrics.histogram.buckets.EvictionPolicies;
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
 public class Telemetry {
-  @Register(name = "instance_start_time_seconds", docstring = "The time at which the current "
-      + "instance started (seconds UTC).", baseLabels = {})
-  private static final Gauge startTime = new Gauge();
-  @Register(name = "telemetry_initialization_time_ms", docstring = "The time it took for the "
-      + "telemetry system to initialize (ms).", baseLabels = {})
-  static final Counter telemetryInitializationTime = new Counter();
-  @Register(name = "telemetry_requests_metrics_total", docstring = "A counter of the total "
-      + "requests made against the telemetry system.", baseLabels = {})
-  static final Counter telemetryRequests = new Counter();
-  @Register(name = "telemetry_generation_latency_ms", docstring = "A histogram of telemetry "
-      + "generation latencies (ms).", baseLabels = {})
-  static final Histogram telemetryGenerationLatencies = new Histogram(new float[] {0.01f, 0.05f,
-      0.5f, 0.90f, 0.99f}, Distributions.logarithmicSizedBucketsFor(0, 5000), new BucketBuilder() {
-    @Override
-    public Bucket newBucket() {
-      return new AccumulatingBucket(EvictionPolicies.evictOldest(100), 500);
-    }
-  });
+  @Register
+  private static final Gauge startTime = Gauge.builder().inNamespace("telemetry")
+      .named("initialization_time_ms")
+      .documentedAs("The time it took for the telemetry system to initialize (ms).").build();
+
+  @Register
+  static final Gauge telemetryInitializationTime = Gauge.builder().inNamespace("telemetry")
+      .named("initialization_time_ms")
+      .documentedAs("The time it took for the telemetry system to initialize (ms).").build();
+
+  @Register
+  static final Counter telemetryRequests = Counter.builder().inNamespace("telemetry")
+      .named("requests_metrics_total")
+      .documentedAs("A counter of the total requests made against the telemetry system.").build();
+
+  @Register
+  static final Summary telemetryGenerationLatencies = Summary.builder().inNamespace("telemetry")
+      .named("generation_latency_ms")
+      .documentedAs("A histogram of telemetry generation latencies (ms).").withTarget(0.01, 0.05)
+      .withTarget(0.05, 0.05).withTarget(0.5, 0.05).withTarget(0.9, 0.01).withTarget(0.99, 0.001)
+      .build();
 
   static {
-    startTime.set(Registry.emptyLabels(), (float) (System.currentTimeMillis() / 1000));
+    startTime.newPartial().apply().set(System.currentTimeMillis() / 1000);
   }
 }

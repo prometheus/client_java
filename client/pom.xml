@@ -6,8 +6,13 @@
 
     <groupId>io.prometheus</groupId>
     <artifactId>client</artifactId>
-    <version>0.0.0c</version>
+    <version>0.0.0d</version>
     <dependencies>
+        <dependency>
+            <groupId>io.prometheus.client</groupId>
+            <artifactId>model</artifactId>
+            <version>0.0.0d</version>
+        </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
@@ -52,6 +57,16 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.9.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.matttproud.quantile</groupId>
+            <artifactId>quantile</artifactId>
+            <version>0.0.1</version>
         </dependency>
     </dependencies>
     <build>

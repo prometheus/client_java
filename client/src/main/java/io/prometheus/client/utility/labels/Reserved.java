@@ -25,7 +25,7 @@ public enum Reserved {
   /**
    * <p>
    * {@code name} is a reserved label name key in Prometheus used to indicate
-   * the name of the {@link io.prometheus.client.metrics.Metric}.
+   * the name of the {@link io.prometheus.client.metrics.OldMetric}.
    * </p>
    */
   NAME("name");
