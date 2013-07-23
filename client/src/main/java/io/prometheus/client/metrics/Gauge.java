@@ -39,6 +39,7 @@ import java.util.Map;
  *   // Annotate this with Register!
  *   private static final Gauge waterTemp = Gauge.builder()
  *     .inNamespace("seaworld")
+ *     .inSubsystem("aquatic_tanks")
  *     .named("water_temperature_c")
  *     .withDimension("tank_name")
  *     .documentedAs("The current aquarium tank temperature partitioned by tank name.")

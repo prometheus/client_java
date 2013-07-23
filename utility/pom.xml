@@ -7,9 +7,72 @@
     <groupId>io.prometheus.client</groupId>
     <artifactId>utility</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.0d</version>
-    <name>${project.artifactId}</name>
+    <name>Prometheus Client Utilities</name>
+
+    <parent>
+        <groupId>io.prometheus</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <url>http://github.com/prometheus/client_java</url>
+    <description>
+        Utilities for the Prometheus Java Client
+    </description>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:prometheus/client_java.git</connection>
+        <developerConnection>scm:git:git@github.com:prometheus/client_java.git</developerConnection>
+        <url>git@github.com:prometheus/client_java.git</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>mtp</id>
+            <name>Matt T. Proud</name>
+            <email>matt.proud@gmail.com</email>
+        </developer>
+    </developers>
+
     <modules>
         <module>servlet</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.4</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
