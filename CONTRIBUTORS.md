@@ -1,4 +1,4 @@
 # Prometheus Team
 - Julius Volz
-- Matt M. Proud
+- Matt T. Proud
 
