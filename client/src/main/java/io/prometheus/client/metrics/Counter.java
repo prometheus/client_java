@@ -1,7 +1,20 @@
+/*
+ * Copyright 2013 Prometheus Team Licensed under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package io.prometheus.client.metrics;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.*;
 import io.prometheus.client.Metrics;
@@ -9,21 +22,26 @@ import io.prometheus.client.utility.labels.Reserved;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 /**
- * <p>{@link Counter} is a {@link Metric} that tracks the addition or subtraction of a value from itself.</p>
+ * <p>
+ * {@link Counter} is a {@link Metric} that tracks the addition or subtraction
+ * of a value from itself.
+ * </p>
  * <ul>
- *     <li>
- *         Tallies: Number of people who walked through that door.
- *     </li>
- *     <li>
- *         Running Sums: Amount of money that has been brought through the door.
- *     </li>
+ * <li>
+ * Tallies: Number of people who walked through that door.</li>
+ * <li>
+ * Running Sums: Amount of money that has been brought through the door.</li>
  * </ul>
  *
  *
- * <p>An example from {@link io.prometheus.client.Prometheus}:</p>
+ * <p>
+ * An example follows:
+ * </p>
+ *
  * <pre>
  * {@code
  * package example;
@@ -33,23 +51,24 @@ import java.util.Map;
  * import io.prometheus.client.metrics.Counter;
  *
  * public class CashRegister {
- *   // Annotate this with Register!
- *   private static final Counter operations = Counter.builder()
- *     .inNamespace("cash_register")
- *     .named("operation")
- *     .withDimension("operation", "result")
- *     .documentedAs("Cash register operations partitioned by type and outcome.")
+ *   // Annotate this with "Register" if this class is not explicitly loaded
+ *   // by your project.
+ *   private static final Counter operations = Counter.newBuilder()
+ *     .namespace("cash_register")
+ *     .name("operations")
+ *     .registerStatic("operation", "result")
+ *     .documentation("Cash register operations partitioned by type and outcome.")
  *     .build()
  *
  *   public float divide(float dividend, float divisor) {
  *     Counter.Partial result = operations.newPartial()
- *       .withDimension("operation", "division");
+ *       .registerStatic("operation", "division");
  *     try {
  *       float f = dividend / divisor;
- *       result.withDimension("result", "success");
+ *       result.registerStatic("result", "success");
  *       return f;
  *     } catch (ArithmeticException e) {
- *       result.withDimension("result", "failure");
+ *       result.registerStatic("result", "failure");
  *       throw e;
  *     } finally {
  *       result.apply().increment();
@@ -58,7 +77,19 @@ import java.util.Map;
  * }}
  * </pre>
  *
- * <p><em>For representing values outside of business logic direct control, use a {@link Gauge}.</em></p>
+ * <p>
+ * Assuming each code path is hit once, {@code operations} yields the following
+ * child metrics:
+ * </p>
+ *
+ * <pre>
+ *   cash_register_operations{operation="division", result="failure"} = 1
+ *   cash_register_operations{operation="division", result="success"} = 1
+ * </pre>
+ *
+ * <p>
+ * <em>For representing blackbox values, use a {@link Gauge}.</em>
+ * </p>
  *
  * @author Matt T. Proud (matt.proud@gmail.com)
  */
@@ -66,9 +97,9 @@ import java.util.Map;
 public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
   private final double defaultValue;
 
-  private Counter(final String n, final String d, final ImmutableList<String> ds,
-      final double defaultValue, final Metrics.MetricFamily p) {
-    super(n, d, ds, p);
+  private Counter(final String n, final String d, final List<String> ds, final double defaultValue,
+      final Metrics.MetricFamily p, final boolean rs) {
+    super(n, d, ds, p, rs);
     this.defaultValue = defaultValue;
   }
 
@@ -89,14 +120,14 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
     return b;
   }
 
-    /**
-     * <p>
-     *  Start generating a concrete {@link Counter.Child} instance by building a partial and accumulating
-     *  labels with it.
-     * </p>
-     *
-     * @see io.prometheus.client.metrics.Metric#newPartial()
-     */
+  /**
+   * <p>
+   * Start generating a concrete {@link Child} instance by building a partial
+   * and accumulating labels with it.
+   * </p>
+   *
+   * @see io.prometheus.client.metrics.Metric#newPartial()
+   */
   @Override
   public Partial newPartial() {
     return new Partial();
@@ -107,7 +138,7 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
    * Create a {@link Builder} to configure the {@link Counter}.
    * </p>
    */
-  public static Builder builder() {
+  public static Builder newBuilder() {
     return new Builder();
   }
 
@@ -127,51 +158,50 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
    * For all other behaviors, see {@link Metric.BaseBuilder}.
    * </p>
    */
-  public static class Builder {
+  public static class Builder implements Metric.Builder<Builder, Counter> {
     private static final Double DEFAULT_VALUE = Double.valueOf(0);
 
-    private final Metric.BaseBuilder base = new Metric.BaseBuilder();
+    private final Metric.BaseBuilder base;
+    private final Optional<Double> defaultValue;
 
-    private Optional<Double> defaultValue = Optional.absent();
-
-    /**
-     * @see Metric.BaseBuilder#withDimension(String...)
-     */
-    public Builder withDimension(String... ds) {
-      base.withDimension(ds);
-      return this;
+    Builder() {
+      base = new Metric.BaseBuilder();
+      defaultValue = Optional.absent();
     }
 
-    /**
-     * @see Metric.BaseBuilder#documentedAs(String)
-     */
-    public Builder documentedAs(String d) {
-      base.documentedAs(d);
-      return this;
+    private Builder(final BaseBuilder base, final Optional<Double> defaultValue) {
+      this.base = base;
+      this.defaultValue = defaultValue;
     }
 
-    /**
-     * @see Metric.BaseBuilder#named(String)
-     */
-    public Builder named(String n) {
-      base.named(n);
-      return this;
+    @Override
+    public Builder labelNames(String... ds) {
+      return new Builder(base.labelNames(ds), defaultValue);
     }
 
-    /**
-     * @see Metric.BaseBuilder#ofSubsystem(String)
-     */
-    public Builder ofSubsystem(String ss) {
-      base.ofSubsystem(ss);
-      return this;
+    @Override
+    public Builder documentation(String d) {
+      return new Builder(base.documentation(d), defaultValue);
     }
 
-    /**
-     * @see Metric.BaseBuilder#inNamespace(String)
-     */
-    public Builder inNamespace(String ns) {
-      base.inNamespace(ns);
-      return this;
+    @Override
+    public Builder name(String n) {
+      return new Builder(base.name(n), defaultValue);
+    }
+
+    @Override
+    public Builder subsystem(String ss) {
+      return new Builder(base.subsystem(ss), defaultValue);
+    }
+
+    @Override
+    public Builder namespace(String ns) {
+      return new Builder(base.namespace(ns), defaultValue);
+    }
+
+    @Override
+    public Builder registerStatic(final boolean rs) {
+      return new Builder(base.registerStatic(rs), defaultValue);
     }
 
     /**
@@ -180,10 +210,12 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
      * a {@link io.prometheus.client.metrics.Counter#resetAll()} or a specific
      * {@link Child} undergoes a {@link Counter.Child#reset()}.
      * </p>
+     *
+     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     *         target value.
      */
-    public Builder withDefaultValue(final Double v) {
-      defaultValue = Optional.of(v);
-      return this;
+    public Builder defaultValue(final Double v) {
+      return new Builder(base, Optional.of(v));
     }
 
     private double getDefaultValue() {
@@ -203,32 +235,31 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
           Metrics.MetricFamily.newBuilder().setName(name).setHelp(docstring)
               .setType(Metrics.MetricType.COUNTER);
 
-      return new Counter(name, docstring, base.buildDimensions(), getDefaultValue(),
-          builder.build());
+      return new Counter(name, docstring, base.buildLabelNames(), getDefaultValue(),
+          builder.build(), base.getRegisterStatic());
     }
   }
 
   /**
    * <p>
-   *     A derivative of {@link Counter} that lets you accumulate labels to build a concrete metric via
-   *     {@link #apply()} for mutation with the methods of {@link Counter.Child}.
+   * A derivative of {@link Counter} that lets you accumulate labels to build a
+   * concrete metric via {@link #apply()} for mutation with the methods of
+   * {@link Counter.Child}.
    * </p>
+   *
    * @see Metric.Partial
    */
   public class Partial extends Metric.Partial {
     /**
-     * <p>Add a label-value pair to this metric.</p>
+     * <p>
+     * Add a label-value pair to this metric.
+     * </p>
      *
-     * <p><em>Warning:</em> Do not hold onto a reference of a {@link Partial}
-     * if you ever use the {@link #resetAll()} or
-     * {@link io.prometheus.client.metrics.Metric.Child#reset()} tools.
-     * This will be fixed in a follow-up release.</p>
-     *
-     * @see Metric.Partial#withDimension(String, String)
+     * @see Metric.Partial#labelPair(String, String)
      */
     @Override
-    public Partial withDimension(String labelName, String labelValue) {
-      return (Partial) baseWithDimension(labelName, labelValue);
+    public Partial labelPair(String labelName, String labelValue) {
+      return (Partial) baseLabelPair(labelName, labelValue);
     }
 
     @Override
@@ -237,7 +268,11 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
     }
 
     /**
-     * <p>Finalize this child to perform mutations under this set of label-value pairs.</p>
+     * <p>
+     * Finalize this child to perform mutations under this set of label-value
+     * pairs.
+     * </p>
+     *
      * @see io.prometheus.client.metrics.Metric.Partial#apply()
      */
     @Override
@@ -248,12 +283,14 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
 
   /**
    * <p>
-   *     A concrete instance of {@link Counter} for a unique set of label dimensions.
+   * A concrete instance of {@link Counter} for a unique set of label
+   * dimensions.
    * </p>
+   *
    * @see Metric.Child
    */
   public class Child implements Metric.Child {
-    private final AtomicDouble value = new AtomicDouble();
+    final AtomicDouble value = new AtomicDouble();
 
     /**
      * <p>
@@ -303,7 +340,7 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
     /**
      * <p>
      * Reset this {@link Counter} to its default value per
-     * {@link Counter.Builder#withDefaultValue(Double)}.
+     * {@link Counter.Builder#defaultValue(Double)}.
      * </p>
      */
     @Override
