@@ -12,19 +12,28 @@
  * the License.
  */
 
-package io.prometheus.client.utility;
+package io.prometheus.client;
+
+import com.google.common.util.concurrent.AtomicDouble;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
+import java.lang.reflect.Type;
 
 /**
  * <p>
- * A {@link Clock} that proxies the system's clock.
+ * A {@link JsonSerializer} for converting {@link AtomicDouble} into an
+ * acceptable value for {@link com.google.gson.Gson}.
  * </p>
  *
- * @see Clock
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
-public class SystemClock implements Clock {
+class AtomicDoubleSerializer implements JsonSerializer<AtomicDouble> {
   @Override
-  public long nowMs() {
-    return System.currentTimeMillis();
+  public JsonElement serialize(final AtomicDouble src, final Type typeOfSrc,
+      final JsonSerializationContext context) {
+    return new JsonPrimitive(src.doubleValue());
   }
 }
