@@ -57,7 +57,7 @@ import java.util.Map;
  *     .namespace("seaworld")
  *     .inSubsystem("aquatic_tanks")
  *     .name("water_temperature_c")
- *     .registerStatic("tank_name")
+ *     .labelNames("tank_name")
  *     .documentation("The current aquarium tank temperature partitioned by tank name.")
  *     .build()
  *
@@ -65,12 +65,12 @@ import java.util.Map;
  *     while (true) {
  *       // Busy loop.  :sad-trombone:
  *       waterTemp.newPartial()
- *         .registerStatic("tank_name", "shamu")
+ *         .labelPair("tank_name", "shamu")
  *         .apply()
  *         .set(getShamuTemperature());
  *
  *       waterTemp.newPartial()
- *         .registerStatic("tank_name", "urchin")
+ *         .labelPair("tank_name", "urchin")
  *         .apply()
  *         .set(getUrchinTemperature());
  *     }

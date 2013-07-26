@@ -63,7 +63,7 @@ import io.prometheus.client.utility.labels.Reserved;
  *   private static final Summary observations = Summary.newBuilder()
  *     .namespace("birds")
  *     .name("weights")
- *     .registerStatic("genus")
+ *     .labelNames("genus")
  *     .documentation("Weights of birds partitioned by genus.")
  *     .targetQuantile(0.5, 0.05)  // Gimme median!
  *     .targetQuantile(0.99, 0.001)  // Gimme 99th!
@@ -73,12 +73,12 @@ import io.prometheus.client.utility.labels.Reserved;
  *     while (true) {
  *       // Busy loop.  :eat berries, watch birds, and try not to poison yourself:
  *       observations.newPartial()
- *         .registerStatic("genus", "garrulus")  // Got a Eurasian Jay.
+ *         .labelPair("genus", "garrulus")  // Got a Eurasian Jay.
  *         .apply()
  *         .observe(175);
  *
  *       observations.newPartial()
- *         .registerStatic("genus", "corvus")  // Got a Hooded Crow.
+ *         .labelPair("genus", "corvus")  // Got a Hooded Crow.
  *         .apply()
  *         .observe(500);
  *     }

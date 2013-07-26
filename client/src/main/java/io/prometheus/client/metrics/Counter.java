@@ -56,19 +56,19 @@ import java.util.Map;
  *   private static final Counter operations = Counter.newBuilder()
  *     .namespace("cash_register")
  *     .name("operations")
- *     .registerStatic("operation", "result")
+ *     .labelNames("operation", "result")
  *     .documentation("Cash register operations partitioned by type and outcome.")
  *     .build()
  *
  *   public float divide(float dividend, float divisor) {
  *     Counter.Partial result = operations.newPartial()
- *       .registerStatic("operation", "division");
+ *       .labelPair("operation", "division");
  *     try {
  *       float f = dividend / divisor;
- *       result.registerStatic("result", "success");
+ *       result.labelPair("result", "success");
  *       return f;
  *     } catch (ArithmeticException e) {
- *       result.registerStatic("result", "failure");
+ *       result.labelPair("result", "failure");
  *       throw e;
  *     } finally {
  *       result.apply().increment();
