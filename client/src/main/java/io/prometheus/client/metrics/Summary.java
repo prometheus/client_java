@@ -1,17 +1,29 @@
+/*
+ * Copyright 2013 Prometheus Team Licensed under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package io.prometheus.client.metrics;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-import org.joda.time.Instant;
-import org.joda.time.Minutes;
-import org.joda.time.ReadableDuration;
-
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.*;
@@ -22,15 +34,21 @@ import io.prometheus.client.Metrics;
 import io.prometheus.client.utility.labels.Reserved;
 
 /**
- * <p>{@link Summary} is a {@link Metric} that samples events over sliding windows of time.</p>
+ * <p>
+ * {@link Summary} is a {@link Metric} that samples events over sliding windows
+ * of time.
+ * </p>
  * <ul>
- *     <li>
- *         Distributions: The spread and depth of observed samples, including quantile ranks.
- *     </li>
+ * <li>
+ * Distributions: The spread and depth of observed samples, including quantile
+ * ranks.</li>
  * </ul>
  *
  *
- * <p>An example from {@link io.prometheus.client.Prometheus}:</p>
+ * <p>
+ * An example follows:
+ * </p>
+ *
  * <pre>
  * {@code
  * package example;
@@ -40,26 +58,27 @@ import io.prometheus.client.utility.labels.Reserved;
  * import io.prometheus.client.metrics.Counter;
  *
  * public class BirdWatcher {
- *   // Annotate this with Register!
- *   private static final Summary observations = Summary.builder()
- *     .inNamespace("birds")
- *     .named("weights")
- *     .withDimension("genus")
- *     .documentedAs("Weights of birds partitioned by genus.")
- *     .withTarget(0.5, 0.05)  // Gimme median!
- *     .withTarget(0.99, 0.001)  // Gimme 99th!
+ *   // Annotate this with "Register" if this class is not explicitly loaded
+ *   // by your project.
+ *   private static final Summary observations = Summary.newBuilder()
+ *     .namespace("birds")
+ *     .name("weights")
+ *     .registerStatic("genus")
+ *     .documentation("Weights of birds partitioned by genus.")
+ *     .targetQuantile(0.5, 0.05)  // Gimme median!
+ *     .targetQuantile(0.99, 0.001)  // Gimme 99th!
  *     .build()
  *
  *   public float visitForest() {
  *     while (true) {
  *       // Busy loop.  :eat berries, watch birds, and try not to poison yourself:
  *       observations.newPartial()
- *         .withDimension("genus", "garrulus")  // Got a Eurasian Jay.
+ *         .registerStatic("genus", "garrulus")  // Got a Eurasian Jay.
  *         .apply()
  *         .observe(175);
  *
  *       observations.newPartial()
- *         .withDimension("genus", "corvus")  // Got a Hooded Crow.
+ *         .registerStatic("genus", "corvus")  // Got a Hooded Crow.
  *         .apply()
  *         .observe(500);
  *     }
@@ -67,39 +86,63 @@ import io.prometheus.client.utility.labels.Reserved;
  * }}
  * </pre>
  *
+ * <p>
+ * Assuming each code path is hit twice, {@code observations} yields the
+ * following child metrics:
+ * </p>
+ *
+ * <pre>
+ *   birds_weights{genus="garrulus", quantile="0.5"}  = 175
+ *   birds_weights{genus="garrulus", quantile="0.99"} = 175
+ *   birds_weights{genus="corvus", quantile="0.5"}    = 500
+ *   birds_weights{genus="corvus", quantile="0.99"}   = 500
+ * </pre>
+ *
+ * <p>
+ * {@code observations} also yield supplemental synthetic children:
+ * </p>
+ *
+ * <pre>
+ *   birds_weights_count{genus="garrulus"}  = 2
+ *   birds_weights_count{genus="corvus"}    = 2
+ *   birds_weights_sum{genus="garrulus"}    = 350
+ *   birds_weights_sum{genus="corvus"}      = 1000
+ * </pre>
+ *
  * @author Matt T. Proud (matt.proud@gmail.com)
  */
 @ThreadSafe
 public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
-  private final int purgeInterval;
-  private final ReadableDuration purgeTimeUnit;
-  private final ImmutableMap<Double, Double> targets;
+  private final long purgeIntervalMs;
+  private final Map<Double, Double> targets;
 
-  private Instant lastPurge;
+  Long lastPurgeInstantMs;
 
-  private Summary(final String n, final String d, final ImmutableList<String> ds, final int pi,
-      final ReadableDuration pu, final ImmutableMap<Double, Double> t, final Metrics.MetricFamily p) {
-    super(n, d, ds, p);
+  private Summary(final String n, final String d, final List<String> ds, final long pi,
+      final Map<Double, Double> t, final Metrics.MetricFamily p, final boolean rs) {
+    super(n, d, ds, p, rs);
 
-    purgeInterval = pi;
-    purgeTimeUnit = pu;
+    purgeIntervalMs = pi;
     targets = t;
 
-    lastPurge = Instant.now();
+    lastPurgeInstantMs = System.currentTimeMillis();
   }
 
   void purge() {
-    if (lastPurge.withDurationAdded(purgeTimeUnit, purgeInterval).isAfterNow()) {
-      return;
+    synchronized (lastPurgeInstantMs) {
+      final long now = System.currentTimeMillis();
+      if (now - lastPurgeInstantMs < purgeIntervalMs) {
+        return;
+      }
+
+      for (final Child c : children.values()) {
+        c.reset();
+      }
+
+      children.clear();
+
+      lastPurgeInstantMs = now;
     }
-
-    for (final Child c : children.values()) {
-      c.reset();
-    }
-
-    children.clear();
-
-    lastPurge = Instant.now();
   }
 
   @Override
@@ -116,17 +159,15 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
 
         final Metrics.Summary.Builder builder = Metrics.Summary.newBuilder();
 
-        for (final Child c : children.values()) {
-          builder.setSampleCount(c.count.get());
-          builder.setSampleSum(c.sum.get());
+        builder.setSampleCount(child.count.get());
+        builder.setSampleSum(child.sum.get());
 
-          for (final double q : c.targets.keySet()) {
-            final double v = c.query(q);
-            final Metrics.Quantile.Builder qs = builder.addQuantileBuilder();
+        for (final double q : child.targets.keySet()) {
+          final double v = child.query(q);
+          final Metrics.Quantile.Builder qs = builder.addQuantileBuilder();
 
-            qs.setQuantile(q);
-            qs.setValue(v);
-          }
+          qs.setQuantile(q);
+          qs.setValue(v);
         }
 
         m.setSummary(builder.build());
@@ -138,89 +179,119 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     }
   }
 
+  /**
+   * <p>
+   * Start generating a concrete {@link Child} instance by building a partial
+   * and accumulating labels with it.
+   * </p>
+   *
+   * @see io.prometheus.client.metrics.Metric#newPartial()
+   */
   @Override
   public Partial newPartial() {
     return new Partial();
   }
 
-  public static Builder builder() {
+  public static Builder newBuilder() {
     return new Builder();
   }
 
-  public static class Builder {
-    private static final ReadableDuration DEFAULT_PURGE_TIME_UNIT = Minutes.ONE
-        .toStandardDuration();
-    private static final Integer DEFAULT_PURGE_INTERVAL = 15;
+  public static class Builder implements Metric.Builder<Builder, Summary> {
+    private static final Long DEFAULT_PURGE_INTERVAL = TimeUnit.MINUTES.toMillis(15);
     private static final ImmutableMap<Double, Double> DEFAULT_TARGETS = ImmutableMap.of(0.5, 0.05,
-        0.99, 0.001);
+        0.90, 0.01, 0.99, 0.001);
 
-    private final BaseBuilder base = new BaseBuilder();
-    private final ImmutableMap.Builder<Double, Double> targets = ImmutableMap.builder();
+    private final BaseBuilder base;
+    private final Map<Double, Double> targets;
+    private final Optional<Long> purgeIntervalMs;
 
-    private Optional<ReadableDuration> purgeTimeUnit = Optional.absent();
-    private Optional<Integer> purgeInterval = Optional.absent();
-
-    public Builder withDimension(String... ds) {
-      base.withDimension(ds);
-      return this;
+    Builder() {
+      base = new BaseBuilder();
+      targets = new HashMap<Double, Double>();
+      purgeIntervalMs = Optional.absent();
     }
 
-    public Builder documentedAs(String d) {
-      base.documentedAs(d);
-      return this;
+    private Builder(BaseBuilder base, Map<Double, Double> targets, Optional<Long> purgeIntervalMs) {
+      this.base = base;
+      this.targets = targets;
+      this.purgeIntervalMs = purgeIntervalMs;
     }
 
-    public Builder named(String n) {
-      base.named(n);
-      return this;
+    @Override
+    public Builder labelNames(String... ds) {
+      return new Builder(base.labelNames(ds), targets, purgeIntervalMs);
     }
 
-    public Builder ofSubsystem(String ss) {
-      base.ofSubsystem(ss);
-      return this;
+    @Override
+    public Builder documentation(String d) {
+      return new Builder(base.documentation(d), targets, purgeIntervalMs);
     }
 
-    public Builder inNamespace(String ns) {
-      base.inNamespace(ns);
-      return this;
+    @Override
+    public Builder name(String n) {
+      return new Builder(base.name(n), targets, purgeIntervalMs);
     }
 
-    public Builder purgesEvery(final int n, final ReadableDuration d) {
-      purgeTimeUnit = Optional.of(d);
-      purgeInterval = Optional.of(n);
+    @Override
+    public Builder subsystem(String ss) {
+      return new Builder(base.subsystem(ss), targets, purgeIntervalMs);
+    }
 
-      return this;
+    @Override
+    public Builder namespace(String ns) {
+      return new Builder(base.namespace(ns), targets, purgeIntervalMs);
+    }
+
+    @Override
+    public Builder registerStatic(final boolean rs) {
+      return new Builder(base.registerStatic(rs), targets, purgeIntervalMs);
     }
 
     /**
-     * 
+     * <p>
+     * Set the frequency at which the {@link Summary}'s reported quantiles,
+     * observation count, and observation sum are reset. This is useful to
+     * prevent staleness.
+     * </p>
+     *
+     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     *         target value.
+     */
+    public Builder purgeInterval(final int n, final TimeUnit u) {
+      return new Builder(base, targets, Optional.of(u.toMillis(n)));
+    }
+
+    /**
+     * <p>
+     * <em>Important:</em> You may repeat calls to
+     * {@link #targetQuantile(Double, Double)} to request additional values in
+     * exposition!
+     * </p>
+     *
      * @param quantile The target quantile expressed over the
      *        <code>[0, 1]</code> interval.
      * @param inaccuracy The inaccuracy allowance expressed over the
      *        <code>[0, 1]</code> interval.
-     * @return
+     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     *         target value.
      */
-    public Builder withTarget(final Double quantile, final Double inaccuracy) {
-      targets.put(quantile, inaccuracy);
-
-      return this;
+    public Builder targetQuantile(final Double quantile, final Double inaccuracy) {
+      final Map<Double, Double> quantiles = new HashMap<Double, Double>(targets);
+      quantiles.put(quantile, inaccuracy);
+      return new Builder(base, quantiles, purgeIntervalMs);
     }
 
-    private ReadableDuration getPurgeTimeUnit() {
-      return purgeTimeUnit.or(DEFAULT_PURGE_TIME_UNIT);
+
+    private long getPurgeIntervalMs() {
+      return purgeIntervalMs.or(DEFAULT_PURGE_INTERVAL);
     }
 
-    private int getPurgeInterval() {
-      return purgeInterval.or(DEFAULT_PURGE_INTERVAL);
-    }
-
-    private ImmutableMap<Double, Double> getTargets() {
-      final ImmutableMap<Double, Double> setTargets = targets.build();
-      if (setTargets.size() == 0) {
+    private Map<Double, Double> getTargets() {
+      if (targets.size() == 0) {
         return DEFAULT_TARGETS;
       }
 
-      return setTargets;
+      return targets;
     }
 
     public Summary build() {
@@ -231,23 +302,25 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
           Metrics.MetricFamily.newBuilder().setName(name).setHelp(docstring)
               .setType(Metrics.MetricType.SUMMARY);
 
-      return new Summary(base.buildName(), base.buildDocstring(), base.buildDimensions(),
-          getPurgeInterval(), getPurgeTimeUnit(), getTargets(), builder.build());
+      return new Summary(base.buildName(), base.buildDocstring(), base.buildLabelNames(),
+          getPurgeIntervalMs(), getTargets(), builder.build(), base.getRegisterStatic());
     }
   }
 
   public class Partial extends Metric.Partial {
     /**
-     * <p><em>Warning:</em> Do not hold onto a reference of a {@link Partial}
-     * if you ever use the {@link #resetAll()} or
-     * {@link io.prometheus.client.metrics.Metric.Child#reset()} tools.
-     * This will be fixed in a follow-up release.</p>
+     * <p>
+     * <em>Warning:</em> Do not hold onto a reference of a {@link Partial} if
+     * you ever use the {@link #resetAll()} or
+     * {@link io.prometheus.client.metrics.Metric.Child#reset()} tools. This
+     * will be fixed in a follow-up release.
+     * </p>
      *
-     * @see Metric.Partial#withDimension(String, String)
+     * @see Metric.Partial#labelPair(String, String)
      */
     @Override
-    public Partial withDimension(String labelName, String labelValue) {
-      return (Partial) baseWithDimension(labelName, labelValue);
+    public Partial labelPair(String labelName, String labelValue) {
+      return (Partial) baseLabelPair(labelName, labelValue);
     }
 
     @Override
@@ -264,11 +337,11 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
   public class Child implements Metric.Child {
     private final AtomicDouble sum = new AtomicDouble();
     private final AtomicLong count = new AtomicLong();
-    private final ImmutableMap<Double, Double> targets;
+    private final Map<Double, Double> targets;
 
     private Estimator<Double> estimator;
 
-    Child(final ImmutableMap<Double, Double> targets) {
+    Child(final Map<Double, Double> targets) {
       this.targets = targets;
 
       final Quantile quantiles[] = new Quantile[targets.size()];
@@ -281,7 +354,6 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
       }
 
       estimator = new Estimator<Double>(quantiles);
-
     }
 
     synchronized public void observe(final Double v) {
@@ -312,11 +384,11 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     }
   }
 
-    /**
-     * <p>
-     * Used to serialize {@link Summary} instances for {@link Gson}.
-     * </p>
-     */
+  /**
+   * <p>
+   * Used to serialize {@link Summary} instances for {@link Gson}.
+   * </p>
+   */
   public static class Serializer implements JsonSerializer<Summary> {
     @Override
     public JsonElement serialize(final Summary src, final Type typeOfSrc,
@@ -351,29 +423,5 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
 
       return container;
     }
-  }
-
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Summary)) return false;
-    if (!super.equals(o)) return false;
-
-    final Summary summary = (Summary) o;
-
-    if (purgeInterval != summary.purgeInterval) return false;
-    if (!purgeTimeUnit.equals(summary.purgeTimeUnit)) return false;
-    if (!targets.equals(summary.targets)) return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = super.hashCode();
-    result = 31 * result + purgeInterval;
-    result = 31 * result + purgeTimeUnit.hashCode();
-    result = 31 * result + targets.hashCode();
-    return result;
   }
 }
