@@ -88,7 +88,7 @@ import java.util.Map;
  * </pre>
  *
  * <p>
- * Assuming each code path is hit once, {@code waterTemp} yields the following
+ * Assuming that each code path is executed once, {@code waterTemp} yields the following
  * child metrics:
  * </p>
  *
@@ -98,7 +98,7 @@ import java.util.Map;
  * </pre>
  *
  * <p>
- * <em>For representing whitebox values inside of business logic control, use a {@link Counter}.</em>
+ * <em>Note:</em>To represent whitebox values inside of business logic control, use {@link Counter}.
  * </p>
  *
  * @author Matt T. Proud (matt.proud@gmail.com)
@@ -218,13 +218,9 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
      * <p>
      * Provide a custom default value for this {@link Gauge} when it undergoes a
      * {@link io.prometheus.client.metrics.Gauge#resetAll()} or a specific
-     * {@link Child} undergoes a {@link Gauge.Child#reset()}.
+     * {@link Child} undergoes a {@link Gauge.Child#reset()}.</p>
      *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
-     *         target value.
-     *         </p>
-     *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public Builder defaultValue(final Double v) {
