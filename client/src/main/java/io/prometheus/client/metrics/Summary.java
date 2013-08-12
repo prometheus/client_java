@@ -87,7 +87,7 @@ import io.prometheus.client.utility.labels.Reserved;
  * </pre>
  *
  * <p>
- * Assuming each code path is hit twice, {@code observations} yields the
+ * Assuming that each code path is executed twice, {@code observations} yields the
  * following child metrics:
  * </p>
  *
@@ -254,7 +254,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
      * prevent staleness.
      * </p>
      *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public Builder purgeInterval(final int n, final TimeUnit u) {
@@ -272,7 +272,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
      *        <code>[0, 1]</code> interval.
      * @param inaccuracy The inaccuracy allowance expressed over the
      *        <code>[0, 1]</code> interval.
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public Builder targetQuantile(final Double quantile, final Double inaccuracy) {

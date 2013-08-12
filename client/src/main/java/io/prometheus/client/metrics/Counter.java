@@ -78,7 +78,7 @@ import java.util.Map;
  * </pre>
  *
  * <p>
- * Assuming each code path is hit once, {@code operations} yields the following
+ * Assuming that each code path is executed once, {@code operations} yields the following
  * child metrics:
  * </p>
  *
@@ -88,7 +88,7 @@ import java.util.Map;
  * </pre>
  *
  * <p>
- * <em>For representing blackbox values, use a {@link Gauge}.</em>
+ * <em>Note:</em> To represent blackbox values, use {@link Gauge}.
  * </p>
  *
  * @author Matt T. Proud (matt.proud@gmail.com)
@@ -211,7 +211,7 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
      * {@link Child} undergoes a {@link Counter.Child#reset()}.
      * </p>
      *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public Builder defaultValue(final Double v) {
