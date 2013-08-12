@@ -30,12 +30,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * </p>
  *
  * <p>
- * <em>Users of Prometheus do not need to be familiar with the internals of this class.</em>
+ * <em>Note:</em> If you are using Prometheus, you do not need to be familiar with the internals of
+ * this class.
  * </p>
  *
- * @param <M> The concrete implementation of {@link Metric}.
- * @param <C> The concrete implementation of {@link Metric.Child}.
- * @param <P> The concrete implementation of {@link Metric.Partial}.
+ * @param <M> The concrete implementation of {@link Metric}
+ * @param <C> The concrete implementation of {@link Metric.Child}
+ * @param <P> The concrete implementation of {@link Metric.Partial}
  *
  * @see Counter
  * @see Gauge
@@ -114,11 +115,12 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      *
      * <ul>
      * <li>
-     * a {@code namespace = "seaworld"},</li>
+     * {@code namespace = "seaworld"}
+     * </li>
      * <li>
-     * a {@code subsystem = "water_heaters"}, and</li>
+     * {@code subsystem = "water_heaters"}</li>
      * <li>
-     * a {@code name = "efficiency_percentage"},</li>
+     * {@code name = "efficiency_percentage"}</li>
      * </ul>
      *
      * The {@link Metric}'s naming system generates the following composite
@@ -126,7 +128,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * namespace is <em>seaworld</em>.
      * </p>
      *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public B namespace(String namespace);
@@ -147,11 +149,11 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      *
      * <ul>
      * <li>
-     * a {@code namespace = "seaworld"},</li>
+     * {@code namespace = "seaworld"}</li>
      * <li>
-     * a {@code subsystem = "water_heaters"}, and</li>
+     * {@code subsystem = "water_heaters"}</li>
      * <li>
-     * a {@code name = "efficiency_percentage"},</li>
+     * {@code name = "efficiency_percentage"}</li>
      * </ul>
      *
      * The {@link Metric}'s naming system generates the following composite
@@ -159,7 +161,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * subsystem is <em>water_heaters</em>.
      * </p>
      *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public B subsystem(String subsystem);
@@ -179,11 +181,11 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      *
      * <ul>
      * <li>
-     * a {@code namespace = "seaworld"},</li>
+     * {@code namespace = "seaworld"}</li>
      * <li>
-     * a {@code subsystem = "water_heaters"}, and</li>
+     * {@code subsystem = "water_heaters"}</li>
      * <li>
-     * a {@code name = "efficiency_percentage"},</li>
+     * {@code name = "efficiency_percentage"}</li>
      * </ul>
      *
      * The {@link Metric}'s naming system generates the following composite
@@ -191,7 +193,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * name is <em>efficiency_percentage</em>.
      * </p>
      *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public B name(String name);
@@ -202,7 +204,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * metric.
      * </p>
      *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public B documentation(String documentation);
@@ -225,7 +227,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * due to a programming error.
      * </p>
      *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public B labelNames(String... labelNames);
@@ -260,7 +262,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * </ul>
      * </p>
      *
-     * @return A <em>new copy</em> of the original {@link Builder} with the new
+     * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
     public B registerStatic(boolean registerStatic);
