@@ -43,6 +43,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see Summary
  */
 public abstract class Metric<M extends Metric, C extends Metric.Child, P extends Metric.Partial> {
+  /**
+   * <p>
+   * Per <a
+   * href="https://groups.google.com/d/msg/prometheus-developers/yyc0lYaCFMU/XUDRDaLLwksJ">decision
+   * on the developer mailinglist</a>, we have declared that no label names shall be allowed that
+   * are prefixed with "__" are to be allowed, since they are used internally for private indices.
+   * </p>
+   */
+  private static final String PRIVATE_LABEL_NAMESPACE = "__";
+
   static final String SERIALIZE_BASE_LABELS = "baseLabels";
   static final String SERIALIZE_DOCSTRING = "docstring";
   static final String SERIALIZE_METRIC = "metric";
@@ -359,6 +369,17 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
     }
 
     List<String> buildLabelNames() {
+      final String metricName = name.or("<unknown>");
+
+      for (final String labelName : labelNames) {
+        if (labelName.isEmpty()) {
+          throw IllegalLabelDeclarationException.empty(metricName);
+        }
+        if (labelName.startsWith(PRIVATE_LABEL_NAMESPACE)) {
+          throw IllegalLabelDeclarationException.reserved(labelName, metricName);
+        }
+      }
+
       return labelNames;
     }
   }
@@ -660,5 +681,29 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
   @Override
   public String toString() {
     return String.format("Metric{name='%s', registerStatic=%s}", name, labelNames);
+  }
+
+  /**
+   * <p>
+   * {@link io.prometheus.client.metrics.Metric.IllegalLabelDeclarationException} is used in cases
+   * whereby the author of a metric declares an illegal label name.
+   * </p>
+   */
+  public static class IllegalLabelDeclarationException extends IllegalArgumentException {
+    private IllegalLabelDeclarationException(final String msg) {
+      super(msg);
+    }
+
+    static IllegalLabelDeclarationException reserved(final String labelName,
+        final String metricName) {
+      return new IllegalLabelDeclarationException(
+          String.format("metric %s's label of %s begins with reserved prefix %s", metricName,
+          labelName, PRIVATE_LABEL_NAMESPACE));
+    }
+
+    static IllegalLabelDeclarationException empty(final String metricName) {
+      return new IllegalLabelDeclarationException(
+          String.format("metric %s has an empty label name", metricName));
+    }
   }
 }
