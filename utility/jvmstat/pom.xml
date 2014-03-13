@@ -129,7 +129,10 @@
         <profile>
             <!--
              Before fiddling with this profile settings here, please carefully read the Javadoc
-             contained in JvmstatMonitor.  It explains
+             contained in JvmstatMonitor.  It explains that the use of this Maven module requires
+             the HotSpot/OpenJDK tools.jar to be included in the classpath.  Since this is
+             required for use, it is also required for compile-time validations of this module;
+             thusly, we have included it here.
               -->
             <id>default-tools.jar</id>
             <activation>

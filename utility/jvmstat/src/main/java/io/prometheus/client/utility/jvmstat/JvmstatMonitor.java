@@ -39,7 +39,7 @@ import java.util.regex.PatternSyntaxException;
  * <p>
  * These <em>low-level</em> metrics are defined in the C++ bowels of the HotSpot VM through
  * internal measurement types.  The VM exposes these through the <em>HSPerfData</em> interface
- * for customers.  Typically ones accesses this data via a MMAPed direct buffer—namely Java native
+ * for customers.  Typically one accesses this data via a MMAPed direct buffer—namely Java native
  * I/O (nio).
  * </p>
  * <p/>
@@ -199,6 +199,16 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
   }
 
   /**
+   * <p>A {@link UnknownMonitorError} indicates that we have an invalid entry in the processing
+   * pipeline.</p>
+   */
+  static class UnknownMonitorError extends IllegalArgumentException {
+    UnknownMonitorError(final Monitor m) {
+      super(String.format("unhandled jvmstat monitor: %s", m.getName()));
+    }
+  }
+
+  /**
    * <p>Provide visibility about the internals of the JVM's class loader.</p>
    * <p/>
    * <h1>Generated Metrics</h1>
@@ -212,9 +222,9 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * machine starts and builds its initial class dependency graph.  Alternatively it may occur at
    * runtime when using the reflection facilities or programmatic class loader: {@code
    * Class.forName("java.lang.String")}.  As noted in {@code unloaded}, this can also
-   * occur if a unneeded class is unloaded due to memory pressure in the <em>permanent generation
+   * occur if an unneeded class is unloaded due to memory pressure in the <em>permanent generation
    * </em> and later needs to be reloaded.  The virtual machine's default behavior is to try to
-   * keep all classes statically loaded for the lifetime of the process.  See See {@code
+   * keep all classes statically loaded for the lifetime of the process.  See {@code
    * ClassLoadingService::notify_class_loaded}</li>
    * <li>{@code unloaded}: The virtual machine unloaded a class.  This event is likely to be rare
    * and will likely occur when either <em>permanent generation</em> memory space is too small for
@@ -249,25 +259,40 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private Gauge sizes;
     private Gauge durations;
 
-    public boolean visit(final Monitor metric) {
-      switch (metric.getName()) {
+    public boolean visit(final Monitor monitor) {
+      final String name = monitor.getName();
+      switch (name) {
         case "java.cls.loadedClasses":
         case "java.cls.unloadedClasses":
         case "sun.cls.initializedClasses":
-          return visitClassEvents(metric);
+          return visitClassEvents(name, monitor);
 
         case "sun.cls.loadedBytes":
-          return visitSizes(metric);
+          return visitSizes(monitor);
 
         case "sun.classloader.findClassTime":
         case "sun.cls.parseClassTime":
-          return visitDurations(metric);
+          return visitDurations(name, monitor);
       }
 
       return false;
     }
 
-    private boolean visitDurations(final Monitor metric) {
+    private boolean remarkDuration(final String duration, final Monitor monitor) {
+      final Double value = decodeMetric(monitor);
+      if (value == null) {
+        return false;
+      }
+
+      durations.newPartial()
+          .labelPair("operation", duration)
+          .apply()
+          .set(value);
+
+      return true;
+    }
+
+    private boolean visitDurations(final String name, final Monitor monitor) {
       if (durations == null && durationsOnce.getAndSet(true) == false) {
         durations = gaugePrototype
             .name("duration_ms")
@@ -275,39 +300,50 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .labelNames("operation")
             .build();
       }
-      final String name = metric.getName();
-      final String base = name.substring(name.lastIndexOf(".") + 1);
-      final String event = base.substring(0, base.length() - 9);
-      final Double value = decodeMetric(metric);
-      if (value == null) {
-        return false;
-      }
-      durations.newPartial()
-          .labelPair("event", event)
-          .apply()
-          .set(value);
 
-      return true;
+      switch (name) {
+        case "sun.classloader.findClassTime":
+          return remarkDuration("find", monitor);
+        case "sun.cls.parseClassTime":
+          return remarkDuration("parse", monitor);
+        default:
+          throw new UnknownMonitorError(monitor);
+      }
     }
 
-    private boolean visitSizes(final Monitor metric) {
+    private boolean visitSizes(final Monitor monitor) {
       if (sizes == null && sizesOnce.getAndSet(true) == false) {
         sizes = gaugePrototype
             .name("loaded")
             .documentation("The number of bytes the classloader has loaded.")
             .build();
       }
-      final Double value = decodeMetric(metric);
+
+      final Double value = decodeMetric(monitor);
       if (value == null) {
         return false;
       }
+
       sizes.newPartial()
           .apply()
           .set(value);
       return true;
     }
 
-    private boolean visitClassEvents(final Monitor metric) {
+    private boolean remarkClassEvent(final String event, final Monitor monitor) {
+      final Double value = decodeMetric(monitor);
+      if (value == null) {
+        return false;
+      }
+
+      states.newPartial()
+          .labelPair("event", event)
+          .apply()
+          .set(value);
+      return true;
+    }
+
+    private boolean visitClassEvents(final String name, final Monitor monitor) {
       if (states == null && statesOnce.getAndSet(true) == false) {
         states = gaugePrototype
             .name("operations_total")
@@ -315,19 +351,17 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .labelNames("event")
             .build();
       }
-      final String name = metric.getName();
-      final String base = name.substring(name.lastIndexOf(".") + 1);
-      final String event = base.substring(0, base.length() - 7);
-      final Double value = decodeMetric(metric);
-      if (value == null) {
-        return false;
-      }
-      states.newPartial()
-          .labelPair("event", event)
-          .apply()
-          .set(value);
 
-      return true;
+      switch (name) {
+        case "java.cls.loadedClasses":
+          return remarkClassEvent("loaded", monitor);
+        case "java.cls.unloadedClasses":
+          return remarkClassEvent("unloaded", monitor);
+        case "sun.cls.initializedClasses":
+          return remarkClassEvent("initialized", monitor);
+        default:
+          throw new UnknownMonitorError(monitor);
+      }
     }
   }
 
@@ -341,8 +375,9 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private Gauge compilations;
     private Gauge durations;
 
-    public boolean visit(final Monitor metric) {
-      switch (metric.getName()) {
+    public boolean visit(final Monitor monitor) {
+      final String name = monitor.getName();
+      switch (name) {
             /*
              * Incorporate sun.ci.threads for accurate counting.  It is unlikely that there will
              * be more than two threads at any time.  If we see index "2", we will need to revisit
@@ -351,18 +386,32 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
         case "sun.ci.compilerThread.0.compiles":
         case "sun.ci.compilerThread.1.compiles":
         case "sun.ci.compilerThread.2.compiles":
-          return visitCompilations(metric);
+          return visitCompilations(name, monitor);
 
         case "sun.ci.compilerThread.0.time":
         case "sun.ci.compilerThread.1.time":
         case "sun.ci.compilerThread.2.time":
-          return visitDurations(metric);
+          return visitDurations(name, monitor);
       }
 
       return false;
     }
 
-    private boolean visitDurations(final Monitor metric) {
+    private boolean remarkDuration(final String thread, final Monitor monitor) {
+      final Double value = decodeMetric(monitor);
+      if (value == null) {
+        return false;
+      }
+
+      durations.newPartial()
+          .labelPair("thread", thread)
+          .apply()
+          .set(value);
+
+      return true;
+    }
+
+    private boolean visitDurations(final String name, final Monitor monitor) {
       if (durations == null && durationOnce.getAndSet(true) == false) {
         durations = gaugePrototype
             .name("compilation_time_ms")
@@ -370,19 +419,34 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .labelNames("thread")
             .build();
       }
-      final Double value = decodeMetric(metric);
+
+      switch (name) {
+        case "sun.ci.compilerThread.0.time":
+          return remarkDuration("0", monitor);
+        case "sun.ci.compilerThread.1.time":
+          return remarkDuration("1", monitor);
+        case "sun.ci.compilerThread.2.time":
+          return remarkDuration("2", monitor);
+        default:
+          throw new UnknownMonitorError(monitor);
+      }
+    }
+
+    private boolean remarkCompilation(final String thread, final Monitor monitor) {
+      final Double value = decodeMetric(monitor);
       if (value == null) {
         return false;
       }
-      durations.newPartial()
-          // Extract the thread index from the name.
-          .labelPair("thread", metric.getName().substring(22, 23))
+
+      compilations.newPartial()
+          .labelPair("thread", thread)
           .apply()
           .set(value);
+
       return true;
     }
 
-    private boolean visitCompilations(final Monitor metric) {
+    private boolean visitCompilations(final String name, final Monitor monitor) {
       if (compilations == null && compilationOnce.getAndSet(true) == false) {
         compilations = gaugePrototype
             .name("compilation_count")
@@ -391,16 +455,16 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      final Double value = decodeMetric(metric);
-      if (value == null) {
-        return false;
+      switch (name) {
+        case "sun.ci.compilerThread.0.compiles":
+          return remarkCompilation("0", monitor);
+        case "sun.ci.compilerThread.1.compiles":
+          return remarkCompilation("1", monitor);
+        case "sun.ci.compilerThread.2.compiles":
+          return remarkCompilation("2", monitor);
+        default:
+          throw new UnknownMonitorError(monitor);
       }
-      compilations.newPartial()
-          // Extract the thread index from the name.
-          .labelPair("thread", metric.getName().substring(22, 23))
-          .apply()
-          .set(value);
-      return true;
     }
   }
 
@@ -420,21 +484,36 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
      *
      * TODO: Add metrics for "full GC" events from failure modes.
      */
-    public boolean visit(final Monitor metric) {
-      switch (metric.getName()) {
+    public boolean visit(final Monitor monitor) {
+      final String name = monitor.getName();
+      switch (name) {
         case "sun.gc.collector.0.invocations":
         case "sun.gc.collector.1.invocations":
-          return visitInvocations(metric);
+          return visitInvocations(name, monitor);
 
         case "sun.gc.collector.0.time":
         case "sun.gc.collector.1.time":
-          return visitDurations(metric);
+          return visitDurations(name, monitor);
       }
 
       return false;
     }
 
-    private boolean visitInvocations(final Monitor metric) {
+    private boolean remarkInvocation(final String generation, final Monitor monitor) {
+      final Double value = decodeMetric(monitor);
+      if (value == null) {
+        return false;
+      }
+
+      invocations.newPartial()
+          .labelPair("generation", generation)
+          .apply()
+          .set(value);
+
+      return true;
+    }
+
+    private boolean visitInvocations(final String name, final Monitor monitor) {
       if (invocations == null && invocationsOnce.getAndSet(true) == false) {
         invocations = gaugePrototype
             .name("invocations_total")
@@ -443,30 +522,33 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      final Double value = decodeMetric(metric);
-      if (value == null) {
+      switch (name) {
+        case "sun.gc.collector.0.invocations":
+          return remarkInvocation("new", monitor);
+        case "sun.gc.collector.1.invocations":
+          return remarkInvocation("old", monitor);
+        default:
+          throw new UnknownMonitorError(monitor);
+      }
+    }
+
+    private boolean remarkDuration(final String generation, final Monitor monitor) {
+      final Double valueMicros = decodeMetric(monitor);
+      if (valueMicros == null) {
         return false;
       }
 
-      switch (metric.getName()) {
-        case "sun.gc.collector.0.invocations":
-          calculateInvocations("new", value);
-        case "sun.gc.collector.1.invocations":
-          calculateInvocations("old", value);
-          break;
-      }
+      final Double valueMillis = valueMicros / 1000;
+
+      durations.newPartial()
+          .labelPair("generation", generation)
+          .apply()
+          .set(valueMillis);
 
       return true;
     }
 
-    private void calculateInvocations(final String generation, final double time) {
-      invocations.newPartial()
-          .labelPair("generation", generation)
-          .apply()
-          .set(time);
-    }
-
-    private boolean visitDurations(final Monitor metric) {
+    private boolean visitDurations(final String name, final Monitor monitor) {
       if (durations == null && durationsOnce.getAndSet(true) == false) {
         durations = gaugePrototype
             .name("durations_ms_total")
@@ -474,27 +556,14 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      final Double valueMicros = decodeMetric(metric);
-      if (valueMicros == null) {
-        return false;
-      }
-      final Double valueMillis = valueMicros / 1000;
-      switch (metric.getName()) {
+      switch (name) {
         case "sun.gc.collector.0.time":
-          calculateDurations("new", valueMillis);
+          return remarkDuration("new", monitor);
         case "sun.gc.collector.1.time":
-          calculateDurations("old", valueMillis);
-          break;
+          return remarkDuration("old", monitor);
+        default:
+          throw new UnknownMonitorError(monitor);
       }
-
-      return true;
-    }
-
-    private void calculateDurations(final String generation, final double time) {
-      durations.newPartial()
-          .labelPair("generation", generation)
-          .apply()
-          .set(time);
     }
   }
 
@@ -513,8 +582,9 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private Gauge generationLimit;
     private Gauge generationUsage;
 
-    public boolean visit(final Monitor metric) {
-      switch (metric.getName()) {
+    public boolean visit(final Monitor monitor) {
+      final String name = monitor.getName();
+      switch (name) {
         case "sun.gc.generation.0.agetable.bytes.00":
         case "sun.gc.generation.0.agetable.bytes.01":
         case "sun.gc.generation.0.agetable.bytes.02":
@@ -531,30 +601,43 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
         case "sun.gc.generation.0.agetable.bytes.13":
         case "sun.gc.generation.0.agetable.bytes.14":
         case "sun.gc.generation.0.agetable.bytes.15":
-          return visitSurvivorSpaceAgetableCohorts(metric);
+          return visitSurvivorSpaceAgetableCohorts(name, monitor);
 
         case "sun.gc.generation.0.agetable.size":
-          return visitSurvivorSpaceAgetableCount(metric);
+          return visitSurvivorSpaceAgetableCount(monitor);
 
         case "sun.gc.generation.0.space.0.capacity":
         case "sun.gc.generation.0.space.1.capacity":
         case "sun.gc.generation.0.space.2.capacity":
         case "sun.gc.generation.1.space.0.capacity":
         case "sun.gc.generation.2.space.0.capacity":
-          return visitGenerationLimits(metric);
+          return visitGenerationLimits(name, monitor);
 
         case "sun.gc.generation.0.space.0.used":
         case "sun.gc.generation.0.space.1.used":
         case "sun.gc.generation.0.space.2.used":
         case "sun.gc.generation.1.space.0.used":
         case "sun.gc.generation.2.space.0.used":
-          return visitGenerationUsage(metric);
+          return visitGenerationUsage(name, monitor);
       }
 
       return false;
     }
 
-    private boolean visitGenerationLimits(final Monitor metric) {
+    private boolean remarkGenerationLimit(final String generation, final Monitor monitor) {
+      final Double value = decodeMetric(monitor);
+      if (value == null) {
+        return false;
+      }
+
+      generationLimit.newPartial()
+          .labelPair("generation", generation)
+          .apply()
+          .set(value);
+      return true;
+    }
+
+    private boolean visitGenerationLimits(final String name, final Monitor monitor) {
       if (generationLimit == null && generationLimitOnce.getAndSet(true) == false) {
         generationLimit = gaugePrototype
             .name("generation_limit_bytes")
@@ -563,65 +646,37 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      final Double value = decodeMetric(metric);
+      switch (name) {
+        case "sun.gc.generation.0.space.0.capacity":
+          return remarkGenerationLimit("eden", monitor);
+        case "sun.gc.generation.0.space.1.capacity":
+          return remarkGenerationLimit("survivor0", monitor);
+        case "sun.gc.generation.0.space.2.capacity":
+          return remarkGenerationLimit("survivor1", monitor);
+        case "sun.gc.generation.1.space.0.capacity":
+          return remarkGenerationLimit("old", monitor);
+        case "sun.gc.generation.2.space.0.capacity":
+          return remarkGenerationLimit("permgen", monitor);
+        default:
+          throw new UnknownMonitorError(monitor);
+      }
+    }
+
+    private boolean remarkGenerationUsage(final String generation, final Monitor monitor) {
+      final Double value = decodeMetric(monitor);
       if (value == null) {
         return false;
       }
 
-      switch (metric.getName()) {
-        case "sun.gc.generation.0.space.0.capacity":
-          calculateEdenGenerationLimit(value);
-          break;
-
-        case "sun.gc.generation.0.space.1.capacity":
-          calculateSurvivorSpaceLimit("survivor0", value);
-          break;
-
-        case "sun.gc.generation.0.space.2.capacity":
-          calculateSurvivorSpaceLimit("survivor1", value);
-          break;
-
-        case "sun.gc.generation.1.space.0.capacity":
-          calculateOldGenerationLimit(value);
-          break;
-
-        case "sun.gc.generation.2.space.0.capacity":
-          calculatePermGenerationLimit(value);
-          break;
-      }
+      generationUsage.newPartial()
+          .labelPair("generation", generation)
+          .apply()
+          .set(value);
 
       return true;
     }
 
-    private void calculateEdenGenerationLimit(final double value) {
-      generationLimit.newPartial()
-          .labelPair("generation", "new")
-          .apply()
-          .set(value);
-    }
-
-    private void calculateSurvivorSpaceLimit(final String space, final double value) {
-      generationLimit.newPartial()
-          .labelPair("generation", space)
-          .apply()
-          .set(value);
-    }
-
-    private void calculateOldGenerationLimit(final double value) {
-      generationLimit.newPartial()
-          .labelPair("generation", "old")
-          .apply()
-          .set(value);
-    }
-
-    private void calculatePermGenerationLimit(final double value) {
-      generationLimit.newPartial()
-          .labelPair("generation", "permgen")
-          .apply()
-          .set(value);
-    }
-
-    private boolean visitGenerationUsage(final Monitor metric) {
+    private boolean visitGenerationUsage(final String name, final Monitor monitor) {
       if (generationUsage == null && generationUsageOnce.getAndSet(true) == false) {
         generationUsage = gaugePrototype
             .name("generation_usage_bytes")
@@ -630,79 +685,28 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      final Double value = decodeMetric(metric);
-      if (value == null) {
-        return false;
-      }
-
-      switch (metric.getName()) {
+      switch (name) {
         case "sun.gc.generation.0.space.0.used":
-          calculateEdenGenerationUsage(value);
-          break;
-
+          return remarkGenerationUsage("eden", monitor);
         case "sun.gc.generation.0.space.1.used":
-          calculateSurvivorSpaceUsage("survivor0", value);
-          break;
-
+          return remarkGenerationUsage("survivor0", monitor);
         case "sun.gc.generation.0.space.2.used":
-          calculateSurvivorSpaceUsage("survivor1", value);
-          break;
-
+          return remarkGenerationUsage("survivor1", monitor);
         case "sun.gc.generation.1.space.0.used":
-          calculateOldGenerationUsage(value);
-          break;
-
+          return remarkGenerationUsage("old", monitor);
         case "sun.gc.generation.2.space.0.used":
-          calculatePermGenerationUsage(value);
-          break;
+          return remarkGenerationUsage("permgen", monitor);
+        default:
+          throw new UnknownMonitorError(monitor);
       }
-
-      return true;
     }
 
-    private void calculateEdenGenerationUsage(final double value) {
-      generationUsage.newPartial()
-          .labelPair("generation", "new")
-          .apply()
-          .set(value);
-    }
-
-    private void calculateSurvivorSpaceUsage(final String space, final double value) {
-      generationUsage.newPartial()
-          .labelPair("generation", space)
-          .apply()
-          .set(value);
-    }
-
-    private void calculateOldGenerationUsage(final double value) {
-      generationUsage.newPartial()
-          .labelPair("generation", "old")
-          .apply()
-          .set(value);
-    }
-
-    private void calculatePermGenerationUsage(final double value) {
-      generationUsage.newPartial()
-          .labelPair("generation", "permgen")
-          .apply()
-          .set(value);
-    }
-
-    private boolean visitSurvivorSpaceAgetableCohorts(final Monitor metric) {
-      if (agetableCohorts == null && agetableCohortsOnce.getAndSet(true) == false) {
-        agetableCohorts = gaugePrototype
-            .name("survivor_space_agetable_size_bytes")
-            .labelNames("cohort")
-            .documentation("A measure of the size of each survivor space agetable cohort.")
-            .build();
-      }
-
-      final Double value = decodeMetric(metric);
+    private boolean remarkAgetableCohortSize(final String cohort, final Monitor monitor) {
+      final Double value = decodeMetric(monitor);
       if (value == null) {
         return false;
       }
 
-      final String cohort = metric.getName().substring(35, 37);
       agetableCohorts.newPartial()
           .labelPair("cohort", cohort)
           .apply()
@@ -711,7 +715,54 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
       return true;
     }
 
-    private boolean visitSurvivorSpaceAgetableCount(final Monitor metric) {
+    private boolean visitSurvivorSpaceAgetableCohorts(final String name, final Monitor monitor) {
+      if (agetableCohorts == null && agetableCohortsOnce.getAndSet(true) == false) {
+        agetableCohorts = gaugePrototype
+            .name("survivor_space_agetable_size_bytes")
+            .labelNames("cohort")
+            .documentation("A measure of the size of each survivor space agetable cohort.")
+            .build();
+      }
+
+      switch (name) {
+        case "sun.gc.generation.0.agetable.bytes.00":
+          return remarkAgetableCohortSize("00", monitor);
+        case "sun.gc.generation.0.agetable.bytes.01":
+          return remarkAgetableCohortSize("01", monitor);
+        case "sun.gc.generation.0.agetable.bytes.02":
+          return remarkAgetableCohortSize("02", monitor);
+        case "sun.gc.generation.0.agetable.bytes.03":
+          return remarkAgetableCohortSize("03", monitor);
+        case "sun.gc.generation.0.agetable.bytes.04":
+          return remarkAgetableCohortSize("04", monitor);
+        case "sun.gc.generation.0.agetable.bytes.05":
+          return remarkAgetableCohortSize("05", monitor);
+        case "sun.gc.generation.0.agetable.bytes.06":
+          return remarkAgetableCohortSize("06", monitor);
+        case "sun.gc.generation.0.agetable.bytes.07":
+          return remarkAgetableCohortSize("07", monitor);
+        case "sun.gc.generation.0.agetable.bytes.08":
+          return remarkAgetableCohortSize("08", monitor);
+        case "sun.gc.generation.0.agetable.bytes.09":
+          return remarkAgetableCohortSize("09", monitor);
+        case "sun.gc.generation.0.agetable.bytes.10":
+          return remarkAgetableCohortSize("10", monitor);
+        case "sun.gc.generation.0.agetable.bytes.11":
+          return remarkAgetableCohortSize("11", monitor);
+        case "sun.gc.generation.0.agetable.bytes.12":
+          return remarkAgetableCohortSize("12", monitor);
+        case "sun.gc.generation.0.agetable.bytes.13":
+          return remarkAgetableCohortSize("13", monitor);
+        case "sun.gc.generation.0.agetable.bytes.14":
+          return remarkAgetableCohortSize("14", monitor);
+        case "sun.gc.generation.0.agetable.bytes.15":
+          return remarkAgetableCohortSize("15", monitor);
+        default:
+          throw new UnknownMonitorError(monitor);
+      }
+    }
+
+    private boolean visitSurvivorSpaceAgetableCount(final Monitor monitor) {
       if (agetableCount == null && agetableCountOnce.getAndSet(true) == false) {
         agetableCount = gaugePrototype
             .name("survivor_space_agetable_count")
@@ -719,7 +770,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      final Double value = decodeMetric(metric);
+      final Double value = decodeMetric(monitor);
       if (value == null) {
         return false;
       }
