@@ -6,29 +6,21 @@ It supports Java, Clojure, Scala, JRuby, and anything else that runs on the JVM.
 If you use Maven, you can simply reference the following
 assets:
 
-  * The Client
+  * [The Client](http://mvnrepository.com/artifact/io.prometheus/client)
     * groupId: _io.prometheus_
     * artifactId: _client_
-    * version: _0.0.2-SNAPSHOT_
-  * Hotspot VM Metrics
+    * version: _0.0.2_
+  * [Hotspot VM Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/hotspot)
     * groupId: _io.prometheus.client.utility_
     * artifactId: _hotspot_
-    * version: _0.0.2-SNAPSHOT_
-  * Exposition Servlet - Transferring Metrics to Prometheus Servers
+    * version: _0.0.2_
+  * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client.utility/servlet) - Transferring Metrics to Prometheus Servers
     * groupId: _io.prometheus.client.utility_
     * artifactId: _servlet_
-    * version: _0.0.2-SNAPSHOT_
+    * version: _0.0.2_
 
 ### Getting Started
 There are canonical examples defined in the class definition Javadoc headers in the _io.prometheus.client.metrics_ package.
-
-## Building
-
-    $ mvn compile
-
-## Testing
-
-    $ mvn test
 
 ## Documentation
 The client is canonically documented with Javadoc.  Running the following will produce output local documentation
@@ -38,6 +30,71 @@ in _apidocs_ directories for you to read.
 
 If you use the Mavenized version of the Prometheus client, you can also instruct Maven to download the Javadoc and
 source artifacts.
+
+<strong>Alternatively</strong>, you can also look at the generated [Java Client
+Github Project Page](http://prometheus.github.io/client_java), but the raw
+Javadoc in Java source in version control should be treated as the canonical
+form of documentation.
+
+## Maintenance of this Library
+This suite is built and managed by [Maven](http://maven.apache.org), and the
+artifacts are hosted on the [Sonatype OSS Asset Repository](https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide).
+
+### Building
+
+    $ mvn compile
+
+### Testing
+
+    $ mvn test
+
+Please note that tests on Travis may be unreliable due to the absence of
+installed Maven artifacts.  Ensure that the current snapshot version is
+deployed to Sonatype OSS Repository.
+
+###  Deployment
+These steps below are only useful if you are in a release engineering capacity
+and want to publicize these changes for external users.  You will also need to
+have your local Maven setup correctly along with valid and public GPG key and
+adequate authorization on the Sonatype OSS Repository to submit new artifacts,
+be they _staging_ or _release_ ones.
+
+#### Staging
+    $  mvn clean deploy -DperformRelease=true
+
+#### Release
+    $ mvn release:clean -DperformRelease=true
+    $ mvn release:prepare -DperformRelease=true
+    $ mvn release:perform -DperformRelease=true
+
+#### Documentation
+Documentation can also be released to the public via the Github Pages subproduct
+through the magic _gh-pages_ branch for a Github project.  Documentation is
+generated via the following command:
+
+    $ mvn javadoc:aggregate
+
+It will need to be automatically merged into the _gh-pages_ branch, but that is
+as simple as this:
+
+    $ git checkout master
+    $ mvn javadoc:aggregate
+    $ git checkout gh-pages
+    $ mv target/site/apidocs/ ./
+    $ git status
+    $ # Amend the branch as necessary.
+    $ git commit
+    $ git push
+
+There is a Maven plugin to perform this work, but it is broken.  The
+javadoc:aggregate step will emit documentation into
+_target/site/apidocs_.  The reason that we use this aggregate step instead
+of bare javadoc is that we want one comprehensive Javadoc emission that includes
+all Maven submodules versus trying to manually concatenate this together.
+
+Output documentation lives in the [Java Client Github Project
+Page](http://prometheus.github.io/client_java).
+
 
 ## Contact
   * All of the core developers are accessible via the [Prometheus Developers Mailinglist](https://groups.google.com/forum/?fromgroups#!forum/prometheus-developers).

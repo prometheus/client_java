@@ -396,7 +396,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
   /**
    * <p>
    * {@link Partial} is an <em>incomplete incarnation</em> of a
-   * {@link Metric.Child} that you add label value pair registerStatic to with
+   * {@link Metric.Child} that you add label value pair to with
    * {@link #labelPair(String, String)}. They are used to provide measurements
    * in a trace-like fashion where the outcomes are not known a priori, and the
    * outcomes affect what label pairs the metric shall have.
@@ -413,12 +413,12 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    *       Summary
    *           .newBuilder()
    *           .name(&quot;request_latency_ms&quot;)
-   *           // There are three distinct registerStatic we care about:
+   *           // There are three distinct labelNames we care about:
    *           // - operation: What type of operation are we handling?
    *           // - result: What was its outcome?
    *           // - shard: What remote storage shard was used in answering this
    *           // request?
-   *           .registerStatic(&quot;operation&quot;, &quot;result&quot;, &quot;shard&quot;)
+   *           .labelNames(&quot;operation&quot;, &quot;result&quot;, &quot;shard&quot;)
    *           .documentation(
    *               &quot;Latency quantiles for requests partitioned by 'operation' type, 'result' disposition, and storage 'shard' name.&quot;)
    *           .build();
@@ -441,21 +441,21 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    *
    *   private void doCreate(CreateReq r, Summary.Partial t) throws StorageException {
    *     String shard = shardMap.getForReq(r);
-   *     op.registerStatic(&quot;shard&quot;, shard);
+   *     op.labelNames(&quot;shard&quot;, shard);
    *     // Do our work: Create the entity in the remote shard.
    *   }
    *
    *   public void handleDelete(DeleteReq r) {
-   *     Summary.Partial op = latencies.newPartial().registerStatic(&quot;operation&quot;, &quot;delete&quot;);
+   *     Summary.Partial op = latencies.newPartial().labelNames(&quot;operation&quot;, &quot;delete&quot;);
    *     long start = System.currentTimeMillis();
    *
    *     try {
    *       doDelete(shard, r);
-   *       op.registerStatic(&quot;result&quot;, &quot;success&quot;);
+   *       op.labelName(&quot;result&quot;, &quot;success&quot;);
    *     } catch (StorageException e) {
-   *       op.registerStatic(&quot;result&quot;, &quot;storage_failure&quot;);
+   *       op.labelNames(&quot;result&quot;, &quot;storage_failure&quot;);
    *     } catch (RuntimeException e) {
-   *       op.registerStatic(&quot;result&quot;, &quot;unknown_error&quot;);
+   *       op.labelNames(&quot;result&quot;, &quot;unknown_error&quot;);
    *     } finally {
    *       op.apply().observe(System.currentTimeMillis() - start);
    *     }
@@ -463,7 +463,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    *
    *   private void doDelete(deleteReq r, Summary.Partial t) throws StorageException {
    *     String shard = shardMap.getForReq(r);
-   *     op.registerStatic(&quot;shard&quot;, shard);
+   *     op.labelNames(&quot;shard&quot;, shard);
    *     // Do our work: delete the entity in the remote shard.
    *   }
    *
@@ -545,7 +545,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    * <li>
    * If there is a mismatch between the number of labels that have been
    * accumulated with {@link #labelPair(String, String)} and those defined in
-   * the underlying {@code Builder#registerStatic}, a runtime exception will
+   * the underlying {@code Builder#labelNames}, a runtime exception will
    * occur, signifying illegal use.</li>
    * </ul>
    * </p>
@@ -680,7 +680,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
 
   @Override
   public String toString() {
-    return String.format("Metric{name='%s', registerStatic=%s}", name, labelNames);
+    return String.format("Metric{name='%s', labelNames=%s}", name, labelNames);
   }
 
   /**
