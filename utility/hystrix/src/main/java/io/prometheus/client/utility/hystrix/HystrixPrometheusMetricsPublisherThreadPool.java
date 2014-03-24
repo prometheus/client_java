@@ -17,10 +17,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * <p>Implementation of {@link HystrixMetricsPublisherThreadPool} using the
- * <a href="https://github.com/prometheus/client_java">Prometheus Java Client</a>.</p>
+ * <p>Implementation of {@link HystrixMetricsPublisherThreadPool} using the <a href="https://github.com/prometheus/client_java">Prometheus Java Client</a>.</p>
  *
  * <p>This class is based on the <a href="https://github.com/Netflix/Hystrix/blob/master/hystrix-contrib/hystrix-codahale-metrics-publisher/src/main/java/com/netflix/hystrix/contrib/codahalemetricspublisher/HystrixCodaHaleMetricsPublisherThreadPool.java">HystrixCodaHaleMetricsPublisherThreadPool</a>.</p>
+ *
+ * <p>For a description of the hystrix metrics see the <a href="https://github.com/Netflix/Hystrix/wiki/Metrics-and-Monitoring">Hystrix Metrics &amp; Monitoring wiki</a>.<p/>
  */
 public class HystrixPrometheusMetricsPublisherThreadPool
         implements HystrixMetricsPublisherThreadPool, ExpositionHook {
@@ -57,64 +58,89 @@ public class HystrixPrometheusMetricsPublisherThreadPool
     public void initialize() {
         Prometheus.defaultAddPreexpositionHook(this);
 
-        values.put(createMetricName("threadActiveCount"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getCurrentActiveCount();
+        values.put(createMetricName("thread_active_count",
+            "Current state of thread-pool partitioned by pool_name."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getCurrentActiveCount();
+                }
             }
-        });
+        );
 
-        values.put(createMetricName("completedTaskCount"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getCurrentCompletedTaskCount();
+        values.put(createMetricName("completed_task_count",
+            "Current state of thread-pool partitioned by pool_name."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getCurrentCompletedTaskCount();
+                }
             }
-        });
+        );
 
-        values.put(createMetricName("largestPoolSize"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getCurrentLargestPoolSize();
+        values.put(createMetricName("largest_pool_size",
+            "Current state of thread-pool partitioned by pool_name."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getCurrentLargestPoolSize();
+                }
             }
-        });
+        );
 
-        values.put(createMetricName("totalTaskCount"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getCurrentTaskCount();
+        values.put(createMetricName("total_task_count",
+            "Current state of thread-pool partitioned by pool_name."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getCurrentTaskCount();
+                }
             }
-        });
+        );
 
-        values.put(createMetricName("queueSize"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getCurrentQueueSize();
+        values.put(createMetricName("queue_size",
+            "Current state of thread-pool partitioned by pool_name."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getCurrentQueueSize();
+                }
             }
-        });
+        );
 
-        values.put(createMetricName("rollingMaxActiveThreads"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getRollingMaxActiveThreads();
+        values.put(createMetricName("rolling_max_active_threads",
+            "Rolling count partitioned by pool_name."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getRollingMaxActiveThreads();
+                }
             }
-        });
+        );
 
-        values.put(createMetricName("countThreadsExecuted"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getCumulativeCountThreadsExecuted();
+        values.put(createMetricName("count_threads_executed",
+            "Cumulative count partitioned by pool_name."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getCumulativeCountThreadsExecuted();
+                }
             }
-        });
+        );
 
-        values.put(createMetricName("rollingCountThreadsExecuted"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getRollingCountThreadsExecuted();
+        values.put(createMetricName("rolling_count_threads_executed",
+            "Rolling count partitioned by pool_name."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getRollingCountThreadsExecuted();
+                }
             }
-        });
+        );
 
         if (exportProperties) {
-            values.put(createMetricName("propertyValue_corePoolSize"),
+            values.put(createMetricName("property_value_core_pool_size",
+                "Configuration property partitioned by pool_name."),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -122,7 +148,8 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_keepAliveTimeInMinutes"),
+            values.put(createMetricName("property_value_keep_alive_time_in_minutes",
+                "Configuration property partitioned by pool_name."),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -130,7 +157,8 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_queueSizeRejectionThreshold"),
+            values.put(createMetricName("property_value_queue_size_rejection_threshold",
+                "Configuration property partitioned by pool_name."),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -138,7 +166,8 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_maxQueueSize"),
+            values.put(createMetricName("property_value_max_queue_size",
+                "Configuration property partitioned by pool_name."),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -166,12 +195,9 @@ public class HystrixPrometheusMetricsPublisherThreadPool
         }
     }
 
-    private String createMetricName(String name) {
+    private String createMetricName(String name, String documentation) {
         String metricName = String.format("%s,%s,%s", namespace, SUBSYSTEM, name);
         if (!gauges.containsKey(metricName)) {
-            String documentation = String.format(
-                    "%s %s gauge partitioned by %s.",
-                    SUBSYSTEM, name, POOL_NAME);
             gauges.put(metricName, Gauge.newBuilder()
                     .namespace(namespace)
                     .subsystem(SUBSYSTEM)

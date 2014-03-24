@@ -20,10 +20,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * <p>Implementation of {@link HystrixMetricsPublisherCommand} using the
- * <a href="https://github.com/prometheus/client_java">Prometheus Java Client</a>.</p>
+ * <p>Implementation of {@link HystrixMetricsPublisherCommand} using the <a href="https://github.com/prometheus/client_java">Prometheus Java Client</a>.</p>
  *
  * <p>This class is based on <a href="https://github.com/Netflix/Hystrix/blob/master/hystrix-contrib/hystrix-codahale-metrics-publisher/src/main/java/com/netflix/hystrix/contrib/codahalemetricspublisher/HystrixCodaHaleMetricsPublisherCommand.java">HystrixCodaHaleMetricsPublisherCommand</a>.</p>
+ *
+ * <p>For a description of the hystrix metrics see the <a href="https://github.com/Netflix/Hystrix/wiki/Metrics-and-Monitoring">Hystrix Metrics &amp; Monitoring wiki</a>.<p/>
  */
 public class HystrixPrometheusMetricsPublisherCommand
         implements HystrixMetricsPublisherCommand, ExpositionHook {
@@ -66,182 +67,232 @@ public class HystrixPrometheusMetricsPublisherCommand
     public void initialize() {
         Prometheus.defaultAddPreexpositionHook(this);
 
-        values.put(createMetricName("isCircuitBreakerOpen"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return booleanToNumber(circuitBreaker.isOpen());
+        values.put(createMetricName("is_circuit_breaker_open",
+            "Current status of circuit breaker: 1 = open, 0 = closed."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return booleanToNumber(circuitBreaker.isOpen());
+                }
             }
-        });
+        );
+        values.put(createMetricName("execution_semaphore_permits_in_use",
+            "The number of executionSemaphorePermits in use right now."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getCurrentConcurrentExecutionCount();
+                }
+            }
+        );
+        values.put(createMetricName("error_percentage",
+            "Error percentage derived from current metrics."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getHealthCounts().getErrorPercentage();
+                }
+            }
+        );
 
-        // cumulative counts
-        createCumulativeCountForEvent("countCollapsedRequests",
+        createCumulativeCountForEvent("count_collapsed_requests",
             HystrixRollingNumberEvent.COLLAPSED);
-        createCumulativeCountForEvent("countExceptionsThrown",
+        createCumulativeCountForEvent("count_exceptions_thrown",
             HystrixRollingNumberEvent.EXCEPTION_THROWN);
-        createCumulativeCountForEvent("countFailure",
+        createCumulativeCountForEvent("count_failure",
             HystrixRollingNumberEvent.FAILURE);
-        createCumulativeCountForEvent("countFallbackFailure",
+        createCumulativeCountForEvent("count_fallback_failure",
             HystrixRollingNumberEvent.FALLBACK_FAILURE);
-        createCumulativeCountForEvent("countFallbackRejection",
+        createCumulativeCountForEvent("count_fallback_rejection",
             HystrixRollingNumberEvent.FALLBACK_REJECTION);
-        createCumulativeCountForEvent("countFallbackSuccess",
+        createCumulativeCountForEvent("count_fallback_success",
             HystrixRollingNumberEvent.FALLBACK_SUCCESS);
-        createCumulativeCountForEvent("countResponsesFromCache",
+        createCumulativeCountForEvent("count_responses_from_cache",
             HystrixRollingNumberEvent.RESPONSE_FROM_CACHE);
-        createCumulativeCountForEvent("countSemaphoreRejected",
+        createCumulativeCountForEvent("count_semaphore_rejected",
             HystrixRollingNumberEvent.SEMAPHORE_REJECTED);
-        createCumulativeCountForEvent("countShortCircuited",
+        createCumulativeCountForEvent("count_short_circuited",
             HystrixRollingNumberEvent.SHORT_CIRCUITED);
-        createCumulativeCountForEvent("countSuccess",
+        createCumulativeCountForEvent("count_success",
             HystrixRollingNumberEvent.SUCCESS);
-        createCumulativeCountForEvent("countThreadPoolRejected",
+        createCumulativeCountForEvent("count_thread_pool_rejected",
             HystrixRollingNumberEvent.THREAD_POOL_REJECTED);
-        createCumulativeCountForEvent("countTimeout",
+        createCumulativeCountForEvent("count_timeout",
             HystrixRollingNumberEvent.TIMEOUT);
 
-        // rolling counts
-        createRollingCountForEvent("rollingCountCollapsedRequests",
+        createRollingCountForEvent("rolling_count_collapsed_requests",
             HystrixRollingNumberEvent.COLLAPSED);
-        createRollingCountForEvent("rollingCountExceptionsThrown",
+        createRollingCountForEvent("rolling_count_exceptions_thrown",
             HystrixRollingNumberEvent.EXCEPTION_THROWN);
-        createRollingCountForEvent("rollingCountFailure",
+        createRollingCountForEvent("rolling_count_failure",
             HystrixRollingNumberEvent.FAILURE);
-        createRollingCountForEvent("rollingCountFallbackFailure",
+        createRollingCountForEvent("rolling_count_fallback_failure",
             HystrixRollingNumberEvent.FALLBACK_FAILURE);
-        createRollingCountForEvent("rollingCountFallbackRejection",
+        createRollingCountForEvent("rolling_count_fallback_rejection",
             HystrixRollingNumberEvent.FALLBACK_REJECTION);
-        createRollingCountForEvent("rollingCountFallbackSuccess",
+        createRollingCountForEvent("rolling_count_fallback_success",
             HystrixRollingNumberEvent.FALLBACK_SUCCESS);
-        createRollingCountForEvent("rollingCountResponsesFromCache",
+        createRollingCountForEvent("rolling_count_responses_from_cache",
             HystrixRollingNumberEvent.RESPONSE_FROM_CACHE);
-        createRollingCountForEvent("rollingCountSemaphoreRejected",
+        createRollingCountForEvent("rolling_count_semaphore_rejected",
             HystrixRollingNumberEvent.SEMAPHORE_REJECTED);
-        createRollingCountForEvent("rollingCountShortCircuited",
+        createRollingCountForEvent("rolling_count_short_circuited",
             HystrixRollingNumberEvent.SHORT_CIRCUITED);
-        createRollingCountForEvent("rollingCountSuccess",
+        createRollingCountForEvent("rolling_count_success",
             HystrixRollingNumberEvent.SUCCESS);
-        createRollingCountForEvent("rollingCountThreadPoolRejected",
+        createRollingCountForEvent("rolling_count_thread_pool_rejected",
             HystrixRollingNumberEvent.THREAD_POOL_REJECTED);
-        createRollingCountForEvent("rollingCountTimeout",
+        createRollingCountForEvent("rolling_count_timeout",
             HystrixRollingNumberEvent.TIMEOUT);
 
-        // the number of executionSemaphorePermits in use right now
-        values.put(createMetricName("executionSemaphorePermitsInUse"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getCurrentConcurrentExecutionCount();
-            }
-        });
+        final String latencyExecuteDescription = "Rolling percentiles of execution times for the "
+            +"HystrixCommand.run() method (on the child thread if using thread isolation).";
 
-        // error percentage derived from current metrics
-        values.put(createMetricName("errorPercentage"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getHealthCounts().getErrorPercentage();
-            }
-        });
-
-        // latency metrics
-        values.put(createMetricName("latencyExecute_mean"), new Callable<Number>() {
+        values.put(createMetricName("latency_execute_mean", latencyExecuteDescription),
+            new Callable<Number>() {
             @Override
             public Number call() {
                 return metrics.getExecutionTimeMean();
             }
         });
-        values.put(createMetricName("latencyExecute_percentile_5"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getExecutionTimePercentile(5);
+        values.put(createMetricName("latency_execute_percentile_5", latencyExecuteDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getExecutionTimePercentile(5);
+                }
             }
-        });
-        values.put(createMetricName("latencyExecute_percentile_25"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getExecutionTimePercentile(25);
+        );
+        values.put(createMetricName("latency_execute_percentile_25", latencyExecuteDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getExecutionTimePercentile(25);
+                }
             }
-        });
-        values.put(createMetricName("latencyExecute_percentile_50"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getExecutionTimePercentile(50);
+        );
+        values.put(createMetricName("latency_execute_percentile_50", latencyExecuteDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getExecutionTimePercentile(50);
+                }
             }
-        });
-        values.put(createMetricName("latencyExecute_percentile_75"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getExecutionTimePercentile(75);
+        );
+        values.put(createMetricName("latency_execute_percentile_75", latencyExecuteDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getExecutionTimePercentile(75);
+                }
             }
-        });
-        values.put(createMetricName("latencyExecute_percentile_90"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getExecutionTimePercentile(90);
+        );
+        values.put(createMetricName("latency_execute_percentile_90", latencyExecuteDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getExecutionTimePercentile(90);
+                }
             }
-        });
-        values.put(createMetricName("latencyExecute_percentile_99"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getExecutionTimePercentile(99);
+        );
+        values.put(createMetricName("latency_execute_percentile_99", latencyExecuteDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getExecutionTimePercentile(99);
+                }
             }
-        });
-        values.put(createMetricName("latencyExecute_percentile_995"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getExecutionTimePercentile(99.5);
+        );
+        values.put(createMetricName("latency_execute_percentile_995", latencyExecuteDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getExecutionTimePercentile(99.5);
+                }
             }
-        });
+        );
 
-        values.put(createMetricName("latencyTotal_mean"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getTotalTimeMean();
+        final String latencyTotalDescription = "Rolling percentiles of execution times for the "
+            + "end-to-end execution of HystrixCommand.execute() or HystrixCommand.queue() until "
+            + "a response is returned (or ready to return in case of queue(). The purpose of this "
+            + "compared with the latency_execute* percentiles is to measure the cost of thread "
+            + "queuing/scheduling/execution, semaphores, circuit breaker logic and other "
+            + "aspects of overhead (including metrics capture itself).";
+
+        values.put(createMetricName("latency_total_mean", latencyTotalDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getTotalTimeMean();
+                }
             }
-        });
-        values.put(createMetricName("latencyTotal_percentile_5"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getTotalTimePercentile(5);
+        );
+        values.put(createMetricName("latency_total_percentile_5", latencyTotalDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getTotalTimePercentile(5);
+                }
             }
-        });
-        values.put(createMetricName("latencyTotal_percentile_25"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getTotalTimePercentile(25);
+        );
+        values.put(createMetricName("latency_total_percentile_25", latencyTotalDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getTotalTimePercentile(25);
+                }
             }
-        });
-        values.put(createMetricName("latencyTotal_percentile_50"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getTotalTimePercentile(50);
+        );
+        values.put(createMetricName("latency_total_percentile_50", latencyTotalDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getTotalTimePercentile(50);
+                }
             }
-        });
-        values.put(createMetricName("latencyTotal_percentile_75"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getTotalTimePercentile(75);
+        );
+        values.put(createMetricName("latency_total_percentile_75", latencyTotalDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getTotalTimePercentile(75);
+                }
             }
-        });
-        values.put(createMetricName("latencyTotal_percentile_90"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getTotalTimePercentile(90);
+        );
+        values.put(createMetricName("latency_total_percentile_90", latencyTotalDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getTotalTimePercentile(90);
+                }
             }
-        });
-        values.put(createMetricName("latencyTotal_percentile_99"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getTotalTimePercentile(99);
+        );
+        values.put(createMetricName("latency_total_percentile_99", latencyTotalDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getTotalTimePercentile(99);
+                }
             }
-        });
-        values.put(createMetricName("latencyTotal_percentile_995"), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getTotalTimePercentile(99.5);
+        );
+        values.put(createMetricName("latency_total_percentile_995", latencyTotalDescription),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getTotalTimePercentile(99.5);
+                }
             }
-        });
+        );
 
         if (exportProperties) {
-            values.put(createMetricName("propertyValue_rollingStatisticalWindowInMilliseconds"),
+            final String propertyValueDescription = "These informational metrics report the "
+                + "actual property values being used by the HystrixCommand. This is useful to "
+                + "see when a dynamic property takes effect and confirm a property is set as "
+                + "expected.";
+
+            values.put(createMetricName(
+                "property_value_rolling_statistical_window_in_milliseconds",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -249,7 +300,9 @@ public class HystrixPrometheusMetricsPublisherCommand
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_circuitBreakerRequestVolumeThreshold"),
+            values.put(createMetricName(
+                "property_value_circuit_breaker_request_volume_threshold",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -257,14 +310,18 @@ public class HystrixPrometheusMetricsPublisherCommand
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_circuitBreakerSleepWindowInMilliseconds"),
+            values.put(createMetricName(
+                "property_value_circuit_breaker_sleep_window_in_milliseconds",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
                         return properties.circuitBreakerSleepWindowInMilliseconds().get();
                     }
             });
-            values.put(createMetricName("propertyValue_circuitBreakerErrorThresholdPercentage"),
+            values.put(createMetricName(
+                "property_value_circuit_breaker_error_threshold_percentage",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -272,7 +329,9 @@ public class HystrixPrometheusMetricsPublisherCommand
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_circuitBreakerForceOpen"),
+            values.put(createMetricName(
+                "property_value_circuit_breaker_force_open",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -280,7 +339,9 @@ public class HystrixPrometheusMetricsPublisherCommand
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_circuitBreakerForceClosed"),
+            values.put(createMetricName(
+                "property_value_circuit_breaker_force_closed",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -289,7 +350,8 @@ public class HystrixPrometheusMetricsPublisherCommand
                 }
             );
             values.put(createMetricName(
-                "propertyValue_executionIsolationThreadTimeoutInMilliseconds"),
+                "property_value_execution_isolation_thread_timeout_in_milliseconds",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -297,7 +359,9 @@ public class HystrixPrometheusMetricsPublisherCommand
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_executionIsolationStrategy"),
+            values.put(createMetricName(
+                "property_value_execution_isolation_strategy",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -305,7 +369,9 @@ public class HystrixPrometheusMetricsPublisherCommand
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_metricsRollingPercentileEnabled"),
+            values.put(createMetricName(
+                "property_value_metrics_rolling_percentile_enabled",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -313,7 +379,9 @@ public class HystrixPrometheusMetricsPublisherCommand
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_requestCacheEnabled"),
+            values.put(createMetricName(
+                "property_value_request_cache_enabled",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -321,7 +389,9 @@ public class HystrixPrometheusMetricsPublisherCommand
                     }
                 }
             );
-            values.put(createMetricName("propertyValue_requestLogEnabled"),
+            values.put(createMetricName(
+                "property_value_request_log_enabled",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -330,7 +400,8 @@ public class HystrixPrometheusMetricsPublisherCommand
                 }
             );
             values.put(createMetricName(
-                "propertyValue_executionIsolationSemaphoreMaxConcurrentRequests"),
+                "property_value_execution_isolation_semaphore_max_concurrent_requests",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -339,7 +410,8 @@ public class HystrixPrometheusMetricsPublisherCommand
                 }
             );
             values.put(createMetricName(
-                "propertyValue_fallbackIsolationSemaphoreMaxConcurrentRequests"),
+                "property_value_fallback_isolation_semaphore_max_concurrent_requests",
+                propertyValueDescription),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -369,33 +441,36 @@ public class HystrixPrometheusMetricsPublisherCommand
     }
 
     private void createCumulativeCountForEvent(String name, final HystrixRollingNumberEvent event) {
-        values.put(createMetricName(name), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getCumulativeCount(event);
+        values.put(createMetricName(name,
+            "These are cumulative counts since the start of the application."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getCumulativeCount(event);
+                }
             }
-        });
+        );
     }
 
-    private void createRollingCountForEvent(String name, final HystrixRollingNumberEvent event) {
-        values.put(createMetricName(name), new Callable<Number>() {
-            @Override
-            public Number call() {
-                return metrics.getRollingCount(event);
+    private void createRollingCountForEvent(String name,  final HystrixRollingNumberEvent event) {
+        values.put(createMetricName(name,
+            "These are \"point in time\" counts representing the last X seconds."),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getRollingCount(event);
+                }
             }
-        });
+        );
     }
 
     private int booleanToNumber(boolean value) {
         return value ? 1 : 0;
     }
 
-    private String createMetricName(String name) {
+    private String createMetricName(String name, String documentation) {
         String metricName = String.format("%s,%s,%s", namespace, SUBSYSTEM, name);
         if (!gauges.containsKey(metricName)) {
-            String documentation = String.format(
-                    "%s %s gauge partitioned by %s and %s.",
-                    SUBSYSTEM, name, COMMAND_GROUP, COMMAND_NAME);
             gauges.put(metricName, Gauge.newBuilder()
                     .namespace(namespace)
                     .subsystem(SUBSYSTEM)

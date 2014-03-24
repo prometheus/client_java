@@ -48,6 +48,11 @@ public class HystrixPrometheusMetricsPublisher extends HystrixMetricsPublisher {
                 metrics, properties, exportProperties);
     }
 
+    /**
+     * Register an instance of this publisher for the given namespace with the
+     * {@link com.netflix.hystrix.strategy.HystrixPlugins} singleton. The publisher
+     * registered by this method will NOT attempt to export properties.
+     */
     public static void register(String namespace) {
         HystrixPlugins.getInstance().registerMetricsPublisher(
             new HystrixPrometheusMetricsPublisher(namespace, false));
