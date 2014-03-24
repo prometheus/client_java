@@ -25,7 +25,7 @@ import io.prometheus.client.metrics.Summary;
  *
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
-public class Telemetry {
+class Telemetry {
   @Register
   static final Gauge initializeTime = Gauge.newBuilder()
           .namespace("telemetry")
