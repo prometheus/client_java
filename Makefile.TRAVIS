@@ -5,7 +5,7 @@ build: client utility examples
 client:
 	$(MAKE) -C client -f Makefile.TRAVIS
 
-examples: client
+examples: client utility
 	$(MAKE) -C examples -f Makefile.TRAVIS
 
 utility: client

@@ -2,19 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.prometheus.client.utility</groupId>
-    <artifactId>hotspot</artifactId>
+    <groupId>io.prometheus.client.examples</groupId>
+    <artifactId>guice</artifactId>
 
     <parent>
         <groupId>io.prometheus.client</groupId>
-        <artifactId>utility</artifactId>
+        <artifactId>examples</artifactId>
         <version>0.0.3-SNAPSHOT</version>
     </parent>
 
-    <name>Prometheus Java Instrumentation Helpers for Hotspot VM</name>
+    <name>Prometheus Java Client Guice Injection Example</name>
     <url>http://github.com/prometheus/client_java</url>
     <description>
-        The Prometheus Java Instrumentation Helpers for Hotspot VM
+        The Prometheus Java Client Guice Injection Example
     </description>
 
     <licenses>
@@ -46,6 +46,36 @@
             <artifactId>client</artifactId>
             <version>0.0.3-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>io.prometheus.client.utility</groupId>
+            <artifactId>servlet</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>8.1.7.v20120910</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>8.1.7.v20120910</version>
+        </dependency>
+        <dependency>
+            <groupId>args4j</groupId>
+            <artifactId>args4j</artifactId>
+            <version>2.0.16</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
+            <version>3.0</version>
+        </dependency>
+	<dependency>
+	  <groupId>com.google.inject</groupId>
+	  <artifactId>guice</artifactId>
+	  <version>3.0</version>
+	</dependency>
     </dependencies>
     <build>
         <plugins>
@@ -55,6 +85,19 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>io.prometheus.client.examples.guice.Main</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
