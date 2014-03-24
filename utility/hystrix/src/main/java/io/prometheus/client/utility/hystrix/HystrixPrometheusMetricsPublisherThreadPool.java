@@ -58,8 +58,9 @@ public class HystrixPrometheusMetricsPublisherThreadPool
     public void initialize() {
         Prometheus.defaultAddPreexpositionHook(this);
 
-        values.put(createMetricName("thread_active_count",
-            "Current state of thread-pool partitioned by pool_name."),
+        final String currentStateDoc = "Current state of thread-pool partitioned by pool_name.";
+
+        values.put(createMetricName("thread_active_count", currentStateDoc),
             new Callable<Number>() {
                 @Override
                 public Number call() {
@@ -67,9 +68,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                 }
             }
         );
-
-        values.put(createMetricName("completed_task_count",
-            "Current state of thread-pool partitioned by pool_name."),
+        values.put(createMetricName("completed_task_count", currentStateDoc),
             new Callable<Number>() {
                 @Override
                 public Number call() {
@@ -77,9 +76,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                 }
             }
         );
-
-        values.put(createMetricName("largest_pool_size",
-            "Current state of thread-pool partitioned by pool_name."),
+        values.put(createMetricName("largest_pool_size", currentStateDoc),
             new Callable<Number>() {
                 @Override
                 public Number call() {
@@ -87,9 +84,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                 }
             }
         );
-
-        values.put(createMetricName("total_task_count",
-            "Current state of thread-pool partitioned by pool_name."),
+        values.put(createMetricName("total_task_count", currentStateDoc),
             new Callable<Number>() {
                 @Override
                 public Number call() {
@@ -97,9 +92,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                 }
             }
         );
-
-        values.put(createMetricName("queue_size",
-            "Current state of thread-pool partitioned by pool_name."),
+        values.put(createMetricName("queue_size", currentStateDoc),
             new Callable<Number>() {
                 @Override
                 public Number call() {
@@ -108,12 +101,21 @@ public class HystrixPrometheusMetricsPublisherThreadPool
             }
         );
 
-        values.put(createMetricName("rolling_max_active_threads",
-            "Rolling count partitioned by pool_name."),
+        final String rollingCountDoc = "Rolling count partitioned by pool_name.";
+
+        values.put(createMetricName("rolling_max_active_threads", rollingCountDoc),
             new Callable<Number>() {
                 @Override
                 public Number call() {
                     return metrics.getRollingMaxActiveThreads();
+                }
+            }
+        );
+        values.put(createMetricName("rolling_count_threads_executed", rollingCountDoc),
+            new Callable<Number>() {
+                @Override
+                public Number call() {
+                    return metrics.getRollingCountThreadsExecuted();
                 }
             }
         );
@@ -128,19 +130,12 @@ public class HystrixPrometheusMetricsPublisherThreadPool
             }
         );
 
-        values.put(createMetricName("rolling_count_threads_executed",
-            "Rolling count partitioned by pool_name."),
-            new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return metrics.getRollingCountThreadsExecuted();
-                }
-            }
-        );
+
 
         if (exportProperties) {
-            values.put(createMetricName("property_value_core_pool_size",
-                "Configuration property partitioned by pool_name."),
+            final String propDoc = "Configuration property partitioned by pool_name.";
+
+            values.put(createMetricName("property_value_core_pool_size", propDoc),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -148,8 +143,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                     }
                 }
             );
-            values.put(createMetricName("property_value_keep_alive_time_in_minutes",
-                "Configuration property partitioned by pool_name."),
+            values.put(createMetricName("property_value_keep_alive_time_in_minutes", propDoc),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -157,8 +151,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                     }
                 }
             );
-            values.put(createMetricName("property_value_queue_size_rejection_threshold",
-                "Configuration property partitioned by pool_name."),
+            values.put(createMetricName("property_value_queue_size_rejection_threshold", propDoc),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
@@ -166,8 +159,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
                     }
                 }
             );
-            values.put(createMetricName("property_value_max_queue_size",
-                "Configuration property partitioned by pool_name."),
+            values.put(createMetricName("property_value_max_queue_size", propDoc),
                 new Callable<Number>() {
                     @Override
                     public Number call() {
