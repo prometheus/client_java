@@ -29,6 +29,7 @@ import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -63,6 +64,7 @@ import java.util.logging.Logger;
  * @see io.prometheus.client.metrics.Metric
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
+@ThreadSafe
 public class Prometheus {
   private static final Logger log = Logger.getLogger(Prometheus.class.getName());
 
