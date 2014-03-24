@@ -30,14 +30,12 @@ import java.util.concurrent.TimeUnit;
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
 public class Main {
-  @Register
   private static final Counter rpcCalls = Counter.newBuilder()
           .namespace("rpc")
           .name("calls_total")
           .documentation("The total number of RPC calls partitioned by RPC service.")
           .build();
 
-  @Register
   private static final Summary rpcLatency = Summary.newBuilder()
           .namespace("rpc")
           .name("latency_microseconds")
