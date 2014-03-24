@@ -20,6 +20,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.lang.reflect.Type;
 
 /**
@@ -30,6 +31,7 @@ import java.lang.reflect.Type;
  *
  * @author matt.proud@gmail.com (Matt T. Proud)
  */
+@ThreadSafe
 class AtomicDoubleSerializer implements JsonSerializer<AtomicDouble> {
   @Override
   public JsonElement serialize(final AtomicDouble src, final Type typeOfSrc,

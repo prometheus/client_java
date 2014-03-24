@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Optional;
@@ -196,6 +197,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     return new Builder();
   }
 
+  @ThreadSafe
   public static class Builder implements Metric.Builder<Builder, Summary> {
     private static final Long DEFAULT_PURGE_INTERVAL = TimeUnit.MINUTES.toMillis(15);
     private static final ImmutableMap<Double, Double> DEFAULT_TARGETS = ImmutableMap.of(0.5, 0.05,
@@ -307,6 +309,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     }
   }
 
+  @NotThreadSafe
   public class Partial extends Metric.Partial {
     /**
      * <p>
@@ -334,6 +337,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     }
   }
 
+  @ThreadSafe
   public class Child implements Metric.Child {
     private final AtomicDouble sum = new AtomicDouble();
     private final AtomicLong count = new AtomicLong();

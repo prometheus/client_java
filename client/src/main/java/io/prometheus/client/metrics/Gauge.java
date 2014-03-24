@@ -20,6 +20,7 @@ import com.google.gson.*;
 import io.prometheus.client.Metrics;
 import io.prometheus.client.utility.labels.Reserved;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -168,6 +169,7 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
    * For all other behaviors, see {@link Metric.BaseBuilder}.
    * </p>
    */
+  @ThreadSafe
   public static class Builder implements Metric.Builder<Builder, Gauge> {
     private static final Double DEFAULT_VALUE = Double.valueOf(0);
 
@@ -254,6 +256,7 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
    *
    * @see Metric.Partial
    */
+  @NotThreadSafe
   public class Partial extends Metric.Partial {
     /**
      * <p>
@@ -296,6 +299,7 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
    *
    * @see Metric.Child
    */
+  @ThreadSafe
   public class Child implements Metric.Child {
     final AtomicDouble value = new AtomicDouble();
 
