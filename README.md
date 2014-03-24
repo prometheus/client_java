@@ -40,6 +40,12 @@ form of documentation.
 This suite is built and managed by [Maven](http://maven.apache.org), and the
 artifacts are hosted on the [Sonatype OSS Asset Repository](https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide).
 
+All contributions to this library must follow, as far as practical, the
+prevalent patterns in the library for consistency and the following style
+guide: [Google Java Style](http://goo.gl/FfwVsc).  Depending upon your
+development environment, you may be able to find an automatic formatter
+and adherence checker that follows these rules.
+
 ### Building
 
     $ mvn compile
