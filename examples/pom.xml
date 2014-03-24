@@ -42,6 +42,8 @@
     </developers>
 
     <modules>
+        <module>guice</module>
+        <module>jvmstat</module>
         <module>random</module>
         <module>simple</module>
     </modules>
