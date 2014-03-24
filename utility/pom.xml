@@ -45,6 +45,7 @@
         <module>hotspot</module>
         <module>jvmstat</module>
         <module>servlet</module>
+        <module>hystrix</module>
     </modules>
 
     <profiles>
