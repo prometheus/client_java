@@ -32,7 +32,7 @@ public class HystrixPrometheusMetricsPublisherCommand
     private static final String COMMAND_NAME = "command_name";
     private static final String COMMAND_GROUP = "command_group";
 
-    private static final Map<String, Gauge> GAUGES = new ConcurrentHashMap<String, Gauge>();
+    private static final Map<String, Gauge> gauges = new ConcurrentHashMap<String, Gauge>();
 
     private final Map<String, Callable<Number>> values = new HashMap<String, Callable<Number>>();
 
@@ -355,7 +355,7 @@ public class HystrixPrometheusMetricsPublisherCommand
         for (Entry<String, Callable<Number>> metric : values.entrySet()) {
             try {
                 double value = metric.getValue().call().doubleValue();
-                GAUGES.get(metric.getKey())
+                gauges.get(metric.getKey())
                         .newPartial()
                         .labelPair(COMMAND_GROUP, commandGroup)
                         .labelPair(COMMAND_NAME, commandName)
@@ -392,11 +392,11 @@ public class HystrixPrometheusMetricsPublisherCommand
 
     private String createMetricName(String name) {
         String metricName = String.format("%s,%s,%s", namespace, SUBSYSTEM, name);
-        if (!GAUGES.containsKey(metricName)) {
+        if (!gauges.containsKey(metricName)) {
             String documentation = String.format(
                     "%s %s gauge partitioned by %s and %s.",
                     SUBSYSTEM, name, COMMAND_GROUP, COMMAND_NAME);
-            GAUGES.put(metricName, Gauge.newBuilder()
+            gauges.put(metricName, Gauge.newBuilder()
                     .namespace(namespace)
                     .subsystem(SUBSYSTEM)
                     .name(name)

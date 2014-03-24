@@ -28,7 +28,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
     private static final String SUBSYSTEM = "hystrix_thread_pool";
     private static final String POOL_NAME = "pool_name";
 
-    private static final Map<String, Gauge> GAUGES = new ConcurrentHashMap<String, Gauge>();
+    private static final Map<String, Gauge> gauges = new ConcurrentHashMap<String, Gauge>();
 
     private final Map<String, Callable<Number>> values = new HashMap<String, Callable<Number>>();
 
@@ -154,7 +154,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
         for (Entry<String, Callable<Number>> metric : values.entrySet()) {
             try {
                 double value = metric.getValue().call().doubleValue();
-                GAUGES.get(metric.getKey())
+                gauges.get(metric.getKey())
                         .newPartial()
                         .labelPair(POOL_NAME, poolName)
                         .apply()
@@ -168,11 +168,11 @@ public class HystrixPrometheusMetricsPublisherThreadPool
 
     private String createMetricName(String name) {
         String metricName = String.format("%s,%s,%s", namespace, SUBSYSTEM, name);
-        if (!GAUGES.containsKey(metricName)) {
+        if (!gauges.containsKey(metricName)) {
             String documentation = String.format(
                     "%s %s gauge partitioned by %s.",
                     SUBSYSTEM, name, POOL_NAME);
-            GAUGES.put(metricName, Gauge.newBuilder()
+            gauges.put(metricName, Gauge.newBuilder()
                     .namespace(namespace)
                     .subsystem(SUBSYSTEM)
                     .name(name)
