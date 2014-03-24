@@ -263,6 +263,11 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
     }
 
     @Override
+    public Partial clone() {
+      return (Partial) super.clone();
+    }
+
+    @Override
     protected Counter.Child newChild() {
       return new Child();
     }

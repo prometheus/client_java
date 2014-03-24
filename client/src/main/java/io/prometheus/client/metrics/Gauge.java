@@ -271,6 +271,11 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
     }
 
     @Override
+    public Partial clone() {
+      return (Partial) super.clone();
+    }
+
+    @Override
     protected Gauge.Child newChild() {
       return new Child();
     }
