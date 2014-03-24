@@ -26,7 +26,9 @@ import sun.jvmstat.monitor.VmIdentifier;
 import java.lang.management.ManagementFactory;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.regex.PatternSyntaxException;
 
@@ -36,6 +38,7 @@ import java.util.regex.PatternSyntaxException;
  * sun.jvmstat.monitor.MonitoredVm} facilities.
  * </p>
  * <p/>
+ *
  * <p>
  * These <em>low-level</em> metrics are defined in the C++ bowels of the HotSpot VM through
  * internal measurement types.  The VM exposes these through the <em>HSPerfData</em> interface
@@ -43,6 +46,7 @@ import java.util.regex.PatternSyntaxException;
  * I/O (nio).
  * </p>
  * <p/>
+ *
  * <p>
  * <h1>Important Notes</h1>
  * Due to inconsistencies of virtual machine packages and vendoring, the following remarks should
@@ -56,32 +60,39 @@ import java.util.regex.PatternSyntaxException;
  * in most deployment environments.
  * </li>
  * <li>
- * Users may need to explicitly set {@code -XX:+UsePerfData} in the VM's flags to enable
+ * Users <em>may</em> need to explicitly set {@code -XX:+UsePerfData} in the VM's flags to enable
  * low-level telemetric export.
  * </li>
  * </ul>
  * </p>
  *
+ * <p>
+ * The metrics that this class exposes are dependent upon the release of HotSpot, including even
+ * minor releases.  Depending on that, it may be possible to use adapt this utility to be more
+ * flexible by incorporating support for common metric aliases, as defined in {@code
+ * sun/jvmstat/perfdata/resources/aliasmap}.
+ * </p>
+ *
  * @author Matt T. Proud (matt.proud@gmail.com)
  * @see Prometheus#addPreexpositionHook(io.prometheus.client.Prometheus.ExpositionHook)
  * @see sun.jvmstat.monitor.MonitoredVm
- * @see {@code perfdata/resources/aliasmap}
  */
 public class JvmstatMonitor implements Prometheus.ExpositionHook {
+  private static final int REFRESH_INTERVAL = 5;
   private static final Gauge.Builder gaugePrototype = Gauge.newBuilder()
       .namespace("jvmstat");
   private static final Logger log = Logger.getLogger(JvmstatMonitor.class.getName());
 
   private final MonitoredVm bridge;
 
-  private final ClassLoaderInstrumentation clsInstrumentation =
-      new ClassLoaderInstrumentation();
-  private final NativeCodeCompilerInstrumentation nccInstrumentation =
-      new NativeCodeCompilerInstrumentation();
-  private final GarbageCollectionInstrumentation gcInstrumentation =
-      new GarbageCollectionInstrumentation();
-  private final ManagedMemoryInstrumentation mmInstrumentation =
-      new ManagedMemoryInstrumentation();
+  private final MonitorVisitor clsInstrumentation = new ClassLoaderInstrumentation();
+  private final MonitorVisitor nccInstrumentation = new NativeCodeCompilerInstrumentation();
+  private final MonitorVisitor gcInstrumentation = new GarbageCollectionInstrumentation();
+  private final MonitorVisitor mmInstrumentation =  new ManagedMemoryInstrumentation();
+
+  private final AtomicInteger refreshes = new AtomicInteger(0);
+  private final ConcurrentHashMap<String, Monitor> monitors =
+      new ConcurrentHashMap<String, Monitor>(400);
 
   /**
    * <p>Create a {@link JvmstatMonitor} for the local virtual machine associated with this
@@ -107,28 +118,10 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     bridge = b;
   }
 
-  @Override
-  public void run() {
-    /*
-     * N.B.: There are a few ways we could make this cleaner, through the current
-     * implementation is just fine.  Here are a few candidates:
-      *
-      * - Direct buffer access of HSPerfData MMAP.
-      * -- Caveat: We would need to implement our own HSPerfData processor, which becomes a huge
-      *            point of fragility with even minor HotSpot releases.
-      * - Extending the Metric and its children's mutation model to use a callback when a value
-      *   is requested.
-      * -- Caveat: Unimplemented, but would need to be really careful with the API's design.
-      * - Persistent VmListener registered with HotSpot.
-      * -- Caveat: HotSpot just uses polls as well in the underlying implementation for event
-      *            dispatching.
-     */
+  private void refreshMetrics() {
     final List<Monitor> monitors;
     try {
       monitors = bridge.findByPattern(".*");
-      if (monitors == null) {
-        return;
-      }
     } catch (final MonitorException ex) {
       log.warning(String.format("could not extract telemetry: %s", ex));
       return;
@@ -136,8 +129,40 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
       log.warning(String.format("could not extract telemetry: %s", ex));
       return;
     }
-
+    if (monitors == null) {
+      return;
+    }
     for (final Monitor monitor : monitors) {
+      this.monitors.putIfAbsent(monitor.getName(), monitor);
+    }
+  }
+
+  @Override
+  public void run() {
+    if (refreshes.getAndIncrement() % REFRESH_INTERVAL == 0) {
+      /* This model presumes that metrics are only added throughout the course of runtime and never
+       * removed.  I think that is a reasonable assumption for now.  Handling the removal case
+       * would be easy.
+       */
+      refreshMetrics();
+    }
+    /*
+     * There are a few ways we could make this cleaner, through the current implementation is just
+     * fine.  Here are a few candidates:
+     *
+     * - Direct buffer access of HSPerfData MMAP.
+     * -- Caveat: We would need to implement our own HSPerfData processor, which becomes a huge
+     *            point of fragility with even minor HotSpot releases.
+     * - Extending the Metric and its children's mutation model to use a callback when a value
+     *   is requested.
+     * -- Caveat: Unimplemented, but would need to be really careful with the API's design.
+     * - Persistent VmListener registered with HotSpot.
+     * -- Caveat: HotSpot just uses polls as well in the underlying implementation for event
+     *            dispatching.
+     */
+    for (final String monitorName : monitors.keySet()) {
+      final Monitor monitor = monitors.get(monitorName);
+
       /*
        * Dynamically visit any metrics if they are found.  Unfound metrics are never
        * registered and exported, because we do not want to clutter the namespace and
@@ -146,17 +171,16 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
        * The VM offers no contract about metric order, so it seems imprudent to accumulate
        * state and infer the existence of extra metrics solely by the presence of an earlier one.
        */
-
-      if (clsInstrumentation.visit(monitor)) {
+      if (clsInstrumentation.visit(monitorName, monitor)) {
         continue;
       }
-      if (nccInstrumentation.visit(monitor)) {
+      if (nccInstrumentation.visit(monitorName, monitor)) {
         continue;
       }
-      if (gcInstrumentation.visit(monitor)) {
+      if (gcInstrumentation.visit(monitorName, monitor)) {
         continue;
       }
-      if (mmInstrumentation.visit(monitor)) {
+      if (mmInstrumentation.visit(monitorName, monitor)) {
         continue;
       }
     }
@@ -225,7 +249,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * occur if an unneeded class is unloaded due to memory pressure in the <em>permanent generation
    * </em> and later needs to be reloaded.  The virtual machine's default behavior is to try to
    * keep all classes statically loaded for the lifetime of the process.  See {@code
-   * ClassLoadingService::notify_class_loaded}</li>
+   * ClassLoadingService::notify_class_loaded} in the HotSpot source.</li>
    * <li>{@code unloaded}: The virtual machine unloaded a class.  This event is likely to be rare
    * and will likely occur when either <em>permanent generation</em> memory space is too small for
    * all of the needed classes, or memory pressure occurs from excessive class loading churn.
@@ -233,16 +257,16 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * facilities from mock or dependency injection frameworks, though this case is most likely to
    * occur only in test suite runs.  Most likely, memory pressure is a result from using a
    * poorly-designed dynamic language on the virtual machine that unintelligently uses code
-   * generation for dynamic types, thereby blasting the <em>permanent generation</em> with
+   * generation for ad hoc type generation, thereby blasting the <em>permanent generation</em> with
    * leaky class metadata descriptors.  See @{code
-   * ClassLoadingService::notify_class_unloaded}.</li>
+   * ClassLoadingService::notify_class_unloaded} in the HotSpot source.</li>
    * <li>{@code initialized}: The virtual machine initializes a class.  The process of initializing
    * a class is different from loading it, in that initialization takes the process of loading one
    * important step further: <em>it initializes all static fields and instantiates all objects
-   * required for the fulfillment of that</em>, including performing further class loading and
+   * required for the fulfillment of that class</em>, including performing further class loading and
    * initialization of dependent classes.  The initialization process includes running a class'
-   * static initializers: {@code static {}} blocks.  See VMS 2.16.4 and 2.16.5 and {@code
-   * InstanceClass::initialize} for a further discussion.</li>
+   * static initializers: {@code static {}} blocks.  See <em>VMS 2.16.4-5</em> and {@code
+   * InstanceClass::initialize} in the HotSpot source for a further discussion.</li>
    * </ul>
    * </li>
    * </ul>
@@ -259,8 +283,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private Gauge sizes;
     private Gauge durations;
 
-    public boolean visit(final Monitor monitor) {
-      final String name = monitor.getName();
+    public boolean visit(final String name, final Monitor monitor) {
       switch (name) {
         case "java.cls.loadedClasses":
         case "java.cls.unloadedClasses":
@@ -375,8 +398,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private Gauge compilations;
     private Gauge durations;
 
-    public boolean visit(final Monitor monitor) {
-      final String name = monitor.getName();
+    public boolean visit(final String name, final Monitor monitor) {
       switch (name) {
             /*
              * Incorporate sun.ci.threads for accurate counting.  It is unlikely that there will
@@ -484,8 +506,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
      *
      * TODO: Add metrics for "full GC" events from failure modes.
      */
-    public boolean visit(final Monitor monitor) {
-      final String name = monitor.getName();
+    public boolean visit(final String name, final Monitor monitor) {
       switch (name) {
         case "sun.gc.collector.0.invocations":
         case "sun.gc.collector.1.invocations":
@@ -582,8 +603,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private Gauge generationLimit;
     private Gauge generationUsage;
 
-    public boolean visit(final Monitor monitor) {
-      final String name = monitor.getName();
+    public boolean visit(final String name, final Monitor monitor) {
       switch (name) {
         case "sun.gc.generation.0.agetable.bytes.00":
         case "sun.gc.generation.0.agetable.bytes.01":
@@ -784,7 +804,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
   }
 
   static interface MonitorVisitor {
-    boolean visit(final Monitor m);
+    boolean visit(final String name, final Monitor monitor);
   }
 
   private static Double decodeMetric(final Monitor m) {
