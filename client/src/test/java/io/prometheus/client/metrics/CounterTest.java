@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class CounterTest {
   @Test
-  public void testWorkflow() {
+  public void workflow() {
     Counter.Builder oldBuilder = null;
     Counter.Builder builder = Counter.newBuilder().registerStatic(false);
     Assert.assertNotNull(builder);
@@ -121,5 +121,60 @@ public class CounterTest {
 
     Assert.assertEquals("same children no. after reset", 1, Counter.children.size());
     Assert.assertEquals("got default val. after reset", 13, child.value.get(), 0.001);
+  }
+
+  @Test
+  public void clonePartialSingle() {
+    Counter counter = Counter.newBuilder()
+        .name("some-name")
+        .documentation("some-documentation")
+        .labelNames("a-dimension")
+        .registerStatic(false)
+        .build();
+
+    Counter.Partial partial = counter.newPartial();
+    partial.labelPair("a-dimension", "preset-value");
+    Counter.Partial derivative = partial.clone();
+    Assert.assertNotSame("should return a new object", partial, derivative);
+    Assert.assertSame(partial.apply(), derivative.apply());
+    partial.apply().increment();
+    derivative.apply().increment();
+
+    Metrics.MetricFamily dump = counter.dump();
+    Assert.assertEquals("just one metric", 1, dump.getMetricCount());
+  }
+
+  @Test
+  public void clonePartialDouble() {
+    Counter counter = Counter.newBuilder()
+        .name("some-name")
+        .documentation("some-documentation")
+        .labelNames("a-dimension", "another-dimension")
+        .registerStatic(false)
+        .build();
+
+    Counter.Partial partial = counter.newPartial();
+    partial.labelPair("a-dimension", "preset-value");
+    Counter.Partial derivative = partial.clone();
+    Assert.assertNotSame("two different partials", partial, derivative);
+    partial.labelPair("another-dimension", "first");
+    partial.apply().increment();
+    derivative.labelPair("another-dimension", "second");
+    derivative.apply().increment();
+
+    Metrics.MetricFamily dump = counter.dump();
+    Assert.assertEquals("just two metrics", 2, dump.getMetricCount());
+
+    Assert.assertEquals("a-dimension", dump.getMetric(0).getLabel(0).getName());
+    Assert.assertEquals("preset-value", dump.getMetric(0).getLabel(0).getValue());
+    Assert.assertEquals("another-dimension", dump.getMetric(0).getLabel(1).getName());
+    Assert.assertEquals("first", dump.getMetric(0).getLabel(1).getValue());
+    Assert.assertEquals(1, dump.getMetric(0).getCounter().getValue(), 0);
+
+    Assert.assertEquals("a-dimension", dump.getMetric(1).getLabel(0).getName());
+    Assert.assertEquals("preset-value", dump.getMetric(1).getLabel(0).getValue());
+    Assert.assertEquals("another-dimension", dump.getMetric(1).getLabel(1).getName());
+    Assert.assertEquals("second", dump.getMetric(1).getLabel(1).getValue());
+    Assert.assertEquals(1, dump.getMetric(1).getCounter().getValue(), 0);
   }
 }

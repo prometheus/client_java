@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SummaryTest {
   @Test
-  public void testWorkflow() throws InterruptedException {
+  public void workflow() throws InterruptedException {
     Summary.Builder oldBuilder = null;
     Summary.Builder builder = Summary.newBuilder().registerStatic(false);
     Assert.assertNotNull(builder);
@@ -132,5 +132,60 @@ public class SummaryTest {
     summary.lastPurgeInstantMs = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1);
     summary.purge();
     Assert.assertEquals("no children after purge", 0, summary.children.size());
+  }
+
+  @Test
+  public void clonePartialSingle() {
+    Summary summary = Summary.newBuilder()
+        .name("some-name")
+        .documentation("some-documentation")
+        .labelNames("a-dimension")
+        .registerStatic(false)
+        .build();
+
+    Summary.Partial partial = summary.newPartial();
+    partial.labelPair("a-dimension", "preset-value");
+    Summary.Partial derivative = partial.clone();
+    Assert.assertNotSame("should return a new object", partial, derivative);
+    Assert.assertSame(partial.apply(), derivative.apply());
+    partial.apply().observe(1D);
+    derivative.apply().observe(1D);
+
+    Metrics.MetricFamily dump = summary.dump();
+    Assert.assertEquals("just one metric", 1, dump.getMetricCount());
+  }
+
+  @Test
+  public void clonePartialDouble() {
+    Summary summary = Summary.newBuilder()
+        .name("some-name")
+        .documentation("some-documentation")
+        .labelNames("a-dimension", "another-dimension")
+        .registerStatic(false)
+        .build();
+
+    Summary.Partial partial = summary.newPartial();
+    partial.labelPair("a-dimension", "preset-value");
+    Summary.Partial derivative = partial.clone();
+    Assert.assertNotSame("two different partials", partial, derivative);
+    partial.labelPair("another-dimension", "first");
+    partial.apply().observe(1D);
+    derivative.labelPair("another-dimension", "second");
+    derivative.apply().observe(1D);
+
+    Metrics.MetricFamily dump = summary.dump();
+    Assert.assertEquals("just two metrics", 2, dump.getMetricCount());
+
+    Assert.assertEquals("a-dimension", dump.getMetric(0).getLabel(0).getName());
+    Assert.assertEquals("preset-value", dump.getMetric(0).getLabel(0).getValue());
+    Assert.assertEquals("another-dimension", dump.getMetric(0).getLabel(1).getName());
+    Assert.assertEquals("first", dump.getMetric(0).getLabel(1).getValue());
+    Assert.assertEquals(1, dump.getMetric(0).getSummary().getQuantile(0).getValue(), 0);
+
+    Assert.assertEquals("a-dimension", dump.getMetric(1).getLabel(0).getName());
+    Assert.assertEquals("preset-value", dump.getMetric(1).getLabel(0).getValue());
+    Assert.assertEquals("another-dimension", dump.getMetric(1).getLabel(1).getName());
+    Assert.assertEquals("second", dump.getMetric(1).getLabel(1).getValue());
+    Assert.assertEquals(1, dump.getMetric(1).getSummary().getQuantile(0).getValue(), 0);
   }
 }

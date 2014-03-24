@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class GaugeTest {
   @Test
-  public void testWorkflow() {
+  public void workflow() {
     Gauge.Builder oldBuilder = null;
     Gauge.Builder builder = Gauge.newBuilder().registerStatic(false);
     Assert.assertNotNull(builder);
@@ -113,5 +113,60 @@ public class GaugeTest {
 
     Assert.assertEquals("same children no. after reset", 1, gauge.children.size());
     Assert.assertEquals("got default val. after reset", 5, child.value.get(), 0.001);
+  }
+
+  @Test
+  public void clonePartialSingle() {
+    Gauge gauge = Gauge.newBuilder()
+        .name("some-name")
+        .documentation("some-documentation")
+        .labelNames("a-dimension")
+        .registerStatic(false)
+        .build();
+
+    Gauge.Partial partial = gauge.newPartial();
+    partial.labelPair("a-dimension", "preset-value");
+    Gauge.Partial derivative = partial.clone();
+    Assert.assertNotSame("should return a new object", partial, derivative);
+    Assert.assertSame(partial.apply(), derivative.apply());
+    partial.apply().set(1);
+    derivative.apply().set(1);
+
+    Metrics.MetricFamily dump = gauge.dump();
+    Assert.assertEquals("just one metric", 1, dump.getMetricCount());
+  }
+
+  @Test
+  public void clonePartialDouble() {
+    Gauge gauge = Gauge.newBuilder()
+        .name("some-name")
+        .documentation("some-documentation")
+        .labelNames("a-dimension", "another-dimension")
+        .registerStatic(false)
+        .build();
+
+    Gauge.Partial partial = gauge.newPartial();
+    partial.labelPair("a-dimension", "preset-value");
+    Gauge.Partial derivative = partial.clone();
+    Assert.assertNotSame("two different partials", partial, derivative);
+    partial.labelPair("another-dimension", "first");
+    partial.apply().set(1);
+    derivative.labelPair("another-dimension", "second");
+    derivative.apply().set(1);
+
+    Metrics.MetricFamily dump = gauge.dump();
+    Assert.assertEquals("just two metrics", 2, dump.getMetricCount());
+
+    Assert.assertEquals("a-dimension", dump.getMetric(0).getLabel(0).getName());
+    Assert.assertEquals("preset-value", dump.getMetric(0).getLabel(0).getValue());
+    Assert.assertEquals("another-dimension", dump.getMetric(0).getLabel(1).getName());
+    Assert.assertEquals("first", dump.getMetric(0).getLabel(1).getValue());
+    Assert.assertEquals(1, dump.getMetric(0).getGauge().getValue(), 0);
+
+    Assert.assertEquals("a-dimension", dump.getMetric(1).getLabel(0).getName());
+    Assert.assertEquals("preset-value", dump.getMetric(1).getLabel(0).getValue());
+    Assert.assertEquals("another-dimension", dump.getMetric(1).getLabel(1).getName());
+    Assert.assertEquals("second", dump.getMetric(1).getLabel(1).getValue());
+    Assert.assertEquals(1, dump.getMetric(1).getGauge().getValue(), 0);
   }
 }

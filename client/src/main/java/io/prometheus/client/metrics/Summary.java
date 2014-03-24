@@ -324,6 +324,11 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     }
 
     @Override
+    public Partial clone() {
+      return (Partial) super.clone();
+    }
+
+    @Override
     protected Summary.Child newChild() {
       return new Child(targets);
     }
