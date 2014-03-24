@@ -14,9 +14,10 @@ import com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisherCommand;
 import com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisherThreadPool;
 
 /**
- * <a href="https://github.com/prometheus/client_java">Prometheus Java Client</a> implementation of {@link HystrixMetricsPublisher}.
- * <br>
- * This class is based on <a href="https://github.com/Netflix/Hystrix/blob/master/hystrix-contrib/hystrix-codahale-metrics-publisher/src/main/java/com/netflix/hystrix/contrib/codahalemetricspublisher/HystrixCodaHaleMetricsPublisher.java">HystrixCodaHaleMetricsPublisher</a>.
+ * <p><a href="https://github.com/prometheus/client_java">Prometheus Java Client</a> implementation
+ * of {@link HystrixMetricsPublisher}.</p>
+ *
+ * <p>This class is based on <a href="https://github.com/Netflix/Hystrix/blob/master/hystrix-contrib/hystrix-codahale-metrics-publisher/src/main/java/com/netflix/hystrix/contrib/codahalemetricspublisher/HystrixCodaHaleMetricsPublisher.java">HystrixCodaHaleMetricsPublisher</a>.</p>
  */
 public class HystrixPrometheusMetricsPublisher extends HystrixMetricsPublisher {
 
@@ -30,8 +31,9 @@ public class HystrixPrometheusMetricsPublisher extends HystrixMetricsPublisher {
 
     @Override
     public HystrixMetricsPublisherCommand getMetricsPublisherForCommand(
-            HystrixCommandKey commandKey, HystrixCommandGroupKey commandGroupKey, HystrixCommandMetrics metrics,
-            HystrixCircuitBreaker circuitBreaker, HystrixCommandProperties properties) {
+            HystrixCommandKey commandKey, HystrixCommandGroupKey commandGroupKey,
+            HystrixCommandMetrics metrics, HystrixCircuitBreaker circuitBreaker,
+            HystrixCommandProperties properties) {
 
         return new HystrixPrometheusMetricsPublisherCommand(namespace, commandKey, commandGroupKey,
                 metrics, circuitBreaker, properties, exportProperties);
@@ -47,6 +49,7 @@ public class HystrixPrometheusMetricsPublisher extends HystrixMetricsPublisher {
     }
 
     public static void register(String namespace) {
-        HystrixPlugins.getInstance().registerMetricsPublisher(new HystrixPrometheusMetricsPublisher(namespace, false));
+        HystrixPlugins.getInstance().registerMetricsPublisher(
+            new HystrixPrometheusMetricsPublisher(namespace, false));
     }
 }

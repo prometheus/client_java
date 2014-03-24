@@ -17,11 +17,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Implementation of {@link HystrixMetricsPublisherThreadPool} using the <a href="https://github.com/prometheus/client_java">Prometheus Java Client</a>.
- * <br>
- * This class is based on the <a href="https://github.com/Netflix/Hystrix/blob/master/hystrix-contrib/hystrix-codahale-metrics-publisher/src/main/java/com/netflix/hystrix/contrib/codahalemetricspublisher/HystrixCodaHaleMetricsPublisherThreadPool.java">HystrixCodaHaleMetricsPublisherThreadPool</a>.
+ * <p>Implementation of {@link HystrixMetricsPublisherThreadPool} using the
+ * <a href="https://github.com/prometheus/client_java">Prometheus Java Client</a>.</p>
+ *
+ * <p>This class is based on the <a href="https://github.com/Netflix/Hystrix/blob/master/hystrix-contrib/hystrix-codahale-metrics-publisher/src/main/java/com/netflix/hystrix/contrib/codahalemetricspublisher/HystrixCodaHaleMetricsPublisherThreadPool.java">HystrixCodaHaleMetricsPublisherThreadPool</a>.</p>
  */
-public class HystrixPrometheusMetricsPublisherThreadPool implements HystrixMetricsPublisherThreadPool, ExpositionHook {
+public class HystrixPrometheusMetricsPublisherThreadPool
+        implements HystrixMetricsPublisherThreadPool, ExpositionHook {
 
     private static final String SUBSYSTEM = "hystrix_thread_pool";
     private static final String POOL_NAME = "pool_name";
@@ -112,30 +114,38 @@ public class HystrixPrometheusMetricsPublisherThreadPool implements HystrixMetri
         });
 
         if (exportProperties) {
-            values.put(createMetricName("propertyValue_corePoolSize"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.coreSize().get();
+            values.put(createMetricName("propertyValue_corePoolSize"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.coreSize().get();
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_keepAliveTimeInMinutes"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.keepAliveTimeMinutes().get();
+            );
+            values.put(createMetricName("propertyValue_keepAliveTimeInMinutes"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.keepAliveTimeMinutes().get();
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_queueSizeRejectionThreshold"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.queueSizeRejectionThreshold().get();
+            );
+            values.put(createMetricName("propertyValue_queueSizeRejectionThreshold"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.queueSizeRejectionThreshold().get();
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_maxQueueSize"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.maxQueueSize().get();
+            );
+            values.put(createMetricName("propertyValue_maxQueueSize"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.maxQueueSize().get();
+                    }
                 }
-            });
+            );
         }
     }
 
@@ -157,7 +167,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool implements HystrixMetri
     }
 
     private String createMetricName(String name) {
-        String metricName = namespace + "," + SUBSYSTEM + "," + name;
+        String metricName = String.format("%s,%s,%s", namespace, SUBSYSTEM, name);
         if (!GAUGES.containsKey(metricName)) {
             String documentation = String.format(
                     "%s %s gauge partitioned by %s.",

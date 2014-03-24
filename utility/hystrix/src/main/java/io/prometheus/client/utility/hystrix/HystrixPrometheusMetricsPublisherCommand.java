@@ -20,11 +20,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Implementation of {@link HystrixMetricsPublisherCommand} using the <a href="https://github.com/prometheus/client_java">Prometheus Java Client</a>.
- * <br>
- * This class is based on <a href="https://github.com/Netflix/Hystrix/blob/master/hystrix-contrib/hystrix-codahale-metrics-publisher/src/main/java/com/netflix/hystrix/contrib/codahalemetricspublisher/HystrixCodaHaleMetricsPublisherCommand.java">HystrixCodaHaleMetricsPublisherCommand</a>.
+ * <p>Implementation of {@link HystrixMetricsPublisherCommand} using the
+ * <a href="https://github.com/prometheus/client_java">Prometheus Java Client</a>.</p>
+ *
+ * <p>This class is based on <a href="https://github.com/Netflix/Hystrix/blob/master/hystrix-contrib/hystrix-codahale-metrics-publisher/src/main/java/com/netflix/hystrix/contrib/codahalemetricspublisher/HystrixCodaHaleMetricsPublisherCommand.java">HystrixCodaHaleMetricsPublisherCommand</a>.</p>
  */
-public class HystrixPrometheusMetricsPublisherCommand implements HystrixMetricsPublisherCommand, ExpositionHook {
+public class HystrixPrometheusMetricsPublisherCommand
+        implements HystrixMetricsPublisherCommand, ExpositionHook {
 
     private static final String SUBSYSTEM = "hystrix_command";
     private static final String COMMAND_NAME = "command_name";
@@ -72,32 +74,56 @@ public class HystrixPrometheusMetricsPublisherCommand implements HystrixMetricsP
         });
 
         // cumulative counts
-        createCumulativeCountForEvent("countCollapsedRequests", HystrixRollingNumberEvent.COLLAPSED);
-        createCumulativeCountForEvent("countExceptionsThrown", HystrixRollingNumberEvent.EXCEPTION_THROWN);
-        createCumulativeCountForEvent("countFailure", HystrixRollingNumberEvent.FAILURE);
-        createCumulativeCountForEvent("countFallbackFailure", HystrixRollingNumberEvent.FALLBACK_FAILURE);
-        createCumulativeCountForEvent("countFallbackRejection", HystrixRollingNumberEvent.FALLBACK_REJECTION);
-        createCumulativeCountForEvent("countFallbackSuccess", HystrixRollingNumberEvent.FALLBACK_SUCCESS);
-        createCumulativeCountForEvent("countResponsesFromCache", HystrixRollingNumberEvent.RESPONSE_FROM_CACHE);
-        createCumulativeCountForEvent("countSemaphoreRejected", HystrixRollingNumberEvent.SEMAPHORE_REJECTED);
-        createCumulativeCountForEvent("countShortCircuited", HystrixRollingNumberEvent.SHORT_CIRCUITED);
-        createCumulativeCountForEvent("countSuccess", HystrixRollingNumberEvent.SUCCESS);
-        createCumulativeCountForEvent("countThreadPoolRejected", HystrixRollingNumberEvent.THREAD_POOL_REJECTED);
-        createCumulativeCountForEvent("countTimeout", HystrixRollingNumberEvent.TIMEOUT);
+        createCumulativeCountForEvent("countCollapsedRequests",
+            HystrixRollingNumberEvent.COLLAPSED);
+        createCumulativeCountForEvent("countExceptionsThrown",
+            HystrixRollingNumberEvent.EXCEPTION_THROWN);
+        createCumulativeCountForEvent("countFailure",
+            HystrixRollingNumberEvent.FAILURE);
+        createCumulativeCountForEvent("countFallbackFailure",
+            HystrixRollingNumberEvent.FALLBACK_FAILURE);
+        createCumulativeCountForEvent("countFallbackRejection",
+            HystrixRollingNumberEvent.FALLBACK_REJECTION);
+        createCumulativeCountForEvent("countFallbackSuccess",
+            HystrixRollingNumberEvent.FALLBACK_SUCCESS);
+        createCumulativeCountForEvent("countResponsesFromCache",
+            HystrixRollingNumberEvent.RESPONSE_FROM_CACHE);
+        createCumulativeCountForEvent("countSemaphoreRejected",
+            HystrixRollingNumberEvent.SEMAPHORE_REJECTED);
+        createCumulativeCountForEvent("countShortCircuited",
+            HystrixRollingNumberEvent.SHORT_CIRCUITED);
+        createCumulativeCountForEvent("countSuccess",
+            HystrixRollingNumberEvent.SUCCESS);
+        createCumulativeCountForEvent("countThreadPoolRejected",
+            HystrixRollingNumberEvent.THREAD_POOL_REJECTED);
+        createCumulativeCountForEvent("countTimeout",
+            HystrixRollingNumberEvent.TIMEOUT);
 
         // rolling counts
-        createRollingCountForEvent("rollingCountCollapsedRequests", HystrixRollingNumberEvent.COLLAPSED);
-        createRollingCountForEvent("rollingCountExceptionsThrown", HystrixRollingNumberEvent.EXCEPTION_THROWN);
-        createRollingCountForEvent("rollingCountFailure", HystrixRollingNumberEvent.FAILURE);
-        createRollingCountForEvent("rollingCountFallbackFailure", HystrixRollingNumberEvent.FALLBACK_FAILURE);
-        createRollingCountForEvent("rollingCountFallbackRejection", HystrixRollingNumberEvent.FALLBACK_REJECTION);
-        createRollingCountForEvent("rollingCountFallbackSuccess", HystrixRollingNumberEvent.FALLBACK_SUCCESS);
-        createRollingCountForEvent("rollingCountResponsesFromCache", HystrixRollingNumberEvent.RESPONSE_FROM_CACHE);
-        createRollingCountForEvent("rollingCountSemaphoreRejected", HystrixRollingNumberEvent.SEMAPHORE_REJECTED);
-        createRollingCountForEvent("rollingCountShortCircuited", HystrixRollingNumberEvent.SHORT_CIRCUITED);
-        createRollingCountForEvent("rollingCountSuccess", HystrixRollingNumberEvent.SUCCESS);
-        createRollingCountForEvent("rollingCountThreadPoolRejected", HystrixRollingNumberEvent.THREAD_POOL_REJECTED);
-        createRollingCountForEvent("rollingCountTimeout", HystrixRollingNumberEvent.TIMEOUT);
+        createRollingCountForEvent("rollingCountCollapsedRequests",
+            HystrixRollingNumberEvent.COLLAPSED);
+        createRollingCountForEvent("rollingCountExceptionsThrown",
+            HystrixRollingNumberEvent.EXCEPTION_THROWN);
+        createRollingCountForEvent("rollingCountFailure",
+            HystrixRollingNumberEvent.FAILURE);
+        createRollingCountForEvent("rollingCountFallbackFailure",
+            HystrixRollingNumberEvent.FALLBACK_FAILURE);
+        createRollingCountForEvent("rollingCountFallbackRejection",
+            HystrixRollingNumberEvent.FALLBACK_REJECTION);
+        createRollingCountForEvent("rollingCountFallbackSuccess",
+            HystrixRollingNumberEvent.FALLBACK_SUCCESS);
+        createRollingCountForEvent("rollingCountResponsesFromCache",
+            HystrixRollingNumberEvent.RESPONSE_FROM_CACHE);
+        createRollingCountForEvent("rollingCountSemaphoreRejected",
+            HystrixRollingNumberEvent.SEMAPHORE_REJECTED);
+        createRollingCountForEvent("rollingCountShortCircuited",
+            HystrixRollingNumberEvent.SHORT_CIRCUITED);
+        createRollingCountForEvent("rollingCountSuccess",
+            HystrixRollingNumberEvent.SUCCESS);
+        createRollingCountForEvent("rollingCountThreadPoolRejected",
+            HystrixRollingNumberEvent.THREAD_POOL_REJECTED);
+        createRollingCountForEvent("rollingCountTimeout",
+            HystrixRollingNumberEvent.TIMEOUT);
 
         // the number of executionSemaphorePermits in use right now
         values.put(createMetricName("executionSemaphorePermitsInUse"), new Callable<Number>() {
@@ -215,84 +241,112 @@ public class HystrixPrometheusMetricsPublisherCommand implements HystrixMetricsP
         });
 
         if (exportProperties) {
-            values.put(createMetricName("propertyValue_rollingStatisticalWindowInMilliseconds"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.metricsRollingStatisticalWindowInMilliseconds().get();
+            values.put(createMetricName("propertyValue_rollingStatisticalWindowInMilliseconds"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.metricsRollingStatisticalWindowInMilliseconds().get();
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_circuitBreakerRequestVolumeThreshold"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.circuitBreakerRequestVolumeThreshold().get();
+            );
+            values.put(createMetricName("propertyValue_circuitBreakerRequestVolumeThreshold"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.circuitBreakerRequestVolumeThreshold().get();
+                    }
                 }
+            );
+            values.put(createMetricName("propertyValue_circuitBreakerSleepWindowInMilliseconds"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.circuitBreakerSleepWindowInMilliseconds().get();
+                    }
             });
-            values.put(createMetricName("propertyValue_circuitBreakerSleepWindowInMilliseconds"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.circuitBreakerSleepWindowInMilliseconds().get();
+            values.put(createMetricName("propertyValue_circuitBreakerErrorThresholdPercentage"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.circuitBreakerErrorThresholdPercentage().get();
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_circuitBreakerErrorThresholdPercentage"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.circuitBreakerErrorThresholdPercentage().get();
+            );
+            values.put(createMetricName("propertyValue_circuitBreakerForceOpen"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return booleanToNumber(properties.circuitBreakerForceOpen().get());
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_circuitBreakerForceOpen"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return booleanToNumber(properties.circuitBreakerForceOpen().get());
+            );
+            values.put(createMetricName("propertyValue_circuitBreakerForceClosed"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return booleanToNumber(properties.circuitBreakerForceClosed().get());
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_circuitBreakerForceClosed"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return booleanToNumber(properties.circuitBreakerForceClosed().get());
+            );
+            values.put(createMetricName(
+                "propertyValue_executionIsolationThreadTimeoutInMilliseconds"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.executionIsolationThreadTimeoutInMilliseconds().get();
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_executionIsolationThreadTimeoutInMilliseconds"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.executionIsolationThreadTimeoutInMilliseconds().get();
+            );
+            values.put(createMetricName("propertyValue_executionIsolationStrategy"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.executionIsolationStrategy().get().ordinal();
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_executionIsolationStrategy"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.executionIsolationStrategy().get().ordinal();
+            );
+            values.put(createMetricName("propertyValue_metricsRollingPercentileEnabled"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return booleanToNumber(properties.metricsRollingPercentileEnabled().get());
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_metricsRollingPercentileEnabled"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return booleanToNumber(properties.metricsRollingPercentileEnabled().get());
+            );
+            values.put(createMetricName("propertyValue_requestCacheEnabled"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return booleanToNumber(properties.requestCacheEnabled().get());
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_requestCacheEnabled"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return booleanToNumber(properties.requestCacheEnabled().get());
+            );
+            values.put(createMetricName("propertyValue_requestLogEnabled"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return booleanToNumber(properties.requestLogEnabled().get());
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_requestLogEnabled"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return booleanToNumber(properties.requestLogEnabled().get());
+            );
+            values.put(createMetricName(
+                "propertyValue_executionIsolationSemaphoreMaxConcurrentRequests"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.executionIsolationSemaphoreMaxConcurrentRequests().get();
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_executionIsolationSemaphoreMaxConcurrentRequests"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.executionIsolationSemaphoreMaxConcurrentRequests().get();
+            );
+            values.put(createMetricName(
+                "propertyValue_fallbackIsolationSemaphoreMaxConcurrentRequests"),
+                new Callable<Number>() {
+                    @Override
+                    public Number call() {
+                        return properties.fallbackIsolationSemaphoreMaxConcurrentRequests().get();
+                    }
                 }
-            });
-            values.put(createMetricName("propertyValue_fallbackIsolationSemaphoreMaxConcurrentRequests"), new Callable<Number>() {
-                @Override
-                public Number call() {
-                    return properties.fallbackIsolationSemaphoreMaxConcurrentRequests().get();
-                }
-            });
+            );
         }
     }
 
@@ -337,7 +391,7 @@ public class HystrixPrometheusMetricsPublisherCommand implements HystrixMetricsP
     }
 
     private String createMetricName(String name) {
-        String metricName = namespace + "," + SUBSYSTEM + "," + name;
+        String metricName = String.format("%s,%s,%s", namespace, SUBSYSTEM, name);
         if (!GAUGES.containsKey(metricName)) {
             String documentation = String.format(
                     "%s %s gauge partitioned by %s and %s.",
