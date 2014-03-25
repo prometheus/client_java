@@ -29,7 +29,7 @@ public class HystrixPrometheusMetricsPublisherThreadPool
     private static final String SUBSYSTEM = "hystrix_thread_pool";
     private static final String POOL_NAME = "pool_name";
 
-    private static final Map<String, Gauge> gauges = new ConcurrentHashMap<String, Gauge>();
+    private static final ConcurrentHashMap<String, Gauge> gauges = new ConcurrentHashMap<String, Gauge>();
 
     private final Map<String, Callable<Number>> values = new HashMap<String, Callable<Number>>();
 
@@ -187,17 +187,34 @@ public class HystrixPrometheusMetricsPublisherThreadPool
         }
     }
 
-    private String createMetricName(String name, String documentation) {
-        String metricName = String.format("%s,%s,%s", namespace, SUBSYSTEM, name);
-        if (!gauges.containsKey(metricName)) {
-            gauges.put(metricName, Gauge.newBuilder()
-                    .namespace(namespace)
-                    .subsystem(SUBSYSTEM)
-                    .name(name)
-                    .labelNames(POOL_NAME)
-                    .documentation(documentation)
-                    .build());
-        }
+    private String createMetricName(String metric, String documentation) {
+        String metricName = String.format("%s,%s,%s", namespace, SUBSYSTEM, metric);
+        registerGauge(metricName, namespace, metric, documentation);
         return metricName;
+    }
+
+    /**
+     * An instance of this class is created for each Hystrix thread-pool but our gauges are configured for
+     * each metric within a given namespace. Although the {@link #initialize()} method is only called once
+     * for each thread-pool by {@link com.netflix.hystrix.strategy.metrics.HystrixMetricsPublisherFactory}
+     * in a thread-safe manner, this method will still be called more than once for each metric across
+     * multiple threads so we should ensure that the gauge is only registered once.
+     */
+    private static void registerGauge(String metricName, String namespace,
+                                      String metric, String documentation) {
+
+        Gauge gauge = Gauge.newBuilder()
+                .namespace(namespace)
+                .subsystem(SUBSYSTEM)
+                .name(metric)
+                .labelNames(POOL_NAME)
+                .documentation(documentation)
+                .registerStatic(false)
+                .build();
+
+        Gauge existing = gauges.putIfAbsent(metricName, gauge);
+        if (existing == null) {
+            Prometheus.defaultRegister(gauge);
+        }
     }
 }
