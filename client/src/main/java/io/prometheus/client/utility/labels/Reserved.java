@@ -28,7 +28,7 @@ public enum Reserved {
    * the name of the {@link io.prometheus.client.metrics.Metric}.
    * </p>
    */
-  NAME("name");
+  NAME("__name__");
 
   private final String name;
 
