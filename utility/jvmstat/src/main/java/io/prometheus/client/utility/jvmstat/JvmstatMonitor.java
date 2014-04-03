@@ -37,7 +37,6 @@ import java.util.regex.PatternSyntaxException;
  * {@link JvmstatMonitor} provides HotSpot-specific JVM metrics through the {@link
  * sun.jvmstat.monitor.MonitoredVm} facilities.
  * </p>
- * <p/>
  *
  * <p>
  * These <em>low-level</em> metrics are defined in the C++ bowels of the HotSpot VM through
@@ -45,7 +44,6 @@ import java.util.regex.PatternSyntaxException;
  * for customers.  Typically one accesses this data via a MMAPed direct buffer—namely Java native
  * I/O (nio).
  * </p>
- * <p/>
  *
  * <p>
  * <h1>Important Notes</h1>
@@ -53,15 +51,15 @@ import java.util.regex.PatternSyntaxException;
  * be carefully observed:
  * <ul>
  * <li>
- * Users may need to explicitly add {@code ${JAVA_HOME}/lib/tools.jar} to the <em>CLASSPATH</em>
- * when using this helper.  This is because the {@code sun.jvmstat.monitor} package hierarchy
- * is not a part of the standard Java library.  These packages are, however, typically included
- * in Sun-, Oracle-, and OpenJDK-provided virtual machines, which is to say they are ubiquitous
- * in most deployment environments.
+ *   Users may need to explicitly add {@code ${JAVA_HOME}/lib/tools.jar} to the <em>CLASSPATH</em>
+ *   when using this helper.  This is because the {@code sun.jvmstat.monitor} package hierarchy
+ *   is not a part of the standard Java library.  These packages are, however, typically included
+ *   in Sun-, Oracle-, and OpenJDK-provided virtual machines, which is to say they are ubiquitous
+ *   in most deployment environments.
  * </li>
  * <li>
- * Users <em>may</em> need to explicitly set {@code -XX:+UsePerfData} in the VM's flags to enable
- * low-level telemetric export.
+ *   Users <em>may</em> need to explicitly set {@code -XX:+UsePerfData} in the VM's flags to enable
+ *   low-level telemetric export.
  * </li>
  * </ul>
  * </p>
@@ -91,8 +89,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
   private final MonitorVisitor mmInstrumentation =  new ManagedMemoryInstrumentation();
 
   private final AtomicInteger refreshes = new AtomicInteger(0);
-  private final ConcurrentHashMap<String, Monitor> monitors =
-      new ConcurrentHashMap<String, Monitor>(400);
+  private final ConcurrentHashMap<String, Monitor> monitors = new ConcurrentHashMap<>(400);
 
   /**
    * <p>Create a {@link JvmstatMonitor} for the local virtual machine associated with this
@@ -107,7 +104,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
   /**
    * <p>Create a {@link JvmstatMonitor} monitoring bridge with a supplied {@link
    * sun.jvmstat.monitor.MonitoredVm}.</p>
-   * <p/>
+   *
    * <p><strong>This is only useful for reusing an existing {@link sun.jvmstat.monitor.MonitoredVm}
    * or for testing purposes.</strong>  Users are encouraged to use the {@link #JvmstatMonitor()}
    * default constructor.</p>
@@ -234,44 +231,72 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
 
   /**
    * <p>Provide visibility about the internals of the JVM's class loader.</p>
-   * <p/>
+   *
    * <h1>Generated Metrics</h1>
    * <h2>{@code jvmstat_classloader_operations_total}</h2>
    * This metric tracks the number of classloader operations by event type.
    * <h3>Metric Dimensions</h3>
    * <ul>
-   * <li>{@code event}: The type of event.
+   * <li>
+   *   {@code event}: The type of event.
    * <ul>
-   * <li>{@code loaded}: The virtual machine loaded a class.  This occurs when the virtual
-   * machine starts and builds its initial class dependency graph.  Alternatively it may occur at
-   * runtime when using the reflection facilities or programmatic class loader: {@code
-   * Class.forName("java.lang.String")}.  As noted in {@code unloaded}, this can also
-   * occur if an unneeded class is unloaded due to memory pressure in the <em>permanent generation
-   * </em> and later needs to be reloaded.  The virtual machine's default behavior is to try to
-   * keep all classes statically loaded for the lifetime of the process.  See {@code
-   * ClassLoadingService::notify_class_loaded} in the HotSpot source.</li>
-   * <li>{@code unloaded}: The virtual machine unloaded a class.  This event is likely to be rare
-   * and will likely occur when either <em>permanent generation</em> memory space is too small for
-   * all of the needed classes, or memory pressure occurs from excessive class loading churn.
-   * Examples for this latter case of churn and memory pressure may be from using code generation
-   * facilities from mock or dependency injection frameworks, though this case is most likely to
-   * occur only in test suite runs.  Most likely, memory pressure is a result from using a
-   * poorly-designed dynamic language on the virtual machine that unintelligently uses code
-   * generation for ad hoc type generation, thereby blasting the <em>permanent generation</em> with
-   * leaky class metadata descriptors.  See @{code
-   * ClassLoadingService::notify_class_unloaded} in the HotSpot source.</li>
-   * <li>{@code initialized}: The virtual machine initializes a class.  The process of initializing
-   * a class is different from loading it, in that initialization takes the process of loading one
-   * important step further: <em>it initializes all static fields and instantiates all objects
-   * required for the fulfillment of that class</em>, including performing further class loading and
-   * initialization of dependent classes.  The initialization process includes running a class'
-   * static initializers: {@code static {}} blocks.  See <em>VMS 2.16.4-5</em> and {@code
-   * InstanceClass::initialize} in the HotSpot source for a further discussion.</li>
+   * <li>
+   *   {@code loaded}: The virtual machine loaded a class.  This occurs when the virtual
+   *   machine starts and builds its initial class dependency graph.  Alternatively it may occur at
+   *   runtime when using the reflection facilities or programmatic class loader: {@code
+   *   Class.forName("java.lang.String")}.  As noted in {@code unloaded}, this can also
+   *   occur if an unneeded class is unloaded due to memory pressure in the <em>permanent
+   *   generation</em> and later needs to be reloaded.  The virtual machine's default behavior is
+   *   to try to keep all classes statically loaded for the lifetime of the process.  See {@code
+   *   ClassLoadingService::notify_class_loaded} in the HotSpot source.
+   * </li>
+   * <li>
+   *   {@code unloaded}: The virtual machine unloaded a class.  This event is likely to be rare
+   *   and will likely occur when either <em>permanent generation</em> memory space is too small
+   *   for all of the needed classes, or memory pressure occurs from excessive class loading churn.
+   *   Examples for this latter case of churn and memory pressure may be from using code generation
+   *   facilities from mock or dependency injection frameworks, though this case is most likely to
+   *   occur only in test suite runs.  Most likely, memory pressure is a result from using a
+   *   poorly-designed dynamic language on the virtual machine that unintelligently uses code
+   *   generation for ad hoc type generation, thereby blasting the <em>permanent generation</em>
+   *   with leaky class metadata descriptors.  See @{code
+   *   ClassLoadingService::notify_class_unloaded} in the HotSpot source.
+   * </li>
+   * <li>
+   *   {@code initialized}: The virtual machine initializes a class.  The process of initializing
+   *   a class is different from loading it, in that initialization takes the process of loading
+   *   one important step further: <em>it initializes all static fields and instantiates all
+   *   objects required for the fulfillment of that class</em>, including performing further class
+   *   loading and initialization of dependent classes.  The initialization process includes
+   *   running a class' static initializers: {@code static {}} blocks.  Consult the <em>Virtual
+   *   Machine Specification sections 2.16.4-5</em> and {@code InstanceClass::initialize} in the
+   *   HotSpot source for a further discussion.
+   * </li>
    * </ul>
    * </li>
    * </ul>
+   *
+   * <h2>{@code jvmstat_classloader_duration_ms}</h2>
+   * This metric tracks the amount of time the class loader spends in various types of
+   * operations.
+   * <h3>Metric Dimensions</h3>
+   * <ul>
+   * <li>
+   *   {@code operation}: The operation type.
+   * </li>
+   * <li>
+   *   {@code find}
+   * </li>
+   * <li>
+   *   {@code parse}
+   * </li>
+   * </ul>
+   *
+   * <h2>{@code jvmstat_classloader_loaded_bytes}</h2>
+   * This metric tracks the total number of bytes the classloader has loaded and processed.
    */
   public static class ClassLoaderInstrumentation implements MonitorVisitor {
+    // This class has public visibility solely for Javadoc production.
     private static final Gauge.Builder gaugePrototype = JvmstatMonitor.gaugePrototype
         .subsystem("classloader");
 
@@ -337,7 +362,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private boolean visitSizes(final Monitor monitor) {
       if (sizes == null && sizesOnce.getAndSet(true) == false) {
         sizes = gaugePrototype
-            .name("loaded")
+            .name("loaded_bytes")
             .documentation("The number of bytes the classloader has loaded.")
             .build();
       }
@@ -388,7 +413,37 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     }
   }
 
+  /**
+   * <p>Provide visibility about the internals of the JVM's just-in-time (JIT) compiler.</p>
+   *
+   * <p>Even if you do not run your Java server with {@code -server} mode, these metrics will be
+   * beneficial to understand how much is being optimized and whether a deeper analysis to find
+   * classes to blacklist from JIT rewriting exist.</p>
+   *
+   * <h1>Generated Metrics</h1>
+   * <h2>{@code jvmstat_jit_compilation_time_ms}</h2>
+   * This metric tracks the amount of time the JIT spends compiling byte code into native code
+   * partitioned by JIT thread.
+   * <h3>Metric Dimensions</h3>
+   * <ul>
+   * <li>
+   *   {@code thread}: The thread ID associated with the work.
+   * </li>
+   * <ul>
+   *
+   * <h2>{@code jvmstat_jit_compilation_count}</h2>
+   * This metric tracks the number of classes the JIT has compiled and potentially recompiled after
+   * determining either the initial byte code definition or re-interpreted machine code
+   * representation is suboptimal.
+   * <h3>Metric Dimensions</h3>
+   * <ul>
+   * <li>
+   *   {@code thread}: The thread ID associated with the work.
+   * </li>
+   * <ul>
+   */
   public static class NativeCodeCompilerInstrumentation implements MonitorVisitor {
+    // This class has public visibility solely for Javadoc production.
     private static final Gauge.Builder gaugePrototype = JvmstatMonitor.gaugePrototype
         .subsystem("jit");
 
@@ -400,11 +455,11 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
 
     public boolean visit(final String name, final Monitor monitor) {
       switch (name) {
-            /*
-             * Incorporate sun.ci.threads for accurate counting.  It is unlikely that there will
-             * be more than two threads at any time.  If we see index "2", we will need to revisit
-             * this exposition bridge.
-             */
+        /*
+         * Incorporate sun.ci.threads for accurate counting.  It is unlikely that there will
+         * be more than two threads at any time.  If we see index "2", we will need to revisit
+         * this exposition bridge.
+         */
         case "sun.ci.compilerThread.0.compiles":
         case "sun.ci.compilerThread.1.compiles":
         case "sun.ci.compilerThread.2.compiles":
@@ -490,7 +545,55 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     }
   }
 
+  /**
+   * <p>Provide visibility about the internals of the JVM's garbage collector.</p>
+   *
+   * <h1>Generated Metrics</h1>
+   * <h2>{@code jvmstat_garbage_collection_invocations_total}</h2>
+   * <p>Since JRE 1.1, the Java Virtual Machine has used a generational model for managing memory
+   * due to object lifecycle in well-designed systems typically following an exponential
+   * distribution whereby the majority of object born die young.  This means great efficiency gains
+   * can be achieved when long-standing tenured objects are ignored (i.e., collected less
+   * frequently) and the focus of collection becomes those newly-birthed objects</p>
+   *
+   * <pre>
+   *  o  |
+   *  b  | X
+   *  j  | X
+   *  e  | X  X
+   *  c  | X  X
+   *  t  | X  X  X
+   *  s  | X  X  X
+   *     | X  X  X  X  X  X
+   *  #   —————————————————————
+   *       0  1  2  3  4  5 … n
+   *
+   *      object cohort age
+   * </pre>
+   *
+   * <p>This is to say, assuming a small amount of persistent in-memory state within a server, the
+   * majority of objects are allocated during units of work (e.g., HTTP requests, RPCs, etc.) and
+   * have no bearing or produce little by way of side effects that need to be retained later
+   * in the life of the server.  <strong>This is the ideal case.</strong></p>
+   *
+   * <h3>Metric Dimensions</h3>
+   * <ul>
+   * <li>
+   *   {@code generation}: The managed memory region name.
+   * </li>
+   * <ul>
+   *
+   * <h2>{@code jvmstat_garbage_collection_duration_ms_total}</h2>
+   * This metric tracks the amount of time spent spent collecting the respective generation.
+   * <h3>Metric Dimensions</h3>
+   * <ul>
+   * <li>
+   *   {@code generation}: The managed memory region name.
+   * </li>
+   * <ul>
+   */
   public static class GarbageCollectionInstrumentation implements MonitorVisitor {
+    // This class has public visibility solely for Javadoc production.
     private static final Gauge.Builder gaugePrototype = JvmstatMonitor.gaugePrototype
         .subsystem("garbage_collection");
 
@@ -588,7 +691,41 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     }
   }
 
+  /**
+   * <p>Provide visibility about the internals of the JVM memory regions.</p>
+   *
+   * <h1>Generated Metrics</h1>
+   * <h2>{@code jvmstat_managed_memory_generation_limit_bytes}</h2>
+   * <h3>Metric Dimensions</h3>
+   * <ul>
+   * <li>
+   *   {@code generation}: The managed memory region name.
+   * </li>
+   * <ul>
+   *
+   * <h2>{@code jvmstat_managed_memory_generation_usage_bytes}</h2>
+   * <h3>Metric Dimensions</h3>
+   * <ul>
+   * <li>
+   *   {@code generation}: The managed memory region name.
+   * </li>
+   * <ul>
+   *
+   * <h2>{@code jvmstat_managed_memory_survivor_space_agetable_size_bytes}</h2>
+   * <h3>Metric Dimensions</h3>
+   * <ul>
+   * <li>
+   *   {@code cohort}: The agetable cohort.  (TODO: Discuss the agetable design.)
+   * </li>
+   * <ul>
+   *
+   * <h2>{@code jvmstat_managed_memory_survivor_space_agetable_count}</h2>
+   *(TODO: Discuss the agetable design.)
+   *
+   * @see io.prometheus.client.utility.jvmstat.JvmstatMonitor.GarbageCollectionInstrumentation
+   */
   public static class ManagedMemoryInstrumentation implements MonitorVisitor {
+    // This class has public visibility solely for Javadoc production.
     private static final Gauge.Builder gaugePrototype = JvmstatMonitor.gaugePrototype
         .subsystem("managed_memory");
 
