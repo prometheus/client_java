@@ -15,9 +15,11 @@
 package io.prometheus.client.metrics;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -344,9 +346,40 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
 
   @ThreadSafe
   public class Child implements Metric.Child {
+    // How large of a buffer to use for internally queued sample observations before passing them
+    // to the Estimator.  This value is found by performing microbenchmarks against the cross of
+    // the following cases
+    //
+    // - thread count [1, 16]
+    // - iteration count [1024, 131072]
+    //
+    // with a worker threads that #observe a constant value repeatedly in iteration to test
+    // overhead of concurrency control.  To further minimize noise in the data, the VM was allowed
+    // to warm up with three prior runs of the same case in the same process to enable the VM to
+    // settle on whatever optimizations it so chooses (running in -server mode for most accurate
+    // readout).
+    //
+    // The value below was reached when performing a binary search of the crosses above against an
+    // interval of [128, 8192].  After 2048, diminishing returns were observed.  Further costs of
+    // memory allocation seem unwarranted.  That said, the buffer allocations are single-time and
+    // never resize throughout the life of the program once they reach capacity.
+    //
+    // At a standard metric request interval, which invokes #query, buffers should be compacted
+    // rather frequently and probably will rarely reach saturation on their own.
+    private static final int BUFFER_SIZE = 2048;
+
     private final AtomicDouble sum = new AtomicDouble();
     private final AtomicLong count = new AtomicLong();
     private final Map<Double, Double> targets;
+    // Use a low latency buffer to receive incoming sample values.  This is done because
+    // Estimator is not thread safe and requires coarse locking around it.
+    private final ArrayBlockingQueue<Double> obsQueue = new ArrayBlockingQueue<>(BUFFER_SIZE);
+    // Upon obsQueue saturation, values are immediately emptied into this pre-allocated buffer to
+    // be passed onto the Estimator, which may at its convenience either accept the values as-is
+    // for later computation or accept them and precompute the requested quantile values.  This
+    // latter operation, while fast, should not force sample value producers to block until this
+    // operation has been performed.
+    private final ArrayList<Double> dequeued = new ArrayList<Double>(BUFFER_SIZE);
 
     private Estimator<Double> estimator;
 
@@ -362,13 +395,39 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
         i++;
       }
 
-      estimator = new Estimator<Double>(quantiles);
+      // Default upstream buffer value pinned for predictability.
+      estimator = new Estimator<Double>(4096, quantiles);
     }
 
-    synchronized public void observe(final Double v) {
-      estimator.insert(v);
-      sum.getAndAdd(v);
-      count.getAndIncrement();
+    public void observe(final Double v) {
+      try {
+        if (obsQueue.offer(v)) {
+          return;
+        }
+
+        synchronized (this) {
+          if (obsQueue.offer(v)) {
+            // Offer the ability to accept the value after potentially waiting without having to
+            // force a premature compaction since this current thread may have been blocked with
+            // others.
+            return;
+          }
+
+          // Otherwise, this unlucky thread will force a compaction and then accept the value,
+          // thereby liberating any waiting parties.
+          compact();
+          estimator.insert(v);
+        }
+      } finally {
+        sum.getAndAdd(v);
+        count.getAndIncrement();
+      }
+    }
+
+    private void compact() {
+      obsQueue.drainTo(dequeued);
+      estimator.insert(dequeued);
+      dequeued.clear();
     }
 
     @Override
@@ -386,9 +445,12 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
 
       sum.set(0);
       count.set(0);
+      obsQueue.clear();
+      dequeued.clear();
     }
 
     synchronized Double query(final Double q) {
+      compact();  // Ensure any remaining observations are rendered available.
       return estimator.query(q);
     }
   }
