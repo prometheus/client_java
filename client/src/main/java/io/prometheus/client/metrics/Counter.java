@@ -363,6 +363,7 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
    * Used to serialize {@link Counter} instances for {@link Gson}.
    * </p>
    */
+  @Deprecated
   public static class Serializer implements JsonSerializer<Counter> {
     @Override
     public JsonElement serialize(final Counter src, final Type typeOfSrc,

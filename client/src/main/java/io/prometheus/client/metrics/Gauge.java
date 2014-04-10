@@ -335,6 +335,7 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
    * Used to serialize {@link Gauge} instances for {@link Gson}.
    * </p>
    */
+  @Deprecated
   public static class Serializer implements JsonSerializer<Gauge> {
     @Override
     public JsonElement serialize(final Gauge src, final Type typeOfSrc,

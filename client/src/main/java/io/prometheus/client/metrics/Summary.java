@@ -460,6 +460,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
    * Used to serialize {@link Summary} instances for {@link Gson}.
    * </p>
    */
+  @Deprecated
   public static class Serializer implements JsonSerializer<Summary> {
     @Override
     public JsonElement serialize(final Summary src, final Type typeOfSrc,

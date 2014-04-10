@@ -123,6 +123,7 @@ public class Prometheus {
     }
   }
 
+  @Deprecated
   private void dumpJson(final Writer writer) throws IOException {
     final long start = clock.nowMs();
 
