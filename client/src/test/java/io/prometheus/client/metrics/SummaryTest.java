@@ -18,8 +18,12 @@ import io.prometheus.client.Metrics;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+// TODO(matt): Build fluent matchers to reduce boilerplate.
 
 /**
  * <p>
@@ -187,5 +191,56 @@ public class SummaryTest {
     Assert.assertEquals("another-dimension", dump.getMetric(1).getLabel(1).getName());
     Assert.assertEquals("second", dump.getMetric(1).getLabel(1).getValue());
     Assert.assertEquals(1, dump.getMetric(1).getSummary().getQuantile(0).getValue(), 0);
+  }
+
+  @Test
+  public void emptiedAndSentForExposition() {
+    final Summary summary = Summary.newBuilder()
+        .name("latencies-by-handler")
+        .documentation("some-documentation")
+        .labelNames("handler")
+        .registerStatic(false)
+        .build();
+
+    final Summary.Child fooLatencies = summary.newPartial()
+        .labelPair("handler", "foo")
+        .apply();
+
+    fooLatencies.observe(5D);
+
+    final Summary.Child barLatencies = summary.newPartial()
+        .labelPair("handler", "bar")
+        .apply();
+
+    barLatencies.observe(1D);
+
+    // Explicitly clean the slate of one dimension!
+    fooLatencies.reset();
+
+    Metrics.MetricFamily out = summary.dump();
+
+    Assert.assertEquals("must contain two metrics", 2, out.getMetricCount());
+    final Set<String> found = new HashSet<>();
+    for (final Metrics.Metric m : out.getMetricList()) {
+      final String dim = m.getLabel(0).getValue();
+      final Metrics.Summary sum = m.getSummary();
+      found.add(dim);
+      switch (dim) {
+        case "foo":
+          Assert.assertEquals("should lack ranked values after reset", 0, sum.getQuantileCount());
+          Assert.assertEquals("should have record of single observation", 1, sum.getSampleCount());
+          Assert.assertEquals("should have sum of single observation", 5, sum.getSampleSum(), 0);
+        break;
+        case "bar":
+          Assert.assertEquals("should have ranked values", 3, sum.getQuantileCount());
+          Assert.assertEquals("should have record of single observation", 1, sum.getSampleCount());
+          Assert.assertEquals("should have sum of single observation", 1, sum.getSampleSum(), 0);
+        break;
+        default:
+          Assert.fail("illegal condition");
+      }
+    }
+    Assert.assertTrue("must have seen bar", found.contains("bar"));
+    Assert.assertTrue("must have seen foo", found.contains("foo"));
   }
 }

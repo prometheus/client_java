@@ -151,8 +151,41 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
   @Override
   Metrics.MetricFamily.Builder annotateBuilder(final Metrics.MetricFamily.Builder b) {
     try {
+      // TODO(matt): This metric is a prime candidate for extractions.
+      // TODO(matt): This could probably use a purge lock.
+
       for (final Map<String, String> labels : children.keySet()) {
         final Child child = children.get(labels);
+        final Metrics.Summary.Builder builder = Metrics.Summary.newBuilder();
+
+        if (!child.isEmpty()) {
+          // These are the cases whereby a Summary metric's child may be empty:
+          //   1. A user has invoked #resetAll on the Summary
+          //      - The Summary was automatically flushed on a given interval to prevent retention
+          //        of outliers via Summary.Builder#purgeInterval.
+          //      - Business logic of the application dictates that all metrics dimensions
+          //        associated with this name need to be reset.
+          //   2. A user has invoked #reset on the single Metric.Child
+          //      - Business logic of the application dictates that the individual metric needs to
+          //        be deleted or reset.
+
+          for (final double q : child.targets.keySet()) {
+            final Double v = child.query(q);
+            if (v == null) {
+              // This condition should never occur, but we want to be safe.
+              continue;
+            }
+
+            final Metrics.Quantile.Builder qs = builder.addQuantileBuilder();
+
+            qs.setQuantile(q);
+            qs.setValue(v);
+          }
+        }
+
+        builder.setSampleCount(child.count.get());
+        builder.setSampleSum(child.sum.get());
+
         final Metrics.Metric.Builder m = b.addMetricBuilder();
 
         for (final String label : labels.keySet()) {
@@ -160,20 +193,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
           m.addLabelBuilder().setName(label).setValue(value);
         }
 
-        final Metrics.Summary.Builder builder = Metrics.Summary.newBuilder();
-
-        builder.setSampleCount(child.count.get());
-        builder.setSampleSum(child.sum.get());
-
-        for (final double q : child.targets.keySet()) {
-          final double v = child.query(q);
-          final Metrics.Quantile.Builder qs = builder.addQuantileBuilder();
-
-          qs.setQuantile(q);
-          qs.setValue(v);
-        }
-
-        m.setSummary(builder.build());
+        m.setSummary(builder);
       }
 
       return b;
@@ -443,8 +463,6 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
 
       estimator = new Estimator<Double>(quantiles);
 
-      sum.set(0);
-      count.set(0);
       obsQueue.clear();
       dequeued.clear();
     }
@@ -452,6 +470,10 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     synchronized Double query(final Double q) {
       compact();  // Ensure any remaining observations are rendered available.
       return estimator.query(q);
+    }
+
+    boolean isEmpty() {
+      return count.get() == 0;
     }
   }
 

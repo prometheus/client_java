@@ -242,7 +242,7 @@ public class Prometheus {
   }
 
   private void addPreexpositionHook(final ExpositionHook h) {
-    preexpositionHooks.putIfAbsent(h, new Object());
+    preexpositionHooks.putIfAbsent(h, this);
   }
 
   private void runPreexpositionHooks() {
