@@ -123,6 +123,7 @@ public class Prometheus {
     }
   }
 
+  @Deprecated
   private void dumpJson(final Writer writer) throws IOException {
     final long start = clock.nowMs();
 
@@ -241,7 +242,7 @@ public class Prometheus {
   }
 
   private void addPreexpositionHook(final ExpositionHook h) {
-    preexpositionHooks.putIfAbsent(h, new Object());
+    preexpositionHooks.putIfAbsent(h, this);
   }
 
   private void runPreexpositionHooks() {

@@ -82,7 +82,7 @@
         <dependency>
             <groupId>com.matttproud.quantile</groupId>
             <artifactId>quantile</artifactId>
-            <version>0.0.2</version>
+            <version>0.0.3</version>
         </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
