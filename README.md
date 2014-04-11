@@ -9,15 +9,19 @@ assets:
   * [The Client](http://mvnrepository.com/artifact/io.prometheus/client)
     * groupId: _io.prometheus_
     * artifactId: _client_
-    * version: _0.0.2_
+    * version: _0.0.3_
+  * [Hotspot 'jvmstat/perfdata' Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/jvmstat)
+    * groupId: _io.prometheus.client.utility_
+    * artifactId: _jvmstat_
+    * version: _0.0.3_
   * [Hotspot VM Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/hotspot)
     * groupId: _io.prometheus.client.utility_
     * artifactId: _hotspot_
-    * version: _0.0.2_
+    * version: _0.0.3_
   * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client.utility/servlet) - Transferring Metrics to Prometheus Servers
     * groupId: _io.prometheus.client.utility_
     * artifactId: _servlet_
-    * version: _0.0.2_
+    * version: _0.0.3_
 
 ### Getting Started
 There are canonical examples defined in the class definition Javadoc headers in the _io.prometheus.client.metrics_ package.
@@ -64,6 +68,9 @@ and want to publicize these changes for external users.  You will also need to
 have your local Maven setup correctly along with valid and public GPG key and
 adequate authorization on the Sonatype OSS Repository to submit new artifacts,
 be they _staging_ or _release_ ones.
+
+You should read the [Sonatype OSS Maven Repository Usage
+Guide](http://goo.gl/Sp9No5) before performing any of the following:
 
 #### Staging
     $  mvn clean deploy -DperformRelease=true
