@@ -393,7 +393,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     private final Map<Double, Double> targets;
     // Use a low latency buffer to receive incoming sample values.  This is done because
     // Estimator is not thread safe and requires coarse locking around it.
-    private final ArrayBlockingQueue<Double> obsQueue = new ArrayBlockingQueue<>(BUFFER_SIZE);
+    private final ArrayBlockingQueue<Double> obsQueue = new ArrayBlockingQueue<Double>(BUFFER_SIZE);
     // Upon obsQueue saturation, values are immediately emptied into this pre-allocated buffer to
     // be passed onto the Estimator, which may at its convenience either accept the values as-is
     // for later computation or accept them and precompute the requested quantile values.  This

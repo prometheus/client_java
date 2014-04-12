@@ -23,6 +23,7 @@ import sun.jvmstat.monitor.MonitoredHost;
 import sun.jvmstat.monitor.MonitoredVm;
 import sun.jvmstat.monitor.VmIdentifier;
 
+import javax.annotation.concurrent.GuardedBy;
 import java.lang.management.ManagementFactory;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -89,7 +90,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
   private final MonitorVisitor mmInstrumentation =  new ManagedMemoryInstrumentation();
 
   private final AtomicInteger refreshes = new AtomicInteger(0);
-  private final ConcurrentHashMap<String, Monitor> monitors = new ConcurrentHashMap<>(400);
+  private final ConcurrentHashMap<String, Monitor> monitors = new ConcurrentHashMap<String, Monitor>(400);
 
   /**
    * <p>Create a {@link JvmstatMonitor} for the local virtual machine associated with this
@@ -304,23 +305,20 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private final AtomicBoolean sizesOnce = new AtomicBoolean(false);
     private final AtomicBoolean durationsOnce = new AtomicBoolean(false);
 
-    private Gauge states;
-    private Gauge sizes;
-    private Gauge durations;
+    private @GuardedBy("statesOnce") Gauge states;
+    private @GuardedBy("sizesOnce") Gauge sizes;
+    private @GuardedBy("durationsOnce") Gauge durations;
 
     public boolean visit(final String name, final Monitor monitor) {
-      switch (name) {
-        case "java.cls.loadedClasses":
-        case "java.cls.unloadedClasses":
-        case "sun.cls.initializedClasses":
-          return visitClassEvents(name, monitor);
-
-        case "sun.cls.loadedBytes":
-          return visitSizes(monitor);
-
-        case "sun.classloader.findClassTime":
-        case "sun.cls.parseClassTime":
-          return visitDurations(name, monitor);
+      if ("java.cls.loadedClasses".equals(name)
+          || "java.cls.unloadedClasses".equals(name)
+          || "sun.cls.initializedClasses".equals(name)) {
+        return visitClassEvents(name, monitor);
+      } else if ("sun.cls.loadedBytes".equals(name)) {
+        return visitSizes(monitor);
+      } else if ("sun.classloader.findClassTime".equals(name)
+          || "sun.cls.parseClassTime".equals(name)) {
+        return visitDurations(name, monitor);
       }
 
       return false;
@@ -349,14 +347,13 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      switch (name) {
-        case "sun.classloader.findClassTime":
-          return remarkDuration("find", monitor);
-        case "sun.cls.parseClassTime":
-          return remarkDuration("parse", monitor);
-        default:
-          throw new UnknownMonitorError(monitor);
+      if ("sun.classloader.findClassTime".equals(name)) {
+        return remarkDuration("find", monitor);
+      } else if ("sun.cls.parseClassTime".equals(name)) {
+        return remarkDuration("parse", monitor);
       }
+
+      throw new UnknownMonitorError(monitor);
     }
 
     private boolean visitSizes(final Monitor monitor) {
@@ -400,16 +397,15 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      switch (name) {
-        case "java.cls.loadedClasses":
-          return remarkClassEvent("loaded", monitor);
-        case "java.cls.unloadedClasses":
-          return remarkClassEvent("unloaded", monitor);
-        case "sun.cls.initializedClasses":
-          return remarkClassEvent("initialized", monitor);
-        default:
-          throw new UnknownMonitorError(monitor);
+      if ("java.cls.loadedClasses".equals(name)) {
+        return remarkClassEvent("loaded", monitor);
+      } else if ("java.cls.unloadedClasses".equals(name)) {
+        return remarkClassEvent("unloaded", monitor);
+      } else if ("sun.cls.initializedClasses".equals(name)) {
+        return remarkClassEvent("initialized", monitor);
       }
+
+      throw new UnknownMonitorError(monitor);
     }
   }
 
@@ -450,25 +446,23 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private final AtomicBoolean compilationOnce = new AtomicBoolean(false);
     private final AtomicBoolean durationOnce = new AtomicBoolean(false);
 
-    private Gauge compilations;
-    private Gauge durations;
+    private @GuardedBy("compilationsOnce") Gauge compilations;
+    private @GuardedBy("durationsOnce") Gauge durations;
 
     public boolean visit(final String name, final Monitor monitor) {
-      switch (name) {
+      if ("sun.ci.compilerThread.0.compiles".equals(name)
+          || "sun.ci.compilerThread.1.compiles".equals(name)
+          || "sun.ci.compilerThread.2.compiles".equals(name)) {
         /*
          * Incorporate sun.ci.threads for accurate counting.  It is unlikely that there will
          * be more than two threads at any time.  If we see index "2", we will need to revisit
          * this exposition bridge.
          */
-        case "sun.ci.compilerThread.0.compiles":
-        case "sun.ci.compilerThread.1.compiles":
-        case "sun.ci.compilerThread.2.compiles":
-          return visitCompilations(name, monitor);
-
-        case "sun.ci.compilerThread.0.time":
-        case "sun.ci.compilerThread.1.time":
-        case "sun.ci.compilerThread.2.time":
-          return visitDurations(name, monitor);
+        return visitCompilations(name, monitor);
+      } else if ("sun.ci.compilerThread.0.time".equals(name)
+          || "sun.ci.compilerThread.1.time".equals(name)
+          || "sun.ci.compilerThread.2.time".equals(name)){
+        return visitDurations(name, monitor);
       }
 
       return false;
@@ -497,16 +491,14 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      switch (name) {
-        case "sun.ci.compilerThread.0.time":
-          return remarkDuration("0", monitor);
-        case "sun.ci.compilerThread.1.time":
-          return remarkDuration("1", monitor);
-        case "sun.ci.compilerThread.2.time":
-          return remarkDuration("2", monitor);
-        default:
-          throw new UnknownMonitorError(monitor);
+      if ("sun.ci.compilerThread.0.time".equals(name)) {
+        return remarkDuration("0", monitor);
+      } else if ("sun.ci.compilerThread.1.time".equals(name)) {
+        return remarkDuration("1", monitor);
+      } else if ("sun.ci.compilerThread.2.time".equals(name)) {
+        return remarkDuration("2", monitor);
       }
+      throw new UnknownMonitorError(monitor);
     }
 
     private boolean remarkCompilation(final String thread, final Monitor monitor) {
@@ -532,16 +524,15 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      switch (name) {
-        case "sun.ci.compilerThread.0.compiles":
-          return remarkCompilation("0", monitor);
-        case "sun.ci.compilerThread.1.compiles":
-          return remarkCompilation("1", monitor);
-        case "sun.ci.compilerThread.2.compiles":
-          return remarkCompilation("2", monitor);
-        default:
-          throw new UnknownMonitorError(monitor);
+      if ("sun.ci.compilerThread.0.compiles".equals(name)) {
+        return remarkCompilation("0", monitor);
+      } else if ("sun.ci.compilerThread.1.compiles".equals(name)) {
+        return remarkCompilation("1", monitor);
+      } else if ("sun.ci.compilerThread.1.compiles".equals(name)) {
+        return remarkCompilation("2", monitor);
       }
+
+      throw new UnknownMonitorError(monitor);
     }
   }
 
@@ -600,8 +591,8 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     final AtomicBoolean invocationsOnce = new AtomicBoolean(false);
     final AtomicBoolean durationsOnce = new AtomicBoolean(false);
 
-    Gauge invocations;
-    Gauge durations;
+    private @GuardedBy("invocationsOnce") Gauge  invocations;
+    private @GuardedBy("durationsOnce") Gauge durations;
 
     /*
      * TODO: Add garbage collection failure mode registration instrumentation after coming to
@@ -610,14 +601,12 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
      * TODO: Add metrics for "full GC" events from failure modes.
      */
     public boolean visit(final String name, final Monitor monitor) {
-      switch (name) {
-        case "sun.gc.collector.0.invocations":
-        case "sun.gc.collector.1.invocations":
-          return visitInvocations(name, monitor);
-
-        case "sun.gc.collector.0.time":
-        case "sun.gc.collector.1.time":
-          return visitDurations(name, monitor);
+      if ("sun.gc.collector.0.invocations".equals(name)
+          || "sun.gc.collector.1.invocations".equals(name)) {
+        return visitInvocations(name, monitor);
+      } else if ("sun.gc.collector.0.time".equals(name)
+          || "sun.gc.collector.1.time".equals(name)) {
+        return visitDurations(name, monitor);
       }
 
       return false;
@@ -646,14 +635,13 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      switch (name) {
-        case "sun.gc.collector.0.invocations":
-          return remarkInvocation("new", monitor);
-        case "sun.gc.collector.1.invocations":
-          return remarkInvocation("old", monitor);
-        default:
-          throw new UnknownMonitorError(monitor);
+      if ("sun.gc.collector.0.invocations".equals(name)) {
+        return remarkInvocation("new", monitor);
+      } else if ("sun.gc.collector.1.invocations".equals(name)) {
+        return remarkInvocation("old", monitor);
       }
+
+      throw new UnknownMonitorError(monitor);
     }
 
     private boolean remarkDuration(final String generation, final Monitor monitor) {
@@ -680,14 +668,13 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      switch (name) {
-        case "sun.gc.collector.0.time":
-          return remarkDuration("new", monitor);
-        case "sun.gc.collector.1.time":
-          return remarkDuration("old", monitor);
-        default:
-          throw new UnknownMonitorError(monitor);
+      if ("sun.gc.collector.0.time".equals(name)) {
+        return remarkDuration("new", monitor);
+      } else if ("sun.gc.collector.1.time".equals(name)) {
+        return remarkDuration("old", monitor);
       }
+
+      throw new UnknownMonitorError(monitor);
     }
   }
 
@@ -735,46 +722,42 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private final AtomicBoolean generationUsageOnce = new AtomicBoolean(false);
 
     // TODO: Discuss markOop and oopDesc types.
-    private Gauge agetableCohorts;
-    private Gauge agetableCount;
-    private Gauge generationLimit;
-    private Gauge generationUsage;
+    private @GuardedBy("agetableCohortsOnce") Gauge agetableCohorts;
+    private @GuardedBy("agetableCountOnce") Gauge agetableCount;
+    private @GuardedBy("generationLimitOnce") Gauge generationLimit;
+    private @GuardedBy("generationUsageOnce") Gauge generationUsage;
 
     public boolean visit(final String name, final Monitor monitor) {
-      switch (name) {
-        case "sun.gc.generation.0.agetable.bytes.00":
-        case "sun.gc.generation.0.agetable.bytes.01":
-        case "sun.gc.generation.0.agetable.bytes.02":
-        case "sun.gc.generation.0.agetable.bytes.03":
-        case "sun.gc.generation.0.agetable.bytes.04":
-        case "sun.gc.generation.0.agetable.bytes.05":
-        case "sun.gc.generation.0.agetable.bytes.06":
-        case "sun.gc.generation.0.agetable.bytes.07":
-        case "sun.gc.generation.0.agetable.bytes.08":
-        case "sun.gc.generation.0.agetable.bytes.09":
-        case "sun.gc.generation.0.agetable.bytes.10":
-        case "sun.gc.generation.0.agetable.bytes.11":
-        case "sun.gc.generation.0.agetable.bytes.12":
-        case "sun.gc.generation.0.agetable.bytes.13":
-        case "sun.gc.generation.0.agetable.bytes.14":
-        case "sun.gc.generation.0.agetable.bytes.15":
+      if ("sun.gc.generation.0.agetable.bytes.00".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.01".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.02".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.03".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.04".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.05".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.06".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.07".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.08".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.09".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.10".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.11".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.12".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.13".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.14".equals(name)
+          || "sun.gc.generation.0.agetable.bytes.15".equals(name)) {
           return visitSurvivorSpaceAgetableCohorts(name, monitor);
-
-        case "sun.gc.generation.0.agetable.size":
+      } else if ("sun.gc.generation.0.agetable.size".equals(name)) {
           return visitSurvivorSpaceAgetableCount(monitor);
-
-        case "sun.gc.generation.0.space.0.capacity":
-        case "sun.gc.generation.0.space.1.capacity":
-        case "sun.gc.generation.0.space.2.capacity":
-        case "sun.gc.generation.1.space.0.capacity":
-        case "sun.gc.generation.2.space.0.capacity":
+      } else if ("sun.gc.generation.0.space.0.capacity".equals(name)
+          || "sun.gc.generation.0.space.1.capacity".equals(name)
+          || "sun.gc.generation.0.space.2.capacity".equals(name)
+          || "sun.gc.generation.1.space.0.capacity".equals(name)
+          || "sun.gc.generation.2.space.0.capacity".equals(name)) {
           return visitGenerationLimits(name, monitor);
-
-        case "sun.gc.generation.0.space.0.used":
-        case "sun.gc.generation.0.space.1.used":
-        case "sun.gc.generation.0.space.2.used":
-        case "sun.gc.generation.1.space.0.used":
-        case "sun.gc.generation.2.space.0.used":
+      } else if ("sun.gc.generation.0.space.0.used".equals(name)
+          || "sun.gc.generation.0.space.1.used".equals(name)
+          || "sun.gc.generation.0.space.2.used".equals(name)
+          || "sun.gc.generation.1.space.0.used".equals(name)
+          || "sun.gc.generation.2.space.0.used".equals(name)) {
           return visitGenerationUsage(name, monitor);
       }
 
@@ -803,20 +786,19 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      switch (name) {
-        case "sun.gc.generation.0.space.0.capacity":
+      if ("sun.gc.generation.0.space.0.capacity".equals(name)) {
           return remarkGenerationLimit("eden", monitor);
-        case "sun.gc.generation.0.space.1.capacity":
+      } else if ("sun.gc.generation.0.space.1.capacity".equals(name)) {
           return remarkGenerationLimit("survivor0", monitor);
-        case "sun.gc.generation.0.space.2.capacity":
+      } else if ("sun.gc.generation.0.space.2.capacity".equals(name)) {
           return remarkGenerationLimit("survivor1", monitor);
-        case "sun.gc.generation.1.space.0.capacity":
+      } else if ("sun.gc.generation.1.space.0.capacity".equals(name)) {
           return remarkGenerationLimit("old", monitor);
-        case "sun.gc.generation.2.space.0.capacity":
+      } else if ("sun.gc.generation.2.space.0.capacity".equals(name)) {
           return remarkGenerationLimit("permgen", monitor);
-        default:
-          throw new UnknownMonitorError(monitor);
       }
+
+      throw new UnknownMonitorError(monitor);
     }
 
     private boolean remarkGenerationUsage(final String generation, final Monitor monitor) {
@@ -842,20 +824,19 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      switch (name) {
-        case "sun.gc.generation.0.space.0.used":
+      if ("sun.gc.generation.0.space.0.used".equals(name)) {
           return remarkGenerationUsage("eden", monitor);
-        case "sun.gc.generation.0.space.1.used":
+      } else if  ("sun.gc.generation.0.space.1.used".equals(name)) {
           return remarkGenerationUsage("survivor0", monitor);
-        case "sun.gc.generation.0.space.2.used":
+      } else if  ("sun.gc.generation.0.space.2.used".equals(name)) {
           return remarkGenerationUsage("survivor1", monitor);
-        case "sun.gc.generation.1.space.0.used":
+      } else if  ("sun.gc.generation.1.space.0.used".equals(name)) {
           return remarkGenerationUsage("old", monitor);
-        case "sun.gc.generation.2.space.0.used":
+      } else if  ("sun.gc.generation.2.space.0.used".equals(name)) {
           return remarkGenerationUsage("permgen", monitor);
-        default:
-          throw new UnknownMonitorError(monitor);
       }
+
+      throw new UnknownMonitorError(monitor);
     }
 
     private boolean remarkAgetableCohortSize(final String cohort, final Monitor monitor) {
@@ -881,42 +862,41 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
             .build();
       }
 
-      switch (name) {
-        case "sun.gc.generation.0.agetable.bytes.00":
+      if ("sun.gc.generation.0.agetable.bytes.00".equals(name)) {
           return remarkAgetableCohortSize("00", monitor);
-        case "sun.gc.generation.0.agetable.bytes.01":
+      } else if ("sun.gc.generation.0.agetable.bytes.01".equals(name)) {
           return remarkAgetableCohortSize("01", monitor);
-        case "sun.gc.generation.0.agetable.bytes.02":
+      } else if ("sun.gc.generation.0.agetable.bytes.02".equals(name)) {
           return remarkAgetableCohortSize("02", monitor);
-        case "sun.gc.generation.0.agetable.bytes.03":
+      } else if ("sun.gc.generation.0.agetable.bytes.03".equals(name)) {
           return remarkAgetableCohortSize("03", monitor);
-        case "sun.gc.generation.0.agetable.bytes.04":
+      } else if ("sun.gc.generation.0.agetable.bytes.04".equals(name)) {
           return remarkAgetableCohortSize("04", monitor);
-        case "sun.gc.generation.0.agetable.bytes.05":
+      } else if ("sun.gc.generation.0.agetable.bytes.05".equals(name)) {
           return remarkAgetableCohortSize("05", monitor);
-        case "sun.gc.generation.0.agetable.bytes.06":
+      } else if ("sun.gc.generation.0.agetable.bytes.06".equals(name)) {
           return remarkAgetableCohortSize("06", monitor);
-        case "sun.gc.generation.0.agetable.bytes.07":
+      } else if ("sun.gc.generation.0.agetable.bytes.07".equals(name)) {
           return remarkAgetableCohortSize("07", monitor);
-        case "sun.gc.generation.0.agetable.bytes.08":
+      } else if ("sun.gc.generation.0.agetable.bytes.08".equals(name)) {
           return remarkAgetableCohortSize("08", monitor);
-        case "sun.gc.generation.0.agetable.bytes.09":
+      } else if ("sun.gc.generation.0.agetable.bytes.09".equals(name)) {
           return remarkAgetableCohortSize("09", monitor);
-        case "sun.gc.generation.0.agetable.bytes.10":
+      } else if ("sun.gc.generation.0.agetable.bytes.10".equals(name)) {
           return remarkAgetableCohortSize("10", monitor);
-        case "sun.gc.generation.0.agetable.bytes.11":
+      } else if ("sun.gc.generation.0.agetable.bytes.11".equals(name)) {
           return remarkAgetableCohortSize("11", monitor);
-        case "sun.gc.generation.0.agetable.bytes.12":
+      } else if ("sun.gc.generation.0.agetable.bytes.12".equals(name)) {
           return remarkAgetableCohortSize("12", monitor);
-        case "sun.gc.generation.0.agetable.bytes.13":
+      } else if  ("sun.gc.generation.0.agetable.bytes.13".equals(name)) {
           return remarkAgetableCohortSize("13", monitor);
-        case "sun.gc.generation.0.agetable.bytes.14":
+      } else if ("sun.gc.generation.0.agetable.bytes.14".equals(name)) {
           return remarkAgetableCohortSize("14", monitor);
-        case "sun.gc.generation.0.agetable.bytes.15":
+      } else if ("sun.gc.generation.0.agetable.bytes.15".equals(name)) {
           return remarkAgetableCohortSize("15", monitor);
-        default:
-          throw new UnknownMonitorError(monitor);
       }
+
+      throw new UnknownMonitorError(monitor);
     }
 
     private boolean visitSurvivorSpaceAgetableCount(final Monitor monitor) {
