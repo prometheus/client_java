@@ -220,24 +220,21 @@ public class SummaryTest {
     Metrics.MetricFamily out = summary.dump();
 
     Assert.assertEquals("must contain two metrics", 2, out.getMetricCount());
-    final Set<String> found = new HashSet<>();
+    final Set<String> found = new HashSet<String>();
     for (final Metrics.Metric m : out.getMetricList()) {
       final String dim = m.getLabel(0).getValue();
       final Metrics.Summary sum = m.getSummary();
       found.add(dim);
-      switch (dim) {
-        case "foo":
-          Assert.assertEquals("should lack ranked values after reset", 0, sum.getQuantileCount());
-          Assert.assertEquals("should have record of single observation", 1, sum.getSampleCount());
-          Assert.assertEquals("should have sum of single observation", 5, sum.getSampleSum(), 0);
-        break;
-        case "bar":
-          Assert.assertEquals("should have ranked values", 3, sum.getQuantileCount());
-          Assert.assertEquals("should have record of single observation", 1, sum.getSampleCount());
-          Assert.assertEquals("should have sum of single observation", 1, sum.getSampleSum(), 0);
-        break;
-        default:
-          Assert.fail("illegal condition");
+      if ("foo".equals(dim)) {
+        Assert.assertEquals("should lack ranked values after reset", 0, sum.getQuantileCount());
+        Assert.assertEquals("should have record of single observation", 1, sum.getSampleCount());
+        Assert.assertEquals("should have sum of single observation", 5, sum.getSampleSum(), 0);
+      } else if ("bar".equals(dim)) {
+        Assert.assertEquals("should have ranked values", 3, sum.getQuantileCount());
+        Assert.assertEquals("should have record of single observation", 1, sum.getSampleCount());
+        Assert.assertEquals("should have sum of single observation", 1, sum.getSampleSum(), 0);
+      } else {
+        Assert.fail("illegal condition");
       }
     }
     Assert.assertTrue("must have seen bar", found.contains("bar"));
