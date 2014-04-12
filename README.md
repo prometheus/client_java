@@ -9,19 +9,19 @@ assets:
   * [The Client](http://mvnrepository.com/artifact/io.prometheus/client)
     * groupId: _io.prometheus_
     * artifactId: _client_
-    * version: _0.0.3_
+    * version: _0.0.4_
   * [Hotspot 'jvmstat/perfdata' Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/jvmstat)
     * groupId: _io.prometheus.client.utility_
     * artifactId: _jvmstat_
-    * version: _0.0.3_
+    * version: _0.0.4_
   * [Hotspot VM Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/hotspot)
     * groupId: _io.prometheus.client.utility_
     * artifactId: _hotspot_
-    * version: _0.0.3_
+    * version: _0.0.4_
   * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client.utility/servlet) - Transferring Metrics to Prometheus Servers
     * groupId: _io.prometheus.client.utility_
     * artifactId: _servlet_
-    * version: _0.0.3_
+    * version: _0.0.4_
 
 ### Getting Started
 There are canonical examples defined in the class definition Javadoc headers in the _io.prometheus.client.metrics_ package.
