@@ -23,6 +23,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -117,21 +118,30 @@ import io.prometheus.client.utility.labels.Reserved;
 @ThreadSafe
 public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
   private final long purgeIntervalMs;
+  private final long resetIntervalMs;
   private final Map<Double, Double> targets;
 
-  Long lastPurgeInstantMs;
+  @GuardedBy("lastPurgeInstantMs") Long lastPurgeInstantMs;
+  @GuardedBy("lastResetInstantMs") Long lastResetInstantMs;
 
   private Summary(final String n, final String d, final List<String> ds, final long pi,
-      final Map<Double, Double> t, final Metrics.MetricFamily p, final boolean rs) {
+      final Map<Double, Double> t, final Metrics.MetricFamily p, final boolean rs, final long ri) {
     super(n, d, ds, p, rs);
 
     purgeIntervalMs = pi;
+    resetIntervalMs = ri;
+
     targets = t;
 
     lastPurgeInstantMs = System.currentTimeMillis();
+    lastResetInstantMs = lastPurgeInstantMs;
   }
 
   void purge() {
+    if (purgeIntervalMs == 0) {
+      return;
+    }
+
     synchronized (lastPurgeInstantMs) {
       final long now = System.currentTimeMillis();
       if (now - lastPurgeInstantMs < purgeIntervalMs) {
@@ -145,6 +155,25 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
       children.clear();
 
       lastPurgeInstantMs = now;
+    }
+  }
+
+  void reset() {
+    if (resetIntervalMs == 0) {
+      return;
+    }
+
+    synchronized (lastResetInstantMs) {
+      final long now = System.currentTimeMillis();
+      if (now - lastResetInstantMs < resetIntervalMs) {
+        return;
+      }
+
+      for (final Child c : children.values()) {
+        c.reset();
+      }
+
+      lastResetInstantMs = now;
     }
   }
 
@@ -198,6 +227,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
 
       return b;
     } finally {
+      reset();
       purge();
     }
   }
@@ -221,54 +251,59 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
 
   @ThreadSafe
   public static class Builder implements Metric.Builder<Builder, Summary> {
-    private static final Long DEFAULT_PURGE_INTERVAL = TimeUnit.MINUTES.toMillis(15);
+    private static final Long DEFAULT_PURGE_INTERVAL = TimeUnit.MINUTES.toMillis(0);
+    private static final Long DEFAULT_RESET_INTERVAL = TimeUnit.MINUTES.toMillis(15);
     private static final ImmutableMap<Double, Double> DEFAULT_TARGETS = ImmutableMap.of(0.5, 0.05,
         0.90, 0.01, 0.99, 0.001);
 
     private final BaseBuilder base;
     private final Map<Double, Double> targets;
     private final Optional<Long> purgeIntervalMs;
+    private final Optional<Long> resetIntervalMs;
 
     Builder() {
       base = new BaseBuilder();
       targets = new HashMap<Double, Double>();
       purgeIntervalMs = Optional.absent();
+      resetIntervalMs = Optional.absent();
     }
 
-    private Builder(BaseBuilder base, Map<Double, Double> targets, Optional<Long> purgeIntervalMs) {
+    private Builder(BaseBuilder base, Map<Double, Double> targets, Optional<Long> purgeIntervalMs,
+        Optional<Long> resetIntervalMs) {
       this.base = base;
       this.targets = targets;
       this.purgeIntervalMs = purgeIntervalMs;
+      this.resetIntervalMs = resetIntervalMs;
     }
 
     @Override
     public Builder labelNames(String... ds) {
-      return new Builder(base.labelNames(ds), targets, purgeIntervalMs);
+      return new Builder(base.labelNames(ds), targets, purgeIntervalMs, resetIntervalMs);
     }
 
     @Override
     public Builder documentation(String d) {
-      return new Builder(base.documentation(d), targets, purgeIntervalMs);
+      return new Builder(base.documentation(d), targets, purgeIntervalMs, resetIntervalMs);
     }
 
     @Override
     public Builder name(String n) {
-      return new Builder(base.name(n), targets, purgeIntervalMs);
+      return new Builder(base.name(n), targets, purgeIntervalMs, resetIntervalMs);
     }
 
     @Override
     public Builder subsystem(String ss) {
-      return new Builder(base.subsystem(ss), targets, purgeIntervalMs);
+      return new Builder(base.subsystem(ss), targets, purgeIntervalMs, resetIntervalMs);
     }
 
     @Override
     public Builder namespace(String ns) {
-      return new Builder(base.namespace(ns), targets, purgeIntervalMs);
+      return new Builder(base.namespace(ns), targets, purgeIntervalMs, resetIntervalMs);
     }
 
     @Override
     public Builder registerStatic(final boolean rs) {
-      return new Builder(base.registerStatic(rs), targets, purgeIntervalMs);
+      return new Builder(base.registerStatic(rs), targets, purgeIntervalMs, resetIntervalMs);
     }
 
     /**
@@ -281,8 +316,21 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
      * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
      */
+    public Builder resetInterval(final int n, final TimeUnit u) {
+      return new Builder(base, targets, purgeIntervalMs, Optional.of(u.toMillis(n)));
+    }
+
+    /**
+     * <p>
+     * Set the frequency at which the {@link Summary}'s children are evicted
+     * to prevent staleness.
+     * </p>
+     *
+     * @return A <em>copy</em> of the original {@link Builder} with the new
+     *         target value.
+     */
     public Builder purgeInterval(final int n, final TimeUnit u) {
-      return new Builder(base, targets, Optional.of(u.toMillis(n)));
+      return new Builder(base, targets, Optional.of(u.toMillis(n)), resetIntervalMs);
     }
 
     /**
@@ -302,12 +350,16 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     public Builder targetQuantile(final Double quantile, final Double inaccuracy) {
       final Map<Double, Double> quantiles = new HashMap<Double, Double>(targets);
       quantiles.put(quantile, inaccuracy);
-      return new Builder(base, quantiles, purgeIntervalMs);
+      return new Builder(base, quantiles, purgeIntervalMs, resetIntervalMs);
     }
 
 
     private long getPurgeIntervalMs() {
       return purgeIntervalMs.or(DEFAULT_PURGE_INTERVAL);
+    }
+
+    private long getResetIntervalMs() {
+      return purgeIntervalMs.or(DEFAULT_RESET_INTERVAL);
     }
 
     private Map<Double, Double> getTargets() {
@@ -327,7 +379,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
               .setType(Metrics.MetricType.SUMMARY);
 
       return new Summary(base.buildName(), base.buildDocstring(), base.buildLabelNames(),
-          getPurgeIntervalMs(), getTargets(), builder.build(), base.getRegisterStatic());
+          getPurgeIntervalMs(), getTargets(), builder.build(), base.getRegisterStatic(), getResetIntervalMs());
     }
   }
 
