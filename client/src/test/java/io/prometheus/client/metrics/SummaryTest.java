@@ -240,4 +240,50 @@ public class SummaryTest {
     Assert.assertTrue("must have seen bar", found.contains("bar"));
     Assert.assertTrue("must have seen foo", found.contains("foo"));
   }
+
+  @Test
+  public void resetBehavior() throws InterruptedException {
+    final Summary summary = Summary.newBuilder()
+        .name("a-metric")
+        .documentation("some-documentation")
+        .registerStatic(false)
+        .labelNames("dimension_a")
+        .resetInterval(1, TimeUnit.MILLISECONDS)
+        .build();
+
+    summary.newPartial()
+        .labelPair("dimension_a", "some_label")
+        .apply()
+        .observe(100D);
+
+    Thread.sleep(100);  // WART: Synchronization or injected timing obviates.
+
+    summary.reset();
+    Metrics.MetricFamily dump = summary.dump();
+
+    Assert.assertEquals(1, dump.getMetricCount());
+  }
+
+  @Test
+  public void purgeBehavior() throws InterruptedException {
+    final Summary summary = Summary.newBuilder()
+        .name("a-metric")
+        .documentation("some-documentation")
+        .registerStatic(false)
+        .labelNames("dimension_a")
+        .purgeInterval(1, TimeUnit.MILLISECONDS)
+        .build();
+
+    summary.newPartial()
+        .labelPair("dimension_a", "some_label")
+        .apply()
+        .observe(100D);
+
+    Thread.sleep(100);  // WART: Synchronization or injected timing obviates.
+
+    summary.purge();
+    Metrics.MetricFamily dump = summary.dump();
+
+    Assert.assertEquals(0, dump.getMetricCount());
+  }
 }
