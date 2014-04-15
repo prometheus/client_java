@@ -16,7 +16,11 @@ package io.prometheus.client.metrics;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.AtomicDouble;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import io.prometheus.client.Metrics;
 import io.prometheus.client.utility.labels.Reserved;
 
@@ -254,20 +258,77 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
    * {@link Gauge.Child}.
    * </p>
    *
+   * <p>
+   * <em>Warning:</em> All mutations to {@link Partial} are retained.  You should <em>not</em>
+   * share {@link Partial} between distinct label sets unless you have a parent
+   * {@link Partial} that you {@link io.prometheus.client.metrics.Gauge.Partial#clone()}.
+   * </p>
+   *
+   * <p>
+   * In this example below, we have both a race condition with a nasty outcome that
+   * unformedMetric is mutated in both threads and that it is an undefined behavior, which
+   * {@code data-type} label pair setting wins.
+   * </p>
+   *
+   * <pre>
+   * {@code
+   *   Gauge.Partial unformedMetric = …;
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       unformedMetric.labelPair("system", "cache");
+   *           .labelPair("data-type", "user-profile");  // Difference
+   *           .apply()
+   *           .set(1);
+   *     }
+   *   }.start();
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       unformedMetric.labelPair("system", "cache");
+   *           .labelPair("data-type", "avatar");  // Difference
+   *           .apply()
+   *           .set(15);
+   *     }
+   *   }.start();
+   * }
+   * </pre>
+   *
+   * <p>
+   * The following is preferable and {@link ThreadSafe}:
+   * </p>
+   * <pre>
+   * {@code
+   *   Gauge.Partial unformedMetric = …;
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       Gauge.Partial local = unformedMetric.clone();  // Safe step!
+   *
+   *       local.labelPair("system", "cache");
+   *           .labelPair("data-type", "user-profile");  // Difference
+   *           .apply()
+   *           .set(5);
+   *     }
+   *   }.start();
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       Gauge.Partial local = unformedMetric.clone();  // Safe step!
+   *
+   *       local.labelPair("system", "cache");
+   *           .labelPair("data-type", "avatar");  // Difference
+   *           .apply()
+   *           .set(15);
+   *     }
+   *   }.start();
+   * }
+   * </pre>
+   *
    * @see Metric.Partial
    */
   @NotThreadSafe
   public class Partial extends Metric.Partial {
-    /**
-     * <p>
-     * <em>Warning:</em> Do not hold onto a reference of a {@link Partial} if
-     * you ever use the {@link #resetAll()} or
-     * {@link io.prometheus.client.metrics.Metric.Child#reset()} tools. This
-     * will be fixed in a follow-up release.
-     * </p>
-     *
-     * @see Metric.Partial#labelPair(String, String)
-     */
     @Override
     public Partial labelPair(String labelName, String labelValue) {
       return (Partial) baseLabelPair(labelName, labelValue);
@@ -302,6 +363,13 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
    * A concrete instance of {@link Gauge} for a unique set of label dimensions.
    * </p>
    *
+   * <p>
+   * <em>Warning:</em> Do not hold onto a reference of a {@link Child} if you
+   * ever use the {@link #resetAll()}.  If you want to hold onto a concrete
+   * instance, please hold onto a {@link io.prometheus.client.metrics.Gauge.Partial} and use
+   * {@link io.prometheus.client.metrics.Gauge.Partial#apply()}.
+   * </p>
+   *
    * @see Metric.Child
    */
   @ThreadSafe
@@ -332,7 +400,7 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
 
   /**
    * <p>
-   * Used to serialize {@link Gauge} instances for {@link Gson}.
+   * Used to serialize {@link Gauge} instances for {@link com.google.gson.Gson}.
    * </p>
    */
   @Deprecated

@@ -722,10 +722,10 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     private final AtomicBoolean generationUsageOnce = new AtomicBoolean(false);
 
     // TODO: Discuss markOop and oopDesc types.
-    private @GuardedBy("agetableCohortsOnce") Gauge agetableCohorts;
-    private @GuardedBy("agetableCountOnce") Gauge agetableCount;
-    private @GuardedBy("generationLimitOnce") Gauge generationLimit;
-    private @GuardedBy("generationUsageOnce") Gauge generationUsage;
+    private @GuardedBy("this") Gauge agetableCohorts;
+    private @GuardedBy("this") Gauge agetableCount;
+    private @GuardedBy("this") Gauge generationLimit;
+    private @GuardedBy("this") Gauge generationUsage;
 
     public boolean visit(final String name, final Monitor monitor) {
       if ("sun.gc.generation.0.agetable.bytes.00".equals(name)
@@ -778,12 +778,24 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     }
 
     private boolean visitGenerationLimits(final String name, final Monitor monitor) {
-      if (generationLimit == null && generationLimitOnce.getAndSet(true) == false) {
-        generationLimit = gaugePrototype
-            .name("generation_limit_bytes")
-            .labelNames("generation")
-            .documentation("The total allocation/reservation of each managed memory region or generation.")
-            .build();
+      if (generationLimit == null) {
+        synchronized (this) {
+          if (generationLimitOnce.getAndSet(true) == false) {
+            generationLimit = gaugePrototype
+                .name("generation_limit_bytes")
+                .labelNames("generation")
+                .documentation("The total allocation/reservation of each managed memory region or generation.")
+                .build();
+
+            notifyAll();
+          } else {
+            try {
+              // In case of data race, wait until this has been initialized.
+              wait();
+            } catch (final InterruptedException ignored) {
+            }
+          }
+        }
       }
 
       if ("sun.gc.generation.0.space.0.capacity".equals(name)) {
@@ -816,12 +828,24 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     }
 
     private boolean visitGenerationUsage(final String name, final Monitor monitor) {
-      if (generationUsage == null && generationUsageOnce.getAndSet(true) == false) {
-        generationUsage = gaugePrototype
-            .name("generation_usage_bytes")
-            .labelNames("generation")
-            .documentation("The size used of each managed memory region or generation.")
-            .build();
+      if (generationUsage == null) {
+        synchronized (this) {
+          if (generationUsageOnce.getAndSet(true) == false) {
+            generationUsage = gaugePrototype
+                .name("generation_usage_bytes")
+                .labelNames("generation")
+                .documentation("The size used of each managed memory region or generation.")
+                .build();
+
+            notifyAll();
+          } else {
+            try {
+              // In case of data race, wait until this has been initialized.
+              wait();
+            } catch (final InterruptedException ignored) {
+            }
+          }
+        }
       }
 
       if ("sun.gc.generation.0.space.0.used".equals(name)) {
@@ -854,12 +878,24 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     }
 
     private boolean visitSurvivorSpaceAgetableCohorts(final String name, final Monitor monitor) {
-      if (agetableCohorts == null && agetableCohortsOnce.getAndSet(true) == false) {
-        agetableCohorts = gaugePrototype
-            .name("survivor_space_agetable_size_bytes")
-            .labelNames("cohort")
-            .documentation("A measure of the size of each survivor space agetable cohort.")
-            .build();
+      if (agetableCohorts == null) {
+        synchronized (this) {
+          if (agetableCohortsOnce.getAndSet(true) == false) {
+            agetableCohorts = gaugePrototype
+               .name("survivor_space_agetable_size_bytes")
+                .labelNames("cohort")
+                .documentation("A measure of the size of each survivor space agetable cohort.")
+                .build();
+
+            notifyAll();
+          } else {
+            try {
+              // In case of data race, wait until this has been initialized.
+              wait();
+            } catch (final InterruptedException ignored) {
+            }
+          }
+        }
       }
 
       if ("sun.gc.generation.0.agetable.bytes.00".equals(name)) {
@@ -900,11 +936,23 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
     }
 
     private boolean visitSurvivorSpaceAgetableCount(final Monitor monitor) {
-      if (agetableCount == null && agetableCountOnce.getAndSet(true) == false) {
-        agetableCount = gaugePrototype
-            .name("survivor_space_agetable_count")
-            .documentation("The number of survivor space agetable cohorts.")
-            .build();
+      if (agetableCount == null) {
+        synchronized (this) {
+          if (agetableCountOnce.getAndSet(true) == false) {
+            agetableCount = gaugePrototype
+                .name("survivor_space_agetable_count")
+               .documentation("The number of survivor space agetable cohorts.")
+               .build();
+
+            notifyAll();
+          } else {
+            try {
+              // In case of data race, wait until this has been initialized.
+              wait();
+            } catch (final InterruptedException ignored) {
+            }
+          }
+        }
       }
 
       final Double value = decodeMetric(monitor);

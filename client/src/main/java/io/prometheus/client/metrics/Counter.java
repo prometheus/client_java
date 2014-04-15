@@ -16,7 +16,11 @@ package io.prometheus.client.metrics;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.AtomicDouble;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import io.prometheus.client.Metrics;
 import io.prometheus.client.utility.labels.Reserved;
 
@@ -249,17 +253,77 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
    * {@link Counter.Child}.
    * </p>
    *
+   * <p>
+   * <em>Warning:</em> All mutations to {@link Partial} are retained.  You should <em>not</em>
+   * share {@link Partial} between distinct label sets unless you have a parent
+   * {@link Partial} that you {@link io.prometheus.client.metrics.Counter.Partial#clone()}.
+   * </p>
+   *
+   * <p>
+   * In this example below, we have both a race condition with a nasty outcome that
+   * unformedMetric is mutated in both threads and that it is an undefined behavior, which
+   * {@code data-type} label pair setting wins.
+   * </p>
+   *
+   * <pre>
+   * {@code
+   *   Counter.Partial unformedMetric = …;
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       unformedMetric.labelPair("system", "cache");
+   *           .labelPair("data-type", "user-profile");  // Difference
+   *           .apply()
+   *           .increment();
+   *     }
+   *   }.start();
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       unformedMetric.labelPair("system", "cache");
+   *           .labelPair("data-type", "avatar");  // Difference
+   *           .apply()
+   *           .increment();
+   *     }
+   *   }.start();
+   * }
+   * </pre>
+   *
+   * <p>
+   * The following is preferable and {@link ThreadSafe}:
+   * </p>
+   * <pre>
+   * {@code
+   *   Counter.Partial unformedMetric = …;
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       Counter.Partial local = unformedMetric.clone();  // Safe step!
+   *
+   *       local.labelPair("system", "cache");
+   *           .labelPair("data-type", "user-profile");  // Difference
+   *           .apply()
+   *           .increment();
+   *     }
+   *   }.start();
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       Counter.Partial local = unformedMetric.clone();  // Safe step!
+   *
+   *       local.labelPair("system", "cache");
+   *           .labelPair("data-type", "avatar");  // Difference
+   *           .apply()
+   *           .increment();
+   *     }
+   *   }.start();
+   * }
+   * </pre>
+   *
    * @see Metric.Partial
    */
   @NotThreadSafe
   public class Partial extends Metric.Partial {
-    /**
-     * <p>
-     * Add a label-value pair to this metric.
-     * </p>
-     *
-     * @see Metric.Partial#labelPair(String, String)
-     */
     @Override
     public Partial labelPair(String labelName, String labelValue) {
       return (Partial) baseLabelPair(labelName, labelValue);
@@ -277,8 +341,8 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
 
     /**
      * <p>
-     * Finalize this child to perform mutations under this set of label-value
-     * pairs.
+     * Finalize this child under this set of label-value pairs and create a {@link Counter.Child}
+     * to mutate.
      * </p>
      *
      * @see io.prometheus.client.metrics.Metric.Partial#apply()
@@ -293,6 +357,13 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
    * <p>
    * A concrete instance of {@link Counter} for a unique set of label
    * dimensions.
+   * </p>
+   *
+   * <p>
+   * <em>Warning:</em> Do not hold onto a reference of a {@link Child} if you
+   * ever use the {@link #resetAll()}.  If you want to hold onto a concrete
+   * instance, please hold onto a {@link io.prometheus.client.metrics.Counter.Partial} and use
+   * {@link io.prometheus.client.metrics.Counter.Partial#apply()}.
    * </p>
    *
    * @see Metric.Child

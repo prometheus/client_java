@@ -18,10 +18,18 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import io.prometheus.client.Metrics;
 import io.prometheus.client.Prometheus;
+import net.jcip.annotations.Immutable;
 import net.jcip.annotations.NotThreadSafe;
 import net.jcip.annotations.ThreadSafe;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -107,7 +115,21 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
     children.clear();
   }
 
+
+  /**
+   * <p>
+   * A {@link Builder} is used to create a {@link Metric}'s descriptor, which describes everything
+   * about the metric: name, required label dimensions (i.e., metric cardinality), docstring, etc.
+   * </p>
+   *
+   * <p>
+   * {@link Builder} are {@link Immutable} and {@link ThreadSafe}, so you can use them to create
+   * metric templates when there is redundancy between the definitions.  All methods return a new
+   * {@link Builder} instance.
+   * </p>
+   */
   @ThreadSafe
+  @Immutable
   public static interface Builder<B, M> {
     /**
      * <p>
@@ -647,9 +669,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    *
    * <p>
    * <em>Warning:</em> Do not hold onto a reference of a {@link Child} if you
-   * ever use the {@link #resetAll()} or
-   * {@link io.prometheus.client.metrics.Metric.Child#reset()} tools. This will
-   * be fixed in a follow-up release.
+   * ever use the {@link #resetAll()}.
    * </p>
    */
   public static interface Child {
