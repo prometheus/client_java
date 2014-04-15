@@ -13,5 +13,6 @@ utility: client
 
 test: build
 	mvn test
+	mvn javadoc:aggregate
 
 .PHONY: build client examples test utility
