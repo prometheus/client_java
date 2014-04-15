@@ -30,12 +30,17 @@ import javax.annotation.concurrent.ThreadSafe;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AtomicDouble;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.matttproud.quantile.Estimator;
 import com.matttproud.quantile.Quantile;
 
 import io.prometheus.client.Metrics;
 import io.prometheus.client.utility.labels.Reserved;
+import net.jcip.annotations.Immutable;
 
 /**
  * <p>
@@ -250,6 +255,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
   }
 
   @ThreadSafe
+  @Immutable
   public static class Builder implements Metric.Builder<Builder, Summary> {
     private static final Long DEFAULT_PURGE_INTERVAL = TimeUnit.MINUTES.toMillis(0);
     private static final Long DEFAULT_RESET_INTERVAL = TimeUnit.MINUTES.toMillis(15);
@@ -383,18 +389,84 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     }
   }
 
+  /**
+   * <p>
+   * A derivative of {@link Summary} that lets you accumulate labels to build a
+   * concrete metric via {@link #apply()} for mutation with the methods of
+   * {@link Summary.Child}.
+   * </p>
+   *
+   * <p>
+   * <em>Warning:</em> All mutations to {@link Partial} are retained.  You should <em>not</em>
+   * share {@link Partial} between distinct label sets unless you have a parent
+   * {@link Partial} that you {@link io.prometheus.client.metrics.Summary.Partial#clone()}.
+   * </p>
+   *
+   * <p>
+   * In this example below, we have both a race condition with a nasty outcome that
+   * unformedMetric is mutated in both threads and that it is an undefined behavior, which
+   * {@code data-type} label pair setting wins.
+   * </p>
+   *
+   * <pre>
+   * {@code
+   *   Summary.Partial unformedMetric = …;
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       unformedMetric.labelPair("system", "cache");
+   *           .labelPair("data-type", "user-profile");  // Difference
+   *           .apply()
+   *           .observe(1);
+   *     }
+   *   }.start();
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       unformedMetric.labelPair("system", "cache");
+   *           .labelPair("data-type", "avatar");  // Difference
+   *           .apply()
+   *           .observe(15);
+   *     }
+   *   }.start();
+   * }
+   * </pre>
+   *
+   * <p>
+   * The following is preferable and {@link ThreadSafe}:
+   * </p>
+   * <pre>
+   * {@code
+   *   Summary.Partial unformedMetric = …;
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       Summary.Partial local = unformedMetric.clone();  // Safe step!
+   *
+   *       local.labelPair("system", "cache");
+   *           .labelPair("data-type", "user-profile");  // Difference
+   *           .apply()
+   *           .observe(5);
+   *     }
+   *   }.start();
+   *
+   *   new Thread() {
+   *     public void run() {
+   *       Summary.Partial local = unformedMetric.clone();  // Safe step!
+   *
+   *       local.labelPair("system", "cache");
+   *           .labelPair("data-type", "avatar");  // Difference
+   *           .apply()
+   *           .observe(15);
+   *     }
+   *   }.start();
+   * }
+   * </pre>
+   *
+   * @see Metric.Partial
+   */
   @NotThreadSafe
   public class Partial extends Metric.Partial {
-    /**
-     * <p>
-     * <em>Warning:</em> Do not hold onto a reference of a {@link Partial} if
-     * you ever use the {@link #resetAll()} or
-     * {@link io.prometheus.client.metrics.Metric.Child#reset()} tools. This
-     * will be fixed in a follow-up release.
-     * </p>
-     *
-     * @see Metric.Partial#labelPair(String, String)
-     */
     @Override
     public Partial labelPair(String labelName, String labelValue) {
       return (Partial) baseLabelPair(labelName, labelValue);
@@ -416,6 +488,19 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
     }
   }
 
+  /**
+   *  <p>
+   * A concrete instance of {@link Summary} for a unique set of label
+   * dimensions.
+   * </p>
+   *
+   * <p>
+   * <em>Warning:</em> Do not hold onto a reference of a {@link Child} if you
+   * ever use the {@link #resetAll()}.  If you want to hold onto a concrete
+   * instance, please hold onto a {@link io.prometheus.client.metrics.Summary.Partial} and use
+   * {@link io.prometheus.client.metrics.Summary.Partial#apply()}.
+   * </p>
+   */
   @ThreadSafe
   public class Child implements Metric.Child {
     // How large of a buffer to use for internally queued sample observations before passing them
@@ -531,7 +616,7 @@ public class Summary extends Metric<Summary, Summary.Child, Summary.Partial> {
 
   /**
    * <p>
-   * Used to serialize {@link Summary} instances for {@link Gson}.
+   * Used to serialize {@link Summary} instances for {@link com.google.gson.Gson}.
    * </p>
    */
   @Deprecated
