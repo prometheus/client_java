@@ -82,12 +82,6 @@ public class CounterTest {
     newChild.increment(5);
     Assert.assertEquals("original instantiated child incremented by five", 48, child.value.get(),
         0.001);
-    newChild.decrement(13);
-    Assert.assertEquals("original instantiated child decremented by 13", 35, child.value.get(),
-        0.001);
-    newChild.decrement();
-    Assert.assertEquals("original instantiated child decremented", 34, child.value.get(), 0.001);
-
 
     Assert.assertEquals("only one child after mutations", 1, Counter.children.size());
 
@@ -115,7 +109,7 @@ public class CounterTest {
     final Metrics.Counter nestedCounter = metric.getCounter();
     Assert.assertNotNull("set nested type", nestedCounter);
 
-    Assert.assertEquals("transferred last value", 34, nestedCounter.getValue(), 0.001);
+    Assert.assertEquals("transferred last value", 48, nestedCounter.getValue(), 0.001);
 
     Counter.resetAll();
 

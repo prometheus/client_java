@@ -392,24 +392,6 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
 
     /**
      * <p>
-     * Decrement this {@link Counter.Child} by one.
-     * </p>
-     */
-    public void decrement() {
-      decrement(1);
-    }
-
-    /**
-     * <p>
-     * Decrement this {@link Counter.Child} by {@code v}.
-     * </p>
-     */
-    public void decrement(final double v) {
-      value.getAndAdd(-1 * v);
-    }
-
-    /**
-     * <p>
      * Set this {@link io.prometheus.client.metrics.Counter.Child} to {@code v}.
      * </p>
      */
