@@ -169,4 +169,28 @@ public class GaugeTest {
     Assert.assertEquals("second", dump.getMetric(1).getLabel(1).getValue());
     Assert.assertEquals(1, dump.getMetric(1).getGauge().getValue(), 0);
   }
+
+  @Test
+  public void incrementDecrement() {
+    Gauge gauge = Gauge.newBuilder()
+        .name("some-name")
+        .documentation("some-documentation")
+        .labelNames("a-dimension", "another-dimension")
+        .registerStatic(false)
+        .build();
+    final Gauge.Child child = gauge.newPartial().apply();
+    Assert.assertEquals("starts as default", 0, child.value.get(), .001);
+
+    child.increment();
+    Assert.assertEquals("incremented by one", 1, child.value.get(), .001);
+
+    child.increment(10);
+    Assert.assertEquals("incremented by many", 11, child.value.get(), .001);
+
+    child.decrement();
+    Assert.assertEquals("decremented by one", 10, child.value.get(), .001);
+
+    child.decrement(5);
+    Assert.assertEquals("decremented by many", 5, child.value.get(), .001);
+  }
 }

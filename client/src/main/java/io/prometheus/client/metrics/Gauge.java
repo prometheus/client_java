@@ -53,7 +53,7 @@ import java.util.Map;
  *
  * import io.prometheus.client.Prometheus;
  * import io.prometheus.client.Register;
- * import io.prometheus.client.metrics.Counter;
+ * import io.prometheus.client.metrics.Gauge;
  *
  * public class Aquarium {
  *   // Annotate this with "Register" if this class is not explicitly loaded
@@ -388,8 +388,44 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
 
     /**
      * <p>
-     * Reset this {@link Counter} to its default value per
-     * {@link Counter.Builder#defaultValue(Double)}.
+     * Increment this {@link Gauge.Child} by one.
+     * </p>
+     */
+    public void increment() {
+      increment(1);
+    }
+
+    /**
+     * <p>
+     * Increment this {@link Gauge.Child} by {@code v}.
+     * </p>
+     */
+    public void increment(final double v) {
+      value.getAndAdd(v);
+    }
+
+    /**
+     * <p>
+     * Decrement this {@link Gauge.Child} by one.
+     * </p>
+     */
+    public void decrement() {
+      decrement(1);
+    }
+
+    /**
+     * <p>
+     * Decrement this {@link Gauge.Child} by {@code v}.
+     * </p>
+     */
+    public void decrement(final double v) {
+      value.getAndAdd(-v);
+    }
+
+    /**
+     * <p>
+     * Reset this {@link Gauge} to its default value per
+     * {@link Gauge.Builder#defaultValue(Double)}.
      * </p>
      */
     @Override
