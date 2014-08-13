@@ -261,6 +261,9 @@ public class Prometheus {
    * Important Usage Notes:
    *
    * <ul>
+   * <li>In normal cirsumstances, you should use
+   * {@link io.prometheus.client.utility.initilisation.PrometheusInitilisation} rather
+   * than calling this directly.</li>
    * <li>Calling this is a <em>prerequisite</em> for successful Prometheus
    * usage, meaning if it is never called, no metrics will be exposed.</li>
    * <li>It is recommended that it is invoked early in the cycle of the main

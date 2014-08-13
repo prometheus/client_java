@@ -44,58 +44,71 @@ import java.lang.management.MemoryUsage;
 public class Hotspot implements Prometheus.ExpositionHook {
   private static final MemoryMXBean allocationBean = ManagementFactory.getMemoryMXBean();
 
-  private static final Gauge allocations = Gauge.newBuilder()
+  private static final Gauge initialAllocation = Gauge.newBuilder()
           .namespace("hotspot")
           .subsystem("allocation")
-          .name("size_bytes")
-          .labelNames("measure", "region")
-          .documentation("Raw memory allocations partitioned by measurement and region type")
+          .name("initial_size_bytes")
+          .labelNames("region")
+          .documentation("Initial memory allocation partitioned by region type")
+          .build();
+  private static final Gauge committedAllocation = Gauge.newBuilder()
+          .namespace("hotspot")
+          .subsystem("allocation")
+          .name("committed_size_bytes")
+          .labelNames("region")
+          .documentation("Commited memory allocation partitioned by region type")
+          .build();
+  private static final Gauge usedAllocation = Gauge.newBuilder()
+          .namespace("hotspot")
+          .subsystem("allocation")
+          .name("used_size_bytes")
+          .labelNames("region")
+          .documentation("Used memory allocation partitioned by region type")
+          .build();
+  private static final Gauge maxAllocation = Gauge.newBuilder()
+          .namespace("hotspot")
+          .subsystem("allocation")
+          .name("max_size_bytes")
+          .labelNames("region")
+          .documentation("Max memory allocation partitioned by region type")
           .build();
 
   @Override
   public void run() {
     final MemoryUsage heapUsage = allocationBean.getHeapMemoryUsage();
-    allocations.newPartial()
-            .labelPair("measure", "initial")
+    initialAllocation.newPartial()
             .labelPair("region", "heap")
             .apply()
             .set(heapUsage.getInit());
-    allocations.newPartial()
-            .labelPair("measure", "committed")
+    committedAllocation.newPartial()
             .labelPair("region", "heap")
             .apply()
             .set(heapUsage.getCommitted());
-    allocations.newPartial()
-            .labelPair("measure", "used")
+    usedAllocation.newPartial()
             .labelPair("region", "heap")
             .apply()
             .set(heapUsage.getUsed());
-    allocations.newPartial()
-            .labelPair("measure", "max")
+    maxAllocation.newPartial()
             .labelPair("region", "heap")
             .apply()
             .set(heapUsage.getMax());
 
-    final MemoryUsage nonHeap = allocationBean.getNonHeapMemoryUsage();
-    allocations.newPartial()
-            .labelPair("measure", "initial")
+    final MemoryUsage nonHeapUsage = allocationBean.getNonHeapMemoryUsage();
+    initialAllocation.newPartial()
             .labelPair("region", "nonheap")
             .apply()
-            .set(nonHeap.getInit());
-    allocations.newPartial()
-            .labelPair("measure", "committed")
+            .set(nonHeapUsage.getInit());
+    committedAllocation.newPartial()
             .labelPair("region", "nonheap")
             .apply()
-            .set(nonHeap.getCommitted());
-    allocations.newPartial()
-            .labelPair("measure", "used")
+            .set(nonHeapUsage.getCommitted());
+    usedAllocation.newPartial()
             .labelPair("region", "nonheap")
             .apply()
-            .set(nonHeap.getUsed());
-    allocations.newPartial()
-            .labelPair("measure", "max")
+            .set(nonHeapUsage.getUsed());
+    maxAllocation.newPartial()
             .labelPair("region", "nonheap")
             .apply()
-            .set(nonHeap.getMax());
+            .set(nonHeapUsage.getMax());
   }
 }
