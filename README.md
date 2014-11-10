@@ -6,25 +6,37 @@ It supports Java, Clojure, Scala, JRuby, and anything else that runs on the JVM.
 If you use Maven, you can simply reference the following
 assets:
 
-  * [The Client](http://mvnrepository.com/artifact/io.prometheus/client)
-    * groupId: _io.prometheus_
-    * artifactId: _client_
-    * version: _0.0.4_
-  * [Hotspot 'jvmstat/perfdata' Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/jvmstat)
-    * groupId: _io.prometheus.client.utility_
-    * artifactId: _jvmstat_
-    * version: _0.0.4_
-  * [Hotspot VM Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/hotspot)
-    * groupId: _io.prometheus.client.utility_
-    * artifactId: _hotspot_
-    * version: _0.0.4_
-  * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client.utility/servlet) - Transferring Metrics to Prometheus Servers
-    * groupId: _io.prometheus.client.utility_
-    * artifactId: _servlet_
-    * version: _0.0.4_
+  * Original Client
+    * [The Client](http://mvnrepository.com/artifact/io.prometheus/client)
+      * groupId: _io.prometheus_
+      * artifactId: _client_
+      * version: _0.0.4_
+    * [Hotspot 'jvmstat/perfdata' Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/jvmstat)
+      * groupId: _io.prometheus.client.utility_
+      * artifactId: _jvmstat_
+      * version: _0.0.4_
+    * [Hotspot VM Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/hotspot)
+      * groupId: _io.prometheus.client.utility_
+      * artifactId: _hotspot_
+      * version: _0.0.4_
+    * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client.utility/servlet) - Transferring Metrics to Prometheus Servers
+      * groupId: _io.prometheus.client.utility_
+      * artifactId: _servlet_
+      * version: _0.0.4_
+  * Simple Client
+    * [The Client](http://mvnrepository.com/artifact/io.prometheus/simpleclient)
+      * groupId: _io.prometheus_
+      * artifactId: _simpleclient_
+      * version: _0.0.2_
+    * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client.utility/servlet)
+      * groupId: _io.prometheus_
+      * artifactId: _simpleclient_servlet_
+      * version: _0.0.2_
 
 ### Getting Started
-There are canonical examples defined in the class definition Javadoc headers in the _io.prometheus.client.metrics_ package.
+There are canonical examples defined in the class definition Javadoc of the client packages.
+
+See [the wiki](https://github.com/prometheus/client_java/wiki) for more information.
 
 ## Documentation
 The client is canonically documented with Javadoc.  Running the following will produce output local documentation
