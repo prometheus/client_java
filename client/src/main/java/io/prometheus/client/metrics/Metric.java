@@ -635,11 +635,12 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
 
     C baseApply() {
       final TreeMap<String, String> t = new TreeMap<String, String>(validate());
-      final C v = children.putIfAbsent(t, newChild());
-      if (v != null) {
-        return v;
+      C child = children.get(t);
+      if(child == null) { 
+    	  child = newChild();
+    	  children.put(t, child);
       }
-      return children.get(t);
+      return child;
     }
 
     @Override
