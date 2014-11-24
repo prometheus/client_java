@@ -46,6 +46,8 @@
         <module>client</module>
         <module>examples</module>
         <module>utility</module>
+        <module>simpleclient</module>
+        <module>simpleclient_servlet</module>
     </modules>
 
     <build>
