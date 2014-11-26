@@ -47,7 +47,9 @@
         <module>examples</module>
         <module>utility</module>
         <module>simpleclient</module>
+        <module>simpleclient_common</module>
         <module>simpleclient_servlet</module>
+        <module>simpleclient_pushgateway</module>
     </modules>
 
     <build>

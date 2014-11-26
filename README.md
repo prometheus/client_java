@@ -28,10 +28,14 @@ assets:
       * groupId: _io.prometheus_
       * artifactId: _simpleclient_
       * version: _0.0.2_
-    * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client.utility/servlet)
+    * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client/simpleclient_servlet)
       * groupId: _io.prometheus_
       * artifactId: _simpleclient_servlet_
-      * version: _0.0.2_
+      * version: _0.0.3_
+    * [PushGateway support](http://mvnrepository.com/artifact/io.prometheus.client/simpleclient_pushgateway)
+      * groupId: _io.prometheus_
+      * artifactId: _simpleclient_pushgateway_
+      * version: _0.0.3_
 
 ### Getting Started
 There are canonical examples defined in the class definition Javadoc of the client packages.
