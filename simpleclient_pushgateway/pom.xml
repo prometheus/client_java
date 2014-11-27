@@ -9,7 +9,7 @@
     </parent>
 
     <groupId>io.prometheus</groupId>
-    <artifactId>simpleclient_servlet</artifactId>
+    <artifactId>simpleclient_pushgateway</artifactId>
     <version>0.0.3</version>
 
     <name>Prometheus Java Client Metrics</name>
@@ -48,12 +48,6 @@
             <artifactId>simpleclient_common</artifactId>
             <version>0.0.3</version>
         </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>junit</groupId>
@@ -62,10 +56,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>8.1.7.v20120910</version>
-            <scope>test</scope>
+           <groupId>org.mock-server</groupId>
+           <artifactId>mockserver-netty</artifactId>
+           <version>3.8.2</version>
+           <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
