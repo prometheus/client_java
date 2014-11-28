@@ -5,6 +5,7 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Gauge;
 import java.io.IOException;;
 import org.junit.Before;
 import org.junit.Rule;
@@ -19,11 +20,13 @@ public class PushGatewayTest {
   private MockServerClient mockServerClient;
 
   CollectorRegistry registry;
+  Gauge gauge;
   PushGateway pg;
 
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
+    gauge = (Gauge) Gauge.build().name("g").help("help").create();
     pg = new PushGateway("localhost:" + mockServerRule.getHttpPort());
   }
 
@@ -68,6 +71,16 @@ public class PushGatewayTest {
   }
 
   @Test
+  public void testPushCollector() throws IOException {
+    mockServerClient.when(
+        request()
+          .withMethod("POST")
+          .withPath("/metrics/jobs/j/instances/i")
+      ).respond(response().withStatusCode(202));
+    pg.push(gauge, "j", "i");
+  }
+
+  @Test
   public void testPushAdd() throws IOException {
     mockServerClient.when(
         request()
@@ -75,6 +88,16 @@ public class PushGatewayTest {
           .withPath("/metrics/jobs/j/instances/i")
       ).respond(response().withStatusCode(202));
     pg.pushAdd(registry, "j", "i");
+  }
+
+  @Test
+  public void testPushAddCollector() throws IOException {
+    mockServerClient.when(
+        request()
+          .withMethod("PUT")
+          .withPath("/metrics/jobs/j/instances/i")
+      ).respond(response().withStatusCode(202));
+    pg.pushAdd(gauge, "j", "i");
   }
 
   @Test

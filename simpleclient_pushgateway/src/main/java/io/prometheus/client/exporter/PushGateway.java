@@ -1,5 +1,6 @@
 package io.prometheus.client.exporter;
 
+import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 
@@ -46,6 +47,21 @@ public class PushGateway {
   }
 
   /**
+   * Pushes all metrics in a Collector, replacing all those with the same job and instance.
+   * <p>
+   * This is useful for pushing a single Gauge.
+   * <p>
+   * See the Pushgateway documentation for detailed implications of the job and
+   * instance parameter. instance can be left empty. The Pushgateway will then
+   * use the client's IP number instead. This uses the POST HTTP method.
+  */
+  public void push(Collector collector, String job, String instance) throws IOException {
+    CollectorRegistry registry = new CollectorRegistry();
+    collector.register(registry);
+    push(registry, job, instance);
+  }
+
+  /**
    * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name.
    * <p>
    * See the Pushgateway documentation for detailed implications of the job and
@@ -54,6 +70,21 @@ public class PushGateway {
   */
   public void pushAdd(CollectorRegistry registry, String job, String instance) throws IOException {
     doRequest(registry, job, instance, "PUT");
+  }
+
+  /**
+   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name.
+   * <p>
+   * This is useful for pushing a single Gauge.
+   * <p>
+   * See the Pushgateway documentation for detailed implications of the job and
+   * instance parameter. instance can be left empty. The Pushgateway will then
+   * use the client's IP number instead. This uses the POST HTTP method.
+  */
+  public void pushAdd(Collector collector, String job, String instance) throws IOException {
+    CollectorRegistry registry = new CollectorRegistry();
+    collector.register(registry);
+    pushAdd(registry, job, instance);
   }
 
   /**
