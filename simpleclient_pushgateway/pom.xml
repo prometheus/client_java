@@ -10,7 +10,7 @@
 
     <groupId>io.prometheus</groupId>
     <artifactId>simpleclient_pushgateway</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
 
     <name>Prometheus Java Client Metrics</name>
     <description>

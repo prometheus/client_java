@@ -35,7 +35,7 @@ assets:
     * [PushGateway support](http://mvnrepository.com/artifact/io.prometheus.client/simpleclient_pushgateway)
       * groupId: _io.prometheus_
       * artifactId: _simpleclient_pushgateway_
-      * version: _0.0.3_
+      * version: _0.0.4_
 
 ### Getting Started
 There are canonical examples defined in the class definition Javadoc of the client packages.
