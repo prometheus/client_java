@@ -42,7 +42,6 @@
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
             <version>0.0.2</version>
-            <scope>provided</scope>
         </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
