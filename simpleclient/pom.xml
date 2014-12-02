@@ -10,7 +10,6 @@
 
     <groupId>io.prometheus</groupId>
     <artifactId>simpleclient</artifactId>
-    <version>0.0.2</version>
 
     <name>Prometheus Java Client Metrics</name>
     <description>
