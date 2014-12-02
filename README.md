@@ -10,32 +10,32 @@ assets:
     * [The Client](http://mvnrepository.com/artifact/io.prometheus/client)
       * groupId: _io.prometheus_
       * artifactId: _client_
-      * version: _0.0.4_
+      * version: _0.0.5_
     * [Hotspot 'jvmstat/perfdata' Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/jvmstat)
       * groupId: _io.prometheus.client.utility_
       * artifactId: _jvmstat_
-      * version: _0.0.4_
+      * version: _0.0.5_
     * [Hotspot VM Metrics](http://mvnrepository.com/artifact/io.prometheus.client.utility/hotspot)
       * groupId: _io.prometheus.client.utility_
       * artifactId: _hotspot_
-      * version: _0.0.4_
+      * version: _0.0.5_
     * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client.utility/servlet) - Transferring Metrics to Prometheus Servers
       * groupId: _io.prometheus.client.utility_
       * artifactId: _servlet_
-      * version: _0.0.4_
+      * version: _0.0.5_
   * Simple Client
     * [The Client](http://mvnrepository.com/artifact/io.prometheus/simpleclient)
       * groupId: _io.prometheus_
       * artifactId: _simpleclient_
-      * version: _0.0.2_
+      * version: _0.0.5_
     * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client/simpleclient_servlet)
       * groupId: _io.prometheus_
       * artifactId: _simpleclient_servlet_
-      * version: _0.0.3_
+      * version: _0.0.5_
     * [PushGateway support](http://mvnrepository.com/artifact/io.prometheus.client/simpleclient_pushgateway)
       * groupId: _io.prometheus_
       * artifactId: _simpleclient_pushgateway_
-      * version: _0.0.4_
+      * version: _0.0.5_
 
 ### Getting Started
 There are canonical examples defined in the class definition Javadoc of the client packages.
