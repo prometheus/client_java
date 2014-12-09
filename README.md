@@ -28,6 +28,10 @@ assets:
       * groupId: _io.prometheus_
       * artifactId: _simpleclient_
       * version: _0.0.5_
+    * [Hotspot metrics](http://mvnrepository.com/artifact/io.prometheus.client/simpleclient_hotspot)
+      * groupId: _io.prometheus_
+      * artifactId: _simpleclient_hotspot_
+      * version: _0.0.5_
     * [Exposition Servlet](http://mvnrepository.com/artifact/io.prometheus.client/simpleclient_servlet)
       * groupId: _io.prometheus_
       * artifactId: _simpleclient_servlet_
