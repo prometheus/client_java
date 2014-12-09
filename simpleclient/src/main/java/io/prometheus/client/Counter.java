@@ -1,8 +1,8 @@
 package io.prometheus.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * Counter metric, to track counts of events or running totals.
@@ -23,9 +23,9 @@ import java.util.Vector;
  * <pre>
  * {@code
  *   class YourClass {
- *     static final Counter requests = (Counter) Counter.build()
+ *     static final Counter requests = Counter.build()
  *         .name("requests_total").help("Total requests.").register();
- *     static final Counter failedRequests = (Counter) Counter.build()
+ *     static final Counter failedRequests = Counter.build()
  *         .name("requests_failed_total").help("Total failed requests.").register();
  *
  *     void processRequest() {
@@ -46,7 +46,7 @@ import java.util.Vector;
  * <pre>
  * {@code
  *   class YourClass {
- *     static final Counter requests = (Counter) Counter.build()
+ *     static final Counter requests = Counter.build()
  *         .name("requests_total").help("Total requests.")
  *         .labelNames("method").register();
  *
@@ -64,18 +64,15 @@ import java.util.Vector;
  * These can be aggregated and processed together much more easily in the Promtheus 
  * server than individual metrics for each labelset.
  */
-public class Counter extends SimpleCollector<Counter.Child> {
+public class Counter extends SimpleCollector<Counter.Child, Counter> {
 
-  public Counter(Builder b) {
+  Counter(Builder b) {
     super(b);
-    if (labelNames.length == 0) {
-      inc(0);
-    }
   }
 
-  public static class Builder extends SimpleCollector.Builder {
+  public static class Builder extends SimpleCollector.Builder<Counter> {
     @Override
-    public SimpleCollector create() {
+    public Counter create() {
       return new Counter(this);
     }
   }
@@ -142,13 +139,15 @@ public class Counter extends SimpleCollector<Counter.Child> {
   }
 
   @Override
-  public MetricFamilySamples[] collect() {
-    Vector<MetricFamilySamples.Sample> samples = new Vector<MetricFamilySamples.Sample>();
+  public List<MetricFamilySamples> collect() {
+    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
       samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
     }
-
     MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.COUNTER, help, samples);
-    return new MetricFamilySamples[]{mfs};
+
+    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
+    mfsList.add(mfs);
+    return mfsList;
   }
 }

@@ -1,8 +1,8 @@
 package io.prometheus.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * Gauge metric, to report instantaneous values.
@@ -22,7 +22,7 @@ import java.util.Vector;
  * <pre>
  * {@code
  *   class YourClass {
- *     static final Gauge inprogressRequests = (Gauge) Gauge.build()
+ *     static final Gauge inprogressRequests = Gauge.build()
  *         .name("inprogress_requests").help("Inprogress requests.").register();
  *
  *     void processRequest() {
@@ -39,7 +39,7 @@ import java.util.Vector;
  * <pre>
  * {@code
  *   class YourClass {
- *     static final Gauge inprogressRequests = (Gauge) Gauge.build()
+ *     static final Gauge inprogressRequests = Gauge.build()
  *         .name("inprogress_requests").help("Inprogress requests.")
  *         .labelNames("method").register();
  *
@@ -59,18 +59,15 @@ import java.util.Vector;
  * These can be aggregated and processed together much more easily in the Promtheus 
  * server than individual metrics for each labelset.
  */
-public class Gauge extends SimpleCollector<Gauge.Child> {
+public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
   
-  public Gauge(Builder b) {
+  Gauge(Builder b) {
     super(b);
-    if (labelNames.length == 0) {
-      set(0);
-    }
   }
 
-  public static class Builder extends SimpleCollector.Builder {
+  public static class Builder extends SimpleCollector.Builder<Gauge> {
     @Override
-    public SimpleCollector create() {
+    public Gauge create() {
       return new Gauge(this);
     }
   }
@@ -95,6 +92,8 @@ public class Gauge extends SimpleCollector<Gauge.Child> {
    */
   public static class Child {
     private volatile double value;
+
+    static TimeProvider timeProvider = new TimeProvider();
     /**
      * Increment the gauge by 1.
      */
@@ -130,6 +129,12 @@ public class Gauge extends SimpleCollector<Gauge.Child> {
       synchronized(this){
         value = val;
       }
+    }
+    /**
+     * Set the gauge to the current unixtime.
+     */
+    public void setToCurrentTime() {
+      set(timeProvider.currentTimeMillis() / MILLISECONDS_PER_SECOND);
     }
     /**
      * Get the value of the gauge.
@@ -170,15 +175,29 @@ public class Gauge extends SimpleCollector<Gauge.Child> {
   public void set(double val) {
     labels().set(val);
   }
+  /**
+   * Set the gauge with no labels to the current unixtime.
+   */
+  public void setToCurrentTime() {
+    labels().setToCurrentTime();
+  }
 
   @Override
-  public MetricFamilySamples[] collect() {
-    Vector<MetricFamilySamples.Sample> samples = new Vector<MetricFamilySamples.Sample>();
+  public List<MetricFamilySamples> collect() {
+    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
       samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
     }
     MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.GAUGE, help, samples);
 
-    return new MetricFamilySamples[]{mfs};
+    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
+    mfsList.add(mfs);
+    return mfsList;
+  }
+
+  static class TimeProvider {
+    long currentTimeMillis() {
+      return System.currentTimeMillis();
+    }
   }
 }

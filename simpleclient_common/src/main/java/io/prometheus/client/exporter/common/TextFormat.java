@@ -19,10 +19,11 @@ public class TextFormat {
       writer.write("# TYPE " + metricFamilySamples.name + " " + typeString(metricFamilySamples.type) + "\n");
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
         writer.write(sample.name);
-        if (sample.labelNames.length > 0) {
+        if (sample.labelNames.size() > 0) {
           writer.write("{");
-          for (int i = 0; i < sample.labelNames.length; ++i) {
-            writer.write(sample.labelNames[i] + "=\"" + escapeLabelValue(sample.labelValues.get(i)) + "\",");
+          for (int i = 0; i < sample.labelNames.size(); ++i) {
+            writer.write(String.format("%s=\"%s\",",
+                sample.labelNames.get(i),  escapeLabelValue(sample.labelValues.get(i))));
           }
           writer.write("}");
         }

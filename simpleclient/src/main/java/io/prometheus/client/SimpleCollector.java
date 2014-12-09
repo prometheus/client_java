@@ -30,8 +30,9 @@ import java.util.List;
  * <p>
  * {@link #remove} and {@link #clear} can be used to remove children.
  * <p>
- * <em>Warning #1:</em> Metrics that don't always something are difficult to monitor, if you know in advance
- * what labels will be in use you should initilise them to 0. This is done for you for metrics with no labels.
+ * <em>Warning #1:</em> Metrics that don't always export something are difficult to monitor, if you know in advance
+ * what labels will be in use you should initilise them be calling {@link #labels}.
+ * This is done for you for metrics with no labels.
  * <p>
  * <em>Warning #2:</em> While labels are very powerful, avoid overly granular metric labels. 
  * The combinatorial explosion of breaking out a metric in many dimensions can produce huge numberts
@@ -43,12 +44,12 @@ import java.util.List;
  * by each. If the cardinality is in the hundreds, you may wish to consider removing the breakout
  * by one of the dimensions altogether.
  */
-abstract public class SimpleCollector<Child> extends Collector {
-  final String fullname;
-  final String help;
-  final String[] labelNames;
+public abstract class SimpleCollector<Child, T extends SimpleCollector> extends Collector {
+  protected final String fullname;
+  protected final String help;
+  protected final List<String> labelNames;
 
-  final ConcurrentHashMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();;
+  protected final ConcurrentHashMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();;
 
   /**
    * Return the Child with the given labels, creating it if needed.
@@ -56,7 +57,7 @@ abstract public class SimpleCollector<Child> extends Collector {
    * Must be passed the same number of labels are were passed to {@link #labelNames}.
    */
   public Child labels(String... labelValues) {
-    if (labelValues.length != labelNames.length) {
+    if (labelValues.length != labelNames.size()) {
       throw new IllegalArgumentException("Incorrect number of labels.");
     }
     List<String> key = Arrays.asList(labelValues);
@@ -87,9 +88,40 @@ abstract public class SimpleCollector<Child> extends Collector {
   }
 
   /**
+   * Replace the Child with the given labels.
+   * <p>
+   * This is intended for advanced uses, in particular proxying metrics
+   * from another monitoring system. This allows for callbacks for returning
+   * values for {@Link Counter} and {@Link Gauge} without having to implement
+   * a full {@link Collector}.
+   * <p>
+   * An example with {@Link Gauge}:
+   * <pre>
+   * {@code
+   *   Gauge.build().name("current_time").help("Current unixtime.").create()
+   *       .setChild(new Gauge.Child() {
+   *         public double get() {
+   *           return System.currentTimeMillis() / MILLISECONDS_PER_SECOND;
+   *         }
+   *       }).register();
+   * }
+   * </pre>
+   * <p>
+   * Any references any previous Child with these labelValues are invalidated. 
+   * A metric should be either all callbacks, or none.
+   */
+  public <T extends Collector> T setChild(Child child, String... labelValues) {
+    if (labelValues.length != labelNames.size()) {
+      throw new IllegalArgumentException("Incorrect number of labels.");
+    }
+    children.put(Arrays.asList(labelValues), child);
+    return (T)this;
+  }
+
+  /**
    * Return a new child, workaround for Java generics limitations.
    */
-  abstract protected Child newChild();
+  protected abstract Child newChild();
 
   protected SimpleCollector(Builder b) {
     if (b.name.isEmpty()) throw new IllegalStateException("Name hasn't been set.");
@@ -103,13 +135,18 @@ abstract public class SimpleCollector<Child> extends Collector {
     fullname = name;
     if (b.help.isEmpty()) throw new IllegalStateException("Help hasn't been set.");
     help = b.help;
-    labelNames = b.labelNames;
+    labelNames = Arrays.asList(b.labelNames);
+
+    // Initlize metric if it has no labels.
+    if (labelNames.size() == 0) {
+      labels();
+    }
   }
 
   /**
    * Builders let you configure and then create collectors.
    */
-  abstract public static class Builder {
+  public abstract static class Builder<T extends SimpleCollector> {
     String namespace = "";
     String subsystem = "";
     String name = "";
@@ -120,35 +157,35 @@ abstract public class SimpleCollector<Child> extends Collector {
     /**
      * Set the name of the metric. Required.
      */
-    public Builder name(String name) {
+    public Builder<T> name(String name) {
       this.name = name;
       return this;
     }
     /**
      * Set the subsystem of the metric. Optional.
      */
-    public Builder subsystem(String subsystem) {
+    public Builder<T> subsystem(String subsystem) {
       this.subsystem = subsystem;
       return this;
     }
     /**
      * Set the namespace of the metric. Optional.
      */
-    public Builder namespace(String namespace) {
+    public Builder<T> namespace(String namespace) {
       this.namespace = namespace;
       return this;
     }
     /**
      * Set the help string of the metric. Required.
      */
-    public Builder help(String help) {
+    public Builder<T> help(String help) {
       this.help = help;
       return this;
     }
     /**
      * Set the labelNames of the metric. Optional, defaults to no labels.
      */
-    public Builder labelNames(String... labelNames) {
+    public Builder<T> labelNames(String... labelNames) {
       this.labelNames = labelNames;
       return this;
     }
@@ -158,20 +195,20 @@ abstract public class SimpleCollector<Child> extends Collector {
      * <p>
      * Abstract due to generics limitations.
      */
-    abstract public SimpleCollector create();
+    public abstract T create();
 
     /**
      * Create and register the Collector with the default registry.
      */
-    public SimpleCollector register() {
+    public T register() {
       return register(CollectorRegistry.defaultRegistry);
     }
 
     /**
      * Create and register the Collector with the given registry.
      */
-    public SimpleCollector register(CollectorRegistry registry) {
-      SimpleCollector sc = create();
+    public T register(CollectorRegistry registry) {
+      T sc = create();
       registry.register(sc);
       return sc;
     }

@@ -2,9 +2,11 @@ package io.prometheus.client;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Vector;
-import org.junit.Test;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 
 public class SummaryTest {
@@ -15,8 +17,13 @@ public class SummaryTest {
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
-    noLabels = (Summary) Summary.build().name("nolabels").help("help").register(registry);
-    labels = (Summary) Summary.build().name("labels").help("help").labelNames("l").register(registry);
+    noLabels = Summary.build().name("nolabels").help("help").register(registry);
+    labels = Summary.build().name("labels").help("help").labelNames("l").register(registry);
+  }
+
+  @After
+  public void tearDown() {
+    Summary.Child.timeProvider = new Summary.TimeProvider();
   }
 
   private double getCount() {
@@ -34,6 +41,18 @@ public class SummaryTest {
     noLabels.labels().observe(4);
     assertEquals(2.0, getCount(), .001);
     assertEquals(6.0, getSum(), .001);
+  }
+
+  @Test
+  public void testObserveSecondsSinceNanoTime() {
+    Summary.Child.timeProvider = new Summary.TimeProvider() {
+      long nanoTime() {
+        return (long)(30 * 1e9);
+      }
+    };
+    noLabels.observeSecondsSinceNanoTime((long)(20 * 1e9));
+    assertEquals(1, getCount(), .001);
+    assertEquals(10, getSum(), .001);
   }
   
   @Test
@@ -70,17 +89,19 @@ public class SummaryTest {
   @Test
   public void testCollect() {
     labels.labels("a").observe(2);
-    Collector.MetricFamilySamples[] mfs = labels.collect();
+    List<Collector.MetricFamilySamples> mfs = labels.collect();
     
-    Vector<Collector.MetricFamilySamples.Sample> samples = new Vector<Collector.MetricFamilySamples.Sample>();
-    Vector<String> labelValues = new Vector<String>();
+    ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+    ArrayList<String> labelNames = new ArrayList<String>();
+    labelNames.add("l");
+    ArrayList<String> labelValues = new ArrayList<String>();
     labelValues.add("a");
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_count", new String[]{"l"}, labelValues, 1.0));
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", new String[]{"l"}, labelValues, 2.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.SUMMARY, "help", samples);
 
-    assertEquals(1, mfs.length);
-    assertEquals(mfsFixture, mfs[0]);
+    assertEquals(1, mfs.size());
+    assertEquals(mfsFixture, mfs.get(0));
   }
 
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -57,8 +58,7 @@ public class CollectorRegistry {
   class MetricFamilySamplesEnumeration implements Enumeration<Collector.MetricFamilySamples> {
 
     private final Iterator<Collector> collectorIter = collectors.iterator();
-    private Collector.MetricFamilySamples[] metricFamilySamples;
-    private int metricFamilySamplesIndex;
+    private Iterator<Collector.MetricFamilySamples> metricFamilySamples;
     private Collector.MetricFamilySamples next;
 
     MetricFamilySamplesEnumeration() {
@@ -66,16 +66,13 @@ public class CollectorRegistry {
     }
     
     private void findNextElement() {
-      if (metricFamilySamples != null && metricFamilySamplesIndex < metricFamilySamples.length) {
-        next = metricFamilySamples[metricFamilySamplesIndex];
-        metricFamilySamplesIndex++;
+      if (metricFamilySamples != null && metricFamilySamples.hasNext()) {
+        next = metricFamilySamples.next();
       } else {
         while (collectorIter.hasNext()) {
-          metricFamilySamplesIndex = 0;
-          metricFamilySamples = collectorIter.next().collect();
-          if (metricFamilySamples.length > 0) {
-            next = metricFamilySamples[metricFamilySamplesIndex];
-            metricFamilySamplesIndex++;
+          metricFamilySamples = collectorIter.next().collect().iterator();
+          if (metricFamilySamples.hasNext()) {
+            next = metricFamilySamples.next();
             return;
           }
         }
@@ -106,7 +103,7 @@ public class CollectorRegistry {
     for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(metricFamilySamples())) {
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
         if (sample.name.equals(name)
-            && Arrays.equals(sample.labelNames, labelNames)
+            && Arrays.equals(sample.labelNames.toArray(), labelNames)
             && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
           return new Double(sample.value);
         }

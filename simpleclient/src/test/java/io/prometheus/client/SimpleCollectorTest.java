@@ -16,7 +16,7 @@ public class SimpleCollectorTest {
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
-    metric = (Gauge) Gauge.build().name("labels").help("help").labelNames("l").register(registry);
+    metric = Gauge.build().name("labels").help("help").labelNames("l").register(registry);
   }
   
   private Double getValue(String labelValue) {
@@ -76,5 +76,29 @@ public class SimpleCollectorTest {
   @Test(expected=IllegalStateException.class)
   public void testHelpIsRequired() {
     Gauge.build().name("c").create();
+  }
+
+  @Test
+  public void testSetChild() {
+    metric.setChild(new Gauge.Child(){
+      public double get() {
+        return 42;
+      }
+    }, "a");
+    assertEquals(42.0, getValue("a").doubleValue(), .001);
+  }
+
+  @Test
+  public void testSetChildReturnsGauge() {
+    Gauge g = metric.setChild(new Gauge.Child(){
+      public double get() {
+        return 42;
+      }
+    }, "a");
+  }
+
+  @Test
+  public void testCreateReturnsGauge() {
+    Gauge g = Gauge.build().name("labels").help("help").labelNames("l").create();
   }
 }
