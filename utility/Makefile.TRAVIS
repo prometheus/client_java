@@ -1,6 +1,0 @@
-all: build
-
-build:
-	mvn install -DskipTests=true
-
-.PHONY: build
