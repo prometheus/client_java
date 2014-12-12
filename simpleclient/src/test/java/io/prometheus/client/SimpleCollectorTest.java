@@ -12,15 +12,21 @@ public class SimpleCollectorTest {
 
   CollectorRegistry registry;
   Gauge metric;
+  Gauge noLabels;
 
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
     metric = Gauge.build().name("labels").help("help").labelNames("l").register(registry);
+    noLabels = Gauge.build().name("nolabels").help("help").register(registry);
   }
   
   private Double getValue(String labelValue) {
     return registry.getSampleValue("labels", new String[]{"l"}, new String[]{labelValue});
+  }
+
+  private Double getValueNoLabels() {
+    return registry.getSampleValue("nolabels", new String[]{}, new String[]{});
   }
 
   @Test(expected=IllegalArgumentException.class)
@@ -51,6 +57,15 @@ public class SimpleCollectorTest {
   }
 
   @Test
+  public void testNoLabelsWorkAfterRemove() {
+    noLabels.inc(1);
+    assertEquals(getValueNoLabels(), 1.0, .001);
+    noLabels.remove();
+    noLabels.inc(2);
+    assertEquals(getValueNoLabels(), 2.0, .001);
+  }
+
+  @Test
   public void testClear() {
     assertNull(getValue("a"));
     metric.labels("a").set(7);
@@ -61,6 +76,15 @@ public class SimpleCollectorTest {
     // Brand new Child.
     metric.labels("a").inc();
     assertEquals(1.0, getValue("a").doubleValue(), .001);
+  }
+
+  @Test
+  public void testNoLabelsWorkAfterClear() {
+    noLabels.inc(1);
+    assertEquals(getValueNoLabels(), 1.0, .001);
+    noLabels.clear();
+    noLabels.inc(2);
+    assertEquals(getValueNoLabels(), 2.0, .001);
   }
 
   @Test

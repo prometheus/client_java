@@ -1,6 +1,7 @@
 package io.prometheus.client;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,7 +50,8 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
   protected final String help;
   protected final List<String> labelNames;
 
-  protected final ConcurrentHashMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();;
+  protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();;
+  protected Child noLabelsChild;
 
   /**
    * Return the Child with the given labels, creating it if needed.
@@ -76,6 +78,9 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
    */
   public void remove(String... labelValues) {
     children.remove(Arrays.asList(labelValues));
+    if (labelNames.size() == 0) {
+      noLabelsChild = labels();
+    }
   }
   
   /**
@@ -85,6 +90,9 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
    */
   public void clear() {
     children.clear();
+    if (labelNames.size() == 0) {
+      noLabelsChild = labels();
+    }
   }
 
   /**
@@ -139,7 +147,7 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
 
     // Initlize metric if it has no labels.
     if (labelNames.size() == 0) {
-      labels();
+      noLabelsChild = labels();
     }
   }
 
