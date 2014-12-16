@@ -3,7 +3,6 @@ package io.prometheus.client;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * A collector for a set of metrics.
@@ -11,11 +10,11 @@ import java.util.Vector;
  * Normal users should use {@link Gauge}, {@link Counter} and {@link Summary}.
  * Subclasssing Collector is for advanced uses, such as proxying metrics from another monitoring system.
  */
-abstract public class Collector {
+public abstract class Collector {
   /**
    * Return all of the metrics of this Collector.
    */
-  abstract public MetricFamilySamples[] collect();
+  public abstract List<MetricFamilySamples> collect();
   public static enum Type {
     COUNTER,
     GAUGE,
@@ -29,9 +28,9 @@ abstract public class Collector {
     public final String name;
     public final Type type;
     public final String help;
-    public final Vector<Sample> samples;
+    public final List<Sample> samples;
 
-    public MetricFamilySamples(String name, Type type, String help, Vector<Sample> samples) {
+    public MetricFamilySamples(String name, Type type, String help, List<Sample> samples) {
       this.name = name;
       this.type = type;
       this.help = help;
@@ -70,11 +69,11 @@ abstract public class Collector {
    */
     public static class Sample {
       public final String name;
-      public final String[] labelNames;
+      public final List<String> labelNames;
       public final List<String> labelValues;  // Must have same length as labelNames.
       public final double value;
 
-      public Sample(String name, String[] labelNames, List<String> labelValues, double value) {
+      public Sample(String name, List<String> labelNames, List<String> labelValues, double value) {
         this.name = name;
         this.labelNames = labelNames;
         this.labelValues = labelValues;
@@ -87,7 +86,7 @@ abstract public class Collector {
           return false;
         }
         Sample other = (Sample) obj;
-        return other.name.equals(name) && Arrays.equals(other.labelNames, labelNames)
+        return other.name.equals(name) && other.labelNames.equals(labelNames)
           && other.labelValues.equals(labelValues) && other.value == value;
       }
 
@@ -111,17 +110,26 @@ abstract public class Collector {
   }
 
   /**
+   * Number of nanoseconds in a second.
+   */
+  public static final double NANOSECONDS_PER_SECOND = 1E9;
+  /**
+   * Number of milliseconds in a second.
+   */
+  public static final double MILLISECONDS_PER_SECOND = 1E3;
+
+  /**
    * Register the Collector with the default registry.
    */
-  public Collector register() {
+  public <T extends Collector> T register() {
     return register(CollectorRegistry.defaultRegistry);
   }
 
   /**
    * Register the Collector with the given registry.
    */
-  public Collector register(CollectorRegistry registry) {
+  public <T extends Collector> T register(CollectorRegistry registry) {
     registry.register(this);
-    return this;
+    return (T)this;
   }
 }

@@ -3,11 +3,11 @@ package io.prometheus.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Vector;
 import org.junit.Test;
 import org.junit.Before;
 
@@ -53,8 +53,8 @@ public class CollectorRegistryTest {
   }
 
   class EmptyCollector extends Collector {
-    public MetricFamilySamples[] collect(){
-      return new MetricFamilySamples[]{};
+    public List<MetricFamilySamples> collect(){
+      return new ArrayList<MetricFamilySamples>();
     }
   }
 

@@ -1,8 +1,8 @@
 package io.prometheus.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * Summary metric, to track distributions and frequencies..
@@ -18,37 +18,38 @@ import java.util.Vector;
  * observations and the average observation size.
  * 
  * <p>
- * An example Summary:
+ * Example Summaries:
  * <pre>
  * {@code
  *   class YourClass {
- *     static final Summary requestLatency = (Summary) Summary.build()
+ *     static final Summary receivedBytes = Summary.build()
+ *         .name("requests_size_bytes_total").help("Request size in bytes.").register();
+ *     static final Summary requestLatency = Summary.build()
  *         .name("requests_latency_s_total").help("Request latency in seconds.").register();
  *
- *     void processRequest() {  
+ *     void processRequest(Request req) {  
  *        long start = System.nanoTime();
  *        try {
  *          // Your code here.
  *        } finally {
- *          requestLatency.observe((System.nanoTime() - start) / 1000000000.0);
+ *          requestLatency.observe(req.size());
+ *          requestLatency.observeSecondsSinceNanoTime(start);
  *        }
  *     }
  *   }
  * }
  * </pre>
+ * This would allow you to track request rate, average latency and average request size.
  */
-public class Summary extends SimpleCollector<Summary.Child> {
+public class Summary extends SimpleCollector<Summary.Child, Summary> {
 
-  public Summary(Builder b) {
+  Summary(Builder b) {
     super(b);
-    if (labelNames.length == 0) {
-      labels().set(0, 0);
-    }
   }
 
-  public static class Builder extends SimpleCollector.Builder {
+  public static class Builder extends SimpleCollector.Builder<Summary> {
     @Override
-    public SimpleCollector create() {
+    public Summary create() {
       return new Summary(this);
     }
   }
@@ -69,7 +70,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
    * The value of a single Summary.
    * <p>
    * <em>Warning:</em> References to a Child become invalid after using
-   * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
+   * {@link SimpleCollector#remove} or {@link SimpleCollector#clear}.
    */
   public static class Child {
     public static class Value {
@@ -77,6 +78,8 @@ public class Summary extends SimpleCollector<Summary.Child> {
       private volatile double sum;
     }
     private final Value value = new Value();
+
+    static TimeProvider timeProvider = new TimeProvider();
     /**
      * Observe the given amount.
      */
@@ -86,11 +89,13 @@ public class Summary extends SimpleCollector<Summary.Child> {
         value.sum += amt;
       }
     }
-    void set(double c, double s) {
-      synchronized(this){
-        value.count = c;
-        value.sum = s;
-      }
+    /**
+     * Observe the number of seconds since the given nanoTime.
+     * <p>
+     * This should be passed a previous result of {@link System.nanoTime}.
+     */
+    public void observeSecondsSinceNanoTime(long nanoTime) {
+      observe((timeProvider.nanoTime() - nanoTime) / NANOSECONDS_PER_SECOND);
     }
     /**
      * Get the value of the Summary.
@@ -109,15 +114,23 @@ public class Summary extends SimpleCollector<Summary.Child> {
 
   // Convenience method.
   /**
-   * Observe the given amount on the Summary with no labels.
+   * Observe the given amount on the summary with no labels.
    */
   public void observe(double amt) {
     labels().observe(amt);
   }
+  /**
+   * Observe the number of seconds since the given nanoTime on the summary with no labels.
+   * <p>
+   * This should be passed a previous result of {@link System.nanoTime}.
+   */
+  public void observeSecondsSinceNanoTime(long nanoTime) {
+    labels().observeSecondsSinceNanoTime(nanoTime);
+  }
 
   @Override
-  public MetricFamilySamples[] collect() {
-    Vector<MetricFamilySamples.Sample> samples = new Vector<MetricFamilySamples.Sample>();
+  public List<MetricFamilySamples> collect() {
+    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
       Child.Value v = c.getValue().get();
       samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
@@ -125,6 +138,14 @@ public class Summary extends SimpleCollector<Summary.Child> {
     }
 
     MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.SUMMARY, help, samples);
-    return new MetricFamilySamples[]{mfs};
+    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
+    mfsList.add(mfs);
+    return mfsList;
+  }
+
+  static class TimeProvider {
+    long nanoTime() {
+      return System.nanoTime();
+    }
   }
 }

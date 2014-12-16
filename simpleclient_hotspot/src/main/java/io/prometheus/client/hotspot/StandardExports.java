@@ -8,8 +8,9 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
-import java.util.Vector;
 
 import io.prometheus.client.Collector;
 
@@ -53,17 +54,15 @@ public class StandardExports extends Collector {
   }
 
   MetricFamilySamples singleMetric(String name, Type type, String help, double value) {
-    Vector<MetricFamilySamples.Sample> samples = new Vector<MetricFamilySamples.Sample>();
-    samples.add(new MetricFamilySamples.Sample(name, new String[]{}, new Vector<String>(), value));
+    ArrayList<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
+    samples.add(new MetricFamilySamples.Sample(name, new ArrayList<String>(), new ArrayList<String>(), value));
     return new MetricFamilySamples(name, type, help, samples);
   }
 
-  private final static double NANOSECONDS_PER_SECOND = 1E9;
-  private final static double MILLISECONDS_PER_SECOND = 1E3;
   private final static double KB = 1024;
 
-  public MetricFamilySamples[] collect() {
-    Vector<MetricFamilySamples> mfs = new Vector<MetricFamilySamples>();
+  public List<MetricFamilySamples> collect() {
+    List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
 
     mfs.add(singleMetric("process_cpu_seconds_total", Type.COUNTER, "CPU time used by the process in seconds.",
         osBean.getProcessCpuTime() / NANOSECONDS_PER_SECOND));
@@ -89,11 +88,10 @@ public class StandardExports extends Collector {
         LOGGER.warning(e.toString());
       }
     }
-
-    return mfs.toArray(new MetricFamilySamples[]{});
+    return mfs;
   }
 
-  void collectMemoryMetricsLinux(Vector<MetricFamilySamples> mfs) {
+  void collectMemoryMetricsLinux(List<MetricFamilySamples> mfs) {
     // statm/stat report in pages, and it's non-trivial to get pagesize from Java
     // so we parse status instead.
     BufferedReader br = null;

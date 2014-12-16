@@ -2,21 +2,21 @@ package io.prometheus.client;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Test;
 import org.junit.Before;
 
 
 public class CounterTest {
-
   CollectorRegistry registry;
   Counter noLabels, labels;
 
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
-    noLabels = (Counter) Counter.build().name("nolabels").help("help").register(registry);
-    labels = (Counter) Counter.build().name("labels").help("help").labelNames("l").register(registry);
+    noLabels = Counter.build().name("nolabels").help("help").register(registry);
+    labels = Counter.build().name("labels").help("help").labelNames("l").register(registry);
   }
 
   private double getValue() {
@@ -64,16 +64,18 @@ public class CounterTest {
   @Test
   public void testCollect() {
     labels.labels("a").inc();
-    Collector.MetricFamilySamples[] mfs = labels.collect();
+    List<Collector.MetricFamilySamples> mfs = labels.collect();
     
-    Vector<Collector.MetricFamilySamples.Sample> samples = new Vector<Collector.MetricFamilySamples.Sample>();
-    Vector<String> labelValues = new Vector<String>();
+    ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+    ArrayList<String> labelNames = new ArrayList<String>();
+    labelNames.add("l");
+    ArrayList<String> labelValues = new ArrayList<String>();
     labelValues.add("a");
-    samples.add(new Collector.MetricFamilySamples.Sample("labels", new String[]{"l"}, labelValues, 1.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels", labelNames, labelValues, 1.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.COUNTER, "help", samples);
 
-    assertEquals(1, mfs.length);
-    assertEquals(mfsFixture, mfs[0]);
+    assertEquals(1, mfs.size());
+    assertEquals(mfsFixture, mfs.get(0));
   }
 
 }

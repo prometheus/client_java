@@ -11,9 +11,9 @@
     <groupId>io.prometheus</groupId>
     <artifactId>simpleclient_common</artifactId>
 
-    <name>Prometheus Java Client Metrics</name>
+    <name>Prometheus Java Simpleclient Common</name>
     <description>
-        Prometheus Java Client Metrics
+        Common code used by various modules of the Simpleclient. 
     </description>
 
     <licenses>

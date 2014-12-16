@@ -11,9 +11,9 @@
     <groupId>io.prometheus</groupId>
     <artifactId>simpleclient_servlet</artifactId>
 
-    <name>Prometheus Java Client Metrics</name>
+    <name>Prometheus Java Simpleclient Servlet</name>
     <description>
-        Prometheus Java Client Metrics
+        HTTP servlet exporter for the simpleclient.
     </description>
 
     <licenses>
