@@ -72,7 +72,21 @@ public class GaugeTest {
     noLabels.setToCurrentTime();
     assertEquals(42, getValue(), .001);
   }
- 
+
+  @Test
+  public void testTimer() {
+    Gauge.Child.timeProvider = new Gauge.TimeProvider() {
+      long value = (long)(30 * 1e9);
+      long nanoTime() {
+        value += (long)(10 * 1e9);
+        return value;
+      }
+    };
+    Gauge.Timer timer = noLabels.startTimer();
+    timer.setDuration();
+    assertEquals(10, getValue(), .001);
+  }
+
   @Test
   public void noLabelsDefaultZeroValue() {
     assertEquals(0.0, getValue(), .001);

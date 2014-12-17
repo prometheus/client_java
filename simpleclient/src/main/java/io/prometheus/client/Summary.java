@@ -28,12 +28,12 @@ import java.util.Map;
  *         .name("requests_latency_s_total").help("Request latency in seconds.").register();
  *
  *     void processRequest(Request req) {  
- *        long start = System.nanoTime();
+ *        Summary.Timer requestTimer = requestLatency.startTimer()
  *        try {
  *          // Your code here.
  *        } finally {
- *          requestLatency.observe(req.size());
- *          requestLatency.observeSecondsSinceNanoTime(start);
+ *          receivedBytes.observe(req.size());
+ *          requestTimer.observeDuration();
  *        }
  *     }
  *   }
@@ -67,6 +67,24 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
   }
 
   /**
+   * Represents an event being timed.
+   */
+  public static class Timer {
+    Child child;
+    long start;
+    private Timer(Child child) {
+      this.child = child;
+      start = Child.timeProvider.nanoTime();
+    }
+    /**
+     * Observe the amount of time in seconds since {@link Child#startTimer} was called.
+     */
+    public void observeDuration() {
+      child.observe((Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND);
+    }
+  }
+
+  /**
    * The value of a single Summary.
    * <p>
    * <em>Warning:</em> References to a Child become invalid after using
@@ -94,12 +112,12 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
       sum.add(amt);
     }
     /**
-     * Observe the number of seconds since the given nanoTime.
+     * Start a timer to track a duration.
      * <p>
-     * This should be passed a previous result of {@link System.nanoTime}.
+     * Call {@link Timer#observeDuration} at the end of what you want to measure the duration of.
      */
-    public void observeSecondsSinceNanoTime(long nanoTime) {
-      observe((timeProvider.nanoTime() - nanoTime) / NANOSECONDS_PER_SECOND);
+    public Timer startTimer() {
+      return new Timer(this);
     }
     /**
      * Get the value of the Summary.
@@ -114,7 +132,7 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
     }
   }
 
-  // Convenience method.
+  // Convenience methods.
   /**
    * Observe the given amount on the summary with no labels.
    */
@@ -122,12 +140,12 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
     noLabelsChild.observe(amt);
   }
   /**
-   * Observe the number of seconds since the given nanoTime on the summary with no labels.
+   * Start a timer to track a duration on the summary with no labels.
    * <p>
-   * This should be passed a previous result of {@link System.nanoTime}.
+   * Call {@link Timer#observeDuration} at the end of what you want to measure the duration of.
    */
-  public void observeSecondsSinceNanoTime(long nanoTime) {
-    noLabelsChild.observeSecondsSinceNanoTime(nanoTime);
+  public Timer startTimer() {
+    return noLabelsChild.startTimer();
   }
 
   @Override

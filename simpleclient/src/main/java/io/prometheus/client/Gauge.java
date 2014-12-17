@@ -85,6 +85,24 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
     return new Child();
   }
 
+   /**
+    * Represents an event being timed.
+    */
+   public static class Timer {
+     Child child;
+     long start;
+     private Timer(Child child) {
+       this.child = child;
+       start = Child.timeProvider.nanoTime();
+     }
+     /**
+      * Set the amount of time in seconds since {@link Child#startTimer} was called.
+      */
+     public void setDuration() {
+       child.set((Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND);
+     }
+   }
+
   /**
    * The value of a single Gauge.
    * <p>
@@ -138,6 +156,20 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
       set(timeProvider.currentTimeMillis() / MILLISECONDS_PER_SECOND);
     }
     /**
+     * Start a timer to track a duration.
+     * <p>
+     * Call {@link Timer#setDuration} at the end of what you want to measure the duration of.
+     * <p>
+     * This is primarily useful for tracking the durations of major steps of batch jobs,
+     * which are then pushed to a Pushgateway.
+     * For tracking other durations/latencies you should usually use a {@link Summary}.
+     *
+     * @see io.prometheus.client.exporter.PushGateway
+     */
+    public Timer startTimer() {
+      return new Timer(this);
+    }
+    /**
      * Get the value of the gauge.
      */
     public double get() {
@@ -184,6 +216,18 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
   public void setToCurrentTime() {
     noLabelsChild.setToCurrentTime();
   }
+  /**
+   * Start a timer to track a duration, for the gauge with no labels.
+   * <p>
+   * This is primarily useful for tracking the durations of major steps of batch jobs,
+   * which are then pushed with {@link PushGateway}.
+   * For tracking other durations/latencies you should usually use a {@link Summary}.
+   * <p>
+   * Call {@link Timer#setDuration} at the end of what you want to measure the duration of.
+   */
+  public Timer startTimer() {
+    return noLabelsChild.startTimer();
+  }
 
   @Override
   public List<MetricFamilySamples> collect() {
@@ -201,6 +245,9 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
   static class TimeProvider {
     long currentTimeMillis() {
       return System.currentTimeMillis();
+    }
+    long nanoTime() {
+      return System.nanoTime();
     }
   }
 }

@@ -100,10 +100,10 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
    * <p>
    * This is intended for advanced uses, in particular proxying metrics
    * from another monitoring system. This allows for callbacks for returning
-   * values for {@Link Counter} and {@Link Gauge} without having to implement
+   * values for {@link Counter} and {@link Gauge} without having to implement
    * a full {@link Collector}.
    * <p>
-   * An example with {@Link Gauge}:
+   * An example with {@link Gauge}:
    * <pre>
    * {@code
    *   Gauge.build().name("current_time").help("Current unixtime.").create()
