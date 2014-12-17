@@ -74,20 +74,24 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
    */
   public static class Child {
     public static class Value {
-      private volatile double count;
-      private volatile double sum;
+      private double count;  
+      private double sum;
     }
-    private final Value value = new Value();
+
+    // Having these seperate leaves us open to races,
+    // however Prometheus as whole has other races
+    // that mean adding atomicity here wouldn't be useful.
+    // This should be reevaluated in the future.
+    private DoubleAdder count = new DoubleAdder();  
+    private DoubleAdder sum = new DoubleAdder();
 
     static TimeProvider timeProvider = new TimeProvider();
     /**
      * Observe the given amount.
      */
     public void observe(double amt) {
-      synchronized(this){
-        value.count++;
-        value.sum += amt;
-      }
+      count.add(1);
+      sum.add(amt);
     }
     /**
      * Observe the number of seconds since the given nanoTime.
@@ -104,10 +108,8 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
      */
     public Value get() {
       Value v = new Value();
-      synchronized(this){
-        v.sum = value.sum;
-        v.count = value.count;
-      }
+      v.count = count.sum();
+      v.sum = sum.sum();
       return v;
     }
   }
@@ -117,7 +119,7 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
    * Observe the given amount on the summary with no labels.
    */
   public void observe(double amt) {
-    labels().observe(amt);
+    noLabelsChild.observe(amt);
   }
   /**
    * Observe the number of seconds since the given nanoTime on the summary with no labels.
@@ -125,7 +127,7 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
    * This should be passed a previous result of {@link System.nanoTime}.
    */
   public void observeSecondsSinceNanoTime(long nanoTime) {
-    labels().observeSecondsSinceNanoTime(nanoTime);
+    noLabelsChild.observeSecondsSinceNanoTime(nanoTime);
   }
 
   @Override

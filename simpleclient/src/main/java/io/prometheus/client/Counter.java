@@ -96,7 +96,7 @@ public class Counter extends SimpleCollector<Counter.Child, Counter> {
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
    */
   public static class Child {
-    private volatile double value;
+    private DoubleAdder value = new DoubleAdder();
     /**
      * Increment the counter by 1.
      */
@@ -111,15 +111,13 @@ public class Counter extends SimpleCollector<Counter.Child, Counter> {
       if (amt < 0) {
         throw new IllegalArgumentException("Amount to increment must be non-negative.");
       }
-      synchronized(this){
-        value += amt;
-      }
+      value.add(amt);
     }
     /**
      * Get the value of the counter.
      */
     public double get() {
-      return value;
+      return value.sum();
     }
   }
 
@@ -135,7 +133,7 @@ public class Counter extends SimpleCollector<Counter.Child, Counter> {
    * @throws IllegalArgumentException If amt is negative.
    */
   public void inc(double amt) {
-    labels().inc(amt);
+    noLabelsChild.inc(amt);
   }
 
   @Override

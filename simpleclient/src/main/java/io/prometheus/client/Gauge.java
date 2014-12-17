@@ -56,8 +56,9 @@ import java.util.Map;
  *   }
  * }
  * </pre>
- * These can be aggregated and processed together much more easily in the Promtheus 
+ * These can be aggregated and processed together much more easily in the Prometheus 
  * server than individual metrics for each labelset.
+ * </p>
  */
 public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
   
@@ -91,7 +92,7 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
    */
   public static class Child {
-    private volatile double value;
+    private DoubleAdder value = new DoubleAdder();
 
     static TimeProvider timeProvider = new TimeProvider();
     /**
@@ -104,9 +105,7 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
      * Increment the gauge by the given amount.
      */
     public void inc(double amt) {
-      synchronized(this){
-        value += amt;
-      }
+      value.add(amt);
     }
     /**
      * Decrement the gauge by 1.
@@ -118,16 +117,18 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
      * Decrement the gauge by the given amount.
      */
     public void dec(double amt) {
-      synchronized(this){
-        value -= amt;
-      }
+      value.add(-amt);
     }
     /**
      * Set the gauge to the given value.
      */
     public void set(double val) {
-      synchronized(this){
-        value = val;
+      synchronized(this) {
+        value.reset();
+        // If get() were called here it'd see an invalid value, so use a lock.
+        // inc()/dec() don't need locks, as all the possible outcomes
+        // are still possible if set() were atomic so no new races are introduced.
+        value.add(val);
       }
     }
     /**
@@ -140,7 +141,9 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
      * Get the value of the gauge.
      */
     public double get() {
-      return value;
+      synchronized(this) {
+        return value.sum();
+      }
     }
   }
 
@@ -155,7 +158,7 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
    * Increment the gauge with no labels by the given amount.
    */
   public void inc(double amt) {
-    labels().inc(amt);
+    noLabelsChild.inc(amt);
   }
   /**
    * Increment the gauge with no labels by 1.
@@ -167,19 +170,19 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
    * Decrement the gauge with no labels by the given amount.
    */
   public void dec(double amt) {
-    labels().dec(amt);
+    noLabelsChild.dec(amt);
   }
   /**
    * Set the gauge with no labels to the given value.
    */
   public void set(double val) {
-    labels().set(val);
+    noLabelsChild.set(val);
   }
   /**
    * Set the gauge with no labels to the current unixtime.
    */
   public void setToCurrentTime() {
-    labels().setToCurrentTime();
+    noLabelsChild.setToCurrentTime();
   }
 
   @Override
