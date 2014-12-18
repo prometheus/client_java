@@ -44,13 +44,16 @@ public class SummaryTest {
   }
 
   @Test
-  public void testObserveSecondsSinceNanoTime() {
+  public void testTimer() {
     Summary.Child.timeProvider = new Summary.TimeProvider() {
+      long value = (long)(30 * 1e9);
       long nanoTime() {
-        return (long)(30 * 1e9);
+        value += (long)(10 * 1e9);
+        return value;
       }
     };
-    noLabels.observeSecondsSinceNanoTime((long)(20 * 1e9));
+    Summary.Timer timer = noLabels.startTimer();
+    timer.observeDuration();
     assertEquals(1, getCount(), .001);
     assertEquals(10, getSum(), .001);
   }
