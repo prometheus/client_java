@@ -47,7 +47,7 @@ There are canonical examples defined in the class definition Javadoc of the clie
 See [the wiki](https://github.com/prometheus/client_java/wiki) for more information.
 
 ## Documentation
-The client is canonically documented with Javadoc.  Running the following will produce output local documentation
+The client is canonically documented with Javadoc.  Running the following will produce local documentation
 in _apidocs_ directories for you to read.
 
     $ mvn package
