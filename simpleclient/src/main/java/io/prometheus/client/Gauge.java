@@ -161,10 +161,8 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
      * Call {@link Timer#setDuration} at the end of what you want to measure the duration of.
      * <p>
      * This is primarily useful for tracking the durations of major steps of batch jobs,
-     * which are then pushed to a Pushgateway.
+     * which are then pushed to a {@link io.prometheus.client.exporter.PushGateway}.
      * For tracking other durations/latencies you should usually use a {@link Summary}.
-     *
-     * @see io.prometheus.client.exporter.PushGateway
      */
     public Timer startTimer() {
       return new Timer(this);

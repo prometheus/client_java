@@ -23,12 +23,12 @@ import java.util.Map;
  * {@code
  *   class YourClass {
  *     static final Summary receivedBytes = Summary.build()
- *         .name("requests_size_bytes_total").help("Request size in bytes.").register();
+ *         .name("requests_size_bytes").help("Request size in bytes.").register();
  *     static final Summary requestLatency = Summary.build()
- *         .name("requests_latency_s_total").help("Request latency in seconds.").register();
+ *         .name("requests_latency_seconds").help("Request latency in seconds.").register();
  *
  *     void processRequest(Request req) {  
- *        Summary.Timer requestTimer = requestLatency.startTimer()
+ *        Summary.Timer requestTimer = requestLatency.startTimer();
  *        try {
  *          // Your code here.
  *        } finally {
