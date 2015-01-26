@@ -19,7 +19,7 @@ public class StandardExportsTest {
 
   static class StatusReaderTest extends StandardExports.StatusReader {
     BufferedReader procSelfStatusReader() throws FileNotFoundException {
-      return new BufferedReader(new StringReader("Name:   cat\nVmSize:     5900 kB\nVmRSS:       360 kB\n"));
+      return new BufferedReader(new StringReader("Name:   cat\nVmSize:\t5900 kB\nVmRSS:\t   360 kB\n"));
     }
   }
 
