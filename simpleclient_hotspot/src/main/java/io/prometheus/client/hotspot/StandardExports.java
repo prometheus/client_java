@@ -102,11 +102,11 @@ public class StandardExports extends Collector {
         if (line.startsWith("VmSize:")) {
           mfs.add(singleMetric("process_virtual_memory_bytes", Type.GAUGE,
               "The virtual memory size of the process, in bytes.",
-              Float.parseFloat(line.split(" +")[1]) * KB));
+              Float.parseFloat(line.split("\\s+")[1]) * KB));
         } else if (line.startsWith("VmRSS:")) {
           mfs.add(singleMetric("process_resident_memory_bytes", Type.GAUGE,
               "The resident memory size of the process, in bytes.",
-              Float.parseFloat(line.split(" +")[1]) * KB));
+              Float.parseFloat(line.split("\\s+")[1]) * KB));
         }
       }
     } catch (IOException e) {
