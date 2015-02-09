@@ -3,12 +3,16 @@ package io.prometheus.client;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * A collector for a set of metrics.
  * <p>
  * Normal users should use {@link Gauge}, {@link Counter} and {@link Summary}.
+ * <p>
  * Subclasssing Collector is for advanced uses, such as proxying metrics from another monitoring system.
+ * It is it the responsibility of subclasses to ensure they produce valid metrics.
+ * @see <a href="http://prometheus.io/docs/instrumenting/exposition_formats/">Exposition formats</a>.
  */
 public abstract class Collector {
   /**
@@ -110,15 +114,6 @@ public abstract class Collector {
   }
 
   /**
-   * Number of nanoseconds in a second.
-   */
-  public static final double NANOSECONDS_PER_SECOND = 1E9;
-  /**
-   * Number of milliseconds in a second.
-   */
-  public static final double MILLISECONDS_PER_SECOND = 1E3;
-
-  /**
    * Register the Collector with the default registry.
    */
   public <T extends Collector> T register() {
@@ -131,5 +126,41 @@ public abstract class Collector {
   public <T extends Collector> T register(CollectorRegistry registry) {
     registry.register(this);
     return (T)this;
+  }
+
+  /* Various utility functions for implementing Collectors. */
+
+  /**
+   * Number of nanoseconds in a second.
+   */
+  public static final double NANOSECONDS_PER_SECOND = 1E9;
+  /**
+   * Number of milliseconds in a second.
+   */
+  public static final double MILLISECONDS_PER_SECOND = 1E3;
+
+  protected static final Pattern METRIC_NAME_RE = Pattern.compile("[a-zA-Z_:][a-zA-Z0-9_:]*");
+  protected static final Pattern METRIC_LABEL_NAME_RE = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
+  protected static final Pattern RESERVED_METRIC_LABEL_NAME_RE = Pattern.compile("__.*");
+
+  /**
+   * Throw an exception if the metric name is invalid.
+   */
+  protected static void checkMetricName(String name) {
+    if (!METRIC_NAME_RE.matcher(name).matches()) {
+      throw new IllegalArgumentException("Invalid metric name: " + name);
+    }
+  }
+
+  /**
+   * Throw an exception if the metric label name is invalid.
+   */
+  protected static void checkMetricLabelName(String name) {
+    if (!METRIC_LABEL_NAME_RE.matcher(name).matches()) {
+      throw new IllegalArgumentException("Invalid metric label name: " + name);
+    }
+    if (RESERVED_METRIC_LABEL_NAME_RE.matcher(name).matches()) {
+      throw new IllegalArgumentException("Invalid metric label name, reserved for internal use: " + name);
+    }
   }
 }
