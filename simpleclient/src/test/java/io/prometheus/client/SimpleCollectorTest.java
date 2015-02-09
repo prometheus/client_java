@@ -102,6 +102,21 @@ public class SimpleCollectorTest {
     Gauge.build().name("c").create();
   }
 
+  @Test(expected=IllegalArgumentException.class)
+  public void testInvalidNameThrows() {
+    Gauge.build().name("c'a").create();
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testInvalidLabelNameThrows() {
+    Gauge.build().name("a").labelNames("c:d").help("h").create();
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testReservedLabelNameThrows() {
+    Gauge.build().name("a").labelNames("__name__").help("h").create();
+  }
+
   @Test
   public void testSetChild() {
     metric.setChild(new Gauge.Child(){

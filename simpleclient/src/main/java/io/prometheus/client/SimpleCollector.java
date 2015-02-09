@@ -141,9 +141,14 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
       name = b.namespace + '_' + name;
     }
     fullname = name;
+    checkMetricName(fullname);
     if (b.help.isEmpty()) throw new IllegalStateException("Help hasn't been set.");
     help = b.help;
     labelNames = Arrays.asList(b.labelNames);
+
+    for (String n: labelNames) {
+      checkMetricLabelName(n);
+    }
 
     // Initlize metric if it has no labels.
     if (labelNames.size() == 0) {
