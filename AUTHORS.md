@@ -14,4 +14,5 @@ The following individuals have contributed code to this repository
 * Flavio W. Brasil <fwbrasil@gmail.com>
 * Julius Volz <julius@soundcloud.com>
 * Matt T. Proud <matt.proud@gmail.com>
+* Michal Witkowski <michal@improbable.io>
 * Ursula Kallio <ursula@soundcloud.com>
