@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 
 public class GarbageCollectorExportsTest {
@@ -23,12 +24,12 @@ public class GarbageCollectorExportsTest {
 
   @Before
   public void setUp() {
-    Mockito.when(mockGcBean1.getName()).thenReturn("MyGC1");
-    Mockito.when(mockGcBean1.getCollectionCount()).thenReturn(100L);
-    Mockito.when(mockGcBean1.getCollectionTime()).thenReturn(TimeUnit.SECONDS.toMillis(10));
-    Mockito.when(mockGcBean2.getName()).thenReturn("MyGC2");
-    Mockito.when(mockGcBean2.getCollectionCount()).thenReturn(200L);
-    Mockito.when(mockGcBean2.getCollectionTime()).thenReturn(TimeUnit.SECONDS.toMillis(20));
+    when(mockGcBean1.getName()).thenReturn("MyGC1");
+    when(mockGcBean1.getCollectionCount()).thenReturn(100L);
+    when(mockGcBean1.getCollectionTime()).thenReturn(TimeUnit.SECONDS.toMillis(10));
+    when(mockGcBean2.getName()).thenReturn("MyGC2");
+    when(mockGcBean2.getCollectionCount()).thenReturn(200L);
+    when(mockGcBean2.getCollectionTime()).thenReturn(TimeUnit.SECONDS.toMillis(20));
     collectorUnderTest = new GarbageCollectorExports(mockList).register(registry);
   }
 
@@ -37,28 +38,28 @@ public class GarbageCollectorExportsTest {
     assertEquals(
         100L,
         registry.getSampleValue(
-            GarbageCollectorExports.COLLECTIONS_COUNT_METRIC,
+            "jvm_gc_collection_seconds_count",
             new String[]{"gc"},
             new String[]{"MyGC1"}),
         .0000001);
     assertEquals(
         10d,
         registry.getSampleValue(
-            GarbageCollectorExports.COLLECTIONS_TIME_METRIC,
+            "jvm_gc_collection_seconds_sum",
             new String[]{"gc"},
             new String[]{"MyGC1"}),
         .0000001);
     assertEquals(
         200L,
         registry.getSampleValue(
-            GarbageCollectorExports.COLLECTIONS_COUNT_METRIC,
+            "jvm_gc_collection_seconds_count",
             new String[]{"gc"},
             new String[]{"MyGC2"}),
         .0000001);
     assertEquals(
         20d,
         registry.getSampleValue(
-            GarbageCollectorExports.COLLECTIONS_TIME_METRIC,
+            "jvm_gc_collection_seconds_sum",
             new String[]{"gc"},
             new String[]{"MyGC2"}),
         .0000001);

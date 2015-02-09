@@ -2,6 +2,7 @@ package io.prometheus.client.hotspot;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 import com.sun.management.UnixOperatingSystemMXBean;
 import java.io.BufferedReader;
@@ -29,12 +30,12 @@ public class StandardExportsTest {
   @Before
   public void setUp() {
     osBean = Mockito.mock(UnixOperatingSystemMXBean.class);
-    Mockito.when(osBean.getName()).thenReturn("Linux");
-    Mockito.when(osBean.getProcessCpuTime()).thenReturn(123L);
-    Mockito.when(osBean.getOpenFileDescriptorCount()).thenReturn(10L);
-    Mockito.when(osBean.getMaxFileDescriptorCount()).thenReturn(20L);
+    when(osBean.getName()).thenReturn("Linux");
+    when(osBean.getProcessCpuTime()).thenReturn(123L);
+    when(osBean.getOpenFileDescriptorCount()).thenReturn(10L);
+    when(osBean.getMaxFileDescriptorCount()).thenReturn(20L);
     runtimeBean = Mockito.mock(RuntimeMXBean.class);
-    Mockito.when(runtimeBean.getStartTime()).thenReturn(456L);
+    when(runtimeBean.getStartTime()).thenReturn(456L);
   }
 
   @Test
