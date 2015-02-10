@@ -62,6 +62,11 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
     if (labelValues.length != labelNames.size()) {
       throw new IllegalArgumentException("Incorrect number of labels.");
     }
+    for (String label: labelValues) {
+      if (label == null) {
+        throw new IllegalArgumentException("Label cannot be null.");
+      }
+    }
     List<String> key = Arrays.asList(labelValues);
     Child c = children.get(key);
     if (c != null) {
