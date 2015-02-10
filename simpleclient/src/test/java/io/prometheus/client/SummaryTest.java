@@ -27,10 +27,10 @@ public class SummaryTest {
   }
 
   private double getCount() {
-    return registry.getSampleValue("nolabels_count", new String[]{}, new String[]{}).doubleValue();
+    return registry.getSampleValue("nolabels_count").doubleValue();
   }
   private double getSum() {
-    return registry.getSampleValue("nolabels_sum", new String[]{}, new String[]{}).doubleValue();
+    return registry.getSampleValue("nolabels_sum").doubleValue();
   }
   
   @Test
