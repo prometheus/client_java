@@ -35,6 +35,11 @@ public class SimpleCollectorTest {
   }
 
   @Test(expected=IllegalArgumentException.class)
+  public void testNullLabelThrows() {
+    metric.labels(new String[]{null});
+  }
+
+  @Test(expected=IllegalArgumentException.class)
   public void testTooManyLabelsThrows() {
     metric.labels("a", "b");
   }
