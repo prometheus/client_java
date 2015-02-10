@@ -99,6 +99,15 @@ public class CollectorRegistry {
    * </p>
    * This is inefficient, and intended only for use in unittests.
    */
+  public Double getSampleValue(String name) {
+    return getSampleValue(name, new String[]{}, new String[]{});
+  }
+
+  /**
+   * Returns the given value, or null if it doesn't exist.
+   * </p>
+   * This is inefficient, and intended only for use in unittests.
+   */
   public Double getSampleValue(String name, String[] labelNames, String[] labelValues) {
     for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(metricFamilySamples())) {
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {

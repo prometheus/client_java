@@ -26,7 +26,7 @@ public class SimpleCollectorTest {
   }
 
   private Double getValueNoLabels() {
-    return registry.getSampleValue("nolabels", new String[]{}, new String[]{});
+    return registry.getSampleValue("nolabels");
   }
 
   @Test(expected=IllegalArgumentException.class)

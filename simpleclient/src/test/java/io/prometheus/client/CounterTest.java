@@ -20,7 +20,7 @@ public class CounterTest {
   }
 
   private double getValue() {
-    return registry.getSampleValue("nolabels", new String[]{}, new String[]{}).doubleValue();
+    return registry.getSampleValue("nolabels").doubleValue();
   }
   
   @Test
