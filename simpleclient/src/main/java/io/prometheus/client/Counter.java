@@ -70,7 +70,7 @@ public class Counter extends SimpleCollector<Counter.Child, Counter> {
     super(b);
   }
 
-  public static class Builder extends SimpleCollector.Builder<Counter> {
+  public static class Builder extends SimpleCollector.Builder<Builder> {
     @Override
     public Counter create() {
       return new Counter(this);

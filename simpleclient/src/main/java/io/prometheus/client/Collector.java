@@ -22,7 +22,8 @@ public abstract class Collector {
   public static enum Type {
     COUNTER,
     GAUGE,
-    SUMMARY
+    SUMMARY,
+    HISTOGRAM,
   }
 
   /**
@@ -162,5 +163,18 @@ public abstract class Collector {
     if (RESERVED_METRIC_LABEL_NAME_RE.matcher(name).matches()) {
       throw new IllegalArgumentException("Invalid metric label name, reserved for internal use: " + name);
     }
+  }
+
+  /**
+   * Convert a double to it's string representation in Go.
+   */
+  public static String doubleToGoString(double d) {
+    if (d == Double.POSITIVE_INFINITY) {
+      return "+Inf";
+    } 
+    if (d == Double.NEGATIVE_INFINITY) {
+      return "-Inf";
+    }
+    return Double.toString(d);
   }
 }

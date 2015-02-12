@@ -35,6 +35,16 @@ public class TextFormatTest {
   }
 
   @Test
+  public void testValueInfinity() throws IOException {
+    Gauge noLabels = (Gauge) Gauge.build().name("nolabels").help("help").register(registry);
+    noLabels.set(Double.POSITIVE_INFINITY);
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP nolabels help\n"
+                 + "# TYPE nolabels gauge\n"
+                 + "nolabels +Inf\n", writer.toString());
+  }
+
+  @Test
   public void testCounterOutput() throws IOException {
     Counter noLabels = (Counter) Counter.build().name("nolabels").help("help").register(registry);
     noLabels.inc();

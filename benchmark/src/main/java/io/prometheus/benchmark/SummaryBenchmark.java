@@ -26,6 +26,9 @@ public class SummaryBenchmark {
   io.prometheus.client.Summary prometheusSimpleSummary;
   io.prometheus.client.Summary.Child prometheusSimpleSummaryChild;
   io.prometheus.client.Summary prometheusSimpleSummaryNoLabels;
+  io.prometheus.client.Histogram prometheusSimpleHistogram;
+  io.prometheus.client.Histogram.Child prometheusSimpleHistogramChild;
+  io.prometheus.client.Histogram prometheusSimpleHistogramNoLabels;
 
   @Setup
   public void setup() {
@@ -42,6 +45,17 @@ public class SummaryBenchmark {
     prometheusSimpleSummaryChild = prometheusSimpleSummary.labels("test", "group");
 
     prometheusSimpleSummaryNoLabels = io.prometheus.client.Summary.build()
+      .name("name")
+      .help("some description..")
+      .create();
+
+    prometheusSimpleHistogram = io.prometheus.client.Histogram.build()
+      .name("name")
+      .help("some description..")
+      .labelNames("some", "group").create();
+    prometheusSimpleHistogramChild = prometheusSimpleHistogram.labels("test", "group");
+
+    prometheusSimpleHistogramNoLabels = io.prometheus.client.Histogram.build()
       .name("name")
       .help("some description..")
       .create();
@@ -70,7 +84,7 @@ public class SummaryBenchmark {
   public void prometheusSimpleSummaryBenchmark() {
     prometheusSimpleSummary.labels("test", "group").observe(1) ;
   }
-  
+
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -83,6 +97,27 @@ public class SummaryBenchmark {
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleSummaryNoLabelsBenchmark() {
     prometheusSimpleSummaryNoLabels.observe(1); 
+  }
+
+  @Benchmark
+  @BenchmarkMode({Mode.AverageTime})
+  @OutputTimeUnit(TimeUnit.NANOSECONDS)
+  public void prometheusSimpleHistogramBenchmark() {
+    prometheusSimpleHistogram.labels("test", "group").observe(1) ;
+  }
+
+  @Benchmark
+  @BenchmarkMode({Mode.AverageTime})
+  @OutputTimeUnit(TimeUnit.NANOSECONDS)
+  public void prometheusSimpleHistogramChildBenchmark() {
+    prometheusSimpleHistogramChild.observe(1);
+  }
+
+  @Benchmark
+  @BenchmarkMode({Mode.AverageTime})
+  @OutputTimeUnit(TimeUnit.NANOSECONDS)
+  public void prometheusSimpleHistogramNoLabelsBenchmark() {
+    prometheusSimpleHistogramNoLabels.observe(1);
   }
 
   @Benchmark

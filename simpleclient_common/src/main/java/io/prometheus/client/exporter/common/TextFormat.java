@@ -27,7 +27,7 @@ public class TextFormat {
           }
           writer.write("}");
         }
-        writer.write(" " + sample.value + "\n");
+        writer.write(" " + Collector.doubleToGoString(sample.value) + "\n");
       }
     }
   }
@@ -52,6 +52,8 @@ public class TextFormat {
         return "counter";
       case SUMMARY:
         return "summary";
+      case HISTOGRAM:
+        return "histogram";
       default:
         return "untyped";
     }

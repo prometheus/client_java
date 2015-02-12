@@ -66,7 +66,7 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
     super(b);
   }
 
-  public static class Builder extends SimpleCollector.Builder<Gauge> {
+  public static class Builder extends SimpleCollector.Builder<Builder> {
     @Override
     public Gauge create() {
       return new Gauge(this);
