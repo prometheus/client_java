@@ -83,9 +83,7 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
    */
   public void remove(String... labelValues) {
     children.remove(Arrays.asList(labelValues));
-    if (labelNames.size() == 0) {
-      noLabelsChild = labels();
-    }
+    initializeNoLabelsChild();
   }
   
   /**
@@ -95,6 +93,14 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
    */
   public void clear() {
     children.clear();
+    initializeNoLabelsChild();
+  }
+  
+  /**
+   * Initialize the child with no labels.
+   */
+  protected void initializeNoLabelsChild() {
+    // Initlize metric if it has no labels.
     if (labelNames.size() == 0) {
       noLabelsChild = labels();
     }
@@ -155,57 +161,58 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
       checkMetricLabelName(n);
     }
 
-    // Initlize metric if it has no labels.
-    if (labelNames.size() == 0) {
-      noLabelsChild = labels();
+    if (!b.dontInitializeNoLabelsChild) {
+      initializeNoLabelsChild();
     }
   }
 
   /**
    * Builders let you configure and then create collectors.
    */
-  public abstract static class Builder<T extends SimpleCollector> {
+  public abstract static class Builder<B extends Builder<B>> {
     String namespace = "";
     String subsystem = "";
     String name = "";
     String fullname = "";
     String help = "";
     String[] labelNames = new String[]{};
+    // Some metrics require additional setup before the initialization can be done.
+    boolean dontInitializeNoLabelsChild;
 
     /**
      * Set the name of the metric. Required.
      */
-    public Builder<T> name(String name) {
+    public B name(String name) {
       this.name = name;
-      return this;
+      return (B)this;
     }
     /**
      * Set the subsystem of the metric. Optional.
      */
-    public Builder<T> subsystem(String subsystem) {
+    public B subsystem(String subsystem) {
       this.subsystem = subsystem;
-      return this;
+      return (B)this;
     }
     /**
      * Set the namespace of the metric. Optional.
      */
-    public Builder<T> namespace(String namespace) {
+    public B namespace(String namespace) {
       this.namespace = namespace;
-      return this;
+      return (B)this;
     }
     /**
      * Set the help string of the metric. Required.
      */
-    public Builder<T> help(String help) {
+    public B help(String help) {
       this.help = help;
-      return this;
+      return (B)this;
     }
     /**
      * Set the labelNames of the metric. Optional, defaults to no labels.
      */
-    public Builder<T> labelNames(String... labelNames) {
+    public B labelNames(String... labelNames) {
       this.labelNames = labelNames;
-      return this;
+      return (B)this;
     }
 
     /**
@@ -213,19 +220,19 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
      * <p>
      * Abstract due to generics limitations.
      */
-    public abstract T create();
+    public abstract <T extends SimpleCollector>T create();
 
     /**
      * Create and register the Collector with the default registry.
      */
-    public T register() {
+    public <T extends SimpleCollector>T register() {
       return register(CollectorRegistry.defaultRegistry);
     }
 
     /**
      * Create and register the Collector with the given registry.
      */
-    public T register(CollectorRegistry registry) {
+    public <T extends SimpleCollector>T register(CollectorRegistry registry) {
       T sc = create();
       registry.register(sc);
       return sc;

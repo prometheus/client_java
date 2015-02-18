@@ -5,17 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Summary metric, to track distributions and frequencies..
+ * Summary metric, to track the size of events.
  * <p>
  * Example of uses for Summaries include:
  * <ul>
  *  <li>Response latency</li>
  *  <li>Request size</li>
  * </ul>
- * <p>
- * <em>Note:</em> Full distribution support is still a work in progress. Currently it reports only
- * the count of observations and their sum, allowing for calculation of the rate of 
- * observations and the average observation size.
  * 
  * <p>
  * Example Summaries:
@@ -47,7 +43,7 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
     super(b);
   }
 
-  public static class Builder extends SimpleCollector.Builder<Summary> {
+  public static class Builder extends SimpleCollector.Builder<Builder> {
     @Override
     public Summary create() {
       return new Summary(this);
