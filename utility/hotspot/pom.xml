@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.prometheus.client</groupId>
         <artifactId>utility</artifactId>
-        <version>0.0.7-SNAPSHOT</version>
+        <version>0.0.8-SNAPSHOT</version>
     </parent>
 
     <name>Prometheus Java Instrumentation Helpers for Hotspot VM</name>
