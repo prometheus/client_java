@@ -2,13 +2,16 @@
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
  * http://creativecommons.org/publicdomain/zero/1.0/
+ *
+ * Source: http://gee.cs.oswego.edu/cgi-bin/viewcvs.cgi/jsr166/src/jsr166e/DoubleAdder.java?revision=1.12
  */
 
 package io.prometheus.client;
+
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 /**
  * One or more variables that together maintain an initially zero
@@ -19,12 +22,12 @@ import java.io.ObjectOutputStream;
  * variables maintaining the sum.
  *
  * <p>This class extends {@link Number}, but does <em>not</em> define
- * methods such as {@code hashCode} and {@code compareTo} because
- * instances are expected to be mutated, and so are not useful as
- * collection keys.
+ * methods such as {@code equals}, {@code hashCode} and {@code
+ * compareTo} because instances are expected to be mutated, and so are
+ * not useful as collection keys.
  *
  * <p><em>jsr166e note: This class is targeted to be placed in
- * java.util.concurrent.atomic<em>
+ * java.util.concurrent.atomic.</em>
  *
  * @since 1.8
  * @author Doug Lea
@@ -46,8 +49,8 @@ public class DoubleAdder extends Striped64 implements Serializable {
      */
     final long fn(long v, long x) {
         return Double.doubleToRawLongBits
-            (Double.longBitsToDouble(v) +
-             Double.longBitsToDouble(x));
+                (Double.longBitsToDouble(v) +
+                        Double.longBitsToDouble(x));
     }
 
     /**
@@ -62,28 +65,28 @@ public class DoubleAdder extends Striped64 implements Serializable {
      * @param x the value to add
      */
     public void add(double x) {
-        Cell[] as; long b, v; HashCode hc; Cell a; int n;
+        Cell[] as; long b, v; int[] hc; Cell a; int n;
         if ((as = cells) != null ||
-            !casBase(b = base,
-                     Double.doubleToRawLongBits
-                     (Double.longBitsToDouble(b) + x))) {
+                !casBase(b = base,
+                        Double.doubleToRawLongBits
+                                (Double.longBitsToDouble(b) + x))) {
             boolean uncontended = true;
-            int h = (hc = threadHashCode.get()).code;
-            if (as == null || (n = as.length) < 1 ||
-                (a = as[(n - 1) & h]) == null ||
-                !(uncontended = a.cas(v = a.value,
-                                      Double.doubleToRawLongBits
-                                      (Double.longBitsToDouble(v) + x))))
+            if ((hc = threadHashCode.get()) == null ||
+                    as == null || (n = as.length) < 1 ||
+                    (a = as[(n - 1) & hc[0]]) == null ||
+                    !(uncontended = a.cas(v = a.value,
+                            Double.doubleToRawLongBits
+                                    (Double.longBitsToDouble(v) + x))))
                 retryUpdate(Double.doubleToRawLongBits(x), hc, uncontended);
         }
     }
 
     /**
      * Returns the current sum.  The returned value is <em>NOT</em> an
-     * atomic snapshot: Invocation in the absence of concurrent
+     * atomic snapshot; invocation in the absence of concurrent
      * updates returns an accurate result, but concurrent updates that
      * occur while the sum is being calculated might not be
-     * incorporated.  Also, because double-precision arithmetic is not
+     * incorporated.  Also, because floating-point arithmetic is not
      * strictly associative, the returned result need not be identical
      * to the value that would be obtained in a sequential series of
      * updates to a single variable.
@@ -184,14 +187,13 @@ public class DoubleAdder extends Striped64 implements Serializable {
         return (float)sum();
     }
 
-    private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException {
+    private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         s.writeDouble(sum());
     }
 
     private void readObject(ObjectInputStream s)
-        throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
         s.defaultReadObject();
         busy = 0;
         cells = null;
