@@ -2,9 +2,12 @@
  * Written by Doug Lea with assistance from members of JCP JSR-166
  * Expert Group and released to the public domain, as explained at
  * http://creativecommons.org/publicdomain/zero/1.0/
+ *
+ * Source: http://gee.cs.oswego.edu/cgi-bin/viewcvs.cgi/jsr166/src/jsr166e/Striped64.java?revision=1.10
  */
 
 package io.prometheus.client;
+
 import java.util.Random;
 
 /**
@@ -40,7 +43,7 @@ abstract class Striped64 extends Number {
      *
      * A single spinlock ("busy") is used for initializing and
      * resizing the table, as well as populating slots with new Cells.
-     * There is no need for a blocking lock: When the lock is not
+     * There is no need for a blocking lock; when the lock is not
      * available, threads try other slots (or the base).  During these
      * retries, there is increased contention and reduced locality,
      * which is still better than alternatives.
@@ -102,7 +105,7 @@ abstract class Striped64 extends Number {
                 UNSAFE = getUnsafe();
                 Class<?> ak = Cell.class;
                 valueOffset = UNSAFE.objectFieldOffset
-                    (ak.getDeclaredField("value"));
+                        (ak.getDeclaredField("value"));
             } catch (Exception e) {
                 throw new Error(e);
             }
@@ -111,32 +114,17 @@ abstract class Striped64 extends Number {
     }
 
     /**
-     * Holder for the thread-local hash code. The code is initially
-     * random, but may be set to a different value upon collisions.
+     * ThreadLocal holding a single-slot int array holding hash code.
+     * Unlike the JDK8 version of this class, we use a suboptimal
+     * int[] representation to avoid introducing a new type that can
+     * impede class-unloading when ThreadLocals are not removed.
      */
-    static final class HashCode {
-        static final Random rng = new Random();
-        int code;
-        HashCode() {
-            int h = rng.nextInt(); // Avoid zero to allow xorShift rehash
-            code = (h == 0) ? 1 : h;
-        }
-    }
+    static final ThreadLocal<int[]> threadHashCode = new ThreadLocal<int[]>();
 
     /**
-     * The corresponding ThreadLocal class
+     * Generator of new random hash codes
      */
-    static final class ThreadHashCode extends ThreadLocal<HashCode> {
-        public HashCode initialValue() { return new HashCode(); }
-    }
-
-    /**
-     * Static per-thread hash codes. Shared across all instances to
-     * reduce ThreadLocal pollution and because adjustments due to
-     * collisions in one table are likely to be appropriate for
-     * others.
-     */
-    static final ThreadHashCode threadHashCode = new ThreadHashCode();
+    static final Random rng = new Random();
 
     /** Number of CPUS, to place bound on table size */
     static final int NCPU = Runtime.getRuntime().availableProcessors();
@@ -199,8 +187,15 @@ abstract class Striped64 extends Number {
      * @param hc the hash code holder
      * @param wasUncontended false if CAS failed before call
      */
-    final void retryUpdate(long x, HashCode hc, boolean wasUncontended) {
-        int h = hc.code;
+    final void retryUpdate(long x, int[] hc, boolean wasUncontended) {
+        int h;
+        if (hc == null) {
+            threadHashCode.set(hc = new int[1]); // Initialize randomly
+            int r = rng.nextInt(); // Avoid zero to allow xorShift rehash
+            h = hc[0] = (r == 0) ? 1 : r;
+        }
+        else
+            h = hc[0];
         boolean collide = false;                // True if last slot nonempty
         for (;;) {
             Cell[] as; Cell a; int n; long v;
@@ -213,8 +208,8 @@ abstract class Striped64 extends Number {
                             try {               // Recheck under lock
                                 Cell[] rs; int m, j;
                                 if ((rs = cells) != null &&
-                                    (m = rs.length) > 0 &&
-                                    rs[j = (m - 1) & h] == null) {
+                                        (m = rs.length) > 0 &&
+                                        rs[j = (m - 1) & h] == null) {
                                     rs[j] = r;
                                     created = true;
                                 }
@@ -253,6 +248,7 @@ abstract class Striped64 extends Number {
                 h ^= h << 13;                   // Rehash
                 h ^= h >>> 17;
                 h ^= h << 5;
+                hc[0] = h;                      // Record index for next time
             }
             else if (busy == 0 && cells == as && casBusy()) {
                 boolean init = false;
@@ -272,7 +268,6 @@ abstract class Striped64 extends Number {
             else if (casBase(v = base, fn(v, x)))
                 break;                          // Fall back on using base
         }
-        hc.code = h;                            // Record index for next time
     }
 
 
@@ -301,9 +296,9 @@ abstract class Striped64 extends Number {
             UNSAFE = getUnsafe();
             Class<?> sk = Striped64.class;
             baseOffset = UNSAFE.objectFieldOffset
-                (sk.getDeclaredField("base"));
+                    (sk.getDeclaredField("base"));
             busyOffset = UNSAFE.objectFieldOffset
-                (sk.getDeclaredField("busy"));
+                    (sk.getDeclaredField("busy"));
         } catch (Exception e) {
             throw new Error(e);
         }
@@ -319,22 +314,23 @@ abstract class Striped64 extends Number {
     private static sun.misc.Unsafe getUnsafe() {
         try {
             return sun.misc.Unsafe.getUnsafe();
-        } catch (SecurityException se) {
-            try {
-                return java.security.AccessController.doPrivileged
-                    (new java.security
-                     .PrivilegedExceptionAction<sun.misc.Unsafe>() {
+        } catch (SecurityException tryReflectionInstead) {}
+        try {
+            return java.security.AccessController.doPrivileged
+                    (new java.security.PrivilegedExceptionAction<sun.misc.Unsafe>() {
                         public sun.misc.Unsafe run() throws Exception {
-                            java.lang.reflect.Field f = sun.misc
-                                .Unsafe.class.getDeclaredField("theUnsafe");
-                            f.setAccessible(true);
-                            return (sun.misc.Unsafe) f.get(null);
+                            Class<sun.misc.Unsafe> k = sun.misc.Unsafe.class;
+                            for (java.lang.reflect.Field f : k.getDeclaredFields()) {
+                                f.setAccessible(true);
+                                Object x = f.get(null);
+                                if (k.isInstance(x))
+                                    return k.cast(x);
+                            }
+                            throw new NoSuchFieldError("the Unsafe");
                         }});
-            } catch (java.security.PrivilegedActionException e) {
-                throw new RuntimeException("Could not initialize intrinsics",
-                                           e.getCause());
-            }
+        } catch (java.security.PrivilegedActionException e) {
+            throw new RuntimeException("Could not initialize intrinsics",
+                    e.getCause());
         }
     }
-
 }
