@@ -51,6 +51,7 @@
         <module>simpleclient_hotspot</module>
         <module>simpleclient_servlet</module>
         <module>simpleclient_pushgateway</module>
+        <module>simpleclient_httpserver</module>
         <module>benchmark</module>
     </modules>
 
