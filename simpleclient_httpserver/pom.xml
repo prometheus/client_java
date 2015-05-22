@@ -48,13 +48,6 @@
             <artifactId>simpleclient_common</artifactId>
             <version>0.0.9-SNAPSHOT</version>
         </dependency>
-        <!-- Test Dependencies Follow -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
