@@ -33,7 +33,7 @@ version can be found on in the maven repository for
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_httpserver</artifactId>
-  <version>0.0.9</version>
+  <version>0.0.6</version>
 </dependency>
 <!-- Pushgateway exposition-->
 <dependency>
