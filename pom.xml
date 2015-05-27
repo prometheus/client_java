@@ -50,9 +50,21 @@
         <module>simpleclient_common</module>
         <module>simpleclient_hotspot</module>
         <module>simpleclient_servlet</module>
+        <module>simpleclient_log4j</module>
+        <module>simpleclient_logback</module>
         <module>simpleclient_pushgateway</module>
         <module>benchmark</module>
     </modules>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        
+        <junit.version>4.11</junit.version>
+        <mockito.version>1.9.5</mockito.version>
+    </properties>
 
     <build>
         <plugins>
@@ -71,6 +83,11 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>2.4.0</version>
                 <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.15</version>
             </plugin>
         </plugins>
     </build>
