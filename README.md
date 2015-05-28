@@ -117,16 +117,15 @@ have your local Maven setup correctly along with valid and public GPG key and
 adequate authorization on the Sonatype OSS Repository to submit new artifacts,
 be they _staging_ or _release_ ones.
 
-You should read the [Sonatype OSS Maven Repository Usage
-Guide](http://goo.gl/Sp9No5) before performing any of the following:
+You should read the [Sonatype OSS Aoache Maven
+Guide](http://central.sonatype.org/pages/apache-maven.html) before performing any of the following:
 
 #### Staging
-    $  mvn clean deploy -DperformRelease=true
+    $ mvn clean deploy -Prelease
 
 #### Release
-    $ mvn release:clean -DperformRelease=true
-    $ mvn release:prepare -DperformRelease=true
-    $ mvn release:perform -DperformRelease=true
+    $ mvn release:clean release:prepare -Prelease
+    $ mvn release:perform -Prelease
 
 #### Documentation
 Documentation can also be released to the public via the Github Pages subproduct
