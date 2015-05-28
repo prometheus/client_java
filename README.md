@@ -43,13 +43,6 @@ version can be found on in the maven repository for
 </dependency>
 ```
 
-### POJO
-If you don't want to use Maven, just expose the metrics, use
-`simpleclient` + `simpleclient_common` + `simpleclient_httpserver`,
-like in the [example](./simpleclient_httpserver/src/test/java/io/prometheus/client/exporter/ExampleExporter.java).
-This has no other dependency than a JRE 1.6 and the mentioned simpleclient jars - no jetty, no servlet server, as it uses only `com.sun.net.httpserver.HttpServer`.
-
-
 #### Original client
 ```
 <!-- The client -->
