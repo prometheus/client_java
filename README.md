@@ -121,11 +121,17 @@ You should read the [Sonatype OSS Aoache Maven
 Guide](http://central.sonatype.org/pages/apache-maven.html) before performing any of the following:
 
 #### Staging
-    $ mvn clean deploy -Prelease
-
-#### Release
     $ mvn release:clean release:prepare -Prelease
     $ mvn release:perform -Prelease
+
+#### Release
+
+Go to https://oss.sonatype.org/#stagingRepositories and Close the `ioprometheus-XXX` release.
+Once it's closed, Release it. Wait for the new version to appear in
+[The Central Repository](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22io.prometheus%22).
+
+Send an email to the developer's mailing list announcing the release.
+
 
 #### Documentation
 Documentation can also be released to the public via the Github Pages subproduct
