@@ -120,6 +120,9 @@ be they _staging_ or _release_ ones.
 You should read the [Sonatype OSS Apache Maven
 Guide](http://central.sonatype.org/pages/apache-maven.html) before performing any of the following:
 
+### Snapshot Deployment
+    $ mvn clean deploy
+
 #### Staging
     $ mvn release:clean release:prepare -Prelease
     $ mvn release:perform -Prelease
