@@ -117,7 +117,7 @@ have your local Maven setup correctly along with valid and public GPG key and
 adequate authorization on the Sonatype OSS Repository to submit new artifacts,
 be they _staging_ or _release_ ones.
 
-You should read the [Sonatype OSS Aoache Maven
+You should read the [Sonatype OSS Apache Maven
 Guide](http://central.sonatype.org/pages/apache-maven.html) before performing any of the following:
 
 #### Staging
