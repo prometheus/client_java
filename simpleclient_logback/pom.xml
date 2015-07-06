@@ -32,35 +32,31 @@
             <email>will.fleury@boxever.com</email>
         </developer>
     </developers>
-    
-    <properties>
-        <logback.version>1.1.2</logback.version>
-    </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>${project.version}</version>
+            <version>0.0.10-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
+            <version>1.1.2</version>
         </dependency>
         
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
+            <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
