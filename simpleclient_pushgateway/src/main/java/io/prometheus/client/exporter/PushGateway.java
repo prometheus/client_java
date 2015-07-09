@@ -7,6 +7,8 @@ import io.prometheus.client.exporter.common.TextFormat;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -39,7 +41,7 @@ import java.io.OutputStreamWriter;
  *     } finally {
  *       durationTimer.setDuration();
  *       PushGateway pg = new PushGateway("127.0.0.1:9091");
- *       pg.pushAdd(registry, "my_batch_job", "my_batch_job");
+ *       pg.pushAdd(registry, "my_batch_job");
  *     }
  *   }
  * }
@@ -61,14 +63,129 @@ public class PushGateway {
   }
 
   /**
+   * Pushes all metrics in a registry, replacing all those with the same job as the grouping key.
+   * <p>
+   * This uses the POST HTTP method.
+  */
+  public void push(CollectorRegistry registry, String job) throws IOException {
+    doRequest(registry, job, null, "POST");
+  }
+
+  /**
+   * Pushes all metrics in a Collector, replacing all those with the same job and no grouping key.
+   * <p>
+   * This is useful for pushing a single Gauge.
+   * <p>
+   * This uses the POST HTTP method.
+  */
+  public void push(Collector collector, String job) throws IOException {
+    CollectorRegistry registry = new CollectorRegistry();
+    collector.register(registry);
+    push(registry, job);
+  }
+
+  /**
+   * Pushes all metrics in a Collector, replacing all those with the same job and grouping key.
+   * <p>
+   * This is useful for pushing a single Gauge.
+   * <p>
+   * This uses the POST HTTP method.
+  */
+  public void push(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
+    doRequest(registry, job, groupingKey, "POST");
+  }
+
+  /**
+   * Pushes all metrics in a Collector, replacing all those with the same job and grouping key.
+   * <p>
+   * This is useful for pushing a single Gauge.
+   * <p>
+   * This uses the POST HTTP method.
+  */
+  public void push(Collector collector, String job, Map<String, String> groupingKey) throws IOException {
+    CollectorRegistry registry = new CollectorRegistry();
+    collector.register(registry);
+    push(registry, job, groupingKey);
+  }
+
+  /**
+   * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name and job and no grouping key.
+   * <p>
+   * This uses the PUT HTTP method.
+  */
+  public void pushAdd(CollectorRegistry registry, String job) throws IOException {
+    doRequest(registry, job, null, "PUT");
+  }
+
+  /**
+   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name and job and no grouping key.
+   * <p>
+   * This is useful for pushing a single Gauge.
+   * <p>
+   * This uses the PUT HTTP method.
+  */
+  public void pushAdd(Collector collector, String job) throws IOException {
+    CollectorRegistry registry = new CollectorRegistry();
+    collector.register(registry);
+    pushAdd(registry, job);
+  }
+
+  /**
+   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name, job and grouping key.
+   * <p>
+   * This is useful for pushing a single Gauge.
+   * <p>
+   * This uses the PUT HTTP method.
+  */
+  public void pushAdd(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
+    doRequest(registry, job, groupingKey, "PUT");
+  }
+
+  /**
+   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name, job and grouping key.
+   * <p>
+   * This is useful for pushing a single Gauge.
+   * <p>
+   * This uses the PUT HTTP method.
+  */
+  public void pushAdd(Collector collector, String job, Map<String, String> groupingKey) throws IOException {
+    CollectorRegistry registry = new CollectorRegistry();
+    collector.register(registry);
+    pushAdd(registry, job, groupingKey);
+  }
+
+
+  /**
+   * Deletes metrics from the Pushgateway.
+   * <p>
+   * Deletes metrics with no grouping key and the provided job.
+   * This uses the DELETE HTTP method.
+  */
+  public void delete(String job) throws IOException {
+    doRequest(null, job, null, "DELETE");
+  }
+
+  /**
+   * Deletes metrics from the Pushgateway.
+   * <p>
+   * Deletes metrics with the provided job and grouping key.
+   * This uses the DELETE HTTP method.
+  */
+  public void delete(String job, Map<String, String> groupingKey) throws IOException {
+    doRequest(null, job, groupingKey, "DELETE");
+  }
+
+
+  /**
    * Pushes all metrics in a registry, replacing all those with the same job and instance.
    * <p>
-   * See the Pushgateway documentation for detailed implications of the job and
-   * instance parameter. instance can be left empty. The Pushgateway will then
-   * use the client's IP number instead. This uses the POST HTTP method.
+   * This uses the POST HTTP method.
   */
+  @Deprecated
   public void push(CollectorRegistry registry, String job, String instance) throws IOException {
-    doRequest(registry, job, instance, "POST");
+    Map<String, String> groupingKey = new HashMap<String, String>();
+    groupingKey.put("instance", instance);
+    doRequest(registry, job, groupingKey, "POST");
   }
 
   /**
@@ -76,10 +193,9 @@ public class PushGateway {
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
-   * See the Pushgateway documentation for detailed implications of the job and
-   * instance parameter. instance can be left empty. The Pushgateway will then
-   * use the client's IP number instead. This uses the POST HTTP method.
+   * This uses the POST HTTP method.
   */
+  @Deprecated
   public void push(Collector collector, String job, String instance) throws IOException {
     CollectorRegistry registry = new CollectorRegistry();
     collector.register(registry);
@@ -89,12 +205,13 @@ public class PushGateway {
   /**
    * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name.
    * <p>
-   * See the Pushgateway documentation for detailed implications of the job and
-   * instance parameter. instance can be left empty. The Pushgateway will then
-   * use the client's IP number instead. This uses the PUT HTTP method.
+   * This uses the PUT HTTP method.
   */
+  @Deprecated
   public void pushAdd(CollectorRegistry registry, String job, String instance) throws IOException {
-    doRequest(registry, job, instance, "PUT");
+    Map<String, String> groupingKey = new HashMap<String, String>();
+    groupingKey.put("instance", instance);
+    doRequest(registry, job, groupingKey, "PUT");
   }
 
   /**
@@ -102,10 +219,9 @@ public class PushGateway {
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
-   * See the Pushgateway documentation for detailed implications of the job and
-   * instance parameter. instance can be left empty. The Pushgateway will then
-   * use the client's IP number instead. This uses the POST HTTP method.
+   * This uses the PUT HTTP method.
   */
+  @Deprecated
   public void pushAdd(Collector collector, String job, String instance) throws IOException {
     CollectorRegistry registry = new CollectorRegistry();
     collector.register(registry);
@@ -115,17 +231,21 @@ public class PushGateway {
   /**
    * Deletes metrics from the Pushgateway.
    * <p>
-   * instance can be left empty. The Pushgateway will then
-   * use the client's IP number instead. This uses the DELETE HTTP method.
+   * This uses the DELETE HTTP method.
   */
+  @Deprecated
   public void delete(String job, String instance) throws IOException {
-    doRequest(null, job, instance, "DELETE");
+    Map<String, String> groupingKey = new HashMap<String, String>();
+    groupingKey.put("instance", instance);
+    doRequest(null, job, groupingKey, "DELETE");
   }
 
-  void doRequest(CollectorRegistry registry, String job, String instance, String method) throws IOException {
-    String url = "http://" + address + "/metrics/jobs/" + URLEncoder.encode(job, "UTF-8");
-    if (!instance.isEmpty()) {
-      url += "/instances/" + URLEncoder.encode(instance, "UTF-8");
+  void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
+    String url = "http://" + address + "/metrics/job/" + URLEncoder.encode(job, "UTF-8");
+    if (groupingKey != null) {
+      for (Map.Entry<String, String> entry: groupingKey.entrySet()) {
+        url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
+      }
     }
     HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
     connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
@@ -154,6 +274,5 @@ public class PushGateway {
       connection.disconnect();
     }
   }
-
 
 }
