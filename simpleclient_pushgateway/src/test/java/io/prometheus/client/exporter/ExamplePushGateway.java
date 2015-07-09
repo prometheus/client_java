@@ -14,7 +14,7 @@ public class ExamplePushGateway {
   public static void main(String[] args) throws Exception {
     PushGateway pg = new PushGateway(args[0]);
     g.set(42);
-    pg.push(pushRegistry, "job", "instance");
+    pg.push(pushRegistry, "job");
   }
 }
 

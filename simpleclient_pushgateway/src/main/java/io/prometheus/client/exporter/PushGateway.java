@@ -5,6 +5,8 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -273,6 +275,18 @@ public class PushGateway {
     } finally {
       connection.disconnect();
     }
+  }
+
+  /**
+   * Returns a grouping key with the instance label set to the machine's IP address.
+   * <p>
+   * This is a convenience function, and should only be used where you want to
+   * push per-instance metrics rather than cluster/job level metrics.
+  */
+  public static Map<String, String> instanceIPGroupingKey() throws UnknownHostException {
+    Map<String, String> groupingKey = new HashMap<String, String>();
+    groupingKey.put("instance", InetAddress.getLocalHost().getHostAddress());
+    return groupingKey;
   }
 
 }

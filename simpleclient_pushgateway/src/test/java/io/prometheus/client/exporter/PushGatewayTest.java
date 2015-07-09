@@ -9,6 +9,7 @@ import io.prometheus.client.Gauge;
 import java.io.IOException;;
 import java.util.TreeMap;
 import java.util.Map;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -247,5 +248,11 @@ public class PushGatewayTest {
           .withPath("/metrics/job/j/instance/i")
       ).respond(response().withStatusCode(202));
     pg.delete("j", "i");
+  }
+
+  @Test
+  public void testInstanceIPGroupingKey() throws IOException {
+    groupingKey = PushGateway.instanceIPGroupingKey();
+    Assert.assertTrue(!groupingKey.get("instance").equals(""));
   }
 }
