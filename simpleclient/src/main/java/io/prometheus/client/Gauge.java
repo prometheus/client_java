@@ -97,9 +97,12 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
      }
      /**
       * Set the amount of time in seconds since {@link Child#startTimer} was called.
+      * @return Measured duration in seconds since {@link Child#startTimer} was called.
       */
-     public void setDuration() {
-       child.set((Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND);
+     public double setDuration() {
+       double elapsed = (Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND;
+       child.set(elapsed);
+       return elapsed;
      }
    }
 

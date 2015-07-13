@@ -83,8 +83,9 @@ public class GaugeTest {
       }
     };
     Gauge.Timer timer = noLabels.startTimer();
-    timer.setDuration();
+    double elapsed = timer.setDuration();
     assertEquals(10, getValue(), .001);
+    assertEquals(10, elapsed, .001);
   }
 
   @Test

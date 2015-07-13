@@ -53,9 +53,10 @@ public class SummaryTest {
       }
     };
     Summary.Timer timer = noLabels.startTimer();
-    timer.observeDuration();
+    double elapsed = timer.observeDuration();
     assertEquals(1, getCount(), .001);
     assertEquals(10, getSum(), .001);
+    assertEquals(10, elapsed, .001);
   }
   
   @Test
