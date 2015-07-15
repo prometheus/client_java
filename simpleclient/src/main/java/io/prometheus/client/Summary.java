@@ -74,9 +74,12 @@ public class Summary extends SimpleCollector<Summary.Child, Summary> {
     }
     /**
      * Observe the amount of time in seconds since {@link Child#startTimer} was called.
+     * @return Measured duration in seconds since {@link Child#startTimer} was called.
      */
-    public void observeDuration() {
-      child.observe((Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND);
+    public double observeDuration() {
+      double elapsed = (Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND;
+      child.observe(elapsed);
+      return elapsed;
     }
   }
 
