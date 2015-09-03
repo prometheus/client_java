@@ -153,12 +153,12 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
    * </p>
    * <p>
    * Implementation-Specific Behaviors:
+   * </p>
    * <ul>
    * <li>
    * If the metric and its children are reset, a default value of {@code 0} is
    * used.</li>
    * </ul>
-   * </p>
    * <p>
    * For all other behaviors, see {@link Metric.BaseBuilder}.
    * </p>
@@ -413,7 +413,7 @@ public class Counter extends Metric<Counter, Counter.Child, Counter.Partial> {
 
   /**
    * <p>
-   * Used to serialize {@link Counter} instances for {@link Gson}.
+   * Used to serialize {@link Counter} instances for Gson.
    * </p>
    */
   @Deprecated

@@ -29,7 +29,7 @@ public class CollectorRegistry {
 
   /**
    * Register a Collector.
-   * </p>
+   * <p>
    * A collector can be registered to multiple CollectorRegistries.
    */
   public void register(Collector m) {
@@ -96,7 +96,7 @@ public class CollectorRegistry {
 
   /**
    * Returns the given value, or null if it doesn't exist.
-   * </p>
+   * <p>
    * This is inefficient, and intended only for use in unittests.
    */
   public Double getSampleValue(String name) {
@@ -105,7 +105,7 @@ public class CollectorRegistry {
 
   /**
    * Returns the given value, or null if it doesn't exist.
-   * </p>
+   * <p>
    * This is inefficient, and intended only for use in unittests.
    */
   public Double getSampleValue(String name, String[] labelNames, String[] labelValues) {

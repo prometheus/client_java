@@ -163,12 +163,12 @@ public class Gauge extends Metric<Gauge, Gauge.Child, Gauge.Partial> {
    * </p>
    * <p>
    * Implementation-Specific Behaviors:
+   * </p>
    * <ul>
    * <li>
    * If the metric and its children are reset, a default value of {@code 0} is
    * used.</li>
    * </ul>
-   * </p>
    * <p>
    * For all other behaviors, see {@link Metric.BaseBuilder}.
    * </p>

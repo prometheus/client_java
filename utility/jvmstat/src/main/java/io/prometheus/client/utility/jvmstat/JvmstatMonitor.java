@@ -46,10 +46,11 @@ import java.util.regex.PatternSyntaxException;
  * I/O (nio).
  * </p>
  *
- * <p>
  * <h1>Important Notes</h1>
+ * <p>
  * Due to inconsistencies of virtual machine packages and vendoring, the following remarks should
  * be carefully observed:
+ * </p>
  * <ul>
  * <li>
  *   Users may need to explicitly add {@code ${JAVA_HOME}/lib/tools.jar} to the <em>CLASSPATH</em>
@@ -63,7 +64,6 @@ import java.util.regex.PatternSyntaxException;
  *   low-level telemetric export.
  * </li>
  * </ul>
- * </p>
  *
  * <p>
  * The metrics that this class exposes are dependent upon the release of HotSpot, including even
@@ -93,10 +93,10 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
   private final ConcurrentHashMap<String, Monitor> monitors = new ConcurrentHashMap<String, Monitor>(400);
 
   /**
-   * <p>Create a {@link JvmstatMonitor} for the local virtual machine associated with this
-   * specific Java server.</p>
+   * Create a {@link JvmstatMonitor} for the local virtual machine associated with this
+   * specific Java server.
    *
-   * @throws {@link AttachmentError} if the VM cannot be attached to.
+   * @throws AttachmentError if the VM cannot be attached to.
    */
   public JvmstatMonitor() throws AttachmentError {
     this(getLocalVM());
@@ -425,7 +425,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * <li>
    *   {@code thread}: The thread ID associated with the work.
    * </li>
-   * <ul>
+   * </ul>
    *
    * <h2>{@code jvmstat_jit_compilation_count}</h2>
    * This metric tracks the number of classes the JIT has compiled and potentially recompiled after
@@ -436,7 +436,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * <li>
    *   {@code thread}: The thread ID associated with the work.
    * </li>
-   * <ul>
+   * </ul>
    */
   public static class NativeCodeCompilerInstrumentation implements MonitorVisitor {
     // This class has public visibility solely for Javadoc production.
@@ -572,7 +572,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * <li>
    *   {@code generation}: The managed memory region name.
    * </li>
-   * <ul>
+   * </ul>
    *
    * <h2>{@code jvmstat_garbage_collection_duration_ms_total}</h2>
    * This metric tracks the amount of time spent spent collecting the respective generation.
@@ -581,7 +581,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * <li>
    *   {@code generation}: The managed memory region name.
    * </li>
-   * <ul>
+   * </ul>
    */
   public static class GarbageCollectionInstrumentation implements MonitorVisitor {
     // This class has public visibility solely for Javadoc production.
@@ -688,7 +688,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * <li>
    *   {@code generation}: The managed memory region name.
    * </li>
-   * <ul>
+   * </ul>
    *
    * <h2>{@code jvmstat_managed_memory_generation_usage_bytes}</h2>
    * <h3>Metric Dimensions</h3>
@@ -696,7 +696,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * <li>
    *   {@code generation}: The managed memory region name.
    * </li>
-   * <ul>
+   * </ul>
    *
    * <h2>{@code jvmstat_managed_memory_survivor_space_agetable_size_bytes}</h2>
    * <h3>Metric Dimensions</h3>
@@ -704,7 +704,7 @@ public class JvmstatMonitor implements Prometheus.ExpositionHook {
    * <li>
    *   {@code cohort}: The agetable cohort.  (TODO: Discuss the agetable design.)
    * </li>
-   * <ul>
+   * </ul>
    *
    * <h2>{@code jvmstat_managed_memory_survivor_space_agetable_count}</h2>
    *(TODO: Discuss the agetable design.)

@@ -56,9 +56,9 @@ import java.util.Map;
  *   }
  * }
  * </pre>
+ * <p>
  * These can be aggregated and processed together much more easily in the Prometheus 
  * server than individual metrics for each labelset.
- * </p>
  */
 public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
   
@@ -221,7 +221,7 @@ public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
    * Start a timer to track a duration, for the gauge with no labels.
    * <p>
    * This is primarily useful for tracking the durations of major steps of batch jobs,
-   * which are then pushed with {@link PushGateway}.
+   * which are then pushed with {@link io.prometheus.client.exporter.PushGateway}.
    * For tracking other durations/latencies you should usually use a {@link Summary}.
    * <p>
    * Call {@link Timer#setDuration} at the end of what you want to measure the duration of.

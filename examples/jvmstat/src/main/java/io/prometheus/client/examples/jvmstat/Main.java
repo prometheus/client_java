@@ -26,7 +26,7 @@ import com.google.inject.Singleton;
  *
  * <p>
  * This example builds strongly on the one found in the <em>guice</em> workflow in that it adds
- * an extra {@link Prometheus.ExpositionHook} through the use of a {@link
+ * an extra {@link io.prometheus.client.Prometheus.ExpositionHook} through the use of a {@link
  * com.google.inject.multibindings.Multibinder} found in {@link
  * io.prometheus.client.examples.jvmstat.Module}.
  * </p>

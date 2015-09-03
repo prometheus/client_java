@@ -47,6 +47,7 @@ import java.util.logging.Logger;
  *
  * <p>
  * You can apply the patterns from examples in the following classes' Javadocs:
+ * </p>
  * <ul>
  * <li>
  * {@link Counter}</li>
@@ -55,7 +56,6 @@ import java.util.logging.Logger;
  * <li>
  * {@link Summary}</li>
  * </ul>
- * </p>
  *
  * <em>Important:</em> To initialize the whole stack, call
  * {@link Prometheus#defaultInitialize()} <em>once</em> somewhere in your main
@@ -259,6 +259,7 @@ public class Prometheus {
    *
    * <p>
    * Important Usage Notes:
+   * </p>
    *
    * <ul>
    * <li>Calling this is a <em>prerequisite</em> for successful Prometheus
@@ -267,7 +268,6 @@ public class Prometheus {
    * class' main block.</li>
    * <li>While idempotent, it should be called only once.</li>
    * </ul>
-   * </p>
    *
    */
   public static void defaultInitialize() {

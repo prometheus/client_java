@@ -28,6 +28,7 @@ import java.lang.management.MemoryUsage;
  *
  * <p>
  * TODO(matt): There is a lot that can be added here with a day's work:
+ * </p>
  * <ul>
  *     <li>Managed Memory by Generation</li>
  *     <li>Which Garbage Collector is Used by What Generation</li>
@@ -36,7 +37,6 @@ import java.lang.management.MemoryUsage;
  *     <li>Thread Statistics</li>
  *     <li>Lock Statistics</li>
  * </ul>
- * </p>
  *
  * @author Matt T. Proud (matt.proud@gmail.com)
  * @see Prometheus#addPreexpositionHook(io.prometheus.client.Prometheus.ExpositionHook)

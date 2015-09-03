@@ -144,6 +144,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * <p>
      * For example, you have provided {@link Metric}'s
      * {@link Metric.BaseBuilder} with the following parameters:
+     * </p>
      *
      * <ul>
      * <li>
@@ -155,6 +156,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * {@code name = "efficiency_percentage"}</li>
      * </ul>
      *
+     * <p>
      * The {@link Metric}'s naming system generates the following composite
      * metric name: {@code seaworld_water_heaters_efficiency_percentage}. The
      * namespace is <em>seaworld</em>.
@@ -188,6 +190,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * {@code name = "efficiency_percentage"}</li>
      * </ul>
      *
+     * <p>
      * The {@link Metric}'s naming system generates the following composite
      * metric name: {@code seaworld_water_heaters_efficiency_percentage} . The
      * subsystem is <em>water_heaters</em>.
@@ -210,6 +213,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * <p>
      * For example, you have provided {@link Metric}'s
      * {@link Metric.BaseBuilder} with the following parameters:
+     * </p>
      *
      * <ul>
      * <li>
@@ -220,6 +224,7 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * {@code name = "efficiency_percentage"}</li>
      * </ul>
      *
+     * <p>
      * The {@link Metric}'s naming system generates the following composite
      * metric name: {@code seaworld_water_heaters_efficiency_percentage} . The
      * name is <em>efficiency_percentage</em>.
@@ -276,15 +281,16 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      *
      * <p>
      * The following are use cases for setting this to {@code true}:
+     * </p>
      * <ul>
      * <li>
      * Runtimes where <em>runtime-retained annotations neither respected
      * nor supported</em>, meaning {@link io.prometheus.client.Register} cannot
      * be used and you wish to not explicitly register the metrics yourself.</li>
      * </ul>
-     * </p>
      * <p>
      * The following are use cases for setting this to {@code false}:
+     * </p>
      * <ul>
      * <li>
      * Preventing static side-effects from tests.</li>
@@ -292,7 +298,6 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
      * Respecting dependency injection paradigms. Be sure to explicitly use
      * {@link Prometheus#defaultRegister(Metric)}.</li>
      * </ul>
-     * </p>
      *
      * @return A <em>copy</em> of the original {@link Builder} with the new
      *         target value.
@@ -428,7 +433,6 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    * An example follows:
    * </p>
    *
-   * <code>
    * <pre>
    * public class InvitationHandler {
    *   public static Summary latencies =
@@ -494,13 +498,11 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    *   public static class DeleteReq {}
    * }
    * </pre>
-   * </code>
    *
    * <p>
    * Assuming each code path is hit twice, {@code latencies} could yield the
    * following child metrics:
    * </p>
-   * <code>
    * <pre>
    *   request_latency_ms{operation="create", result="success", shard="a", quantile="0.5"}            = ?
    *   request_latency_ms{operation="create", result="success", shard="a", quantile="0.99"}           = ?
@@ -527,12 +529,10 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    *   request_latency_ms{operation="delete", result="unknown_error", shard="b", quantile="0.5"}      = ?
    *   request_latency_ms{operation="delete", result="unknown_error", shard="b", quantile="0.99"}     = ?
    * </pre>
-   * </code>
    *
    * <p>
    * {@code latencies} also yields supplemental synthetic children:
    * </p>
-   * <code>
    * <pre>
    *   request_latency_ms_count{operation="create", result="success", shard="a"}         = 1
    *   request_latency_ms_count{operation="create", result="success", shard="b"}         = 1
@@ -560,9 +560,9 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    *   request_latency_ms_sum{operation="delete", result="unknown_error", shard="a"}   = ?
    *   request_latency_ms_sum{operation="delete", result="unknown_error", shard="b"}   = ?
    * </pre>
-   * </code>
    * <p>
    * <em>Important</em>:
+   * </p>
    * <ul>
    * <li>
    * If there is a mismatch between the number of labels that have been
@@ -570,7 +570,6 @@ public abstract class Metric<M extends Metric, C extends Metric.Child, P extends
    * the underlying {@code Builder#labelNames}, a runtime exception will
    * occur, signifying illegal use.</li>
    * </ul>
-   * </p>
    */
   @NotThreadSafe
   public abstract class Partial {

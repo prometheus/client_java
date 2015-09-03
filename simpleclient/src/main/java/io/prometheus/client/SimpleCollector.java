@@ -38,7 +38,7 @@ import java.util.List;
  * <em>Warning #2:</em> While labels are very powerful, avoid overly granular metric labels. 
  * The combinatorial explosion of breaking out a metric in many dimensions can produce huge numberts
  * of timeseries, which will then take longer and more resources to process.
- * <br/>
+ * <p>
  * As a rule of thumb aim to keep the cardinality of metrics below ten, and limit where the
  * cardinality exceeds that value. For example rather than breaking out latency
  * by customer and endpoint in one metric, you might have two metrics with one breaking out
