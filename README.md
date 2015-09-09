@@ -126,6 +126,8 @@ Guide](http://central.sonatype.org/pages/apache-maven.html) before performing an
 #### Staging
     $ mvn release:clean release:prepare -Prelease
     $ mvn release:perform -Prelease
+    
+Sonatype creates a staging repository per IP address, so turn off any loadbalancing over IP addresses before running these commands.
 
 #### Release
 
