@@ -64,13 +64,13 @@ import java.util.Map;
  * These can be aggregated and processed together much more easily in the Promtheus 
  * server than individual metrics for each labelset.
  */
-public class Counter extends SimpleCollector<Counter.Child, Counter> {
+public class Counter extends SimpleCollector<Counter.Child> {
 
   Counter(Builder b) {
     super(b);
   }
 
-  public static class Builder extends SimpleCollector.Builder<Builder> {
+  public static class Builder extends SimpleCollector.Builder<Builder, Counter> {
     @Override
     public Counter create() {
       return new Counter(this);

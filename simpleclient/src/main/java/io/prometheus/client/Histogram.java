@@ -50,7 +50,7 @@ import java.util.Map;
  * {@link Histogram.Builder#exponentialBuckets(double, double, int) exponentialBuckets}
  * offer easy ways to set common bucket patterns.
  */
-public class Histogram extends SimpleCollector<Histogram.Child, Histogram> {
+public class Histogram extends SimpleCollector<Histogram.Child> {
   double[] buckets;
 
   Histogram(Builder b) {
@@ -59,7 +59,7 @@ public class Histogram extends SimpleCollector<Histogram.Child, Histogram> {
     initializeNoLabelsChild();
   }
 
-  public static class Builder extends SimpleCollector.Builder<Builder> {
+  public static class Builder extends SimpleCollector.Builder<Builder, Histogram> {
     double[] buckets = new double[]{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10};
 
     @Override

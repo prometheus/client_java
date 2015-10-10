@@ -37,13 +37,13 @@ import java.util.Map;
  * </pre>
  * This would allow you to track request rate, average latency and average request size.
  */
-public class Summary extends SimpleCollector<Summary.Child, Summary> {
+public class Summary extends SimpleCollector<Summary.Child> {
 
   Summary(Builder b) {
     super(b);
   }
 
-  public static class Builder extends SimpleCollector.Builder<Builder> {
+  public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
     @Override
     public Summary create() {
       return new Summary(this);
