@@ -60,13 +60,13 @@ import java.util.Map;
  * These can be aggregated and processed together much more easily in the Prometheus 
  * server than individual metrics for each labelset.
  */
-public class Gauge extends SimpleCollector<Gauge.Child, Gauge> {
+public class Gauge extends SimpleCollector<Gauge.Child> {
   
   Gauge(Builder b) {
     super(b);
   }
 
-  public static class Builder extends SimpleCollector.Builder<Builder> {
+  public static class Builder extends SimpleCollector.Builder<Builder, Gauge> {
     @Override
     public Gauge create() {
       return new Gauge(this);

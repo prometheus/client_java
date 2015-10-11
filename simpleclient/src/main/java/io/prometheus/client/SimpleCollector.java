@@ -45,7 +45,7 @@ import java.util.List;
  * by each. If the cardinality is in the hundreds, you may wish to consider removing the breakout
  * by one of the dimensions altogether.
  */
-public abstract class SimpleCollector<Child, T extends SimpleCollector> extends Collector {
+public abstract class SimpleCollector<Child> extends Collector {
   protected final String fullname;
   protected final String help;
   protected final List<String> labelNames;
@@ -169,7 +169,7 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
   /**
    * Builders let you configure and then create collectors.
    */
-  public abstract static class Builder<B extends Builder<B>> {
+  public abstract static class Builder<B extends Builder<B, C>, C extends SimpleCollector> {
     String namespace = "";
     String subsystem = "";
     String name = "";
@@ -220,20 +220,20 @@ public abstract class SimpleCollector<Child, T extends SimpleCollector> extends 
      * <p>
      * Abstract due to generics limitations.
      */
-    public abstract <T extends SimpleCollector>T create();
+    public abstract C create();
 
     /**
      * Create and register the Collector with the default registry.
      */
-    public <T extends SimpleCollector>T register() {
+    public C register() {
       return register(CollectorRegistry.defaultRegistry);
     }
 
     /**
      * Create and register the Collector with the given registry.
      */
-    public <T extends SimpleCollector>T register(CollectorRegistry registry) {
-      T sc = create();
+    public C register(CollectorRegistry registry) {
+      C sc = create();
       registry.register(sc);
       return sc;
     }
