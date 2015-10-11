@@ -10,7 +10,7 @@ version can be found on in the maven repository for
 
 #### Simpleclient
 
-```
+```xml
 <!-- The client -->
 <dependency>
   <groupId>io.prometheus</groupId>
@@ -38,7 +38,7 @@ version can be found on in the maven repository for
 ```
 
 #### Original client
-```
+```xml
 <!-- The client -->
 <dependency>
   <groupId>io.prometheus</groupId>
