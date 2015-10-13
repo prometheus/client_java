@@ -39,7 +39,7 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>client</artifactId>
-            <version>0.0.11-SNAPSHOT</version>
+            <version>0.0.10</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
