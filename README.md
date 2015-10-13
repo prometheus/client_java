@@ -5,10 +5,7 @@ It supports Java, Clojure, Scala, JRuby, and anything else that runs on the JVM.
 ### Assets
 If you use Maven, you can simply reference the assets below.  The latest
 version can be found on in the maven repository for
-[io.prometheus](http://mvnrepository.com/artifact/io.prometheus) and
-[io.prometheus.client.utility](http://mvnrepository.com/artifact/io.prometheus.client.utility).
-
-#### Simpleclient
+[io.prometheus](http://mvnrepository.com/artifact/io.prometheus).
 
 ```xml
 <!-- The client -->
@@ -33,40 +30,6 @@ version can be found on in the maven repository for
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_pushgateway</artifactId>
-  <version>0.0.10</version>
-</dependency>
-```
-
-#### Original client
-```xml
-<!-- The client -->
-<dependency>
-  <groupId>io.prometheus</groupId>
-  <artifactId>client</artifactId>
-  <version>0.0.10</version>
-</dependency>
-<!-- Hotspot 'jvmstat/perfdata' metrics -->
-<dependency>
-  <groupId>io.prometheus.client.utility</groupId>
-  <artifactId>jvmstat</artifactId>
-  <version>0.0.10</version>
-</dependency>
-<!-- Hotspot 'jvmstat/perfdata' metrics -->
-<dependency>
-  <groupId>io.prometheus.client.utility</groupId>
-  <artifactId>jvmstat</artifactId>
-  <version>0.0.10</version>
-</dependency>
-<!-- Hotspot VM metrics -->
-<dependency>
-  <groupId>io.prometheus.client.utility</groupId>
-  <artifactId>metrics</artifactId>
-  <version>0.0.10</version>
-</dependency>
-<!-- Exposition servlet -->
-<dependency>
-  <groupId>io.prometheus.client.utility</groupId>
-  <artifactId>servlet</artifactId>
   <version>0.0.10</version>
 </dependency>
 ```
@@ -166,9 +129,14 @@ all Maven submodules versus trying to manually concatenate this together.
 Output documentation lives in the [Java Client Github Project
 Page](http://prometheus.github.io/client_java).
 
+## Historical Note
+The version of the Java client in this repository is the "Simpleclient". The
+previous "Original client" is deprecated, and can be found in [the
+junkyard](https://github.com/prometheus-junkyard/client_java_original).
+
 
 ## Contact
-  * All of the core developers are accessible via the [Prometheus Developers Mailinglist](https://groups.google.com/forum/?fromgroups#!forum/prometheus-developers).
+All of the core developers are accessible via the [Prometheus Developers Mailinglist](https://groups.google.com/forum/?fromgroups#!forum/prometheus-developers).
 
 
 [![Build Status](https://travis-ci.org/prometheus/client_java.png?branch=master)](https://travis-ci.org/prometheus/client_java)
