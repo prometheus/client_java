@@ -43,9 +43,6 @@
     </developers>
 
     <modules>
-        <module>client</module>
-        <module>examples</module>
-        <module>utility</module>
         <module>simpleclient</module>
         <module>simpleclient_common</module>
         <module>simpleclient_hotspot</module>
