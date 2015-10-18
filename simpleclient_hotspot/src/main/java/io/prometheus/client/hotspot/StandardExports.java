@@ -64,17 +64,17 @@ public class StandardExports extends Collector {
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
 
-    mfs.add(singleMetric("process_cpu_seconds_total", Type.COUNTER, "CPU time used by the process in seconds.",
+    mfs.add(singleMetric("process_cpu_seconds_total", Type.COUNTER, "Total user and system CPU time spent in seconds.",
         osBean.getProcessCpuTime() / NANOSECONDS_PER_SECOND));
 
-    mfs.add(singleMetric("process_start_time_seconds", Type.GAUGE, "Start time of the process, in unixtime.",
+    mfs.add(singleMetric("process_start_time_seconds", Type.GAUGE, "Start time of the process since unix epoch in seconds.",
         runtimeBean.getStartTime() / MILLISECONDS_PER_SECOND));
 
     if (unix) {
       UnixOperatingSystemMXBean unixBean = (UnixOperatingSystemMXBean) osBean;
-      mfs.add(singleMetric("process_open_fds", Type.GAUGE, "The number of open file descriptors.",
+      mfs.add(singleMetric("process_open_fds", Type.GAUGE, "Number of open file descriptors.",
           unixBean.getOpenFileDescriptorCount()));
-      mfs.add(singleMetric("process_max_fds", Type.GAUGE, "The maximum number of open file descriptors.",
+      mfs.add(singleMetric("process_max_fds", Type.GAUGE, "Maximum number of open file descriptors.",
           unixBean.getMaxFileDescriptorCount()));
     }
 
@@ -101,11 +101,11 @@ public class StandardExports extends Collector {
       while ((line = br.readLine()) != null) {
         if (line.startsWith("VmSize:")) {
           mfs.add(singleMetric("process_virtual_memory_bytes", Type.GAUGE,
-              "The virtual memory size of the process, in bytes.",
+              "Virtual memory size in bytes.",
               Float.parseFloat(line.split("\\s+")[1]) * KB));
         } else if (line.startsWith("VmRSS:")) {
           mfs.add(singleMetric("process_resident_memory_bytes", Type.GAUGE,
-              "The resident memory size of the process, in bytes.",
+              "Resident memory size in bytes.",
               Float.parseFloat(line.split("\\s+")[1]) * KB));
         }
       }
