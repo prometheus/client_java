@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * A collector for a set of metrics.
  * <p>
- * Normal users should use {@link Gauge}, {@link Counter} and {@link Summary}.
+ * Normal users should use {@link Gauge}, {@link Counter}, {@link Summary} and {@link Histogram}.
  * <p>
  * Subclasssing Collector is for advanced uses, such as proxying metrics from another monitoring system.
  * It is it the responsibility of subclasses to ensure they produce valid metrics.

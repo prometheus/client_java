@@ -6,10 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Common functionality for {@link Gauge}, {@link Counter} and {@link Summary}.
+ * Common functionality for {@link Gauge}, {@link Counter}, {@link Summary} and {@link Histogram}.
  * <p>
- * This class handles common initlization and label logic for the standard metrics.
- * You should never need to subclass this class.
+ * This class handles common initialization and label logic for the standard metrics.
+ * You should never subclass this class.
  * <p>
  * <h2>Initilization</h2>
  * After calling build() on a subclass, {@link Builder#name(String) name},
