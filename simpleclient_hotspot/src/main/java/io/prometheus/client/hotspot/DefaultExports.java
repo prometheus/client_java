@@ -9,7 +9,7 @@ package io.prometheus.client.hotspot;
  * Example usage:
  * <pre>
  * {@code
- *   DefaultExports().initialize();
+ *   DefaultExports.initialize();
  * }
  * </pre>
  */
