@@ -26,6 +26,12 @@ version can be found on in the maven repository for
   <artifactId>simpleclient_servlet</artifactId>
   <version>0.0.11</version>
 </dependency>
+<!-- Exposition HTTP server-->
+<dependency>
+  <groupId>io.prometheus</groupId>
+  <artifactId>simpleclient_httpserver</artifactId>
+  <version>0.0.6</version>
+</dependency>
 <!-- Pushgateway exposition-->
 <dependency>
   <groupId>io.prometheus</groupId>
