@@ -157,7 +157,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
          * @param quantile
          * @return
          */
-        public double getQuantile(double quantile) {
+        private double getQuantile(double quantile) {
             if (quantile < 0.0 || quantile > 1.0 || Double.isNaN(quantile)) {
                 throw new IllegalArgumentException(quantile + " is not in [0..1]");
             }
