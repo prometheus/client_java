@@ -3,6 +3,8 @@ package io.prometheus.client;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
@@ -102,6 +104,55 @@ public class SummaryTest {
     labelValues.add("a");
     samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
     samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
+    Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.SUMMARY, "help", samples);
+    assertEquals(1, mfs.size());
+    assertEquals(mfsFixture, mfs.get(0));
+  }
+
+  @Test
+  public void testCollectQuantiles(){
+    labels = Summary.build().name("labels").help("help").labelNames("l").quantiles(0.25, 0.50, 0.75, 0.90).register(registry);
+
+    labels.labels("a").observe(1);
+    labels.labels("a").observe(3);
+    labels.labels("a").observe(3);
+    labels.labels("a").observe(2);
+    labels.labels("a").observe(4);
+    labels.labels("a").observe(3);
+    labels.labels("a").observe(9);
+
+    List<Collector.MetricFamilySamples> mfs = labels.collect();
+
+    ArrayList<String> labelNames = new ArrayList<String>();
+    labelNames.add("l");
+    ArrayList<String> labelValues = new ArrayList<String>();
+    labelValues.add("a");
+
+    ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+
+
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 7.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 25.0));
+    samples.add(new Collector.MetricFamilySamples.Sample(
+            "labels",
+            Arrays.asList("l", "quantile"),
+            Arrays.asList("a", "0.25"), 2.0));
+
+    samples.add(new Collector.MetricFamilySamples.Sample(
+            "labels",
+            Arrays.asList("l", "quantile"),
+            Arrays.asList("a", "0.5"), 3.0));
+
+    samples.add(new Collector.MetricFamilySamples.Sample(
+            "labels",
+            Arrays.asList("l", "quantile"),
+            Arrays.asList("a", "0.75"), 4.0));
+
+    samples.add(new Collector.MetricFamilySamples.Sample(
+            "labels",
+            Arrays.asList("l", "quantile"),
+            Arrays.asList("a", "0.9"), 9));
+
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.SUMMARY, "help", samples);
 
     assertEquals(1, mfs.size());
