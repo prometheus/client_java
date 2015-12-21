@@ -1,6 +1,11 @@
 package io.prometheus.client;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static java.lang.Math.floor;
 
@@ -39,7 +44,8 @@ import static java.lang.Math.floor;
  * This would allow you to track request rate, average latency and average request size.
  */
 public class Summary extends SimpleCollector<Summary.Child> {
-
+    // Quantiles that should be calculated for this Summary
+    // e.g.  0.20, 0.50, 0.99
     private double[] quantiles;
 
     Summary(Builder b) {
@@ -56,9 +62,15 @@ public class Summary extends SimpleCollector<Summary.Child> {
         }
 
         public Builder quantiles(double... quantiles) {
+            // We want the Summary to display quantiles in ascending order (e.g. 0.20, 0.50, 0.99)
+            Arrays.sort(quantiles);
             this.quantiles = quantiles;
             return this;
         }
+    }
+
+    protected boolean shouldCalculateQuantiles() {
+        return quantiles != null && quantiles.length > 0;
     }
 
     /**
@@ -71,7 +83,13 @@ public class Summary extends SimpleCollector<Summary.Child> {
 
     @Override
     protected Child newChild() {
-        return new Child();
+        Child child = new Child();
+        if (this.shouldCalculateQuantiles()) {
+            child.shouldCalculateQuant = true;
+        } else {
+            child.shouldCalculateQuant = false;
+        }
+        return child;
     }
 
     /**
@@ -116,7 +134,13 @@ public class Summary extends SimpleCollector<Summary.Child> {
         // This should be reevaluated in the future.
         private DoubleAdder count = new DoubleAdder();
         private DoubleAdder sum = new DoubleAdder();
-        private List<Double> data = new ArrayList<Double>();
+
+        // Boolean flag that dictates whether a Child instance should save data for subsequent quantile
+        // calculations.
+        private boolean shouldCalculateQuant = false;
+
+        // Data is used to keep track of all observed metrics
+        private ArrayList<Double> data = new ArrayList<Double>();
         static TimeProvider timeProvider = new TimeProvider();
 
         /**
@@ -125,9 +149,11 @@ public class Summary extends SimpleCollector<Summary.Child> {
         public void observe(double amt) {
             count.add(1);
             sum.add(amt);
-            // TODO
-            // This operation needs to be thread-safe
-            data.add(amt);
+            if (this.shouldCalculateQuant) {
+                synchronized (data) {
+                    data.add(amt);
+                }
+            }
         }
 
         /**
@@ -151,47 +177,60 @@ public class Summary extends SimpleCollector<Summary.Child> {
             return v;
         }
 
-
-        /***
-         * Source for this algorithm:
-         * "http://www.dummies.com/how-to/content/how-to-calculate-percentiles-in-statistics.html"
-         *
-         * @param quantile
-         * @return
-         */
-        private double getQuantile(double quantile) {
-            if (quantile < 0.0 || quantile > 1.0 || Double.isNaN(quantile)) {
-                throw new IllegalArgumentException(quantile + " is not in [0..1]");
-            }
-
-            if (data.size() == 0) {
-                return 0.0;
-            }
-
-            final double pos = quantile * (data.size());
-            final Boolean wholeNumber = pos == Math.floor(pos) && !Double.isInfinite(pos);
-            final int index = wholeNumber? (int) pos - 1: (int) Math.ceil(pos) - 1;
-
-            if (index < 1) {
-                return data.get(0);
-            }
-
-            if (index >= data.size()) {
-                return data.get(data.size() - 1);
-            }
-
-            if (wholeNumber) {
-                if (data.size() >= index + 1) {
-                    return (data.get(index) + data.get(index + 1)) / 2;
-                }
-                return data.get(index);
-            } else {
-                return data.get(index);
-            }
+        private Double[] getDataSnapshot() {
+            // Data needs to be sorted. This is a pre-requisite for percentile/quantile calculations.
+            Double[] data = this.data.toArray(new Double[this.data.size()]);
+            return data;
         }
+
     }
 
     // Convenience methods.
+
+
+    /***
+     * Source for this algorithm:
+     * "http://www.dummies.com/how-to/content/how-to-calculate-percentiles-in-statistics.html"
+     *
+     * @param quantile
+     * @return
+     */
+    private static double getQuantile(double quantile, Double[] data) {
+        if (quantile < 0.0 || quantile > 1.0 || Double.isNaN(quantile)) {
+            throw new IllegalArgumentException(quantile + " is not in [0..1]");
+        }
+
+        //ArrayList<Double> dataCopy = new ArrayList<Double>(data);
+
+        int size = data.length;
+
+        if (size == 0) {
+            return 0.0;
+        }
+
+        final double pos = quantile * (size);
+        final Boolean wholeNumber = pos == Math.floor(pos) && !Double.isInfinite(pos);
+        final int index = wholeNumber ? (int) pos - 1 : (int) Math.ceil(pos) - 1;
+
+        if (index < 1) {
+            return data[0];
+        }
+
+        if (index >= size) {
+            return data[size - 1];
+        }
+
+        if (wholeNumber) {
+            if (size >= index + 1) {
+                return (data[index] + data[index + 1]) / 2;
+            }
+            return data[index];
+        } else {
+            return data[index];
+        }
+    }
+
+
 
     /**
      * Observe the given amount on the summary with no labels.
@@ -220,23 +259,21 @@ public class Summary extends SimpleCollector<Summary.Child> {
 
 
             // If the quantiles is a desired calculation then add the quantile calculations to the Summary.
-            if (quantiles != null && quantiles.length > 0) {
-                // We want the Summary to display quantiles in ascending order (e.g. 0.20, 0.50, 0.99)
-                Arrays.sort(quantiles);
-
-                // Data needs to be sorted. This is a pre-requisite for percentile/quantile calculations.
-                Collections.sort(c.getValue().data);
-
+            if (this.shouldCalculateQuantiles()) {
                 // Since `labelNames` is declared final, we need to create a new list that includes our "quantile"
                 // label.
+                Double[] data = c.getValue().getDataSnapshot();
+                Arrays.sort(data);
+
                 List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
                 labelNamesWithQuantile.add("quantile");
 
                 for (int i = 0; i < quantiles.length; i++) {
                     List<String> labelValuesWithQuantile = new ArrayList<String>(c.getKey());
+
                     labelValuesWithQuantile.add(Double.toString(quantiles[i]));
                     samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile,
-                            c.getValue().getQuantile(quantiles[i])));
+                            Summary.getQuantile(quantiles[i], data)));
                 }
             }
         }
