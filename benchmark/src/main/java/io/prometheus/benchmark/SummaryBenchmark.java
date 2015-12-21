@@ -54,7 +54,7 @@ public class SummaryBenchmark {
     prometheusQuantileSummary = io.prometheus.client.Summary.build()
             .name("name")
             .help("quantiles computation help")
-            .quantiles(0.25)
+            .quantiles(1024, 0.25)
             .labelNames("some", "group")
             .create();
     prometheusQuantileSummaryChild = prometheusQuantileSummary.labels("test", "group2");

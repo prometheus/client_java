@@ -3,6 +3,7 @@ package io.prometheus.client;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -47,24 +48,28 @@ public class Summary extends SimpleCollector<Summary.Child> {
     // Quantiles that should be calculated for this Summary
     // e.g.  0.20, 0.50, 0.99
     private double[] quantiles;
+    private double [] data;
 
     Summary(Builder b) {
         super(b);
         this.quantiles = b.quantiles;
+        this.data = b.data;
     }
 
     public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
         private double[] quantiles;
+        private double [] data;
 
         @Override
         public Summary create() {
             return new Summary(this);
         }
 
-        public Builder quantiles(double... quantiles) {
+        public Builder quantiles(int sampleSize, double... quantiles) {
             // We want the Summary to display quantiles in ascending order (e.g. 0.20, 0.50, 0.99)
             Arrays.sort(quantiles);
             this.quantiles = quantiles;
+            this.data = new double[sampleSize];
             return this;
         }
     }
@@ -83,13 +88,11 @@ public class Summary extends SimpleCollector<Summary.Child> {
 
     @Override
     protected Child newChild() {
-        Child child = new Child();
         if (this.shouldCalculateQuantiles()) {
-            child.shouldCalculateQuant = true;
+           return new Child(data);
         } else {
-            child.shouldCalculateQuant = false;
+           return new Child();
         }
-        return child;
     }
 
     /**
@@ -128,6 +131,14 @@ public class Summary extends SimpleCollector<Summary.Child> {
             private double sum;
         }
 
+        Child(){
+
+        }
+
+        Child(double[] reservoir){
+            this.reservoir = reservoir;
+            shouldCalculateQuant = true;
+        }
         // Having these seperate leaves us open to races,
         // however Prometheus as whole has other races
         // that mean adding atomicity here wouldn't be useful.
@@ -141,6 +152,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
 
         // Data is used to keep track of all observed metrics
         private ArrayList<Double> data = new ArrayList<Double>();
+        private double[] reservoir;
         static TimeProvider timeProvider = new TimeProvider();
 
         /**
@@ -150,10 +162,28 @@ public class Summary extends SimpleCollector<Summary.Child> {
             count.add(1);
             sum.add(amt);
             if (this.shouldCalculateQuant) {
-                synchronized (data) {
+                synchronized (reservoir) {
+                    int c = this.count.intValue();
+                    if (c <= reservoir.length){
+                        reservoir[c-1] = amt;
+                    } else {
+                        final long r = nextLong(c);
+                        if (r < reservoir.length) {
+                            reservoir[(int)r] = amt;
+                        }
+                    }
                     data.add(amt);
                 }
             }
+        }
+
+        private static long nextLong(long n){
+            long bits, val;
+            do {
+                bits = ThreadLocalRandom.current().nextLong() & (~(1L << 63));
+                val = bits % n;
+            } while (bits - val + (n - 1) < 0L);
+            return val;
         }
 
         /**
@@ -177,10 +207,9 @@ public class Summary extends SimpleCollector<Summary.Child> {
             return v;
         }
 
-        private Double[] getDataSnapshot() {
-            // Data needs to be sorted. This is a pre-requisite for percentile/quantile calculations.
-            Double[] data = this.data.toArray(new Double[this.data.size()]);
-            return data;
+        private double[] getDataSnapshot() {
+            int capacity = Math.min(this.count.intValue(), reservoir.length);
+            return Arrays.copyOfRange(reservoir, 0, capacity);
         }
 
     }
@@ -195,12 +224,10 @@ public class Summary extends SimpleCollector<Summary.Child> {
      * @param quantile
      * @return
      */
-    private static double getQuantile(double quantile, Double[] data) {
+    private static double getQuantile(double quantile, double[] data) {
         if (quantile < 0.0 || quantile > 1.0 || Double.isNaN(quantile)) {
             throw new IllegalArgumentException(quantile + " is not in [0..1]");
         }
-
-        //ArrayList<Double> dataCopy = new ArrayList<Double>(data);
 
         int size = data.length;
 
@@ -262,7 +289,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
             if (this.shouldCalculateQuantiles()) {
                 // Since `labelNames` is declared final, we need to create a new list that includes our "quantile"
                 // label.
-                Double[] data = c.getValue().getDataSnapshot();
+                double[] data = c.getValue().getDataSnapshot();
                 Arrays.sort(data);
 
                 List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
