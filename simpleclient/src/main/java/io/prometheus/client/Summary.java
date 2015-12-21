@@ -182,13 +182,6 @@ public class Summary extends SimpleCollector<Summary.Child> {
     // Convenience methods.
 
 
-    /***
-     * Source for this algorithm:
-     * "http://www.dummies.com/how-to/content/how-to-calculate-percentiles-in-statistics.html"
-     *
-     * @param quantile
-     * @return
-
     /**
      * Observe the given amount on the summary with no labels.
      */

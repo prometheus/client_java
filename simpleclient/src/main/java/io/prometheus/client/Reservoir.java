@@ -42,6 +42,14 @@ public class Reservoir {
     }
 
 
+    /***
+     * Source for this algorithm:
+     * "http://www.dummies.com/how-to/content/how-to-calculate-percentiles-in-statistics.html"
+     *
+     * @param quantile
+     * @return
+     ***/
+
     public double getQuantile(double quantile, double[] data) {
         if (quantile < 0.0 || quantile > 1.0 || Double.isNaN(quantile)) {
             throw new IllegalArgumentException(quantile + " is not in [0..1]");
