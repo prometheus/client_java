@@ -39,17 +39,17 @@ public class Summary extends SimpleCollector<Summary.Child> {
     // Quantiles that should be calculated for this Summary
     // e.g.  0.20, 0.50, 0.99
     private double[] quantiles;
-    private Reservoir reservoir;
+    private int sampleSize;
 
     Summary(Builder b) {
         super(b);
         this.quantiles = b.quantiles;
-        this.reservoir = b.reservoir;
+        this.sampleSize = b.sampleSize;
     }
 
     public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
         private double[] quantiles;
-        private Reservoir reservoir;
+        private int sampleSize;
 
         @Override
         public Summary create() {
@@ -60,7 +60,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
             // We want the Summary to display quantiles in ascending order (e.g. 0.20, 0.50, 0.99)
             Arrays.sort(quantiles);
             this.quantiles = quantiles;
-            this.reservoir = new Reservoir(sampleSize);
+            this.sampleSize = sampleSize;
             return this;
         }
     }
@@ -80,7 +80,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
     @Override
     protected Child newChild() {
         if (this.shouldCalculateQuantiles()) {
-           return new Child(this.reservoir);
+           return new Child(this.sampleSize);
         } else {
            return new Child();
         }
@@ -126,8 +126,8 @@ public class Summary extends SimpleCollector<Summary.Child> {
 
         }
 
-        Child(Reservoir reservoir){
-            this.reservoir = reservoir;
+        Child(int sampleSize){
+            this.reservoir = new Reservoir(sampleSize);
             shouldCalculateQuant = true;
         }
         // Having these seperate leaves us open to races,
