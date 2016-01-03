@@ -50,6 +50,7 @@
         <module>simpleclient_log4j</module>
         <module>simpleclient_logback</module>
         <module>simpleclient_pushgateway</module>
+        <module>simpleclient_dropwizard</module>
         <module>benchmark</module>
     </modules>
     
