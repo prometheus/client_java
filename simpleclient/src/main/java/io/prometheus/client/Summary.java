@@ -165,6 +165,9 @@ public class Summary extends SimpleCollector<Summary.Child> {
             count.add(1);
             sum.add(amt);
             if (this.shouldCalculateQuant) {
+
+                //  TODO
+                //  Will need to look into replacing the requirement.
                 synchronized (stream) {
                     stream.insert(amt);
                 }
@@ -228,8 +231,13 @@ public class Summary extends SimpleCollector<Summary.Child> {
                 // Since `labelNames` is declared final, we need to create a new list that includes our "quantile"
                 // label.
 
-                Map<Quantile, Double> snapshot = c.getValue().stream.getSnapshot(this.quantiles);
+                Map<Quantile, Double> snapshot;
 
+                //  TODO
+                //  Will need to look into replacing the requirement.
+                synchronized (stream) {
+                   snapshot = c.getValue().stream.getSnapshot(this.quantiles);
+                }
                 List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
                 labelNamesWithQuantile.add("quantile");
 
