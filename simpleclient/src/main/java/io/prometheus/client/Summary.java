@@ -38,29 +38,35 @@ import java.util.*;
 public class Summary extends SimpleCollector<Summary.Child> {
     // Quantiles that should be calculated for this Summary
     // e.g.  0.20, 0.50, 0.99
-    private double[] quantiles;
-    private int sampleSize;
+    private Quantile[] quantiles;
+    private Stream stream;
 
     Summary(Builder b) {
         super(b);
-        this.quantiles = b.quantiles;
-        this.sampleSize = b.sampleSize;
+        quantiles = b.quantiles;
+        this.stream = b.stream;
     }
 
     public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
-        private double[] quantiles;
-        private int sampleSize;
+        private Quantile[] quantiles = new Quantile[]{new Quantile(0.2, 0.05), new Quantile(0.5, 0.1),
+                new Quantile(0.9, 0.01)};
+
+        private Stream<Double> stream;
 
         @Override
         public Summary create() {
             return new Summary(this);
         }
 
-        public Builder quantiles(int sampleSize, double... quantiles) {
+        public Builder quantiles(Quantile... quantiles) {
             // We want the Summary to display quantiles in ascending order (e.g. 0.20, 0.50, 0.99)
-            Arrays.sort(quantiles);
+            //Arrays.sort(quantiles);
             this.quantiles = quantiles;
-            this.sampleSize = sampleSize;
+            return this;
+        }
+
+        public Builder stream(Stream stream) {
+            this.stream = stream;
             return this;
         }
     }
@@ -80,9 +86,12 @@ public class Summary extends SimpleCollector<Summary.Child> {
     @Override
     protected Child newChild() {
         if (this.shouldCalculateQuantiles()) {
-           return new Child(this.sampleSize);
+            if(this.stream == null){
+                this.stream = new CKMSStream(500, quantiles);
+            }
+            return new Child(this.stream);
         } else {
-           return new Child();
+            return new Child();
         }
     }
 
@@ -122,14 +131,15 @@ public class Summary extends SimpleCollector<Summary.Child> {
             private double sum;
         }
 
-        Child(){
+        Child() {
 
         }
 
-        Child(int sampleSize){
-            this.reservoir = new Reservoir(sampleSize);
+        Child(Stream<Double> stream) {
+            this.stream = stream;
             shouldCalculateQuant = true;
         }
+
         // Having these seperate leaves us open to races,
         // however Prometheus as whole has other races
         // that mean adding atomicity here wouldn't be useful.
@@ -140,7 +150,8 @@ public class Summary extends SimpleCollector<Summary.Child> {
         // Boolean flag that dictates whether a Child instance should save data for subsequent quantile
         // calculations.
         private boolean shouldCalculateQuant = false;
-        private Reservoir reservoir;
+        private Stream<Double> stream;
+
         static TimeProvider timeProvider = new TimeProvider();
 
         /**
@@ -150,8 +161,8 @@ public class Summary extends SimpleCollector<Summary.Child> {
             count.add(1);
             sum.add(amt);
             if (this.shouldCalculateQuant) {
-                synchronized (reservoir) {
-                    reservoir.update(amt);
+                synchronized (stream) {
+                    stream.insert(amt);
                 }
             }
         }
@@ -212,18 +223,18 @@ public class Summary extends SimpleCollector<Summary.Child> {
             if (this.shouldCalculateQuantiles()) {
                 // Since `labelNames` is declared final, we need to create a new list that includes our "quantile"
                 // label.
-                double[] data = c.getValue().reservoir.getSnapshot();
-                Arrays.sort(data);
+
+                Map<Quantile, Double> snapshot = c.getValue().stream.getSnapshot(this.quantiles);
 
                 List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
                 labelNamesWithQuantile.add("quantile");
 
-                for (int i = 0; i < quantiles.length; i++) {
+                for (Map.Entry<Quantile, Double> qe : snapshot.entrySet()) {
                     List<String> labelValuesWithQuantile = new ArrayList<String>(c.getKey());
 
-                    labelValuesWithQuantile.add(Double.toString(quantiles[i]));
+                    labelValuesWithQuantile.add(Double.toString(qe.getKey().getQuantile()));
                     samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile,
-                            c.getValue().reservoir.getQuantile(quantiles[i], data)));
+                            qe.getValue()));
                 }
             }
         }

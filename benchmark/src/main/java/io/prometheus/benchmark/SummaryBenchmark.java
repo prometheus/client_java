@@ -51,13 +51,14 @@ public class SummaryBenchmark {
       .help("some description..")
       .create();
 
-    prometheusQuantileSummary = io.prometheus.client.Summary.build()
-            .name("name")
+   /*  prometheusQuantileSummary = io.prometheus.client.Summary.build()
+           .name("name")
             .help("quantiles computation help")
             .quantiles(1024, 0.25)
             .labelNames("some", "group")
             .create();
     prometheusQuantileSummaryChild = prometheusQuantileSummary.labels("test", "group2");
+    */
 
     prometheusSimpleHistogram = io.prometheus.client.Histogram.build()
       .name("name")
