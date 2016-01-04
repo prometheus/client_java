@@ -1,4 +1,4 @@
-package io.prometheus.client;
+package io.prometheus.client.stream;
 
 /**
  * Created by warebot on 1/4/16.

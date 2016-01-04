@@ -1,4 +1,4 @@
-package io.prometheus.client;
+package io.prometheus.client.stream;
 
 import java.util.Map;
 

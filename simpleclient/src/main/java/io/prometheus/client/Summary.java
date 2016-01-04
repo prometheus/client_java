@@ -1,5 +1,9 @@
 package io.prometheus.client;
 
+import io.prometheus.client.stream.CKMSStream;
+import io.prometheus.client.stream.Quantile;
+import io.prometheus.client.stream.Stream;
+
 import java.util.*;
 
 /**

@@ -1,10 +1,8 @@
-package io.prometheus.client;
+package io.prometheus.client.stream;
 
 /**
  * Created by warebot on 12/27/15.
  */
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.LocatorEx;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
