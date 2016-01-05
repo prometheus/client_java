@@ -84,7 +84,7 @@ public class CKMSStream<T extends Number & Comparable<T>> implements Stream<T> {
 
 
     public void merge() {
-
+        int start = 0;
         int bufferSize = buffer.size();
         if (bufferSize == 0) {
             return;
@@ -92,38 +92,49 @@ public class CKMSStream<T extends Number & Comparable<T>> implements Stream<T> {
 
         Collections.sort(buffer);
 
+        if (samples.size() == 0) {
+            samples.add(new Sample(buffer.get(0), 1, 0));
+            start = 1;
+            count.getAndIncrement();
+        }
+
         ListIterator<Sample> iterator = samples.listIterator(0);
-        int ri = 0;
-        int rank = 0;
 
-        for (int bufIdx = 0; bufIdx < bufferSize; bufIdx++) {
+        for (int bufIdx = start; bufIdx < bufferSize; bufIdx++) {
             T v = buffer.get(bufIdx);
-            boolean found = true;
+            int ri = 0;
 
-            Sample lower = null;
-            while (iterator.hasNext()) {
-                Sample vi = iterator.next();
-                if (v.compareTo(vi.value) < 0) {
-                    iterator.previous();
-                    found = false;
-                    break;
-                }
+            Sample vi = iterator.next();
+
+            while (iterator.hasNext() && v.compareTo(vi.value) > 0) {
+                vi = iterator.next();
                 ri += vi.g;
+
+            }
+
+            if (vi.value.compareTo(v) > 0) {
+                iterator.previous();
+                if(ri > 0) {
+                    ri -= vi.g;
+                }
             }
 
             int delta;
-            if(!found) {
-                rank = ri + bufIdx;
-            } else {
-                rank = ri + 1;
-            }
 
             if (!iterator.hasPrevious() || !iterator.hasNext()) {
                 delta = 0;
             } else {
-                delta = (int) Math.floor(f(rank, count.get())) - 1;
+                delta = (int) Math.floor(f(ri, count.get())) - 1;
             }
             iterator.add(new Sample(v, 1, delta, ri));
+
+            // TODO
+            // Rewinding the iterator to the beginning of list for every item in the merge process might not be the
+            // best thing to do, but so far it's the easiest way to calculate `ri` accurately without getting to clever
+            // with spaghetti code.
+            // I am sure there is a better way.
+
+            iterator = samples.listIterator(0);
             count.getAndIncrement();
         }
         if (bufferSize > sampleSize) {
@@ -170,6 +181,7 @@ public class CKMSStream<T extends Number & Comparable<T>> implements Stream<T> {
     public void reset() {
         samples.clear();
         count.set(0);
+        buffer.clear();
     }
 
 
@@ -193,9 +205,8 @@ public class CKMSStream<T extends Number & Comparable<T>> implements Stream<T> {
         while (it.hasNext()) {
             prev = cur;
             cur = it.next();
+
             ri += prev.g;
-
-
             if (ri + cur.g + cur.delta > desired + (f(desired, count.get())) / 2) {
                 return prev.value;
             }
@@ -207,9 +218,9 @@ public class CKMSStream<T extends Number & Comparable<T>> implements Stream<T> {
     }
 
     @Override
-    public Map<Quantile, T> getSnapshot(Quantile...quantiles) {
-        Map<Quantile, T> snapshot= new HashMap<Quantile, T>();
-        for (Quantile q: quantiles ){
+    public Map<Quantile, T> getSnapshot(Quantile... quantiles) {
+        Map<Quantile, T> snapshot = new HashMap<Quantile, T>();
+        for (Quantile q : quantiles) {
             T approx = this.query(q.getQuantile());
             snapshot.put(q, approx);
         }
@@ -219,7 +230,7 @@ public class CKMSStream<T extends Number & Comparable<T>> implements Stream<T> {
     void flush() {
         // If the buffer is at capacity, merge and compress to relinquish storage.
         merge();
-        compress();
+        //compress();
     }
 
     private class Sample {
