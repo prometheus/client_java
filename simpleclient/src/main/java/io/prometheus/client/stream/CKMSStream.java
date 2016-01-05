@@ -98,19 +98,25 @@ public class CKMSStream<T extends Number & Comparable<T>> implements Stream<T> {
 
         for (int bufIdx = 0; bufIdx < bufferSize; bufIdx++) {
             T v = buffer.get(bufIdx);
+            boolean found = true;
 
             Sample lower = null;
             while (iterator.hasNext()) {
                 Sample vi = iterator.next();
                 if (v.compareTo(vi.value) < 0) {
                     iterator.previous();
+                    found = false;
                     break;
                 }
                 ri += vi.g;
             }
 
             int delta;
-            rank = ri + bufIdx;
+            if(!found) {
+                rank = ri + bufIdx;
+            } else {
+                rank = ri + 1;
+            }
 
             if (!iterator.hasPrevious() || !iterator.hasNext()) {
                 delta = 0;
