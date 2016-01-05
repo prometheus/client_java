@@ -44,11 +44,13 @@ public class Summary extends SimpleCollector<Summary.Child> {
     // e.g.  0.20, 0.50, 0.99
     private Quantile[] quantiles;
     private Stream stream;
+    private boolean shouldCalculateQuant = false;
 
     Summary(Builder b) {
         super(b);
         quantiles = b.quantiles;
         this.stream = b.stream;
+        this.shouldCalculateQuant = b.shouldCalculateQuant;
     }
 
     public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
@@ -56,7 +58,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
                 new Quantile(0.9, 0.01)};
 
         private Stream<Double> stream;
-
+        private boolean shouldCalculateQuant;
         @Override
         public Summary create() {
             return new Summary(this);
@@ -66,17 +68,19 @@ public class Summary extends SimpleCollector<Summary.Child> {
             // We want the Summary to display quantiles in ascending order (e.g. 0.20, 0.50, 0.99)
             //Arrays.sort(quantiles);
             this.quantiles = quantiles;
+            this.shouldCalculateQuant = true;
             return this;
         }
 
         public Builder stream(Stream stream) {
             this.stream = stream;
+            this.shouldCalculateQuant = true;
             return this;
         }
     }
 
     protected boolean shouldCalculateQuantiles() {
-        return quantiles != null && quantiles.length > 0;
+        return shouldCalculateQuant;
     }
 
     /**
