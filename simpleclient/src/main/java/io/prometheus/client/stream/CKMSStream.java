@@ -230,7 +230,7 @@ public class CKMSStream<T extends Number & Comparable<T>> implements Stream<T> {
     void flush() {
         // If the buffer is at capacity, merge and compress to relinquish storage.
         merge();
-        //compress();
+        compress();
     }
 
     private class Sample {
