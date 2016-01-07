@@ -114,7 +114,7 @@ as simple as this:
     $ git checkout master
     $ mvn javadoc:aggregate
     $ git checkout gh-pages
-    $ mv target/site/apidocs/ ./
+    $ mv target/site/apidocs/* .
     $ git status
     $ # Amend the branch as necessary.
     $ git commit
