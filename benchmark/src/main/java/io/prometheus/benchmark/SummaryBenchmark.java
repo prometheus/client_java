@@ -26,6 +26,8 @@ public class SummaryBenchmark {
   io.prometheus.client.Summary prometheusSimpleSummary;
   io.prometheus.client.Summary.Child prometheusSimpleSummaryChild;
   io.prometheus.client.Summary prometheusSimpleSummaryNoLabels;
+  io.prometheus.client.Summary prometheusQuantileSummary;
+  io.prometheus.client.Summary.Child prometheusQuantileSummaryChild;
   io.prometheus.client.Histogram prometheusSimpleHistogram;
   io.prometheus.client.Histogram.Child prometheusSimpleHistogramChild;
   io.prometheus.client.Histogram prometheusSimpleHistogramNoLabels;
@@ -48,6 +50,15 @@ public class SummaryBenchmark {
       .name("name")
       .help("some description..")
       .create();
+
+   /*  prometheusQuantileSummary = io.prometheus.client.Summary.build()
+           .name("name")
+            .help("quantiles computation help")
+            .quantiles(1024, 0.25)
+            .labelNames("some", "group")
+            .create();
+    prometheusQuantileSummaryChild = prometheusQuantileSummary.labels("test", "group2");
+    */
 
     prometheusSimpleHistogram = io.prometheus.client.Histogram.build()
       .name("name")
@@ -95,8 +106,16 @@ public class SummaryBenchmark {
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
+  public void prometheusQuantileSummaryChildBenchmark() {
+    prometheusQuantileSummaryChild.observe(1);
+  }
+
+
+  @Benchmark
+  @BenchmarkMode({Mode.AverageTime})
+  @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleSummaryNoLabelsBenchmark() {
-    prometheusSimpleSummaryNoLabels.observe(1); 
+    prometheusSimpleSummaryNoLabels.observe(1);
   }
 
   @Benchmark
