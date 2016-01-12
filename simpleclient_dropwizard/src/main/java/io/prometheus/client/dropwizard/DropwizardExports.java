@@ -21,7 +21,7 @@ public class DropwizardExports extends io.prometheus.client.Collector {
     /**
      * @param registry a metric registry to export in prometheus.
      */
-    DropwizardExports(MetricRegistry registry) {
+    public DropwizardExports(MetricRegistry registry) {
         this.registry = registry;
     }
 
