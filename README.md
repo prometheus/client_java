@@ -12,25 +12,25 @@ version can be found on in the maven repository for
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient</artifactId>
-  <version>0.0.12</version>
+  <version>0.0.13</version>
 </dependency>
 <!-- Hotspot JVM metrics-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_hotspot</artifactId>
-  <version>0.0.12</version>
+  <version>0.0.13</version>
 </dependency>
 <!-- Exposition servlet-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_servlet</artifactId>
-  <version>0.0.12</version>
+  <version>0.0.13</version>
 </dependency>
 <!-- Pushgateway exposition-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_pushgateway</artifactId>
-  <version>0.0.12</version>
+  <version>0.0.13</version>
 </dependency>
 ```
 
@@ -111,14 +111,15 @@ generated via the following command:
 It will need to be automatically merged into the _gh-pages_ branch, but that is
 as simple as this:
 
-    $ git checkout master
-    $ mvn javadoc:aggregate
-    $ git checkout gh-pages
-    $ mv target/site/apidocs/* .
-    $ git status
-    $ # Amend the branch as necessary.
-    $ git commit
-    $ git push
+    git checkout master
+    mvn javadoc:aggregate
+    git checkout gh-pages
+    rm -r io src-html
+    mv target/site/apidocs/* .
+    git status
+    # Amend the branch as necessary.
+    git commit
+    git push
 
 There is a Maven plugin to perform this work, but it is broken.  The
 javadoc:aggregate step will emit documentation into
