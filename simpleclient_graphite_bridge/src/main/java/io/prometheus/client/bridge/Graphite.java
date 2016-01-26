@@ -26,11 +26,10 @@ import java.util.regex.Matcher;
  *  Thread thread = g.start(CollectorRegistry.defaultRegistry, 60);
  *  // Stop pushing.
  *  thread.interrupt();
- *  thread.joi();
+ *  thread.join();
  * }
  * </pre>
  * <p>
- * See <a href="https://github.com/prometheus/pushgateway">https://github.com/prometheus/pushgateway</a>
  */
 public class Graphite {
   private static final Logger logger = Logger.getLogger(Graphite.class.getName());
