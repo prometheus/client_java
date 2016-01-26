@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>parent</artifactId>
-        <version>0.0.13-SNAPSHOT</version>
+        <version>0.0.13</version>
     </parent>
 
     <groupId>io.prometheus</groupId>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.0.13-SNAPSHOT</version>
+            <version>0.0.13</version>
         </dependency>
         <dependency>
           <groupId>com.codahale.metrics</groupId>
