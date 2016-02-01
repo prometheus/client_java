@@ -23,6 +23,7 @@ public class DefaultExports {
       new StandardExports().register();
       new MemoryPoolsExports().register();
       new GarbageCollectorExports().register();
+      new ThreadExports().register();
       initialized = true;
     }
   }
