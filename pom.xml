@@ -45,13 +45,13 @@
     <modules>
         <module>simpleclient</module>
         <module>simpleclient_common</module>
-        <module>simpleclient_hotspot</module>
-        <module>simpleclient_servlet</module>
+        <module>simpleclient_dropwizard</module>
         <module>simpleclient_graphite_bridge</module>
+        <module>simpleclient_hotspot</module>
         <module>simpleclient_log4j</module>
         <module>simpleclient_logback</module>
         <module>simpleclient_pushgateway</module>
-        <module>simpleclient_dropwizard</module>
+        <module>simpleclient_servlet</module>
         <module>benchmark</module>
     </modules>
     
