@@ -52,17 +52,25 @@ public class DropwizardExportsTest {
                 return 1234L;
             }
         };
-
         Gauge<Float> floatGauge = new Gauge<Float>() {
             @Override
             public Float getValue() {
                 return 0.1234F;
             }
         };
+        Gauge<Boolean> booleanGauge = new Gauge<Boolean>() {
+            @Override
+            public Boolean getValue() {
+                return true;
+            }
+        };
+
         metricRegistry.register("double_gauge", doubleGauge);
         metricRegistry.register("long_gauge", longGauge);
         metricRegistry.register("integer_gauge", integerGauge);
         metricRegistry.register("float_gauge", floatGauge);
+        metricRegistry.register("boolean_gauge", booleanGauge);
+
         assertEquals(new Double(1234),
                 registry.getSampleValue("integer_gauge", new String[]{}, new String[]{}));
         assertEquals(new Double(1234),
@@ -71,6 +79,8 @@ public class DropwizardExportsTest {
                 registry.getSampleValue("double_gauge", new String[]{}, new String[]{}));
         assertEquals(new Double(0.1234F),
                 registry.getSampleValue("float_gauge", new String[]{}, new String[]{}));
+        assertEquals(new Double(1),
+                registry.getSampleValue("boolean_gauge", new String[]{}, new String[]{}));
     }
 
     @Test

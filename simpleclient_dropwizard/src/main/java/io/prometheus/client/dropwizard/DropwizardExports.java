@@ -1,6 +1,5 @@
 package io.prometheus.client.dropwizard;
 
-
 import com.codahale.metrics.*;
 
 import java.util.ArrayList;
@@ -44,15 +43,11 @@ public class DropwizardExports extends io.prometheus.client.Collector {
      */
     List<MetricFamilySamples> fromGauge(String name, Gauge gauge) {
         Object obj = gauge.getValue();
-        Double value;
-        if (obj instanceof Integer) {
-            value = Double.valueOf(((Integer) obj).doubleValue());
-        } else if (obj instanceof Double) {
-            value = (Double) obj;
-        } else if (obj instanceof Float) {
-            value = Double.valueOf(((Float) obj).doubleValue());
-        } else if (obj instanceof Long) {
-            value = Double.valueOf(((Long) obj).doubleValue());
+        double value;
+        if (obj instanceof Number) {
+            value = ((Number) obj).doubleValue();
+        } else if (obj instanceof Boolean) {
+            value = ((Boolean) obj) ? 1 : 0;
         } else {
             LOGGER.log(Level.FINE, String.format("Invalid type for Gauge %s: %s", name,
                     obj.getClass().getName()));
