@@ -12,7 +12,7 @@ public class TextFormat {
    * Write out the text version 0.0.4 of the given MetricFamilySamples.
    */
   public static void write004(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
-    /* See https://docs.google.com/a/boxever.com/document/d/1ZjyKiKxZV83VI9ZKAXRGKaUKK2BIWCT7oiGBKDBpjEY/edit# 
+    /* See http://prometheus.io/docs/instrumenting/exposition_formats/
      * for the output format specification. */
     for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(mfs)) {
       writer.write("# HELP " + metricFamilySamples.name + " " + escapeHelp(metricFamilySamples.help) + "\n");
