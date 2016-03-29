@@ -164,8 +164,8 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
    */
   public static class Child {
     public static class Value {
-      private double sum;  
-      private double[] buckets;
+      public double sum;
+      public double[] buckets;
     }
 
     private Child(double[] buckets) {

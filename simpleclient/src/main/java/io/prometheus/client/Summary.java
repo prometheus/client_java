@@ -91,8 +91,8 @@ public class Summary extends SimpleCollector<Summary.Child> {
    */
   public static class Child {
     public static class Value {
-      private double count;  
-      private double sum;
+      public double count;
+      public double sum;
     }
 
     // Having these seperate leaves us open to races,
