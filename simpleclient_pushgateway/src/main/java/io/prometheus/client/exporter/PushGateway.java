@@ -9,8 +9,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -54,7 +55,7 @@ import java.io.OutputStreamWriter;
 public class PushGateway {
 
   private final String address;
-  private final static int SECONDS_PER_MILLISECOND = 1000;
+  private static final int SECONDS_PER_MILLISECOND = 1000;
   /**
    * Construct a Pushgateway, with the given address.
    * <p>
@@ -182,12 +183,11 @@ public class PushGateway {
    * Pushes all metrics in a registry, replacing all those with the same job and instance.
    * <p>
    * This uses the POST HTTP method.
+   * @deprecated use {@link #push(CollectorRegistry, String, Map)}
   */
   @Deprecated
   public void push(CollectorRegistry registry, String job, String instance) throws IOException {
-    Map<String, String> groupingKey = new HashMap<String, String>();
-    groupingKey.put("instance", instance);
-    doRequest(registry, job, groupingKey, "POST");
+    push(registry, job, Collections.singletonMap("instance", instance));
   }
 
   /**
@@ -196,24 +196,22 @@ public class PushGateway {
    * This is useful for pushing a single Gauge.
    * <p>
    * This uses the POST HTTP method.
+   * @deprecated use {@link #push(Collector, String, Map)}
   */
   @Deprecated
   public void push(Collector collector, String job, String instance) throws IOException {
-    CollectorRegistry registry = new CollectorRegistry();
-    collector.register(registry);
-    push(registry, job, instance);
+    push(collector, job, Collections.singletonMap("instance", instance));
   }
 
   /**
    * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name.
    * <p>
    * This uses the PUT HTTP method.
+   * @deprecated use {@link #pushAdd(CollectorRegistry, String, Map)}
   */
   @Deprecated
   public void pushAdd(CollectorRegistry registry, String job, String instance) throws IOException {
-    Map<String, String> groupingKey = new HashMap<String, String>();
-    groupingKey.put("instance", instance);
-    doRequest(registry, job, groupingKey, "PUT");
+    pushAdd(registry, job, Collections.singletonMap("instance", instance));
   }
 
   /**
@@ -222,24 +220,22 @@ public class PushGateway {
    * This is useful for pushing a single Gauge.
    * <p>
    * This uses the PUT HTTP method.
+   * @deprecated use {@link #pushAdd(Collector, String, Map)}
   */
   @Deprecated
   public void pushAdd(Collector collector, String job, String instance) throws IOException {
-    CollectorRegistry registry = new CollectorRegistry();
-    collector.register(registry);
-    pushAdd(registry, job, instance);
+    pushAdd(collector, job, Collections.singletonMap("instance", instance));
   }
 
   /**
    * Deletes metrics from the Pushgateway.
    * <p>
    * This uses the DELETE HTTP method.
+   * @deprecated use {@link #delete(String, Map)}
   */
   @Deprecated
   public void delete(String job, String instance) throws IOException {
-    Map<String, String> groupingKey = new HashMap<String, String>();
-    groupingKey.put("instance", instance);
-    doRequest(null, job, groupingKey, "DELETE");
+    delete(job, Collections.singletonMap("instance", instance));
   }
 
   void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
