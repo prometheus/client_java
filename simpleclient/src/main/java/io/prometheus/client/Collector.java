@@ -108,7 +108,7 @@ public abstract class Collector {
 
       @Override
       public String toString() {
-        return "Name: " + name + " LabelNames: " + Arrays.asList(labelNames) + " labelValues: " + labelValues + 
+        return "Name: " + name + " LabelNames: " + labelNames + " labelValues: " + labelValues +
           " Value: " + value;
       }
     }

@@ -33,7 +33,7 @@ public class TextFormat {
   }
 
   /**
-   * Content-type for text verision 0.0.4.
+   * Content-type for text version 0.0.4.
    */
   public final static String CONTENT_TYPE_004 = "text/plain; version=0.0.4; charset=utf-8";
 
