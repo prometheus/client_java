@@ -66,8 +66,8 @@ public class Summary extends SimpleCollector<Summary.Child> {
    * Represents an event being timed.
    */
   public static class Timer {
-    Child child;
-    long start;
+    private final Child child;
+    private final long start;
     private Timer(Child child) {
       this.child = child;
       start = Child.timeProvider.nanoTime();
@@ -91,16 +91,21 @@ public class Summary extends SimpleCollector<Summary.Child> {
    */
   public static class Child {
     public static class Value {
-      public double count;
-      public double sum;
+      public final double count;
+      public final double sum;
+
+      private Value(double count, double sum) {
+        this.count = count;
+        this.sum = sum;
+      }
     }
 
-    // Having these seperate leaves us open to races,
+    // Having these separate leaves us open to races,
     // however Prometheus as whole has other races
     // that mean adding atomicity here wouldn't be useful.
     // This should be reevaluated in the future.
-    private DoubleAdder count = new DoubleAdder();  
-    private DoubleAdder sum = new DoubleAdder();
+    private final DoubleAdder count = new DoubleAdder();
+    private final DoubleAdder sum = new DoubleAdder();
 
     static TimeProvider timeProvider = new TimeProvider();
     /**
@@ -124,10 +129,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
      * <em>Warning:</em> The definition of {@link Value} is subject to change.
      */
     public Value get() {
-      Value v = new Value();
-      v.count = count.sum();
-      v.sum = sum.sum();
-      return v;
+      return new Value(count.sum(), sum.sum());
     }
   }
 

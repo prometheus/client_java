@@ -96,7 +96,7 @@ public class Counter extends SimpleCollector<Counter.Child> {
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
    */
   public static class Child {
-    private DoubleAdder value = new DoubleAdder();
+    private final DoubleAdder value = new DoubleAdder();
     /**
      * Increment the counter by 1.
      */

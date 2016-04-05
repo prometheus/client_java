@@ -26,9 +26,9 @@ import java.util.List;
  * </pre>
  */
 public class ThreadExports extends Collector {
-  private final ThreadMXBean threadBean;
+  private static final List<String> EMPTY_LABEL = Collections.emptyList();
 
-  public static final List<String> EMPTY_LABEL = Collections.emptyList();
+  private final ThreadMXBean threadBean;
 
   public ThreadExports() {
     this(ManagementFactory.getThreadMXBean());

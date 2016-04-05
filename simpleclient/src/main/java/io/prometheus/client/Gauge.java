@@ -89,8 +89,8 @@ public class Gauge extends SimpleCollector<Gauge.Child> {
     * Represents an event being timed.
     */
    public static class Timer {
-     Child child;
-     long start;
+     private final Child child;
+     private final long start;
      private Timer(Child child) {
        this.child = child;
        start = Child.timeProvider.nanoTime();
@@ -113,7 +113,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> {
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
    */
   public static class Child {
-    private DoubleAdder value = new DoubleAdder();
+    private final DoubleAdder value = new DoubleAdder();
 
     static TimeProvider timeProvider = new TimeProvider();
     /**

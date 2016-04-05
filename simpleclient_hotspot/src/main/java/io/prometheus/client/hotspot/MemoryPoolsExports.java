@@ -7,10 +7,8 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Exports metrics about JVM memory areas.
@@ -52,14 +50,14 @@ public class MemoryPoolsExports extends Collector {
     usedSamples.add(
         new MetricFamilySamples.Sample(
             "jvm_memory_bytes_used",
-            Arrays.asList("area"),
-            Arrays.asList("heap"),
+            Collections.singletonList("area"),
+            Collections.singletonList("heap"),
             heapUsage.getUsed()));
     usedSamples.add(
         new MetricFamilySamples.Sample(
             "jvm_memory_bytes_used",
-            Arrays.asList("area"),
-            Arrays.asList("nonheap"),
+            Collections.singletonList("area"),
+            Collections.singletonList("nonheap"),
             nonHeapUsage.getUsed()));
     sampleFamilies.add(
         new MetricFamilySamples(
@@ -71,14 +69,14 @@ public class MemoryPoolsExports extends Collector {
     committedSamples.add(
         new MetricFamilySamples.Sample(
             "jvm_memory_bytes_committed",
-            Arrays.asList("area"),
-            Arrays.asList("heap"),
+            Collections.singletonList("area"),
+            Collections.singletonList("heap"),
             heapUsage.getCommitted()));
     committedSamples.add(
         new MetricFamilySamples.Sample(
             "jvm_memory_bytes_committed",
-            Arrays.asList("area"),
-            Arrays.asList("nonheap"),
+            Collections.singletonList("area"),
+            Collections.singletonList("nonheap"),
             nonHeapUsage.getCommitted()));
     sampleFamilies.add(
         new MetricFamilySamples(
@@ -90,14 +88,14 @@ public class MemoryPoolsExports extends Collector {
     maxSamples.add(
         new MetricFamilySamples.Sample(
             "jvm_memory_bytes_max",
-            Arrays.asList("area"),
-            Arrays.asList("heap"),
+            Collections.singletonList("area"),
+            Collections.singletonList("heap"),
             heapUsage.getMax()));
     maxSamples.add(
         new MetricFamilySamples.Sample(
             "jvm_memory_bytes_max",
-            Arrays.asList("area"),
-            Arrays.asList("nonheap"),
+            Collections.singletonList("area"),
+            Collections.singletonList("nonheap"),
             nonHeapUsage.getMax()));
     sampleFamilies.add(
         new MetricFamilySamples(
@@ -108,28 +106,28 @@ public class MemoryPoolsExports extends Collector {
   }
 
   void addMemoryPoolMetrics(List<MetricFamilySamples> sampleFamilies) {
-    ArrayList<MetricFamilySamples.Sample> usedSamples = new ArrayList<MetricFamilySamples.Sample>();
-    ArrayList<MetricFamilySamples.Sample> committedSamples = new ArrayList<MetricFamilySamples.Sample>();
-    ArrayList<MetricFamilySamples.Sample> maxSamples = new ArrayList<MetricFamilySamples.Sample>();
+    List<MetricFamilySamples.Sample> usedSamples = new ArrayList<MetricFamilySamples.Sample>();
+    List<MetricFamilySamples.Sample> committedSamples = new ArrayList<MetricFamilySamples.Sample>();
+    List<MetricFamilySamples.Sample> maxSamples = new ArrayList<MetricFamilySamples.Sample>();
     for (final MemoryPoolMXBean pool : poolBeans) {
       MemoryUsage poolUsage = pool.getUsage();
       usedSamples.add(
           new MetricFamilySamples.Sample(
               "jvm_memory_pool_bytes_used",
-              Arrays.asList("pool"),
-              Arrays.asList(pool.getName()),
+              Collections.singletonList("pool"),
+              Collections.singletonList(pool.getName()),
               poolUsage.getUsed()));
       committedSamples.add(
           new MetricFamilySamples.Sample(
               "jvm_memory_pool_bytes_committed",
-              Arrays.asList("pool"),
-              Arrays.asList(pool.getName()),
+              Collections.singletonList("pool"),
+              Collections.singletonList(pool.getName()),
               poolUsage.getCommitted()));
       maxSamples.add(
           new MetricFamilySamples.Sample(
               "jvm_memory_pool_bytes_max",
-              Arrays.asList("pool"),
-              Arrays.asList(pool.getName()),
+              Collections.singletonList("pool"),
+              Collections.singletonList(pool.getName()),
               poolUsage.getMax()));
     }
     sampleFamilies.add(

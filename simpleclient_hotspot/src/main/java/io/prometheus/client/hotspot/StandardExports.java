@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -29,11 +30,11 @@ import io.prometheus.client.Collector;
 public class StandardExports extends Collector {
   private static final Logger LOGGER = Logger.getLogger(StandardExports.class.getName());
 
-  private StatusReader statusReader;
-  private OperatingSystemMXBean osBean;
-  private RuntimeMXBean runtimeBean;
-  private boolean unix;
-  private boolean linux;
+  private final StatusReader statusReader;
+  private final OperatingSystemMXBean osBean;
+  private final RuntimeMXBean runtimeBean;
+  private final boolean unix;
+  private final boolean linux;
 
   public StandardExports() {
     this(new StatusReader(),
@@ -45,17 +46,13 @@ public class StandardExports extends Collector {
       this.statusReader = statusReader;
       this.osBean = osBean;
       this.runtimeBean = runtimeBean;
-      if (osBean instanceof UnixOperatingSystemMXBean) {
-        unix = true;
-      }
-      if (osBean.getName().indexOf("Linux") == 0) {
-        linux = true;
-      }
+      this.unix = (osBean instanceof UnixOperatingSystemMXBean);
+      this.linux = (osBean.getName().indexOf("Linux") == 0);
   }
 
-  MetricFamilySamples singleMetric(String name, Type type, String help, double value) {
-    ArrayList<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
-    samples.add(new MetricFamilySamples.Sample(name, new ArrayList<String>(), new ArrayList<String>(), value));
+  private static MetricFamilySamples singleMetric(String name, Type type, String help, double value) {
+    List<MetricFamilySamples.Sample> samples = Collections.singletonList(
+        new MetricFamilySamples.Sample(name, Collections.<String>emptyList(), Collections.<String>emptyList(), value));
     return new MetricFamilySamples(name, type, help, samples);
   }
 
