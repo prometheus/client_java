@@ -24,7 +24,7 @@ public class HistogramTest {
 
   @After
   public void tearDown() {
-    Histogram.Child.timeProvider = new Histogram.TimeProvider();
+    Histogram.Child.timeProvider = new NanoTimeProvider();
   }
 
   private double getCount() {
@@ -100,7 +100,7 @@ public class HistogramTest {
 
   @Test
   public void testTimer() {
-    Histogram.Child.timeProvider = new Histogram.TimeProvider() {
+    Histogram.Child.timeProvider = new NanoTimeProvider() {
       long value = (long)(30 * 1e9);
       long nanoTime() {
         value += (long)(10 * 1e9);

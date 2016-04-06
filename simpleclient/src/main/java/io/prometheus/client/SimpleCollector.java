@@ -1,5 +1,6 @@
 package io.prometheus.client;
 
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Arrays;
@@ -141,6 +142,13 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Return a new child, workaround for Java generics limitations.
    */
   protected abstract Child newChild();
+
+  List<MetricFamilySamples> familySamplesList(Collector.Type type, List<MetricFamilySamples.Sample> samples) {
+    MetricFamilySamples mfs = new MetricFamilySamples(fullname, type, help, samples);
+    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>(1);
+    mfsList.add(mfs);
+    return mfsList;
+  }
 
   protected SimpleCollector(Builder b) {
     if (b.name.isEmpty()) throw new IllegalStateException("Name hasn't been set.");

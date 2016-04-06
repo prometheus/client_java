@@ -107,7 +107,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
     private final DoubleAdder count = new DoubleAdder();
     private final DoubleAdder sum = new DoubleAdder();
 
-    static TimeProvider timeProvider = new TimeProvider();
+    static NanoTimeProvider timeProvider = new NanoTimeProvider();
     /**
      * Observe the given amount.
      */
@@ -158,15 +158,6 @@ public class Summary extends SimpleCollector<Summary.Child> {
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
     }
 
-    MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.SUMMARY, help, samples);
-    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    mfsList.add(mfs);
-    return mfsList;
-  }
-
-  static class TimeProvider {
-    long nanoTime() {
-      return System.nanoTime();
-    }
+    return familySamplesList(Type.SUMMARY, samples);
   }
 }

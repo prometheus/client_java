@@ -182,7 +182,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
     private final DoubleAdder[] cumulativeCounts;
     private final DoubleAdder sum = new DoubleAdder();
 
-    static TimeProvider timeProvider = new TimeProvider();
+    static NanoTimeProvider timeProvider = new NanoTimeProvider();
     /**
      * Observe the given amount.
      */
@@ -252,19 +252,10 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
     }
 
-    MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.HISTOGRAM, help, samples);
-    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    mfsList.add(mfs);
-    return mfsList;
+    return familySamplesList(Type.HISTOGRAM, samples);
   }
 
   double[] getBuckets() {
     return buckets;
-  }
-
-  static class TimeProvider {
-    long nanoTime() {
-      return System.nanoTime();
-    }
   }
 }
