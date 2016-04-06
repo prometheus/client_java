@@ -114,7 +114,7 @@ public class CollectorRegistry {
         if (sample.name.equals(name)
             && Arrays.equals(sample.labelNames.toArray(), labelNames)
             && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
-          return new Double(sample.value);
+          return sample.value;
         }
       }
     }

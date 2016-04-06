@@ -51,7 +51,7 @@ import java.util.Map;
  * offer easy ways to set common bucket patterns.
  */
 public class Histogram extends SimpleCollector<Histogram.Child> {
-  double[] buckets;
+  private final double[] buckets;
 
   Histogram(Builder b) {
     super(b);
@@ -60,7 +60,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
   }
 
   public static class Builder extends SimpleCollector.Builder<Builder, Histogram> {
-    double[] buckets = new double[]{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10};
+    private double[] buckets = new double[]{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10};
 
     @Override
     public Histogram create() {
@@ -82,9 +82,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
       // Append infinity bucket if it's not already there.
       if (buckets[buckets.length - 1] != Double.POSITIVE_INFINITY) {
         double[] tmp = new double[buckets.length + 1];
-        for (int i = 0; i < buckets.length; i++) {
-          tmp[i] = buckets[i];
-        }
+        System.arraycopy(buckets, 0, tmp, 0, buckets.length);
         tmp[buckets.length] = Double.POSITIVE_INFINITY;
         buckets = tmp;
       }
@@ -139,8 +137,8 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
    * Represents an event being timed.
    */
   public static class Timer {
-    Child child;
-    long start;
+    private final Child child;
+    private final long start;
     private Timer(Child child) {
       this.child = child;
       start = Child.timeProvider.nanoTime();
@@ -164,8 +162,13 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
    */
   public static class Child {
     public static class Value {
-      public double sum;
-      public double[] buckets;
+      public final double sum;
+      public final double[] buckets;
+
+      public Value(double sum, double[] buckets) {
+        this.sum = sum;
+        this.buckets = buckets;
+      }
     }
 
     private Child(double[] buckets) {
@@ -175,9 +178,9 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
         cumulativeCounts[i] = new DoubleAdder();
       }
     }
-    private double[] upperBounds;
-    private DoubleAdder[] cumulativeCounts;
-    private DoubleAdder sum = new DoubleAdder();
+    private final double[] upperBounds;
+    private final DoubleAdder[] cumulativeCounts;
+    private final DoubleAdder sum = new DoubleAdder();
 
     static TimeProvider timeProvider = new TimeProvider();
     /**
@@ -207,15 +210,13 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
      * <em>Warning:</em> The definition of {@link Value} is subject to change.
      */
     public Value get() {
-      Value v = new Value();
-      v.buckets = new double[cumulativeCounts.length];
+      double[] buckets = new double[cumulativeCounts.length];
       double acc = 0;
       for (int i = 0; i < cumulativeCounts.length; ++i) {
         acc += cumulativeCounts[i].sum();
-        v.buckets[i] = acc;
+        buckets[i] = acc;
       }
-      v.sum = sum.sum();
-      return v;
+      return new Value(sum.sum(), buckets);
     }
   }
 
@@ -255,6 +256,10 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(mfs);
     return mfsList;
+  }
+
+  double[] getBuckets() {
+    return buckets;
   }
 
   static class TimeProvider {
