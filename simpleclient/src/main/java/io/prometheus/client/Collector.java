@@ -19,7 +19,7 @@ public abstract class Collector {
    * Return all of the metrics of this Collector.
    */
   public abstract List<MetricFamilySamples> collect();
-  public static enum Type {
+  public enum Type {
     COUNTER,
     GAUGE,
     SUMMARY,
@@ -140,9 +140,9 @@ public abstract class Collector {
    */
   public static final double MILLISECONDS_PER_SECOND = 1E3;
 
-  protected static final Pattern METRIC_NAME_RE = Pattern.compile("[a-zA-Z_:][a-zA-Z0-9_:]*");
-  protected static final Pattern METRIC_LABEL_NAME_RE = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
-  protected static final Pattern RESERVED_METRIC_LABEL_NAME_RE = Pattern.compile("__.*");
+  private static final Pattern METRIC_NAME_RE = Pattern.compile("[a-zA-Z_:][a-zA-Z0-9_:]*");
+  private static final Pattern METRIC_LABEL_NAME_RE = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
+  private static final Pattern RESERVED_METRIC_LABEL_NAME_RE = Pattern.compile("__.*");
 
   /**
    * Throw an exception if the metric name is invalid.

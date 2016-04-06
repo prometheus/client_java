@@ -77,25 +77,25 @@ public class HistogramTest {
   @Test
   public void testManualBuckets() {
     Histogram h = Histogram.build().name("h").help("help").buckets(1, 2).create();
-    assertArrayEquals(new double[]{1, 2, Double.POSITIVE_INFINITY}, h.buckets, .001);
+    assertArrayEquals(new double[]{1, 2, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
   }
 
   @Test
   public void testManualBucketsInfinityAlreadyIncluded() {
     Histogram h = Histogram.build().buckets(1, 2, Double.POSITIVE_INFINITY).name("h").help("help").create();
-    assertArrayEquals(new double[]{1, 2, Double.POSITIVE_INFINITY}, h.buckets, .001);
+    assertArrayEquals(new double[]{1, 2, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
   }
 
   @Test
   public void testLinearBuckets() {
     Histogram h = Histogram.build().name("h").help("help").linearBuckets(1, 2, 3).create();
-    assertArrayEquals(new double[]{1, 3, 5, Double.POSITIVE_INFINITY}, h.buckets, .001);
+    assertArrayEquals(new double[]{1, 3, 5, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
   }
 
   @Test
   public void testExponentialBuckets() {
     Histogram h = Histogram.build().name("h").help("help").exponentialBuckets(2, 2.5, 3).create();
-    assertArrayEquals(new double[]{2, 5, 12.5, Double.POSITIVE_INFINITY}, h.buckets, .001);
+    assertArrayEquals(new double[]{2, 5, 12.5, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
   }
 
   @Test
