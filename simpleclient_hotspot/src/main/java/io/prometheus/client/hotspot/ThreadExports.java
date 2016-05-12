@@ -26,7 +26,6 @@ import java.util.List;
  * </pre>
  */
 public class ThreadExports extends Collector {
-  private static final List<String> EMPTY_LABEL = Collections.emptyList();
 
   private final ThreadMXBean threadBean;
 
@@ -46,7 +45,7 @@ public class ThreadExports extends Collector {
                     "Current thread count of a JVM",
                     Collections.singletonList(
                             new MetricFamilySamples.Sample(
-                                    "jvm_threads_current", EMPTY_LABEL, EMPTY_LABEL,
+                                    "jvm_threads_current",
                                     threadBean.getThreadCount()))));
 
     sampleFamilies.add(
@@ -56,7 +55,7 @@ public class ThreadExports extends Collector {
                     "Daemon thread count of a JVM",
                     Collections.singletonList(
                             new MetricFamilySamples.Sample(
-                                    "jvm_threads_daemon", EMPTY_LABEL, EMPTY_LABEL,
+                                    "jvm_threads_daemon",
                                     threadBean.getDaemonThreadCount()))));
 
     sampleFamilies.add(
@@ -66,7 +65,7 @@ public class ThreadExports extends Collector {
                     "Peak thread count of a JVM",
                     Collections.singletonList(
                             new MetricFamilySamples.Sample(
-                                    "jvm_threads_peak", EMPTY_LABEL, EMPTY_LABEL,
+                                    "jvm_threads_peak",
                                     threadBean.getPeakThreadCount()))));
 
     sampleFamilies.add(
@@ -76,7 +75,7 @@ public class ThreadExports extends Collector {
                     "Started thread count of a JVM",
                     Collections.singletonList(
                             new MetricFamilySamples.Sample(
-                                    "jvm_threads_started_total", EMPTY_LABEL, EMPTY_LABEL,
+                                    "jvm_threads_started_total",
                                     threadBean.getTotalStartedThreadCount()))));
   }
 

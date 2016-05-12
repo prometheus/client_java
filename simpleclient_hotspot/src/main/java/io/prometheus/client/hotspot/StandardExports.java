@@ -52,7 +52,7 @@ public class StandardExports extends Collector {
 
   private static MetricFamilySamples singleMetric(String name, Type type, String help, double value) {
     List<MetricFamilySamples.Sample> samples = Collections.singletonList(
-        new MetricFamilySamples.Sample(name, Collections.<String>emptyList(), Collections.<String>emptyList(), value));
+        new MetricFamilySamples.Sample(name, value));
     return new MetricFamilySamples(name, type, help, samples);
   }
 

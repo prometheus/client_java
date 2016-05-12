@@ -1,8 +1,9 @@
 
 package io.prometheus.client;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -74,14 +75,18 @@ public abstract class Collector {
    */
     public static class Sample {
       public final String name;
-      public final List<String> labelNames;
-      public final List<String> labelValues;  // Must have same length as labelNames.
+      public final Map<String, String> labels;
       public final double value;
 
-      public Sample(String name, List<String> labelNames, List<String> labelValues, double value) {
+      public Sample(String name, double value) {
         this.name = name;
-        this.labelNames = labelNames;
-        this.labelValues = labelValues;
+        this.labels = Collections.EMPTY_MAP;
+        this.value = value;
+      }
+
+      public Sample(String name, Map<String, String> labels, double value) {
+        this.name = name;
+        this.labels = labels;
         this.value = value;
       }
 
@@ -91,16 +96,14 @@ public abstract class Collector {
           return false;
         }
         Sample other = (Sample) obj;
-        return other.name.equals(name) && other.labelNames.equals(labelNames)
-          && other.labelValues.equals(labelValues) && other.value == value;
+        return other.name.equals(name) && other.labels.equals(labels) && other.value == value;
       }
 
       @Override
       public int hashCode() {
         int hash = 1;
         hash = 37 * hash + name.hashCode();
-        hash = 37 * hash + labelNames.hashCode();
-        hash = 37 * hash + labelValues.hashCode();
+        hash = 37 * hash + labels.hashCode();
         long d = Double.doubleToLongBits(value);
         hash = 37 * hash + (int)(d ^ (d >>> 32));
         return hash;
@@ -108,7 +111,7 @@ public abstract class Collector {
 
       @Override
       public String toString() {
-        return "Name: " + name + " LabelNames: " + labelNames + " labelValues: " + labelValues +
+        return "Name: " + name + " LabelNames: " + labels.keySet() + " labelValues: " + labels.values() +
           " Value: " + value;
       }
     }

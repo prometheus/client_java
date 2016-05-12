@@ -1,6 +1,7 @@
 package io.prometheus.client;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -234,7 +235,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> {
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
+      samples.add(new MetricFamilySamples.Sample(fullname, labelsMap(c.getKey()), c.getValue().get()));
     }
     MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.GAUGE, help, samples);
 

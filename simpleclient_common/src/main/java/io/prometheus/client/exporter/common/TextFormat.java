@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 
 public class TextFormat {
   /**
@@ -19,11 +20,11 @@ public class TextFormat {
       writer.write("# TYPE " + metricFamilySamples.name + " " + typeString(metricFamilySamples.type) + "\n");
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
         writer.write(sample.name);
-        if (sample.labelNames.size() > 0) {
+        if (sample.labels != null && !sample.labels.isEmpty()) {
           writer.write("{");
-          for (int i = 0; i < sample.labelNames.size(); ++i) {
+          for (Map.Entry<String, String> label : sample.labels.entrySet()) {
             writer.write(String.format("%s=\"%s\",",
-                sample.labelNames.get(i),  escapeLabelValue(sample.labelValues.get(i))));
+                label.getKey(), escapeLabelValue(label.getValue())));
           }
           writer.write("}");
         }

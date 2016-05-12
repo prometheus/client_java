@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Collections;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -57,9 +58,11 @@ public class Graphite {
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
         m.reset(sample.name);
         writer.write(m.replaceAll("_"));
-        for (int i = 0; i < sample.labelNames.size(); ++i) {
-          m.reset(sample.labelValues.get(i));
-          writer.write("." + sample.labelNames.get(i) + "." + m.replaceAll("_"));
+        if (sample.labels != null && !sample.labels.isEmpty()) {
+          for (Map.Entry<String, String> label : sample.labels.entrySet()) {
+            m.reset(label.getValue());
+            writer.write("." + label.getKey() + "." + m.replaceAll("_"));
+          }
         }
         writer.write(" " + sample.value + " " + now + "\n");
       }

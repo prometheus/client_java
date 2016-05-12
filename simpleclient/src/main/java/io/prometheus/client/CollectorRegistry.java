@@ -112,8 +112,8 @@ public class CollectorRegistry {
     for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(metricFamilySamples())) {
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
         if (sample.name.equals(name)
-            && Arrays.equals(sample.labelNames.toArray(), labelNames)
-            && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
+            && Arrays.equals(sample.labels.keySet().toArray(), labelNames)
+            && Arrays.equals(sample.labels.values().toArray(), labelValues)) {
           return sample.value;
         }
       }

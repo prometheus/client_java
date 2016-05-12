@@ -1,5 +1,7 @@
 package io.prometheus.client;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Arrays;
@@ -50,7 +52,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   protected final String help;
   protected final List<String> labelNames;
 
-  protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();;
+  protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
   protected Child noLabelsChild;
 
   /**
@@ -104,6 +106,17 @@ public abstract class SimpleCollector<Child> extends Collector {
     if (labelNames.size() == 0) {
       noLabelsChild = labels();
     }
+  }
+
+  /**
+   * Return label names and values as map.
+   */
+  protected Map<String, String> labelsMap(List<String> childLabels) {
+    Map<String, String> labels = new HashMap<String, String>();
+    for (int i = 0; i < labelNames.size(); i++) {
+      labels.put(labelNames.get(i), childLabels.get(i));
+    }
+    return labels;
   }
 
   /**
@@ -173,7 +186,6 @@ public abstract class SimpleCollector<Child> extends Collector {
     String namespace = "";
     String subsystem = "";
     String name = "";
-    String fullname = "";
     String help = "";
     String[] labelNames = new String[]{};
     // Some metrics require additional setup before the initialization can be done.
