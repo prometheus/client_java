@@ -1,9 +1,12 @@
 package io.prometheus.client;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,10 +69,10 @@ public class SummaryTest {
   }
   
   private Double getLabelsCount(String labelValue) {
-    return registry.getSampleValue("labels_count", new String[]{"l"}, new String[]{labelValue});
+    return registry.getSampleValue("labels_count", "l", labelValue);
   }
   private Double getLabelsSum(String labelValue) {
-    return registry.getSampleValue("labels_sum", new String[]{"l"}, new String[]{labelValue});
+    return registry.getSampleValue("labels_sum", "l", labelValue);
   }
 
   @Test
@@ -96,12 +99,9 @@ public class SummaryTest {
     List<Collector.MetricFamilySamples> mfs = labels.collect();
     
     ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
-    ArrayList<String> labelNames = new ArrayList<String>();
-    labelNames.add("l");
-    ArrayList<String> labelValues = new ArrayList<String>();
-    labelValues.add("a");
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
+    Map<String, String> labels = singletonMap("l", "a");
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labels, 1.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labels, 2.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.SUMMARY, "help", samples);
 
     assertEquals(1, mfs.size());

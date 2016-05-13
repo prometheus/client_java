@@ -31,23 +31,19 @@ public class ThreadExportsTest {
   public void testThreadPools() {
     assertEquals(
             300L,
-            registry.getSampleValue(
-                    "jvm_threads_current", EMPTY_LABEL, EMPTY_LABEL),
+            registry.getSampleValue("jvm_threads_current"),
             .0000001);
     assertEquals(
             200L,
-            registry.getSampleValue(
-                    "jvm_threads_daemon", EMPTY_LABEL, EMPTY_LABEL),
+            registry.getSampleValue("jvm_threads_daemon"),
             .0000001);
     assertEquals(
             301L,
-            registry.getSampleValue(
-                    "jvm_threads_peak", EMPTY_LABEL, EMPTY_LABEL),
+            registry.getSampleValue("jvm_threads_peak"),
             .0000001);
     assertEquals(
             503L,
-            registry.getSampleValue(
-                    "jvm_threads_started_total", EMPTY_LABEL, EMPTY_LABEL),
+            registry.getSampleValue("jvm_threads_started_total"),
             .0000001);
   }
 }

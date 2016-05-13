@@ -2,8 +2,11 @@ package io.prometheus.client.dropwizard;
 
 import com.codahale.metrics.*;
 
+import io.prometheus.client.Collector;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
@@ -13,7 +16,7 @@ import java.util.logging.Logger;
 /**
  * Collect dropwizard metrics from a MetricRegistry.
  */
-public class DropwizardExports extends io.prometheus.client.Collector {
+public class DropwizardExports extends Collector {
     private MetricRegistry registry;
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
 
@@ -28,7 +31,7 @@ public class DropwizardExports extends io.prometheus.client.Collector {
      * Export counter as prometheus counter.
      */
     List<MetricFamilySamples> fromCounter(String name, Counter counter) {
-        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name, new ArrayList<String>(), new ArrayList<String>(),
+        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name,
                 new Long(counter.getCount()).doubleValue());
         return Arrays.asList(new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(name, counter), Arrays.asList(sample)));
     }
@@ -53,8 +56,7 @@ public class DropwizardExports extends io.prometheus.client.Collector {
                     obj.getClass().getName()));
             return new ArrayList<MetricFamilySamples>();
         }
-        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name,
-                new ArrayList<String>(), new ArrayList<String>(), value);
+        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name, value);
         return Arrays.asList(new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(name, gauge), Arrays.asList(sample)));
     }
 
@@ -73,14 +75,14 @@ public class DropwizardExports extends io.prometheus.client.Collector {
             sum += i;
         }
         List<MetricFamilySamples.Sample> samples = Arrays.asList(
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.5"), snapshot.getMedian() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.75"), snapshot.get75thPercentile() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.95"), snapshot.get95thPercentile() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.98"), snapshot.get98thPercentile() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.99"), snapshot.get99thPercentile() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.999"), snapshot.get999thPercentile() * factor),
-                new MetricFamilySamples.Sample(name + "_count", new ArrayList<String>(), new ArrayList<String>(), count),
-                new MetricFamilySamples.Sample(name + "_sum", new ArrayList<String>(), new ArrayList<String>(), sum * factor)
+                new MetricFamilySamples.Sample(name, Collections.singletonMap("quantile", "0.5"), snapshot.getMedian() * factor),
+                new MetricFamilySamples.Sample(name, Collections.singletonMap("quantile", "0.75"), snapshot.get75thPercentile() * factor),
+                new MetricFamilySamples.Sample(name, Collections.singletonMap("quantile", "0.95"), snapshot.get95thPercentile() * factor),
+                new MetricFamilySamples.Sample(name, Collections.singletonMap("quantile", "0.98"), snapshot.get98thPercentile() * factor),
+                new MetricFamilySamples.Sample(name, Collections.singletonMap("quantile", "0.99"), snapshot.get99thPercentile() * factor),
+                new MetricFamilySamples.Sample(name, Collections.singletonMap("quantile", "0.999"), snapshot.get999thPercentile() * factor),
+                new MetricFamilySamples.Sample(name + "_count", count),
+                new MetricFamilySamples.Sample(name + "_sum", sum * factor)
         );
         return Arrays.asList(
                 new MetricFamilySamples(name, Type.SUMMARY, helpMessage, samples)
@@ -110,8 +112,6 @@ public class DropwizardExports extends io.prometheus.client.Collector {
         return Arrays.asList(
                 new MetricFamilySamples(name + "_total", Type.COUNTER, getHelpMessage(name, meter),
                         Arrays.asList(new MetricFamilySamples.Sample(name + "_total",
-                                new ArrayList<String>(),
-                                new ArrayList<String>(),
                                 meter.getCount())))
 
         );

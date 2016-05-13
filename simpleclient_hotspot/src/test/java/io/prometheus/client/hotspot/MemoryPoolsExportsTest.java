@@ -47,44 +47,32 @@ public class MemoryPoolsExportsTest {
     assertEquals(
         500000L,
         registry.getSampleValue(
-            "jvm_memory_pool_bytes_used",
-            new String[]{"pool"},
-            new String[]{"PS Eden Space"}),
+            "jvm_memory_pool_bytes_used", "pool", "PS Eden Space"),
         .0000001);
     assertEquals(
         1000000L,
         registry.getSampleValue(
-            "jvm_memory_pool_bytes_committed",
-            new String[]{"pool"},
-            new String[]{"PS Eden Space"}),
+            "jvm_memory_pool_bytes_committed", "pool", "PS Eden Space"),
         .0000001);
     assertEquals(
         2000000L,
         registry.getSampleValue(
-            "jvm_memory_pool_bytes_max",
-            new String[]{"pool"},
-            new String[]{"PS Eden Space"}),
+            "jvm_memory_pool_bytes_max", "pool", "PS Eden Space"),
         .0000001);
     assertEquals(
         10000L,
         registry.getSampleValue(
-            "jvm_memory_pool_bytes_used",
-            new String[]{"pool"},
-            new String[]{"PS Old Gen"}),
+            "jvm_memory_pool_bytes_used", "pool", "PS Old Gen"),
         .0000001);
     assertEquals(
         20000L,
         registry.getSampleValue(
-            "jvm_memory_pool_bytes_committed",
-            new String[]{"pool"},
-            new String[]{"PS Old Gen"}),
+            "jvm_memory_pool_bytes_committed", "pool", "PS Old Gen"),
         .0000001);
     assertEquals(
         3000000L,
         registry.getSampleValue(
-            "jvm_memory_pool_bytes_max",
-            new String[]{"pool"},
-            new String[]{"PS Old Gen"}),
+            "jvm_memory_pool_bytes_max", "pool", "PS Old Gen"),
         .0000001);
   }
 
@@ -93,44 +81,32 @@ public class MemoryPoolsExportsTest {
     assertEquals(
         500000L,
         registry.getSampleValue(
-            "jvm_memory_bytes_used",
-            new String[]{"area"},
-            new String[]{"heap"}),
+            "jvm_memory_bytes_used", "area", "heap"),
         .0000001);
     assertEquals(
         1000000L,
         registry.getSampleValue(
-            "jvm_memory_bytes_committed",
-            new String[]{"area"},
-            new String[]{"heap"}),
+            "jvm_memory_bytes_committed", "area", "heap"),
         .0000001);
     assertEquals(
         2000000L,
         registry.getSampleValue(
-            "jvm_memory_bytes_max",
-            new String[]{"area"},
-            new String[]{"heap"}),
+            "jvm_memory_bytes_max", "area", "heap"),
         .0000001);
     assertEquals(
         10000L,
         registry.getSampleValue(
-            "jvm_memory_bytes_used",
-            new String[]{"area"},
-            new String[]{"nonheap"}),
+            "jvm_memory_bytes_used", "area", "nonheap"),
         .0000001);
     assertEquals(
         20000L,
         registry.getSampleValue(
-            "jvm_memory_bytes_committed",
-            new String[]{"area"},
-            new String[]{"nonheap"}),
+            "jvm_memory_bytes_committed", "area", "nonheap"),
         .0000001);
     assertEquals(
         3000000L,
         registry.getSampleValue(
-            "jvm_memory_bytes_max",
-            new String[]{"area"},
-            new String[]{"nonheap"}),
+            "jvm_memory_bytes_max", "area", "nonheap"),
         .0000001);
   }
 }

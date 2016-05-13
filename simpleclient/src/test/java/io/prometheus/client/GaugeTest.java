@@ -1,5 +1,6 @@
 package io.prometheus.client;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -92,9 +93,9 @@ public class GaugeTest {
   public void noLabelsDefaultZeroValue() {
     assertEquals(0.0, getValue(), .001);
   }
-  
+
   private Double getLabelsValue(String labelValue) {
-    return registry.getSampleValue("labels", new String[]{"l"}, new String[]{labelValue});
+    return registry.getSampleValue("labels", "l", labelValue);
   }
 
   @Test
@@ -115,11 +116,7 @@ public class GaugeTest {
     List<Collector.MetricFamilySamples> mfs = labels.collect();
     
     ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
-    ArrayList<String> labelNames = new ArrayList<String>();
-    labelNames.add("l");
-    ArrayList<String> labelValues = new ArrayList<String>();
-    labelValues.add("a");
-    samples.add(new Collector.MetricFamilySamples.Sample("labels", labelNames, labelValues, 1.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels", singletonMap("l", "a"), 1.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.GAUGE, "help", samples);
 
     assertEquals(1, mfs.size());

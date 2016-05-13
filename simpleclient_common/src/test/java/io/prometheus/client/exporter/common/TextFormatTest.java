@@ -76,6 +76,16 @@ public class TextFormatTest {
   }
 
   @Test
+  public void testSortedLabelsOutput() throws IOException {
+    Gauge labels = (Gauge) Gauge.build().name("labels").help("help").labelNames("m", "s", "l").register(registry);
+    labels.labels("a", "b", "c").inc();
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP labels help\n"
+            + "# TYPE labels gauge\n"
+            + "labels{l=\"c\",m=\"a\",s=\"b\",} 1.0\n", writer.toString());
+  }
+
+  @Test
   public void testLabelValuesEscaped() throws IOException {
     Gauge labels = (Gauge) Gauge.build().name("labels").help("help").labelNames("l").register(registry);
     labels.labels("a\nb\\c\"d").inc();

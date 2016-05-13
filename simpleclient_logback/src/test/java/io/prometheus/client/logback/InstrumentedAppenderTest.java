@@ -70,7 +70,6 @@ public class InstrumentedAppenderTest {
   }
 
   private int getLogLevelCount(String level) {
-    return CollectorRegistry.defaultRegistry.getSampleValue(COUNTER_NAME, 
-            new String[]{"level"}, new String[]{level}).intValue();
+    return CollectorRegistry.defaultRegistry.getSampleValue(COUNTER_NAME, "level", level).intValue();
   }
 }

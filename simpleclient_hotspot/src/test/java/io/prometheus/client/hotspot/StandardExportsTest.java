@@ -44,17 +44,17 @@ public class StandardExportsTest {
     new StandardExports(new StatusReaderTest(), osBean, runtimeBean).register(registry);
 
     assertEquals(123 / 1.0E9,
-        registry.getSampleValue("process_cpu_seconds_total", new String[]{}, new String[]{}), .0000001);
+        registry.getSampleValue("process_cpu_seconds_total"), .0000001);
     assertEquals(10,
-        registry.getSampleValue("process_open_fds", new String[]{}, new String[]{}), .001);
+        registry.getSampleValue("process_open_fds"), .001);
     assertEquals(20,
-        registry.getSampleValue("process_max_fds", new String[]{}, new String[]{}), .001);
+        registry.getSampleValue("process_max_fds"), .001);
     assertEquals(456 / 1.0E3,
-        registry.getSampleValue("process_start_time_seconds", new String[]{}, new String[]{}), .0000001);
+        registry.getSampleValue("process_start_time_seconds"), .0000001);
     assertEquals(5900 * 1024,
-        registry.getSampleValue("process_virtual_memory_bytes", new String[]{}, new String[]{}), .001);
+        registry.getSampleValue("process_virtual_memory_bytes"), .001);
     assertEquals(360 * 1024,
-        registry.getSampleValue("process_resident_memory_bytes", new String[]{}, new String[]{}), .001);
+        registry.getSampleValue("process_resident_memory_bytes"), .001);
   }
 
   @Test
@@ -69,7 +69,7 @@ public class StandardExportsTest {
     new StandardExports(new StatusReaderBroken(), osBean, runtimeBean).register(registry);
 
     assertEquals(123 / 1.0E9,
-      registry.getSampleValue("process_cpu_seconds_total", new String[]{}, new String[]{}), .0000001);
-    assertNull(registry.getSampleValue("process_resident_memory_bytes", new String[]{}, new String[]{}));
+      registry.getSampleValue("process_cpu_seconds_total"), .0000001);
+    assertNull(registry.getSampleValue("process_resident_memory_bytes"));
   }
 }

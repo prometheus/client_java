@@ -38,30 +38,22 @@ public class GarbageCollectorExportsTest {
     assertEquals(
         100L,
         registry.getSampleValue(
-            "jvm_gc_collection_seconds_count",
-            new String[]{"gc"},
-            new String[]{"MyGC1"}),
+            "jvm_gc_collection_seconds_count", "gc", "MyGC1"),
         .0000001);
     assertEquals(
         10d,
         registry.getSampleValue(
-            "jvm_gc_collection_seconds_sum",
-            new String[]{"gc"},
-            new String[]{"MyGC1"}),
+            "jvm_gc_collection_seconds_sum", "gc", "MyGC1"),
         .0000001);
     assertEquals(
         200L,
         registry.getSampleValue(
-            "jvm_gc_collection_seconds_count",
-            new String[]{"gc"},
-            new String[]{"MyGC2"}),
+            "jvm_gc_collection_seconds_count", "gc", "MyGC2"),
         .0000001);
     assertEquals(
         20d,
         registry.getSampleValue(
-            "jvm_gc_collection_seconds_sum",
-            new String[]{"gc"},
-            new String[]{"MyGC2"}),
+            "jvm_gc_collection_seconds_sum", "gc", "MyGC2"),
         .0000001);
   }
 }
