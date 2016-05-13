@@ -1,10 +1,10 @@
 package io.prometheus.client;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -38,9 +38,8 @@ public class HistogramTest {
     return registry.getSampleValue("nolabels_sum").doubleValue();
   }
   private double getBucket(double b) {
-    return registry.getSampleValue("nolabels_bucket", 
-        new String[]{"le"},
-        new String[]{Collector.doubleToGoString(b)}).doubleValue();
+    return registry.getSampleValue("nolabels_bucket",
+            "le", Collector.doubleToGoString(b)).doubleValue();
   }
   
   @Test
@@ -125,10 +124,10 @@ public class HistogramTest {
   }
   
   private Double getLabelsCount(String labelValue) {
-    return registry.getSampleValue("labels_count", new String[]{"l"}, new String[]{labelValue});
+    return registry.getSampleValue("labels_count", "l", labelValue);
   }
   private Double getLabelsSum(String labelValue) {
-    return registry.getSampleValue("labels_sum", new String[]{"l"}, new String[]{labelValue});
+    return registry.getSampleValue("labels_sum", "l", labelValue);
   }
 
   @Test
@@ -160,7 +159,7 @@ public class HistogramTest {
     List<Collector.MetricFamilySamples> mfs = labels.collect();
     
     List<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
-    Map<String, String> labels = Collections.singletonMap("l", "a");
+    Map<String, String> labels = singletonMap("l", "a");
     for (String bucket: new String[]{"0.005", "0.01", "0.025", "0.05", "0.075", "0.1", "0.25", "0.5", "0.75", "1.0"}) {
       Map<String, String> labelsWithLe = new HashMap<String, String>(labels);
       labelsWithLe.put("le", bucket);

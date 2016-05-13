@@ -1,11 +1,10 @@
 package io.prometheus.client;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -100,7 +99,7 @@ public class CollectorRegistry {
    * This is inefficient, and intended only for use in unittests.
    */
   public Double getSampleValue(String name) {
-    return getSampleValue(name, new String[]{}, new String[]{});
+    return getSampleValue(name, Collections.EMPTY_MAP);
   }
 
   /**
@@ -108,12 +107,19 @@ public class CollectorRegistry {
    * <p>
    * This is inefficient, and intended only for use in unittests.
    */
-  public Double getSampleValue(String name, String[] labelNames, String[] labelValues) {
+  public Double getSampleValue(String name, String labelName, String labelValue) {
+    return getSampleValue(name, Collections.singletonMap(labelName, labelValue));
+  }
+
+  /**
+   * Returns the given value, or null if it doesn't exist.
+   * <p>
+   * This is inefficient, and intended only for use in unittests.
+   */
+  public Double getSampleValue(String name, Map<String, String> labels) {
     for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(metricFamilySamples())) {
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
-        if (sample.name.equals(name)
-            && Arrays.equals(sample.labels.keySet().toArray(), labelNames)
-            && Arrays.equals(sample.labels.values().toArray(), labelValues)) {
+        if (sample.name.equals(name) && sample.labels.equals(labels)) {
           return sample.value;
         }
       }

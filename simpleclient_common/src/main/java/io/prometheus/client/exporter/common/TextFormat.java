@@ -19,16 +19,7 @@ public class TextFormat {
       writer.write("# HELP " + metricFamilySamples.name + " " + escapeHelp(metricFamilySamples.help) + "\n");
       writer.write("# TYPE " + metricFamilySamples.name + " " + typeString(metricFamilySamples.type) + "\n");
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
-        writer.write(sample.name);
-        if (sample.labels != null && !sample.labels.isEmpty()) {
-          writer.write("{");
-          for (Map.Entry<String, String> label : sample.labels.entrySet()) {
-            writer.write(String.format("%s=\"%s\",",
-                label.getKey(), escapeLabelValue(label.getValue())));
-          }
-          writer.write("}");
-        }
-        writer.write(" " + Collector.doubleToGoString(sample.value) + "\n");
+        writer.write(sample.toString() + "\n");
       }
     }
   }

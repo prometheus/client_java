@@ -4,6 +4,7 @@ package io.prometheus.client;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
@@ -111,8 +112,26 @@ public abstract class Collector {
 
       @Override
       public String toString() {
-        return "Name: " + name + " LabelNames: " + labels.keySet() + " labelValues: " + labels.values() +
-          " Value: " + value;
+        StringBuilder sb = new StringBuilder();
+        sb.append(name);
+        if (labels != null && !labels.isEmpty()) {
+          sb.append('{');
+          final Map<String, String> sortedLabels = new TreeMap<String, String>(labels);
+          for (Map.Entry<String, String> label : sortedLabels.entrySet()) {
+            sb.append(label.getKey())
+                    .append('=')
+                    .append('\"')
+                    .append(escapeLabelValue(label.getValue()))
+                    .append("\",");
+          }
+          sb.append('}');
+        }
+        sb.append(' ').append(doubleToGoString(value));
+        return sb.toString();
+      }
+
+      private String escapeLabelValue(String s) {
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
       }
     }
   }

@@ -1,9 +1,9 @@
 package io.prometheus.client;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import org.junit.Before;
@@ -47,7 +47,7 @@ public class CounterTest {
   }
   
   private Double getLabelsValue(String labelValue) {
-    return registry.getSampleValue("labels", new String[]{"l"}, new String[]{labelValue});
+    return registry.getSampleValue("labels", "l", labelValue);
   }
 
   @Test
@@ -68,7 +68,7 @@ public class CounterTest {
     List<Collector.MetricFamilySamples> mfs = labels.collect();
     
     ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
-    samples.add(new Collector.MetricFamilySamples.Sample("labels", Collections.singletonMap("l", "a"), 1.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels", singletonMap("l", "a"), 1.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.COUNTER, "help", samples);
 
     assertEquals(1, mfs.size());

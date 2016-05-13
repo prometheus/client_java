@@ -22,7 +22,7 @@ public class SimpleCollectorTest {
   }
   
   private Double getValue(String labelValue) {
-    return registry.getSampleValue("labels", new String[]{"l"}, new String[]{labelValue});
+    return registry.getSampleValue("labels", "l", labelValue);
   }
 
   private Double getValueNoLabels() {

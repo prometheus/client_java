@@ -1,6 +1,5 @@
 package io.prometheus.client.dropwizard;
 
-
 import com.codahale.metrics.*;
 import io.prometheus.client.CollectorRegistry;
 import org.junit.Before;
@@ -71,16 +70,11 @@ public class DropwizardExportsTest {
         metricRegistry.register("float_gauge", floatGauge);
         metricRegistry.register("boolean_gauge", booleanGauge);
 
-        assertEquals(new Double(1234),
-                registry.getSampleValue("integer_gauge", new String[]{}, new String[]{}));
-        assertEquals(new Double(1234),
-                registry.getSampleValue("long_gauge", new String[]{}, new String[]{}));
-        assertEquals(new Double(1.234),
-                registry.getSampleValue("double_gauge", new String[]{}, new String[]{}));
-        assertEquals(new Double(0.1234F),
-                registry.getSampleValue("float_gauge", new String[]{}, new String[]{}));
-        assertEquals(new Double(1),
-                registry.getSampleValue("boolean_gauge", new String[]{}, new String[]{}));
+        assertEquals(new Double(1234), registry.getSampleValue("integer_gauge"));
+        assertEquals(new Double(1234), registry.getSampleValue("long_gauge"));
+        assertEquals(new Double(1.234), registry.getSampleValue("double_gauge"));
+        assertEquals(new Double(0.1234F), registry.getSampleValue("float_gauge"));
+        assertEquals(new Double(1), registry.getSampleValue("boolean_gauge"));
     }
 
     @Test
@@ -98,7 +92,7 @@ public class DropwizardExportsTest {
     void assertRegistryContainsMetrics(String... metrics) {
         for (String metric : metrics) {
             assertNotEquals(String.format("Metric %s should exist", metric), null,
-                    registry.getSampleValue(metric, new String[]{}, new String[]{}));
+                    registry.getSampleValue(metric));
         }
     }
 
@@ -114,10 +108,10 @@ public class DropwizardExportsTest {
         assertEquals(new Double(4950), registry.getSampleValue("hist_sum"));
         for (double b : Arrays.asList(0.75, 0.95, 0.98, 0.99)) {
             assertEquals(new Double((b - 0.01) * 100), registry.getSampleValue("hist",
-                    new String[]{"quantile"}, new String[]{String.format("%.2f", b)}));
+                    "quantile", String.format("%.2f", b)));
         }
-        assertEquals(new Double(99), registry.getSampleValue("hist", new String[]{"quantile"},
-                new String[]{"0.999"}));
+        assertEquals(new Double(99), registry.getSampleValue("hist",
+                "quantile", "0.999"));
     }
 
     @Test
@@ -135,7 +129,7 @@ public class DropwizardExportsTest {
         Thread.sleep(1L);
         time.stop();
         // We slept for 1Ms so we ensure that all timers are above 1ms:
-        assertTrue(registry.getSampleValue("timer", new String[]{"quantile"}, new String[]{"0.99"}) > 0.001);
+        assertTrue(registry.getSampleValue("timer", "quantile", "0.99") > 0.001);
         assertEquals(new Double(1.0D), registry.getSampleValue("timer_count"));
         assertRegistryContainsMetrics("timer_count", "timer_sum");
     }
