@@ -1,5 +1,6 @@
 package io.prometheus.client;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,14 +40,44 @@ import java.util.Map;
  */
 public class Summary extends SimpleCollector<Summary.Child> {
 
+  public static final String QUANTILE_LABEL = "quantile";
+  public static final double[] DEFAULT_QUANTILE_VALUES = new double[] { .5, .95, .98, .99, .999 };
+
+  private final double[] quantiles;
+
   Summary(Builder b) {
     super(b);
+    this.quantiles = b.quantiles;
   }
 
   public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
+    private double[] quantiles = DEFAULT_QUANTILE_VALUES;
+
     @Override
     public Summary create() {
+      if (quantiles != null && quantiles.length > 0) {
+        for (double q : quantiles) {
+          if (q < 0 || q > 1) {
+            throw new IllegalArgumentException("quantile value must be in interval [0, 1]");
+          }
+        }
+      }
+
+      for (String label: labelNames) {
+        if (label.equals(QUANTILE_LABEL)) {
+          throw new IllegalStateException("Summary cannot have a label named '" + QUANTILE_LABEL + "'.");
+        }
+      }
+
       return new Summary(this);
+    }
+
+    /**
+     * Set quantile values to be calculated.
+     */
+    public Builder quantiles(double... quantiles) {
+      this.quantiles = quantiles;
+      return this;
     }
   }
 
@@ -93,11 +124,80 @@ public class Summary extends SimpleCollector<Summary.Child> {
     public static class Value {
       public final double count;
       public final double sum;
+      public final double[] values;
 
-      private Value(double count, double sum) {
+      private Value(double count, double sum, double[] values) {
         this.count = count;
         this.sum = sum;
+        this.values = values;
       }
+
+      /**
+       * Return the φ-quantile estimation of the observed events.
+       * The approximate value is calculated by interpolation
+       * between adjacent elements in the array of observed values.
+       *
+       * @param φ a given quantile, in {@code [0, 1]}
+       * @return the approximate value of the the φ-quantile
+       */
+      public double getQuantile(double φ) {
+        if (φ < 0 || φ > 1) {
+          throw new IllegalArgumentException("quantile value must be in interval [0, 1]");
+        }
+
+        final int length = values.length;
+
+        if (length == 0) {
+          return 0;
+        }
+
+        if (length == 1) {
+          return values[0];
+        }
+
+        final double index = index(φ);
+
+        if (index < 1) {
+          return values[0];
+        }
+
+        if (index >= length) {
+          return values[length - 1];
+        }
+
+        return approxQuantile(index);
+      }
+
+      /**
+       * Find the index of the element of the array
+       * that can be used to compute the φ-quantile value.
+       *
+       * @param φ a given quantile
+       * @return the index for the array of values
+       */
+      private double index(final double φ) {
+        final int length = values.length;
+        return Double.compare(φ, 0) == 0 ? 0 :
+               Double.compare(φ, 1) == 0 ? length :
+               φ * (length + 1);
+      }
+
+      /**
+       * Calculate an approximate quantile from the observed
+       * value at {@code index}.
+       *
+       * @param index the index in the array of observed values
+       * @return the approximate quantile value
+       */
+      private double approxQuantile(final double index) {
+        final int intIdx = (int) index;
+
+        final double lower = values[intIdx - 1];
+        final double upper = values[intIdx];
+
+        return lower + (index - Math.floor(index)) * (upper - lower);
+      }
+
     }
 
     // Having these separate leaves us open to races,
@@ -107,6 +207,8 @@ public class Summary extends SimpleCollector<Summary.Child> {
     private final DoubleAdder count = new DoubleAdder();
     private final DoubleAdder sum = new DoubleAdder();
 
+    private final UniformSampling sampling = new UniformSampling();
+
     static TimeProvider timeProvider = new TimeProvider();
     /**
      * Observe the given amount.
@@ -114,6 +216,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
     public void observe(double amt) {
       count.add(1);
       sum.add(amt);
+      sampling.add(amt);
     }
     /**
      * Start a timer to track a duration.
@@ -129,7 +232,9 @@ public class Summary extends SimpleCollector<Summary.Child> {
      * <em>Warning:</em> The definition of {@link Value} is subject to change.
      */
     public Value get() {
-      return new Value(count.sum(), sum.sum());
+      final double[] values = sampling.getValues();
+      Arrays.sort(values);
+      return new Value(count.sum(), sum.sum(), values);
     }
   }
 
@@ -154,6 +259,15 @@ public class Summary extends SimpleCollector<Summary.Child> {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
       Child.Value v = c.getValue().get();
+      if (quantiles != null && quantiles.length > 0) {
+        List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
+        labelNamesWithQuantile.add(QUANTILE_LABEL);
+        for (double q : quantiles) {
+          List<String> labelValuesWithQuantile = new ArrayList<String>(c.getKey());
+          labelValuesWithQuantile.add(String.valueOf(q));
+          samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, v.getQuantile(q)));
+        }
+      }
       samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
     }

@@ -91,6 +91,24 @@ public class SummaryTest {
   }
 
   @Test
+  public void testQuantiles() {
+    for (double d : new double[] { 1.0, 2.0 }) {
+      noLabels.observe(d);
+    }
+
+    assertEquals(2.0, getCount(), .0);
+    assertEquals(3.0, getSum(), .001);
+
+    assertEquals(1.0, noLabels.labels().get().getQuantile(0), .001);
+    assertEquals(1.0, noLabels.labels().get().getQuantile(0.25), .001);
+    assertEquals(1.5, noLabels.labels().get().getQuantile(0.50), .001);
+    assertEquals(2.0, noLabels.labels().get().getQuantile(0.98), .001);
+    assertEquals(2.0, noLabels.labels().get().getQuantile(0.99), .001);
+    assertEquals(2.0, noLabels.labels().get().getQuantile(0.999), .001);
+    assertEquals(2.0, noLabels.labels().get().getQuantile(1), .001);
+  }
+
+  @Test
   public void testCollect() {
     labels.labels("a").observe(2);
     List<Collector.MetricFamilySamples> mfs = labels.collect();
@@ -100,6 +118,13 @@ public class SummaryTest {
     labelNames.add("l");
     ArrayList<String> labelValues = new ArrayList<String>();
     labelValues.add("a");
+    ArrayList<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
+    labelNamesWithQuantile.add(Summary.QUANTILE_LABEL);
+    for (double q : Summary.DEFAULT_QUANTILE_VALUES) {
+      List<String> labelValuesWithQuantile = new ArrayList<String>(labelValues);
+      labelValuesWithQuantile.add(String.valueOf(q));
+      samples.add(new Collector.MetricFamilySamples.Sample("labels", labelNamesWithQuantile, labelValuesWithQuantile, 2.0));
+    }
     samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
     samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.SUMMARY, "help", samples);
