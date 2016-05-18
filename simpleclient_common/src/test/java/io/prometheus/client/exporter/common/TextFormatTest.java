@@ -61,11 +61,6 @@ public class TextFormatTest {
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP nolabels help\n"
                  + "# TYPE nolabels summary\n"
-                 + "nolabels{quantile=\"0.5\",} 2.0\n"
-                 + "nolabels{quantile=\"0.95\",} 2.0\n"
-                 + "nolabels{quantile=\"0.98\",} 2.0\n"
-                 + "nolabels{quantile=\"0.99\",} 2.0\n"
-                 + "nolabels{quantile=\"0.999\",} 2.0\n"
                  + "nolabels_count 1.0\n"
                  + "nolabels_sum 2.0\n", writer.toString());
   }

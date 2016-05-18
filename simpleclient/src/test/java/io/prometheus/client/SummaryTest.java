@@ -1,5 +1,7 @@
 package io.prometheus.client;
 
+import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -11,14 +13,18 @@ import org.junit.Test;
 
 public class SummaryTest {
 
+  static final double[] QUANTILE_VALUES = {0, .25, .5, .95, .98, .99, .999, 1.0};
+  static final double[] EXPECTED_QUANTILES = {1, 1, 1.5, 2, 2, 2, 2, 2};
+
   CollectorRegistry registry;
-  Summary noLabels, labels;
+  Summary noLabels, labels, quantiles;
 
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
     noLabels = Summary.build().name("nolabels").help("help").register(registry);
     labels = Summary.build().name("labels").help("help").labelNames("l").register(registry);
+    quantiles = Summary.build().name("quant").help("help").quantiles(QUANTILE_VALUES).register(registry);
   }
 
   @After
@@ -72,6 +78,16 @@ public class SummaryTest {
     return registry.getSampleValue("labels_sum", new String[]{"l"}, new String[]{labelValue});
   }
 
+  private Double getQuantileCount() {
+    return registry.getSampleValue("quant_count");
+  }
+  private Double getQuantileSum() {
+    return registry.getSampleValue("quant_sum");
+  }
+  private Double getQuantileValue(double q){
+    return registry.getSampleValue("quant", new String[]{Summary.QUANTILE_LABEL}, new String[]{String.valueOf(q)});
+  }
+
   @Test
   public void testLabels() {
     assertEquals(null, getLabelsCount("a"));
@@ -92,20 +108,20 @@ public class SummaryTest {
 
   @Test
   public void testQuantiles() {
-    for (double d : new double[] { 1.0, 2.0 }) {
-      noLabels.observe(d);
+    for (int i = 0; i < QUANTILE_VALUES.length; i++) {
+      assertEquals(Double.NaN, getQuantileValue(QUANTILE_VALUES[i]), .001);
     }
 
-    assertEquals(2.0, getCount(), .0);
-    assertEquals(3.0, getSum(), .001);
+    for (double d : new double[] { 1.0, 2.0 }) {
+      quantiles.observe(d);
+    }
 
-    assertEquals(1.0, noLabels.labels().get().getQuantile(0), .001);
-    assertEquals(1.0, noLabels.labels().get().getQuantile(0.25), .001);
-    assertEquals(1.5, noLabels.labels().get().getQuantile(0.50), .001);
-    assertEquals(2.0, noLabels.labels().get().getQuantile(0.98), .001);
-    assertEquals(2.0, noLabels.labels().get().getQuantile(0.99), .001);
-    assertEquals(2.0, noLabels.labels().get().getQuantile(0.999), .001);
-    assertEquals(2.0, noLabels.labels().get().getQuantile(1), .001);
+    assertEquals(2.0, getQuantileCount(), .0);
+    assertEquals(3.0, getQuantileSum(), .001);
+
+    for (int i = 0; i < QUANTILE_VALUES.length; i++) {
+      assertEquals(EXPECTED_QUANTILES[i], getQuantileValue(QUANTILE_VALUES[i]), .001);
+    }
   }
 
   @Test
@@ -118,16 +134,29 @@ public class SummaryTest {
     labelNames.add("l");
     ArrayList<String> labelValues = new ArrayList<String>();
     labelValues.add("a");
-    ArrayList<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
-    labelNamesWithQuantile.add(Summary.QUANTILE_LABEL);
-    for (double q : Summary.DEFAULT_QUANTILE_VALUES) {
-      List<String> labelValuesWithQuantile = new ArrayList<String>(labelValues);
-      labelValuesWithQuantile.add(String.valueOf(q));
-      samples.add(new Collector.MetricFamilySamples.Sample("labels", labelNamesWithQuantile, labelValuesWithQuantile, 2.0));
-    }
     samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
     samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.SUMMARY, "help", samples);
+
+    assertEquals(1, mfs.size());
+    assertEquals(mfsFixture, mfs.get(0));
+  }
+
+  @Test
+  public void testCollectWithQuantiles() {
+    quantiles.observe(2);
+    List<Collector.MetricFamilySamples> mfs = quantiles.collect();
+
+    List<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+    List<String> quantileLabelName = singletonList(Summary.QUANTILE_LABEL);
+    for (double q : QUANTILE_VALUES) {
+      List<String> quantileLabelValue = singletonList(String.valueOf(q));
+      samples.add(new Collector.MetricFamilySamples.Sample("quant", quantileLabelName, quantileLabelValue, 2.0));
+    }
+    samples.add(new Collector.MetricFamilySamples.Sample("quant_count", EMPTY_LIST, EMPTY_LIST, 1.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("quant_sum", EMPTY_LIST, EMPTY_LIST, 2.0));
+
+    Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("quant", Collector.Type.SUMMARY, "help", samples);
 
     assertEquals(1, mfs.size());
     assertEquals(mfsFixture, mfs.get(0));

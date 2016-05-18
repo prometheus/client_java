@@ -41,24 +41,24 @@ import java.util.Map;
 public class Summary extends SimpleCollector<Summary.Child> {
 
   public static final String QUANTILE_LABEL = "quantile";
-  public static final double[] DEFAULT_QUANTILE_VALUES = new double[] { .5, .95, .98, .99, .999 };
 
   private final double[] quantiles;
 
   Summary(Builder b) {
     super(b);
     this.quantiles = b.quantiles;
+    initializeNoLabelsChild();
   }
 
   public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
-    private double[] quantiles = DEFAULT_QUANTILE_VALUES;
+    private double[] quantiles;
 
     @Override
     public Summary create() {
       if (quantiles != null && quantiles.length > 0) {
         for (double q : quantiles) {
-          if (q < 0 || q > 1) {
-            throw new IllegalArgumentException("quantile value must be in interval [0, 1]");
+          if (!isValidQuantile(q)) {
+            throw new IllegalArgumentException("quantile value must be 0 <= q <= 1");
           }
         }
       }
@@ -69,6 +69,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
         }
       }
 
+      dontInitializeNoLabelsChild = true;
       return new Summary(this);
     }
 
@@ -90,7 +91,8 @@ public class Summary extends SimpleCollector<Summary.Child> {
 
   @Override
   protected Child newChild() {
-    return new Child();
+    final boolean trackValues = quantiles != null && quantiles.length > 0;
+    return new Child(trackValues);
   }
 
   /**
@@ -126,6 +128,10 @@ public class Summary extends SimpleCollector<Summary.Child> {
       public final double sum;
       public final double[] values;
 
+      private Value(double count, double sum) {
+        this(count, sum, null);
+      }
+
       private Value(double count, double sum, double[] values) {
         this.count = count;
         this.sum = sum;
@@ -137,25 +143,27 @@ public class Summary extends SimpleCollector<Summary.Child> {
        * The approximate value is calculated by interpolation
        * between adjacent elements in the array of observed values.
        *
-       * @param φ a given quantile, in {@code [0, 1]}
+       * @param q a given quantile, where 0 <= q <= 1
        * @return the approximate value of the the φ-quantile
        */
-      public double getQuantile(double φ) {
-        if (φ < 0 || φ > 1) {
-          throw new IllegalArgumentException("quantile value must be in interval [0, 1]");
+      public double getQuantile(double q) {
+        if (!isValidQuantile(q)) {
+          throw new IllegalArgumentException("quantile value must be 0 <= q <= 1");
+        }
+
+        if (values == null || values.length == 0) {
+          return Double.NaN;
         }
 
         final int length = values.length;
-
-        if (length == 0) {
-          return 0;
-        }
 
         if (length == 1) {
           return values[0];
         }
 
-        final double index = index(φ);
+        final double index = Double.compare(q, 0) == 0 ? 0 :
+                             Double.compare(q, 1) == 0 ? length :
+                             q * (length + 1);
 
         if (index < 1) {
           return values[0];
@@ -165,39 +173,12 @@ public class Summary extends SimpleCollector<Summary.Child> {
           return values[length - 1];
         }
 
-        return approxQuantile(index);
-      }
-
-      /**
-       * Find the index of the element of the array
-       * that can be used to compute the φ-quantile value.
-       *
-       * @param φ a given quantile
-       * @return the index for the array of values
-       */
-      private double index(final double φ) {
-        final int length = values.length;
-        return Double.compare(φ, 0) == 0 ? 0 :
-               Double.compare(φ, 1) == 0 ? length :
-               φ * (length + 1);
-      }
-
-      /**
-       * Calculate an approximate quantile from the observed
-       * value at {@code index}.
-       *
-       * @param index the index in the array of observed values
-       * @return the approximate quantile value
-       */
-      private double approxQuantile(final double index) {
         final int intIdx = (int) index;
-
         final double lower = values[intIdx - 1];
         final double upper = values[intIdx];
 
         return lower + (index - Math.floor(index)) * (upper - lower);
       }
-
     }
 
     // Having these separate leaves us open to races,
@@ -207,16 +188,27 @@ public class Summary extends SimpleCollector<Summary.Child> {
     private final DoubleAdder count = new DoubleAdder();
     private final DoubleAdder sum = new DoubleAdder();
 
-    private final UniformSampling sampling = new UniformSampling();
+    private final UniformSampling sampling;
 
     static TimeProvider timeProvider = new TimeProvider();
+
+    public Child() {
+      this(false);
+    }
+
+    public Child(boolean trackValues) {
+      this.sampling = trackValues ? new UniformSampling() : null;
+    }
+
     /**
      * Observe the given amount.
      */
     public void observe(double amt) {
       count.add(1);
       sum.add(amt);
-      sampling.add(amt);
+      if (sampling != null) {
+        sampling.add(amt);
+      }
     }
     /**
      * Start a timer to track a duration.
@@ -232,9 +224,13 @@ public class Summary extends SimpleCollector<Summary.Child> {
      * <em>Warning:</em> The definition of {@link Value} is subject to change.
      */
     public Value get() {
-      final double[] values = sampling.getValues();
-      Arrays.sort(values);
-      return new Value(count.sum(), sum.sum(), values);
+      if (sampling != null) {
+        double[] values = sampling.getValues();
+        Arrays.sort(values);
+        return new Value(count.sum(), sum.sum(), values);
+      } else {
+        return new Value(count.sum(), sum.sum());
+      }
     }
   }
 
@@ -252,6 +248,10 @@ public class Summary extends SimpleCollector<Summary.Child> {
    */
   public Timer startTimer() {
     return noLabelsChild.startTimer();
+  }
+
+  static boolean isValidQuantile(double q) {
+    return q >= 0 && q <= 1;
   }
 
   @Override
