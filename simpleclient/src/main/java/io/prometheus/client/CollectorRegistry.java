@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -48,7 +47,7 @@ public class CollectorRegistry {
   public void clear() {
     collectors.clear();
   }
- 
+
   /**
    * Enumeration of metrics of all registered collectors.
    */
