@@ -25,7 +25,7 @@ public class DropwizardExports extends io.prometheus.client.Collector {
     }
 
     /**
-     * Export counter as prometheus counter.
+     * Export counter as Prometheus <a href="https://prometheus.io/docs/concepts/metric_types/#gauge">Gauge</a>.
      */
     List<MetricFamilySamples> fromCounter(String name, Counter counter) {
         MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name, new ArrayList<String>(), new ArrayList<String>(),
