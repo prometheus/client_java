@@ -111,7 +111,6 @@ public class DropwizardExportsTest {
             i += 1;
         }
         assertEquals(new Double(100), registry.getSampleValue("hist_count"));
-        assertEquals(new Double(4950), registry.getSampleValue("hist_sum"));
         for (double b : Arrays.asList(0.75, 0.95, 0.98, 0.99)) {
             assertEquals(new Double((b - 0.01) * 100), registry.getSampleValue("hist",
                     new String[]{"quantile"}, new String[]{String.format("%.2f", b)}));
@@ -137,7 +136,6 @@ public class DropwizardExportsTest {
         // We slept for 1Ms so we ensure that all timers are above 1ms:
         assertTrue(registry.getSampleValue("timer", new String[]{"quantile"}, new String[]{"0.99"}) > 0.001);
         assertEquals(new Double(1.0D), registry.getSampleValue("timer_count"));
-        assertRegistryContainsMetrics("timer_count", "timer_sum");
     }
 
     @Test
