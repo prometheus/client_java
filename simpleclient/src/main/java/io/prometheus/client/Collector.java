@@ -1,7 +1,6 @@
 
 package io.prometheus.client;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -151,6 +150,18 @@ public abstract class Collector {
     if (!METRIC_NAME_RE.matcher(name).matches()) {
       throw new IllegalArgumentException("Invalid metric name: " + name);
     }
+  }
+
+  private static final Pattern SANITIZE_PREFIX_PATTERN = Pattern.compile("^[^a-zA-Z_]");
+  private static final Pattern SANITIZE_BODY_PATTERN = Pattern.compile("[^a-zA-Z0-9_]");
+
+  /**
+   * Sanitize metric name
+   */
+  public static String sanitizeMetricName(String metricName) {
+    return SANITIZE_BODY_PATTERN.matcher(
+            SANITIZE_PREFIX_PATTERN.matcher(metricName).replaceFirst("_")
+    ).replaceAll("_");
   }
 
   /**

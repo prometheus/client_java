@@ -52,6 +52,7 @@
         <module>simpleclient_logback</module>
         <module>simpleclient_pushgateway</module>
         <module>simpleclient_servlet</module>
+        <module>simpleclient_spring_boot</module>
         <module>simpleclient_hikaricp</module>
         <module>benchmark</module>
     </modules>
