@@ -1,8 +1,6 @@
 package io.prometheus.client;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Histogram metric, to track distributions of events.
@@ -51,26 +49,21 @@ import java.util.Map;
  * offer easy ways to set common bucket patterns.
  */
 public class Histogram extends SimpleCollector<Histogram.Child> {
-  private final double[] buckets;
+  private final Double[] buckets;
 
   Histogram(Builder b) {
     super(b);
-    buckets = b.buckets;
+    buckets = b.getBuckets();
     initializeNoLabelsChild();
   }
 
   public static class Builder extends SimpleCollector.Builder<Builder, Histogram> {
-    private double[] buckets = new double[]{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10};
+    private static final Double[] DEFAULT_BUCKETS = new Double[]{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1.0, 2.5, 5.0, 7.5, 10.0};
+    private final List<Double> bucketsList = new LinkedList<Double>();
 
     @Override
     public Histogram create() {
-      for (int i = 0; i < buckets.length - 1; i++) {
-        if (buckets[i] >= buckets[i + 1]) {
-          throw new IllegalStateException("Histogram buckets must be in increasing order: "
-              + buckets[i] + " >= " + buckets[i + 1]);
-        }
-      }
-      if (buckets.length == 0) {
+      if (bucketsList.isEmpty()) {
           throw new IllegalStateException("Histogram must have at least one bucket.");
       }
       for (String label: labelNames) {
@@ -79,46 +72,65 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
         }
       }
 
+      dontInitializeNoLabelsChild = true;
+      return new Histogram(this);
+    }
+
+    /**
+     * Return sorted and sanitized (with infinity as last item) buckets list.
+     *
+     * @return
+       */
+    public Double[] getBuckets() {
+      Double[] buckets;
+      if(this.bucketsList == null || this.bucketsList.isEmpty()) {
+        buckets = DEFAULT_BUCKETS;
+      } else {
+        Collections.sort(this.bucketsList);
+        buckets = this.bucketsList.toArray(new Double[this.bucketsList.size()]);
+      }
+      for (int i = 0; i < buckets.length - 1; i++) {
+        if (buckets[i] > buckets[i + 1]) {
+          throw new IllegalStateException("Histogram buckets must be in increasing order: "
+              + buckets[i] + " > " + buckets[i + 1]);
+        }
+      }
       // Append infinity bucket if it's not already there.
       if (buckets[buckets.length - 1] != Double.POSITIVE_INFINITY) {
-        double[] tmp = new double[buckets.length + 1];
+        Double[] tmp = new Double[buckets.length + 1];
         System.arraycopy(buckets, 0, tmp, 0, buckets.length);
         tmp[buckets.length] = Double.POSITIVE_INFINITY;
         buckets = tmp;
       }
-      dontInitializeNoLabelsChild = true;
-      return new Histogram(this);
+      return buckets;
     }
    
     /**
-      * Set the upper bounds of buckets for the histogram.
+      * Adds the upper bounds of buckets for the histogram.
       */
-    public Builder buckets(double... buckets) {
-      this.buckets = buckets;
+    public Builder buckets(Double... buckets) {
+      this.bucketsList.addAll(Arrays.asList(buckets));
       return this;
     }
 
     /**
-      * Set the upper bounds of buckets for the histogram with a linear sequence.
+      * Adds the upper bounds of buckets for the histogram with a linear sequence.
       */
     public Builder linearBuckets(double start, double width, int count) {
-      buckets = new double[count];
       for (int i = 0; i < count; i++){
-        buckets[i] = start + i*width;
+        bucketsList.add(start + i*width);
       }
       return this;
     }
     /**
-      * Set the upper bounds of buckets for the histogram with an exponential sequence.
+      * Adds the upper bounds of buckets for the histogram with an exponential sequence.
       */
     public Builder exponentialBuckets(double start, double factor, int count) {
-      buckets = new double[count];
       for (int i = 0; i < count; i++) {
-        buckets[i] = start * Math.pow(factor, i);
+        bucketsList.add(start * Math.pow(factor, i));
       }
       return this;
     }
-    
   }
 
   /**
@@ -171,14 +183,14 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
       }
     }
 
-    private Child(double[] buckets) {
+    private Child(Double[] buckets) {
       upperBounds = buckets;
       cumulativeCounts = new DoubleAdder[buckets.length];
       for (int i = 0; i < buckets.length; ++i) {
         cumulativeCounts[i] = new DoubleAdder();
       }
     }
-    private final double[] upperBounds;
+    private final Double[] upperBounds;
     private final DoubleAdder[] cumulativeCounts;
     private final DoubleAdder sum = new DoubleAdder();
 
@@ -258,7 +270,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
     return mfsList;
   }
 
-  double[] getBuckets() {
+  Double[] getBuckets() {
     return buckets;
   }
 
