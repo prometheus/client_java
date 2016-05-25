@@ -64,6 +64,7 @@ public class HikariCPCollectorTest {
     config.setPoolName("connectionClosed");
     config.setMetricsTrackerFactory(new HikariCPMetricsTrackerFactory());
     config.setJdbcUrl("jdbc:h2:mem:");
+    config.setMaximumPoolSize(20);
 
     HikariDataSource ds = new HikariDataSource(config);
     Connection connection1 = ds.getConnection();
