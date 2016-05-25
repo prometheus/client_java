@@ -24,7 +24,7 @@ class HikariCPCollector extends Collector {
             createSample("hikaricp_active_connections", "Active connections", poolStats.getActiveConnections()),
             createSample("hikaricp_idle_connections", "Idle connections", poolStats.getIdleConnections()),
             createSample("hikaricp_pending_threads", "Pending threads", poolStats.getPendingThreads()),
-            createSample("hikaricp_total_connections", "Total connections", poolStats.getTotalConnections())
+            createSample("hikaricp_connections", "The number of current connections", poolStats.getTotalConnections())
     );
   }
 
