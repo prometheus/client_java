@@ -1,13 +1,14 @@
 package io.prometheus.client;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 
 public class HistogramTest {
@@ -72,6 +73,25 @@ public class HistogramTest {
     assertEquals(1.0, getBucket(7.5), .001);
     assertEquals(1.0, getBucket(10.0), .001);
     assertEquals(2.0, getBucket(Double.POSITIVE_INFINITY), .001);
+  }
+
+  @Test
+  public void testExpenentialAndManualBucketsAtOnce() {
+    Histogram h = Histogram.build().name("h").help("help")
+        .exponentialBuckets(16, 4, 6)
+        .buckets(32768d)
+        .create();
+    assertArrayEquals(new Double[]{16d, 64d, 256d, 1024d, 4096d, 16384d, 32768d, Double.POSITIVE_INFINITY}, h.getBuckets());
+  }
+
+  @Test
+  public void testExpenentialLinearAndManualBucketsAtOnce() {
+    Histogram h = Histogram.build().name("h").help("help")
+        .exponentialBuckets(16, 4, 6)
+        .linearBuckets(1, 2, 3)
+        .buckets(32768d)
+        .create();
+    assertArrayEquals(new Double[]{1d, 3d, 5d, 16d, 64d, 256d, 1024d, 4096d, 16384d, 32768d, Double.POSITIVE_INFINITY}, h.getBuckets());
   }
 
   @Test
