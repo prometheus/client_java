@@ -27,6 +27,20 @@ public class HikariCPCollectorTest {
   }
 
   @Test
+  public void noConnection2() throws Exception {
+    HikariConfig config = new HikariConfig();
+    config.setMetricsTrackerFactory(new HikariCPMetricsTrackerFactory());
+    config.setJdbcUrl("jdbc:h2:mem:");
+
+    new HikariDataSource(config);
+
+    assertThat(getValue("hikaricp_active_connections", "HikariPool-1"), is(0.0));
+    assertThat(getValue("hikaricp_idle_connections", "HikariPool-1"), is(0.0));
+    assertThat(getValue("hikaricp_pending_threads", "HikariPool-1"), is(0.0));
+    assertThat(getValue("hikaricp_connections", "HikariPool-1"), is(0.0));
+  }
+
+  @Test
   public void connection1() throws Exception {
     HikariConfig config = new HikariConfig();
     config.setPoolName("connection1");
