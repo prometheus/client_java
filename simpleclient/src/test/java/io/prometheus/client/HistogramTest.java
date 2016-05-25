@@ -27,16 +27,16 @@ public class HistogramTest {
     Histogram.Child.timeProvider = new Histogram.TimeProvider();
   }
 
-  private double getCount() {
-    return registry.getSampleValue("nolabels_count").doubleValue();
+  private Double getCount() {
+    return registry.getSampleValue("nolabels_count");
   }
-  private double getSum() {
-    return registry.getSampleValue("nolabels_sum").doubleValue();
+  private Double getSum() {
+    return registry.getSampleValue("nolabels_sum");
   }
-  private double getBucket(double b) {
+  private Double getBucket(Double b) {
     return registry.getSampleValue("nolabels_bucket", 
         new String[]{"le"},
-        new String[]{Collector.doubleToGoString(b)}).doubleValue();
+        new String[]{Collector.doubleToGoString(b.doubleValue())}).doubleValue();
   }
   
   @Test
@@ -44,16 +44,16 @@ public class HistogramTest {
     noLabels.observe(2);
     assertEquals(1.0, getCount(), .001);
     assertEquals(2.0, getSum(), .001);
-    assertEquals(0.0, getBucket(1), .001);
+    assertEquals(0.0, getBucket(1.0), .001);
     assertEquals(1.0, getBucket(2.5), .001);
     noLabels.labels().observe(4);
     assertEquals(2.0, getCount(), .001);
     assertEquals(6.0, getSum(), .001);
-    assertEquals(0.0, getBucket(1), .001);
+    assertEquals(0.0, getBucket(1.0), .001);
     assertEquals(1.0, getBucket(2.5), .001);
-    assertEquals(2.0, getBucket(5), .001);
+    assertEquals(2.0, getBucket(5.0), .001);
     assertEquals(2.0, getBucket(7.5), .001);
-    assertEquals(2.0, getBucket(10), .001);
+    assertEquals(2.0, getBucket(10.0), .001);
     assertEquals(2.0, getBucket(Double.POSITIVE_INFINITY), .001);
   }
 
@@ -61,41 +61,41 @@ public class HistogramTest {
   public void testBoundaryConditions() {
     // Equal to a bucket.
     noLabels.observe(2.5);
-    assertEquals(0.0, getBucket(1), .001);
+    assertEquals(0.0, getBucket(1.0), .001);
     assertEquals(1.0, getBucket(2.5), .001);
     noLabels.labels().observe(Double.POSITIVE_INFINITY);
 
     // Infinity.
-    assertEquals(0.0, getBucket(1), .001);
+    assertEquals(0.0, getBucket(1.0), .001);
     assertEquals(1.0, getBucket(2.5), .001);
-    assertEquals(1.0, getBucket(5), .001);
+    assertEquals(1.0, getBucket(5.0), .001);
     assertEquals(1.0, getBucket(7.5), .001);
-    assertEquals(1.0, getBucket(10), .001);
+    assertEquals(1.0, getBucket(10.0), .001);
     assertEquals(2.0, getBucket(Double.POSITIVE_INFINITY), .001);
   }
 
   @Test
   public void testManualBuckets() {
-    Histogram h = Histogram.build().name("h").help("help").buckets(1, 2).create();
-    assertArrayEquals(new double[]{1, 2, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+    Histogram h = Histogram.build().name("h").help("help").buckets(1.0, 2.0).create();
+    assertArrayEquals(new Double[]{1.0, 2.0, Double.POSITIVE_INFINITY}, h.getBuckets());
   }
 
   @Test
   public void testManualBucketsInfinityAlreadyIncluded() {
-    Histogram h = Histogram.build().buckets(1, 2, Double.POSITIVE_INFINITY).name("h").help("help").create();
-    assertArrayEquals(new double[]{1, 2, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+    Histogram h = Histogram.build().buckets(1.0, 2.0, Double.POSITIVE_INFINITY).name("h").help("help").create();
+    assertArrayEquals(new Double[]{1.0, 2.0, Double.POSITIVE_INFINITY}, h.getBuckets());
   }
 
   @Test
   public void testLinearBuckets() {
     Histogram h = Histogram.build().name("h").help("help").linearBuckets(1, 2, 3).create();
-    assertArrayEquals(new double[]{1, 3, 5, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+    assertArrayEquals(new Double[]{1.0, 3.0, 5.0, Double.POSITIVE_INFINITY}, h.getBuckets());
   }
 
   @Test
   public void testExponentialBuckets() {
     Histogram h = Histogram.build().name("h").help("help").exponentialBuckets(2, 2.5, 3).create();
-    assertArrayEquals(new double[]{2, 5, 12.5, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+    assertArrayEquals(new Double[]{2.0, 5.0, 12.5, Double.POSITIVE_INFINITY}, h.getBuckets());
   }
 
   @Test
@@ -108,7 +108,7 @@ public class HistogramTest {
       }
     };
     Histogram.Timer timer = noLabels.startTimer();
-    double elapsed = timer.observeDuration();
+    Double elapsed = timer.observeDuration();
     assertEquals(1, getCount(), .001);
     assertEquals(10, getSum(), .001);
     assertEquals(10, elapsed, .001);
@@ -134,15 +134,15 @@ public class HistogramTest {
     assertEquals(null, getLabelsCount("b"));
     assertEquals(null, getLabelsSum("b"));
     labels.labels("a").observe(2);
-    assertEquals(1.0, getLabelsCount("a").doubleValue(), .001);
-    assertEquals(2.0, getLabelsSum("a").doubleValue(), .001);
+    assertEquals(1.0, getLabelsCount("a"), .001);
+    assertEquals(2.0, getLabelsSum("a"), .001);
     assertEquals(null, getLabelsCount("b"));
     assertEquals(null, getLabelsSum("b"));
     labels.labels("b").observe(3);
-    assertEquals(1.0, getLabelsCount("a").doubleValue(), .001);
-    assertEquals(2.0, getLabelsSum("a").doubleValue(), .001);
-    assertEquals(1.0, getLabelsCount("b").doubleValue(), .001);
-    assertEquals(3.0, getLabelsSum("b").doubleValue(), .001);
+    assertEquals(1.0, getLabelsCount("a"), .001);
+    assertEquals(2.0, getLabelsSum("a"), .001);
+    assertEquals(1.0, getLabelsCount("b"), .001);
+    assertEquals(3.0, getLabelsSum("b"), .001);
   }
 
   @Test(expected=IllegalStateException.class)
@@ -179,5 +179,4 @@ public class HistogramTest {
     assertEquals(1, mfs.size());
     assertEquals(mfsFixture, mfs.get(0));
   }
-
 }
