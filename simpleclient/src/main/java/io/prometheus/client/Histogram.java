@@ -54,6 +54,9 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
   Histogram(Builder b) {
     super(b);
     buckets = b.getBuckets();
+    if (buckets.length < 1) {
+      throw new IllegalStateException("Histogram must have at least one bucket.");
+    }
     initializeNoLabelsChild();
   }
 
@@ -63,9 +66,6 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
 
     @Override
     public Histogram create() {
-      if (bucketsList.isEmpty()) {
-          throw new IllegalStateException("Histogram must have at least one bucket.");
-      }
       for (String label: labelNames) {
         if (label.equals("le")) {
             throw new IllegalStateException("Histogram cannot have a label named 'le'.");
