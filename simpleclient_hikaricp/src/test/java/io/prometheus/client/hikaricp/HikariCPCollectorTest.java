@@ -23,7 +23,7 @@ public class HikariCPCollectorTest {
     assertThat(getValue("hikaricp_active_connections", "no_connection"), is(0.0));
     assertThat(getValue("hikaricp_idle_connections", "no_connection"), is(0.0));
     assertThat(getValue("hikaricp_pending_threads", "no_connection"), is(0.0));
-    assertThat(getValue("hikaricp_total_connections", "no_connection"), is(0.0));
+    assertThat(getValue("hikaricp_connections", "no_connection"), is(0.0));
   }
 
   @Test
@@ -39,7 +39,7 @@ public class HikariCPCollectorTest {
     assertThat(getValue("hikaricp_active_connections", "connection1"), is(1.0));
     assertThat(getValue("hikaricp_idle_connections", "connection1"), is(0.0));
     assertThat(getValue("hikaricp_pending_threads", "connection1"), is(0.0));
-    assertThat(getValue("hikaricp_total_connections", "connection1"), is(1.0));
+    assertThat(getValue("hikaricp_connections", "connection1"), is(1.0));
 
     connection1.close();
   }
@@ -58,7 +58,7 @@ public class HikariCPCollectorTest {
     assertThat(getValue("hikaricp_active_connections", "connectionClosed"), is(0.0));
     assertThat(getValue("hikaricp_idle_connections", "connectionClosed"), is(1.0));
     assertThat(getValue("hikaricp_pending_threads", "connectionClosed"), is(0.0));
-    assertThat(getValue("hikaricp_total_connections", "connectionClosed"), is(1.0));
+    assertThat(getValue("hikaricp_connections", "connectionClosed"), is(1.0));
   }
 
   private double getValue(String name, String poolName) {
