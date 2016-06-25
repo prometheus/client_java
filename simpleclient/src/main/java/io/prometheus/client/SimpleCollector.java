@@ -50,7 +50,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   protected final String help;
   protected final List<String> labelNames;
 
-  protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();;
+  protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
   protected Child noLabelsChild;
 
   /**

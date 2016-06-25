@@ -3,6 +3,7 @@ package io.prometheus.client;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Counter metric, to track counts of events or running totals.
@@ -139,7 +140,7 @@ public class Counter extends SimpleCollector<Counter.Child> {
   }
 
   public void reset() {
-    noLabelsChild.reset();
+    clear();
   }
 
   @Override

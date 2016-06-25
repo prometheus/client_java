@@ -71,8 +71,14 @@ public class CounterTest {
     labels.labels("b").inc(3);
     assertEquals(1.0, getLabelsValue("a").doubleValue(), .001);
     assertEquals(3.0, getLabelsValue("b").doubleValue(), .001);
+
     labels.labels("b").reset();
     assertEquals(0, getLabelsValue("b").doubleValue(), .001);
+    assertEquals(1.0, getLabelsValue("a").doubleValue(), .001);
+
+    labels.reset();
+    assertEquals(null, getLabelsValue("a"));
+    assertEquals(null, getLabelsValue("b"));
   }
 
   @Test
