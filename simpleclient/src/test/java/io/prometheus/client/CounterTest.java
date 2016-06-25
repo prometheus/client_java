@@ -34,6 +34,18 @@ public class CounterTest {
     noLabels.labels().inc();
     assertEquals(8.0, getValue(), .001);
   }
+
+  @Test
+  public void testReset() {
+    noLabels.reset();
+    assertEquals(0, getValue(), .001);
+    noLabels.inc(2);
+    assertEquals(2.0, getValue(), .001);
+    noLabels.labels().reset();
+    assertEquals(0, getValue(), .001);
+    noLabels.labels().inc();
+    assertEquals(1.0, getValue(), .001);
+  }
     
   @Test(expected=IllegalArgumentException.class)
   public void testNegativeIncrementFails() {
@@ -59,6 +71,8 @@ public class CounterTest {
     labels.labels("b").inc(3);
     assertEquals(1.0, getLabelsValue("a").doubleValue(), .001);
     assertEquals(3.0, getLabelsValue("b").doubleValue(), .001);
+    labels.labels("b").reset();
+    assertEquals(0, getLabelsValue("b").doubleValue(), .001);
   }
 
   @Test

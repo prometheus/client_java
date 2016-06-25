@@ -119,6 +119,8 @@ public class Counter extends SimpleCollector<Counter.Child> {
     public double get() {
       return value.sum();
     }
+
+    public void reset() { value.reset(); }
   }
 
   // Convenience methods.
@@ -134,6 +136,10 @@ public class Counter extends SimpleCollector<Counter.Child> {
    */
   public void inc(double amt) {
     noLabelsChild.inc(amt);
+  }
+
+  public void reset() {
+    noLabelsChild.reset();
   }
 
   @Override
