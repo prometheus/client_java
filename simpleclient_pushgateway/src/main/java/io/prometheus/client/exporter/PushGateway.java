@@ -71,7 +71,7 @@ public class PushGateway {
    * This uses the POST HTTP method.
   */
   public void push(CollectorRegistry registry, String job) throws IOException {
-    doRequest(registry, job, null, "POST");
+    doRequest(registry, job, null, "POST", null);
   }
 
   /**
@@ -95,7 +95,16 @@ public class PushGateway {
    * This uses the POST HTTP method.
   */
   public void push(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-    doRequest(registry, job, groupingKey, "POST");
+    doRequest(registry, job, groupingKey, "POST", null);
+  }
+
+  /**
+   * Pushes all metrics in a Collector with timestamp, replacing all those with the same job and grouping key.
+   * <p>
+   * This uses the POST HTTP method.
+  */
+  public void push(CollectorRegistry registry, String job, Map<String, String> groupingKey, String timestamp) throws IOException {
+    doRequest(registry, job, groupingKey, "POST", timestamp);
   }
 
   /**
@@ -117,7 +126,7 @@ public class PushGateway {
    * This uses the PUT HTTP method.
   */
   public void pushAdd(CollectorRegistry registry, String job) throws IOException {
-    doRequest(registry, job, null, "PUT");
+    doRequest(registry, job, null, "PUT", null);
   }
 
   /**
@@ -141,7 +150,7 @@ public class PushGateway {
    * This uses the PUT HTTP method.
   */
   public void pushAdd(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-    doRequest(registry, job, groupingKey, "PUT");
+    doRequest(registry, job, groupingKey, "PUT", null);
   }
 
   /**
@@ -165,7 +174,7 @@ public class PushGateway {
    * This uses the DELETE HTTP method.
   */
   public void delete(String job) throws IOException {
-    doRequest(null, job, null, "DELETE");
+    doRequest(null, job, null, "DELETE", null);
   }
 
   /**
@@ -175,7 +184,7 @@ public class PushGateway {
    * This uses the DELETE HTTP method.
   */
   public void delete(String job, Map<String, String> groupingKey) throws IOException {
-    doRequest(null, job, groupingKey, "DELETE");
+    doRequest(null, job, groupingKey, "DELETE", null);
   }
 
 
@@ -238,7 +247,7 @@ public class PushGateway {
     delete(job, Collections.singletonMap("instance", instance));
   }
 
-  void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
+  void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method, String timestamp) throws IOException {
     String url = "http://" + address + "/metrics/job/" + URLEncoder.encode(job, "UTF-8");
     if (groupingKey != null) {
       for (Map.Entry<String, String> entry: groupingKey.entrySet()) {
@@ -259,7 +268,7 @@ public class PushGateway {
     try {
       if (!method.equals("DELETE")) {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
-        TextFormat.write004(writer, registry.metricFamilySamples());
+        TextFormat.write004(writer, registry.metricFamilySamples(), timestamp);
         writer.flush();
         writer.close();
       }
