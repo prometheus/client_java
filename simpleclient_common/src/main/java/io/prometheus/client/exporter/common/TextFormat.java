@@ -12,6 +12,13 @@ public class TextFormat {
    * Write out the text version 0.0.4 of the given MetricFamilySamples.
    */
   public static void write004(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
+    write004(writer, mfs, null);
+  }
+
+  /**
+   * Write out the text version 0.0.4 of the given MetricFamilySamples.
+   */
+  public static void write004(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs, String timestamp) throws IOException {
     /* See http://prometheus.io/docs/instrumenting/exposition_formats/
      * for the output format specification. */
     for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(mfs)) {
@@ -27,7 +34,11 @@ public class TextFormat {
           }
           writer.write("}");
         }
-        writer.write(" " + Collector.doubleToGoString(sample.value) + "\n");
+        writer.write(" " + Collector.doubleToGoString(sample.value));
+        if (timestamp != null && !timestamp.isEmpty()) {
+          writer.write(" " + timestamp);
+        }
+        writer.write("\n");
       }
     }
   }
