@@ -57,7 +57,7 @@ artifacts are hosted on the [Sonatype OSS Asset Repository](https://docs.sonatyp
 
 All contributions to this library must follow, as far as practical, the
 prevalent patterns in the library for consistency and the following style
-guide: [Google Java Style](http://goo.gl/FfwVsc).  Depending upon your
+guide: [Google Java Style](https://google.github.io/styleguide/javaguide.html).  Depending upon your
 development environment, you may be able to find an automatic formatter
 and adherence checker that follows these rules.
 
