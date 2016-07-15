@@ -5,7 +5,7 @@
 
     <groupId>io.prometheus</groupId>
     <artifactId>parent</artifactId>
-    <version>0.0.15-SNAPSHOT</version>
+    <version>0.0.15</version>
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
@@ -31,7 +31,7 @@
         <connection>scm:git:git@github.com:prometheus/client_java.git</connection>
         <developerConnection>scm:git:git@github.com:prometheus/client_java.git</developerConnection>
         <url>git@github.com:prometheus/client_java.git</url>
-        <tag>HEAD</tag>
+        <tag>parent-0.0.15</tag>
     </scm>
 
     <developers>
