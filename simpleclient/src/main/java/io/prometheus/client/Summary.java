@@ -1,5 +1,6 @@
 package io.prometheus.client;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,14 +40,45 @@ import java.util.Map;
  */
 public class Summary extends SimpleCollector<Summary.Child> {
 
+  public static final String QUANTILE_LABEL = "quantile";
+
+  private final double[] quantiles;
+
   Summary(Builder b) {
     super(b);
+    this.quantiles = b.quantiles;
+    initializeNoLabelsChild();
   }
 
   public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
+    private double[] quantiles;
+
     @Override
     public Summary create() {
+      if (quantiles != null && quantiles.length > 0) {
+        for (double q : quantiles) {
+          if (!isValidQuantile(q)) {
+            throw new IllegalArgumentException("quantile value must be 0 <= q <= 1");
+          }
+        }
+      }
+
+      for (String label: labelNames) {
+        if (label.equals(QUANTILE_LABEL)) {
+          throw new IllegalStateException("Summary cannot have a label named '" + QUANTILE_LABEL + "'.");
+        }
+      }
+
+      dontInitializeNoLabelsChild = true;
       return new Summary(this);
+    }
+
+    /**
+     * Set quantile values to be calculated.
+     */
+    public Builder quantiles(double... quantiles) {
+      this.quantiles = quantiles;
+      return this;
     }
   }
 
@@ -59,7 +91,8 @@ public class Summary extends SimpleCollector<Summary.Child> {
 
   @Override
   protected Child newChild() {
-    return new Child();
+    final boolean trackValues = quantiles != null && quantiles.length > 0;
+    return new Child(trackValues);
   }
 
   /**
@@ -93,10 +126,58 @@ public class Summary extends SimpleCollector<Summary.Child> {
     public static class Value {
       public final double count;
       public final double sum;
+      public final double[] values;
 
       private Value(double count, double sum) {
+        this(count, sum, null);
+      }
+
+      private Value(double count, double sum, double[] values) {
         this.count = count;
         this.sum = sum;
+        this.values = values;
+      }
+
+      /**
+       * Return the φ-quantile estimation of the observed events.
+       * The approximate value is calculated by interpolation
+       * between adjacent elements in the array of observed values.
+       *
+       * @param q a given quantile, where 0 <= q <= 1
+       * @return the approximate value of the the φ-quantile
+       */
+      public double getQuantile(double q) {
+        if (!isValidQuantile(q)) {
+          throw new IllegalArgumentException("quantile value must be 0 <= q <= 1");
+        }
+
+        if (values == null || values.length == 0) {
+          return Double.NaN;
+        }
+
+        final int length = values.length;
+
+        if (length == 1) {
+          return values[0];
+        }
+
+        final double index = Double.compare(q, 0) == 0 ? 0 :
+                             Double.compare(q, 1) == 0 ? length :
+                             q * (length + 1);
+
+        if (index < 1) {
+          return values[0];
+        }
+
+        if (index >= length) {
+          return values[length - 1];
+        }
+
+        final int intIdx = (int) index;
+        final double lower = values[intIdx - 1];
+        final double upper = values[intIdx];
+
+        return lower + (index - Math.floor(index)) * (upper - lower);
       }
     }
 
@@ -107,13 +188,27 @@ public class Summary extends SimpleCollector<Summary.Child> {
     private final DoubleAdder count = new DoubleAdder();
     private final DoubleAdder sum = new DoubleAdder();
 
+    private final UniformSampling sampling;
+
     static TimeProvider timeProvider = new TimeProvider();
+
+    public Child() {
+      this(false);
+    }
+
+    public Child(boolean trackValues) {
+      this.sampling = trackValues ? new UniformSampling() : null;
+    }
+
     /**
      * Observe the given amount.
      */
     public void observe(double amt) {
       count.add(1);
       sum.add(amt);
+      if (sampling != null) {
+        sampling.add(amt);
+      }
     }
     /**
      * Start a timer to track a duration.
@@ -129,7 +224,13 @@ public class Summary extends SimpleCollector<Summary.Child> {
      * <em>Warning:</em> The definition of {@link Value} is subject to change.
      */
     public Value get() {
-      return new Value(count.sum(), sum.sum());
+      if (sampling != null) {
+        double[] values = sampling.getValues();
+        Arrays.sort(values);
+        return new Value(count.sum(), sum.sum(), values);
+      } else {
+        return new Value(count.sum(), sum.sum());
+      }
     }
   }
 
@@ -149,11 +250,24 @@ public class Summary extends SimpleCollector<Summary.Child> {
     return noLabelsChild.startTimer();
   }
 
+  static boolean isValidQuantile(double q) {
+    return q >= 0 && q <= 1;
+  }
+
   @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
       Child.Value v = c.getValue().get();
+      if (quantiles != null && quantiles.length > 0) {
+        List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
+        labelNamesWithQuantile.add(QUANTILE_LABEL);
+        for (double q : quantiles) {
+          List<String> labelValuesWithQuantile = new ArrayList<String>(c.getKey());
+          labelValuesWithQuantile.add(String.valueOf(q));
+          samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, v.getQuantile(q)));
+        }
+      }
       samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
     }
