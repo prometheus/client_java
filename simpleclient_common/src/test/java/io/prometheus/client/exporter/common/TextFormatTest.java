@@ -66,6 +66,23 @@ public class TextFormatTest {
   }
 
   @Test
+  public void testSummaryOutputWithQuantiles() throws IOException {
+    Summary labelsAndQuantiles = Summary.build()
+            .quantile(0.5, 0.05).quantile(0.9, 0.01).quantile(0.99, 0.001)
+            .labelNames("l").name("labelsAndQuantiles").help("help").register(registry);
+    labelsAndQuantiles.labels("a").observe(2);
+    writer = new StringWriter();
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP labelsAndQuantiles help\n"
+            + "# TYPE labelsAndQuantiles summary\n"
+            + "labelsAndQuantiles{l=\"a\",quantile=\"0.5\",} 2.0\n"
+            + "labelsAndQuantiles{l=\"a\",quantile=\"0.9\",} 2.0\n"
+            + "labelsAndQuantiles{l=\"a\",quantile=\"0.99\",} 2.0\n"
+            + "labelsAndQuantiles_count{l=\"a\",} 1.0\n"
+            + "labelsAndQuantiles_sum{l=\"a\",} 2.0\n", writer.toString());
+  }
+
+  @Test
   public void testLabelsOutput() throws IOException {
     Gauge labels = (Gauge) Gauge.build().name("labels").help("help").labelNames("l").register(registry);
     labels.labels("a").inc();

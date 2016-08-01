@@ -186,6 +186,9 @@ public abstract class Collector {
     if (d == Double.NEGATIVE_INFINITY) {
       return "-Inf";
     }
+    if (Double.isNaN(d)) {
+      return "NaN";
+    }
     return Double.toString(d);
   }
 }
