@@ -77,6 +77,16 @@ public class PushGatewayTest {
   }
 
   @Test
+  public void testPushWithTimestamp() throws IOException {
+    mockServerClient.when(
+            request()
+                    .withMethod("POST")
+                    .withPath("/metrics/job/j/l/v")
+    ).respond(response().withStatusCode(202));
+    pg.push(registry, "j", groupingKey, String.valueOf(System.currentTimeMillis()));
+  }
+
+  @Test
   public void testPushWithMultiGroupingKey() throws IOException {
     mockServerClient.when(
         request()
