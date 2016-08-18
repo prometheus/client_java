@@ -66,7 +66,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a registry, replacing all those with the same job as the grouping key.
+   * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name and job and no grouping key.
    * <p>
    * This uses the POST HTTP method.
   */
@@ -75,7 +75,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing all those with the same job and no grouping key.
+   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name and job and no grouping key.
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
@@ -88,9 +88,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing all those with the same job and grouping key.
-   * <p>
-   * This is useful for pushing a single Gauge.
+   * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name, job and grouping key.
    * <p>
    * This uses the POST HTTP method.
   */
@@ -99,7 +97,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing all those with the same job and grouping key.
+   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name, job and grouping key.
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
@@ -112,7 +110,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name and job and no grouping key.
+   * Pushes all metrics in a registry, replacing all those with the same job and no grouping key.
    * <p>
    * This uses the PUT HTTP method.
   */
@@ -121,7 +119,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name and job and no grouping key.
+   * Pushes all metrics in a Collector, replacing all those with the same job and no grouping key.
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
@@ -134,9 +132,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name, job and grouping key.
-   * <p>
-   * This is useful for pushing a single Gauge.
+   * Pushes all metrics in a registry, replacing all those with the same job and grouping key.
    * <p>
    * This uses the PUT HTTP method.
   */
@@ -145,7 +141,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name, job and grouping key.
+   * Pushes all metrics in a Collector, replacing all those with the same job and grouping key.
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
@@ -180,7 +176,7 @@ public class PushGateway {
 
 
   /**
-   * Pushes all metrics in a registry, replacing all those with the same job and instance.
+   * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name.
    * <p>
    * This uses the POST HTTP method.
    * @deprecated use {@link #push(CollectorRegistry, String, Map)}
@@ -191,7 +187,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing all those with the same job and instance.
+   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name.
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
@@ -204,7 +200,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name.
+   * Pushes all metrics in a registry, replacing all those with the same job and instance.
    * <p>
    * This uses the PUT HTTP method.
    * @deprecated use {@link #pushAdd(CollectorRegistry, String, Map)}
@@ -215,7 +211,7 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name.
+   * Pushes all metrics in a Collector, replacing all those with the same job and instance.
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
