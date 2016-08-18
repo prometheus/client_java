@@ -66,12 +66,12 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a registry, replacing all those with the same job as the grouping key.
+   * Pushes all metrics in a registry, replacing all those with the same job and no grouping key.
    * <p>
-   * This uses the POST HTTP method.
+   * This uses the PUT HTTP method.
   */
   public void push(CollectorRegistry registry, String job) throws IOException {
-    doRequest(registry, job, null, "POST");
+    doRequest(registry, job, null, "PUT");
   }
 
   /**
@@ -79,7 +79,7 @@ public class PushGateway {
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
-   * This uses the POST HTTP method.
+   * This uses the PUT HTTP method.
   */
   public void push(Collector collector, String job) throws IOException {
     CollectorRegistry registry = new CollectorRegistry();
@@ -88,14 +88,12 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing all those with the same job and grouping key.
+   * Pushes all metrics in a registry, replacing all those with the same job and grouping key.
    * <p>
-   * This is useful for pushing a single Gauge.
-   * <p>
-   * This uses the POST HTTP method.
+   * This uses the PUT HTTP method.
   */
   public void push(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-    doRequest(registry, job, groupingKey, "POST");
+    doRequest(registry, job, groupingKey, "PUT");
   }
 
   /**
@@ -103,7 +101,7 @@ public class PushGateway {
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
-   * This uses the POST HTTP method.
+   * This uses the PUT HTTP method.
   */
   public void push(Collector collector, String job, Map<String, String> groupingKey) throws IOException {
     CollectorRegistry registry = new CollectorRegistry();
@@ -114,10 +112,10 @@ public class PushGateway {
   /**
    * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name and job and no grouping key.
    * <p>
-   * This uses the PUT HTTP method.
+   * This uses the POST HTTP method.
   */
   public void pushAdd(CollectorRegistry registry, String job) throws IOException {
-    doRequest(registry, job, null, "PUT");
+    doRequest(registry, job, null, "POST");
   }
 
   /**
@@ -125,7 +123,7 @@ public class PushGateway {
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
-   * This uses the PUT HTTP method.
+   * This uses the POST HTTP method.
   */
   public void pushAdd(Collector collector, String job) throws IOException {
     CollectorRegistry registry = new CollectorRegistry();
@@ -134,14 +132,12 @@ public class PushGateway {
   }
 
   /**
-   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name, job and grouping key.
+   * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name, job and grouping key.
    * <p>
-   * This is useful for pushing a single Gauge.
-   * <p>
-   * This uses the PUT HTTP method.
+   * This uses the POST HTTP method.
   */
   public void pushAdd(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-    doRequest(registry, job, groupingKey, "PUT");
+    doRequest(registry, job, groupingKey, "POST");
   }
 
   /**
@@ -149,7 +145,7 @@ public class PushGateway {
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
-   * This uses the PUT HTTP method.
+   * This uses the POST HTTP method.
   */
   public void pushAdd(Collector collector, String job, Map<String, String> groupingKey) throws IOException {
     CollectorRegistry registry = new CollectorRegistry();
@@ -182,7 +178,7 @@ public class PushGateway {
   /**
    * Pushes all metrics in a registry, replacing all those with the same job and instance.
    * <p>
-   * This uses the POST HTTP method.
+   * This uses the PUT HTTP method.
    * @deprecated use {@link #push(CollectorRegistry, String, Map)}
   */
   @Deprecated
@@ -195,7 +191,7 @@ public class PushGateway {
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
-   * This uses the POST HTTP method.
+   * This uses the PUT HTTP method.
    * @deprecated use {@link #push(Collector, String, Map)}
   */
   @Deprecated
@@ -206,7 +202,7 @@ public class PushGateway {
   /**
    * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name.
    * <p>
-   * This uses the PUT HTTP method.
+   * This uses the POST HTTP method.
    * @deprecated use {@link #pushAdd(CollectorRegistry, String, Map)}
   */
   @Deprecated
@@ -219,7 +215,7 @@ public class PushGateway {
    * <p>
    * This is useful for pushing a single Gauge.
    * <p>
-   * This uses the PUT HTTP method.
+   * This uses the POST HTTP method.
    * @deprecated use {@link #pushAdd(Collector, String, Map)}
   */
   @Deprecated
