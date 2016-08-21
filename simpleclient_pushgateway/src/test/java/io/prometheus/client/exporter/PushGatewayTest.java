@@ -40,7 +40,7 @@ public class PushGatewayTest {
   public void testPush() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j")
       ).respond(response().withStatusCode(202));
     pg.push(registry, "j");
@@ -50,7 +50,7 @@ public class PushGatewayTest {
   public void testNon202ResponseThrows() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j")
       ).respond(response().withStatusCode(500));
     pg.push(registry, "j");
@@ -60,7 +60,7 @@ public class PushGatewayTest {
   public void testPushCollector() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j")
       ).respond(response().withStatusCode(202));
     pg.push(gauge, "j");
@@ -70,7 +70,7 @@ public class PushGatewayTest {
   public void testPushWithGroupingKey() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j/l/v")
       ).respond(response().withStatusCode(202));
     pg.push(registry, "j", groupingKey);
@@ -80,7 +80,7 @@ public class PushGatewayTest {
   public void testPushWithMultiGroupingKey() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j/l/v/l2/v2")
       ).respond(response().withStatusCode(202));
     groupingKey.put("l2", "v2");
@@ -91,7 +91,7 @@ public class PushGatewayTest {
   public void testPushWithGroupingKeyWithSlashes() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/a%2Fb/l/v/l2/v%2F2")
       ).respond(response().withStatusCode(202));
     groupingKey.put("l2", "v/2");
@@ -102,7 +102,7 @@ public class PushGatewayTest {
   public void testPushCollectorWithGroupingKey() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j/l/v")
       ).respond(response().withStatusCode(202));
     pg.push(gauge, "j", groupingKey);
@@ -112,7 +112,7 @@ public class PushGatewayTest {
   public void testPushAdd() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("PUT")
+          .withMethod("POST")
           .withPath("/metrics/job/j")
       ).respond(response().withStatusCode(202));
     pg.pushAdd(registry, "j");
@@ -122,7 +122,7 @@ public class PushGatewayTest {
   public void testPushAddCollector() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("PUT")
+          .withMethod("POST")
           .withPath("/metrics/job/j")
       ).respond(response().withStatusCode(202));
     pg.pushAdd(gauge, "j");
@@ -132,7 +132,7 @@ public class PushGatewayTest {
   public void testPushAddWithGroupingKey() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("PUT")
+          .withMethod("POST")
           .withPath("/metrics/job/j/l/v")
       ).respond(response().withStatusCode(202));
     pg.pushAdd(registry, "j", groupingKey);
@@ -142,7 +142,7 @@ public class PushGatewayTest {
   public void testPushAddCollectorWithGroupingKey() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("PUT")
+          .withMethod("POST")
           .withPath("/metrics/job/j/l/v")
       ).respond(response().withStatusCode(202));
     pg.pushAdd(gauge, "j", groupingKey);
@@ -174,7 +174,7 @@ public class PushGatewayTest {
   public void testOldPushWithoutInstance() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j/instance/")
       ).respond(response().withStatusCode(202));
     pg.push(registry, "j", "");
@@ -184,7 +184,7 @@ public class PushGatewayTest {
   public void testOldPushWithInstance() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j/instance/i")
       ).respond(response().withStatusCode(202));
     pg.push(registry, "j", "i");
@@ -194,7 +194,7 @@ public class PushGatewayTest {
   public void testOldNon202ResponseThrows() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j/instance/i")
       ).respond(response().withStatusCode(500));
     pg.push(registry,"j", "i");
@@ -204,7 +204,7 @@ public class PushGatewayTest {
   public void testOldPushWithSlashes() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/a%2Fb/instance/c%2Fd")
       ).respond(response().withStatusCode(202));
     pg.push(registry, "a/b", "c/d");
@@ -214,7 +214,7 @@ public class PushGatewayTest {
   public void testOldPushCollector() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("POST")
+          .withMethod("PUT")
           .withPath("/metrics/job/j/instance/i")
       ).respond(response().withStatusCode(202));
     pg.push(gauge, "j", "i");
@@ -224,7 +224,7 @@ public class PushGatewayTest {
   public void testOldPushAdd() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("PUT")
+          .withMethod("POST")
           .withPath("/metrics/job/j/instance/i")
       ).respond(response().withStatusCode(202));
     pg.pushAdd(registry, "j", "i");
@@ -234,7 +234,7 @@ public class PushGatewayTest {
   public void testOldPushAddCollector() throws IOException {
     mockServerClient.when(
         request()
-          .withMethod("PUT")
+          .withMethod("POST")
           .withPath("/metrics/job/j/instance/i")
       ).respond(response().withStatusCode(202));
     pg.pushAdd(gauge, "j", "i");
