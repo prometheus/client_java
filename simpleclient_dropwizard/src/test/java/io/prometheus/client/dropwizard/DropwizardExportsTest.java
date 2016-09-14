@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+
 public class DropwizardExportsTest {
 
     private CollectorRegistry registry = new CollectorRegistry();
@@ -117,9 +118,9 @@ public class DropwizardExportsTest {
             i += 1;
         }
         assertEquals(new Double(100), registry.getSampleValue("hist_count"));
-        for (double b : Arrays.asList(0.75, 0.95, 0.98, 0.99)) {
-            assertEquals(new Double((b - 0.01) * 100), registry.getSampleValue("hist",
-                    new String[]{"quantile"}, new String[]{String.format("%.2f", b)}));
+        for (Double d : Arrays.asList(0.75, 0.95, 0.98, 0.99)) {
+            assertEquals(new Double((d - 0.01) * 100), registry.getSampleValue("hist",
+                    new String[]{"quantile"}, new String[]{d.toString()}));
         }
         assertEquals(new Double(99), registry.getSampleValue("hist", new String[]{"quantile"},
                 new String[]{"0.999"}));
