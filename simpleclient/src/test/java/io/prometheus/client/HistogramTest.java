@@ -2,7 +2,10 @@ package io.prometheus.client;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
@@ -178,6 +181,19 @@ public class HistogramTest {
 
     assertEquals(1, mfs.size());
     assertEquals(mfsFixture, mfs.get(0));
+  }
+
+  @Test
+  public void testChildAndValuePublicApi() throws Exception {
+    assertTrue(Modifier.isPublic(Histogram.Child.class.getModifiers()));
+
+    final Method getMethod = Histogram.Child.class.getMethod("get");
+    assertTrue(Modifier.isPublic(getMethod.getModifiers()));
+    assertEquals(Histogram.Child.Value.class, getMethod.getReturnType());
+
+    assertTrue(Modifier.isPublic(Histogram.Child.Value.class.getModifiers()));
+    assertTrue(Modifier.isPublic(Histogram.Child.Value.class.getField("sum").getModifiers()));
+    assertTrue(Modifier.isPublic(Histogram.Child.Value.class.getField("buckets").getModifiers()));
   }
 
 }

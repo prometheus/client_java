@@ -4,11 +4,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class SummaryTest {
@@ -179,5 +182,19 @@ public class SummaryTest {
 
     assertEquals(1, mfs.size());
     assertEquals(mfsFixture, mfs.get(0));
+  }
+
+  @Test
+  public void testChildAndValuePublicApi() throws Exception {
+    assertTrue(Modifier.isPublic(Summary.Child.class.getModifiers()));
+
+    final Method getMethod = Summary.Child.class.getMethod("get");
+    assertTrue(Modifier.isPublic(getMethod.getModifiers()));
+    assertEquals(Summary.Child.Value.class, getMethod.getReturnType());
+
+    assertTrue(Modifier.isPublic(Summary.Child.Value.class.getModifiers()));
+    assertTrue(Modifier.isPublic(Summary.Child.Value.class.getField("count").getModifiers()));
+    assertTrue(Modifier.isPublic(Summary.Child.Value.class.getField("sum").getModifiers()));
+    assertTrue(Modifier.isPublic(Summary.Child.Value.class.getField("quantiles").getModifiers()));
   }
 }

@@ -166,7 +166,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear}.
    */
   public static class Child {
-    private static class Value {
+    public static class Value {
       public final double count;
       public final double sum;
       public final SortedMap<Double, Double> quantiles;
