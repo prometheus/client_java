@@ -8,21 +8,18 @@ import org.springframework.boot.actuate.endpoint.PublicMetrics;
 import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.boot.actuate.metrics.GaugeService;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collection;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(SpringBootMetricsCollectorTest.class)
+@RunWith(SpringRunner.class)
 @EnableAutoConfiguration
 public class SpringBootMetricsCollectorTest {
-  @Autowired
-  private SpringBootMetricsCollector springBootMetricsCollector;
 
   @Autowired
   private CounterService counterService;
@@ -30,11 +27,15 @@ public class SpringBootMetricsCollectorTest {
   @Autowired
   private GaugeService gaugeService;
 
-  @Bean
-  public SpringBootMetricsCollector springBootMetricsCollector(Collection<PublicMetrics> publicMetrics) {
-    SpringBootMetricsCollector springBootMetricsCollector = new SpringBootMetricsCollector(publicMetrics);
-    springBootMetricsCollector.register();
-    return springBootMetricsCollector;
+  @Configuration
+  static class PublicMetricsCollector {
+
+    @Bean
+    public SpringBootMetricsCollector springBootMetricsCollector(Collection<PublicMetrics> publicMetrics) {
+      SpringBootMetricsCollector springBootMetricsCollector = new SpringBootMetricsCollector(publicMetrics);
+      springBootMetricsCollector.register();
+      return springBootMetricsCollector;
+    }
   }
 
   @Test
