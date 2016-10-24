@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-class PrometheusConfiguration {
+class PrometheusEndpointConfiguration {
 
   @Bean
   public PrometheusEndpoint prometheusEndpoint() {
