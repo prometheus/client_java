@@ -45,11 +45,6 @@
             <artifactId>simpleclient_common</artifactId>
             <version>0.0.19-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.10</version>
-        </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>junit</groupId>

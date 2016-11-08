@@ -3,7 +3,6 @@ package io.prometheus.client.exporter;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
-import org.apache.commons.codec.binary.Base64;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -52,25 +51,32 @@ public class PushGateway {
 
   private static final int SECONDS_PER_MILLISECOND = 1000;
 
-  private final String address;
+  private final String url;
 
   private final String port;
-
-  private final String username;
-
-  private final String password;
 
   private final String scheme;
 
   /**
    * Construct a Pushgateway, with the given address.
+   * The uri will be split by ':' into url and port.
    * <p>
    *
-   * @param address host or ip of the Pushgateway.
+   * @param address host:port or ip:port of the Pushgateway.
+   */
+  public PushGateway(String address) {
+    this(address.split(":")[0], address.split(":")[1]);
+  }
+
+  /**
+   * Construct a Pushgateway, with the given url and port.
+   * <p>
+   *
+   * @param url host or ip of the Pushgateway.
    * @param port    port of the Pushgateway.
    */
-  public PushGateway(String address, String port) {
-    this("http", address, port, null, null);
+  public PushGateway(String url, String port) {
+    this("http", url, port, null);
   }
 
   /**
@@ -78,19 +84,28 @@ public class PushGateway {
    * <p>
    *
    * @param scheme   url scheme of the Pushgateway.
-   * @param address  host or ip of the Pushgateway.
+   * @param url  host or ip of the Pushgateway.
    * @param port     port of the Pushgateway.
-   * @param username username for basic authorization.
-   * @param password password for basic authorization.
+   * @param authenticator authenticator for the Pushgateway.
    */
-  public PushGateway(String scheme, String address, String port, String username, String password) {
+  public PushGateway(String scheme, String url, String port, Authenticator authenticator) {
     this.scheme = scheme;
-    this.address = address;
+    this.url = url;
     this.port = port;
-    this.username = username;
-    this.password = password;
+    Authenticator.setDefault(authenticator);
   }
 
+  /**
+   * Returns a grouping key with the instance label set to the machine's IP address.
+   * <p>
+   * This is a convenience function, and should only be used where you want to
+   * push per-instance metrics rather than cluster/job level metrics.
+   */
+  public static Map<String, String> instanceIPGroupingKey() throws UnknownHostException {
+    Map<String, String> groupingKey = new HashMap<String, String>();
+    groupingKey.put("instance", InetAddress.getLocalHost().getHostAddress());
+    return groupingKey;
+  }
 
   /**
    * Pushes all metrics in a registry, replacing all those with the same job and no grouping key.
@@ -265,7 +280,7 @@ public class PushGateway {
   }
 
   void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
-    String url = this.scheme + "://" + this.address + ":" + this.port + "/metrics/job/" + URLEncoder.encode(job,
+    String url = this.scheme + "://" + this.url + ":" + this.port + "/metrics/job/" + URLEncoder.encode(job,
             "UTF-8");
     if (groupingKey != null) {
       for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
@@ -274,11 +289,7 @@ public class PushGateway {
     }
     HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
     connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
-    if (this.username != null) {
-      String credentials = this.username + ":" + this.password;
-      String encoded = Base64.encodeBase64String(credentials.getBytes("utf-8"));
-      connection.setRequestProperty("Authorization", "Basic " + encoded);
-    }
+
     if (!method.equals("DELETE")) {
       connection.setDoOutput(true);
     }
@@ -303,17 +314,5 @@ public class PushGateway {
     } finally {
       connection.disconnect();
     }
-  }
-
-  /**
-   * Returns a grouping key with the instance label set to the machine's IP address.
-   * <p>
-   * This is a convenience function, and should only be used where you want to
-   * push per-instance metrics rather than cluster/job level metrics.
-   */
-  public static Map<String, String> instanceIPGroupingKey() throws UnknownHostException {
-    Map<String, String> groupingKey = new HashMap<String, String>();
-    groupingKey.put("instance", InetAddress.getLocalHost().getHostAddress());
-    return groupingKey;
   }
 }

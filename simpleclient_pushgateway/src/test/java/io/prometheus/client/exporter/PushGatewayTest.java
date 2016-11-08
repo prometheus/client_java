@@ -31,7 +31,7 @@ public class PushGatewayTest {
   public void setUp() {
     registry = new CollectorRegistry();
     gauge = (Gauge) Gauge.build().name("g").help("help").create();
-    pg = new PushGateway("localhost", mockServerRule.getHttpPort().toString());
+    pg = new PushGateway("localhost:" + mockServerRule.getHttpPort());
     groupingKey = new TreeMap<String, String>();
     groupingKey.put("l", "v");
   }
