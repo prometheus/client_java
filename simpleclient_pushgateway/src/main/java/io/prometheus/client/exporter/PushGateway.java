@@ -13,7 +13,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.BasicHttpContext;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -102,6 +104,8 @@ public class PushGateway {
 
   private final String urlBase;
 
+  private BasicHttpContext localContext;
+
   /**
    * Construct a Pushgateway, with the given url (without scheme).
    * The uri will be split by ':' into address and port.
@@ -136,6 +140,8 @@ public class PushGateway {
   public PushGateway(String scheme, String address, String port, HttpClient httpClient) {
     this.httpClient = httpClient;
     this.urlBase = scheme + "://" + address + ":" + port + "/metrics/job/";
+    localContext = new BasicHttpContext();
+    localContext.setAttribute("preemptive-auth", new BasicScheme());
   }
 
   /**
@@ -354,7 +360,7 @@ public class PushGateway {
     request.setHeader(HttpHeaders.CONTENT_TYPE, TextFormat.CONTENT_TYPE_004);
 
     try {
-      HttpResponse response = httpClient.execute(request);
+      HttpResponse response = httpClient.execute(request, localContext);
       int responseCode = response.getStatusLine().getStatusCode();
       if (responseCode != HttpStatus.SC_ACCEPTED) {
         throw new IOException("Response code from " + url + " was " + response);
