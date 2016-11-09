@@ -98,53 +98,44 @@ public class PushGateway {
 
   private static final int TIMEOUT = 10000;
 
-  private final String url;
-
-  private final String port;
-
-  private final String scheme;
-
   private final HttpClient httpClient;
 
   private final String urlBase;
 
   /**
-   * Construct a Pushgateway, with the given address.
-   * The uri will be split by ':' into url and port.
+   * Construct a Pushgateway, with the given url (without scheme).
+   * The uri will be split by ':' into address and port.
    * <p>
    *
-   * @param address host:port or ip:port of the Pushgateway.
+   * @param url host:port or ip:port of the Pushgateway.
    */
-  public PushGateway(String address) {
-    this(address.split(":")[0], address.split(":")[1]);
+  public PushGateway(String url) {
+    this(url.split(":")[0], url.split(":")[1]);
   }
 
   /**
-   * Construct a Pushgateway, with the given url and port.
+   * Construct a Pushgateway, with the given address and port.
    * <p>
    *
-   * @param url  host or ip of the Pushgateway.
-   * @param port port of the Pushgateway.
+   * @param address host or ip of the Pushgateway.
+   * @param port    port of the Pushgateway.
    */
-  public PushGateway(String url, String port) {
-    this("http", url, port, HttpClients.createDefault());
+  public PushGateway(String address, String port) {
+    this("http", address, port, HttpClients.createDefault());
   }
 
   /**
    * Construct a Pushgateway, with the given address.
    * <p>
    *
-   * @param scheme     url scheme of the PushGateway.
-   * @param url        host or ip of the PushGateway.
+   * @param scheme     address scheme of the PushGateway.
+   * @param address    host or ip of the PushGateway.
    * @param port       port of the PushGateway.
    * @param httpClient httpClient for the connection to the PushGateway
    */
-  public PushGateway(String scheme, String url, String port, HttpClient httpClient) {
-    this.scheme = scheme;
-    this.url = url;
-    this.port = port;
+  public PushGateway(String scheme, String address, String port, HttpClient httpClient) {
     this.httpClient = httpClient;
-    this.urlBase = this.scheme + "://" + this.url + ":" + this.port + "/metrics/job/";
+    this.urlBase = scheme + "://" + address + ":" + port + "/metrics/job/";
   }
 
   /**
