@@ -353,10 +353,14 @@ public class PushGateway {
 
     request.setHeader(HttpHeaders.CONTENT_TYPE, TextFormat.CONTENT_TYPE_004);
 
-    HttpResponse response = httpClient.execute(request);
-    int responseCode = response.getStatusLine().getStatusCode();
-    if (responseCode != HttpStatus.SC_ACCEPTED) {
-      throw new IOException("Response code from " + url + " was " + response);
+    try {
+      HttpResponse response = httpClient.execute(request);
+      int responseCode = response.getStatusLine().getStatusCode();
+      if (responseCode != HttpStatus.SC_ACCEPTED) {
+        throw new IOException("Response code from " + url + " was " + response);
+      }
+    } finally {
+      request.releaseConnection();
     }
   }
 
@@ -374,7 +378,7 @@ public class PushGateway {
       builder = RequestConfig.copy(config);
 
     }
-    config = builder.setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
+    config = builder.setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).setConnectionRequestTimeout(TIMEOUT).build();
     request.setConfig(config);
   }
 }
