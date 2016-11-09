@@ -3,11 +3,25 @@ package io.prometheus.client.exporter;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.*;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,13 +63,17 @@ import java.util.Map;
  */
 public class PushGateway {
 
-  private static final int SECONDS_PER_MILLISECOND = 1000;
+  private static final int TIMEOUT = 10000;
 
   private final String url;
 
   private final String port;
 
   private final String scheme;
+
+  private final HttpClient httpClient;
+
+  private final String urlBase;
 
   /**
    * Construct a Pushgateway, with the given address.
@@ -72,27 +90,28 @@ public class PushGateway {
    * Construct a Pushgateway, with the given url and port.
    * <p>
    *
-   * @param url host or ip of the Pushgateway.
-   * @param port    port of the Pushgateway.
+   * @param url  host or ip of the Pushgateway.
+   * @param port port of the Pushgateway.
    */
   public PushGateway(String url, String port) {
-    this("http", url, port, null);
+    this("http", url, port, HttpClients.createDefault());
   }
 
   /**
    * Construct a Pushgateway, with the given address.
    * <p>
    *
-   * @param scheme   url scheme of the Pushgateway.
-   * @param url  host or ip of the Pushgateway.
-   * @param port     port of the Pushgateway.
-   * @param authenticator authenticator for the Pushgateway.
+   * @param scheme     url scheme of the PushGateway.
+   * @param url        host or ip of the PushGateway.
+   * @param port       port of the PushGateway.
+   * @param httpClient httpClient for the connection to the PushGateway
    */
-  public PushGateway(String scheme, String url, String port, Authenticator authenticator) {
+  public PushGateway(String scheme, String url, String port, HttpClient httpClient) {
     this.scheme = scheme;
     this.url = url;
     this.port = port;
-    Authenticator.setDefault(authenticator);
+    this.httpClient = httpClient;
+    this.urlBase = this.scheme + "://" + this.url + ":" + this.port + "/metrics/job/";
   }
 
   /**
@@ -113,7 +132,7 @@ public class PushGateway {
    * This uses the PUT HTTP method.
    */
   public void push(CollectorRegistry registry, String job) throws IOException {
-    doRequest(registry, job, null, "PUT");
+    push(registry, job, new HashMap<String, String>());
   }
 
   /**
@@ -135,7 +154,9 @@ public class PushGateway {
    * This uses the PUT HTTP method.
    */
   public void push(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-    doRequest(registry, job, groupingKey, "PUT");
+    HttpPut request = new HttpPut();
+    request.setEntity(createOutputEntity(registry));
+    doRequest(registry, job, groupingKey, request);
   }
 
   /**
@@ -157,7 +178,7 @@ public class PushGateway {
    * This uses the POST HTTP method.
    */
   public void pushAdd(CollectorRegistry registry, String job) throws IOException {
-    doRequest(registry, job, null, "POST");
+    pushAdd(registry, job, new HashMap<String, String>());
   }
 
   /**
@@ -179,7 +200,9 @@ public class PushGateway {
    * This uses the POST HTTP method.
    */
   public void pushAdd(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-    doRequest(registry, job, groupingKey, "POST");
+    HttpPost request = new HttpPost();
+    request.setEntity(createOutputEntity(registry));
+    doRequest(registry, job, groupingKey, request);
   }
 
   /**
@@ -202,7 +225,7 @@ public class PushGateway {
    * This uses the DELETE HTTP method.
    */
   public void delete(String job) throws IOException {
-    doRequest(null, job, null, "DELETE");
+    delete(job, new HashMap<String, String>());
   }
 
   /**
@@ -212,7 +235,7 @@ public class PushGateway {
    * This uses the DELETE HTTP method.
    */
   public void delete(String job, Map<String, String> groupingKey) throws IOException {
-    doRequest(null, job, groupingKey, "DELETE");
+    doRequest(null, job, groupingKey, new HttpDelete());
   }
 
   /**
@@ -268,6 +291,19 @@ public class PushGateway {
   }
 
   /**
+   * Creates the output entity for the POST or PUT requests based on the passed registry
+   *
+   * @param registry the metric collector registry
+   * @return the {@link StringEntity} for the request
+   * @throws IOException
+   */
+  private StringEntity createOutputEntity(CollectorRegistry registry) throws IOException {
+    Writer writer = new StringWriter();
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    return new StringEntity(writer.toString());
+  }
+
+  /**
    * Deletes metrics from the Pushgateway.
    * <p>
    * This uses the DELETE HTTP method.
@@ -279,40 +315,42 @@ public class PushGateway {
     delete(job, Collections.singletonMap("instance", instance));
   }
 
-  void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
-    String url = this.scheme + "://" + this.url + ":" + this.port + "/metrics/job/" + URLEncoder.encode(job,
+  void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, HttpRequestBase request) throws IOException {
+    String url = urlBase + URLEncoder.encode(job,
             "UTF-8");
     if (groupingKey != null) {
       for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
         url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
       }
     }
-    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-    connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
+    customizeRequestConfig(request);
 
-    if (!method.equals("DELETE")) {
-      connection.setDoOutput(true);
+    request.setURI(URI.create(url));
+
+    request.setHeader(HttpHeaders.CONTENT_TYPE, TextFormat.CONTENT_TYPE_004);
+
+    HttpResponse response = httpClient.execute(request);
+    int responseCode = response.getStatusLine().getStatusCode();
+    if (responseCode != HttpStatus.SC_ACCEPTED) {
+      throw new IOException("Response code from " + url + " was " + response);
     }
-    connection.setRequestMethod(method);
+  }
 
-    connection.setConnectTimeout(10 * SECONDS_PER_MILLISECOND);
-    connection.setReadTimeout(10 * SECONDS_PER_MILLISECOND);
-    connection.connect();
+  /**
+   * Customizes the request config for the passed request by adding additional parameters.
+   *
+   * @param request the http request
+   */
+  private void customizeRequestConfig(HttpRequestBase request) {
+    RequestConfig config = request.getConfig();
+    RequestConfig.Builder builder;
+    if (config == null) {
+      builder = RequestConfig.custom();
+    } else {
+      builder = RequestConfig.copy(config);
 
-    try {
-      if (!method.equals("DELETE")) {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
-        TextFormat.write004(writer, registry.metricFamilySamples());
-        writer.flush();
-        writer.close();
-      }
-
-      int response = connection.getResponseCode();
-      if (response != HttpURLConnection.HTTP_ACCEPTED) {
-        throw new IOException("Response code from " + url + " was " + response);
-      }
-    } finally {
-      connection.disconnect();
     }
+    config = builder.setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).build();
+    request.setConfig(config);
   }
 }

@@ -45,6 +45,11 @@
             <artifactId>simpleclient_common</artifactId>
             <version>0.0.19-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.2</version>
+        </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>junit</groupId>
