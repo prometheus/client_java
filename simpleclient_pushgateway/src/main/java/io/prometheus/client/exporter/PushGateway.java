@@ -94,6 +94,10 @@ import java.util.Map;
  * <a href="https://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html">
  * https://hc.apache.org/httpcomponents-client-ga/tutorial/html/authentication.html</a>
  * <p>
+ * For preemptive-auth see:
+ * <a href="http://www.programcreek.com/java-api-examples/index.php?source_dir=jenkins-client-master/src/main/java/com/offbytwo/jenkins/client/JenkinsHttpClient.java">JenkingsHttpClient</a>
+ * <a href="http://www.programcreek.com/java-api-examples/index.php?source_dir=jenkins-client-master/src/main/java/com/offbytwo/jenkins/client/PreemptiveAuth.java">PreemptiveAuth</a>
+ * <p>
  * See <a href="https://github.com/prometheus/pushgateway">https://github.com/prometheus/pushgateway</a>
  */
 public class PushGateway {
