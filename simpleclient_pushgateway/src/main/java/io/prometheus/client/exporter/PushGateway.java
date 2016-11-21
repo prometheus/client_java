@@ -111,39 +111,25 @@ public class PushGateway {
   private BasicHttpContext localContext;
 
   /**
-   * Construct a Pushgateway, with the given url (without scheme).
-   * The uri will be split by ':' into address and port.
-   * <p>
+   * Construct a Pushgateway, with the given authority.
    *
-   * @param url host:port or ip:port of the Pushgateway.
+   * @param authority host:port or ip:port of the Pushgateway.
    */
-  public PushGateway(String url) {
-    this(url.split(":")[0], url.split(":")[1]);
+  public PushGateway(String authority) {
+    this("http", authority, HttpClients.createDefault());
   }
 
   /**
-   * Construct a Pushgateway, with the given address and port.
-   * <p>
-   *
-   * @param address host or ip of the Pushgateway.
-   * @param port    port of the Pushgateway.
-   */
-  public PushGateway(String address, String port) {
-    this("http", address, port, HttpClients.createDefault());
-  }
-
-  /**
-   * Construct a Pushgateway, with the given address.
+   * Construct a Pushgateway, with the given authority, scheme and a {@link HttpClient}.
    * <p>
    *
    * @param scheme     address scheme of the PushGateway.
-   * @param address    host or ip of the PushGateway.
-   * @param port       port of the PushGateway.
+   * @param authority  host:port or ip:port of the Pushgateway.
    * @param httpClient httpClient for the connection to the PushGateway
    */
-  public PushGateway(String scheme, String address, String port, HttpClient httpClient) {
+  public PushGateway(String scheme, String authority, HttpClient httpClient) {
     this.httpClient = httpClient;
-    this.urlBase = scheme + "://" + address + ":" + port + "/metrics/job/";
+    this.urlBase = scheme + "://" + authority + "/metrics/job/";
     localContext = new BasicHttpContext();
     localContext.setAttribute("preemptive-auth", new BasicScheme());
   }
