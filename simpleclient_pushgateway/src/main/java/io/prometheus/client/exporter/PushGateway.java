@@ -176,7 +176,7 @@ public class PushGateway {
   public void push(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
     HttpPut request = new HttpPut();
     request.setEntity(createOutputEntity(registry));
-    doRequest(registry, job, groupingKey, request);
+    doRequest(job, groupingKey, request);
   }
 
   /**
@@ -222,7 +222,7 @@ public class PushGateway {
   public void pushAdd(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
     HttpPost request = new HttpPost();
     request.setEntity(createOutputEntity(registry));
-    doRequest(registry, job, groupingKey, request);
+    doRequest(job, groupingKey, request);
   }
 
   /**
@@ -255,7 +255,7 @@ public class PushGateway {
    * This uses the DELETE HTTP method.
    */
   public void delete(String job, Map<String, String> groupingKey) throws IOException {
-    doRequest(null, job, groupingKey, new HttpDelete());
+    doRequest(job, groupingKey, new HttpDelete());
   }
 
   /**
@@ -335,14 +335,9 @@ public class PushGateway {
     delete(job, Collections.singletonMap("instance", instance));
   }
 
-  void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, HttpRequestBase request) throws IOException {
-    String url = urlBase + URLEncoder.encode(job,
-            "UTF-8");
-    if (groupingKey != null) {
-      for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
-        url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
-      }
-    }
+  void doRequest(String job, Map<String, String> groupingKeys, HttpRequestBase request) throws IOException {
+    String url = buildUrl(job, groupingKeys);
+
     customizeRequestConfig(request);
 
     request.setURI(URI.create(url));
@@ -358,6 +353,16 @@ public class PushGateway {
     } finally {
       request.releaseConnection();
     }
+  }
+
+  private String buildUrl(String job, Map<String, String> groupingKeys) throws IOException {
+    String url = urlBase + URLEncoder.encode(job, "UTF-8");
+    if (groupingKeys != null) {
+      for (Map.Entry<String, String> entry : groupingKeys.entrySet()) {
+        url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
+      }
+    }
+    return url;
   }
 
   /**
