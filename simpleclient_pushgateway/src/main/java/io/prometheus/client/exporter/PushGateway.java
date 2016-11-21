@@ -87,7 +87,7 @@ import java.util.Map;
  *       PushGateway pg = new PushGateway("https", "localhost", "443", httpClient);
  *       pg.pushAdd(registry, "my_batch_job");
  *     }
- *   }
+ *   }>
  * }
  * </pre>
  * For information about authentication using the HttpClient see:
@@ -102,7 +102,7 @@ import java.util.Map;
  */
 public class PushGateway {
 
-  private static final int TIMEOUT = 10000;
+  private static final int TIMEOUT_IN_MILLISECONDS = 10000;
 
   private final HttpClient httpClient;
 
@@ -388,7 +388,10 @@ public class PushGateway {
       builder = RequestConfig.copy(config);
 
     }
-    config = builder.setConnectTimeout(TIMEOUT).setSocketTimeout(TIMEOUT).setConnectionRequestTimeout(TIMEOUT).build();
+    config = builder.setConnectTimeout(TIMEOUT_IN_MILLISECONDS)
+            .setSocketTimeout(TIMEOUT_IN_MILLISECONDS)
+            .setConnectionRequestTimeout(TIMEOUT_IN_MILLISECONDS)
+            .build();
     request.setConfig(config);
   }
 }
