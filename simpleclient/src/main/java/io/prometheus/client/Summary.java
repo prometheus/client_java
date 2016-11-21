@@ -1,6 +1,9 @@
 package io.prometheus.client;
 
 import io.prometheus.client.CKMSQuantiles.Quantile;
+
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -141,7 +144,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
   /**
    * Represents an event being timed.
    */
-  public static class Timer {
+  public static class Timer implements Closeable {
     private final Child child;
     private final long start;
     private Timer(Child child) {
@@ -156,6 +159,15 @@ public class Summary extends SimpleCollector<Summary.Child> {
       double elapsed = (Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND;
       child.observe(elapsed);
       return elapsed;
+    }
+
+    /**
+     * Equivalent to calling {@link #observeDuration()}.
+     * @throws IOException
+     */
+    @Override
+    public void close() throws IOException {
+      observeDuration();
     }
   }
 

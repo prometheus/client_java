@@ -1,5 +1,7 @@
 package io.prometheus.client;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,11 +59,11 @@ import java.util.Map;
  * }
  * </pre>
  * <p>
- * These can be aggregated and processed together much more easily in the Prometheus 
+ * These can be aggregated and processed together much more easily in the Prometheus
  * server than individual metrics for each labelset.
  */
 public class Gauge extends SimpleCollector<Gauge.Child> {
-  
+
   Gauge(Builder b) {
     super(b);
   }
@@ -88,7 +90,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> {
    /**
     * Represents an event being timed.
     */
-   public static class Timer {
+   public static class Timer implements Closeable {
      private final Child child;
      private final long start;
      private Timer(Child child) {
@@ -103,6 +105,15 @@ public class Gauge extends SimpleCollector<Gauge.Child> {
        double elapsed = (Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND;
        child.set(elapsed);
        return elapsed;
+     }
+
+     /**
+      * Equivalent to calling {@link #setDuration()}.
+      * @throws IOException
+      */
+     @Override
+     public void close() throws IOException {
+       setDuration();
      }
    }
 
