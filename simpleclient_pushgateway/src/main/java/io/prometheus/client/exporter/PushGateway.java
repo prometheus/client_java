@@ -102,7 +102,7 @@ public class PushGateway {
 
   private final String urlBase;
 
-  private BasicHttpContext localContext;
+  private final BasicHttpContext localContext;
 
   /**
    * Construct a Pushgateway, with the given authority.
