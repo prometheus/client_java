@@ -34,7 +34,15 @@ public class CounterTest {
     noLabels.labels().inc();
     assertEquals(8.0, getValue(), .001);
   }
-    
+
+  @Test
+  public void testSet() {
+    noLabels.set(42);
+    assertEquals(42, getValue(), .001);
+    noLabels.labels().set(7);
+    assertEquals(7.0, getValue(), .001);
+  }
+
   @Test(expected=IllegalArgumentException.class)
   public void testNegativeIncrementFails() {
     noLabels.inc(-1);

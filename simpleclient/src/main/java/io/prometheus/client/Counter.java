@@ -114,6 +114,23 @@ public class Counter extends SimpleCollector<Counter.Child> {
       value.add(amt);
     }
     /**
+     * Set is used to set the Counter to an arbitrary value. It is only used
+     * if you have to transfer a value from an external counter into this
+     * Prometheus metric. Do not use it for regular handling of a
+     * Prometheus counter (as it can be used to break the contract of
+     * monotonically increasing values).
+     * @param value
+     */
+    public void set(double val) {
+      synchronized(this) {
+        value.reset();
+        // If get() were called here it'd see an invalid value, so use a lock.
+        // inc()/dec() don't need locks, as all the possible outcomes
+        // are still possible if set() were atomic so no new races are introduced.
+        value.add(val);
+      }
+    }
+    /**
      * Get the value of the counter.
      */
     public double get() {
@@ -134,6 +151,12 @@ public class Counter extends SimpleCollector<Counter.Child> {
    */
   public void inc(double amt) {
     noLabelsChild.inc(amt);
+  }
+  /**
+   * Set the gauge with no labels to the given value.
+   */
+  public void set(double val) {
+    noLabelsChild.set(val);
   }
 
   @Override
