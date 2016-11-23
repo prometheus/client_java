@@ -96,6 +96,8 @@ public class PushGateway {
 
   private static final int TIMEOUT_IN_MILLISECONDS = 10000;
 
+  private static final String INSTANCE_GROUPING_KEY = "instance";
+
   private final HttpClient httpClient;
 
   private final String urlBase;
@@ -134,7 +136,7 @@ public class PushGateway {
    */
   public static Map<String, String> instanceIPGroupingKey() throws UnknownHostException {
     Map<String, String> groupingKey = new HashMap<String, String>();
-    groupingKey.put("instance", InetAddress.getLocalHost().getHostAddress());
+    groupingKey.put(INSTANCE_GROUPING_KEY, InetAddress.getLocalHost().getHostAddress());
     return groupingKey;
   }
 
@@ -259,7 +261,7 @@ public class PushGateway {
    */
   @Deprecated
   public void push(CollectorRegistry registry, String job, String instance) throws IOException {
-    push(registry, job, Collections.singletonMap("instance", instance));
+    push(registry, job, Collections.singletonMap(INSTANCE_GROUPING_KEY, instance));
   }
 
   /**
@@ -273,7 +275,7 @@ public class PushGateway {
    */
   @Deprecated
   public void push(Collector collector, String job, String instance) throws IOException {
-    push(collector, job, Collections.singletonMap("instance", instance));
+    push(collector, job, Collections.singletonMap(INSTANCE_GROUPING_KEY, instance));
   }
 
   /**
@@ -285,7 +287,7 @@ public class PushGateway {
    */
   @Deprecated
   public void pushAdd(CollectorRegistry registry, String job, String instance) throws IOException {
-    pushAdd(registry, job, Collections.singletonMap("instance", instance));
+    pushAdd(registry, job, Collections.singletonMap(INSTANCE_GROUPING_KEY, instance));
   }
 
   /**
@@ -299,7 +301,7 @@ public class PushGateway {
    */
   @Deprecated
   public void pushAdd(Collector collector, String job, String instance) throws IOException {
-    pushAdd(collector, job, Collections.singletonMap("instance", instance));
+    pushAdd(collector, job, Collections.singletonMap(INSTANCE_GROUPING_KEY, instance));
   }
 
   /**
@@ -324,7 +326,7 @@ public class PushGateway {
    */
   @Deprecated
   public void delete(String job, String instance) throws IOException {
-    delete(job, Collections.singletonMap("instance", instance));
+    delete(job, Collections.singletonMap(INSTANCE_GROUPING_KEY, instance));
   }
 
   void doRequest(String job, Map<String, String> groupingKeys, HttpRequestBase request) throws IOException {
