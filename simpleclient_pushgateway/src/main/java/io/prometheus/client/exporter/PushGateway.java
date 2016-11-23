@@ -65,11 +65,12 @@ import java.util.Map;
  * <pre>
  * {@code
  *   void executeBatchJob() throws Exception {
+ *     CollectorRegistry registry = new CollectorRegistry();
  *     ...
  *     try {
  *      ...
  *     } finally {
- *       durationTimer.setDuration();
+ *       ...
  *       CredentialsProvider creds = new BasicCredentialsProvider();
  *       creds.setCredentials(
  *          new AuthScope(new HttpHost("localhost")),
