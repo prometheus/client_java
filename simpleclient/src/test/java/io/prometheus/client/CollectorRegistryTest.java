@@ -81,5 +81,26 @@ public class CollectorRegistryTest {
     registry.register(new EmptyCollector());
     assertFalse(registry.metricFamilySamples().hasMoreElements());
   }
+
+  @Test
+  public void testGettingSamples() {
+    Gauge g = Gauge.build().name("g").help("h").labelNames("l1", "l2").register(registry);
+    g.labels("l1Value", "l2Value").inc();
+
+    Counter c = Counter.build().name("c").help("h").labelNames("l1", "l2").register(registry);
+    c.labels("l1Value", "l2Value").inc();
+
+    Summary s = Summary.build().name("s").help("h").labelNames("l1", "l2").register(registry);
+    s.labels("l1Value", "l2Value").observe(5);
+
+    assertEquals(1, registry.listSampleValuesOfPrefix("g").size());
+    assertEquals(1, registry.listSampleValuesOfPrefix("c").size());
+    assertEquals(2, registry.listSampleValuesOfPrefix("s").size());
+
+    assertEquals((Double)1.0, registry.getSampleValue("g", new String[]{"l1", "l2"}, new String[]{"l1Value", "l2Value"}));
+    assertEquals((Double)1.0, registry.getSampleValue("c", new String[]{"l1", "l2"}, new String[]{"l1Value", "l2Value"}));
+    assertEquals((Double)1.0, registry.getSampleValue("s_count", new String[]{"l1", "l2"}, new String[]{"l1Value", "l2Value"}));
+    assertEquals((Double)5.0, registry.getSampleValue("s_sum", new String[]{"l1", "l2"}, new String[]{"l1Value", "l2Value"}));
+  }
   
 }

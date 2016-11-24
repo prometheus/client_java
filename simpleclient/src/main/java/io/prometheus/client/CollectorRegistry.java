@@ -1,10 +1,12 @@
 package io.prometheus.client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -108,16 +110,31 @@ public class CollectorRegistry {
    * This is inefficient, and intended only for use in unittests.
    */
   public Double getSampleValue(String name, String[] labelNames, String[] labelValues) {
-    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(metricFamilySamples())) {
-      for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
-        if (sample.name.equals(name)
-            && Arrays.equals(sample.labelNames.toArray(), labelNames)
-            && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
-          return sample.value;
-        }
+    for (Collector.MetricFamilySamples.Sample sample: listSampleValuesOfPrefix(name)) {
+      if (sample.name.equals(name)
+          && Arrays.equals(sample.labelNames.toArray(), labelNames)
+          && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
+        return sample.value;
       }
     }
     return null;
   }
 
+  /**
+   * Returns the samples whose name starts with the given prefix.
+   * <p>
+   * This is inefficient, and intended only for use in unittests.
+   */
+  public List<Collector.MetricFamilySamples.Sample> listSampleValuesOfPrefix(String prefix) {
+    List<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+
+    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(metricFamilySamples())) {
+      for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
+        if (sample.name.startsWith(prefix)) {
+          samples.add(sample);
+        }
+      }
+    }
+    return samples;
+  }
 }
