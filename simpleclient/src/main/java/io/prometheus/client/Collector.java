@@ -23,10 +23,11 @@ public abstract class Collector {
     GAUGE,
     SUMMARY,
     HISTOGRAM,
+    UNTYPED,
   }
 
   /**
-   * A metric, and all of it's samples.
+   * A metric, and all of its samples.
    */
   static public class MetricFamilySamples {
     public final String name;
@@ -177,7 +178,7 @@ public abstract class Collector {
   }
 
   /**
-   * Convert a double to it's string representation in Go.
+   * Convert a double to its string representation in Go.
    */
   public static String doubleToGoString(double d) {
     if (d == Double.POSITIVE_INFINITY) {
