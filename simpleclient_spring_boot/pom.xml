@@ -52,6 +52,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
         <prometheus.client.version>0.0.19-SNAPSHOT</prometheus.client.version>
         <spring.core.version>4.3.4.RELEASE</spring.core.version>
         <spring.boot.version>1.4.2.RELEASE</spring.boot.version>
