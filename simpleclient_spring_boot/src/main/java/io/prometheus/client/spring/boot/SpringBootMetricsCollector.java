@@ -23,7 +23,7 @@ import java.util.List;
  * </code></pre>
  */
 @Component
-public class SpringBootMetricsCollector extends Collector {
+public class SpringBootMetricsCollector extends Collector implements Collector.Describable {
   private final Collection<PublicMetrics> publicMetrics;
 
   @Autowired
@@ -45,5 +45,9 @@ public class SpringBootMetricsCollector extends Collector {
       }
     }
     return samples;
+  }
+
+  public List<MetricFamilySamples> describe() {
+    return new ArrayList<MetricFamilySamples>();
   }
 }

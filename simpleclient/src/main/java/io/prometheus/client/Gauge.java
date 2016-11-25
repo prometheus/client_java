@@ -62,7 +62,7 @@ import java.util.Map;
  * These can be aggregated and processed together much more easily in the Prometheus
  * server than individual metrics for each labelset.
  */
-public class Gauge extends SimpleCollector<Gauge.Child> {
+public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Describable {
 
   Gauge(Builder b) {
     super(b);
@@ -251,6 +251,12 @@ public class Gauge extends SimpleCollector<Gauge.Child> {
 
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(mfs);
+    return mfsList;
+  }
+
+  public List<MetricFamilySamples> describe() {
+    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
+    mfsList.add(new GaugeMetricFamily(fullname, help, labelNames));
     return mfsList;
   }
 

@@ -52,7 +52,7 @@ import java.util.Map;
  * {@link Histogram.Builder#exponentialBuckets(double, double, int) exponentialBuckets}
  * offer easy ways to set common bucket patterns.
  */
-public class Histogram extends SimpleCollector<Histogram.Child> {
+public class Histogram extends SimpleCollector<Histogram.Child> implements Collector.Describable {
   private final double[] buckets;
 
   Histogram(Builder b) {
@@ -266,6 +266,12 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
     MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.HISTOGRAM, help, samples);
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(mfs);
+    return mfsList;
+  }
+
+  public List<MetricFamilySamples> describe() {
+    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
+    mfsList.add(new MetricFamilySamples(fullname, Type.HISTOGRAM, help, new ArrayList<MetricFamilySamples.Sample>()));
     return mfsList;
   }
 

@@ -81,5 +81,60 @@ public class CollectorRegistryTest {
     registry.register(new EmptyCollector());
     assertFalse(registry.metricFamilySamples().hasMoreElements());
   }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testCounterAndGaugeWithSameNameThrows() {
+    Gauge.build().name("g").help("h").register(registry);
+    Counter.build().name("g").help("h").register(registry);
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testCounterAndSummaryWithSameNameThrows() {
+    Counter.build().name("s").help("h").register(registry);
+    Summary.build().name("s").help("h").register(registry);
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testCounterSumAndSummaryWithSameNameThrows() {
+    Counter.build().name("s_sum").help("h").register(registry);
+    Summary.build().name("s").help("h").register(registry);
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testHistogramAndSummaryWithSameNameThrows() {
+    Histogram.build().name("s").help("h").register(registry);
+    Summary.build().name("s").help("h").register(registry);
+  }
+
+  @Test
+  public void testCanUnAndReregister() {
+    Histogram h = Histogram.build().name("s").help("h").create();
+    registry.register(h);
+    registry.unregister(h);
+    registry.register(h);
+  }
+
+  class MyCollector extends Collector {
+    public List<MetricFamilySamples> collect() {
+      List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
+      mfs.add(new GaugeMetricFamily("g", "help", 42));
+      return mfs;
+    }
+  }
+
+  @Test
+  public void testAutoDescribeDisabledByDefault() {
+    CollectorRegistry r = new CollectorRegistry();
+    new MyCollector().register(r);
+    // This doesn't throw.
+    new MyCollector().register(r);
+  }
+
+  @Test(expected=IllegalArgumentException.class)
+  public void testAutoDescribeThrowsOnReregisteringCustomCollector() {
+    CollectorRegistry r = new CollectorRegistry(true);
+    new MyCollector().register(r);
+    new MyCollector().register(r);
+  }
   
 }

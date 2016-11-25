@@ -70,7 +70,7 @@ import java.util.concurrent.TimeUnit;
  *
  * See https://prometheus.io/docs/practices/histograms/ for more info on quantiles.
  */
-public class Summary extends SimpleCollector<Summary.Child> {
+public class Summary extends SimpleCollector<Summary.Child> implements Counter.Describable {
 
   final List<Quantile> quantiles; // Can be empty, but can never be null.
   final long maxAgeSeconds;
@@ -281,6 +281,12 @@ public class Summary extends SimpleCollector<Summary.Child> {
     MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.SUMMARY, help, samples);
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(mfs);
+    return mfsList;
+  }
+
+  public List<MetricFamilySamples> describe() {
+    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
+    mfsList.add(new SummaryMetricFamily(fullname, help, labelNames));
     return mfsList;
   }
 
