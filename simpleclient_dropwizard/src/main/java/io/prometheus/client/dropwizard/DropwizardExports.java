@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * Collect Dropwizard metrics from a MetricRegistry.
  */
-public class DropwizardExports extends io.prometheus.client.Collector {
+public class DropwizardExports extends io.prometheus.client.Collector implements io.prometheus.client.Collector.Describable {
     private MetricRegistry registry;
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
 
@@ -145,5 +145,9 @@ public class DropwizardExports extends io.prometheus.client.Collector {
             mfSamples.addAll(fromMeter(entry.getKey(), entry.getValue()));
         }
         return mfSamples;
+    }
+
+    public List<MetricFamilySamples> describe() {
+      return new ArrayList<MetricFamilySamples>();
     }
 }

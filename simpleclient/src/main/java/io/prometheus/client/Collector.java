@@ -129,6 +129,25 @@ public abstract class Collector {
     return (T)this;
   }
 
+  public interface Describable {
+    /**
+     *  Provide a list of metric families this Collector is expected to return.
+     *
+     *  These should exclude the samples. This is used by the registry to
+     *  detect collisions and duplicate registrations.
+     *
+     *  Usually custom collectors do not have to implement Describable. If
+     *  Describable is not implemented and the CollectorRegistry was created
+     *  with auto desribe enabled (which is the case for the default registry)
+     *  then {@link collect} will be called at registration time instead of
+     *  describe. If this could cause problems, either implement a proper
+     *  describe, or if that's not practical have describe return an empty
+     *  list.
+     */
+    public List<MetricFamilySamples> describe();
+  }
+
+
   /* Various utility functions for implementing Collectors. */
 
   /**

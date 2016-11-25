@@ -1,12 +1,16 @@
 package io.prometheus.client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.List;
 
 /**
  * A registry of Collectors.
@@ -21,10 +25,21 @@ public class CollectorRegistry {
   /**
    * The default registry.
    */
-  public static final CollectorRegistry defaultRegistry = new CollectorRegistry();
+  public static final CollectorRegistry defaultRegistry = new CollectorRegistry(true);
 
-  private final Set<Collector> collectors = 
-      Collections.newSetFromMap(new ConcurrentHashMap<Collector, Boolean>());
+
+  private final Map<Collector, List<String>> collectorsToNames = new HashMap<Collector, List<String>>();
+  private final Map<String, Collector> namesToCollectors = new HashMap<String, Collector>();
+
+  private final boolean autoDescribe;
+
+  public CollectorRegistry(){
+    this(false);
+  }
+
+  public CollectorRegistry(boolean autoDescribe) {
+    this.autoDescribe = autoDescribe;
+  }
 
   /**
    * Register a Collector.
@@ -32,20 +47,76 @@ public class CollectorRegistry {
    * A collector can be registered to multiple CollectorRegistries.
    */
   public void register(Collector m) {
-    collectors.add(m);
+    List<String> names = collectorNames(m);
+    synchronized (collectorsToNames) {
+      for (String name : names) {
+        if(namesToCollectors.containsKey(name)) {
+          throw new IllegalArgumentException("Collector already registered that provides name: " + name);
+        }
+      }
+      for (String name : names) {
+        namesToCollectors.put(name, m);
+      }
+      collectorsToNames.put(m, names);
+    }
   }
-  
+
   /**
    * Unregister a Collector.
    */
   public void unregister(Collector m) {
-    collectors.remove(m);
+    synchronized (collectorsToNames) {
+      for (String name : collectorsToNames.get(m)) {
+        namesToCollectors.remove(name);
+      }
+      collectorsToNames.remove(m);
+    }
   }
   /**
    * Unregister all Collectors.
    */
   public void clear() {
-    collectors.clear();
+    synchronized (collectorsToNames) {
+      collectorsToNames.clear();
+      namesToCollectors.clear();
+    }
+  }
+
+  /**
+   * A snapshot of the current collectors.
+   */
+  private Set<Collector> collectors() {
+    synchronized (collectorsToNames) {
+      return new HashSet(collectorsToNames.keySet());
+    }
+  }
+
+  private List<String> collectorNames(Collector m) {
+    List<Collector.MetricFamilySamples> mfs;
+    if (m instanceof Collector.Describable) {
+      mfs = ((Collector.Describable)m).describe();
+    } else if (autoDescribe) {
+      mfs = m.collect();
+    } else {
+      mfs = Collections.emptyList();
+    }
+
+    List<String> names = new ArrayList<String>();
+    for (Collector.MetricFamilySamples family : mfs) {
+      switch (family.type) {
+        case SUMMARY:
+          names.add(family.name + "_count");
+          names.add(family.name + "_sum");
+          names.add(family.name);
+        case HISTOGRAM:
+          names.add(family.name + "_count");
+          names.add(family.name + "_sum");
+          names.add(family.name + "_bucket");
+        default:
+          names.add(family.name);
+      }
+    }
+    return names;
   }
 
   /**
@@ -56,14 +127,14 @@ public class CollectorRegistry {
   }
   class MetricFamilySamplesEnumeration implements Enumeration<Collector.MetricFamilySamples> {
 
-    private final Iterator<Collector> collectorIter = collectors.iterator();
+    private final Iterator<Collector> collectorIter = collectors().iterator();
     private Iterator<Collector.MetricFamilySamples> metricFamilySamples;
     private Collector.MetricFamilySamples next;
 
     MetricFamilySamplesEnumeration() {
       findNextElement();
     }
-    
+
     private void findNextElement() {
       if (metricFamilySamples != null && metricFamilySamples.hasNext()) {
         next = metricFamilySamples.next();
@@ -87,7 +158,7 @@ public class CollectorRegistry {
       findNextElement();
       return current;
     }
-    
+
     public boolean hasMoreElements() {
       return next != null;
     }
