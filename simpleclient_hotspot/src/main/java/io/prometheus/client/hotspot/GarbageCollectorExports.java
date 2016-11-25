@@ -1,6 +1,7 @@
 package io.prometheus.client.hotspot;
 
 import io.prometheus.client.Collector;
+import io.prometheus.client.SummaryMetricFamily;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -35,28 +36,18 @@ public class GarbageCollectorExports extends Collector {
   }
 
   public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
+    SummaryMetricFamily gcCollection = new SummaryMetricFamily(
+        "jvm_gc_collection_seconds",
+        "Time spent in a given JVM garbage collector in seconds.",
+        Collections.singletonList("gc"));
     for (final GarbageCollectorMXBean gc : garbageCollectors) {
-      samples.add(
-          new MetricFamilySamples.Sample(
-              "jvm_gc_collection_seconds_sum",
-              Collections.singletonList("gc"),
-              Collections.singletonList(gc.getName()),
-              gc.getCollectionTime() / MILLISECONDS_PER_SECOND));
-      samples.add(
-          new MetricFamilySamples.Sample(
-              "jvm_gc_collection_seconds_count",
-              Collections.singletonList("gc"),
-              Collections.singletonList(gc.getName()),
-              gc.getCollectionCount()));
+        gcCollection.addMetric(
+            Collections.singletonList(gc.getName()),
+            gc.getCollectionCount(),
+            gc.getCollectionTime() / MILLISECONDS_PER_SECOND);
     }
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-    mfs.add(new MetricFamilySamples(
-        "jvm_gc_collection_seconds",
-        Type.SUMMARY,
-        "Time spent in a given JVM garbage collector in seconds.",
-        samples));
-
+    mfs.add(gcCollection);
     return mfs;
   }
 }

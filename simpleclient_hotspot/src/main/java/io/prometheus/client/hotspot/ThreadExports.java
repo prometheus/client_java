@@ -1,11 +1,12 @@
 package io.prometheus.client.hotspot;
 
 import io.prometheus.client.Collector;
+import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.GaugeMetricFamily;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,8 +27,6 @@ import java.util.List;
  * </pre>
  */
 public class ThreadExports extends Collector {
-  private static final List<String> EMPTY_LABEL = Collections.emptyList();
-
   private final ThreadMXBean threadBean;
 
   public ThreadExports() {
@@ -40,44 +39,28 @@ public class ThreadExports extends Collector {
 
   void addThreadMetrics(List<MetricFamilySamples> sampleFamilies) {
     sampleFamilies.add(
-            new MetricFamilySamples(
-                    "jvm_threads_current",
-                    Type.GAUGE,
-                    "Current thread count of a JVM",
-                    Collections.singletonList(
-                            new MetricFamilySamples.Sample(
-                                    "jvm_threads_current", EMPTY_LABEL, EMPTY_LABEL,
-                                    threadBean.getThreadCount()))));
+        new GaugeMetricFamily(
+          "jvm_threads_current",
+          "Current thread count of a JVM",
+          threadBean.getThreadCount()));
 
     sampleFamilies.add(
-            new MetricFamilySamples(
-                    "jvm_threads_daemon",
-                    Type.GAUGE,
-                    "Daemon thread count of a JVM",
-                    Collections.singletonList(
-                            new MetricFamilySamples.Sample(
-                                    "jvm_threads_daemon", EMPTY_LABEL, EMPTY_LABEL,
-                                    threadBean.getDaemonThreadCount()))));
+        new GaugeMetricFamily(
+          "jvm_threads_daemon",
+          "Daemon thread count of a JVM",
+          threadBean.getDaemonThreadCount()));
 
     sampleFamilies.add(
-            new MetricFamilySamples(
-                    "jvm_peak_threads",
-                    Type.GAUGE,
-                    "Peak thread count of a JVM",
-                    Collections.singletonList(
-                            new MetricFamilySamples.Sample(
-                                    "jvm_threads_peak", EMPTY_LABEL, EMPTY_LABEL,
-                                    threadBean.getPeakThreadCount()))));
+        new GaugeMetricFamily(
+          "jvm_threads_peak",
+          "Peak thread count of a JVM",
+          threadBean.getPeakThreadCount()));
 
     sampleFamilies.add(
-            new MetricFamilySamples(
-                    "jvm_threads_started_total",
-                    Type.COUNTER,
-                    "Started thread count of a JVM",
-                    Collections.singletonList(
-                            new MetricFamilySamples.Sample(
-                                    "jvm_threads_started_total", EMPTY_LABEL, EMPTY_LABEL,
-                                    threadBean.getTotalStartedThreadCount()))));
+        new CounterMetricFamily(
+          "jvm_threads_started_total",
+          "Started thread count of a JVM",
+          threadBean.getTotalStartedThreadCount()));
   }
 
 

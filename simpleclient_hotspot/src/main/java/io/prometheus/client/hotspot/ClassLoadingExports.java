@@ -1,11 +1,12 @@
 package io.prometheus.client.hotspot;
 
 import io.prometheus.client.Collector;
+import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.GaugeMetricFamily;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ClassLoadingMXBean;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,8 +26,6 @@ import java.util.List;
  * </pre>
  */
 public class ClassLoadingExports extends Collector {
-  private static final List<String> EMPTY_LABEL = Collections.emptyList();
-
   private final ClassLoadingMXBean clBean;
 
   public ClassLoadingExports() {
@@ -38,35 +37,18 @@ public class ClassLoadingExports extends Collector {
   }
 
   void addClassLoadingMetrics(List<MetricFamilySamples> sampleFamilies) {
-    sampleFamilies.add(
-            new MetricFamilySamples(
-                    "jvm_classes_loaded",
-                    Type.GAUGE,
-                    "The number of classes that are currently loaded in the JVM",
-                    Collections.singletonList(
-                            new MetricFamilySamples.Sample(
-                                    "jvm_classes_loaded", EMPTY_LABEL, EMPTY_LABEL,
-                                    clBean.getLoadedClassCount()))));
-
-    sampleFamilies.add(
-            new MetricFamilySamples(
-                    "jvm_classes_loaded_total",
-                    Type.COUNTER,
-                    "The total number of classes that have been loaded since the JVM has started execution",
-                    Collections.singletonList(
-                            new MetricFamilySamples.Sample(
-                                    "jvm_classes_loaded_total", EMPTY_LABEL, EMPTY_LABEL,
-                                    clBean.getTotalLoadedClassCount()))));
-
-    sampleFamilies.add(
-            new MetricFamilySamples(
-                    "jvm_classes_unloaded_total",
-                    Type.COUNTER,
-                    "The total number of classes that have been unloaded since the JVM has started execution",
-                    Collections.singletonList(
-                            new MetricFamilySamples.Sample(
-                                    "jvm_classes_unloaded_total", EMPTY_LABEL, EMPTY_LABEL,
-                                    clBean.getUnloadedClassCount()))));
+    sampleFamilies.add(new GaugeMetricFamily(
+          "jvm_classes_loaded",
+          "The number of classes that are currently loaded in the JVM",
+          clBean.getLoadedClassCount()));
+    sampleFamilies.add(new CounterMetricFamily(
+          "jvm_classes_loaded_total",
+          "The total number of classes that have been loaded since the JVM has started execution",
+          clBean.getTotalLoadedClassCount()));
+    sampleFamilies.add(new CounterMetricFamily(
+          "jvm_classes_unloaded_total",
+          "The total number of classes that have been unloaded since the JVM has started execution",
+          clBean.getUnloadedClassCount()));
   }
 
 
