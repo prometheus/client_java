@@ -3,12 +3,18 @@ package io.prometheus.client.spring.boot;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -65,8 +71,12 @@ public class PrometheusEndpointTest {
     return "http://localhost:" + localServerPort;
   }
 
-  @SpringBootApplication
+  @SpringBootConfiguration
   @EnablePrometheusEndpoint
+  @EnableAutoConfiguration(exclude = {
+    PrometheusAutoConfiguration.class
+  })
+  @ComponentScan(excludeFilters = @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class))
   static class TestConfiguration {
 
     @Bean
