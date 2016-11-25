@@ -13,6 +13,7 @@ import java.util.List;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.Collector.MetricFamilySamples.Sample;
+import io.prometheus.client.CollectorRegistry;
 
 /**
  * @author pidster
@@ -40,6 +41,20 @@ final class SpringPublicMetricsCollector extends Collector implements BeanPostPr
       publicMetrics.add((PublicMetrics) bean);
     }
     return bean;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T extends Collector> T register() {
+    // NO-OP, because it's taken care of by Spring and we don't want accidents
+    return (T) this;
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T extends Collector> T register(CollectorRegistry registry) {
+    // NO-OP, because it's taken care of by Spring and we don't want accidents
+    return (T) this;
   }
 
   @Override
