@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * @deprecated in favour of {@link io.prometheus.client.spring.SpringPublicMetricsCollector}.
+ *
  * <p>Spring boot metrics integration for Prometheus exporter.</p>
  *
  * <pre><code>{@literal @}Bean
@@ -21,7 +23,10 @@ import java.util.List;
  *   return springBootMetricsCollector;
  * }
  * </code></pre>
+ *
+ * @see io.prometheus.client.spring.SpringPublicMetricsCollector
  */
+@Deprecated
 @Component
 public class SpringBootMetricsCollector extends Collector {
   private final Collection<PublicMetrics> publicMetrics;

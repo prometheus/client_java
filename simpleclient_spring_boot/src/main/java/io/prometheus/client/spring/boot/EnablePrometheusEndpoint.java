@@ -1,5 +1,6 @@
 package io.prometheus.client.spring.boot;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.Documented;
@@ -9,6 +10,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ *
+ * @deprecated in favour of using Spring's AutoConfiguration support.
+ *
  * Enable an endpoint that exposes Prometheus metrics from its default collector.
  * <p>
  * Usage:
@@ -34,6 +38,7 @@ import java.lang.annotation.Target;
  *
  * @author Marco Aust
  * @author Eliezio Oliveira
+ * @see io.prometheus.client.spring.boot.PrometheusAutoConfiguration
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

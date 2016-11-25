@@ -8,6 +8,12 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 
+/**
+ * @deprecated in favour of using {@link io.prometheus.client.spring.EnablePrometheusMetrics}
+ * and {@link io.prometheus.client.spring.EnablePrometheusCollectorRegistration} which provide
+ * finer grained control and use a more conventional Spring style.
+ */
+@Deprecated
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
