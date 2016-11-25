@@ -40,6 +40,7 @@ import java.lang.annotation.Target;
  * @author Eliezio Oliveira
  * @see io.prometheus.client.spring.boot.PrometheusAutoConfiguration
  */
+@Deprecated
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
