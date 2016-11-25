@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @deprecated in favour of {@link io.prometheus.client.spring.SpringPublicMetricsCollector}.
+ * @deprecated in favour of <code>io.prometheus.client.spring.SpringPublicMetricsCollector}</code>.
  *
  * <p>Spring boot metrics integration for Prometheus exporter.</p>
  *
@@ -24,7 +24,6 @@ import java.util.List;
  * }
  * </code></pre>
  *
- * @see io.prometheus.client.spring.SpringPublicMetricsCollector
  */
 @Deprecated
 @Component

@@ -1,15 +1,12 @@
 /**
  * This package provides Spring JavaConfig style utilities for Prometheus Collectors.
  *
- * <p>
  * To enable this functionality, add the following <code>{@literal @}EnableXxxx</code>
  * annotations to a Configuration class in your application.
  *
- * <p>
  * When combined, any {@link io.prometheus.client.Collector} defined as a Spring bean
  * will be automatically registered with the {@link io.prometheus.client.CollectorRegistry}.
  *
- * <p>
  * <pre><code>
  *{@literal @}Configuration
  *{@literal @}EnablePrometheusCollectorRegistration

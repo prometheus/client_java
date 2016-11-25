@@ -12,7 +12,6 @@ import java.lang.annotation.Target;
 /**
  * An {@literal @}Enable style annotation that provides CollectorRegistry related functions.
  *
- * <p>
  * <pre><code>
  *{@literal @}Configuration
  *{@literal @}EnablePrometheusCollectorRegistration(useDefault = true, register = true)

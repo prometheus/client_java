@@ -14,7 +14,6 @@ import java.lang.annotation.Target;
  * Prometheus metrics Collectors and integrats with standard Spring
  * PublicMetrics.
  *
- * <p>
  * <pre><code>
  *{@literal @}Configuration
  *{@literal @}EnablePrometheusMetrics(hotspot = true, spring = true)
