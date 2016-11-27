@@ -20,7 +20,8 @@ import java.io.IOException;
  * The MetricsFilter class exists to provide a high-level filter that enables tunable collection of metrics for Servlet
  * performance.
  *
- * By default, this filter will provide four levels
+ * By default, this filter will provide metrics that distinguish 3 levels deep for the request path
+ * (including servlet context path).
  */
 public class MetricsFilter implements Filter {
     public static final String PATH_COMPONENT_PARAM = "path-components";
