@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import io.prometheus.client.Collector;
+import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.GaugeMetricFamily;
 
 /**
  * Exports the standard exports common across all prometheus clients.
@@ -50,28 +52,22 @@ public class StandardExports extends Collector {
       this.linux = (osBean.getName().indexOf("Linux") == 0);
   }
 
-  private static MetricFamilySamples singleMetric(String name, Type type, String help, double value) {
-    List<MetricFamilySamples.Sample> samples = Collections.singletonList(
-        new MetricFamilySamples.Sample(name, Collections.<String>emptyList(), Collections.<String>emptyList(), value));
-    return new MetricFamilySamples(name, type, help, samples);
-  }
-
   private final static double KB = 1024;
 
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
 
-    mfs.add(singleMetric("process_cpu_seconds_total", Type.COUNTER, "Total user and system CPU time spent in seconds.",
+    mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
         osBean.getProcessCpuTime() / NANOSECONDS_PER_SECOND));
 
-    mfs.add(singleMetric("process_start_time_seconds", Type.GAUGE, "Start time of the process since unix epoch in seconds.",
+    mfs.add(new GaugeMetricFamily("process_start_time_seconds","Start time of the process since unix epoch in seconds.",
         runtimeBean.getStartTime() / MILLISECONDS_PER_SECOND));
 
     if (unix) {
       UnixOperatingSystemMXBean unixBean = (UnixOperatingSystemMXBean) osBean;
-      mfs.add(singleMetric("process_open_fds", Type.GAUGE, "Number of open file descriptors.",
+      mfs.add(new GaugeMetricFamily("process_open_fds", "Number of open file descriptors.",
           unixBean.getOpenFileDescriptorCount()));
-      mfs.add(singleMetric("process_max_fds", Type.GAUGE, "Maximum number of open file descriptors.",
+      mfs.add(new GaugeMetricFamily("process_max_fds", "Maximum number of open file descriptors.",
           unixBean.getMaxFileDescriptorCount()));
     }
 
@@ -97,11 +93,11 @@ public class StandardExports extends Collector {
       String line;
       while ((line = br.readLine()) != null) {
         if (line.startsWith("VmSize:")) {
-          mfs.add(singleMetric("process_virtual_memory_bytes", Type.GAUGE,
+          mfs.add(new GaugeMetricFamily("process_virtual_memory_bytes",
               "Virtual memory size in bytes.",
               Float.parseFloat(line.split("\\s+")[1]) * KB));
         } else if (line.startsWith("VmRSS:")) {
-          mfs.add(singleMetric("process_resident_memory_bytes", Type.GAUGE,
+          mfs.add(new GaugeMetricFamily("process_resident_memory_bytes",
               "Resident memory size in bytes.",
               Float.parseFloat(line.split("\\s+")[1]) * KB));
         }

@@ -1,6 +1,9 @@
 package io.prometheus.client;
 
 import io.prometheus.client.CKMSQuantiles.Quantile;
+
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,7 +70,7 @@ import java.util.concurrent.TimeUnit;
  *
  * See https://prometheus.io/docs/practices/histograms/ for more info on quantiles.
  */
-public class Summary extends SimpleCollector<Summary.Child> {
+public class Summary extends SimpleCollector<Summary.Child> implements Counter.Describable {
 
   final List<Quantile> quantiles; // Can be empty, but can never be null.
   final long maxAgeSeconds;
@@ -141,7 +144,7 @@ public class Summary extends SimpleCollector<Summary.Child> {
   /**
    * Represents an event being timed.
    */
-  public static class Timer {
+  public static class Timer implements Closeable {
     private final Child child;
     private final long start;
     private Timer(Child child) {
@@ -156,6 +159,15 @@ public class Summary extends SimpleCollector<Summary.Child> {
       double elapsed = (Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND;
       child.observe(elapsed);
       return elapsed;
+    }
+
+    /**
+     * Equivalent to calling {@link #observeDuration()}.
+     * @throws IOException
+     */
+    @Override
+    public void close() throws IOException {
+      observeDuration();
     }
   }
 
@@ -269,6 +281,12 @@ public class Summary extends SimpleCollector<Summary.Child> {
     MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.SUMMARY, help, samples);
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(mfs);
+    return mfsList;
+  }
+
+  public List<MetricFamilySamples> describe() {
+    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
+    mfsList.add(new SummaryMetricFamily(fullname, help, labelNames));
     return mfsList;
   }
 

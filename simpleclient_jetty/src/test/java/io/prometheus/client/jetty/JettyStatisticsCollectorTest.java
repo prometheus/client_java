@@ -53,13 +53,13 @@ public class JettyStatisticsCollectorTest {
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_total"), is(1.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active"), is(0.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active_max"), is(1.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_max_seconds"), is(greaterThan(0.0)));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_seconds_total"), is(greaterThan(0.0)));
+    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_max_seconds"), is(notNullValue()));
+    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_seconds_total"), is(notNullValue()));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_total"), is(1.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_active"), is(0.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_active_max"), is(greaterThan(0.0)));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_time_max"), is(greaterThan(0.0)));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_time_seconds_total"), is(greaterThan(0.0)));
+    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_time_max"), is(notNullValue()));
+    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_time_seconds_total"), is(notNullValue()));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_requests_total"), is(0.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_requests_waiting"), is(0.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_requests_waiting_max"), is(0.0));
