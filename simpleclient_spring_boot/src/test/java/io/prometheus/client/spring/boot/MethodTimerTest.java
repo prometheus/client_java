@@ -1,8 +1,8 @@
-package io.prometheus.client.annotation;
+package io.prometheus.client.spring.boot;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.spring.boot.MethodTimer;
-import io.prometheus.client.spring.boot.PrometheusMethodTiming;
+import io.prometheus.client.spring.boot.PrometheusTimeMethods;
 import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 /**
  * Created by andrew on 11/25/16.
  */
-public class AutomaticMethodTimerTest {
+public class MethodTimerTest {
     Timeable proxy;
 
     private static interface Timeable {
@@ -21,7 +21,7 @@ public class AutomaticMethodTimerTest {
     }
 
     private static class TestClass implements Timeable {
-        @PrometheusMethodTiming
+        @PrometheusTimeMethods
         public void timeMe() throws Exception {
             Thread.sleep(20);
         }
@@ -31,7 +31,7 @@ public class AutomaticMethodTimerTest {
         public void timeMe() throws Exception;
     }
 
-    @PrometheusMethodTiming
+    @PrometheusTimeMethods
     private static class TestClass2 implements Time2 {
         public void timeMe() throws  Exception {
             Thread.sleep(30);

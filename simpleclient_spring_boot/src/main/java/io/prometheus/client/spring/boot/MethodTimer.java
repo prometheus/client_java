@@ -4,14 +4,15 @@ import io.prometheus.client.Histogram;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
- * Created by andrew on 11/24/16.
+ * This class automatically times (via aspectj) the execution of methods by their signature, if it's been enabled via {@link EnablePrometheusTiming}
+ * and in methods annotated (or within classes annotated) with {@link PrometheusTimeMethods}
+ *
+ * @author Andrew Stuart <andrew.stuart2@gmail.com>
  */
 @Aspect
 @ControllerAdvice
@@ -21,20 +22,17 @@ public class MethodTimer {
 
     public static final Histogram hist = Histogram.build()
             .name(METRIC_NAME)
-            .help("Automatic method timing")
+            .help("Automatic annotation-driven method timing")
             .labelNames("signature")
             .register();
 
-    @Around("within(@PrometheusMethodTiming *) || execution(@PrometheusMethodTiming * *.*(..))")
+    @Around("within(@PrometheusTimeMethods *) || execution(@PrometheusTimeMethods * *.*(..))")
     public Object timeMethod(ProceedingJoinPoint pjp) throws Throwable {
         Histogram.Timer t = hist.labels(pjp.getSignature().toShortString()).startTimer();
         try {
-            Object result = pjp.proceed();
+            return pjp.proceed();
+        } finally {
             t.observeDuration();
-            return result;
-        } catch (Throwable exception) {
-            t.observeDuration();
-            throw exception;
         }
     }
 }

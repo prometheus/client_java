@@ -26,24 +26,24 @@ import java.io.IOException;
 public class MetricsFilter implements Filter {
     public static final String PATH_COMPONENT_PARAM = "path-components";
     public static final int DEFAULT_PATH_COMPONENTS = 3;
+    public static final String FILTER_NAME = "servlet_request_latency";
 
     private static Histogram servletLatency = null;
 
     private static int pathComponents = DEFAULT_PATH_COMPONENTS;
 
-    private static boolean isEmpty(String string) {
-        return string != null && !"".equals(string);
+    int getPathComponents() {
+        return pathComponents;
     }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         servletLatency = Histogram.build()
-                .name("servlet_request_latency")
+                .name(FILTER_NAME)
                 .help("The time taken fulfilling uportal requests")
                 .labelNames("path", "verb")
                 .register();
-
-        if (!isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
+        if (filterConfig != null && !StringUtils.isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
             pathComponents = Integer.valueOf(filterConfig.getInitParameter(PATH_COMPONENT_PARAM));
         }
     }
