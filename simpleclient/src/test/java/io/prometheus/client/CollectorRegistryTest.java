@@ -2,6 +2,11 @@ package io.prometheus.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +20,7 @@ import org.junit.Before;
 public class CollectorRegistryTest {
 
   CollectorRegistry registry;
+  CollectorRegistryListener listener = mock(CollectorRegistryListener.class);
 
   @Before
   public void setUp() {
@@ -53,7 +59,7 @@ public class CollectorRegistryTest {
   }
 
   class EmptyCollector extends Collector {
-    public List<MetricFamilySamples> collect(){
+    public List<MetricFamilySamples> collect() {
       return new ArrayList<MetricFamilySamples>();
     }
   }
@@ -65,7 +71,8 @@ public class CollectorRegistryTest {
     Collector s = Summary.build().name("s").help("h").register(registry);
     Collector ec = new EmptyCollector().register(registry);
     HashSet<String> names = new HashSet<String>();
-    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(registry.metricFamilySamples())) {
+    for (Collector.MetricFamilySamples metricFamilySamples : Collections
+        .list(registry.metricFamilySamples())) {
       names.add(metricFamilySamples.name);
     }
     assertEquals(new HashSet<String>(Arrays.asList("g", "c", "s")), names);
@@ -81,5 +88,48 @@ public class CollectorRegistryTest {
     registry.register(new EmptyCollector());
     assertFalse(registry.metricFamilySamples().hasMoreElements());
   }
+
+  @Test
+  public void registeringACollectorTriggersANotification() {
+    registry.addListener(listener);
+    Collector s = Summary.build().name("s").help("h").register(registry);
+
+    verify(listener).onCollectorRegistered(same(s));
+  }
+
+  @Test
+  public void removingACollectorTriggersANotification() {
+    registry.addListener(listener);
+    Collector s = Summary.build().name("s").help("h").register(registry);
+    registry.unregister(s);
+
+    verify(listener).onCollectorUnregistered(same(s));
+  }
   
+  @Test
+  public void clearingRegisteryTriggersANotification() {
+    registry.addListener(listener);
+    Collector s = Summary.build().name("s").help("h").register(registry);
+    registry.clear();
+
+    verify(listener).onCollectorUnregistered(same(s));
+  }
+
+  @Test
+  public void addingAListenerWithExistingCollectorCatchesItUp() throws Exception {
+    Collector s = Summary.build().name("s").help("h").register(registry);
+    registry.addListener(listener);
+
+    verify(listener).onCollectorRegistered(same(s));
+  }
+  
+  @Test
+  public void aRemovedListenerDoesNotReceiveUpdates() throws Exception {
+    registry.addListener(listener);
+    registry.removeListener(listener);
+    Summary.build().name("s").help("h").register(registry);
+
+    verify(listener, never()).onCollectorRegistered(any(Collector.class));
+  }
+
 }
