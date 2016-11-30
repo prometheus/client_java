@@ -200,7 +200,7 @@ public class CollectorRegistry {
   /**
    * Adds a {@link CollectorRegistryListener} to a collection of listeners that will be notified on
    * collector registration. Listeners will be notified in the order in which they are added.
-   * <p/>
+   * <p>
    * <b>N.B.:</b> The listener will be notified of all existing collector when it first registers.
    *
    * @param listener the listener that will be notified
