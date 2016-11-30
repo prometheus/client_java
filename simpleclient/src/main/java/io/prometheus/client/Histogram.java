@@ -1,5 +1,7 @@
 package io.prometheus.client;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +17,7 @@ import java.util.Map;
  * <p>
  * <em>Note:</em> Each bucket is one timeseries. Many buckets and/or many dimensions with labels
  * can produce large amount of time series, that may cause performance problems.
- * 
+ *
  * <p>
  * The default buckets are intended to cover a typical web/rpc request from milliseconds to seconds.
  * <p>
@@ -26,7 +28,7 @@ import java.util.Map;
  *     static final Histogram requestLatency = Histogram.build()
  *         .name("requests_latency_seconds").help("Request latency in seconds.").register();
  *
- *     void processRequest(Request req) {  
+ *     void processRequest(Request req) {
  *        Histogram.Timer requestTimer = requestLatency.startTimer();
  *        try {
  *          // Your code here.
@@ -50,7 +52,7 @@ import java.util.Map;
  * {@link Histogram.Builder#exponentialBuckets(double, double, int) exponentialBuckets}
  * offer easy ways to set common bucket patterns.
  */
-public class Histogram extends SimpleCollector<Histogram.Child> {
+public class Histogram extends SimpleCollector<Histogram.Child> implements Collector.Describable {
   private final double[] buckets;
 
   Histogram(Builder b) {
@@ -89,7 +91,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
       dontInitializeNoLabelsChild = true;
       return new Histogram(this);
     }
-   
+
     /**
       * Set the upper bounds of buckets for the histogram.
       */
@@ -118,7 +120,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
       }
       return this;
     }
-    
+
   }
 
   /**
@@ -136,7 +138,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
   /**
    * Represents an event being timed.
    */
-  public static class Timer {
+  public static class Timer implements Closeable {
     private final Child child;
     private final long start;
     private Timer(Child child) {
@@ -151,6 +153,15 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
         double elapsed = (Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND;
         child.observe(elapsed);
         return elapsed;
+    }
+
+    /**
+     * Equivalent to calling {@link #observeDuration()}.
+     * @throws IOException
+     */
+    @Override
+    public void close() throws IOException {
+      observeDuration();
     }
   }
 
@@ -255,6 +266,12 @@ public class Histogram extends SimpleCollector<Histogram.Child> {
     MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.HISTOGRAM, help, samples);
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(mfs);
+    return mfsList;
+  }
+
+  public List<MetricFamilySamples> describe() {
+    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
+    mfsList.add(new MetricFamilySamples(fullname, Type.HISTOGRAM, help, new ArrayList<MetricFamilySamples.Sample>()));
     return mfsList;
   }
 

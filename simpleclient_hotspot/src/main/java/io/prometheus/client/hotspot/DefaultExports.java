@@ -24,6 +24,7 @@ public class DefaultExports {
       new MemoryPoolsExports().register();
       new GarbageCollectorExports().register();
       new ThreadExports().register();
+      new ClassLoadingExports().register();
       initialized = true;
     }
   }

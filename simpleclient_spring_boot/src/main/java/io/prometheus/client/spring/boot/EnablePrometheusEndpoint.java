@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(PrometheusConfiguration.class)
+@Import(PrometheusEndpointConfiguration.class)
 public @interface EnablePrometheusEndpoint {
 
 }
