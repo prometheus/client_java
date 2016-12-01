@@ -118,6 +118,11 @@ public class DropwizardExportsTest {
             i += 1;
         }
         assertEquals(new Double(100), registry.getSampleValue("hist_count"));
+        assertEquals(new Double(0), registry.getSampleValue("hist_min"));
+        assertEquals(new Double(99), registry.getSampleValue("hist_max"));
+        assertEquals(new Double(49.5), registry.getSampleValue("hist_mean"));
+        assertEquals(new Double(49), registry.getSampleValue("hist_median"));
+        assertEquals(new Double(28.86607004772212), registry.getSampleValue("hist_stdDev"));
         for (Double d : Arrays.asList(0.75, 0.95, 0.98, 0.99)) {
             assertEquals(new Double((d - 0.01) * 100), registry.getSampleValue("hist",
                     new String[]{"quantile"}, new String[]{d.toString()}));
