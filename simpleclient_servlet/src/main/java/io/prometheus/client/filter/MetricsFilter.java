@@ -28,7 +28,11 @@ public class MetricsFilter implements Filter {
     public static final int DEFAULT_PATH_COMPONENTS = 3;
     public static final String FILTER_NAME = "servlet_request_latency";
 
-    private static Histogram servletLatency = null;
+    private static Histogram servletLatency = Histogram.build()
+            .name(FILTER_NAME)
+            .help("The time taken fulfilling uportal requests")
+            .labelNames("path", "verb")
+            .register();
 
     private static int pathComponents = DEFAULT_PATH_COMPONENTS;
 
@@ -38,12 +42,11 @@ public class MetricsFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        servletLatency = Histogram.build()
-                .name(FILTER_NAME)
-                .help("The time taken fulfilling uportal requests")
-                .labelNames("path", "verb")
-                .register();
-        if (filterConfig != null && !StringUtils.isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
+         if (filterConfig == null) {
+            pathComponents = DEFAULT_PATH_COMPONENTS;
+            return;
+        }
+        if (!StringUtils.isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
             pathComponents = Integer.valueOf(filterConfig.getInitParameter(PATH_COMPONENT_PARAM));
         }
     }

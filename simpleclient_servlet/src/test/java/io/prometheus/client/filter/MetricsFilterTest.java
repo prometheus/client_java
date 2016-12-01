@@ -2,6 +2,7 @@ package io.prometheus.client.filter;
 
 import io.prometheus.client.CollectorRegistry;
 import org.eclipse.jetty.http.HttpMethods;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.servlet.FilterChain;
@@ -27,6 +28,23 @@ public class MetricsFilterTest {
         f.init(cfg);
 
         assertEquals(f.getPathComponents(), 4);
+
+                HttpServletRequest req = mock(HttpServletRequest.class);
+
+        when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang/zilch/zip/nada");
+        when(req.getMethod()).thenReturn(HttpMethods.GET);
+
+        HttpServletResponse res = mock(HttpServletResponse.class);
+        FilterChain c = mock(FilterChain.class);
+
+        f.doFilter(req, res, c);
+
+        verify(c).doFilter(req, res);
+
+
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(MetricsFilter.FILTER_NAME + "_count", new String[]{"path", "verb"}, new String[]{"/foo/bar/baz/bang", HttpMethods.GET});
+        assertNotNull(sampleValue);
+        assertEquals(sampleValue, 1, 0.0001);
     }
 
     @Test
