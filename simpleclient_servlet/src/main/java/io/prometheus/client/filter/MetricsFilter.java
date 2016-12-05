@@ -13,8 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
- * Created by andrewstuart on 11/19/16.
- *
  * The MetricsFilter class exists to provide a high-level filter that enables tunable collection of metrics for Servlet
  * performance.
  *
@@ -48,7 +46,7 @@ public class MetricsFilter implements Filter {
             return;
         }
 
-        // Allow custom metric naming
+        // Allow custom metric naming, falling back to default name
         builder.name(StringUtils.defaultIfEmpty(filterConfig.getInitParameter(METRIC_NAME_PARAM), DEFAULT_FILTER_NAME));
 
         // Allow overriding of the path "depth" to track
@@ -56,7 +54,7 @@ public class MetricsFilter implements Filter {
             pathComponents = Integer.valueOf(filterConfig.getInitParameter(PATH_COMPONENT_PARAM));
         }
 
-        // Allow users to override the default bucket configuration.
+        // Allow users to override the default bucket configuration
         if (!StringUtils.isEmpty(filterConfig.getInitParameter(BUCKET_CONFIG_PARAM))) {
             String[] bucketParams = filterConfig.getInitParameter(BUCKET_CONFIG_PARAM).split(",");
             double[] buckets = new double[bucketParams.length];
