@@ -35,23 +35,12 @@ public class SpringBootMetricsCollector extends Collector implements Collector.D
   public List<MetricFamilySamples> collect() {
     ArrayList<MetricFamilySamples> samples = new ArrayList<MetricFamilySamples>();
     for (PublicMetrics publicMetrics : this.publicMetrics) {
-
       for (Metric<?> metric : publicMetrics.metrics()) {
-
         String name = Collector.sanitizeMetricName(metric.getName());
         double value = metric.getValue().doubleValue();
         MetricFamilySamples metricFamilySamples = new MetricFamilySamples(
-                name,
-                Type.GAUGE,
-                name,
-                Collections.singletonList(
-                  new MetricFamilySamples.Sample(
-                          name,
-                          new ArrayList<String>(),
-                          new ArrayList<String>(),
-                          value)
-                )
-        );
+                name, Type.GAUGE, name, Collections.singletonList(
+                new MetricFamilySamples.Sample(name, new ArrayList<String>(), new ArrayList<String>(), value)));
         samples.add(metricFamilySamples);
       }
     }
