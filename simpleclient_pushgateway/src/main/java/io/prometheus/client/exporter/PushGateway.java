@@ -110,20 +110,19 @@ public class PushGateway {
    * @param authority host:port or ip:port of the Pushgateway.
    */
   public PushGateway(String authority) {
-    this("http", authority, HttpClients.createDefault());
+    this("http://" + authority, HttpClients.createDefault());
   }
 
   /**
    * Construct a Pushgateway, with the given authority, scheme and a {@link HttpClient}.
    * <p>
    *
-   * @param scheme     address scheme of the PushGateway.
-   * @param authority  host:port or ip:port of the Pushgateway.
+   * @param urlBase    combined by &lt;scheme&gt;://&lt;host&gt;:&lt;port&gt;
    * @param httpClient httpClient for the connection to the PushGateway
    */
-  public PushGateway(String scheme, String authority, HttpClient httpClient) {
+  public PushGateway(String urlBase, HttpClient httpClient) {
     this.httpClient = httpClient;
-    this.urlBase = scheme + "://" + authority + "/metrics/job/";
+    this.urlBase = urlBase + "/metrics/job/";
     localContext = new BasicHttpContext();
     localContext.setAttribute("preemptive-auth", new BasicScheme());
   }
