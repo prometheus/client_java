@@ -1,6 +1,5 @@
 package io.prometheus.client.filter;
 
-import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,7 +10,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -21,39 +19,61 @@ import java.io.IOException;
  * performance.
  *
  * By default, this filter will provide metrics that distinguish 3 levels deep for the request path
- * (including servlet context path).
+ * (including servlet context path), but can be configured with the {@code path-components} init parameter.
+ *
+ * The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list of valid {@code double} values.
+ *
+ * The Histogram name itself can also be configured with a {@code metric-name} init parameter, whose value will be used directly.
  */
 public class MetricsFilter implements Filter {
     public static final String PATH_COMPONENT_PARAM = "path-components";
+    public static final String METRIC_NAME_PARAM = "metric-name";
+    public static final String BUCKET_CONFIG_PARAM = "buckets";
+    public static final String DEFAULT_FILTER_NAME = "servlet_request_latency_seconds";
     public static final int DEFAULT_PATH_COMPONENTS = 3;
-    public static final String FILTER_NAME = "servlet_request_latency";
 
-    private static Histogram servletLatency = Histogram.build()
-            .name(FILTER_NAME)
-            .help("The time taken fulfilling uportal requests")
-            .labelNames("path", "verb")
-            .register();
+    private static Histogram servletLatency = null;
 
-    private static int pathComponents = DEFAULT_PATH_COMPONENTS;
-
-    int getPathComponents() {
-        return pathComponents;
-    }
+    // Package-level for testing purposes
+    int pathComponents = DEFAULT_PATH_COMPONENTS;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-         if (filterConfig == null) {
-            pathComponents = DEFAULT_PATH_COMPONENTS;
+        Histogram.Builder builder = Histogram.build()
+                .help("The time taken fulfilling servlet requests")
+                .labelNames("path", "method");
+
+        if (filterConfig == null) {
+            servletLatency = builder.name(DEFAULT_FILTER_NAME).register();
             return;
         }
+
+        // Allow custom metric naming
+        builder.name(StringUtils.defaultIfEmpty(filterConfig.getInitParameter(METRIC_NAME_PARAM), DEFAULT_FILTER_NAME));
+
+        // Allow overriding of the path "depth" to track
         if (!StringUtils.isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
             pathComponents = Integer.valueOf(filterConfig.getInitParameter(PATH_COMPONENT_PARAM));
         }
+
+        // Allow users to override the default bucket configuration.
+        if (!StringUtils.isEmpty(filterConfig.getInitParameter(BUCKET_CONFIG_PARAM))) {
+            String[] bucketParams = filterConfig.getInitParameter(BUCKET_CONFIG_PARAM).split(",");
+            double[] buckets = new double[bucketParams.length];
+
+            for (int i = 0; i < bucketParams.length; i++) {
+                buckets[i] = Double.parseDouble(bucketParams[i]);
+            }
+
+            builder.buckets(buckets);
+        }
+
+        servletLatency = builder.register();
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if (servletLatency == null || !(servletRequest instanceof HttpServletRequest)) {
+        if (!(servletRequest instanceof HttpServletRequest)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
