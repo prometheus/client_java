@@ -1,5 +1,7 @@
 package io.prometheus.client.spring.boot;
 
+import io.prometheus.client.Collector;
+import io.prometheus.client.Histogram;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -32,5 +34,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Import(MethodTimer.class)
 @Documented
-public @interface EnablePrometheusTiming {
-}
+public @interface EnablePrometheusTiming {}

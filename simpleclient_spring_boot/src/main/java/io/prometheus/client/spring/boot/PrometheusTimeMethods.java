@@ -1,5 +1,8 @@
 package io.prometheus.client.spring.boot;
 
+import io.prometheus.client.Collector;
+import io.prometheus.client.Histogram;
+import io.prometheus.client.SimpleCollector;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -17,5 +20,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface PrometheusTimeMethods {
+    /**
+     * The metric name to use for recording latencies
+     * @return A metric name specific to your use case
+     */
+    String value() default "";
 
+    String help() default "Automatic annotation-driven method timing";
+
+    /**
+     * The type of prometheus timing to use.
+     * @return
+     */
+    Class<? extends SimpleCollector> metricType() default Histogram.class;
 }

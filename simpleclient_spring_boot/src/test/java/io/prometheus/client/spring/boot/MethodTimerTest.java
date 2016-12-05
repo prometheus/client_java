@@ -1,8 +1,6 @@
 package io.prometheus.client.spring.boot;
 
 import io.prometheus.client.Collector;
-import io.prometheus.client.spring.boot.MethodTimer;
-import io.prometheus.client.spring.boot.PrometheusTimeMethods;
 import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
@@ -50,7 +48,7 @@ public class MethodTimerTest {
 
         proxy.timeMe();
 
-        final List<Collector.MetricFamilySamples> samples = MethodTimer.hist.collect();
+        final List<Collector.MetricFamilySamples> samples = MethodTimer.defaultSummary.collect();
 
         assertNotNull(samples);
         assertEquals(samples.size(), 1);
@@ -74,7 +72,7 @@ public class MethodTimerTest {
 
         proxy.timeMe();
 
-        final List<Collector.MetricFamilySamples> samples = MethodTimer.hist.collect();
+        final List<Collector.MetricFamilySamples> samples = MethodTimer.defaultSummary.collect();
 
         assertNotNull(samples);
         assertEquals(samples.size(), 1);
