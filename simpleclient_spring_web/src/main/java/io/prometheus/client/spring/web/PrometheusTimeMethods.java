@@ -1,9 +1,4 @@
-package io.prometheus.client.spring.boot;
-
-import io.prometheus.client.Collector;
-import io.prometheus.client.Histogram;
-import io.prometheus.client.SimpleCollector;
-import org.springframework.context.annotation.Import;
+package io.prometheus.client.spring.web;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,11 +21,9 @@ public @interface PrometheusTimeMethods {
      */
     String value() default "";
 
-    String help() default "Automatic annotation-driven method timing";
-
     /**
-     * The type of prometheus timing to use.
-     * @return
+     * The help messsage to show in prometheus metrics
+     * @return A help string
      */
-    Class<? extends SimpleCollector> metricType() default Histogram.class;
+    String help() default "Automatic annotation-driven method timing";
 }

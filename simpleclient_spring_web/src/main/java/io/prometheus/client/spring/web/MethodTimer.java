@@ -1,4 +1,4 @@
-package io.prometheus.client.spring.boot;
+package io.prometheus.client.spring.web;
 
 import io.prometheus.client.Summary;
 import org.apache.commons.lang3.StringUtils;
@@ -30,9 +30,8 @@ public class MethodTimer {
             .labelNames("signature")
             .register();
 
-    @Around("(within(@PrometheusTimeMethods *) || execution(@PrometheusTimeMethods * *.*(..))) && @annotation(annot)")
+    @Around("@annotation(annot)")
     public Object timeMethod(ProceedingJoinPoint pjp, PrometheusTimeMethods annot) throws Throwable {
-
         Summary summary = defaultSummary;
         String name = annot.value();
         if (!StringUtils.isEmpty(name)) {
@@ -44,6 +43,7 @@ public class MethodTimer {
                         .help(annot.help())
                         .labelNames("signature")
                         .register();
+                collectors.put(name, summary);
             }
         }
 
@@ -53,5 +53,12 @@ public class MethodTimer {
         } finally {
             t.observeDuration();
         }
+    }
+
+    // This gets around some strange Spring AOP binding limitation with `||`. That is, `@annotation(annot) || @within(annot)`
+    // always binds only the second annotation (null for all cases where @annotation() applies).
+    @Around("@within(annot)")
+    private Object timeClassMethod(ProceedingJoinPoint pjp, PrometheusTimeMethods annot) throws Throwable {
+        return timeMethod(pjp, annot);
     }
 }
