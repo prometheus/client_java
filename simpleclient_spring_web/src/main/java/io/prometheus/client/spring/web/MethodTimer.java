@@ -8,7 +8,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This class automatically times (via aspectj) the execution of methods by their signature, if it's been enabled via {@link EnablePrometheusTiming}
@@ -22,7 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MethodTimer {
     public static final String METRIC_NAME = "prometheus_method_timing_seconds";
 
-    public static final ConcurrentHashMap<String, Summary> collectors = new ConcurrentHashMap<String, Summary>(10);
+    public static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    public static final HashMap<String, Summary> collectors = new HashMap<String, Summary>(10);
 
     public static final Summary defaultSummary = Summary.build()
             .name(METRIC_NAME)
@@ -30,24 +34,52 @@ public class MethodTimer {
             .labelNames("signature")
             .register();
 
+    private Summary getSummary(PrometheusTimeMethods annot) {
+        Summary summary;
+        String name = annot.value();
+
+        // Try to read first
+        try {
+            lock.readLock().lock();
+            if (collectors.containsKey(name)) {
+                return collectors.get(name);
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+        try {
+            lock.writeLock().lock();
+
+            // no readers can exist here, so we check again in case multiple thread were waiting on the write lock
+            // and one of them got here first
+            if (collectors.containsKey(name)) {
+                return collectors.get(name);
+            }
+
+            // Only one thread may get here, as writeLock is fully mutually exclusive
+            summary = Summary.build()
+                    .name(name)
+                    .help(annot.help())
+                    .labelNames("signature")
+                    .register();
+
+            collectors.put(name, summary);
+            
+            return summary;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
     @Around("@annotation(annot)")
     public Object timeMethod(ProceedingJoinPoint pjp, PrometheusTimeMethods annot) throws Throwable {
         Summary summary = defaultSummary;
-        String name = annot.value();
-        if (!StringUtils.isEmpty(name)) {
-            if (collectors.containsKey(name)) {
-                summary = collectors.get(name);
-            } else {
-                summary = Summary.build()
-                        .name(name)
-                        .help(annot.help())
-                        .labelNames("signature")
-                        .register();
-                collectors.put(name, summary);
-            }
+        if (!StringUtils.isEmpty(annot.value())) {
+            summary = getSummary(annot);
         }
 
         Summary.Timer t = summary.labels(pjp.getSignature().toShortString()).startTimer();
+
         try {
             return pjp.proceed();
         } finally {
