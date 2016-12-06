@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  *  }
  * </code></pre>
  *
- * @author Andrew Stuart
+ * @author Andrew Stuart <andrew.stuart2@gmail.com>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
