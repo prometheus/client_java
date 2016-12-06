@@ -8,7 +8,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class automatically times (via aspectj) the execution of methods by their signature, if it's been enabled via {@link EnablePrometheusTiming}
@@ -22,7 +22,7 @@ import java.util.HashMap;
 public class MethodTimer {
     public static final String METRIC_NAME = "prometheus_method_timing_seconds";
 
-    public static final HashMap<String, Summary> collectors = new HashMap<String, Summary>(10);
+    public static final ConcurrentHashMap<String, Summary> collectors = new ConcurrentHashMap<String, Summary>(10);
 
     public static final Summary defaultSummary = Summary.build()
             .name(METRIC_NAME)
