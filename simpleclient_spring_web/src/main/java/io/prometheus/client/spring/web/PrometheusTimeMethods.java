@@ -7,8 +7,25 @@ import java.lang.annotation.Target;
 
 /**
  * Enable Spring-AOP-based automated method timing for the annotated method or all methods in an annotated class.
- * The timings will be recorded in a Histogram with the metric name of {@code prometheus_method_timing}, and a label
- * of {@code signature} whose values will be {@code ClassOrInterfaceName.methodName(..)}.
+ * The timings will be recorded in a Histogram with the default metric name of {@code prometheus_method_timing},
+ * which can be overridden by providing a {@code value} parameter in the annotation, and optionally a {@code help}
+ * parameter and a single label of {@code signature} whose values will be {@code ClassOrInterfaceName.methodName(..)}.
+ *
+ * To properly work, {@link EnablePrometheusTiming} must be specified somewhere in your application configuration.
+ *
+ *  <pre><code>
+ * {@literal @}PrometheusTimeMethods("my_app_timer_seconds")
+ * {@literal @}Controller
+ *  public class MyController {
+ *    {@literal @}RequestMapping("/")
+ *    {@literal @}ResponseBody
+ *    public Object handleRequest() {
+ *      // Each invocation will be timed and recorded.
+ *      return database.withCache().get("some_data");
+ *    }
+ *  }
+ * </code></pre>
+ *
  *
  * @author Andrew Stuart <andrew.stuart2@gmail.com>
  */

@@ -11,7 +11,8 @@ import java.lang.annotation.Target;
 /**
  * Enable the use of {@link PrometheusTimeMethods} annotation on classes or methods.
  *
- * Usage: Add this annotation to any spring {@link Configuration} class to enable the use of the {@link PrometheusTimeMethods} annotation.
+ * Usage: Add this annotation to any Spring {@link org.springframework.context.annotation.Configuration} class to enable
+ * the use of the {@link PrometheusTimeMethods} annotation.
  *
  *  * <pre><code>
  * {@literal @}SpringBootApplication
