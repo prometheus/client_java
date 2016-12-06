@@ -1,5 +1,6 @@
 package io.prometheus.client.filter;
 
+import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.eclipse.jetty.http.HttpMethods;
 import org.junit.After;
@@ -12,6 +13,8 @@ import javax.servlet.FilterConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.Enumeration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -97,8 +100,9 @@ public class MetricsFilterTest {
             }
         }).when(c).doFilter(any(HttpServletRequest.class), any(HttpServletResponse.class));
 
+        final String buckets = "0.01,0.05,0.1,0.15,0.25";
         FilterConfig cfg = mock(FilterConfig.class);
-        when(cfg.getInitParameter(MetricsFilter.BUCKET_CONFIG_PARAM)).thenReturn("0.01,0.05,0.1,0.15,0.25");
+        when(cfg.getInitParameter(MetricsFilter.BUCKET_CONFIG_PARAM)).thenReturn(buckets);
         when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn("foo");
 
         HttpServletResponse res = mock(HttpServletResponse.class);
@@ -114,6 +118,27 @@ public class MetricsFilterTest {
         assertEquals(0, le05, 0.0001);
         final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo/bar/baz", HttpMethods.POST, "0.15"});
         assertEquals(1, le15, 0.0001);
+
+
+        final Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.metricFamilySamples();
+        Collector.MetricFamilySamples sample = null;
+        while(samples.hasMoreElements()) {
+            sample = samples.nextElement();
+            if (sample.name.equals("foo")) {
+                break;
+            }
+        }
+
+        assertNotNull(sample);
+
+        int count = 0;
+        for (Collector.MetricFamilySamples.Sample s : sample.samples) {
+            if (s.name.equals("foo_bucket")) {
+                count++;
+            }
+        }
+        // +1 because of the final le=+infinity bucket
+        assertEquals(buckets.split(",").length+1, count);
     }
 
 }
