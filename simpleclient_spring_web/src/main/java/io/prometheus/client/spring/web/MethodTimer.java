@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * This class automatically times (via aspectj) the execution of methods by their signature, if it's been enabled via {@link EnablePrometheusTiming}
  * and in methods annotated (or within classes annotated) with {@link PrometheusTimeMethods}
  *
- * @author Andrew Stuart <andrew.stuart2@gmail.com>
+ * @author Andrew Stuart
  */
 @Aspect
 @ControllerAdvice
@@ -64,7 +64,7 @@ public class MethodTimer {
                     .register();
 
             collectors.put(name, summary);
-            
+
             return summary;
         } finally {
             lock.writeLock().unlock();
