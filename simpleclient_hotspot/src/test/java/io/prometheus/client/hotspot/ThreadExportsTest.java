@@ -24,6 +24,8 @@ public class ThreadExportsTest {
     when(mockThreadsBean.getDaemonThreadCount()).thenReturn(200);
     when(mockThreadsBean.getPeakThreadCount()).thenReturn(301);
     when(mockThreadsBean.getTotalStartedThreadCount()).thenReturn(503L);
+    when(mockThreadsBean.findDeadlockedThreads()).thenReturn(new long[]{1L,2L,3L});
+    when(mockThreadsBean.findMonitorDeadlockedThreads()).thenReturn(new long[]{2L,3L,4L});
     collectorUnderTest = new ThreadExports(mockThreadsBean).register(registry);
   }
 
@@ -48,6 +50,16 @@ public class ThreadExportsTest {
             503L,
             registry.getSampleValue(
                     "jvm_threads_started_total", EMPTY_LABEL, EMPTY_LABEL),
+            .0000001);
+    assertEquals(
+        3L,
+            registry.getSampleValue(
+            "jvm_threads_deadlocked", EMPTY_LABEL, EMPTY_LABEL),
+        .0000001);
+    assertEquals(
+            3L,
+            registry.getSampleValue(
+            "jvm_threads_monitor_deadlocked", EMPTY_LABEL, EMPTY_LABEL),
             .0000001);
   }
 }
