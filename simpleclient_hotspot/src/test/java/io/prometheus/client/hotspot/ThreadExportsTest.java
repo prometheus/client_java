@@ -59,7 +59,7 @@ public class ThreadExportsTest {
     assertEquals(
             3L,
             registry.getSampleValue(
-            "jvm_threads_monitor_deadlocked", EMPTY_LABEL, EMPTY_LABEL),
+            "jvm_threads_deadlocked_monitor", EMPTY_LABEL, EMPTY_LABEL),
             .0000001);
   }
 }

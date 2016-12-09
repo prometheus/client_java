@@ -62,21 +62,20 @@ public class ThreadExports extends Collector {
           "Started thread count of a JVM",
           threadBean.getTotalStartedThreadCount()));
 
-
     sampleFamilies.add(
         new GaugeMetricFamily(
         "jvm_threads_deadlocked",
-        "Deadlocked thread count of a JVM",
+        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers",
         nullSafeArrayLength(threadBean.findDeadlockedThreads())));
 
     sampleFamilies.add(
         new GaugeMetricFamily(
-        "jvm_threads_monitor_deadlocked",
-        "Deadlocked monitor thread count of a JVM",
+        "jvm_threads_deadlocked_monitor",
+        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors",
         nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())));
   }
 
-  private double nullSafeArrayLength(long[] array) {
+  private static double nullSafeArrayLength(long[] array) {
     return null == array ? 0 : array.length;
   }
 
