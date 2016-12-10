@@ -34,12 +34,12 @@ import java.lang.annotation.Target;
 public @interface PrometheusTimeMethods {
     /**
      * The metric name to use for recording latencies
-     * @return A metric name specific to your use case
+     * @return A metric name specific to your use case.
      */
     String value() default "";
 
     /**
-     * The help messsage to show in prometheus metrics
+     * The help message to show in prometheus metrics
      * @return A help string
      */
     String help() default "Automatic annotation-driven method timing";

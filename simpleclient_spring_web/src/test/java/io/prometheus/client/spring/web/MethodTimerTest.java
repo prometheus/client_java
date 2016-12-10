@@ -2,7 +2,6 @@ package io.prometheus.client.spring.web;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Histogram;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
@@ -14,14 +13,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * Created by andrew on 11/25/16.
- */
-@Configuration
-@EnableAspectJAutoProxy
- public class MethodTimerTest {
-    Timeable proxy;
-
+public class MethodTimerTest {
     private interface Timeable {
         void timeMe() throws Exception;
     }
@@ -44,14 +36,11 @@ import static org.junit.Assert.assertEquals;
         }
     }
 
-    private TestClass c;
-
     @Test
     public void timeMethod() throws Exception {
         Timeable cprime = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(cprime);
-        MethodTimer timer = new MethodTimer();
-        factory.addAspect(timer);
+        factory.addAspect(MethodTimer.class);
         Timeable proxy = factory.getProxy();
 
         proxy.timeMe();
@@ -60,15 +49,14 @@ import static org.junit.Assert.assertEquals;
 
         Assert.assertNotNull(samples);
         assertEquals(samples.size(), 1);
-        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue(MethodTimer.METRIC_NAME + "_sum", new String[]{"signature"}, new String[]{"Timeable.timeMe()"});
+        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue(MethodTimer.DEFAULT_METRIC_NAME + "_sum", new String[]{"signature"}, new String[]{"Timeable.timeMe()"});
         Assert.assertNotNull(tot);
         assertEquals(0.02, tot, 0.001);
     }
 
     Time2 getProxy(Time2 source){
         AspectJProxyFactory factory = new AspectJProxyFactory(source);
-        MethodTimer timer = new MethodTimer();
-        factory.addAspect(timer);
+        factory.addAspect(MethodTimer.class);
         return factory.getProxy();
     }
 
@@ -83,7 +71,7 @@ import static org.junit.Assert.assertEquals;
         Assert.assertNotNull(samples);
         assertEquals(samples.size(), 1);
 
-        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue(MethodTimer.METRIC_NAME + "_sum", new String[]{"signature"}, new String[]{"Time2.timeMe()"});
+        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue(MethodTimer.DEFAULT_METRIC_NAME + "_sum", new String[]{"signature"}, new String[]{"Time2.timeMe()"});
         Assert.assertNotNull(tot);
         assertEquals(tot, 0.03, 0.001);
         assert(0.029 < tot && tot < 0.031);
@@ -104,6 +92,12 @@ import static org.junit.Assert.assertEquals;
 
         final Double tot = CollectorRegistry.defaultRegistry.getSampleValue(name + "_sum", new String[]{"signature"}, new String[]{"Time2.timeMe()"});
         assertEquals(tot, 0.035, 0.001);
+
+        a.timeMe();
+        a.timeMe();
+        a.timeMe();
+        final Double tot2 = CollectorRegistry.defaultRegistry.getSampleValue(name + "_sum", new String[]{"signature"}, new String[]{"Time2.timeMe()"});
+        assertEquals(tot2, 0.035*4, 0.008);
     }
 
     @Test

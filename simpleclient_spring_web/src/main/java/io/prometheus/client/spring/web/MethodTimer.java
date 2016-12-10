@@ -5,13 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-
-import java.util.HashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This class automatically times (via aspectj) the execution of methods by their signature, if it's been enabled via {@link EnablePrometheusTiming}
@@ -19,63 +17,75 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Andrew Stuart
  */
-@Aspect
+@Aspect("pertarget(io.prometheus.client.spring.web.MethodTimer.timeable())")
 @ControllerAdvice
 @Component
 public class MethodTimer {
-    public static final String METRIC_NAME = "prometheus_method_timing_seconds";
-
-    public static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    public static final HashMap<String, Summary> collectors = new HashMap<String, Summary>(10);
+    public static final String DEFAULT_METRIC_NAME = "spring_web_method_timing_seconds";
 
     public static final Summary defaultSummary = Summary.build()
-            .name(METRIC_NAME)
+            .name(DEFAULT_METRIC_NAME)
             .help("Automatic annotation-driven method timing")
             .labelNames("signature")
             .register();
 
-    private Summary getSummary(PrometheusTimeMethods annot) {
-        Summary summary;
-        String name = annot.value();
+    private Summary summary = null;
 
-        // Try to read first
-        try {
-            lock.readLock().lock();
-            if (collectors.containsKey(name)) {
-                return collectors.get(name);
-            }
-        } finally {
-            lock.readLock().unlock();
+    @Pointcut("@within(io.prometheus.client.spring.web.PrometheusTimeMethods)")
+    public void annotatedClass() {}
+
+    @Pointcut("@annotation(io.prometheus.client.spring.web.PrometheusTimeMethods)")
+    public void annotatedMethod() {}
+
+    @Pointcut("annotatedClass() || annotatedMethod()")
+    public void timeable() {}
+
+    private PrometheusTimeMethods getAnnotation(ProceedingJoinPoint pjp) {
+        assert(pjp.getSignature() instanceof MethodSignature);
+
+        MethodSignature signature = (MethodSignature) pjp.getSignature();
+
+        PrometheusTimeMethods annot =  AnnotationUtils.findAnnotation(pjp.getTarget().getClass(), PrometheusTimeMethods.class);
+        if (annot != null) {
+            return annot;
         }
+
         try {
-            lock.writeLock().lock();
+            // When target is an AOP interface proxy but annotation is on class method.
+            final String name = signature.getName();
+            final Class[] parameterTypes = signature.getParameterTypes();
 
-            // no readers can exist here, so we check again in case multiple thread were waiting on the write lock
-            // and one of them got here first
-            if (collectors.containsKey(name)) {
-                return collectors.get(name);
-            }
-
-            // Only one thread may get here, as writeLock is fully mutually exclusive
-            summary = Summary.build()
-                    .name(name)
-                    .help(annot.help())
-                    .labelNames("signature")
-                    .register();
-
-            collectors.put(name, summary);
-
-            return summary;
-        } finally {
-            lock.writeLock().unlock();
+            return AnnotationUtils.findAnnotation(pjp.getTarget().getClass().getDeclaredMethod(name, parameterTypes), PrometheusTimeMethods.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
-    @Around("@annotation(annot)")
-    public Object timeMethod(ProceedingJoinPoint pjp, PrometheusTimeMethods annot) throws Throwable {
-        Summary summary = defaultSummary;
-        if (!StringUtils.isEmpty(annot.value())) {
-            summary = getSummary(annot);
+    synchronized private void ensureSummary(ProceedingJoinPoint pjp) {
+        if (summary != null) {
+            return;
+        }
+
+        PrometheusTimeMethods annot = getAnnotation(pjp);
+
+        if (StringUtils.isEmpty(annot.value())) {
+            summary = defaultSummary;
+            return;
+        }
+
+        // Only one thread may get here, as writeLock is fully mutually exclusive
+        summary = Summary.build()
+                .name(annot.value())
+                .help(annot.help())
+                .labelNames("signature")
+                .register();
+    }
+
+    @Around("timeable()")
+    public Object timeClassMethod(ProceedingJoinPoint pjp) throws Throwable {
+        if (summary == null) {
+            ensureSummary(pjp);
         }
 
         Summary.Timer t = summary.labels(pjp.getSignature().toShortString()).startTimer();
@@ -85,12 +95,5 @@ public class MethodTimer {
         } finally {
             t.observeDuration();
         }
-    }
-
-    // This gets around some strange Spring AOP binding limitation with `||`. That is, `@annotation(annot) || @within(annot)`
-    // always binds only the second annotation (null for all cases where @annotation() applies).
-    @Around("@within(annot)")
-    private Object timeClassMethod(ProceedingJoinPoint pjp, PrometheusTimeMethods annot) throws Throwable {
-        return timeMethod(pjp, annot);
     }
 }

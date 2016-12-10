@@ -15,13 +15,10 @@ import java.lang.annotation.Target;
  * the use of the {@link PrometheusTimeMethods} annotation.
  *
  *  * <pre><code>
- * {@literal @}SpringBootApplication
+ * {@literal @}Configuration
  * {@literal @}EnablePrometheusEndpoint
- * {@literal @}EnablePrometheusTiming
- *  public class Application {
- *    public static void main(String[] args) {
- *      SpringApplication.run(Application.class, args);
- *    }
+ *  public class MyAppConfig {
+ *    // Other configuration items...
  *  }
  * </code></pre>
  *
