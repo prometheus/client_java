@@ -16,21 +16,23 @@ import java.io.IOException;
  * The MetricsFilter class exists to provide a high-level filter that enables tunable collection of metrics for Servlet
  * performance.
  *
+ * The Histogram name itself is required, and configured with a {@code metric-name} init parameter.
+ *
  * By default, this filter will provide metrics that distinguish 3 levels deep for the request path
  * (including servlet context path), but can be configured with the {@code path-components} init parameter.
  *
  * The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list of valid {@code double} values.
  *
- * The Histogram name itself can also be configured with a {@code metric-name} init parameter, whose value will be used directly.
+ *
+ * @author Andrew Stuart &lt;andrew.stuart2@gmail.com&gt;
  */
 public class MetricsFilter implements Filter {
     public static final String PATH_COMPONENT_PARAM = "path-components";
     public static final String METRIC_NAME_PARAM = "metric-name";
     public static final String BUCKET_CONFIG_PARAM = "buckets";
-    public static final String DEFAULT_FILTER_NAME = "servlet_request_latency_seconds";
     public static final int DEFAULT_PATH_COMPONENTS = 3;
 
-    private static Histogram servletLatency = null;
+    private Histogram servletLatency = null;
 
     // Package-level for testing purposes
     int pathComponents = DEFAULT_PATH_COMPONENTS;
@@ -42,12 +44,15 @@ public class MetricsFilter implements Filter {
                 .labelNames("path", "method");
 
         if (filterConfig == null) {
-            servletLatency = builder.name(DEFAULT_FILTER_NAME).register();
-            return;
+            throw new ServletException("Please provide a configuration object, even for testing.");
         }
 
-        // Allow custom metric naming, falling back to default name
-        builder.name(StringUtils.defaultIfEmpty(filterConfig.getInitParameter(METRIC_NAME_PARAM), DEFAULT_FILTER_NAME));
+        if (StringUtils.isEmpty(filterConfig.getInitParameter(METRIC_NAME_PARAM))) {
+            throw new ServletException("Init parameter \"" + METRIC_NAME_PARAM + "\" is required. Please supply a value");
+        }
+
+        // "metric-name" is required
+        builder.name(filterConfig.getInitParameter(METRIC_NAME_PARAM));
 
         // Allow overriding of the path "depth" to track
         if (!StringUtils.isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
