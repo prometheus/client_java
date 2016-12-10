@@ -30,12 +30,11 @@ public class MetricsFilter implements Filter {
     public static final String PATH_COMPONENT_PARAM = "path-components";
     public static final String METRIC_NAME_PARAM = "metric-name";
     public static final String BUCKET_CONFIG_PARAM = "buckets";
-    public static final int DEFAULT_PATH_COMPONENTS = 3;
 
     private Histogram servletLatency = null;
 
     // Package-level for testing purposes
-    int pathComponents = DEFAULT_PATH_COMPONENTS;
+    int pathComponents = 0;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -84,10 +83,13 @@ public class MetricsFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         String path = request.getRequestURI();
-        int lastSlash = StringUtils.ordinalIndexOf(path, "/", pathComponents+1);
+        if (pathComponents > 0) {
+            int lastSlash = StringUtils.ordinalIndexOf(path, "/", pathComponents + 1);
+            path = lastSlash == -1 ? path : path.substring(0, lastSlash);
+        }
 
         Histogram.Timer timer = servletLatency
-            .labels(lastSlash == -1 ? path : path.substring(0, lastSlash), request.getMethod())
+            .labels(path, request.getMethod())
             .startTimer();
 
         try {

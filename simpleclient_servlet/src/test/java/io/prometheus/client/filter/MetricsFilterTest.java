@@ -68,19 +68,25 @@ public class MetricsFilterTest {
     @Test
     public void doFilter() throws Exception {
         HttpServletRequest req = mock(HttpServletRequest.class);
-        when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang/zilch/zip/nada");
+        final String path = "/foo/bar/baz/bang/zilch/zip/nada";
+
+        when(req.getRequestURI()).thenReturn(path);
         when(req.getMethod()).thenReturn(HttpMethods.GET);
 
         HttpServletResponse res = mock(HttpServletResponse.class);
         FilterChain c = mock(FilterChain.class);
 
-        f.init(null);
+        String name = "foo";
+        FilterConfig cfg = mock(FilterConfig.class);
+        when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn(name);
+
+        f.init(cfg);
         f.doFilter(req, res, c);
 
         verify(c).doFilter(req, res);
 
 
-        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(MetricsFilter.DEFAULT_FILTER_NAME + "_count", new String[]{"path", "method"}, new String[]{"/foo/bar/baz", HttpMethods.GET});
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(name + "_count", new String[]{"path", "method"}, new String[]{path, HttpMethods.GET});
         assertNotNull(sampleValue);
         assertEquals(1, sampleValue, 0.0001);
     }
@@ -88,7 +94,8 @@ public class MetricsFilterTest {
     @Test
     public void testBucketsAndName() throws Exception {
         HttpServletRequest req = mock(HttpServletRequest.class);
-        when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
+        final String path = "/foo/bar/baz/bang";
+        when(req.getRequestURI()).thenReturn(path);
         when(req.getMethod()).thenReturn(HttpMethods.POST);
 
         FilterChain c = mock(FilterChain.class);
@@ -111,12 +118,12 @@ public class MetricsFilterTest {
 
         f.doFilter(req, res, c);
 
-        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method"}, new String[]{"/foo/bar/baz", HttpMethods.POST});
+        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method"}, new String[]{path, HttpMethods.POST});
         assertEquals(0.1, sum, 0.001);
 
-        final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo/bar/baz", HttpMethods.POST, "0.05"});
+        final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{path, HttpMethods.POST, "0.05"});
         assertEquals(0, le05, 0.0001);
-        final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo/bar/baz", HttpMethods.POST, "0.15"});
+        final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{path, HttpMethods.POST, "0.15"});
         assertEquals(1, le15, 0.0001);
 
 
