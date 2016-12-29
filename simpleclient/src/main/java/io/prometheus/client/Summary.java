@@ -141,22 +141,44 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     return new Child(quantiles, maxAgeSeconds, ageBuckets);
   }
 
+
+  public static class SimpleTimer {
+    private final long start;
+    private final TimeProvider timeProvider;
+
+    public SimpleTimer(TimeProvider timeProvider) {
+      this.timeProvider = timeProvider;
+      start = timeProvider.nanoTime();
+    }
+
+    public SimpleTimer() {
+      this(Child.timeProvider);
+    }
+
+    /**
+     * @return Measured duration in seconds since {@link SimpleTimer} was constructed.
+     */
+    public double elapsedSeconds() {
+      return (timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND;
+    }
+  }
+
   /**
    * Represents an event being timed.
    */
   public static class Timer implements Closeable {
     private final Child child;
-    private final long start;
+    private final SimpleTimer innerTimer;
     private Timer(Child child) {
       this.child = child;
-      start = Child.timeProvider.nanoTime();
+      innerTimer = new SimpleTimer(Child.timeProvider);
     }
     /**
      * Observe the amount of time in seconds since {@link Child#startTimer} was called.
      * @return Measured duration in seconds since {@link Child#startTimer} was called.
      */
     public double observeDuration() {
-      double elapsed = (Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND;
+      double elapsed = innerTimer.elapsedSeconds();
       child.observe(elapsed);
       return elapsed;
     }
