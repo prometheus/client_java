@@ -32,11 +32,11 @@ import java.util.List;
  * {@link #remove} and {@link #clear} can be used to remove children.
  * <p>
  * <em>Warning #1:</em> Metrics that don't always export something are difficult to monitor, if you know in advance
- * what labels will be in use you should initilise them be calling {@link #labels}.
+ * what labels will be in use you should initialise them be calling {@link #labels}.
  * This is done for you for metrics with no labels.
  * <p>
  * <em>Warning #2:</em> While labels are very powerful, avoid overly granular metric labels. 
- * The combinatorial explosion of breaking out a metric in many dimensions can produce huge numberts
+ * The combinatorial explosion of breaking out a metric in many dimensions can produce huge numbers
  * of timeseries, which will then take longer and more resources to process.
  * <p>
  * As a rule of thumb aim to keep the cardinality of metrics below ten, and limit where the
