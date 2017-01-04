@@ -39,7 +39,7 @@ public class SummaryTest {
 
   @After
   public void tearDown() {
-    Summary.Child.timeProvider = new Summary.TimeProvider();
+    SimpleTimer.defaultTimeProvider = new SimpleTimer.TimeProvider();
   }
 
   private double getCount() {
@@ -104,7 +104,7 @@ public class SummaryTest {
 
   @Test
   public void testTimer() {
-    Summary.Child.timeProvider = new Summary.TimeProvider() {
+    SimpleTimer.defaultTimeProvider = new SimpleTimer.TimeProvider() {
       long value = (long)(30 * 1e9);
       long nanoTime() {
         value += (long)(10 * 1e9);
