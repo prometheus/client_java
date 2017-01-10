@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
