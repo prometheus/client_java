@@ -8,7 +8,6 @@ import com.sun.management.UnixOperatingSystemMXBean;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.io.FileNotFoundException;
-import java.util.Vector;
 import java.lang.management.RuntimeMXBean;
 
 import io.prometheus.client.CollectorRegistry;
