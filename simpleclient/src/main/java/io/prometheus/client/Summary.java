@@ -141,22 +141,23 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     return new Child(quantiles, maxAgeSeconds, ageBuckets);
   }
 
+
   /**
    * Represents an event being timed.
    */
   public static class Timer implements Closeable {
     private final Child child;
     private final long start;
-    private Timer(Child child) {
+    private Timer(Child child, long start) {
       this.child = child;
-      start = Child.timeProvider.nanoTime();
+      this.start = start;
     }
     /**
      * Observe the amount of time in seconds since {@link Child#startTimer} was called.
      * @return Measured duration in seconds since {@link Child#startTimer} was called.
      */
     public double observeDuration() {
-      double elapsed = (Child.timeProvider.nanoTime() - start) / NANOSECONDS_PER_SECOND;
+      double elapsed = SimpleTimer.elapsedSecondsFromNanos(start, SimpleTimer.defaultTimeProvider.nanoTime());
       child.observe(elapsed);
       return elapsed;
     }
@@ -207,8 +208,6 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private final List<Quantile> quantiles;
     private final TimeWindowQuantiles quantileValues;
 
-    static TimeProvider timeProvider = new TimeProvider();
-
     private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets) {
       this.quantiles = quantiles;
       if (quantiles.size() > 0) {
@@ -234,7 +233,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
      * Call {@link Timer#observeDuration} at the end of what you want to measure the duration of.
      */
     public Timer startTimer() {
-      return new Timer(this);
+      return new Timer(this, SimpleTimer.defaultTimeProvider.nanoTime());
     }
     /**
      * Get the value of the Summary.
@@ -290,9 +289,4 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     return mfsList;
   }
 
-  static class TimeProvider {
-    long nanoTime() {
-      return System.nanoTime();
-    }
-  }
 }
