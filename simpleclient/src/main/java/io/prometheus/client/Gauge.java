@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * Gauge metric, to report instantaneous values.
@@ -189,6 +190,20 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
         return value.sum();
       }
     }
+  }
+
+
+  public <T extends Collector> T setChild(final Callable<Double> child, final String... labelValues) {
+    return super.setChild(new Child() {
+      @Override
+      public double get() {
+        try {
+          return child.call();
+        } catch (Exception e) {
+          throw new RuntimeException("Error reporting child value. labels="+labelValues,e);
+        }
+      }
+    }, labelValues);
   }
 
   // Convenience methods.
