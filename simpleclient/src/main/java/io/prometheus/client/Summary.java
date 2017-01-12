@@ -283,6 +283,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     return mfsList;
   }
 
+  @Override
   public List<MetricFamilySamples> describe() {
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(new SummaryMetricFamily(fullname, help, labelNames));

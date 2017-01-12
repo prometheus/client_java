@@ -6,7 +6,7 @@ import static org.mockserver.model.HttpResponse.response;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import java.io.IOException;;
+import java.io.IOException;
 import java.util.TreeMap;
 import java.util.Map;
 import org.junit.Assert;
