@@ -70,7 +70,7 @@ public class StandardExports extends Collector {
       }
       Long l = (Long) method.invoke(osBean);
       mfs.add(new CounterMetricFamily("process_cpu_seconds_total","Total user and system CPU time spent in seconds.",
-                                      l / NANOSECONDS_PER_SECOND));
+    l / NANOSECONDS_PER_SECOND));
     }
     catch (Exception e) {
       LOGGER.log(Level.FINE,"Could not access process cpu time",e);
