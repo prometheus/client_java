@@ -11,7 +11,7 @@ import java.util.List;
  * This class handles common initialization and label logic for the standard metrics.
  * You should never subclass this class.
  * <p>
- * <h2>Initilization</h2>
+ * <h2>Initialization</h2>
  * After calling build() on a subclass, {@link Builder#name(String) name},
  * {@link SimpleCollector.Builder#help(String) help},
  * {@link SimpleCollector.Builder#labelNames(String...) labelNames},
@@ -26,7 +26,7 @@ import java.util.List;
  * <h2>Labels</h2>
  * {@link SimpleCollector.Builder#labelNames labelNames} specifies which (if any) labels the metrics will have, and 
  * {@link #labels} returns the Child of the metric that represents that particular set of labels.
- * {@link Gauge}, {@link Counter} and {@link Summary} all offer convienence methods to avoid needing to call
+ * {@link Gauge}, {@link Counter} and {@link Summary} all offer convenience methods to avoid needing to call
  * {@link #labels} for metrics with no labels.
  * <p>
  * {@link #remove} and {@link #clear} can be used to remove children.
@@ -50,7 +50,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   protected final String help;
   protected final List<String> labelNames;
 
-  protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();;
+  protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
   protected Child noLabelsChild;
 
   /**
@@ -100,7 +100,7 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Initialize the child with no labels.
    */
   protected void initializeNoLabelsChild() {
-    // Initlize metric if it has no labels.
+    // Initialize metric if it has no labels.
     if (labelNames.size() == 0) {
       noLabelsChild = labels();
     }

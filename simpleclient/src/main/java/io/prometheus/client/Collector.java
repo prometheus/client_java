@@ -138,7 +138,7 @@ public abstract class Collector {
      *
      *  Usually custom collectors do not have to implement Describable. If
      *  Describable is not implemented and the CollectorRegistry was created
-     *  with auto desribe enabled (which is the case for the default registry)
+     *  with auto describe enabled (which is the case for the default registry)
      *  then {@link collect} will be called at registration time instead of
      *  describe. If this could cause problems, either implement a proper
      *  describe, or if that's not practical have describe return an empty

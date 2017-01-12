@@ -47,6 +47,7 @@ public class SpringBootMetricsCollector extends Collector implements Collector.D
     return samples;
   }
 
+  @Override
   public List<MetricFamilySamples> describe() {
     return new ArrayList<MetricFamilySamples>();
   }

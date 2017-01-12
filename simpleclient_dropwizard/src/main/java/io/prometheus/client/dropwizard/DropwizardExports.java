@@ -147,6 +147,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
         return mfSamples;
     }
 
+    @Override
     public List<MetricFamilySamples> describe() {
       return new ArrayList<MetricFamilySamples>();
     }

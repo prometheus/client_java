@@ -269,6 +269,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
     return mfsList;
   }
 
+  @Override
   public List<MetricFamilySamples> describe() {
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(new MetricFamilySamples(fullname, Type.HISTOGRAM, help, new ArrayList<MetricFamilySamples.Sample>()));

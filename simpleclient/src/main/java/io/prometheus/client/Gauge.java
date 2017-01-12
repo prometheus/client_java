@@ -254,6 +254,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     return mfsList;
   }
 
+  @Override
   public List<MetricFamilySamples> describe() {
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(new GaugeMetricFamily(fullname, help, labelNames));

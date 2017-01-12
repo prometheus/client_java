@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Collect metrics from jettty's org.eclipse.jetty.server.handler.StatisticsHandler.
+ * Collect metrics from jetty's org.eclipse.jetty.server.handler.StatisticsHandler.
  * <p>
  * <pre>{@code
  * Server server = new Server(0);

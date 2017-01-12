@@ -61,7 +61,7 @@ import java.util.Map;
  *   }
  * }
  * </pre>
- * These can be aggregated and processed together much more easily in the Promtheus 
+ * These can be aggregated and processed together much more easily in the Prometheus
  * server than individual metrics for each labelset.
  */
 public class Counter extends SimpleCollector<Counter.Child> implements Collector.Describable {
@@ -149,6 +149,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     return mfsList;
   }
 
+  @Override
   public List<MetricFamilySamples> describe() {
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
     mfsList.add(new CounterMetricFamily(fullname, help, labelNames));
