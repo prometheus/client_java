@@ -64,7 +64,7 @@ public class StandardExports extends Collector {
       but no common interface which exposes getProcessCpuTime. Hence call on the implementing class, which is default access,
       so use reflection hack to set it accessible.
       */
-      Method method = osBean.getClass().getMethod("getProcessCpuTime", null);
+      Method method = osBean.getClass().getMethod("getProcessCpuTime",null);
       if (!method.isAccessible()) {
         method.setAccessible(true);
       }
