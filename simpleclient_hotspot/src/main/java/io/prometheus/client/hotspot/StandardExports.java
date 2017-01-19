@@ -1,20 +1,22 @@
 package io.prometheus.client.hotspot;
 
-import com.sun.management.OperatingSystemMXBean;
 import com.sun.management.UnixOperatingSystemMXBean;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.lang.management.RuntimeMXBean;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Exports the standard exports common across all prometheus clients.
@@ -39,7 +41,7 @@ public class StandardExports extends Collector {
 
   public StandardExports() {
     this(new StatusReader(),
-         (OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean(),
+         ManagementFactory.getOperatingSystemMXBean(),
          ManagementFactory.getRuntimeMXBean());
   }
 
@@ -56,10 +58,26 @@ public class StandardExports extends Collector {
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
 
-    mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
-        osBean.getProcessCpuTime() / NANOSECONDS_PER_SECOND));
+    try {
+      /*
+      There are two interfaces com.ibm.lang.management.OperatingSystemMXBean and com.sun.management.OperatingSystemMXBean,
+      but no common interface which exposes getProcessCpuTime. Hence call on the implementing class, which is default access,
+      so use reflection hack to set it accessible.
+      */
+      Method method = osBean.getClass().getMethod("getProcessCpuTime", null);
+      if (!method.isAccessible()) {
+        method.setAccessible(true);
+      }
+      Long l = (Long) method.invoke(osBean);
+      mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
+          l / NANOSECONDS_PER_SECOND));
+    }
+    catch (Exception e) {
+      LOGGER.log(Level.FINE,"Could not access process cpu time", e);
+    }
 
-    mfs.add(new GaugeMetricFamily("process_start_time_seconds","Start time of the process since unix epoch in seconds.",
+
+    mfs.add(new GaugeMetricFamily("process_start_time_seconds", "Start time of the process since unix epoch in seconds.",
         runtimeBean.getStartTime() / MILLISECONDS_PER_SECOND));
 
     if (unix) {
@@ -74,7 +92,7 @@ public class StandardExports extends Collector {
     // so add support for just Linux for now.
     if (linux) {
       try {
-      collectMemoryMetricsLinux(mfs);
+        collectMemoryMetricsLinux(mfs);
       } catch (Exception e) {
         // If the format changes, log a warning and return what we can.
         LOGGER.warning(e.toString());
