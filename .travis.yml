@@ -4,5 +4,5 @@ jdk:
   - oraclejdk8
 
 script:
-- mvn test
-- mvn javadoc:aggregate
+- ./mvnw test
+- ./mvnw javadoc:aggregate
