@@ -18,7 +18,7 @@ public class InstrumentedAppender extends UnsynchronizedAppenderBase<ILoggingEve
   
   static {
     COUNTER = Counter.build().name(COUNTER_NAME)
-            .help("Log4j log statements at various log levels")
+            .help("Logback log statements at various log levels")
             .labelNames("level")
             .register();
 
