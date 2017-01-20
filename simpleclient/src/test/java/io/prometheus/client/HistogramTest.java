@@ -110,10 +110,19 @@ public class HistogramTest {
         return value;
       }
     };
+
+    double elapsed = noLabels.time(new Runnable() {
+      @Override
+      public void run() {
+        //no op
+      }
+    });
+    assertEquals(10, elapsed, .001);
+
     Histogram.Timer timer = noLabels.startTimer();
-    double elapsed = timer.observeDuration();
-    assertEquals(1, getCount(), .001);
-    assertEquals(10, getSum(), .001);
+    elapsed = timer.observeDuration();
+    assertEquals(2, getCount(), .001);
+    assertEquals(20, getSum(), .001);
     assertEquals(10, elapsed, .001);
   }
   
