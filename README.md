@@ -93,10 +93,7 @@ class YourClass {
 There are utilities for common use cases:
 
 ```java
-gauge.setToCurrentTime(); //Set to current unixtime
-
-# Increment when entered, decrement when exited. (Not implemented yet)
-inprogressRequests.trackInProgress(() -> doWork());
+gauge.setToCurrentTime(); // Set to current unixtime.
 ```
 
 A Gauge can also take its value from a callback:
@@ -114,10 +111,6 @@ void processRequest() {
       }
   })  
 }
-
-//or (Not implemented yet)
-queueDepth.setFunction(() -> executorService.getQueue().size());
-queueDepth.setFunction(() -> executorService.getQueue().size(), "label");
 ```
 
 ### Summary
@@ -153,8 +146,16 @@ class YourClass {
     .name("requests_latency_seconds").help("Request latency in seconds.").register();
   
   void processRequest(Request req) {
+    requestLatency.timer(new Runnable() {
+      public abstract void run() {
+        // Your code here.    
+      }
+    });  
+      
+      
+    // Or the Java 8 lambda equivalent   
     requestLatency.timer(() -> {
-        // Your code here.
+      // Your code here.
     });
   }
 }
@@ -182,7 +183,7 @@ class YourClass {
 ```
 
 The default buckets are intended to cover a typical web/rpc request from milliseconds to seconds.
-They can be overridden with the `buckets()` method on the `Histogram.Builder`.
+They can be overridden with the `buckets()` method on the [Histogram.Builder](https://prometheus.io/client_java/io/prometheus/client/Histogram.Builder.html#buckets-double...-).
 
 There are utilities for timing code:
 
@@ -192,6 +193,14 @@ class YourClass {
      .name("requests_latency_seconds").help("Request latency in seconds.").register();
   
   void processRequest(Request req) {
+    requestLatency.timer(new Runnable() {
+      public abstract void run() {
+        // Your code here.    
+      }
+    });  
+      
+      
+    // Or the Java 8 lambda equivalent  
     requestLatency.time(() -> {
       // Your code here.  
     });
@@ -221,16 +230,33 @@ class YourClass {
 }
 ```
 
-### Included Exporters
+### Included Collectors
 
-The Java client includes exporters for Garbage Collection, Memory Pools, JMX, and Thread counts.
-
+The Java client includes collectors for garbage collection, memory pools, JMX, classloading, and thread counts.
+These can be added individually or just use the `DefaultExports` to conveniently register them. 
 
 ```java
-new GarbageCollectorExports().register();
-new MemoryPoolsExports().register();
-new StandardExports().register();
-new ThreadExports().register()
+DefaultExports.initialize();
+```
+
+####Logging
+
+There are logging collectors for log4j and logback.
+
+To register the Logback collector can be added to the root level like so:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <appender name="METRICS" class="io.prometheus.client.logback.InstrumentedAppender" />
+
+    <root level="INFO">
+        <appender-ref ref="METRICS" />
+    </root>
+
+</configuration>
 ```
 
 ## Exporting
@@ -245,6 +271,7 @@ There are Servlet, SpringBoot, and Vert.x integrations included in the client li
 
 To add Prometheus exposition to an existing HTTP server, see the `MetricsServlet`. 
 It also serves as a simple example of how to write a custom endpoint.
+
 
 
 ## Exporting to a Pushgateway
@@ -307,7 +334,7 @@ thread.join();
 Sometimes it is not possible to directly instrument code, as it is not
 in your control. This requires you to proxy metrics from other systems.
 
-To do so you need to create a custom collector (which will require to be registered as a normal metric), for example:
+To do so you need to create a custom collector (which will need to be registered as a normal metric), for example:
 
 ```java
 class YourCustomCollector extends Collector {
