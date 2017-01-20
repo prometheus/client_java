@@ -47,3 +47,297 @@ Details for those wishing to develop the library can be found on the [wiki](http
 
 
 [![Build Status](https://travis-ci.org/prometheus/client_java.png?branch=master)](https://travis-ci.org/prometheus/client_java)
+
+## Instrumenting
+
+Four types of metric are offered: Counter, Gauge, Summary and Histogram.
+See the documentation on [metric types](http://prometheus.io/docs/concepts/metric_types/)
+and [instrumentation best practices](http://prometheus.io/docs/practices/instrumentation/#counter-vs.-gauge,-summary-vs.-histogram)
+on how to use them.
+
+### Counter
+
+Counters go up, and reset when the process restarts.
+
+
+```java
+import io.prometheus.client.Counter;
+class YourClass {
+  static final Counter requests = Counter.build()
+     .name("requests_total").help("Total requests.").register();
+  
+  void processRequest() {
+    requests.inc();
+    // Your code here.
+  }
+}
+```
+
+### Gauge
+
+Gauges can go up and down.
+
+```java
+class YourClass {
+  static final Gauge inprogressRequests = Gauge.build()
+     .name("inprogress_requests").help("Inprogress requests.").register();
+  
+  void processRequest() {
+    inprogressRequest.inc();
+    // Your code here.
+    inprogressRequest.dec();
+  }
+}
+```
+
+There are utilities for common use cases:
+
+```java
+gauge.setToCurrentTime(); //Set to current unixtime
+
+# Increment when entered, decrement when exited. (Not implemented yet)
+inprogressRequests.trackInProgress(() -> doWork());
+```
+
+A Gauge can also take its value from a callback:
+
+```java
+static final Gauge queueDepth = Gauge.build()
+     .name("widget_queue_depth").help("Widget queue depth.").register();
+
+void processRequest() {
+  queueDepth.setChild(new Child{
+      @Override
+      public double get() {
+          //executorService is a ThreadPoolExecutor
+          return executorService.getQueue().size();
+      }
+  })  
+}
+
+//or (Not implemented yet)
+queueDepth.setFunction(() -> executorService.getQueue().size());
+queueDepth.setFunction(() -> executorService.getQueue().size(), "label");
+```
+
+### Summary
+
+Summaries track the size and number of events.
+
+```java
+class YourClass {
+  static final Summary receivedBytes = Summary.build()
+     .name("requests_size_bytes").help("Request size in bytes.").register();
+  static final Summary requestLatency = Summary.build()
+     .name("requests_latency_seconds").help("Request latency in seconds.").register();
+  
+  void processRequest(Request req) {
+    Summary.Timer requestTimer = requestLatency.startTimer();
+    try {
+      // Your code here.
+    } finally {
+      receivedBytes.observe(req.size());
+      requestTimer.observeDuration();
+    }
+  }
+}
+```
+
+There are utilities for timing code and support quantiles:
+
+```java
+class YourClass {
+  static final Summary requestLatency = Summary.build()
+    .quantile(0.5, 0.05)   // Add 50th percentile (= median) with 5% tolerated error
+    .quantile(0.9, 0.01)   // Add 90th percentile with 1% tolerated error
+    .name("requests_latency_seconds").help("Request latency in seconds.").register();
+  
+  void processRequest(Request req) {
+    requestLatency.timer(() -> {
+        // Your code here.
+    });
+  }
+}
+```
+
+### Histogram
+
+Histograms track the size and number of events in buckets.
+This allows for aggregatable calculation of quantiles.
+
+```java
+class YourClass {
+  static final Histogram requestLatency = Histogram.build()
+     .name("requests_latency_seconds").help("Request latency in seconds.").register();
+
+  void processRequest(Request req) {
+    Histogram.Timer requestTimer = requestLatency.startTimer();
+    try {
+      // Your code here.
+    } finally {
+      requestTimer.observeDuration();
+    }
+  }
+}
+```
+
+The default buckets are intended to cover a typical web/rpc request from milliseconds to seconds.
+They can be overridden with the `buckets()` method on the `Histogram.Builder`.
+
+There are utilities for timing code:
+
+```java
+class YourClass {
+  static final Histogram requestLatency = Histogram.build()
+     .name("requests_latency_seconds").help("Request latency in seconds.").register();
+  
+  void processRequest(Request req) {
+    requestLatency.time(() -> {
+      // Your code here.  
+    });
+  }
+}
+```
+
+### Labels
+
+All metrics can have labels, allowing grouping of related time series.
+
+See the best practices on [naming](http://prometheus.io/docs/practices/naming/)
+and [labels](http://prometheus.io/docs/practices/instrumentation/#use-labels).
+
+Taking a counter as an example:
+
+```java
+class YourClass {
+  static final Counter requests = Counter.build()
+     .name("requests_total").help("Total requests.")
+     .labelNames("method").register();
+  
+  void processGetRequest() {
+    requests.labels("get").inc();
+    // Your code here.
+  }
+}
+```
+
+### Included Exporters
+
+The Java client includes exporters for Garbage Collection, Memory Pools, JMX, and Thread counts.
+
+
+```java
+new GarbageCollectorExports().register();
+new MemoryPoolsExports().register();
+new StandardExports().register();
+new ThreadExports().register()
+```
+
+## Exporting
+
+There are several options for exporting metrics.
+
+### HTTP
+
+Metrics are usually exposed over HTTP, to be read by the Prometheus server.
+
+There are Servlet, SpringBoot, and Vert.x integrations included in the client library.
+
+To add Prometheus exposition to an existing HTTP server, see the `MetricsServlet`. 
+It also serves as a simple example of how to write a custom endpoint.
+
+
+## Exporting to a Pushgateway
+
+The [Pushgateway](https://github.com/prometheus/pushgateway)
+allows ephemeral and batch jobs to expose their metrics to Prometheus.
+
+```java
+void executeBatchJob() throws Exception {
+  CollectorRegistry registry = new CollectorRegistry();
+  Gauge duration = Gauge.build()
+     .name("my_batch_job_duration_seconds").help("Duration of my batch job in seconds.").register(registry);
+  Gauge.Timer durationTimer = duration.startTimer();
+  try {
+    // Your code here.
+  
+    // This is only added to the registry after success,
+    // so that a previous success in the Pushgateway isn't overwritten on failure.
+    Gauge lastSuccess = Gauge.build()
+       .name("my_batch_job_last_success").help("Last time my batch job succeeded, in unixtime.").register(registry);
+    lastSuccess.setToCurrentTime();
+  } finally {
+    durationTimer.setDuration();
+    PushGateway pg = new PushGateway("127.0.0.1:9091");
+    pg.pushAdd(registry, "my_batch_job");
+  }
+}
+ ```
+
+A separate registry is used, as the default registry may contain other metrics
+such as those from the Process Collector. See the 
+[Pushgateway documentation](https://github.com/prometheus/pushgateway/blob/master/README.md)
+for more information.
+
+
+## Bridges
+
+It is also possible to expose metrics to systems other than Prometheus.
+This allows you to take advantage of Prometheus instrumentation even
+if you are not quite ready to fully transition to Prometheus yet.
+
+### Graphite
+
+Metrics are pushed over TCP in the Graphite plaintext format.
+
+```java
+Graphite g = new Graphite("localhost", 2003);
+// Push the default registry once.
+g.push(CollectorRegistry.defaultRegistry);
+
+// Push the default registry every 60 seconds.
+Thread thread = g.start(CollectorRegistry.defaultRegistry, 60);
+// Stop pushing.
+thread.interrupt();
+thread.join();
+```
+
+## Custom Collectors
+
+Sometimes it is not possible to directly instrument code, as it is not
+in your control. This requires you to proxy metrics from other systems.
+
+To do so you need to create a custom collector (which will require to be registered as a normal metric), for example:
+
+```java
+class YourCustomCollector extends Collector {
+  List<MetricFamilySamples> collect() {
+    List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
+    // With no labels.
+    mfs.add(new GaugeMetricFamily("my_gauge", "help", 42));
+    // With labels
+    GaugeMetricFamily labeledGauge = new GaugeMetricFamily("my_other_gauge", "help", Arrays.asList("labelname"));
+    labeledGauge.addMetric(Arrays.asList("foo"), 4);
+    labeledGauge.addMetric(Arrays.asList("bar"), 5);
+    mfs.add(labeledGauge);
+    return mfs;
+  }
+}
+
+// Registration
+static final YourCustomCollector requests = new YourCustomCollector().register()
+```
+
+`SummaryMetricFamily` and `HistogramMetricFamily` work similarly.
+
+A collector may implement a `describe` method which returns metrics in the same
+format as `collect` (though you don't have to include the samples). This is
+used to predetermine the names of time series a `CollectorRegistry` exposes and
+thus to detect collisions and duplicate registrations.
+
+Usually custom collectors do not have to implement `describe`. If `describe` is
+not implemented and the CollectorRegistry was created with `auto_desribe=True`
+(which is the case for the default registry) then `collect` will be called at
+registration time instead of `describe`. If this could cause problems, either
+implement a proper `describe`, or if that's not practical have `describe`
+return an empty list.
