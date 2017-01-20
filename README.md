@@ -1,5 +1,7 @@
 # Prometheus JVM Client
 It supports Java, Clojure, Scala, JRuby, and anything else that runs on the JVM.
+ 
+[![Build Status](https://travis-ci.org/prometheus/client_java.png?branch=master)](https://travis-ci.org/prometheus/client_java)
 
 ## Using
 ### Assets
@@ -34,19 +36,12 @@ version can be found on in the maven repository for
 </dependency>
 ```
 
-### Getting Started
+### Javadocs
 There are canonical examples defined in the class definition Javadoc of the client packages.
 
 Documentation can be found at the [Java Client
 Github Project Page](http://prometheus.github.io/client_java).
 
-## Contact
-The [Prometheus Users Mailinglist](https://groups.google.com/forum/?fromgroups#!forum/prometheus-users) is the best place to ask questions.
-
-Details for those wishing to develop the library can be found on the [wiki](https://github.com/prometheus/client_java/wiki/Development)
-
-
-[![Build Status](https://travis-ci.org/prometheus/client_java.png?branch=master)](https://travis-ci.org/prometheus/client_java)
 
 ## Instrumenting
 
@@ -375,3 +370,8 @@ not implemented and the CollectorRegistry was created with `auto_desribe=True`
 registration time instead of `describe`. If this could cause problems, either
 implement a proper `describe`, or if that's not practical have `describe`
 return an empty list.
+
+## Contact
+The [Prometheus Users Mailinglist](https://groups.google.com/forum/?fromgroups#!forum/prometheus-users) is the best place to ask questions.
+
+Details for those wishing to develop the library can be found on the [wiki](https://github.com/prometheus/client_java/wiki/Development)
