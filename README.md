@@ -96,7 +96,9 @@ There are utilities for common use cases:
 gauge.setToCurrentTime(); // Set to current unixtime.
 ```
 
-A Gauge can also take its value from a callback:
+As an advanced use case, a `Gauge` can also take its value from a callback. Keep in mind that the default `inc()`, `dec()` and `set()`
+methods on Gauge take care of thread safety, so when using this approach ensure the value you are reporting accounts for 
+concurrency.
 
 ```java
 static final Gauge queueDepth = Gauge.build()
@@ -136,7 +138,8 @@ class YourClass {
 }
 ```
 
-There are utilities for timing code and support quantiles:
+There are utilities for timing code and support for [quantiles](https://prometheus.io/docs/practices/histograms/#quantiles).
+Essentially quantiles aren't aggregatable and add some client overhead for the calculation.
 
 ```java
 class YourClass {
@@ -271,6 +274,10 @@ There are Servlet, SpringBoot, and Vert.x integrations included in the client li
 
 To add Prometheus exposition to an existing HTTP server, see the `MetricsServlet`. 
 It also serves as a simple example of how to write a custom endpoint.
+
+```java
+context.addServlet(new ServletHolder(new MetricsServlet()), "/metrics");
+```
 
 
 
