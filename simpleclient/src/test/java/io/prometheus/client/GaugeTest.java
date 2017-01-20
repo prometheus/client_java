@@ -82,8 +82,17 @@ public class GaugeTest {
         return value;
       }
     };
+
+    double elapsed = noLabels.setToTime(new Runnable() {
+      @Override
+      public void run() {
+        //no op
+      }
+    });
+    assertEquals(10, elapsed, .001);
+
     Gauge.Timer timer = noLabels.startTimer();
-    double elapsed = timer.setDuration();
+    elapsed = timer.setDuration();
     assertEquals(10, getValue(), .001);
     assertEquals(10, elapsed, .001);
   }

@@ -40,7 +40,15 @@ import java.util.concurrent.TimeUnit;
  *          requestTimer.observeDuration();
  *        }
  *     }
- *   }
+ *
+ *     // Or if using Java 8 and lambdas.
+ *     void processRequestLambda(Request req) {
+ *       receivedBytes.observe(req.size());
+ *       requestLatency.time(() -> {
+ *         // Your code here.
+ *       });
+ *     }
+ * }
  * }
  * </pre>
  * This would allow you to track request rate, average latency and average request size.
@@ -178,6 +186,25 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear}.
    */
   public static class Child {
+
+    /**
+     * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+     *
+     * @param timeable Code that is being timed
+     * @return Measured duration in seconds for timeable to complete.
+     */
+    public double time(Runnable timeable) {
+      Timer timer = startTimer();
+
+      double elapsed;
+      try {
+        timeable.run();
+      } finally {
+        elapsed = timer.observeDuration();
+      }
+      return elapsed;
+    }
+
     public static class Value {
       public final double count;
       public final double sum;
@@ -260,6 +287,16 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
    */
   public Timer startTimer() {
     return noLabelsChild.startTimer();
+  }
+
+  /**
+   * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+   *
+   * @param timeable Code that is being timed
+   * @return Measured duration in seconds for timeable to complete.
+   */
+  public double time(Runnable timeable){
+    return noLabelsChild.time(timeable);
   }
 
   @Override

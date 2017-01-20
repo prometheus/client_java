@@ -181,6 +181,26 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     public Timer startTimer() {
       return new Timer(this);
     }
+
+    /**
+     * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+     *
+     * @param timeable Code that is being timed
+     * @return Measured duration in seconds for timeable to complete.
+     */
+    public double setToTime(Runnable timeable){
+      Timer timer = startTimer();
+
+      double elapsed;
+      try {
+        timeable.run();
+      } finally {
+        elapsed = timer.setDuration();
+      }
+
+      return elapsed;
+    }
+
     /**
      * Get the value of the gauge.
      */
@@ -239,6 +259,16 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    */
   public Timer startTimer() {
     return noLabelsChild.startTimer();
+  }
+
+  /**
+   * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+   *
+   * @param timeable Code that is being timed
+   * @return Measured duration in seconds for timeable to complete.
+   */
+  public double setToTime(Runnable timeable){
+    return noLabelsChild.setToTime(timeable);
   }
 
   @Override

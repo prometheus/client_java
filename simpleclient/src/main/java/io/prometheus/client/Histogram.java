@@ -36,6 +36,13 @@ import java.util.Map;
  *          requestTimer.observeDuration();
  *        }
  *     }
+ *
+ *     // Or if using Java 8 lambdas.
+ *     void processRequestLambda(Request req) {
+ *        requestLatency.time(() -> {
+ *          // Your code here.
+ *        });
+ *     }
  *   }
  * }
  * </pre>
@@ -172,6 +179,25 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear}.
    */
   public static class Child {
+
+    /**
+     * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+     *
+     * @param timeable Code that is being timed
+     * @return Measured duration in seconds for timeable to complete.
+     */
+    public double time(Runnable timeable) {
+      Timer timer = startTimer();
+
+      double elapsed;
+      try {
+        timeable.run();
+      } finally {
+        elapsed = timer.observeDuration();
+      }
+      return elapsed;
+    }
+
     public static class Value {
       public final double sum;
       public final double[] buckets;
@@ -245,6 +271,16 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
    */
   public Timer startTimer() {
     return noLabelsChild.startTimer();
+  }
+
+  /**
+   * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+   *
+   * @param timeable Code that is being timed
+   * @return Measured duration in seconds for timeable to complete.
+   */
+  public double time(Runnable timeable){
+    return noLabelsChild.time(timeable);
   }
 
   @Override
