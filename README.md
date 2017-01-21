@@ -270,6 +270,8 @@ There are Servlet, SpringBoot, and Vert.x integrations included in the client li
 To add Prometheus exposition to an existing HTTP server, see the `MetricsServlet`. 
 It also serves as a simple example of how to write a custom endpoint.
 
+To expose the metrics used in your code, you would add the Prometheus servlet to your Jetty server:
+
 ```java
 context.addServlet(new ServletHolder(new MetricsServlet()), "/metrics");
 ```
