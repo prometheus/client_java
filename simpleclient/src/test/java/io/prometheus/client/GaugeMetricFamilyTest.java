@@ -42,4 +42,25 @@ public class GaugeMetricFamilyTest {
     assertEquals(5.0, registry.getSampleValue("my_other_gauge", new String[]{"labelname"}, new String[]{"bar"}).doubleValue(), .001);
   }
 
+  @Test
+  public void testBuilderStyleUsage() {
+    class YourCustomCollector extends Collector {
+      public List<MetricFamilySamples> collect() {
+        return Arrays.<MetricFamilySamples>asList(
+            new GaugeMetricFamily("my_metric", "help", Arrays.asList("name"))
+                .addMetric(Arrays.asList("value1"), 1.0)
+                .addMetric(Arrays.asList("value2"), 2.0)
+        );
+      }
+    }
+    new YourCustomCollector().register(registry);
+
+    assertEquals(1.0,
+        registry.getSampleValue("my_metric", new String[]{"name"}, new String[]{"value1"})
+            .doubleValue(), .001);
+    assertEquals(2.0,
+        registry.getSampleValue("my_metric", new String[]{"name"}, new String[]{"value2"})
+            .doubleValue(), .001);
+  }
+
 }
