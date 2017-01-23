@@ -49,10 +49,10 @@ public class SummaryMetricFamily extends Collector.MetricFamilySamples {
     this.quantiles = quantiles;
   }
 
-  public void addMetric(List<String> labelValues, double count, double sum) {
-    addMetric(labelValues, count, sum, Collections.<Double>emptyList());
+  public SummaryMetricFamily addMetric(List<String> labelValues, double count, double sum) {
+    return addMetric(labelValues, count, sum, Collections.<Double>emptyList());
   }
-  public void addMetric(List<String> labelValues, double count, double sum, List<Double> quantiles) {
+  public SummaryMetricFamily addMetric(List<String> labelValues, double count, double sum, List<Double> quantiles) {
     if (labelValues.size() != labelNames.size()) {
       throw new IllegalArgumentException("Incorrect number of labels.");
     }
@@ -68,5 +68,6 @@ public class SummaryMetricFamily extends Collector.MetricFamilySamples {
       labelValuesWithQuantile.add(Collector.doubleToGoString(this.quantiles.get(i)));
       samples.add(new Sample(name, labelNamesWithQuantile, labelValuesWithQuantile, quantiles.get(i)));
     }
+    return this;
   }
 }

@@ -48,10 +48,11 @@ public class CounterMetricFamily extends Collector.MetricFamilySamples {
     this.labelNames = labelNames;
   }
 
-  public void addMetric(List<String> labelValues, double value) {
+  public CounterMetricFamily addMetric(List<String> labelValues, double value) {
     if (labelValues.size() != labelNames.size()) {
       throw new IllegalArgumentException("Incorrect number of labels.");
     }
     samples.add(new Sample(name, labelNames, labelValues, value));
+    return this;
   }
 }
