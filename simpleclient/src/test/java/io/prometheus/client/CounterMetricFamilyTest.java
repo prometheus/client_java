@@ -44,16 +44,12 @@ public class CounterMetricFamilyTest {
 
   @Test
   public void testBuilderStyleUsage() {
-
     class YourCustomCollector extends Collector {
-
       public List<MetricFamilySamples> collect() {
         return Arrays.<MetricFamilySamples>asList(
-
             new CounterMetricFamily("my_metric", "help", Arrays.asList("name"))
                 .addMetric(Arrays.asList("value1"), 1.0)
                 .addMetric(Arrays.asList("value2"), 2.0)
-
         );
       }
     }
@@ -65,7 +61,6 @@ public class CounterMetricFamilyTest {
     assertEquals(2.0,
         registry.getSampleValue("my_metric", new String[]{"name"}, new String[]{"value2"})
             .doubleValue(), .001);
-
   }
 
 }
