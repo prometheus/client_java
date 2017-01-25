@@ -51,19 +51,19 @@ public class HibernateStatisticsCollector extends Collector {
     return Arrays.<MetricFamilySamples>asList(
 
         createCounter(
-            "hibernate_session_open_total",
+            "hibernate_session_opened_total",
             "Global number of sessions opened",
             statistics.getSessionOpenCount()
         ),
 
         createCounter(
-            "hibernate_session_close_total",
+            "hibernate_session_closed_total",
             "Global number of sessions closed",
             statistics.getSessionCloseCount()
         ),
 
         createCounter(
-            "hibernate_flush_total",
+            "hibernate_flushed_total",
             "Get the global number of flush executed by sessions",
             statistics.getFlushCount()
         ),
@@ -87,13 +87,13 @@ public class HibernateStatisticsCollector extends Collector {
     return Arrays.<MetricFamilySamples>asList(
 
         createCounter(
-            "hibernate_statement_prepare_total",
+            "hibernate_statement_prepared_total",
             "The number of prepared statements that were acquired",
             statistics.getPrepareStatementCount()
         ),
 
         createCounter(
-            "hibernate_statement_close_total",
+            "hibernate_statement_closed_total",
             "The number of prepared statements that were released",
             statistics.getCloseStatementCount()
         ),

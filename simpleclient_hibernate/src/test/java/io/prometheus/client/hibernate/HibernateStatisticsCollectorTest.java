@@ -32,9 +32,9 @@ public class HibernateStatisticsCollectorTest {
 
     new HibernateStatisticsCollector(statistics).register(registry);
 
-    assertThat(registry.getSampleValue("hibernate_session_open_total"), is(1.0));
-    assertThat(registry.getSampleValue("hibernate_session_close_total"), is(2.0));
-    assertThat(registry.getSampleValue("hibernate_flush_total"), is(3.0));
+    assertThat(registry.getSampleValue("hibernate_session_opened_total"), is(1.0));
+    assertThat(registry.getSampleValue("hibernate_session_closed_total"), is(2.0));
+    assertThat(registry.getSampleValue("hibernate_flushed_total"), is(3.0));
     assertThat(registry.getSampleValue("hibernate_connect_total"), is(4.0));
     assertThat(registry.getSampleValue("hibernate_optimistic_failure_total"), is(5.0));
 
@@ -50,8 +50,8 @@ public class HibernateStatisticsCollectorTest {
 
     new HibernateStatisticsCollector(statistics).register(registry);
 
-    assertThat(registry.getSampleValue("hibernate_statement_prepare_total"), is(1.0));
-    assertThat(registry.getSampleValue("hibernate_statement_close_total"), is(2.0));
+    assertThat(registry.getSampleValue("hibernate_statement_prepared_total"), is(1.0));
+    assertThat(registry.getSampleValue("hibernate_statement_closed_total"), is(2.0));
     assertThat(registry.getSampleValue("hibernate_transaction_total"), is(3.0));
     assertThat(registry.getSampleValue("hibernate_transaction_success_total"), is(4.0));
 
