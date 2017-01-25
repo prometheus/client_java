@@ -17,7 +17,7 @@ public class MethodTimerTest {
     }
 
     private final class TestClass implements Timeable {
-        @PrometheusTimeMethods
+        @PrometheusTimeMethods(name = "test_class", help = "help one")
         public void timeMe() throws Exception {
             Thread.sleep(20);
         }
@@ -27,7 +27,7 @@ public class MethodTimerTest {
         void timeMe() throws Exception;
     }
 
-    @PrometheusTimeMethods
+    @PrometheusTimeMethods(name = "test_two", help = "help two")
     private final class TestClass2 implements Time2 {
         public void timeMe() throws  Exception {
             Thread.sleep(30);
@@ -43,11 +43,7 @@ public class MethodTimerTest {
 
         proxy.timeMe();
 
-        final List<Collector.MetricFamilySamples> samples = MethodTimer.defaultSummary.collect();
-
-        Assert.assertNotNull(samples);
-        assertEquals(samples.size(), 1);
-        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue(MethodTimer.DEFAULT_METRIC_NAME + "_sum", new String[]{"signature"}, new String[]{"Timeable.timeMe()"});
+        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue("test_class_sum", new String[]{"signature"}, new String[]{"Timeable.timeMe()"});
         Assert.assertNotNull(tot);
         assertEquals(0.02, tot, 0.001);
     }
@@ -64,12 +60,7 @@ public class MethodTimerTest {
 
         proxy.timeMe();
 
-        final List<Collector.MetricFamilySamples> samples = MethodTimer.defaultSummary.collect();
-
-        Assert.assertNotNull(samples);
-        assertEquals(samples.size(), 1);
-
-        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue(MethodTimer.DEFAULT_METRIC_NAME + "_sum", new String[]{"signature"}, new String[]{"Time2.timeMe()"});
+        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue("test_two_sum", new String[]{"signature"}, new String[]{"Time2.timeMe()"});
         Assert.assertNotNull(tot);
         assertEquals(tot, 0.03, 0.001);
         assert(0.029 < tot && tot < 0.031);
@@ -79,7 +70,7 @@ public class MethodTimerTest {
     public void testValueParam() throws Exception {
         final String name = "foobar";
         Time2 a = getProxy(new Time2() {
-            @PrometheusTimeMethods(name = name)
+            @PrometheusTimeMethods(name = name, help="help")
             @Override
             public void timeMe() throws Exception {
                 Thread.sleep(35);
