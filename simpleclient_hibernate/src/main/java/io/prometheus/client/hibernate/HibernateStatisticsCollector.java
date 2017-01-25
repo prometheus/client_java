@@ -14,7 +14,7 @@ import org.hibernate.stat.Statistics;
  * <p>
  * Usage example:
  * <pre>
- * new HibernateStatisticsCollector(sessionFactory, "default).register();
+ * new HibernateStatisticsCollector(sessionFactory, "default").register();
  * </pre>
  * If you are in a JPA environment, you can obtain the SessionFactory like this:
  * <pre>
