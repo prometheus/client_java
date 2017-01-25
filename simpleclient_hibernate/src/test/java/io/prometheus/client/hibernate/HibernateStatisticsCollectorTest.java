@@ -34,8 +34,8 @@ public class HibernateStatisticsCollectorTest {
 
     assertThat(getSample("hibernate_session_opened_total", "factory1"), is(1.0));
     assertThat(getSample("hibernate_session_closed_total", "factory1"), is(2.0));
-    assertThat(getSample("hibernate_flushed_total", "factory1"), is(3.0));
-    assertThat(getSample("hibernate_connect_total", "factory1"), is(4.0));
+    assertThat(getSample("hibernate_flushes_total", "factory1"), is(3.0));
+    assertThat(getSample("hibernate_connection_requested_total", "factory1"), is(4.0));
     assertThat(getSample("hibernate_optimistic_failure_total", "factory1"), is(5.0));
 
   }

@@ -67,13 +67,13 @@ public class HibernateStatisticsCollector extends Collector {
         ),
 
         createCounter(
-            "hibernate_flushed_total",
+            "hibernate_flushes_total",
             "The global number of flush executed by sessions",
             statistics.getFlushCount()
         ),
 
         createCounter(
-            "hibernate_connect_total",
+            "hibernate_connection_requested_total",
             "The global number of connections asked by the sessions",
             statistics.getConnectCount()
         ),
