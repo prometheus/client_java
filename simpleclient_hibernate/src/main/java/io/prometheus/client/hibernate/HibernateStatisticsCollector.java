@@ -53,73 +53,61 @@ public class HibernateStatisticsCollector extends Collector {
 
   private List<MetricFamilySamples> getSessionMetrics() {
     return Arrays.<MetricFamilySamples>asList(
-
         createCounter(
             "hibernate_session_opened_total",
             "Global number of sessions opened",
             statistics.getSessionOpenCount()
         ),
-
         createCounter(
             "hibernate_session_closed_total",
             "Global number of sessions closed",
             statistics.getSessionCloseCount()
         ),
-
         createCounter(
             "hibernate_flushes_total",
             "The global number of flush executed by sessions",
             statistics.getFlushCount()
         ),
-
         createCounter(
             "hibernate_connection_requested_total",
             "The global number of connections asked by the sessions",
             statistics.getConnectCount()
         ),
-
         createCounter(
             "hibernate_optimistic_failure_total",
             "The number of StaleObjectStateExceptions that occurred",
             statistics.getOptimisticFailureCount()
         )
-
     );
   }
 
   private List<MetricFamilySamples> getConnectionMetrics() {
     return Arrays.<MetricFamilySamples>asList(
-
         createCounter(
             "hibernate_statement_prepared_total",
             "The number of prepared statements that were acquired",
             statistics.getPrepareStatementCount()
         ),
-
         createCounter(
             "hibernate_statement_closed_total",
             "The number of prepared statements that were released",
             statistics.getCloseStatementCount()
         ),
-
         createCounter(
             "hibernate_transaction_total",
             "The number of transactions we know to have completed",
             statistics.getTransactionCount()
         ),
-
         createCounter(
             "hibernate_transaction_success_total",
             "The number of transactions we know to have been successful",
             statistics.getSuccessfulTransactionCount()
         )
-
     );
   }
 
   private List<MetricFamilySamples> getCacheMetrics() {
     return Arrays.<MetricFamilySamples>asList(
-
         createCounter(
             "hibernate_second_level_cache_hit_total",
             "Global number of cacheable entities/collections successfully retrieved from the cache",
@@ -135,7 +123,6 @@ public class HibernateStatisticsCollector extends Collector {
             "Global number of cacheable entities/collections put in the cache",
             statistics.getSecondLevelCachePutCount()
         ),
-
         createCounter(
             "hibernate_query_cache_hit_total",
             "The global number of cached queries successfully retrieved from cache",
@@ -151,7 +138,6 @@ public class HibernateStatisticsCollector extends Collector {
             "The global number of cacheable queries put in cache",
             statistics.getQueryCachePutCount()
         ),
-
         createCounter(
             "hibernate_natural_id_cache_hit_total",
             "The global number of cached naturalId lookups successfully retrieved from cache",
@@ -167,7 +153,6 @@ public class HibernateStatisticsCollector extends Collector {
             "The global number of cacheable naturalId lookups put in cache",
             statistics.getNaturalIdCachePutCount()
         ),
-
         createCounter(
             "hibernate_update_timestamps_cache_hit_total",
             "The global number of timestamps successfully retrieved from cache",
@@ -183,13 +168,11 @@ public class HibernateStatisticsCollector extends Collector {
             "The global number of timestamps put in cache",
             statistics.getUpdateTimestampsCachePutCount()
         )
-
     );
   }
 
   private List<MetricFamilySamples> getEntityMetrics() {
     return Arrays.<MetricFamilySamples>asList(
-
         createCounter(
             "hibernate_entity_delete_total",
             "Global number of entity deletes",
@@ -215,7 +198,6 @@ public class HibernateStatisticsCollector extends Collector {
             "Global number of entity updates",
             statistics.getEntityUpdateCount()
         ),
-
         createCounter(
             "hibernate_collection_load_total",
             "Global number of collections loaded",
@@ -241,25 +223,21 @@ public class HibernateStatisticsCollector extends Collector {
             "Global number of collections recreated",
             statistics.getCollectionRecreateCount()
         )
-
     );
   }
 
   private List<MetricFamilySamples> getQueryExecutionMetrics() {
     return Arrays.<MetricFamilySamples>asList(
-
         createCounter(
             "hibernate_query_execution_total",
             "Global number of executed queries",
             statistics.getQueryExecutionCount()
         ),
-
         createCounter(
             "hibernate_natural_id_query_execution_total",
             "The global number of naturalId queries executed against the database",
             statistics.getNaturalIdQueryExecutionCount()
         )
-
     );
   }
 
