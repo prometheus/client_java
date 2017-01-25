@@ -242,7 +242,7 @@ public class HibernateStatisticsCollector extends Collector {
   }
 
   private List<MetricFamilySamples> getQueryExecutionMetrics() {
-    return Arrays.asList(
+    return Arrays.<MetricFamilySamples>asList(
 
         createCounter(
             "hibernate_query_execution_total",
@@ -250,22 +250,10 @@ public class HibernateStatisticsCollector extends Collector {
             statistics.getQueryExecutionCount()
         ),
 
-        createGauge(
-            "hibernate_query_execution_seconds_max",
-            "The time in milliseconds of the slowest query.",
-            statistics.getQueryExecutionMaxTime() / 1000.0
-        ),
-
         createCounter(
             "hibernate_natural_id_query_execution_total",
             "The global number of naturalId queries executed against the database",
             statistics.getNaturalIdQueryExecutionCount()
-        ),
-
-        createGauge(
-            "hibernate_natural_id_query_execution_seconds_max",
-            "The global maximum query time for naturalId queries executed against the database",
-            statistics.getNaturalIdQueryExecutionMaxTime() / 1000.0
         )
 
     );
@@ -273,10 +261,6 @@ public class HibernateStatisticsCollector extends Collector {
 
   private CounterMetricFamily createCounter(String name, String help, double value) {
     return new CounterMetricFamily(name, help, value);
-  }
-
-  private GaugeMetricFamily createGauge(String name, String help, double value) {
-    return new GaugeMetricFamily(name, help, value);
   }
 
 }

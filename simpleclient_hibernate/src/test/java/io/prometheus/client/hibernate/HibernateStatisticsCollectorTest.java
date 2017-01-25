@@ -131,16 +131,12 @@ public class HibernateStatisticsCollectorTest {
   public void shouldPublishQueryExecutionMetrics() {
 
     when(statistics.getQueryExecutionCount()).thenReturn(1L);
-    when(statistics.getQueryExecutionMaxTime()).thenReturn(2000L);
     when(statistics.getNaturalIdQueryExecutionCount()).thenReturn(3L);
-    when(statistics.getNaturalIdQueryExecutionMaxTime()).thenReturn(4000L);
 
     new HibernateStatisticsCollector(statistics).register(registry);
 
     assertThat(registry.getSampleValue("hibernate_query_execution_total"), is(1.0));
-    assertThat(registry.getSampleValue("hibernate_query_execution_seconds_max"), is(2.0));
     assertThat(registry.getSampleValue("hibernate_natural_id_query_execution_total"), is(3.0));
-    assertThat(registry.getSampleValue("hibernate_natural_id_query_execution_seconds_max"), is(4.0));
 
   }
 
