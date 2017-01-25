@@ -5,8 +5,6 @@ import io.prometheus.client.CollectorRegistry;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import java.util.Enumeration;
 import java.util.List;
@@ -81,7 +79,7 @@ public class MethodTimerTest {
     public void testValueParam() throws Exception {
         final String name = "foobar";
         Time2 a = getProxy(new Time2() {
-            @PrometheusTimeMethods(name)
+            @PrometheusTimeMethods(name = name)
             @Override
             public void timeMe() throws Exception {
                 Thread.sleep(35);
@@ -107,7 +105,7 @@ public class MethodTimerTest {
 
         Time2 a = getProxy(new Time2() {
             @Override
-            @PrometheusTimeMethods(value = name, help = help)
+            @PrometheusTimeMethods(name = name, help = help)
             public void timeMe() throws Exception {
                 Thread.sleep(100);
             }
