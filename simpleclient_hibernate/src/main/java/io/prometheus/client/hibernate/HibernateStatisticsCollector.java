@@ -64,13 +64,13 @@ public class HibernateStatisticsCollector extends Collector {
 
         createCounter(
             "hibernate_flushed_total",
-            "Get the global number of flush executed by sessions",
+            "The global number of flush executed by sessions",
             statistics.getFlushCount()
         ),
 
         createCounter(
             "hibernate_connect_total",
-            "Get the global number of connections asked by the sessions",
+            "The global number of connections asked by the sessions",
             statistics.getConnectCount()
         ),
 
@@ -134,49 +134,49 @@ public class HibernateStatisticsCollector extends Collector {
 
         createCounter(
             "hibernate_query_cache_hit_total",
-            "Get the global number of cached queries successfully retrieved from cache",
+            "The global number of cached queries successfully retrieved from cache",
             statistics.getQueryCacheHitCount()
         ),
         createCounter(
             "hibernate_query_cache_miss_total",
-            "Get the global number of cached queries not found in cache",
+            "The global number of cached queries not found in cache",
             statistics.getQueryCacheMissCount()
         ),
         createCounter(
             "hibernate_query_cache_put_total",
-            "Get the global number of cacheable queries put in cache",
+            "The global number of cacheable queries put in cache",
             statistics.getQueryCachePutCount()
         ),
 
         createCounter(
             "hibernate_natural_id_cache_hit_total",
-            "Get the global number of cached naturalId lookups successfully retrieved from cache",
+            "The global number of cached naturalId lookups successfully retrieved from cache",
             statistics.getNaturalIdCacheHitCount()
         ),
         createCounter(
             "hibernate_natural_id_cache_miss_total",
-            "Get the global number of cached naturalId lookups not found in cache",
+            "The global number of cached naturalId lookups not found in cache",
             statistics.getNaturalIdCacheMissCount()
         ),
         createCounter(
             "hibernate_natural_id_cache_put_total",
-            "Get the global number of cacheable naturalId lookups put in cache",
+            "The global number of cacheable naturalId lookups put in cache",
             statistics.getNaturalIdCachePutCount()
         ),
 
         createCounter(
             "hibernate_update_timestamps_cache_hit_total",
-            "Get the global number of timestamps successfully retrieved from cache",
+            "The global number of timestamps successfully retrieved from cache",
             statistics.getUpdateTimestampsCacheHitCount()
         ),
         createCounter(
             "hibernate_update_timestamps_cache_miss_total",
-            "Get the global number of tables for which no update timestamps was not found in cache",
+            "The global number of tables for which no update timestamps was not found in cache",
             statistics.getUpdateTimestampsCacheMissCount()
         ),
         createCounter(
             "hibernate_update_timestamps_cache_put_total",
-            "Get the global number of timestamps put in cache",
+            "The global number of timestamps put in cache",
             statistics.getUpdateTimestampsCachePutCount()
         )
 
@@ -188,27 +188,27 @@ public class HibernateStatisticsCollector extends Collector {
 
         createCounter(
             "hibernate_entity_delete_total",
-            "Get global number of entity deletes",
+            "Global number of entity deletes",
             statistics.getEntityDeleteCount()
         ),
         createCounter(
             "hibernate_entity_insert_total",
-            "Get global number of entity inserts",
+            "Global number of entity inserts",
             statistics.getEntityInsertCount()
         ),
         createCounter(
             "hibernate_entity_load_total",
-            "Get global number of entity loads",
+            "Global number of entity loads",
             statistics.getEntityLoadCount()
         ),
         createCounter(
             "hibernate_entity_fetch_total",
-            "Get global number of entity fetches",
+            "Global number of entity fetches",
             statistics.getEntityFetchCount()
         ),
         createCounter(
             "hibernate_entity_update_total",
-            "Get global number of entity updates",
+            "Global number of entity updates",
             statistics.getEntityUpdateCount()
         ),
 
@@ -246,25 +246,25 @@ public class HibernateStatisticsCollector extends Collector {
 
         createCounter(
             "hibernate_query_execution_total",
-            "Get global number of executed queries",
+            "Global number of executed queries",
             statistics.getQueryExecutionCount()
         ),
 
         createGauge(
             "hibernate_query_execution_seconds_max",
-            "Get the time in milliseconds of the slowest query.",
+            "The time in milliseconds of the slowest query.",
             statistics.getQueryExecutionMaxTime() / 1000.0
         ),
 
         createCounter(
             "hibernate_natural_id_query_execution_total",
-            "Get the global number of naturalId queries executed against the database",
+            "The global number of naturalId queries executed against the database",
             statistics.getNaturalIdQueryExecutionCount()
         ),
 
         createGauge(
             "hibernate_natural_id_query_execution_seconds_max",
-            "Get the global maximum query time for naturalId queries executed against the database",
+            "The global maximum query time for naturalId queries executed against the database",
             statistics.getNaturalIdQueryExecutionMaxTime() / 1000.0
         )
 
