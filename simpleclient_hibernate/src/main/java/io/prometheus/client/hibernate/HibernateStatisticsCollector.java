@@ -55,27 +55,27 @@ public class HibernateStatisticsCollector extends Collector {
     return Arrays.<MetricFamilySamples>asList(
         createCounter(
             "hibernate_session_opened_total",
-            "Global number of sessions opened",
+            "Global number of sessions opened (getSessionOpenCount)",
             statistics.getSessionOpenCount()
         ),
         createCounter(
             "hibernate_session_closed_total",
-            "Global number of sessions closed",
+            "Global number of sessions closed (getSessionCloseCount)",
             statistics.getSessionCloseCount()
         ),
         createCounter(
             "hibernate_flushes_total",
-            "The global number of flush executed by sessions",
+            "The global number of flush executed by sessions (getFlushCount)",
             statistics.getFlushCount()
         ),
         createCounter(
             "hibernate_connection_requested_total",
-            "The global number of connections asked by the sessions",
+            "The global number of connections asked by the sessions (getConnectCount)",
             statistics.getConnectCount()
         ),
         createCounter(
             "hibernate_optimistic_failure_total",
-            "The number of StaleObjectStateExceptions that occurred",
+            "The number of StaleObjectStateExceptions that occurred (getOptimisticFailureCount)",
             statistics.getOptimisticFailureCount()
         )
     );
@@ -85,22 +85,22 @@ public class HibernateStatisticsCollector extends Collector {
     return Arrays.<MetricFamilySamples>asList(
         createCounter(
             "hibernate_statement_prepared_total",
-            "The number of prepared statements that were acquired",
+            "The number of prepared statements that were acquired (getPrepareStatementCount)",
             statistics.getPrepareStatementCount()
         ),
         createCounter(
             "hibernate_statement_closed_total",
-            "The number of prepared statements that were released",
+            "The number of prepared statements that were released (getCloseStatementCount)",
             statistics.getCloseStatementCount()
         ),
         createCounter(
             "hibernate_transaction_total",
-            "The number of transactions we know to have completed",
+            "The number of transactions we know to have completed (getTransactionCount)",
             statistics.getTransactionCount()
         ),
         createCounter(
             "hibernate_transaction_success_total",
-            "The number of transactions we know to have been successful",
+            "The number of transactions we know to have been successful (getSuccessfulTransactionCount)",
             statistics.getSuccessfulTransactionCount()
         )
     );
@@ -110,62 +110,62 @@ public class HibernateStatisticsCollector extends Collector {
     return Arrays.<MetricFamilySamples>asList(
         createCounter(
             "hibernate_second_level_cache_hit_total",
-            "Global number of cacheable entities/collections successfully retrieved from the cache",
+            "Global number of cacheable entities/collections successfully retrieved from the cache (getSecondLevelCacheHitCount)",
             statistics.getSecondLevelCacheHitCount()
         ),
         createCounter(
             "hibernate_second_level_cache_miss_total",
-            "Global number of cacheable entities/collections not found in the cache and loaded from the database.",
+            "Global number of cacheable entities/collections not found in the cache and loaded from the database (getSecondLevelCacheMissCount)",
             statistics.getSecondLevelCacheMissCount()
         ),
         createCounter(
             "hibernate_second_level_cache_put_total",
-            "Global number of cacheable entities/collections put in the cache",
+            "Global number of cacheable entities/collections put in the cache (getSecondLevelCachePutCount)",
             statistics.getSecondLevelCachePutCount()
         ),
         createCounter(
             "hibernate_query_cache_hit_total",
-            "The global number of cached queries successfully retrieved from cache",
+            "The global number of cached queries successfully retrieved from cache (getQueryCacheHitCount)",
             statistics.getQueryCacheHitCount()
         ),
         createCounter(
             "hibernate_query_cache_miss_total",
-            "The global number of cached queries not found in cache",
+            "The global number of cached queries not found in cache (getQueryCacheMissCount)",
             statistics.getQueryCacheMissCount()
         ),
         createCounter(
             "hibernate_query_cache_put_total",
-            "The global number of cacheable queries put in cache",
+            "The global number of cacheable queries put in cache (getQueryCachePutCount)",
             statistics.getQueryCachePutCount()
         ),
         createCounter(
             "hibernate_natural_id_cache_hit_total",
-            "The global number of cached naturalId lookups successfully retrieved from cache",
+            "The global number of cached naturalId lookups successfully retrieved from cache (getNaturalIdCacheHitCount)",
             statistics.getNaturalIdCacheHitCount()
         ),
         createCounter(
             "hibernate_natural_id_cache_miss_total",
-            "The global number of cached naturalId lookups not found in cache",
+            "The global number of cached naturalId lookups not found in cache (getNaturalIdCacheMissCount)",
             statistics.getNaturalIdCacheMissCount()
         ),
         createCounter(
             "hibernate_natural_id_cache_put_total",
-            "The global number of cacheable naturalId lookups put in cache",
+            "The global number of cacheable naturalId lookups put in cache (getNaturalIdCachePutCount)",
             statistics.getNaturalIdCachePutCount()
         ),
         createCounter(
             "hibernate_update_timestamps_cache_hit_total",
-            "The global number of timestamps successfully retrieved from cache",
+            "The global number of timestamps successfully retrieved from cache (getUpdateTimestampsCacheHitCount)",
             statistics.getUpdateTimestampsCacheHitCount()
         ),
         createCounter(
             "hibernate_update_timestamps_cache_miss_total",
-            "The global number of tables for which no update timestamps was not found in cache",
+            "The global number of tables for which no update timestamps was not found in cache (getUpdateTimestampsCacheMissCount)",
             statistics.getUpdateTimestampsCacheMissCount()
         ),
         createCounter(
             "hibernate_update_timestamps_cache_put_total",
-            "The global number of timestamps put in cache",
+            "The global number of timestamps put in cache (getUpdateTimestampsCachePutCount)",
             statistics.getUpdateTimestampsCachePutCount()
         )
     );
@@ -175,52 +175,52 @@ public class HibernateStatisticsCollector extends Collector {
     return Arrays.<MetricFamilySamples>asList(
         createCounter(
             "hibernate_entity_delete_total",
-            "Global number of entity deletes",
+            "Global number of entity deletes (getEntityDeleteCount)",
             statistics.getEntityDeleteCount()
         ),
         createCounter(
             "hibernate_entity_insert_total",
-            "Global number of entity inserts",
+            "Global number of entity inserts (getEntityInsertCount)",
             statistics.getEntityInsertCount()
         ),
         createCounter(
             "hibernate_entity_load_total",
-            "Global number of entity loads",
+            "Global number of entity loads (getEntityLoadCount)",
             statistics.getEntityLoadCount()
         ),
         createCounter(
             "hibernate_entity_fetch_total",
-            "Global number of entity fetches",
+            "Global number of entity fetches (getEntityFetchCount)",
             statistics.getEntityFetchCount()
         ),
         createCounter(
             "hibernate_entity_update_total",
-            "Global number of entity updates",
+            "Global number of entity updates (getEntityUpdateCount)",
             statistics.getEntityUpdateCount()
         ),
         createCounter(
             "hibernate_collection_load_total",
-            "Global number of collections loaded",
+            "Global number of collections loaded (getCollectionLoadCount)",
             statistics.getCollectionLoadCount()
         ),
         createCounter(
             "hibernate_collection_fetch_total",
-            "Global number of collections fetched",
+            "Global number of collections fetched (getCollectionFetchCount)",
             statistics.getCollectionFetchCount()
         ),
         createCounter(
             "hibernate_collection_update_total",
-            "Global number of collections updated",
+            "Global number of collections updated (getCollectionUpdateCount)",
             statistics.getCollectionUpdateCount()
         ),
         createCounter(
             "hibernate_collection_remove_total",
-            "Global number of collections removed",
+            "Global number of collections removed (getCollectionRemoveCount)",
             statistics.getCollectionRemoveCount()
         ),
         createCounter(
             "hibernate_collection_recreate_total",
-            "Global number of collections recreated",
+            "Global number of collections recreated (getCollectionRecreateCount)",
             statistics.getCollectionRecreateCount()
         )
     );
@@ -230,12 +230,12 @@ public class HibernateStatisticsCollector extends Collector {
     return Arrays.<MetricFamilySamples>asList(
         createCounter(
             "hibernate_query_execution_total",
-            "Global number of executed queries",
+            "Global number of executed queries (getQueryExecutionCount)",
             statistics.getQueryExecutionCount()
         ),
         createCounter(
             "hibernate_natural_id_query_execution_total",
-            "The global number of naturalId queries executed against the database",
+            "The global number of naturalId queries executed against the database (getNaturalIdQueryExecutionCount)",
             statistics.getNaturalIdQueryExecutionCount()
         )
     );
