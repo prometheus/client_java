@@ -123,7 +123,7 @@ public class MethodTimerTest {
         }
     }
 
-    @Test()
+    @Test
     public void testThrowWorks() {
         Time2 p = getProxy(new Time2() {
             @Override

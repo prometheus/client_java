@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
  */
 @Aspect("pertarget(io.prometheus.client.spring.web.MethodTimer.timeable())")
 @ControllerAdvice
-@Component
 public class MethodTimer {
     private Summary summary = null;
     private Summary.Child summaryChild = null;
