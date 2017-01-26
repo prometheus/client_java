@@ -1,8 +1,6 @@
 package io.prometheus.client.spring.web;
 
 import io.prometheus.client.Summary;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,7 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
  * This class automatically times (via aspectj) the execution of methods by their signature, if it's been enabled via {@link EnablePrometheusTiming}
- * and in methods annotated (or within classes annotated) with {@link PrometheusTimeMethods}
+ * and in methods annotated (or within classes annotated) with {@link PrometheusTimeMethod}
  *
  * @author Andrew Stuart
  */
@@ -25,21 +23,21 @@ public class MethodTimer {
     private Summary summary = null;
     private Summary.Child summaryChild = null;
 
-    @Pointcut("@within(io.prometheus.client.spring.web.PrometheusTimeMethods)")
+    @Pointcut("@within(io.prometheus.client.spring.web.PrometheusTimeMethod)")
     public void annotatedClass() {}
 
-    @Pointcut("@annotation(io.prometheus.client.spring.web.PrometheusTimeMethods)")
+    @Pointcut("@annotation(io.prometheus.client.spring.web.PrometheusTimeMethod)")
     public void annotatedMethod() {}
 
     @Pointcut("annotatedMethod()")
     public void timeable() {}
 
-    private PrometheusTimeMethods getAnnotation(ProceedingJoinPoint pjp) throws NoSuchMethodException {
+    private PrometheusTimeMethod getAnnotation(ProceedingJoinPoint pjp) throws NoSuchMethodException {
         assert(pjp.getSignature() instanceof MethodSignature);
 
         MethodSignature signature = (MethodSignature) pjp.getSignature();
 
-        PrometheusTimeMethods annot =  AnnotationUtils.findAnnotation(pjp.getTarget().getClass(), PrometheusTimeMethods.class);
+        PrometheusTimeMethod annot =  AnnotationUtils.findAnnotation(pjp.getTarget().getClass(), PrometheusTimeMethod.class);
         if (annot != null) {
             return annot;
         }
@@ -48,7 +46,7 @@ public class MethodTimer {
         final String name = signature.getName();
         final Class[] parameterTypes = signature.getParameterTypes();
 
-        return AnnotationUtils.findAnnotation(pjp.getTarget().getClass().getDeclaredMethod(name, parameterTypes), PrometheusTimeMethods.class);
+        return AnnotationUtils.findAnnotation(pjp.getTarget().getClass().getDeclaredMethod(name, parameterTypes), PrometheusTimeMethod.class);
     }
 
     synchronized private void ensureSummary(ProceedingJoinPoint pjp) throws IllegalStateException {
@@ -58,7 +56,7 @@ public class MethodTimer {
         }
 
         // Only one thread may get here, since this method is synchronized
-        PrometheusTimeMethods annot = null;
+        PrometheusTimeMethod annot = null;
         try {
             annot = getAnnotation(pjp);
         } catch (NoSuchMethodException e) {

@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import java.util.Enumeration;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,7 +16,7 @@ public class MethodTimerTest {
     }
 
     private final class TestClass implements Timeable {
-        @PrometheusTimeMethods(name = "test_class", help = "help one")
+        @PrometheusTimeMethod(name = "test_class", help = "help one")
         public void timeMe() throws Exception {
             Thread.sleep(20);
         }
@@ -27,7 +26,7 @@ public class MethodTimerTest {
         void timeMe() throws Exception;
     }
 
-//    @PrometheusTimeMethods(name = "test_two", help = "help two")
+//    @PrometheusTimeMethod(name = "test_two", help = "help two")
 //    private final class TestClass2 implements Time2 {
 //        public void timeMe() throws  Exception {
 //            Thread.sleep(30);
@@ -70,7 +69,7 @@ public class MethodTimerTest {
     public void testValueParam() throws Exception {
         final String name = "foobar";
         Time2 a = getProxy(new Time2() {
-            @PrometheusTimeMethods(name = name, help="help")
+            @PrometheusTimeMethod(name = name, help="help")
             @Override
             public void timeMe() throws Exception {
                 Thread.sleep(35);
@@ -96,7 +95,7 @@ public class MethodTimerTest {
 
         Time2 a = getProxy(new Time2() {
             @Override
-            @PrometheusTimeMethods(name = name, help = help)
+            @PrometheusTimeMethod(name = name, help = help)
             public void timeMe() throws Exception {
                 Thread.sleep(100);
             }

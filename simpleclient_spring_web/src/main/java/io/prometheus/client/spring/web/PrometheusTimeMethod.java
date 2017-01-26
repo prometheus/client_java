@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  * To properly work, {@link EnablePrometheusTiming} must be specified somewhere in your application configuration.
  *
  *  <pre><code>
- * {@literal @}PrometheusTimeMethods("my_app_timer_seconds")
+ * {@literal @}PrometheusTimeMethod("my_app_timer_seconds")
  * {@literal @}Controller
  *  public class MyController {
  *    {@literal @}RequestMapping("/")
@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface PrometheusTimeMethods {
+public @interface PrometheusTimeMethod {
     /**
      * The metric name to use for recording latencies
      * @return A metric name specific to your use case.

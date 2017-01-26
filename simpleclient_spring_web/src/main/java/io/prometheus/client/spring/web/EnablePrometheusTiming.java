@@ -9,10 +9,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Enable the use of {@link PrometheusTimeMethods} annotation on classes or methods.
+ * Enable the use of {@link PrometheusTimeMethod} annotation on classes or methods.
  *
  * Usage: Add this annotation to any Spring {@link org.springframework.context.annotation.Configuration} class to enable
- * the use of the {@link PrometheusTimeMethods} annotation.
+ * the use of the {@link PrometheusTimeMethod} annotation.
  *
  *  * <pre><code>
  * {@literal @}Configuration
