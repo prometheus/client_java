@@ -91,24 +91,11 @@ There are utilities for common use cases:
 gauge.setToCurrentTime(); // Set to current unixtime.
 ```
 
-As an advanced use case, a `Gauge` can also take its value from a callback. Keep in mind that the default `inc()`, `dec()` and `set()`
-methods on Gauge take care of thread safety, so when using this approach ensure the value you are reporting accounts for 
-concurrency.
+As an advanced use case, a `Gauge` can also take its value from a callback by using the 
+[setChild()](https://prometheus.io/client_java/io/prometheus/client/SimpleCollector.html#setChild-Child-java.lang.String...-) 
+method. Keep in mind that the default `inc()`, `dec()` and `set()` methods on Gauge take care of thread safety, so 
+when using this approach ensure the value you are reporting accounts for concurrency.
 
-```java
-static final Gauge queueDepth = Gauge.build()
-     .name("widget_queue_depth").help("Widget queue depth.").register();
-
-void processRequest() {
-  queueDepth.setChild(new Child{
-      @Override
-      public double get() {
-          //executorService is a ThreadPoolExecutor
-          return executorService.getQueue().size();
-      }
-  })  
-}
-```
 
 ### Summary
 
@@ -273,6 +260,11 @@ It also serves as a simple example of how to write a custom endpoint.
 To expose the metrics used in your code, you would add the Prometheus servlet to your Jetty server:
 
 ```java
+Server server = new Server(1234);
+ServletContextHandler context = new ServletContextHandler();
+context.setContextPath("/");
+server.setHandler(context);
+
 context.addServlet(new ServletHolder(new MetricsServlet()), "/metrics");
 ```
 
