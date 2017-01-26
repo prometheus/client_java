@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 @ControllerAdvice
 public class MethodTimer {
     private Summary summary = null;
-    private Summary.Child summaryChild = null;
 
     @Pointcut("@within(io.prometheus.client.spring.web.PrometheusTimeMethod)")
     public void annotatedClass() {}
@@ -36,7 +35,7 @@ public class MethodTimer {
 
         MethodSignature signature = (MethodSignature) pjp.getSignature();
 
-        PrometheusTimeMethod annot =  AnnotationUtils.findAnnotation(pjp.getTarget().getClass(), PrometheusTimeMethod.class);
+        PrometheusTimeMethod annot = AnnotationUtils.findAnnotation(pjp.getTarget().getClass(), PrometheusTimeMethod.class);
         if (annot != null) {
             return annot;
         }
@@ -50,7 +49,7 @@ public class MethodTimer {
 
     synchronized private void ensureSummary(ProceedingJoinPoint pjp) throws IllegalStateException {
         // Guard against multiple concurrent readers who see `summaryChild == null` and call ensureSummary
-        if (summaryChild != null) {
+        if (summary != null) {
             return;
         }
 
@@ -66,23 +65,21 @@ public class MethodTimer {
 
         assert(annot != null);
 
-        summaryChild = Summary.build()
+        summary = Summary.build()
                 .name(annot.name())
                 .help(annot.help())
-                .register().labels();
-//                .labelNames("signature")
-//                .register().labels(pjp.getSignature().toShortString());
+                .register();
     }
 
     @Around("timeable()")
     public Object timeMethod(ProceedingJoinPoint pjp) throws Throwable {
         // This is not thread safe itself, but faster. The critical section within `ensureSummary` makes a second check
         // so that the summary is only created once.
-        if (summaryChild == null) {
+        if (summary == null) {
             ensureSummary(pjp);
         }
 
-        final Summary.Timer t = summaryChild.startTimer();
+        final Summary.Timer t = summary.startTimer();
 
         try {
             return pjp.proceed();
