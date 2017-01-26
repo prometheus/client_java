@@ -56,7 +56,7 @@ public class MethodTimer {
         }
 
         // Only one thread may get here, since this method is synchronized
-        PrometheusTimeMethod annot = null;
+        PrometheusTimeMethod annot;
         try {
             annot = getAnnotation(pjp);
         } catch (NoSuchMethodException e) {
