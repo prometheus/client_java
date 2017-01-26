@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * @author Andrew Stuart
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD})
 public @interface PrometheusTimeMethods {
     /**
      * The metric name to use for recording latencies

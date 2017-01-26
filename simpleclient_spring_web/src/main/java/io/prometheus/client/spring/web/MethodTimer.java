@@ -31,7 +31,7 @@ public class MethodTimer {
     @Pointcut("@annotation(io.prometheus.client.spring.web.PrometheusTimeMethods)")
     public void annotatedMethod() {}
 
-    @Pointcut("annotatedClass() || annotatedMethod()")
+    @Pointcut("annotatedMethod()")
     public void timeable() {}
 
     private PrometheusTimeMethods getAnnotation(ProceedingJoinPoint pjp) throws NoSuchMethodException {
@@ -44,7 +44,7 @@ public class MethodTimer {
             return annot;
         }
 
-        // When target is an AOP interface proxy but annotation is on class method.
+        // When target is an AOP interface proxy but annotation is on class method (rather than Interface method).
         final String name = signature.getName();
         final Class[] parameterTypes = signature.getParameterTypes();
 
@@ -53,12 +53,12 @@ public class MethodTimer {
 
     synchronized private void ensureSummary(ProceedingJoinPoint pjp) throws IllegalStateException {
         // Guard against multiple concurrent readers who see `summary == null` and call ensureSummary
-        if (summary != null) {
+        if (summaryChild != null) {
             return;
         }
 
-        PrometheusTimeMethods annot = null;
         // Only one thread may get here, since this method is synchronized
+        PrometheusTimeMethods annot = null;
         try {
             annot = getAnnotation(pjp);
         } catch (NoSuchMethodException e) {
@@ -69,22 +69,23 @@ public class MethodTimer {
 
         assert(annot != null);
 
-        summary = Summary.build()
+        summaryChild = Summary.build()
                 .name(annot.name())
                 .help(annot.help())
-                .labelNames("signature")
-                .register();
+                .register().labels();
+//                .labelNames("signature")
+//                .register().labels(pjp.getSignature().toShortString());
     }
 
     @Around("timeable()")
-    public Object timeClassMethod(ProceedingJoinPoint pjp) throws Throwable {
+    public Object timeMethod(ProceedingJoinPoint pjp) throws Throwable {
         // This is not thread safe itself, but faster. The critical section within `ensureSummary` makes a second check
         // so that the summary is only created once.
-        if (summary == null) {
+        if (summaryChild == null) {
             ensureSummary(pjp);
         }
 
-        final Summary.Timer t = summary.labels(pjp.getSignature().toShortString()).startTimer();
+        final Summary.Timer t = summaryChild.startTimer();
 
         try {
             return pjp.proceed();
