@@ -17,6 +17,7 @@ import java.lang.annotation.Target;
  *  * <pre><code>
  * {@literal @}Configuration
  * {@literal @}EnablePrometheusEndpoint
+ * {@literal @}EnablePrometheusTiming
  *  public class MyAppConfig {
  *    // Other configuration items...
  *  }

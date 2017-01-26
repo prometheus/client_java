@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
- * This class automatically times (via aspectj) the execution of methods by their signature, if it's been enabled via {@link EnablePrometheusTiming}
- * and in methods annotated (or within classes annotated) with {@link PrometheusTimeMethod}
+ * This class automatically times (via aspectj) the execution of annotated methods, if it's been enabled via {@link EnablePrometheusTiming},
+ * for methods annotated with {@link PrometheusTimeMethod}
  *
  * @author Andrew Stuart
  */
@@ -50,7 +50,7 @@ public class MethodTimer {
     }
 
     synchronized private void ensureSummary(ProceedingJoinPoint pjp) throws IllegalStateException {
-        // Guard against multiple concurrent readers who see `summary == null` and call ensureSummary
+        // Guard against multiple concurrent readers who see `summaryChild == null` and call ensureSummary
         if (summaryChild != null) {
             return;
         }

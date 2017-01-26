@@ -14,11 +14,11 @@ import java.lang.annotation.Target;
  * To properly work, {@link EnablePrometheusTiming} must be specified somewhere in your application configuration.
  *
  *  <pre><code>
- * {@literal @}PrometheusTimeMethod("my_app_timer_seconds")
  * {@literal @}Controller
  *  public class MyController {
  *    {@literal @}RequestMapping("/")
  *    {@literal @}ResponseBody
+ *    {@literal @}PrometheusTimeMethod(name = "my_app_timer_seconds", help = "The number of seconds taken by the main / path handler")
  *    public Object handleRequest() {
  *      // Each invocation will be timed and recorded.
  *      return database.withCache().get("some_data");
