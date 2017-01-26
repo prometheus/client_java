@@ -100,7 +100,9 @@ public class MetricsFilter implements Filter {
         String path = request.getRequestURI();
         if (pathComponents > 0) {
             int lastSlash = StringUtils.ordinalIndexOf(path, "/", pathComponents + 1);
-            path = lastSlash == -1 ? path : path.substring(0, lastSlash);
+            if (lastSlash >= 0) {
+                path = path.substring(0, lastSlash);
+            }
         }
 
         Histogram.Timer timer = servletLatency
