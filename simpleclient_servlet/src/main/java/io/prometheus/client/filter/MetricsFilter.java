@@ -21,8 +21,23 @@ import java.io.IOException;
  * By default, this filter will provide metrics that distinguish 3 levels deep for the request path
  * (including servlet context path), but can be configured with the {@code path-components} init parameter.
  *
- * The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list of valid {@code double} values.
+ * The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list
+ * of valid {@code double} values.
  *
+ * {@code
+ * <filter>
+ *   <filter-name>prometheusFilter</filter-name>
+ *   <filter-class>net.cccnext.ssp.portal.spring.filter.PrometheusMetricsFilter</filter-class>
+ *   <init-param>
+ *      <param-name>metric-name</param-name>
+ *      <param-value>webapp_metrics_filter</param-value>
+ *   </init-param>
+ *   <init-param>
+ *      <param-name>buckets</param-name>
+ *      <param-value>.001,.002,.005,.010,.020,.040,.080,.120,.200</param-value>
+ *   </init-param>
+ * </filter>
+ * }
  *
  * @author Andrew Stuart &lt;andrew.stuart2@gmail.com&gt;
  */
