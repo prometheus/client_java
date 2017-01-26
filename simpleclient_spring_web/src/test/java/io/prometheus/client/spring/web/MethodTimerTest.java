@@ -9,6 +9,7 @@ import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import java.util.Enumeration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class MethodTimerTest {
     private interface Timeable {
@@ -114,5 +115,37 @@ public class MethodTimerTest {
         }
         Assert.assertNotNull(sample);
         assertEquals(sample.help, help);
+    }
+
+    private class MyException extends Exception {
+        public MyException(String msg) {
+            super(msg);
+        }
+    }
+
+    @Test()
+    public void testThrowWorks() {
+        Time2 p = getProxy(new Time2() {
+            @Override
+            @PrometheusTimeMethod(name="fooasdf", help="bar")
+            public void timeMe() throws Exception {
+                Thread.sleep(10);
+                throw new MyException("Yo this is an exception");
+            }
+        });
+
+        MyException e = null;
+
+        try {
+            p.timeMe();
+        } catch (Exception e1) {
+            e = (MyException) e1;
+        }
+
+
+        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue("fooasdf_sum");
+        assertEquals(tot, 0.01, 0.001);
+        assert(e != null);
+
     }
 }
