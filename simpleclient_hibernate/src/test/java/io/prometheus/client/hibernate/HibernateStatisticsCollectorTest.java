@@ -6,19 +6,28 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.prometheus.client.CollectorRegistry;
+import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class HibernateStatisticsCollectorTest {
 
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  private SessionFactory sessionFactory;
   private Statistics statistics;
   private CollectorRegistry registry;
 
   @Before
   public void before() {
     registry = new CollectorRegistry();
+    sessionFactory = mock(SessionFactory.class);
     statistics = mock(Statistics.class);
+    when(sessionFactory.getStatistics()).thenReturn(statistics);
   }
 
   @Test
@@ -30,7 +39,9 @@ public class HibernateStatisticsCollectorTest {
     when(statistics.getConnectCount()).thenReturn(4L);
     when(statistics.getOptimisticFailureCount()).thenReturn(5L);
 
-    new HibernateStatisticsCollector(statistics, "factory1").register(registry);
+    new HibernateStatisticsCollector()
+        .add(sessionFactory, "factory1")
+        .register(registry);
 
     assertThat(getSample("hibernate_session_opened_total", "factory1"), is(1.0));
     assertThat(getSample("hibernate_session_closed_total", "factory1"), is(2.0));
@@ -48,7 +59,9 @@ public class HibernateStatisticsCollectorTest {
     when(statistics.getTransactionCount()).thenReturn(3L);
     when(statistics.getSuccessfulTransactionCount()).thenReturn(4L);
 
-    new HibernateStatisticsCollector(statistics, "factory2").register(registry);
+    new HibernateStatisticsCollector()
+        .add(sessionFactory, "factory2")
+        .register(registry);
 
     assertThat(getSample("hibernate_statement_prepared_total", "factory2"), is(1.0));
     assertThat(getSample("hibernate_statement_closed_total", "factory2"), is(2.0));
@@ -76,7 +89,9 @@ public class HibernateStatisticsCollectorTest {
     when(statistics.getUpdateTimestampsCacheMissCount()).thenReturn(11L);
     when(statistics.getUpdateTimestampsCachePutCount()).thenReturn(12L);
 
-    new HibernateStatisticsCollector(statistics, "factory3").register(registry);
+    new HibernateStatisticsCollector()
+        .add(sessionFactory, "factory3")
+        .register(registry);
 
     assertThat(getSample("hibernate_second_level_cache_hit_total", "factory3"), is(1.0));
     assertThat(getSample("hibernate_second_level_cache_miss_total", "factory3"), is(2.0));
@@ -111,7 +126,9 @@ public class HibernateStatisticsCollectorTest {
     when(statistics.getCollectionRemoveCount()).thenReturn(9L);
     when(statistics.getCollectionRecreateCount()).thenReturn(10L);
 
-    new HibernateStatisticsCollector(statistics, "factory4").register(registry);
+    new HibernateStatisticsCollector()
+        .add(sessionFactory, "factory4")
+        .register(registry);
 
     assertThat(getSample("hibernate_entity_delete_total", "factory4"), is(1.0));
     assertThat(getSample("hibernate_entity_insert_total", "factory4"), is(2.0));
@@ -133,10 +150,22 @@ public class HibernateStatisticsCollectorTest {
     when(statistics.getQueryExecutionCount()).thenReturn(1L);
     when(statistics.getNaturalIdQueryExecutionCount()).thenReturn(3L);
 
-    new HibernateStatisticsCollector(statistics, "factory5").register(registry);
+    new HibernateStatisticsCollector()
+        .add(sessionFactory, "factory5")
+        .register(registry);
 
     assertThat(getSample("hibernate_query_execution_total", "factory5"), is(1.0));
     assertThat(getSample("hibernate_natural_id_query_execution_total", "factory5"), is(3.0));
+
+  }
+
+  @Test
+  public void shouldFailIfNoSessionFactoriesAreRegistered() {
+
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("SessionFactory");
+
+    new HibernateStatisticsCollector().register(registry);
 
   }
 

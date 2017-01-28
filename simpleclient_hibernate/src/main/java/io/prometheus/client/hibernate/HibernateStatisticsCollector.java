@@ -1,20 +1,26 @@
 package io.prometheus.client.hibernate;
 
 import io.prometheus.client.Collector;
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.CounterMetricFamily;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 
 /**
- * Collect metrics from Hibernate statistics.
+ * Collect metrics from one or more Hibernate SessionFactory instances.
  * <p>
  * Usage example:
  * <pre>
- * new HibernateStatisticsCollector(sessionFactory, "default").register();
+ * new HibernateStatisticsCollector()
+ *     .add(sessionFactory, "myapp")
+ *     .register();
  * </pre>
  * If you are in a JPA environment, you can obtain the SessionFactory like this:
  * <pre>
@@ -28,16 +34,18 @@ public class HibernateStatisticsCollector extends Collector {
 
   private static final List<String> LABEL_NAMES = Collections.singletonList("unit");
 
-  private final Statistics statistics;
-  private final String unit;
+  private final Map<String, SessionFactory> sessionFactories = new LinkedHashMap<String, SessionFactory>();
 
-  public HibernateStatisticsCollector(SessionFactory sessionFactory, String unit) {
-    this(sessionFactory.getStatistics(), unit);
-  }
-
-  public HibernateStatisticsCollector(Statistics statistics, String unit) {
-    this.statistics = statistics;
-    this.unit = unit;
+  /**
+   * Registers a Hibernate SessionFactory with this collector.
+   *
+   * @param sessionFactory The Hibernate SessionFactory to collect metrics for
+   * @param name A unique name for this SessionFactory
+   * @return Returns the collector
+   */
+  public HibernateStatisticsCollector add(SessionFactory sessionFactory, String name) {
+    sessionFactories.put(name, sessionFactory);
+    return this;
   }
 
   @Override
@@ -51,32 +59,65 @@ public class HibernateStatisticsCollector extends Collector {
     return metrics;
   }
 
+  @Override
+  public <T extends Collector> T register(CollectorRegistry registry) {
+    if (sessionFactories.isEmpty()) {
+      throw new IllegalStateException("You must register at least one SessionFactory.");
+    }
+    return super.register(registry);
+  }
+
   private List<MetricFamilySamples> getSessionMetrics() {
     return Arrays.<MetricFamilySamples>asList(
         createCounter(
             "hibernate_session_opened_total",
             "Global number of sessions opened (getSessionOpenCount)",
-            statistics.getSessionOpenCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getSessionOpenCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_session_closed_total",
             "Global number of sessions closed (getSessionCloseCount)",
-            statistics.getSessionCloseCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getSessionCloseCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_flushed_total",
             "The global number of flushes executed by sessions (getFlushCount)",
-            statistics.getFlushCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getFlushCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_connect_total",
             "The global number of connections requested by the sessions (getConnectCount)",
-            statistics.getConnectCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getConnectCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_optimistic_failure_total",
             "The number of StaleObjectStateExceptions that occurred (getOptimisticFailureCount)",
-            statistics.getOptimisticFailureCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getOptimisticFailureCount();
+              }
+            }
         )
     );
   }
@@ -86,22 +127,42 @@ public class HibernateStatisticsCollector extends Collector {
         createCounter(
             "hibernate_statement_prepared_total",
             "The number of prepared statements that were acquired (getPrepareStatementCount)",
-            statistics.getPrepareStatementCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getPrepareStatementCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_statement_closed_total",
             "The number of prepared statements that were released (getCloseStatementCount)",
-            statistics.getCloseStatementCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getCloseStatementCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_transaction_total",
             "The number of transactions we know to have completed (getTransactionCount)",
-            statistics.getTransactionCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getTransactionCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_transaction_success_total",
             "The number of transactions we know to have been successful (getSuccessfulTransactionCount)",
-            statistics.getSuccessfulTransactionCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getSuccessfulTransactionCount();
+              }
+            }
         )
     );
   }
@@ -111,62 +172,122 @@ public class HibernateStatisticsCollector extends Collector {
         createCounter(
             "hibernate_second_level_cache_hit_total",
             "Global number of cacheable entities/collections successfully retrieved from the cache (getSecondLevelCacheHitCount)",
-            statistics.getSecondLevelCacheHitCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getSecondLevelCacheHitCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_second_level_cache_miss_total",
             "Global number of cacheable entities/collections not found in the cache and loaded from the database (getSecondLevelCacheMissCount)",
-            statistics.getSecondLevelCacheMissCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getSecondLevelCacheMissCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_second_level_cache_put_total",
             "Global number of cacheable entities/collections put in the cache (getSecondLevelCachePutCount)",
-            statistics.getSecondLevelCachePutCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getSecondLevelCachePutCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_query_cache_hit_total",
             "The global number of cached queries successfully retrieved from cache (getQueryCacheHitCount)",
-            statistics.getQueryCacheHitCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getQueryCacheHitCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_query_cache_miss_total",
             "The global number of cached queries not found in cache (getQueryCacheMissCount)",
-            statistics.getQueryCacheMissCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getQueryCacheMissCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_query_cache_put_total",
             "The global number of cacheable queries put in cache (getQueryCachePutCount)",
-            statistics.getQueryCachePutCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getQueryCachePutCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_natural_id_cache_hit_total",
             "The global number of cached naturalId lookups successfully retrieved from cache (getNaturalIdCacheHitCount)",
-            statistics.getNaturalIdCacheHitCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getNaturalIdCacheHitCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_natural_id_cache_miss_total",
             "The global number of cached naturalId lookups not found in cache (getNaturalIdCacheMissCount)",
-            statistics.getNaturalIdCacheMissCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getNaturalIdCacheMissCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_natural_id_cache_put_total",
             "The global number of cacheable naturalId lookups put in cache (getNaturalIdCachePutCount)",
-            statistics.getNaturalIdCachePutCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getNaturalIdCachePutCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_update_timestamps_cache_hit_total",
             "The global number of timestamps successfully retrieved from cache (getUpdateTimestampsCacheHitCount)",
-            statistics.getUpdateTimestampsCacheHitCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getUpdateTimestampsCacheHitCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_update_timestamps_cache_miss_total",
             "The global number of tables for which no update timestamps was not found in cache (getUpdateTimestampsCacheMissCount)",
-            statistics.getUpdateTimestampsCacheMissCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getUpdateTimestampsCacheMissCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_update_timestamps_cache_put_total",
             "The global number of timestamps put in cache (getUpdateTimestampsCachePutCount)",
-            statistics.getUpdateTimestampsCachePutCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getUpdateTimestampsCachePutCount();
+              }
+            }
         )
     );
   }
@@ -176,52 +297,102 @@ public class HibernateStatisticsCollector extends Collector {
         createCounter(
             "hibernate_entity_delete_total",
             "Global number of entity deletes (getEntityDeleteCount)",
-            statistics.getEntityDeleteCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getEntityDeleteCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_entity_insert_total",
             "Global number of entity inserts (getEntityInsertCount)",
-            statistics.getEntityInsertCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getEntityInsertCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_entity_load_total",
             "Global number of entity loads (getEntityLoadCount)",
-            statistics.getEntityLoadCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getEntityLoadCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_entity_fetch_total",
             "Global number of entity fetches (getEntityFetchCount)",
-            statistics.getEntityFetchCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getEntityFetchCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_entity_update_total",
             "Global number of entity updates (getEntityUpdateCount)",
-            statistics.getEntityUpdateCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getEntityUpdateCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_collection_load_total",
             "Global number of collections loaded (getCollectionLoadCount)",
-            statistics.getCollectionLoadCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getCollectionLoadCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_collection_fetch_total",
             "Global number of collections fetched (getCollectionFetchCount)",
-            statistics.getCollectionFetchCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getCollectionFetchCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_collection_update_total",
             "Global number of collections updated (getCollectionUpdateCount)",
-            statistics.getCollectionUpdateCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getCollectionUpdateCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_collection_remove_total",
             "Global number of collections removed (getCollectionRemoveCount)",
-            statistics.getCollectionRemoveCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getCollectionRemoveCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_collection_recreate_total",
             "Global number of collections recreated (getCollectionRecreateCount)",
-            statistics.getCollectionRecreateCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getCollectionRecreateCount();
+              }
+            }
         )
     );
   }
@@ -231,19 +402,45 @@ public class HibernateStatisticsCollector extends Collector {
         createCounter(
             "hibernate_query_execution_total",
             "Global number of executed queries (getQueryExecutionCount)",
-            statistics.getQueryExecutionCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getQueryExecutionCount();
+              }
+            }
         ),
         createCounter(
             "hibernate_natural_id_query_execution_total",
             "The global number of naturalId queries executed against the database (getNaturalIdQueryExecutionCount)",
-            statistics.getNaturalIdQueryExecutionCount()
+            new ValueProvider() {
+              @Override
+              public double getValue(Statistics statistics) {
+                return statistics.getNaturalIdQueryExecutionCount();
+              }
+            }
         )
     );
   }
 
-  private CounterMetricFamily createCounter(String metric, String help, long value) {
-    return new CounterMetricFamily(metric, help, LABEL_NAMES)
-        .addMetric(Collections.singletonList(unit), value);
+  private CounterMetricFamily createCounter(String metric, String help, ValueProvider provider) {
+
+    CounterMetricFamily metricFamily = new CounterMetricFamily(metric, help, LABEL_NAMES);
+
+    for (Entry<String, SessionFactory> entry : sessionFactories.entrySet()) {
+      metricFamily.addMetric(
+          Collections.singletonList(entry.getKey()),
+          provider.getValue(entry.getValue().getStatistics())
+      );
+    }
+
+    return metricFamily;
+
+  }
+
+  private interface ValueProvider {
+
+    double getValue(Statistics statistics);
+
   }
 
 }
