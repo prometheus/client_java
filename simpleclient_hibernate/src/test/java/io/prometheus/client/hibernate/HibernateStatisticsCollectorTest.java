@@ -142,7 +142,7 @@ public class HibernateStatisticsCollectorTest {
 
   private Double getSample(String metric, String factory) {
     return registry.getSampleValue(
-        metric, new String[]{"name"}, new String[]{factory}
+        metric, new String[]{"unit"}, new String[]{factory}
     );
   }
 

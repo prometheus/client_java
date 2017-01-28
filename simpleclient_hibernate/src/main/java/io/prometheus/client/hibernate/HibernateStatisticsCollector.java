@@ -26,18 +26,18 @@ import org.hibernate.stat.Statistics;
  */
 public class HibernateStatisticsCollector extends Collector {
 
-  private static final List<String> LABEL_NAMES = Collections.singletonList("name");
+  private static final List<String> LABEL_NAMES = Collections.singletonList("unit");
 
   private final Statistics statistics;
-  private final String name;
+  private final String unit;
 
-  public HibernateStatisticsCollector(SessionFactory sessionFactory, String name) {
-    this(sessionFactory.getStatistics(), name);
+  public HibernateStatisticsCollector(SessionFactory sessionFactory, String unit) {
+    this(sessionFactory.getStatistics(), unit);
   }
 
-  public HibernateStatisticsCollector(Statistics statistics, String name) {
+  public HibernateStatisticsCollector(Statistics statistics, String unit) {
     this.statistics = statistics;
-    this.name = name;
+    this.unit = unit;
   }
 
   @Override
@@ -243,7 +243,7 @@ public class HibernateStatisticsCollector extends Collector {
 
   private CounterMetricFamily createCounter(String metric, String help, long value) {
     return new CounterMetricFamily(metric, help, LABEL_NAMES)
-        .addMetric(Collections.singletonList(name), value);
+        .addMetric(Collections.singletonList(unit), value);
   }
 
 }
