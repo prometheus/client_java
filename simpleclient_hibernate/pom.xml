@@ -38,7 +38,7 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.0.20-SNAPSHOT</version>
+            <version>0.0.21-SNAPSHOT</version>
         </dependency>
 
         <!-- We support Hibernate versions >= 4.2 -->
