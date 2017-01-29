@@ -42,7 +42,6 @@ There are canonical examples defined in the class definition Javadoc of the clie
 Documentation can be found at the [Java Client
 Github Project Page](http://prometheus.github.io/client_java).
 
-
 ## Instrumenting
 
 Four types of metrics are offered: Counter, Gauge, Summary and Histogram.
@@ -214,6 +213,29 @@ class YourClass {
   }
 }
 ```
+
+## Registering Metrics
+
+The best way to register a metric is via a `static final` class variable as is common with loggers.
+
+```java
+static final Counter requests = Counter.build()
+   .name("requests_total").help("Total requests.").labelNames("path").register();
+```
+ 
+Using the default registry with variables that are `static` is ideal since registering a metric with the same name 
+is not allowed and the default registry is also itself static. You can think of registering a metric, more like 
+registering a definition (as in the `TYPE` and `HELP` sections). The actual samples are tracked via `Child` objects.
+
+`Child` metrics aren't children in the inheritance sense of the word. They are the family members of the given metric.
+Metric definition now behave as mini-registries of the children that are defined for it. 
+
+Given the `requests` counter defined above, the `label()` method looks up or creates the corresponding `Child` metric.
+For that reason it can make sense to store the `Child` metrics when the labels are well known as in the 
+[Logback](https://github.com/prometheus/client_java/blob/master/simpleclient_logback/src/main/java/io/prometheus/client/logback/InstrumentedAppender.java#L13)
+instrumentation. Notice how the `Counter.Child` is a different type and `register()` isn't called for them.
+
+
 
 ### Included Collectors
 
