@@ -76,6 +76,16 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   }
 
   /**
+   *  Return a Builder to allow configuration of a new Gauge. Ensures required fields are provided.
+   *
+   *  @param name The name of the metric
+   *  @param help The help string of the metric
+   */
+  public static Builder build(String name, String help) {
+    return new Builder().name(name).help(help);
+  }
+
+  /**
    *  Return a Builder to allow configuration of a new Gauge.
    */
   public static Builder build() {
