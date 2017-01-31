@@ -16,10 +16,15 @@ import org.hibernate.stat.Statistics;
 /**
  * Collect metrics from one or more Hibernate SessionFactory instances.
  * <p>
- * Usage example:
+ * Usage example for a single session factory:
+ * <pre>
+ * new HibernateStatisticsCollector(sessionFactory, "myapp").register();
+ * </pre>
+ * Usage example for multiple session factories:
  * <pre>
  * new HibernateStatisticsCollector()
- *     .add(sessionFactory, "myapp")
+ *     .add(sessionFactory1, "myapp1")
+ *     .add(sessionFactory2, "myapp2")
  *     .register();
  * </pre>
  * If you are in a JPA environment, you can obtain the SessionFactory like this:
@@ -35,6 +40,27 @@ public class HibernateStatisticsCollector extends Collector {
   private static final List<String> LABEL_NAMES = Collections.singletonList("unit");
 
   private final Map<String, SessionFactory> sessionFactories = new LinkedHashMap<String, SessionFactory>();
+
+  /**
+   * Creates an empty collector. If you use this constructor, you have to add one or more
+   * session factories to the collector by calling the {@link #add(SessionFactory, String)}
+   * method.
+   */
+  public HibernateStatisticsCollector() {
+    // nothing
+  }
+
+  /**
+   * Creates a new collector for the given session factory. Calling this constructor
+   * has the same effect as creating an empty collector and adding the session factory
+   * using {@link #add(SessionFactory, String)}.
+   *
+   * @param sessionFactory The Hibernate SessionFactory to collect metrics for
+   * @param name A unique name for this SessionFactory
+   */
+  public HibernateStatisticsCollector(SessionFactory sessionFactory, String name) {
+    add(sessionFactory, name);
+  }
 
   /**
    * Registers a Hibernate SessionFactory with this collector.
