@@ -247,22 +247,22 @@ To register the Logback collector can be added to the root level like so:
 #### Hibernate
 
 There is a collector for Hibernate which allows to collect metrics from one or more 
-`SessionFactory` instances. To use this collector add the following dependency:
+`SessionFactory` instances. 
 
-```xml
-<dependency>
-  <groupId>io.prometheus</groupId>
-  <artifactId>simpleclient_hibernate</artifactId>
-  <version>0.0.20</version>
-</dependency>
+If you want to collect metrics from a single `SessionFactory`, you can register
+the collector like this:
+
+```java
+new HibernateStatisticsCollector(sessionFactory, "myapp").register();
 ```
 
-Now you can create the collector, add your `SessionFactory` instances and register 
-the collector.
+In some situations you may want to collect metrics from multiple factories. In this
+case just call `add()` on the collector for each of them.
 
 ```java
 new HibernateStatisticsCollector()
-    .add(sessionFactory, "myapp")
+    .add(sessionFactory1, "myapp1")
+    .add(sessionFactory2, "myapp2")
     .register();
 ```
 
