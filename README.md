@@ -244,6 +244,35 @@ To register the Logback collector can be added to the root level like so:
 </configuration>
 ```
 
+#### Hibernate
+
+There is a collector for Hibernate which allows to collect metrics from one or more 
+`SessionFactory` instances. 
+
+If you want to collect metrics from a single `SessionFactory`, you can register
+the collector like this:
+
+```java
+new HibernateStatisticsCollector(sessionFactory, "myapp").register();
+```
+
+In some situations you may want to collect metrics from multiple factories. In this
+case just call `add()` on the collector for each of them.
+
+```java
+new HibernateStatisticsCollector()
+    .add(sessionFactory1, "myapp1")
+    .add(sessionFactory2, "myapp2")
+    .register();
+```
+
+If you are using Hibernate in a JPA environment and only have access to the `EntityManager`
+or `EntityManagerFactory`, you can use this code to access the underlying `SessionFactory`:
+
+```java
+SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
+```
+
 ## Exporting
 
 There are several options for exporting metrics.
