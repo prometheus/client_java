@@ -6,10 +6,10 @@ import io.prometheus.client.CounterMetricFamily;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 
@@ -39,7 +39,7 @@ public class HibernateStatisticsCollector extends Collector {
 
   private static final List<String> LABEL_NAMES = Collections.singletonList("unit");
 
-  private final Map<String, SessionFactory> sessionFactories = new LinkedHashMap<String, SessionFactory>();
+  private final Map<String, SessionFactory> sessionFactories = new ConcurrentHashMap<String, SessionFactory>();
 
   /**
    * Creates an empty collector. If you use this constructor, you have to add one or more
