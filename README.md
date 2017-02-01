@@ -266,12 +266,11 @@ new HibernateStatisticsCollector()
     .register();
 ```
 
-If you are using Hibernate in a JPA environment and only have access to the `EntityManager`,
-you can use this code to access the underlying `SessionFactory`:
+If you are using Hibernate in a JPA environment and only have access to the `EntityManager`
+or `EntityManagerFactory`, you can use this code to access the underlying `SessionFactory`:
 
 ```java
-SessionFactory sessionFactory =
-    entityManager.getEntityManagerFactory().unwrap(SessionFactory.class);
+SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
 ```
 
 ## Exporting

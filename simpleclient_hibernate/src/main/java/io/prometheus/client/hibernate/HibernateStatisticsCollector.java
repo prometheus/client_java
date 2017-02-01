@@ -30,7 +30,7 @@ import org.hibernate.stat.Statistics;
  * If you are in a JPA environment, you can obtain the SessionFactory like this:
  * <pre>
  * SessionFactory sessionFactory =
- *     entityManager.getEntityManagerFactory().unwrap(SessionFactory.class);
+ *     entityManagerFactory.unwrap(SessionFactory.class);
  * </pre>
  *
  * @author Christian Kaltepoth
