@@ -15,8 +15,8 @@ public class TextFormat {
     /* See http://prometheus.io/docs/instrumenting/exposition_formats/
      * for the output format specification. */
     for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(mfs)) {
-      writer.write("# HELP " + metricFamilySamples.name + " " + escapeHelp(metricFamilySamples.help) + "\n");
-      writer.write("# TYPE " + metricFamilySamples.name + " " + typeString(metricFamilySamples.type) + "\n");
+      writer.write(String.format("# HELP %s %s\n", metricFamilySamples.name, escapeHelp(metricFamilySamples.help)));
+      writer.write(String.format("# TYPE %s %s\n", metricFamilySamples.name, typeString(metricFamilySamples.type)));
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
         writer.write(sample.name);
         if (sample.labelNames.size() > 0) {
@@ -27,7 +27,7 @@ public class TextFormat {
           }
           writer.write("}");
         }
-        writer.write(" " + Collector.doubleToGoString(sample.value) + "\n");
+        writer.write(String.format(" %s\n", Collector.doubleToGoString(sample.value)));
       }
     }
   }
