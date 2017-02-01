@@ -20,11 +20,13 @@ public class TextFormat {
       writer.write(' ');
       writer.write(escapeHelp(metricFamilySamples.help));
       writer.write('\n');
+
       writer.write("# TYPE ");
       writer.write(metricFamilySamples.name);
       writer.write(' ');
       writer.write(typeString(metricFamilySamples.type));
       writer.write('\n');
+
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
         writer.write(sample.name);
         if (sample.labelNames.size() > 0) {
