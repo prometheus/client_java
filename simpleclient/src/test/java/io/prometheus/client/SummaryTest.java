@@ -60,9 +60,13 @@ public class SummaryTest {
     noLabels.observe(2);
     assertEquals(1.0, getCount(), .001);
     assertEquals(2.0, getSum(), .001);
+    assertEquals(1.0, noLabels.get().count, .001);
+    assertEquals(2.0, noLabels.get().sum, .001);
     noLabels.labels().observe(4);
     assertEquals(2.0, getCount(), .001);
     assertEquals(6.0, getSum(), .001);
+    assertEquals(2.0, noLabels.get().count, .001);
+    assertEquals(6.0, noLabels.get().sum, .001);
   }
 
   @Test

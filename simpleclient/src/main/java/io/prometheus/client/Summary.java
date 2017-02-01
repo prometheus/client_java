@@ -1,6 +1,7 @@
 package io.prometheus.client;
 
 import io.prometheus.client.CKMSQuantiles.Quantile;
+import io.prometheus.client.Summary.Child.Value;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -306,6 +307,15 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
    */
   public double time(Runnable timeable){
     return noLabelsChild.time(timeable);
+  }
+  
+  /**
+   * Get the value of the Summary.
+   * <p>
+   * <em>Warning:</em> The definition of {@link Value} is subject to change.
+   */
+  public Value get() {
+    return noLabelsChild.get();
   }
 
   @Override

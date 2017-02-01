@@ -27,12 +27,16 @@ public class CounterTest {
   public void testIncrement() {
     noLabels.inc();
     assertEquals(1.0, getValue(), .001);
+    assertEquals(1.0, noLabels.get(), .001);
     noLabels.inc(2);
     assertEquals(3.0, getValue(), .001);
+    assertEquals(3.0, noLabels.get(), .001);
     noLabels.labels().inc(4);
     assertEquals(7.0, getValue(), .001);
+    assertEquals(7.0, noLabels.get(), .001);
     noLabels.labels().inc();
     assertEquals(8.0, getValue(), .001);
+    assertEquals(8.0, noLabels.get(), .001);
   }
     
   @Test(expected=IllegalArgumentException.class)
