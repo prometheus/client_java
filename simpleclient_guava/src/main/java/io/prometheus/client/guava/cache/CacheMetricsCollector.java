@@ -72,7 +72,7 @@ public class CacheMetricsCollector extends Collector {
                     cacheName + " cache load failures", stats.loadExceptionCount()));
 
             mfs.add(new SummaryMetricFamily(cacheName + "_cache_load_duration_seconds",
-                    cacheName + " cache load total time in seconds", stats.loadCount(),
+                    cacheName + " cache load total time in seconds (includes success and failure)", stats.loadCount(),
                     stats.totalLoadTime() / Collector.NANOSECONDS_PER_SECOND));
         }
 
