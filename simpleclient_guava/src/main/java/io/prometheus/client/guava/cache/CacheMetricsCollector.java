@@ -70,6 +70,8 @@ public class CacheMetricsCollector extends Collector {
                     cacheName + " cache load successes", stats.loadSuccessCount()));
             mfs.add(new CounterMetricFamily(cacheName + "_cache_load_error_total",
                     cacheName + " cache load failures", stats.loadExceptionCount()));
+            mfs.add(new CounterMetricFamily(cacheName + "_cache_load_total",
+                    cacheName + " total cache loads attempts (success and failures)", stats.loadCount()));
 
             mfs.add(new SummaryMetricFamily(cacheName + "_cache_load_duration_seconds",
                     cacheName + " cache load total time in seconds (includes success and failure)", stats.loadCount(),
