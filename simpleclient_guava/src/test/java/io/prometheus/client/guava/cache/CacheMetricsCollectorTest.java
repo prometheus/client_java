@@ -1,4 +1,4 @@
-package io.prometheus.client.cache.guava;
+package io.prometheus.client.guava.cache;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
