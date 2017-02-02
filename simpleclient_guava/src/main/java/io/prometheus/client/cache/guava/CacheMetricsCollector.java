@@ -56,22 +56,24 @@ public class CacheMetricsCollector extends Collector {
 
         CacheStats stats = cache.stats();
 
-        mfs.add(new CounterMetricFamily(cacheName+"_cache_hit_total",
-                " cache hit totals", stats.hitCount()));
-        mfs.add(new CounterMetricFamily(cacheName+"_cache_miss_total",
-                " cache miss totals", stats.missCount()));
-        mfs.add(new CounterMetricFamily(cacheName+"_cache_eviction_total",
-                " cache eviction totals", stats.evictionCount()));
+        mfs.add(new CounterMetricFamily(cacheName + "_cache_hit_total",
+                cacheName + " cache hit totals", stats.hitCount()));
+        mfs.add(new CounterMetricFamily(cacheName + "_cache_miss_total",
+                cacheName + " cache miss totals", stats.missCount()));
+        mfs.add(new CounterMetricFamily(cacheName + "_cache_requests_total",
+                cacheName + " cache totals (hits and misses)", stats.requestCount()));
+        mfs.add(new CounterMetricFamily(cacheName + "_cache_eviction_total",
+                cacheName + " cache eviction totals", stats.evictionCount()));
 
         if(cache instanceof LoadingCache) {
-            mfs.add(new CounterMetricFamily(cacheName+"_cache_load_success_total",
-                    " cache load totals", stats.loadSuccessCount()));
-            mfs.add(new CounterMetricFamily(cacheName+"_cache_load_error_total",
-                    " cache load totals", stats.loadExceptionCount()));
+            mfs.add(new CounterMetricFamily(cacheName + "_cache_load_success_total",
+                    cacheName + " cache load successes", stats.loadSuccessCount()));
+            mfs.add(new CounterMetricFamily(cacheName + "_cache_load_error_total",
+                    cacheName + " cache load failures", stats.loadExceptionCount()));
 
-            mfs.add(new SummaryMetricFamily(cacheName+"_cache_load_duration_seconds",
-                    " cache load total time in seconds", stats.loadCount(),
-                    stats.totalLoadTime()/ Summary.NANOSECONDS_PER_SECOND));
+            mfs.add(new SummaryMetricFamily(cacheName + "_cache_load_duration_seconds",
+                    cacheName + " cache load total time in seconds", stats.loadCount(),
+                    stats.totalLoadTime() / Collector.NANOSECONDS_PER_SECOND));
         }
 
         return mfs;
