@@ -18,8 +18,8 @@ import java.util.List;
  * </pre>
  * Metrics being exported:
  * <pre>
- *   jvm_info{version="",vendor=""} 1
- *   os_info{name="",version="",arch=""} 1
+ *   jvm_info{version="1.8.0_45-b14",vendor="Oracle Corporation"} 1.0
+ *   os_info{name="Linux",version="2.6.32-504.23.4.el6.x86_64",arch="amd64"} 1.0
  * </pre>
  */
 
