@@ -24,10 +24,5 @@ public class VersionInfoExportsTest {
                 registry.getSampleValue(
                         "jvm_info", new String[]{"version", "vendor"}, new String[]{System.getProperty("java.runtime.version", UNKNOWN_LABEL_VALUE), System.getProperty("java.vm.vendor", UNKNOWN_LABEL_VALUE)}),
                 .0000001);
-        assertEquals(
-                1L,
-                registry.getSampleValue(
-                        "os_info", new String[]{"name", "version", "arch"}, new String[]{System.getProperty("os.name", UNKNOWN_LABEL_VALUE), System.getProperty("os.version", UNKNOWN_LABEL_VALUE), System.getProperty("os.arch", UNKNOWN_LABEL_VALUE)}),
-                .0000001);
     }
 }
