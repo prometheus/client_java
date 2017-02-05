@@ -36,7 +36,6 @@ import static org.apache.logging.log4j.Level.*;
  *   log4j_appender_total{level="error",} 5.0
  *   log4j_appender_total{level="fatal",} 6.0
  * </pre>
- * </p>
  */
 @Plugin(name = "Prometheus", category = "Core", elementType = "appender")
 public final class InstrumentedAppender extends AbstractAppender {
