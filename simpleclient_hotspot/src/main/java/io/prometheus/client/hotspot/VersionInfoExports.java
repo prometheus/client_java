@@ -26,14 +26,13 @@ public class VersionInfoExports extends Collector {
 
 
     public List<MetricFamilySamples> collect() {
-        String UNKNOWN_LABEL_VALUE = "unknown";
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
 
         GaugeMetricFamily jvmInfo = new GaugeMetricFamily(
                 "jvm_info",
-                "jvm version info",
+                "JVM version info",
                 Arrays.asList("version", "vendor"));
-        jvmInfo.addMetric(Arrays.asList(System.getProperty("java.runtime.version", UNKNOWN_LABEL_VALUE), System.getProperty("java.vm.vendor", UNKNOWN_LABEL_VALUE)), 1L);
+        jvmInfo.addMetric(Arrays.asList(System.getProperty("java.runtime.version", "unknown"), System.getProperty("java.vm.vendor", "unknown")), 1L);
         mfs.add(jvmInfo);
 
         return mfs;
