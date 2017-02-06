@@ -311,7 +311,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   /**
    * Get the value of the Summary.
    * <p>
-   * <em>Warning:</em> The definition of {@link Child#Value} is subject to change.
+   * <em>Warning:</em> The definition of {@link Child.Value} is subject to change.
    */
   public Child.Value get() {
     return noLabelsChild.get();
