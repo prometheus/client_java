@@ -25,6 +25,7 @@ public class DefaultExports {
       new GarbageCollectorExports().register();
       new ThreadExports().register();
       new ClassLoadingExports().register();
+      new VersionInfoExports().register();
       initialized = true;
     }
   }
