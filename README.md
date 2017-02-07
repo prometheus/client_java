@@ -226,7 +226,7 @@ DefaultExports.initialize();
 
 ####Logging
 
-There are logging collectors for log4j and logback.
+There are logging collectors for log4j, log4j2 and logback.
 
 To register the Logback collector can be added to the root level like so:
 
@@ -242,6 +242,21 @@ To register the Logback collector can be added to the root level like so:
     </root>
 
 </configuration>
+```
+To register the log4j2 collector at root level:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration packages="io.prometheus.client.log4j2">
+    <Appenders>
+        <Prometheus name="METRICS"/>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="METRICS"/>
+        </Root>
+    </Loggers>
+</Configuration>
 ```
 
 #### Hibernate

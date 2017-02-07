@@ -40,7 +40,7 @@ import static org.apache.logging.log4j.Level.*;
 @Plugin(name = "Prometheus", category = "Core", elementType = "appender")
 public final class InstrumentedAppender extends AbstractAppender {
 
-    public static final String COUNTER_NAME = "log4j_appender_total";
+    public static final String COUNTER_NAME = "log4j2_appender_total";
 
     private static final Counter COUNTER;
     private static final Counter.Child TRACE_LABEL;
