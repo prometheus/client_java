@@ -280,6 +280,14 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   public double setToTime(Runnable timeable){
     return noLabelsChild.setToTime(timeable);
   }
+  
+  /**
+   * Get the value of the gauge.
+   */
+  public double get() {
+    return noLabelsChild.get();
+  }
+
 
   @Override
   public List<MetricFamilySamples> collect() {

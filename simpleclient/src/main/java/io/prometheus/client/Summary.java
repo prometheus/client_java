@@ -307,6 +307,15 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   public double time(Runnable timeable){
     return noLabelsChild.time(timeable);
   }
+  
+  /**
+   * Get the value of the Summary.
+   * <p>
+   * <em>Warning:</em> The definition of {@link Child.Value} is subject to change.
+   */
+  public Child.Value get() {
+    return noLabelsChild.get();
+  }
 
   @Override
   public List<MetricFamilySamples> collect() {
