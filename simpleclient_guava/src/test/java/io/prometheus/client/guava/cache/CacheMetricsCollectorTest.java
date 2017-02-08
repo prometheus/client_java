@@ -8,6 +8,8 @@ import io.prometheus.client.CollectorRegistry;
 import org.junit.Test;
 
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -18,7 +20,10 @@ public class CacheMetricsCollectorTest {
     @Test
     public void cacheExposesMetricsForHitMissAndEviction() throws Exception {
         Cache<String, String> cache = CacheBuilder.newBuilder().maximumSize(2).recordStats().build();
-        CacheMetricsCollector collector = new CacheMetricsCollector(cache, "myapp_users");
+        CollectorRegistry registry = new CollectorRegistry();
+
+        CacheMetricsCollector collector = new CacheMetricsCollector().register(registry);
+        collector.addCache("users", cache);
 
         cache.getIfPresent("user1");
         cache.getIfPresent("user1");
@@ -30,12 +35,10 @@ public class CacheMetricsCollectorTest {
         cache.put("user3", "Third User");
         cache.put("user4", "Fourth User");
 
-        CollectorRegistry registry = new CollectorRegistry();
-        collector.register(registry);
-
-        assertThat(registry.getSampleValue("myapp_users_cache_hit_total")).isEqualTo(1.0);
-        assertThat(registry.getSampleValue("myapp_users_cache_miss_total")).isEqualTo(2.0);
-        assertThat(registry.getSampleValue("myapp_users_cache_eviction_total")).isEqualTo(2.0);
+        assertMetric(registry, "guava_cache_hit_total", "users", 1.0);
+        assertMetric(registry, "guava_cache_miss_total", "users", 2.0);
+        assertMetric(registry, "guava_cache_requests_total", "users", 3.0);
+        assertMetric(registry, "guava_cache_eviction_total", "users", 2.0);
     }
 
     @SuppressWarnings("unchecked")
@@ -48,7 +51,9 @@ public class CacheMetricsCollectorTest {
                 .thenReturn("Third User");
 
         LoadingCache<String, String> cache = CacheBuilder.newBuilder().recordStats().build(loader);
-        CacheMetricsCollector collector = new CacheMetricsCollector(cache, "myapp_loadingusers");
+        CollectorRegistry registry = new CollectorRegistry();
+        CacheMetricsCollector collector = new CacheMetricsCollector().register(registry);
+        collector.addCache("loadingusers", cache);
 
         cache.get("user1");
         cache.get("user1");
@@ -59,17 +64,24 @@ public class CacheMetricsCollectorTest {
         }
         cache.get("user3");
 
-        CollectorRegistry registry = new CollectorRegistry();
-        collector.register(registry);
+        assertMetric(registry, "guava_cache_hit_total", "loadingusers", 1.0);
+        assertMetric(registry, "guava_cache_miss_total", "loadingusers", 3.0);
 
-        assertThat(registry.getSampleValue("myapp_loadingusers_cache_hit_total")).isEqualTo(1.0);
-        assertThat(registry.getSampleValue("myapp_loadingusers_cache_miss_total")).isEqualTo(3.0);
+        assertMetric(registry, "guava_cache_load_success_total", "loadingusers", 2.0);
+        assertMetric(registry, "guava_cache_load_failure_total", "loadingusers", 1.0);
 
-        assertThat(registry.getSampleValue("myapp_loadingusers_cache_load_success_total")).isEqualTo(2.0);
-        assertThat(registry.getSampleValue("myapp_loadingusers_cache_load_error_total")).isEqualTo(1.0);
+        assertMetric(registry, "guava_cache_load_duration_seconds_count", "loadingusers", 3.0);
+        assertMetricGreatThan(registry, "guava_cache_load_duration_seconds_sum", "loadingusers", 0.0);
+    }
 
-        assertThat(registry.getSampleValue("myapp_loadingusers_cache_load_duration_seconds_count")).isEqualTo(3.0);
-        assertThat(registry.getSampleValue("myapp_loadingusers_cache_load_duration_seconds_sum")).isGreaterThan(0.0);
+
+    private void assertMetric(CollectorRegistry registry, String name, String cacheName, double value) {
+        assertThat(registry.getSampleValue(name, new String[]{"cache"}, new String[]{cacheName})).isEqualTo(value);
+    }
+
+
+    private void assertMetricGreatThan(CollectorRegistry registry, String name, String cacheName, double value) {
+        assertThat(registry.getSampleValue(name, new String[]{"cache"}, new String[]{cacheName})).isGreaterThan(value);
     }
 
 
