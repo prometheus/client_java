@@ -67,8 +67,8 @@ public class CacheMetricsCollectorTest {
         assertMetric(registry, "guava_cache_hit_total", "loadingusers", 1.0);
         assertMetric(registry, "guava_cache_miss_total", "loadingusers", 3.0);
 
-        assertMetric(registry, "guava_cache_load_success_total", "loadingusers", 2.0);
         assertMetric(registry, "guava_cache_load_failure_total", "loadingusers", 1.0);
+        assertMetric(registry, "guava_cache_loads_total", "loadingusers", 3.0);
 
         assertMetric(registry, "guava_cache_load_duration_seconds_count", "loadingusers", 3.0);
         assertMetricGreatThan(registry, "guava_cache_load_duration_seconds_sum", "loadingusers", 0.0);

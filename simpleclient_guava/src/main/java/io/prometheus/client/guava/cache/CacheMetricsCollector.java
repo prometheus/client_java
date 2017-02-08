@@ -4,7 +4,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
 import io.prometheus.client.Collector;
+import io.prometheus.client.Counter;
 import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.Gauge;
 import io.prometheus.client.SummaryMetricFamily;
 
 import java.util.ArrayList;
@@ -48,14 +50,34 @@ public class CacheMetricsCollector extends Collector {
 
     protected final ConcurrentMap<String, Cache> children = new ConcurrentHashMap<String, Cache>();
 
+    /**
+     * Add or replace the cache with the given name.
+     * <p>
+     * Any references any previous cache with this name is invalidated.
+     *
+     * @param cacheName The name of the cache, will be the metrics label value
+     * @param cache The cache being monitored
+     */
     public void addCache(String cacheName, Cache cache) {
         children.put(cacheName, cache);
     }
 
+    /**
+     * Remove the cache with the given name.
+     * <p>
+     * Any references to the cache are invalidated.
+     *
+     * @param cacheName cache to be removed
+     */
     public Cache removeCache(String cacheName) {
         return children.remove(cacheName);
     }
 
+    /**
+     * Remove all caches.
+     * <p>
+     * Any references to all caches are invalidated.
+     */
     public void clear(){
         children.clear();
     }
