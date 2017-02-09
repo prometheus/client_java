@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentMap;
  * <pre>
  *     guava_cache_hit_total{cache="mycache"} 10.0
  *     guava_cache_miss_total{cache="mycache"} 3.0
- *     guava_cache_requests_total{cache="mycache"} 3.0
+ *     guava_cache_requests_total{cache="mycache"} 13.0
  *     guava_cache_eviction_total{cache="mycache"} 1.0
  * </pre>
  *
