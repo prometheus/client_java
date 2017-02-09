@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * // Note that `recordStats()` is required to gather non-zero statistics
  * Cache<String, String> cache = CacheBuilder.newBuilder().recordStats().build();
- * CacheMetricsCollector cacheMetrics = new CacheMetricsCollector(cache, "myapp_mycache").register();
+ * CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
  * cacheMetrics.addCache("mycache", cache);
  *
  * }</pre>
@@ -40,8 +40,9 @@ import java.util.concurrent.ConcurrentMap;
  *
  * Additionally if the cache includes a loader, the following metrics would be provided:
  * <pre>
- *     guava_cache_load_failure_total{cache="mycache"} 5.0
- *     guava_cache_load_duration_seconds_count{cache="mycache"} 1.0
+ *     guava_cache_load_failure_total{cache="mycache"} 2.0
+ *     guava_cache_loads_total{cache="mycache"} 7.0
+ *     guava_cache_load_duration_seconds_count{cache="mycache"} 7.0
  *     guava_cache_load_duration_seconds_sum{cache="mycache"} 0.0034
  * </pre>
  *
