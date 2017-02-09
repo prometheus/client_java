@@ -98,7 +98,13 @@ public class CacheMetricsCollectorTest {
             }
         };
 
-        AsyncLoadingCache<String, String> cache = Caffeine.newBuilder().recordStats().buildAsync(loader);
+        AsyncLoadingCache<String, String> cache = Caffeine.newBuilder().recordStats().executor(new Executor() {
+            @Override
+            public void execute(Runnable command) {
+                // Run loading in same thread, to remove async behavior with loading
+                command.run();
+            }
+        }).buildAsync(loader);
         CollectorRegistry registry = new CollectorRegistry();
         CacheMetricsCollector collector = new CacheMetricsCollector().register(registry);
         collector.addCache("loadingusers", cache);
