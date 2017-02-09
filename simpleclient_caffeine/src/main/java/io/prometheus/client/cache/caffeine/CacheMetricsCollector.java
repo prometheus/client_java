@@ -6,6 +6,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.GaugeMetricFamily;
 import io.prometheus.client.SummaryMetricFamily;
 
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ import java.util.concurrent.ConcurrentMap;
  *
  */
 public class CacheMetricsCollector extends Collector {
-
     protected final ConcurrentMap<String, Cache> children = new ConcurrentHashMap<String, Cache>();
 
     /**
@@ -116,6 +116,10 @@ public class CacheMetricsCollector extends Collector {
                 "Cache eviction totals, doesn't include manually removed entries", labelNames);
         mfs.add(cacheEvictionTotal);
 
+        GaugeMetricFamily cacheEvictionWeight = new GaugeMetricFamily("caffeine_cache_eviction_weight",
+                "Cache eviction weight", labelNames);
+        mfs.add(cacheEvictionTotal);
+
         CounterMetricFamily cacheLoadFailure = new CounterMetricFamily("caffeine_cache_load_failure_total",
                 "Cache load failures", labelNames);
         mfs.add(cacheLoadFailure);
@@ -131,6 +135,12 @@ public class CacheMetricsCollector extends Collector {
         for(Map.Entry<String, Cache> c: children.entrySet()) {
             List<String> cacheName = Arrays.asList(c.getKey());
             CacheStats stats = c.getValue().stats();
+
+            try{
+                cacheEvictionWeight.addMetric(cacheName, stats.evictionWeight());
+            } catch (Exception e) {
+                // EvictionWeight metric is unavailable, newer version of Caffeine is needed
+            }
 
             cacheHitTotal.addMetric(cacheName, stats.hitCount());
             cacheMissTotal.addMetric(cacheName, stats.missCount());
