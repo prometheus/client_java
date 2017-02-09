@@ -1,5 +1,6 @@
 package io.prometheus.client.cache.caffeine;
 
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
@@ -60,6 +61,18 @@ public class CacheMetricsCollector extends Collector {
      */
     public void addCache(String cacheName, Cache cache) {
         children.put(cacheName, cache);
+    }
+
+    /**
+     * Add or replace the cache with the given name.
+     * <p>
+     * Any references any previous cache with this name is invalidated.
+     *
+     * @param cacheName The name of the cache, will be the metrics label value
+     * @param cache The cache being monitored
+     */
+    public void addCache(String cacheName, AsyncLoadingCache cache) {
+        children.put(cacheName, cache.synchronous());
     }
 
     /**

@@ -34,6 +34,18 @@ version can be found on in the maven repository for
   <artifactId>simpleclient_pushgateway</artifactId>
   <version>0.0.20</version>
 </dependency>
+<!-- Guava Cache metrics-->
+<dependency>
+  <groupId>io.prometheus</groupId>
+  <artifactId>simpleclient_guava</artifactId>
+  <version>0.0.20</version>
+</dependency>
+<!-- Caffeine Cache metrics-->
+<dependency>
+  <groupId>io.prometheus</groupId>
+  <artifactId>simpleclient_pushgateway</artifactId>
+  <version>0.0.20</version>
+</dependency>
 ```
 
 ### Javadocs

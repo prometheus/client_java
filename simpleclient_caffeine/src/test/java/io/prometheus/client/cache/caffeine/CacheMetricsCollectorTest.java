@@ -1,5 +1,6 @@
 package io.prometheus.client.cache.caffeine;
 
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -46,6 +47,7 @@ public class CacheMetricsCollectorTest {
         assertMetric(registry, "caffeine_cache_eviction_total", "users", 2.0);
     }
 
+
     @SuppressWarnings("unchecked")
     @Test
     public void loadingCacheExposesMetricsForLoadsAndExceptions() throws Exception {
@@ -56,6 +58,47 @@ public class CacheMetricsCollectorTest {
                 .thenReturn("Third User");
 
         LoadingCache<String, String> cache = Caffeine.newBuilder().recordStats().build(loader);
+        CollectorRegistry registry = new CollectorRegistry();
+        CacheMetricsCollector collector = new CacheMetricsCollector().register(registry);
+        collector.addCache("loadingusers", cache);
+
+        cache.get("user1");
+        cache.get("user1");
+        try {
+            cache.get("user2");
+        } catch (Exception e) {
+            // ignoring.
+        }
+        cache.get("user3");
+
+        assertMetric(registry, "caffeine_cache_hit_total", "loadingusers", 1.0);
+        assertMetric(registry, "caffeine_cache_miss_total", "loadingusers", 3.0);
+
+        assertMetric(registry, "caffeine_cache_load_failure_total", "loadingusers", 1.0);
+        assertMetric(registry, "caffeine_cache_loads_total", "loadingusers", 3.0);
+
+        assertMetric(registry, "caffeine_cache_load_duration_seconds_count", "loadingusers", 3.0);
+        assertMetricGreatThan(registry, "caffeine_cache_load_duration_seconds_sum", "loadingusers", 0.0);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void asyncLoadingCacheExposesMetricsForLoadsAndExceptions() throws Exception {
+        CacheLoader<String, String> loader = new CacheLoader<String, String>() {
+            @Override
+            public String load(String key) throws Exception {
+                if(key.equals("user1")) {
+                    return "First User";
+                } else if (key.equals("user3")) {
+                    return "Third User";
+                } else {
+                    throw new RuntimeException("Seconds time fails");
+                }
+            }
+        };
+
+        AsyncLoadingCache<String, String> cache = Caffeine.newBuilder().recordStats().buildAsync(loader);
         CollectorRegistry registry = new CollectorRegistry();
         CacheMetricsCollector collector = new CacheMetricsCollector().register(registry);
         collector.addCache("loadingusers", cache);
