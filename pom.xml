@@ -45,6 +45,7 @@
     <modules>
         <module>simpleclient</module>
         <module>simpleclient_common</module>
+        <module>simpleclient_caffeine</module>
         <module>simpleclient_dropwizard</module>
         <module>simpleclient_graphite_bridge</module>
         <module>simpleclient_hibernate</module>

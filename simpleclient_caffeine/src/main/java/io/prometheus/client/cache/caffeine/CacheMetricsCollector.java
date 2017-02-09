@@ -1,8 +1,8 @@
-package io.prometheus.client.guava.cache;
+package io.prometheus.client.cache.caffeine;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheStats;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.SummaryMetricFamily;
@@ -14,13 +14,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+
 /**
- * Collect metrics from Guava's com.google.common.cache.Cache.
+ * Collect metrics from Caffiene's com.github.benmanes.caffeine.cache.Cache.
  * <p>
  * <pre>{@code
  *
  * // Note that `recordStats()` is required to gather non-zero statistics
- * Cache<String, String> cache = CacheBuilder.newBuilder().recordStats().build();
+ * Cache<String, String> cache = Caffeine.newBuilder().recordStats().build();
  * CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
  * cacheMetrics.addCache("mycache", cache);
  *
@@ -30,18 +31,18 @@ import java.util.concurrent.ConcurrentMap;
  *
  * With the example above, sample metric names would be:
  * <pre>
- *     guava_cache_hit_total{cache="mycache"} 10.0
- *     guava_cache_miss_total{cache="mycache"} 3.0
- *     guava_cache_requests_total{cache="mycache"} 13.0
- *     guava_cache_eviction_total{cache="mycache"} 1.0
+ *     caffeine_cache_hit_total{cache="mycache"} 10.0
+ *     caffeine_cache_miss_total{cache="mycache"} 3.0
+ *     caffeine_cache_requests_total{cache="mycache"} 13.0
+ *     caffeine_cache_eviction_total{cache="mycache"} 1.0
  * </pre>
  *
  * Additionally if the cache includes a loader, the following metrics would be provided:
  * <pre>
- *     guava_cache_load_failure_total{cache="mycache"} 2.0
- *     guava_cache_loads_total{cache="mycache"} 7.0
- *     guava_cache_load_duration_seconds_count{cache="mycache"} 7.0
- *     guava_cache_load_duration_seconds_sum{cache="mycache"} 0.0034
+ *     caffeine_cache_load_failure_total{cache="mycache"} 2.0
+ *     caffeine_cache_loads_total{cache="mycache"} 7.0
+ *     caffeine_cache_load_duration_seconds_count{cache="mycache"} 7.0
+ *     caffeine_cache_load_duration_seconds_sum{cache="mycache"} 0.0034
  * </pre>
  *
  */
@@ -86,31 +87,31 @@ public class CacheMetricsCollector extends Collector {
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
         List<String> labelNames = Arrays.asList("cache");
 
-        CounterMetricFamily cacheHitTotal = new CounterMetricFamily("guava_cache_hit_total",
+        CounterMetricFamily cacheHitTotal = new CounterMetricFamily("caffeine_cache_hit_total",
                 "Cache hit totals", labelNames);
         mfs.add(cacheHitTotal);
 
-        CounterMetricFamily cacheMissTotal = new CounterMetricFamily("guava_cache_miss_total",
+        CounterMetricFamily cacheMissTotal = new CounterMetricFamily("caffeine_cache_miss_total",
                 "Cache miss totals", labelNames);
         mfs.add(cacheMissTotal);
 
-        CounterMetricFamily cacheRequestsTotal = new CounterMetricFamily("guava_cache_requests_total",
+        CounterMetricFamily cacheRequestsTotal = new CounterMetricFamily("caffeine_cache_requests_total",
                 "Cache request totals, hits + misses", labelNames);
         mfs.add(cacheRequestsTotal);
 
-        CounterMetricFamily cacheEvictionTotal = new CounterMetricFamily("guava_cache_eviction_total",
+        CounterMetricFamily cacheEvictionTotal = new CounterMetricFamily("caffeine_cache_eviction_total",
                 "Cache eviction totals, doesn't include manually removed entries", labelNames);
         mfs.add(cacheEvictionTotal);
 
-        CounterMetricFamily cacheLoadFailure = new CounterMetricFamily("guava_cache_load_failure_total",
+        CounterMetricFamily cacheLoadFailure = new CounterMetricFamily("caffeine_cache_load_failure_total",
                 "Cache load failures", labelNames);
         mfs.add(cacheLoadFailure);
 
-        CounterMetricFamily cacheLoadTotal = new CounterMetricFamily("guava_cache_loads_total",
+        CounterMetricFamily cacheLoadTotal = new CounterMetricFamily("caffeine_cache_loads_total",
                 "Cache loads: both success and failures", labelNames);
         mfs.add(cacheLoadTotal);
 
-        SummaryMetricFamily cacheLoadSummary = new SummaryMetricFamily("guava_cache_load_duration_seconds",
+        SummaryMetricFamily cacheLoadSummary = new SummaryMetricFamily("caffeine_cache_load_duration_seconds",
                 "Cache load duration: both success and failures", labelNames);
         mfs.add(cacheLoadSummary);
 
@@ -124,7 +125,7 @@ public class CacheMetricsCollector extends Collector {
             cacheEvictionTotal.addMetric(cacheName, stats.evictionCount());
 
             if(c.getValue() instanceof LoadingCache) {
-                cacheLoadFailure.addMetric(cacheName, stats.loadExceptionCount());
+                cacheLoadFailure.addMetric(cacheName, stats.loadFailureCount());
                 cacheLoadTotal.addMetric(cacheName, stats.loadCount());
 
                 cacheLoadSummary.addMetric(cacheName, stats.loadCount(), stats.totalLoadTime() / Collector.NANOSECONDS_PER_SECOND);
