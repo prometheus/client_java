@@ -30,8 +30,8 @@ import java.util.Collections;
  */
 public class SummaryMetricFamily extends Collector.MetricFamilySamples {
 
-  private List<String> labelNames;
-  private List<Double> quantiles;
+  private final List<String> labelNames;
+  private final List<Double> quantiles;
 
   public SummaryMetricFamily(String name, String help, double count, double sum) {
     super(name, Collector.Type.SUMMARY, help, new ArrayList<Sample>());

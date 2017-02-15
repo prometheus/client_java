@@ -40,7 +40,7 @@ public class SpringBootMetricsCollector extends Collector implements Collector.D
         double value = metric.getValue().doubleValue();
         MetricFamilySamples metricFamilySamples = new MetricFamilySamples(
                 name, Type.GAUGE, name, Collections.singletonList(
-                new MetricFamilySamples.Sample(name, new ArrayList<String>(), new ArrayList<String>(), value)));
+                new MetricFamilySamples.Sample(name, Collections.<String>emptyList(), Collections.<String>emptyList(), value)));
         samples.add(metricFamilySamples);
       }
     }

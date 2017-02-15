@@ -94,7 +94,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
   public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
 
-    private List<Quantile> quantiles = new ArrayList<Quantile>();
+    private final List<Quantile> quantiles = new ArrayList<Quantile>();
     private long maxAgeSeconds = TimeUnit.MINUTES.toSeconds(10);
     private int ageBuckets = 5;
 
@@ -333,17 +333,12 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
     }
 
-    MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.SUMMARY, help, samples);
-    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    mfsList.add(mfs);
-    return mfsList;
+    return familySamplesList(Type.SUMMARY, samples);
   }
 
   @Override
   public List<MetricFamilySamples> describe() {
-    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    mfsList.add(new SummaryMetricFamily(fullname, help, labelNames));
-    return mfsList;
+    return Collections.<MetricFamilySamples>singletonList(new SummaryMetricFamily(fullname, help, labelNames));
   }
 
 }

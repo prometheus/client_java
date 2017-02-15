@@ -87,7 +87,7 @@ public class CollectorRegistry {
    */
   private Set<Collector> collectors() {
     synchronized (collectorsToNames) {
-      return new HashSet(collectorsToNames.keySet());
+      return new HashSet<Collector>(collectorsToNames.keySet());
     }
   }
 
