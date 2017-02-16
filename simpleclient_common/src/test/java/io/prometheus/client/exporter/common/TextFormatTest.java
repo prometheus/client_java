@@ -95,19 +95,19 @@ public class TextFormatTest {
   @Test
   public void testLabelValuesEscaped() throws IOException {
     Gauge labels = Gauge.build().name("labels").help("help").labelNames("l").register(registry);
-    labels.labels("a\nb\\c\"d").inc();
+    labels.labels("ąćčęntěd a\nb\\c\"d").inc();
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP labels help\n"
                  + "# TYPE labels gauge\n"
-                 + "labels{l=\"a\\nb\\\\c\\\"d\",} 1.0\n", writer.toString());
+                 + "labels{l=\"ąćčęntěd a\\nb\\\\c\\\"d\",} 1.0\n", writer.toString());
   }
 
   @Test
   public void testHelpEscaped() throws IOException {
-    Gauge noLabels = Gauge.build().name("nolabels").help("h\"e\\l\np").register(registry);
+    Gauge noLabels = Gauge.build().name("nolabels").help("ąćčęntěd h\"e\\l\np").register(registry);
     noLabels.inc();
     TextFormat.write004(writer, registry.metricFamilySamples());
-    assertEquals("# HELP nolabels h\"e\\\\l\\np\n"
+    assertEquals("# HELP nolabels ąćčęntěd h\"e\\\\l\\np\n"
                  + "# TYPE nolabels gauge\n"
                  + "nolabels 1.0\n", writer.toString());
   }
