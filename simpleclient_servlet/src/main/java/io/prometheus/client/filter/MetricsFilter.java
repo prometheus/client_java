@@ -46,10 +46,15 @@ public class MetricsFilter implements Filter {
     public static final String METRIC_NAME_PARAM = "metric-name";
     public static final String BUCKET_CONFIG_PARAM = "buckets";
 
-    private Histogram servletLatency = null;
+    private Histogram histogram = null;
 
     // Package-level for testing purposes
     int pathComponents = 0;
+
+    public MetricsFilter(Histogram histogram, int pathComponents) {
+        this.histogram = histogram;
+        this.pathComponents = pathComponents;
+    }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -85,7 +90,7 @@ public class MetricsFilter implements Filter {
             builder.buckets(buckets);
         }
 
-        servletLatency = builder.register();
+        histogram = builder.register();
     }
 
     @Override
@@ -105,7 +110,7 @@ public class MetricsFilter implements Filter {
             }
         }
 
-        Histogram.Timer timer = servletLatency
+        Histogram.Timer timer = histogram
             .labels(path, request.getMethod())
             .startTimer();
 
