@@ -245,7 +245,7 @@ The best way to register a metric is via a `static final` class variable as is c
 
 ```java
 static final Counter requests = Counter.build()
-   .name("requests_total").help("Total requests.").labelNames("path").register();
+   .name("my_library_requests_total").help("Total requests.").labelNames("path").register();
 ```
  
 Using the default registry with variables that are `static` is ideal since registering a metric with the same name 
@@ -256,7 +256,7 @@ that are reported and pulled out by Prometheus. Here is an example of registerin
 ```java
 class YourClass {
   static final Gauge activeTransactions = Gauge.build()
-     .name("my_library_active_transaction")
+     .name("my_library_transactions_active")
      .help("Active transactions.")
      .register();
   
@@ -273,7 +273,8 @@ class YourClass {
 
 To create timeseries with labels, include `labelNames()` with the builder. The `labels()` method looks up or creates 
 the corresponding labelled timeseries. You might also consider storing the labelled timeseries as an instance variable if it is
-appropriate for performance, it is thread safe and can be used multiple times.
+appropriate. It is thread safe and can be used multiple times, which can help performance.
+
 
 ```java
 class YourClass {
