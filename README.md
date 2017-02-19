@@ -271,8 +271,8 @@ class YourClass {
 }
 ```
 
-To create metrics with labels include `labelNames()` when building the metric. The `label()` method looks up or creates 
-the corresponding labelled metric. You might also consider storing the labelled metric as an instance variable if it is
+To create timeseries with labels, include `labelNames()` with the builder. The `labels()` method looks up or creates 
+the corresponding labelled timeseries. You might also consider storing the labelled timeseries as an instance variable if it is
 appropriate for performance, it is thread safe and can be used multiple times.
 
 ```java
