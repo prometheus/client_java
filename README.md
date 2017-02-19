@@ -250,7 +250,7 @@ static final Counter requests = Counter.build()
  
 Using the default registry with variables that are `static` is ideal since registering a metric with the same name 
 is not allowed and the default registry is also itself static. You can think of registering a metric, more like 
-registering a definition (as in the `TYPE` and `HELP` sections). The metric 'definition' internally hold the samples 
+registering a definition (as in the `TYPE` and `HELP` sections). The metric 'definition' internally holds the samples 
 that are reported and pulled out by Prometheus. Here is an example of registering a metric that has no labels.
 
 ```java
@@ -271,9 +271,9 @@ class YourClass {
 }
 ```
 
-Metrics with labels include `labelNames()` when building the metric and , the `label()` method looks up or creates 
+To create metrics with labels include `labelNames()` when building the metric. The `label()` method looks up or creates 
 the corresponding labelled metric. You might also consider storing the labelled metric as an instance variable if it is
-appropriate for performance, it is thread safe and can be called multiple times.
+appropriate for performance, it is thread safe and can be used multiple times.
 
 ```java
 class YourClass {
