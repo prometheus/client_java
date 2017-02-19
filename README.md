@@ -15,9 +15,11 @@ Table of Contents
      * [Summary](#summary)
      * [Histogram](#histogram)
      * [Labels](#labels)
-  * [Registering Metrics](#registering-metrics)
-     * [Included Collectors](#included-collectors)
-        * [Logging](#logging)
+     * [Registering Metrics](#registering-metrics)
+  * [Included Collectors](#included-collectors)
+     * [Logging](#logging)
+     * [Caches](#caches)
+     * [Hibernate](#hibernate)
   * [Exporting](#exporting)
      * [HTTP](#http)
   * [Exporting to a Pushgateway](#exporting-to-a-pushgateway)
@@ -287,7 +289,7 @@ class YourClass {
 ```
 
 
-### Included Collectors
+## Included Collectors
 
 The Java client includes collectors for garbage collection, memory pools, JMX, classloading, and thread counts.
 These can be added individually or just use the `DefaultExports` to conveniently register them. 
@@ -296,7 +298,7 @@ These can be added individually or just use the `DefaultExports` to conveniently
 DefaultExports.initialize();
 ```
 
-####Logging
+###Logging
 
 There are logging collectors for log4j, log4j2 and logback.
 
@@ -346,7 +348,7 @@ To register the log4j2 collector at root level:
 </Configuration>
 ```
 
-#### Caches
+### Caches
 
 To register the Guava cache collector, be certain to add `recordStats()` when building
 the cache and adding it to the registered collector. 
@@ -368,7 +370,7 @@ Cache<String, String> cache = Caffeine.newBuilder().recordStats().build();
 cacheMetrics.addCache("myCacheLabel", cache);
 ```
 
-#### Hibernate
+### Hibernate
 
 There is a collector for Hibernate which allows to collect metrics from one or more 
 `SessionFactory` instances. 
