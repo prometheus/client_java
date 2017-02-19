@@ -3,6 +3,29 @@ It supports Java, Clojure, Scala, JRuby, and anything else that runs on the JVM.
  
 [![Build Status](https://travis-ci.org/prometheus/client_java.png?branch=master)](https://travis-ci.org/prometheus/client_java)
 
+Table of Contents
+=================
+
+  * [Using](#using)
+     * [Assets](#assets)
+     * [Javadocs](#javadocs)
+  * [Instrumenting](#instrumenting)
+     * [Counter](#counter)
+     * [Gauge](#gauge)
+     * [Summary](#summary)
+     * [Histogram](#histogram)
+     * [Labels](#labels)
+  * [Registering Metrics](#registering-metrics)
+     * [Included Collectors](#included-collectors)
+        * [Logging](#logging)
+  * [Exporting](#exporting)
+     * [HTTP](#http)
+  * [Exporting to a Pushgateway](#exporting-to-a-pushgateway)
+  * [Bridges](#bridges)
+     * [Graphite](#graphite)
+  * [Custom Collectors](#custom-collectors)
+  * [Contact](#contact)
+
 ## Using
 ### Assets
 If you use Maven, you can simply reference the assets below.  The latest
