@@ -274,6 +274,28 @@ To register the log4j2 collector at root level:
 </Configuration>
 ```
 
+#### Caches
+
+To register the Guava cache collector, be certain to add `recordStats()` when building
+the cache and adding it to the registered collector. 
+
+```java
+CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
+
+Cache<String, String> cache = CacheBuilder.newBuilder().recordStats().build();
+cacheMetrics.addCache("myCacheLabel", cache);
+```
+
+The Caffeine equivalent is nearly identical. Again, be certain to call `recordStats()`
+ when building the cache so that metrics are collected.
+
+```java
+CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
+
+Cache<String, String> cache = Caffeine.newBuilder().recordStats().build();
+cacheMetrics.addCache("myCacheLabel", cache);
+```
+
 #### Hibernate
 
 There is a collector for Hibernate which allows to collect metrics from one or more 
