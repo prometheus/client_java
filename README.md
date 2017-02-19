@@ -287,7 +287,7 @@ cacheMetrics.addCache("myCacheLabel", cache);
 ```
 
 The Caffeine equivalent is nearly identical. Again, be certain to call `recordStats()`
- when building the cache sot hat metrics are collected.
+ when building the cache so that metrics are collected.
 
 ```java
 CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
