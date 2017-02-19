@@ -118,7 +118,7 @@ public class CacheMetricsCollector extends Collector {
 
         GaugeMetricFamily cacheEvictionWeight = new GaugeMetricFamily("caffeine_cache_eviction_weight",
                 "Cache eviction weight", labelNames);
-        mfs.add(cacheEvictionTotal);
+        mfs.add(cacheEvictionWeight);
 
         CounterMetricFamily cacheLoadFailure = new CounterMetricFamily("caffeine_cache_load_failure_total",
                 "Cache load failures", labelNames);
@@ -139,7 +139,7 @@ public class CacheMetricsCollector extends Collector {
             try{
                 cacheEvictionWeight.addMetric(cacheName, stats.evictionWeight());
             } catch (Exception e) {
-                // EvictionWeight metric is unavailable, newer version of Caffeine is needed
+                // EvictionWeight metric is unavailable, newer version of Caffeine is needed.
             }
 
             cacheHitTotal.addMetric(cacheName, stats.hitCount());

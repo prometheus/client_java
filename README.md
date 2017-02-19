@@ -34,18 +34,6 @@ version can be found on in the maven repository for
   <artifactId>simpleclient_pushgateway</artifactId>
   <version>0.0.20</version>
 </dependency>
-<!-- Guava Cache metrics-->
-<dependency>
-  <groupId>io.prometheus</groupId>
-  <artifactId>simpleclient_guava</artifactId>
-  <version>0.0.20</version>
-</dependency>
-<!-- Caffeine Cache metrics-->
-<dependency>
-  <groupId>io.prometheus</groupId>
-  <artifactId>simpleclient_pushgateway</artifactId>
-  <version>0.0.20</version>
-</dependency>
 ```
 
 ### Javadocs
@@ -284,6 +272,28 @@ To register the log4j2 collector at root level:
         </Root>
     </Loggers>
 </Configuration>
+```
+
+#### Caches
+
+To register the Guava cache collector, be certain to add `recordStats()` when building
+the cache and adding it to the registered collector. 
+
+```java
+CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
+
+Cache<String, String> cache = CacheBuilder.newBuilder().recordStats().build();
+cacheMetrics.addCache("myCacheLabel", cache);
+```
+
+The Caffeine equivalent is nearly identical. Again, be certain to call `recordStats()`
+ when building the cache sot hat metrics are collected.
+
+```java
+CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
+
+Cache<String, String> cache = Caffeine.newBuilder().recordStats().build();
+cacheMetrics.addCache("myCacheLabel", cache);
 ```
 
 #### Hibernate
