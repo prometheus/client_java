@@ -227,7 +227,7 @@ Taking a counter as an example:
 ```java
 class YourClass {
   static final Counter requests = Counter.build()
-     .name("requests_total").help("Total requests.")
+     .name("my_library_requests_total").help("Total requests.")
      .labelNames("method").register();
   
   void processGetRequest() {
@@ -237,7 +237,7 @@ class YourClass {
 }
 ```
 
-## Registering Metrics
+### Registering Metrics
 
 The best way to register a metric is via a `static final` class variable as is common with loggers.
 
@@ -248,16 +248,43 @@ static final Counter requests = Counter.build()
  
 Using the default registry with variables that are `static` is ideal since registering a metric with the same name 
 is not allowed and the default registry is also itself static. You can think of registering a metric, more like 
-registering a definition (as in the `TYPE` and `HELP` sections). The actual samples are tracked via `Child` objects.
+registering a definition (as in the `TYPE` and `HELP` sections). The metric 'definition' internally hold the samples 
+that are reported and pulled out by Prometheus. Here is an example of registering a metric that has no labels.
 
-`Child` metrics aren't children in the inheritance sense of the word. They are the family members of the given metric.
-Metric definition now behave as mini-registries of the children that are defined for it. 
+```java
+class YourClass {
+  static final Gauge activeTransactions = Gauge.build()
+     .name("my_library_active_transaction")
+     .help("Active transactions.")
+     .register();
+  
+  void processThatCalculates(String key) {
+    activeTransactions.inc();
+    try {
+        // Perform work.    
+    } finally{
+        activeTransactions.dec();
+    }
+  }
+}
+```
 
-Given the `requests` counter defined above, the `label()` method looks up or creates the corresponding `Child` metric.
-For that reason it can make sense to store the `Child` metrics when the labels are well known as in the 
-[Logback](https://github.com/prometheus/client_java/blob/master/simpleclient_logback/src/main/java/io/prometheus/client/logback/InstrumentedAppender.java#L13)
-instrumentation. Notice how the `Counter.Child` is a different type and `register()` isn't called for them.
+Metrics with labels include `labelNames()` when building the metric and , the `label()` method looks up or creates 
+the corresponding labelled metric. You might also consider storing the labelled metric as an instance variable if it is
+appropriate for performance, it is thread safe and can be called multiple times.
 
+```java
+class YourClass {
+  static final Counter calculationsCounter = Counter.build()
+     .name("my_library_calculations_total").help("Total calls.")
+     .labelNames("key").register();
+  
+  void processThatCalculates(String key) {
+    calculationsCounter.labels(key).inc();
+    // Run calculations.
+  }
+}
+```
 
 
 ### Included Collectors
