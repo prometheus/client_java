@@ -4,10 +4,15 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Metrics Handler for Vert.x Web.
@@ -69,7 +74,7 @@ public class MetricsHandler implements Handler<RoutingContext> {
   public void handle(RoutingContext ctx) {
     try {
       final BufferWriter writer = new BufferWriter();
-      TextFormat.write004(writer, registry.metricFamilySamples());
+      TextFormat.write004(writer, registry.metricFamilySamples(parse(ctx.request())));
       ctx.response()
               .setStatusCode(200)
               .putHeader("Content-Type", TextFormat.CONTENT_TYPE_004)
@@ -77,5 +82,14 @@ public class MetricsHandler implements Handler<RoutingContext> {
     } catch (IOException e) {
       ctx.fail(e);
     }
+  }
+
+  private Set<String> parse(HttpServerRequest request) {
+      String includedParam = request.getParam("names[]");
+      if(includedParam == null) {
+        return Collections.emptySet();
+      } else {
+        return new HashSet<String>(Arrays.asList(includedParam.split(",")));
+      }
   }
 }
