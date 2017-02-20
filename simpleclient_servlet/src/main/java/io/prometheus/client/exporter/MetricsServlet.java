@@ -41,7 +41,7 @@ public class MetricsServlet extends HttpServlet {
 
     Writer writer = resp.getWriter();
     try {
-      TextFormat.write004(writer, registry.metricFamilySamples(parse(req)));
+      TextFormat.write004(writer, registry.filteredMetricFamilySamples(parse(req)));
       writer.flush();
     } finally {
       writer.close();

@@ -126,7 +126,7 @@ public class CollectorRegistry {
     return new MetricFamilySamplesEnumeration();
   }
 
-  public Enumeration<Collector.MetricFamilySamples> metricFamilySamples(Set<String> includedNames) {
+  public Enumeration<Collector.MetricFamilySamples> filteredMetricFamilySamples(Set<String> includedNames) {
     return new MetricFamilySamplesEnumeration(includedNames);
   }
 

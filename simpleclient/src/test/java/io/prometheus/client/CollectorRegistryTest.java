@@ -80,7 +80,7 @@ public class CollectorRegistryTest {
     SkippedCollector sr = new SkippedCollector().register(registry);
     PartiallyFilterCollector pfr = new PartiallyFilterCollector().register(registry);
     HashSet<String> names = new HashSet<String>();
-    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(registry.metricFamilySamples(
+    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(registry.filteredMetricFamilySamples(
             new HashSet<String>(Arrays.asList("","s", "c", "part_filter_a",  "part_filter_c"))))) {
       names.add(metricFamilySamples.name);
     }

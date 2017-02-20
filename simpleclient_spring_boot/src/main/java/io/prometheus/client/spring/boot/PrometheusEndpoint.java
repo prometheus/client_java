@@ -2,10 +2,8 @@ package io.prometheus.client.spring.boot;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.http.HttpRequest;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -31,7 +29,7 @@ class PrometheusEndpoint extends AbstractEndpoint<String> {
   public String writeRegistry(Set<String> metricsToInclude) {
     try {
       Writer writer = new StringWriter();
-      TextFormat.write004(writer, collectorRegistry.metricFamilySamples(metricsToInclude));
+      TextFormat.write004(writer, collectorRegistry.filteredMetricFamilySamples(metricsToInclude));
       return writer.toString();
     } catch (IOException e) {
       // This actually never happens since StringWriter::write() doesn't throw any IOException
