@@ -57,7 +57,10 @@ public class MetricsServletTest {
     PrintWriter writer = mock(PrintWriter.class);
     when(resp.getWriter()).thenReturn(writer);
     doThrow(new RuntimeException()).when(writer).write(anyChar());
-    new MetricsServlet().doGet(req, resp);
+    try{
+      new MetricsServlet().doGet(req, resp);
+      fail("Exception expected");
+    } catch (Exception e){}
     verify(writer).close();
   }
 }
