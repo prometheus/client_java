@@ -2,6 +2,10 @@ package io.prometheus.client.exporter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -37,10 +41,19 @@ public class MetricsServlet extends HttpServlet {
 
     Writer writer = resp.getWriter();
     try {
-      TextFormat.write004(writer, registry.metricFamilySamples());
+      TextFormat.write004(writer, registry.metricFamilySamples(parse(req)));
       writer.flush();
     } finally {
       writer.close();
+    }
+  }
+
+  private Set<String> parse(HttpServletRequest req) {
+    String includedParam = req.getParameter("names[]");
+    if(includedParam == null) {
+      return Collections.emptySet();
+    } else {
+      return new HashSet<String>(Arrays.asList(includedParam.split(",")));
     }
   }
 

@@ -72,6 +72,20 @@ public class CollectorRegistryTest {
   }
 
   @Test
+  public void testMetricFamilySamples_filterNames() {
+    Collector g = Gauge.build().name("g").help("h").register(registry);
+    Collector c = Counter.build().name("c").help("h").register(registry);
+    Collector s = Summary.build().name("s").help("h").register(registry);
+    Collector ec = new EmptyCollector().register(registry);
+    HashSet<String> names = new HashSet<String>();
+    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(registry.metricFamilySamples(
+            new HashSet<String>(Arrays.asList("","g", "c"))))) {
+      names.add(metricFamilySamples.name);
+    }
+    assertEquals(new HashSet<String>(Arrays.asList("g", "c")), names);
+  }
+
+  @Test
   public void testEmptyRegistryHasNoMoreElements() {
     assertFalse(registry.metricFamilySamples().hasMoreElements());
   }

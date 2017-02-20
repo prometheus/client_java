@@ -125,28 +125,50 @@ public class CollectorRegistry {
   public Enumeration<Collector.MetricFamilySamples> metricFamilySamples() {
     return new MetricFamilySamplesEnumeration();
   }
+
+  public Enumeration<Collector.MetricFamilySamples> metricFamilySamples(Set<String> includedNames) {
+    return new MetricFamilySamplesEnumeration(includedNames);
+  }
+
   class MetricFamilySamplesEnumeration implements Enumeration<Collector.MetricFamilySamples> {
 
     private final Iterator<Collector> collectorIter = collectors().iterator();
     private Iterator<Collector.MetricFamilySamples> metricFamilySamples;
     private Collector.MetricFamilySamples next;
+    private Set<String> includedNames;
+
+    MetricFamilySamplesEnumeration(Set<String> includedNames) {
+      this.includedNames = includedNames;
+      findNextElement();
+    }
 
     MetricFamilySamplesEnumeration() {
-      findNextElement();
+      this(Collections.<String>emptySet());
     }
 
     private void findNextElement() {
       if (metricFamilySamples != null && metricFamilySamples.hasNext()) {
-        next = metricFamilySamples.next();
+        next = filter(metricFamilySamples.next());
       } else {
         while (collectorIter.hasNext()) {
           metricFamilySamples = collectorIter.next().collect().iterator();
           if (metricFamilySamples.hasNext()) {
-            next = metricFamilySamples.next();
+            next = filter(metricFamilySamples.next());
+            if(next == null) {
+              continue;
+            }
             return;
           }
         }
         next = null;
+      }
+    }
+
+    private Collector.MetricFamilySamples filter(Collector.MetricFamilySamples next) {
+      if(includedNames.isEmpty() || includedNames.contains(next.name)) {
+        return next;
+      } else {
+        return null;
       }
     }
 
