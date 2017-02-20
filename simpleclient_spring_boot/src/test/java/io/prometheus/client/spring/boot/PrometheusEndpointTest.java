@@ -37,15 +37,17 @@ public class PrometheusEndpointTest {
   @Test
   public void testMetricsExportedThroughPrometheusEndpoint() {
     // given:
-    final Counter promCounter = Counter.build()
-        .name("foo_bar")
-        .help("a simple prometheus counter")
+    final Counter promCounter = Counter.build("foo_bar","test counter" )
         .labelNames("label1", "label2")
         .register();
+    final Counter filteredCounter = Counter.build("filtered_foo_bar","test counter" )
+            .labelNames("label1", "label2")
+            .register();
 
     // when:
     promCounter.labels("val1", "val2").inc(3);
-    ResponseEntity<String> metricsResponse = template.getForEntity(getBaseUrl() + "/prometheus", String.class);
+    filteredCounter.labels("val1", "val2").inc(6);
+    ResponseEntity<String> metricsResponse = template.getForEntity(getBaseUrl() + "/prometheus?names[]=foo_bar", String.class);
 
     // then:
     assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
