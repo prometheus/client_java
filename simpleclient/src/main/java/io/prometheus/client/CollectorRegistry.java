@@ -132,14 +132,32 @@ public class CollectorRegistry {
 
   class MetricFamilySamplesEnumeration implements Enumeration<Collector.MetricFamilySamples> {
 
-    private final Iterator<Collector> collectorIter = collectors().iterator();
+    private final Iterator<Collector> collectorIter;
     private Iterator<Collector.MetricFamilySamples> metricFamilySamples;
     private Collector.MetricFamilySamples next;
     private Set<String> includedNames;
 
     MetricFamilySamplesEnumeration(Set<String> includedNames) {
       this.includedNames = includedNames;
+      collectorIter = includedCollectorIterator(includedNames);
       findNextElement();
+    }
+
+    private Iterator<Collector> includedCollectorIterator(Set<String> includedNames) {
+      if(includedNames.isEmpty()) {
+        return collectors().iterator();
+      } else {
+        HashSet<Collector> collectors = new HashSet<Collector>();
+        synchronized (namesToCollectors) {
+          for(Map.Entry<String,Collector> entry :namesToCollectors.entrySet()){
+            if(includedNames.contains(entry.getKey())) {
+              collectors.add(entry.getValue());
+            }
+          }
+        }
+
+        return collectors.iterator();
+      }
     }
 
     MetricFamilySamplesEnumeration() {
@@ -147,12 +165,16 @@ public class CollectorRegistry {
     }
 
     private void findNextElement() {
-      if (metricFamilySamples != null && metricFamilySamples.hasNext()) {
+      next = null;
+
+      while(metricFamilySamples != null && metricFamilySamples.hasNext()) {
         next = filter(metricFamilySamples.next());
-      } else {
+      }
+
+      if (next == null) {
         while (collectorIter.hasNext()) {
           metricFamilySamples = collectorIter.next().collect().iterator();
-          if (metricFamilySamples.hasNext()) {
+          while (metricFamilySamples.hasNext()) {
             next = filter(metricFamilySamples.next());
             if(next == null) {
               continue;
@@ -160,7 +182,6 @@ public class CollectorRegistry {
             return;
           }
         }
-        next = null;
       }
     }
 

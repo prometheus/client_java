@@ -77,12 +77,17 @@ public class CollectorRegistryTest {
     Collector c = Counter.build().name("c").help("h").register(registry);
     Collector s = Summary.build().name("s").help("h").register(registry);
     Collector ec = new EmptyCollector().register(registry);
+    SkippedCollector sr = new SkippedCollector().register(registry);
+    PartiallyFilterCollector pfr = new PartiallyFilterCollector().register(registry);
     HashSet<String> names = new HashSet<String>();
     for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(registry.metricFamilySamples(
-            new HashSet<String>(Arrays.asList("","g", "c"))))) {
+            new HashSet<String>(Arrays.asList("","s", "c", "part_filter_a",  "part_filter_c"))))) {
       names.add(metricFamilySamples.name);
     }
-    assertEquals(new HashSet<String>(Arrays.asList("g", "c")), names);
+
+    assertEquals(1, sr.collectCallCount);
+    assertEquals(2, pfr.collectCallCount);
+    assertEquals(new HashSet<String>(Arrays.asList("s", "c", "part_filter_a", "part_filter_c")), names);
   }
 
   @Test
@@ -149,6 +154,42 @@ public class CollectorRegistryTest {
     CollectorRegistry r = new CollectorRegistry(true);
     new MyCollector().register(r);
     new MyCollector().register(r);
+  }
+
+  private static class SkippedCollector extends Collector implements Collector.Describable {
+    public int collectCallCount = 0;
+
+    @Override
+    public List<MetricFamilySamples> collect() {
+      collectCallCount++;
+      List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
+      mfs.add(new GaugeMetricFamily("slow_gauge","help", 123));
+      return mfs;
+    }
+
+    @Override
+    public List<MetricFamilySamples> describe() {
+      return collect();
+    }
+  }
+
+  private static class PartiallyFilterCollector extends Collector implements Collector.Describable {
+    public int collectCallCount = 0;
+
+    @Override
+    public List<MetricFamilySamples> collect() {
+      collectCallCount++;
+      List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
+      mfs.add(new GaugeMetricFamily("part_filter_a","help", 123));
+      mfs.add(new GaugeMetricFamily("part_filter_b","help", 123));
+      mfs.add(new GaugeMetricFamily("part_filter_c","help", 123));
+      return mfs;
+    }
+
+    @Override
+    public List<MetricFamilySamples> describe() {
+      return collect();
+    }
   }
   
 }
