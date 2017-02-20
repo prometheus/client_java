@@ -16,15 +16,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.prometheus.client.Gauge;
 import static org.assertj.core.api.Assertions.*;
+import io.prometheus.client.CollectorRegistry;
 import org.junit.Test;
 
 public class MetricsServletTest {
 
   @Test
   public void testWriterFiltersBasedOnParameter() throws IOException, ServletException {
-    Gauge.build("a","a help").register();
-    Gauge.build("b","a help").register();
-    Gauge.build("c","a help").register();
+    CollectorRegistry registry = new CollectorRegistry();
+    Gauge.build("a","a help").register(registry);
+    Gauge.build("b","a help").register(registry);
+    Gauge.build("c","a help").register(registry);
 
     HttpServletRequest req = mock(HttpServletRequest.class);
     when(req.getParameter("names[]")).thenReturn("a,b,oneThatDoesntExist,,b");
@@ -33,7 +35,7 @@ public class MetricsServletTest {
     PrintWriter writer = new PrintWriter(stringWriter);
     when(resp.getWriter()).thenReturn(writer);
 
-    new MetricsServlet().doGet(req, resp);
+    new MetricsServlet(registry).doGet(req, resp);
 
     assertThat(stringWriter.toString()).contains("a 0.0");
     assertThat(stringWriter.toString()).contains("b 0.0");
@@ -46,7 +48,10 @@ public class MetricsServletTest {
     HttpServletResponse resp = mock(HttpServletResponse.class);
     PrintWriter writer = mock(PrintWriter.class);
     when(resp.getWriter()).thenReturn(writer);
-    new MetricsServlet().doGet(req, resp);
+    CollectorRegistry registry = new CollectorRegistry();
+    Gauge a = Gauge.build("a","a help").register(registry);
+
+    new MetricsServlet(registry).doGet(req, resp);
     verify(writer).close();
   }
 
@@ -57,10 +62,14 @@ public class MetricsServletTest {
     PrintWriter writer = mock(PrintWriter.class);
     when(resp.getWriter()).thenReturn(writer);
     doThrow(new RuntimeException()).when(writer).write(anyChar());
+    CollectorRegistry registry = new CollectorRegistry();
+    Gauge a = Gauge.build("a","a help").register(registry);
+
     try{
-      new MetricsServlet().doGet(req, resp);
+      new MetricsServlet(registry).doGet(req, resp);
       fail("Exception expected");
     } catch (Exception e){}
+
     verify(writer).close();
   }
 }
