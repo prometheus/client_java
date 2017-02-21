@@ -5,6 +5,7 @@ import io.prometheus.client.CollectorRegistry;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
+import org.springframework.context.annotation.Import;
 
 import java.util.Enumeration;
 
@@ -21,10 +22,12 @@ public class MethodTimerTest {
         public void timeMe() throws Exception {
             Thread.sleep(20);
         }
+
     }
 
     private interface Time2 {
         void timeMe() throws Exception;
+        void aSecondMethod() throws Exception;
     }
 
 //    @PrometheusTimeMethod(name = "test_two", help = "help two")
@@ -75,6 +78,11 @@ public class MethodTimerTest {
             public void timeMe() throws Exception {
                 Thread.sleep(35);
             }
+
+            @Override
+            public void aSecondMethod() throws Exception {
+
+            }
         });
 
         a.timeMe();
@@ -99,6 +107,11 @@ public class MethodTimerTest {
             @PrometheusTimeMethod(name = name, help = help)
             public void timeMe() throws Exception {
                 Thread.sleep(100);
+            }
+
+            @Override
+            public void aSecondMethod() throws Exception {
+
             }
         });
 
@@ -132,6 +145,10 @@ public class MethodTimerTest {
                 Thread.sleep(10);
                 throw new MyException("Yo this is an exception");
             }
+
+            @Override
+            public void aSecondMethod() throws Exception {
+            }
         });
 
         MyException e = null;
@@ -146,6 +163,41 @@ public class MethodTimerTest {
         final Double tot = CollectorRegistry.defaultRegistry.getSampleValue("fooasdf_sum");
         assertEquals(tot, 0.01, 0.001);
         assert(e != null);
+    }
+
+    @Test
+    public void testSecondMethod() throws Exception {
+        final int sleepTime = 90, misnamedSleepTime = 10;
+
+        Time2 p = getProxy(new Time2() {
+            @Override
+            @PrometheusTimeMethod(name="fooasdf2", help="bar")
+            public void timeMe() throws Exception {
+                Thread.sleep(misnamedSleepTime);
+            }
+
+            @Override
+            @PrometheusTimeMethod(name = "second_method_name_seconds", help = "help two")
+            public void aSecondMethod() throws Exception {
+                Thread.sleep(sleepTime);
+            }
+        });
+
+        p.timeMe();
+
+        int count = 5;
+        for (int i = 0; i < count; i++) {
+            p.aSecondMethod();
+        }
+
+        final Double misnamedTotal = CollectorRegistry.defaultRegistry.getSampleValue("fooasdf2_sum");
+        final Double total = CollectorRegistry.defaultRegistry.getSampleValue("second_method_name_seconds_sum");
+
+        assertNotNull(total);
+        assertEquals(total, 0.001*count*sleepTime, 0.001);
+
+        assertNotNull(misnamedTotal);
+        assertEquals(misnamedTotal, 0.001*misnamedSleepTime, 0.001);
 
     }
 }
