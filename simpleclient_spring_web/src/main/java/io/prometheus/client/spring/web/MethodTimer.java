@@ -34,7 +34,7 @@ public class MethodTimer {
     @Pointcut("@annotation(io.prometheus.client.spring.web.PrometheusTimeMethod)")
     public void annotatedMethod() {}
 
-    @Pointcut("annotatedMethod() || annotatedClass()")
+    @Pointcut("annotatedMethod()")
     public void timeable() {}
 
     private PrometheusTimeMethod getAnnotation(ProceedingJoinPoint pjp) throws NoSuchMethodException {
