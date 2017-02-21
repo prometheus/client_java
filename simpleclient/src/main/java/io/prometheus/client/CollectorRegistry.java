@@ -169,6 +169,9 @@ public class CollectorRegistry {
 
       while(metricFamilySamples != null && metricFamilySamples.hasNext()) {
         next = filter(metricFamilySamples.next());
+        if(next != null) {
+          return;
+        }
       }
 
       if (next == null) {
@@ -176,10 +179,9 @@ public class CollectorRegistry {
           metricFamilySamples = collectorIter.next().collect().iterator();
           while (metricFamilySamples.hasNext()) {
             next = filter(metricFamilySamples.next());
-            if(next == null) {
-              continue;
+            if(next != null) {
+              return;
             }
-            return;
           }
         }
       }
