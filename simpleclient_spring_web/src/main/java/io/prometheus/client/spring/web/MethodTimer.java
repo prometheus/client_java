@@ -6,10 +6,14 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import java.util.HashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This class automatically times (via aspectj) the execution of annotated methods, if it's been enabled via {@link EnablePrometheusTiming},
@@ -18,9 +22,11 @@ import java.util.HashMap;
  * @author Andrew Stuart
  */
 @Aspect("pertarget(io.prometheus.client.spring.web.MethodTimer.timeable())")
+@Scope("prototype")
 @ControllerAdvice
 public class MethodTimer {
-    private HashMap<String, Summary> summaries = new HashMap<String, Summary>();
+    private final ReadWriteLock summaryLock = new ReentrantReadWriteLock();
+    private final HashMap<String, Summary> summaries = new HashMap<String, Summary>();
 
     @Pointcut("@within(io.prometheus.client.spring.web.PrometheusTimeMethod)")
     public void annotatedClass() {}
@@ -47,18 +53,7 @@ public class MethodTimer {
         return AnnotationUtils.findAnnotation(pjp.getTarget().getClass().getDeclaredMethod(name, parameterTypes), PrometheusTimeMethod.class);
     }
 
-    private String hashKey(ProceedingJoinPoint pjp) {
-        return pjp.getSignature().toLongString();
-    }
-
-    synchronized private Summary ensureSummary(ProceedingJoinPoint pjp) throws IllegalStateException {
-        // Guard against multiple concurrent readers who see `summaryChild == null` and call ensureSummary
-        String longSig = hashKey(pjp);
-        Summary summary = summaries.get(longSig);
-        if (summary != null) {
-            return summary;
-        }
-
+    private Summary ensureSummary(ProceedingJoinPoint pjp, String key) throws IllegalStateException {
         // Only one thread may get here, since this method is synchronized
         PrometheusTimeMethod annot;
         try {
@@ -71,23 +66,48 @@ public class MethodTimer {
 
         assert(annot != null);
 
-        summary = Summary.build()
-                .name(annot.name())
-                .help(annot.help())
-                .register();
+        Summary summary;
 
-        summaries.put(longSig, summary);
+        // We use a writeLock here to guarantee no concurrent reads in case the underlying table must be rehashed.
+        final Lock writeLock = summaryLock.writeLock();
+        writeLock.lock();
+        try {
+            // Check one last time with full mutual exclusion in case multiple readers got null before creation
+            summary = summaries.get(key);
+            if (summary != null) {
+                return summary;
+            }
 
-        return summary;
+            // Now we know for sure that we have never before registered
+            summary = Summary.build()
+                    .name(annot.name())
+                    .help(annot.help())
+                    .register();
+
+            // Even a rehash will
+            summaries.put(key, summary);
+
+            return summary;
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Around("timeable()")
     public Object timeMethod(ProceedingJoinPoint pjp) throws Throwable {
-        // This is not thread safe itself, but faster. The critical section within `ensureSummary` makes a second check
-        // so that the summaries is only created once.
-        Summary summary = summaries.get(hashKey(pjp));
+        String key = pjp.getSignature().toLongString();
+
+        Summary summary;
+        final Lock r = summaryLock.readLock();
+        r.lock();
+        try {
+            summary = summaries.get(key);
+        } finally {
+            r.unlock();
+        }
+
         if (summary == null) {
-            summary = ensureSummary(pjp);
+            summary = ensureSummary(pjp, key);
         }
 
         final Summary.Timer t = summary.startTimer();

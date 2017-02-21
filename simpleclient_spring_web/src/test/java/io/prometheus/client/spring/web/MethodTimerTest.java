@@ -51,7 +51,7 @@ public class MethodTimerTest {
         assertEquals(0.02, tot, 0.001);
     }
 
-    Time2 getProxy(Time2 source){
+    <T> T getProxy(T source){
         AspectJProxyFactory factory = new AspectJProxyFactory(source);
         factory.addAspect(MethodTimer.class);
         return factory.getProxy();
@@ -88,13 +88,13 @@ public class MethodTimerTest {
         a.timeMe();
 
         final Double tot = CollectorRegistry.defaultRegistry.getSampleValue(name + "_sum");
-        assertEquals(tot, 0.035, 0.001);
+        assertEquals(0.035, tot,0.001);
 
         a.timeMe();
         a.timeMe();
         a.timeMe();
         final Double tot2 = CollectorRegistry.defaultRegistry.getSampleValue(name + "_sum");
-        assertEquals(tot2, 0.035*4, 0.008);
+        assertEquals(0.035*4, tot2, 0.008);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class MethodTimerTest {
             }
         }
         Assert.assertNotNull(sample);
-        assertEquals(sample.help, help);
+        assertEquals(help, sample.help);
     }
 
     private class MyException extends Exception {
@@ -159,9 +159,8 @@ public class MethodTimerTest {
             e = (MyException) e1;
         }
 
-
         final Double tot = CollectorRegistry.defaultRegistry.getSampleValue("fooasdf_sum");
-        assertEquals(tot, 0.01, 0.001);
+        assertEquals(0.01, tot, 0.01);
         assert(e != null);
     }
 
@@ -194,10 +193,42 @@ public class MethodTimerTest {
         final Double total = CollectorRegistry.defaultRegistry.getSampleValue("second_method_name_seconds_sum");
 
         assertNotNull(total);
-        assertEquals(total, 0.001*count*sleepTime, 0.001);
+        assertEquals(0.001*count*sleepTime, total, 0.01);
 
         assertNotNull(misnamedTotal);
-        assertEquals(misnamedTotal, 0.001*misnamedSleepTime, 0.001);
+        assertEquals(0.001*misnamedSleepTime, misnamedTotal, 0.01);
+    }
 
+    private interface SameMethodNameTest {
+        public void doSomething() throws Exception;
+        public void doSomething(String s) throws Exception;
+    }
+
+    @Test
+    public void testOverloadedMethodName() throws Exception {
+        final int sleep1 = 100, sleep2 = 200;
+        
+        SameMethodNameTest r = getProxy(new SameMethodNameTest() {
+            @Override
+            @PrometheusTimeMethod(name="dosomething_one_test_seconds", help = "halp")
+            public void doSomething() throws Exception {
+                Thread.sleep(sleep1);
+            }
+
+            @Override
+            @PrometheusTimeMethod(name = "dosomething_two_test_seconds", help = "also halp")
+            public void doSomething(String s) throws Exception {
+                Thread.sleep(sleep2);
+            }
+        });
+        
+        r.doSomething();
+        r.doSomething("foobar");
+
+        final Double tot1 = CollectorRegistry.defaultRegistry.getSampleValue("dosomething_one_test_seconds_sum");
+        final Double tot2 = CollectorRegistry.defaultRegistry.getSampleValue("dosomething_two_test_seconds_sum");
+
+        assertEquals(.001*sleep2, tot2,.001);
+        assertEquals(.001*sleep1, tot1, .001);
     }
 }
