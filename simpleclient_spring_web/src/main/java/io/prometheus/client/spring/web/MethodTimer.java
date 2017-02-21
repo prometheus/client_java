@@ -7,8 +7,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+
+import java.util.HashMap;
 
 /**
  * This class automatically times (via aspectj) the execution of annotated methods, if it's been enabled via {@link EnablePrometheusTiming},
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 @Aspect("pertarget(io.prometheus.client.spring.web.MethodTimer.timeable())")
 @ControllerAdvice
 public class MethodTimer {
-    private Summary summary = null;
+    private HashMap<String, Summary> summaries = new HashMap<String, Summary>();
 
     @Pointcut("@within(io.prometheus.client.spring.web.PrometheusTimeMethod)")
     public void annotatedClass() {}
@@ -27,12 +28,11 @@ public class MethodTimer {
     @Pointcut("@annotation(io.prometheus.client.spring.web.PrometheusTimeMethod)")
     public void annotatedMethod() {}
 
-    @Pointcut("annotatedMethod()")
+    @Pointcut("annotatedMethod() || annotatedClass()")
     public void timeable() {}
 
     private PrometheusTimeMethod getAnnotation(ProceedingJoinPoint pjp) throws NoSuchMethodException {
         assert(pjp.getSignature() instanceof MethodSignature);
-
         MethodSignature signature = (MethodSignature) pjp.getSignature();
 
         PrometheusTimeMethod annot = AnnotationUtils.findAnnotation(pjp.getTarget().getClass(), PrometheusTimeMethod.class);
@@ -47,10 +47,16 @@ public class MethodTimer {
         return AnnotationUtils.findAnnotation(pjp.getTarget().getClass().getDeclaredMethod(name, parameterTypes), PrometheusTimeMethod.class);
     }
 
-    synchronized private void ensureSummary(ProceedingJoinPoint pjp) throws IllegalStateException {
+    private String hashKey(ProceedingJoinPoint pjp) {
+        return pjp.getSignature().toLongString();
+    }
+
+    synchronized private Summary ensureSummary(ProceedingJoinPoint pjp) throws IllegalStateException {
         // Guard against multiple concurrent readers who see `summaryChild == null` and call ensureSummary
+        String longSig = hashKey(pjp);
+        Summary summary = summaries.get(longSig);
         if (summary != null) {
-            return;
+            return summary;
         }
 
         // Only one thread may get here, since this method is synchronized
@@ -69,14 +75,19 @@ public class MethodTimer {
                 .name(annot.name())
                 .help(annot.help())
                 .register();
+
+        summaries.put(longSig, summary);
+
+        return summary;
     }
 
     @Around("timeable()")
     public Object timeMethod(ProceedingJoinPoint pjp) throws Throwable {
         // This is not thread safe itself, but faster. The critical section within `ensureSummary` makes a second check
-        // so that the summary is only created once.
+        // so that the summaries is only created once.
+        Summary summary = summaries.get(hashKey(pjp));
         if (summary == null) {
-            ensureSummary(pjp);
+            summary = ensureSummary(pjp);
         }
 
         final Summary.Timer t = summary.startTimer();
