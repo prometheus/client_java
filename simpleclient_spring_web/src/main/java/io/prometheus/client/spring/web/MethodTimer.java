@@ -6,6 +6,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
@@ -18,6 +19,7 @@ import java.util.HashMap;
  * @author Andrew Stuart
  */
 @Aspect("pertarget(io.prometheus.client.spring.web.MethodTimer.timeable())")
+@Scope("prototype")
 @ControllerAdvice
 public class MethodTimer {
     private HashMap<String, Summary> summaries = new HashMap<String, Summary>();
