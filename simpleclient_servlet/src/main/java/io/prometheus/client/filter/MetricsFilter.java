@@ -51,6 +51,8 @@ public class MetricsFilter implements Filter {
     // Package-level for testing purposes
     int pathComponents = 0;
 
+    public MetricsFilter() {};
+
     public MetricsFilter(Histogram histogram, int pathComponents) {
         this.histogram = histogram;
         this.pathComponents = pathComponents;
