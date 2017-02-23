@@ -6,10 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Enable Spring-AOP-based automated method timing for the annotated method or all methods in an annotated class.
- * The timings will be recorded in a {@link io.prometheus.client.Summary} with a name specified by the required
- * {@code name} parameter, and help specified by the {@code help} parameter and a single label of {@code signature}
- * whose values will be {@code ClassOrInterfaceName.methodName(..)}.
+ * Enable Spring-AOP-based automated method timing for the annotated method. The timings will be recorded in a
+ * {@link io.prometheus.client.Summary} with a name specified by the required {@code name} parameter, and help
+ * specified by the {@code help} parameter.
  *
  * To properly work, {@link EnablePrometheusTiming} must be specified somewhere in your application configuration.
  *
@@ -18,7 +17,7 @@ import java.lang.annotation.Target;
  *  public class MyController {
  *    {@literal @}RequestMapping("/")
  *    {@literal @}ResponseBody
- *    {@literal @}PrometheusTimeMethod(name = "my_app_timer_seconds", help = "The number of seconds taken by the main / path handler")
+ *    {@literal @}PrometheusTimeMethod(name = "my_method_seconds", help = "The number of seconds taken by the main handler")
  *    public Object handleRequest() {
  *      // Each invocation will be timed and recorded.
  *      return database.withCache().get("some_data");
