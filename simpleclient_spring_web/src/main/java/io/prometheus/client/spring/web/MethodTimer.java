@@ -78,7 +78,7 @@ public class MethodTimer {
             summary = Summary.build()
                     .name(annot.name())
                     .help(annot.help())
-                    .register();f
+                    .register();
 
             // Even a rehash of the underlying table will not cause issues as we mutually exclude readers while we
             // perform our updates.
