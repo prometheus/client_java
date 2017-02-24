@@ -74,7 +74,7 @@ public class MethodTimer {
                 return summary;
             }
 
-            // Now we know for sure that we have never before registered
+            // Now we know for sure that we have never before registered.
             summary = Summary.build()
                     .name(annot.name())
                     .help(annot.help())
