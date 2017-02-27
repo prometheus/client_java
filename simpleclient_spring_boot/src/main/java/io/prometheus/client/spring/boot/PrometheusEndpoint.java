@@ -1,24 +1,27 @@
 package io.prometheus.client.spring.boot;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.exporter.common.TextFormat;
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.exporter.common.TextFormat;
+
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
-@ConfigurationProperties("endpoints.prometheus")
+/**
+ * @author Marco Aust
+ * @author Eliezio Oliveira
+ */
 class PrometheusEndpoint extends AbstractEndpoint<ResponseEntity<String>> {
 
   private final CollectorRegistry collectorRegistry;
 
-  PrometheusEndpoint(CollectorRegistry collectorRegistry) {
-    super("prometheus");
+  PrometheusEndpoint(CollectorRegistry collectorRegistry, boolean sensitive, boolean enabled) {
+    super("prometheus", sensitive, enabled);
     this.collectorRegistry = collectorRegistry;
   }
 

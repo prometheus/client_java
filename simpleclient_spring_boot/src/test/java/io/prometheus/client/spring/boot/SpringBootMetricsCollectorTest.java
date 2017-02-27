@@ -4,38 +4,37 @@ import io.prometheus.client.CollectorRegistry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.actuate.endpoint.PublicMetrics;
 import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.boot.actuate.metrics.GaugeService;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collection;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(SpringBootMetricsCollectorTest.class)
-@EnableAutoConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 public class SpringBootMetricsCollectorTest {
-  @Autowired
-  private SpringBootMetricsCollector springBootMetricsCollector;
 
   @Autowired
   private CounterService counterService;
 
   @Autowired
   private GaugeService gaugeService;
-
-  @Bean
-  public SpringBootMetricsCollector springBootMetricsCollector(Collection<PublicMetrics> publicMetrics) {
-    SpringBootMetricsCollector springBootMetricsCollector = new SpringBootMetricsCollector(publicMetrics);
-    springBootMetricsCollector.register();
-    return springBootMetricsCollector;
-  }
 
   @Test
   public void collect() throws Exception {
@@ -46,4 +45,15 @@ public class SpringBootMetricsCollectorTest {
     assertThat(defaultRegistry.getSampleValue("counter_foo"), is(1.0));
     assertThat(defaultRegistry.getSampleValue("gauge_bar"), is(3.14));
   }
+
+  @SpringBootConfiguration
+  @EnableSpringBootMetricsCollector
+  @EnableAutoConfiguration(exclude = {
+      PrometheusAutoConfiguration.class
+  })
+  @ComponentScan(excludeFilters = @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class))
+  static class TestConfiguration {
+
+  }
+
 }
