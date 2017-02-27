@@ -305,7 +305,48 @@ SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class
 
 ### Servlet Filter
 
-There is a servlet filter available for configuring 
+There is a servlet filter available for measuring the duration taken by servlet
+requests. The `metric-name` init parameter is required, and is the name of the
+metric prometheus will expose for the timing metrics. Help text via the `help`
+init parameter is not required, although it is highly recommended.  The number
+of buckets is overridable, and can be configured by passing a comma-separated
+string of doubles as the `buckets` init parameter. The granularity of path
+measuring is also configurable, via the `path-components` init parameter. By
+default, the servlet filter will record each path differently, but by setting an
+integer here, you can tell the filter to only record up to the Nth slashes. That
+is, all reqeusts with greater than N "/" characters in the servlet URI path will
+be measured in the same bucket and you will lose that granularity.
+
+Example XML config:
+
+```xml
+<filter>
+  <filter-name>prometheusFilter</filter-name>
+  <filter-class>net.cccnext.ssp.portal.spring.filter.PrometheusMetricsFilter</filter-class>
+  <init-param>
+    <param-name>metric-name</param-name>
+    <param-value>webapp_metrics_filter</param-value>
+  </init-param>
+  <init-param>
+    <param-name>help</param-name>
+    <param-value>This is the help for your metrics filter</param-value>
+  </init-param>
+  <init-param>
+    <param-name>buckets</param-name>
+    <param-value>.001,.002,.005,.010,.020,.040,.080,.120,.200</param-value>
+  </init-param>
+  <init-param>
+    <param-name>path-components</param-name>
+    <param-value>5</param-value>
+  </init-param>
+</filter>
+```
+
+Additionally, you can instantiate your servlet filter directly in Java code. To
+do this, you just need to call the non-empty constructor. The first parameter,
+the metric name, is required. The second, help, is optional but highly
+recommended. The last two (path-components, and buckets) are optional and will
+default sensibly if omitted.
 
 ### Spring AOP
 

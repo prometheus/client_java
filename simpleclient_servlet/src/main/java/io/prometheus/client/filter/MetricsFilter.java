@@ -32,6 +32,10 @@ import java.io.IOException;
  *      <param-name>metric-name</param-name>
  *      <param-value>webapp_metrics_filter</param-value>
  *   </init-param>
+ *    <init-param>
+ *      <param-name>help</param-name>
+ *      <param-value>This is the help for your metrics filter</param-value>
+ *   </init-param>
  *   <init-param>
  *      <param-name>buckets</param-name>
  *      <param-value>.001,.002,.005,.010,.020,.040,.080,.120,.200</param-value>
@@ -46,9 +50,10 @@ import java.io.IOException;
  * @author Andrew Stuart &lt;andrew.stuart2@gmail.com&gt;
  */
 public class MetricsFilter implements Filter {
-    public static final String PATH_COMPONENT_PARAM = "path-components";
-    public static final String METRIC_NAME_PARAM = "metric-name";
-    public static final String BUCKET_CONFIG_PARAM = "buckets";
+    static final String PATH_COMPONENT_PARAM = "path-components";
+    static final String HELP_PARAM = "help";
+    static final String METRIC_NAME_PARAM = "metric-name";
+    static final String BUCKET_CONFIG_PARAM = "buckets";
 
     private Histogram histogram = null;
 
@@ -62,13 +67,15 @@ public class MetricsFilter implements Filter {
 
     public MetricsFilter(
             String metricName,
-            String help,
+            @Nullable String help,
             @Nullable Integer pathComponents,
             @Nullable double[] buckets
     ) throws ServletException {
         this.metricName = metricName;
-        this.help = help;
         this.buckets = buckets;
+        if (help != null) {
+            this.help = help;
+        }
         if (pathComponents != null) {
             this.pathComponents = pathComponents;
         }
@@ -100,7 +107,6 @@ public class MetricsFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Histogram.Builder builder = Histogram.build()
-                .help(help)
                 .labelNames("path", "method");
 
         if (filterConfig == null && isEmpty(metricName)) {
@@ -113,6 +119,10 @@ public class MetricsFilter implements Filter {
                 if (isEmpty(metricName)) {
                     throw new ServletException("Init parameter \"" + METRIC_NAME_PARAM + "\" is required; please supply a value");
                 }
+            }
+
+            if (!isEmpty(filterConfig.getInitParameter(HELP_PARAM))) {
+                help = filterConfig.getInitParameter(HELP_PARAM);
             }
 
             // Allow overriding of the path "depth" to track
@@ -134,7 +144,11 @@ public class MetricsFilter implements Filter {
         if (buckets != null) {
             builder = builder.buckets(buckets);
         }
-        histogram = builder.name(metricName).register();
+
+        histogram = builder
+                .help(help)
+                .name(metricName)
+                .register();
     }
 
     @Override
