@@ -1,5 +1,6 @@
 package io.prometheus.client.filter;
 
+import com.sun.istack.internal.Nullable;
 import io.prometheus.client.Histogram;
 
 import javax.servlet.Filter;
@@ -35,6 +36,10 @@ import java.io.IOException;
  *      <param-name>buckets</param-name>
  *      <param-value>.001,.002,.005,.010,.020,.040,.080,.120,.200</param-value>
  *   </init-param>
+ *   <init-param>
+ *      <param-name>path-components</param-name>
+ *      <param-value>5</param-value>
+ *   </init-param>
  * </filter>
  * }
  *
@@ -49,12 +54,25 @@ public class MetricsFilter implements Filter {
 
     // Package-level for testing purposes.
     int pathComponents = 0;
+    private String metricName = null;
+    private String help = "The time taken fulfilling servlet requests";
+    private double[] buckets = null;
 
-    public MetricsFilter() {};
+    public MetricsFilter() {}
 
-    public MetricsFilter(Histogram histogram, int pathComponents) {
-        this.histogram = histogram;
-        this.pathComponents = pathComponents;
+    public MetricsFilter(
+            String metricName,
+            String help,
+            @Nullable Integer pathComponents,
+            @Nullable double[] buckets
+    ) throws ServletException {
+        this.metricName = metricName;
+        this.help = help;
+        this.buckets = buckets;
+        if (pathComponents != null) {
+            this.pathComponents = pathComponents;
+        }
+        this.init(null);
     }
 
     private boolean isEmpty(String s) {
@@ -82,37 +100,41 @@ public class MetricsFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Histogram.Builder builder = Histogram.build()
-                .help("The time taken fulfilling servlet requests")
+                .help(help)
                 .labelNames("path", "method");
 
-        if (filterConfig == null) {
-            throw new ServletException("Please provide a configuration object, even for testing.");
+        if (filterConfig == null && isEmpty(metricName)) {
+            throw new ServletException("No configuration object provided, and no metricName passed via constructor");
         }
 
-        if (isEmpty(filterConfig.getInitParameter(METRIC_NAME_PARAM))) {
-            throw new ServletException("Init parameter \"" + METRIC_NAME_PARAM + "\" is required. Please supply a value");
-        }
-
-        builder.name(filterConfig.getInitParameter(METRIC_NAME_PARAM));
-
-        // Allow overriding of the path "depth" to track
-        if (!isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
-            pathComponents = Integer.valueOf(filterConfig.getInitParameter(PATH_COMPONENT_PARAM));
-        }
-
-        // Allow users to override the default bucket configuration
-        if (!isEmpty(filterConfig.getInitParameter(BUCKET_CONFIG_PARAM))) {
-            String[] bucketParams = filterConfig.getInitParameter(BUCKET_CONFIG_PARAM).split(",");
-            double[] buckets = new double[bucketParams.length];
-
-            for (int i = 0; i < bucketParams.length; i++) {
-                buckets[i] = Double.parseDouble(bucketParams[i]);
+        if (filterConfig != null) {
+            if (isEmpty(metricName)) {
+                metricName = filterConfig.getInitParameter(METRIC_NAME_PARAM);
+                if (isEmpty(metricName)) {
+                    throw new ServletException("Init parameter \"" + METRIC_NAME_PARAM + "\" is required; please supply a value");
+                }
             }
 
-            builder.buckets(buckets);
+            // Allow overriding of the path "depth" to track
+            if (!isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
+                pathComponents = Integer.valueOf(filterConfig.getInitParameter(PATH_COMPONENT_PARAM));
+            }
+
+            // Allow users to override the default bucket configuration
+            if (!isEmpty(filterConfig.getInitParameter(BUCKET_CONFIG_PARAM))) {
+                String[] bucketParams = filterConfig.getInitParameter(BUCKET_CONFIG_PARAM).split(",");
+                buckets = new double[bucketParams.length];
+
+                for (int i = 0; i < bucketParams.length; i++) {
+                    buckets[i] = Double.parseDouble(bucketParams[i]);
+                }
+            }
         }
 
-        histogram = builder.register();
+        if (buckets != null) {
+            builder = builder.buckets(buckets);
+        }
+        histogram = builder.name(metricName).register();
     }
 
     @Override

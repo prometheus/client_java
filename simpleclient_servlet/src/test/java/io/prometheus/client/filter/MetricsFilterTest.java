@@ -92,6 +92,37 @@ public class MetricsFilterTest {
     }
 
     @Test
+    public void testConstructor() throws Exception {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        final String path = "/foo/bar/baz/bang";
+        when(req.getRequestURI()).thenReturn(path);
+        when(req.getMethod()).thenReturn(HttpMethods.POST);
+
+        FilterChain c = mock(FilterChain.class);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Thread.sleep(100);
+                return null;
+            }
+        }).when(c).doFilter(any(HttpServletRequest.class), any(HttpServletResponse.class));
+
+        MetricsFilter constructed = new MetricsFilter(
+                "foobar_baz_filter_duration_seconds",
+                "Help for my filter",
+                null,
+                null
+        );
+
+        HttpServletResponse res = mock(HttpServletResponse.class);
+        constructed.doFilter(req, res, c);
+
+        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foobar_baz_filter_duration_seconds_sum", new String[]{"path", "method"}, new String[]{path, HttpMethods.POST});
+        assertNotNull(sum);
+        assertEquals(0.1, sum, 0.001);
+    }
+
+    @Test
     public void testBucketsAndName() throws Exception {
         HttpServletRequest req = mock(HttpServletRequest.class);
         final String path = "/foo/bar/baz/bang";

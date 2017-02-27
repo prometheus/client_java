@@ -303,6 +303,10 @@ or `EntityManagerFactory`, you can use this code to access the underlying `Sessi
 SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
 ```
 
+### Servlet Filter
+
+There is a servlet filter available for configuring 
+
 ### Spring AOP
 
 There is a Spring AOP collector that allows you to annotate methods that you
@@ -316,7 +320,7 @@ annotate your Spring components as such:
 @Controller
 public class MyController {
   @RequestMapping("/")
-  @PrometheusTimeMethod(name = "main_path_seconds", help = "Some helpful info here")
+  @PrometheusTimeMethod(name = "my_controller_path_duration_seconds", help = "Some helpful info here")
   public Object handleMain() {
     // Do something
   }
