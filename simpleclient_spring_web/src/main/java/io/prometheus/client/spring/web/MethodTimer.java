@@ -28,13 +28,10 @@ public class MethodTimer {
     private final ReadWriteLock summaryLock = new ReentrantReadWriteLock();
     private final HashMap<String, Summary> summaries = new HashMap<String, Summary>();
 
-    @Pointcut("@within(io.prometheus.client.spring.web.PrometheusTimeMethod)")
-    public void annotatedClass() {}
-
     @Pointcut("@annotation(io.prometheus.client.spring.web.PrometheusTimeMethod)")
     public void annotatedMethod() {}
 
-    @Pointcut("annotatedMethod() || annotatedClass()")
+    @Pointcut("annotatedMethod()")
     public void timeable() {}
 
     private PrometheusTimeMethod getAnnotation(ProceedingJoinPoint pjp) throws NoSuchMethodException {
@@ -54,7 +51,6 @@ public class MethodTimer {
     }
 
     private Summary ensureSummary(ProceedingJoinPoint pjp, String key) throws IllegalStateException {
-        // Only one thread may get here, since this method is synchronized
         PrometheusTimeMethod annot;
         try {
             annot = getAnnotation(pjp);
@@ -68,23 +64,24 @@ public class MethodTimer {
 
         Summary summary;
 
-        // We use a writeLock here to guarantee no concurrent reads in case the underlying table must be rehashed.
+        // We use a writeLock here to guarantee no concurrent reads.
         final Lock writeLock = summaryLock.writeLock();
         writeLock.lock();
         try {
-            // Check one last time with full mutual exclusion in case multiple readers got null before creation
+            // Check one last time with full mutual exclusion in case multiple readers got null before creation.
             summary = summaries.get(key);
             if (summary != null) {
                 return summary;
             }
 
-            // Now we know for sure that we have never before registered
+            // Now we know for sure that we have never before registered.
             summary = Summary.build()
                     .name(annot.name())
                     .help(annot.help())
                     .register();
 
-            // Even a rehash will
+            // Even a rehash of the underlying table will not cause issues as we mutually exclude readers while we
+            // perform our updates.
             summaries.put(key, summary);
 
             return summary;

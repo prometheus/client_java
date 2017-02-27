@@ -303,6 +303,26 @@ or `EntityManagerFactory`, you can use this code to access the underlying `Sessi
 SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
 ```
 
+### Spring AOP
+
+There is a Spring AOP collector that allows you to annotate methods that you
+would like to instrument with a [Summary](#Summary), but without going through
+the process of manually instaniating and registering your metrics classes. To
+use the metrics annotations, simply add `simpleclient_spring_web` as a
+dependency, annotate a configuration class with `@EnablePrometheusTiming`, then
+annotate your Spring components as such:
+
+```java
+@Controller
+public class MyController {
+  @RequestMapping("/")
+  @PrometheusTimeMethod(name = "main_path_seconds", help = "Some helpful info here")
+  public Object handleMain() {
+    // Do something
+  }
+}
+```
+
 ## Exporting
 
 There are several options for exporting metrics.

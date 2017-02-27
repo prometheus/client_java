@@ -30,13 +30,6 @@ public class MethodTimerTest {
         void aSecondMethod() throws Exception;
     }
 
-//    @PrometheusTimeMethod(name = "test_two", help = "help two")
-//    private final class TestClass2 implements Time2 {
-//        public void timeMe() throws  Exception {
-//            Thread.sleep(30);
-//        }
-//    }
-
     @Test
     public void timeMethod() throws Exception {
         Timeable cprime = new TestClass();
@@ -56,18 +49,6 @@ public class MethodTimerTest {
         factory.addAspect(MethodTimer.class);
         return factory.getProxy();
     }
-
-//    @Test
-//    public void timeClassAnnotation() throws Exception {
-//        Time2 proxy = getProxy(new TestClass2());
-//
-//        proxy.timeMe();
-//
-//        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue("test_two_sum");
-//        Assert.assertNotNull(tot);
-//        assertEquals(tot, 0.03, 0.001);
-//        assert(0.029 < tot && tot < 0.031);
-//    }
 
     @Test
     public void testValueParam() throws Exception {
@@ -200,8 +181,8 @@ public class MethodTimerTest {
     }
 
     private interface SameMethodNameTest {
-        public void doSomething() throws Exception;
-        public void doSomething(String s) throws Exception;
+        void doSomething() throws Exception;
+        void doSomething(String s) throws Exception;
     }
 
     @Test

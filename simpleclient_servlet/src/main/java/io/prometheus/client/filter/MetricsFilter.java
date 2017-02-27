@@ -47,7 +47,7 @@ public class MetricsFilter implements Filter {
 
     private Histogram histogram = null;
 
-    // Package-level for testing purposes
+    // Package-level for testing purposes.
     int pathComponents = 0;
 
     public MetricsFilter() {};
@@ -93,7 +93,6 @@ public class MetricsFilter implements Filter {
             throw new ServletException("Init parameter \"" + METRIC_NAME_PARAM + "\" is required. Please supply a value");
         }
 
-        // "metric-name" is required
         builder.name(filterConfig.getInitParameter(METRIC_NAME_PARAM));
 
         // Allow overriding of the path "depth" to track
