@@ -1,7 +1,6 @@
 package io.prometheus.client.filter;
 
 import io.prometheus.client.Histogram;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -58,6 +57,28 @@ public class MetricsFilter implements Filter {
         this.pathComponents = pathComponents;
     }
 
+    private boolean isEmpty(String s) {
+        return s == null || s.length() == 0;
+    }
+
+    private String getComponents(String str) {
+        if (str == null || pathComponents <= 0) {
+            return str;
+        }
+        int count = 0;
+        int i =  -1;
+        do {
+            i = str.indexOf("/", i + 1);
+            if (i < 0) {
+                // Path is longer than specified pathComponents.
+                return str;
+            }
+            count++;
+        } while (count <= pathComponents);
+
+        return str.substring(0, i);
+    }
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Histogram.Builder builder = Histogram.build()
@@ -68,7 +89,7 @@ public class MetricsFilter implements Filter {
             throw new ServletException("Please provide a configuration object, even for testing.");
         }
 
-        if (StringUtils.isEmpty(filterConfig.getInitParameter(METRIC_NAME_PARAM))) {
+        if (isEmpty(filterConfig.getInitParameter(METRIC_NAME_PARAM))) {
             throw new ServletException("Init parameter \"" + METRIC_NAME_PARAM + "\" is required. Please supply a value");
         }
 
@@ -76,12 +97,12 @@ public class MetricsFilter implements Filter {
         builder.name(filterConfig.getInitParameter(METRIC_NAME_PARAM));
 
         // Allow overriding of the path "depth" to track
-        if (!StringUtils.isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
+        if (!isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
             pathComponents = Integer.valueOf(filterConfig.getInitParameter(PATH_COMPONENT_PARAM));
         }
 
         // Allow users to override the default bucket configuration
-        if (!StringUtils.isEmpty(filterConfig.getInitParameter(BUCKET_CONFIG_PARAM))) {
+        if (!isEmpty(filterConfig.getInitParameter(BUCKET_CONFIG_PARAM))) {
             String[] bucketParams = filterConfig.getInitParameter(BUCKET_CONFIG_PARAM).split(",");
             double[] buckets = new double[bucketParams.length];
 
@@ -105,15 +126,9 @@ public class MetricsFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         String path = request.getRequestURI();
-        if (pathComponents > 0) {
-            int lastSlash = StringUtils.ordinalIndexOf(path, "/", pathComponents + 1);
-            if (lastSlash >= 0) {
-                path = path.substring(0, lastSlash);
-            }
-        }
 
         Histogram.Timer timer = histogram
-            .labels(path, request.getMethod())
+            .labels(getComponents(path), request.getMethod())
             .startTimer();
 
         try {

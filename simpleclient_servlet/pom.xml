@@ -54,11 +54,6 @@
             <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
-        </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>junit</groupId>
