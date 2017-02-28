@@ -1,6 +1,5 @@
 package io.prometheus.client.filter;
 
-import com.sun.istack.internal.Nullable;
 import io.prometheus.client.Histogram;
 
 import javax.servlet.Filter;
@@ -70,9 +69,9 @@ public class MetricsFilter implements Filter {
 
     public MetricsFilter(
             String metricName,
-            @Nullable String help,
-            @Nullable Integer pathComponents,
-            @Nullable double[] buckets
+            String help,
+            Integer pathComponents,
+            double[] buckets
     ) throws ServletException {
         this.metricName = metricName;
         this.buckets = buckets;
