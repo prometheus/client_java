@@ -10,16 +10,13 @@ import org.mockito.stubbing.Answer;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.Enumeration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -79,6 +76,7 @@ public class MetricsFilterTest {
         String name = "foo";
         FilterConfig cfg = mock(FilterConfig.class);
         when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn(name);
+        when(cfg.getInitParameter(MetricsFilter.PATH_COMPONENT_PARAM)).thenReturn("0");
 
         f.init(cfg);
         f.doFilter(req, res, c);
@@ -110,7 +108,7 @@ public class MetricsFilterTest {
         MetricsFilter constructed = new MetricsFilter(
                 "foobar_baz_filter_duration_seconds",
                 "Help for my filter",
-                null,
+                0,
                 null
         );
 
@@ -149,12 +147,14 @@ public class MetricsFilterTest {
 
         f.doFilter(req, res, c);
 
-        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method"}, new String[]{path, HttpMethods.POST});
+        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method"}, new String[]{"/foo", HttpMethods.POST});
         assertEquals(0.1, sum, 0.001);
 
-        final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{path, HttpMethods.POST, "0.05"});
+        final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo", HttpMethods.POST, "0.05"});
+        assertNotNull(le05);
         assertEquals(0, le05, 0.0001);
-        final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{path, HttpMethods.POST, "0.15"});
+        final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo", HttpMethods.POST, "0.15"});
+        assertNotNull(le15);
         assertEquals(1, le15, 0.0001);
 
 

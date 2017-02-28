@@ -18,8 +18,11 @@ import java.io.IOException;
  *
  * The Histogram name itself is required, and configured with a {@code metric-name} init parameter.
  *
- * By default, this filter will provide metrics that distinguish 3 levels deep for the request path
- * (including servlet context path), but can be configured with the {@code path-components} init parameter.
+ * The help parameter, configured with the {@code help} init parameter, is not required but strongly recommended.
+ *
+ * By default, this filter will provide metrics that distinguish only 1 level deep for the request path
+ * (including servlet context path), but can be configured with the {@code path-components} init parameter. Any number
+ * provided that is less than 1 will provide the full path granularity (warning, this may affect time series performance).
  *
  * The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list
  * of valid {@code double} values.
@@ -34,15 +37,15 @@ import java.io.IOException;
  *   </init-param>
  *    <init-param>
  *      <param-name>help</param-name>
- *      <param-value>This is the help for your metrics filter</param-value>
+ *      <param-value>The time taken fulfilling servlet requests</param-value>
  *   </init-param>
  *   <init-param>
  *      <param-name>buckets</param-name>
- *      <param-value>.001,.002,.005,.010,.020,.040,.080,.120,.200</param-value>
+ *      <param-value>0.005,0.01,0.025,0.05,0.075,0.1,0.25,0.5,0.75,1,2.5,5,7.5,10</param-value>
  *   </init-param>
  *   <init-param>
  *      <param-name>path-components</param-name>
- *      <param-value>5</param-value>
+ *      <param-value>0</param-value>
  *   </init-param>
  * </filter>
  * }
@@ -58,7 +61,7 @@ public class MetricsFilter implements Filter {
     private Histogram histogram = null;
 
     // Package-level for testing purposes.
-    int pathComponents = 0;
+    int pathComponents = 1;
     private String metricName = null;
     private String help = "The time taken fulfilling servlet requests";
     private double[] buckets = null;
@@ -87,7 +90,7 @@ public class MetricsFilter implements Filter {
     }
 
     private String getComponents(String str) {
-        if (str == null || pathComponents <= 0) {
+        if (str == null || pathComponents < 1) {
             return str;
         }
         int count = 0;

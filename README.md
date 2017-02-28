@@ -303,7 +303,7 @@ or `EntityManagerFactory`, you can use this code to access the underlying `Sessi
 SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
 ```
 
-### Servlet Filter
+#### Servlet Filter
 
 There is a servlet filter available for measuring the duration taken by servlet
 requests. The `metric-name` init parameter is required, and is the name of the
@@ -317,7 +317,9 @@ integer here, you can tell the filter to only record up to the Nth slashes. That
 is, all reqeusts with greater than N "/" characters in the servlet URI path will
 be measured in the same bucket and you will lose that granularity.
 
-Example XML config:
+The code below is an example of the XML configuration for the filter. You will
+need to place this (replace your own values) code in your
+`webapp/WEB-INF/web.xml` file.
 
 ```xml
 <filter>
@@ -333,13 +335,23 @@ Example XML config:
   </init-param>
   <init-param>
     <param-name>buckets</param-name>
-    <param-value>.001,.002,.005,.010,.020,.040,.080,.120,.200</param-value>
+    <param-value>0.005,0.01,0.025,0.05,0.075,0.1,0.25,0.5,0.75,1,2.5,5,7.5,10</param-value>
   </init-param>
+  <!-- Optionally override path components; anything less than 1 (1 is the default)
+       means full granularity -->
   <init-param>
     <param-name>path-components</param-name>
-    <param-value>5</param-value>
+    <param-value>0</param-value>
   </init-param>
 </filter>
+
+<!-- You will most likely want this to be the first filter in the chain
+(therefore the first <filter-mapping> in the web.xml file), so that you can get
+the most accurate measurement of latency. -->
+<filter-mapping>
+  <filter-name>prometheusFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+</filter-mapping>
 ```
 
 Additionally, you can instantiate your servlet filter directly in Java code. To
@@ -348,7 +360,7 @@ the metric name, is required. The second, help, is optional but highly
 recommended. The last two (path-components, and buckets) are optional and will
 default sensibly if omitted.
 
-### Spring AOP
+#### Spring AOP
 
 There is a Spring AOP collector that allows you to annotate methods that you
 would like to instrument with a [Summary](#Summary), but without going through
