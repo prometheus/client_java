@@ -9,6 +9,11 @@ import io.prometheus.client.Collector;
 
 public class TextFormat {
   /**
+   * Content-type for text version 0.0.4.
+   */
+  public final static String CONTENT_TYPE_004 = "text/plain; version=0.0.4; charset=utf-8";
+
+  /**
    * Write out the text version 0.0.4 of the given MetricFamilySamples.
    */
   public static void write004(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
@@ -18,7 +23,7 @@ public class TextFormat {
       writer.write("# HELP ");
       writer.write(metricFamilySamples.name);
       writer.write(' ');
-      writer.write(escapeHelp(metricFamilySamples.help));
+      writeEscapedHelp(writer, metricFamilySamples.help);
       writer.write('\n');
 
       writer.write("# TYPE ");
@@ -34,7 +39,7 @@ public class TextFormat {
           for (int i = 0; i < sample.labelNames.size(); ++i) {
             writer.write(sample.labelNames.get(i));
             writer.write("=\"");
-            writer.write(escapeLabelValue(sample.labelValues.get(i)));
+            writeEscapedLabelValue(writer, sample.labelValues.get(i));
             writer.write("\",");
           }
           writer.write('}');
@@ -46,51 +51,42 @@ public class TextFormat {
     }
   }
 
-  /**
-   * Content-type for text version 0.0.4.
-   */
-  public final static String CONTENT_TYPE_004 = "text/plain; version=0.0.4; charset=utf-8";
-
-  static String escapeHelp(String s) {
-    StringBuilder sb = new StringBuilder(s.length() * 2);
+  private static void writeEscapedHelp(Writer writer, String s) throws IOException {
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
-      switch (s.charAt(i)) {
+      switch (c) {
         case '\\':
-          sb.append("\\\\");
+          writer.append("\\\\");
           break;
         case '\n':
-          sb.append("\\n");
+          writer.append("\\n");
           break;
         default:
-          sb.append(c);
+          writer.append(c);
       }
     }
-    return sb.toString();
   }
 
-  static String escapeLabelValue(String s) {
-    StringBuilder sb = new StringBuilder(s.length() * 2);
+  private static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
-      switch (s.charAt(i)) {
+      switch (c) {
         case '\\':
-          sb.append("\\\\");
+          writer.append("\\\\");
           break;
         case '\"':
-          sb.append("\\\"");
+          writer.append("\\\"");
           break;
         case '\n':
-          sb.append("\\n");
+          writer.append("\\n");
           break;
         default:
-          sb.append(c);
+          writer.append(c);
       }
     }
-    return sb.toString();
   }
 
-  static String typeString(Collector.Type t) {
+  private static String typeString(Collector.Type t) {
     switch (t) {
       case GAUGE:
         return "gauge";

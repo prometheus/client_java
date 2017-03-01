@@ -3,6 +3,7 @@ package io.prometheus.client;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -309,17 +310,13 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
     }
 
-    MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.HISTOGRAM, help, samples);
-    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    mfsList.add(mfs);
-    return mfsList;
+    return familySamplesList(Type.HISTOGRAM, samples);
   }
 
   @Override
   public List<MetricFamilySamples> describe() {
-    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    mfsList.add(new MetricFamilySamples(fullname, Type.HISTOGRAM, help, new ArrayList<MetricFamilySamples.Sample>()));
-    return mfsList;
+    return Collections.singletonList(
+            new MetricFamilySamples(fullname, Type.HISTOGRAM, help, Collections.<MetricFamilySamples.Sample>emptyList()));
   }
 
   double[] getBuckets() {

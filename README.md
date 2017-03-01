@@ -3,6 +3,31 @@ It supports Java, Clojure, Scala, JRuby, and anything else that runs on the JVM.
  
 [![Build Status](https://travis-ci.org/prometheus/client_java.png?branch=master)](https://travis-ci.org/prometheus/client_java)
 
+Table of Contents
+=================
+
+  * [Using](#using)
+     * [Assets](#assets)
+     * [Javadocs](#javadocs)
+  * [Instrumenting](#instrumenting)
+     * [Counter](#counter)
+     * [Gauge](#gauge)
+     * [Summary](#summary)
+     * [Histogram](#histogram)
+     * [Labels](#labels)
+     * [Registering Metrics](#registering-metrics)
+  * [Included Collectors](#included-collectors)
+     * [Logging](#logging)
+     * [Caches](#caches)
+     * [Hibernate](#hibernate)
+  * [Exporting](#exporting)
+     * [HTTP](#http)
+  * [Exporting to a Pushgateway](#exporting-to-a-pushgateway)
+  * [Bridges](#bridges)
+     * [Graphite](#graphite)
+  * [Custom Collectors](#custom-collectors)
+  * [Contact](#contact)
+
 ## Using
 ### Assets
 If you use Maven, you can simply reference the assets below.  The latest
@@ -14,25 +39,25 @@ version can be found on in the maven repository for
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient</artifactId>
-  <version>0.0.20</version>
+  <version>0.0.21</version>
 </dependency>
 <!-- Hotspot JVM metrics-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_hotspot</artifactId>
-  <version>0.0.20</version>
+  <version>0.0.21</version>
 </dependency>
 <!-- Exposition servlet-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_servlet</artifactId>
-  <version>0.0.20</version>
+  <version>0.0.21</version>
 </dependency>
 <!-- Pushgateway exposition-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_pushgateway</artifactId>
-  <version>0.0.20</version>
+  <version>0.0.21</version>
 </dependency>
 ```
 
@@ -41,7 +66,6 @@ There are canonical examples defined in the class definition Javadoc of the clie
 
 Documentation can be found at the [Java Client
 Github Project Page](http://prometheus.github.io/client_java).
-
 
 ## Instrumenting
 
@@ -205,7 +229,7 @@ Taking a counter as an example:
 ```java
 class YourClass {
   static final Counter requests = Counter.build()
-     .name("requests_total").help("Total requests.")
+     .name("my_library_requests_total").help("Total requests.")
      .labelNames("method").register();
   
   void processGetRequest() {
@@ -215,7 +239,58 @@ class YourClass {
 }
 ```
 
-### Included Collectors
+### Registering Metrics
+
+The best way to register a metric is via a `static final` class variable as is common with loggers.
+
+```java
+static final Counter requests = Counter.build()
+   .name("my_library_requests_total").help("Total requests.").labelNames("path").register();
+```
+ 
+Using the default registry with variables that are `static` is ideal since registering a metric with the same name 
+is not allowed and the default registry is also itself static. You can think of registering a metric, more like 
+registering a definition (as in the `TYPE` and `HELP` sections). The metric 'definition' internally holds the samples 
+that are reported and pulled out by Prometheus. Here is an example of registering a metric that has no labels.
+
+```java
+class YourClass {
+  static final Gauge activeTransactions = Gauge.build()
+     .name("my_library_transactions_active")
+     .help("Active transactions.")
+     .register();
+  
+  void processThatCalculates(String key) {
+    activeTransactions.inc();
+    try {
+        // Perform work.    
+    } finally{
+        activeTransactions.dec();
+    }
+  }
+}
+```
+
+To create timeseries with labels, include `labelNames()` with the builder. The `labels()` method looks up or creates 
+the corresponding labelled timeseries. You might also consider storing the labelled timeseries as an instance variable if it is
+appropriate. It is thread safe and can be used multiple times, which can help performance.
+
+
+```java
+class YourClass {
+  static final Counter calculationsCounter = Counter.build()
+     .name("my_library_calculations_total").help("Total calls.")
+     .labelNames("key").register();
+  
+  void processThatCalculates(String key) {
+    calculationsCounter.labels(key).inc();
+    // Run calculations.
+  }
+}
+```
+
+
+## Included Collectors
 
 The Java client includes collectors for garbage collection, memory pools, JMX, classloading, and thread counts.
 These can be added individually or just use the `DefaultExports` to conveniently register them. 
@@ -224,7 +299,7 @@ These can be added individually or just use the `DefaultExports` to conveniently
 DefaultExports.initialize();
 ```
 
-####Logging
+###Logging
 
 There are logging collectors for log4j, log4j2 and logback.
 
@@ -274,7 +349,29 @@ To register the log4j2 collector at root level:
 </Configuration>
 ```
 
-#### Hibernate
+### Caches
+
+To register the Guava cache collector, be certain to add `recordStats()` when building
+the cache and adding it to the registered collector. 
+
+```java
+CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
+
+Cache<String, String> cache = CacheBuilder.newBuilder().recordStats().build();
+cacheMetrics.addCache("myCacheLabel", cache);
+```
+
+The Caffeine equivalent is nearly identical. Again, be certain to call `recordStats()`
+ when building the cache so that metrics are collected.
+
+```java
+CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
+
+Cache<String, String> cache = Caffeine.newBuilder().recordStats().build();
+cacheMetrics.addCache("myCacheLabel", cache);
+```
+
+### Hibernate
 
 There is a collector for Hibernate which allows to collect metrics from one or more 
 `SessionFactory` instances. 

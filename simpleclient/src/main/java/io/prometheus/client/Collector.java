@@ -144,7 +144,7 @@ public abstract class Collector {
      *  describe, or if that's not practical have describe return an empty
      *  list.
      */
-    public List<MetricFamilySamples> describe();
+    List<MetricFamilySamples> describe();
   }
 
 

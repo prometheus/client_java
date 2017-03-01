@@ -1,8 +1,8 @@
 package io.prometheus.client;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Counter metric family, for custom collectors and exporters.
@@ -30,7 +30,7 @@ import java.util.Collections;
  */
 public class CounterMetricFamily extends Collector.MetricFamilySamples {
 
-  private List<String> labelNames;
+  private final List<String> labelNames;
 
   public CounterMetricFamily(String name, String help, double value) {
     super(name, Collector.Type.COUNTER, help, new ArrayList<Sample>());

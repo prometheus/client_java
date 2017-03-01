@@ -5,7 +5,7 @@
 
     <groupId>io.prometheus</groupId>
     <artifactId>parent</artifactId>
-    <version>0.0.21-SNAPSHOT</version>
+    <version>0.0.22-SNAPSHOT</version>
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
@@ -45,6 +45,7 @@
     <modules>
         <module>simpleclient</module>
         <module>simpleclient_common</module>
+        <module>simpleclient_caffeine</module>
         <module>simpleclient_dropwizard</module>
         <module>simpleclient_graphite_bridge</module>
         <module>simpleclient_hibernate</module>

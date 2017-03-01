@@ -1,6 +1,7 @@
 package io.prometheus.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -155,21 +156,15 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
 
   @Override
   public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
+    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
       samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
     }
-    MetricFamilySamples mfs = new MetricFamilySamples(fullname, Type.COUNTER, help, samples);
-
-    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    mfsList.add(mfs);
-    return mfsList;
+    return familySamplesList(Type.COUNTER, samples);
   }
 
   @Override
   public List<MetricFamilySamples> describe() {
-    List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>();
-    mfsList.add(new CounterMetricFamily(fullname, help, labelNames));
-    return mfsList;
+    return Collections.<MetricFamilySamples>singletonList(new CounterMetricFamily(fullname, help, labelNames));
   }
 }
