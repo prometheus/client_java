@@ -21,7 +21,7 @@ import java.io.IOException;
  *
  * By default, this filter will provide metrics that distinguish only 1 level deep for the request path
  * (including servlet context path), but can be configured with the {@code path-components} init parameter. Any number
- * provided that is less than 1 will provide the full path granularity (warning, this may affect time series performance).
+ * provided that is less than 1 will provide the full path granularity (warning, this may affect performance).
  *
  * The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list
  * of valid {@code double} values.

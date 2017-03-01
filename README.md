@@ -341,7 +341,7 @@ need to place this (replace your own values) code in your
        means full granularity -->
   <init-param>
     <param-name>path-components</param-name>
-    <param-value>0</param-value>
+    <param-value>1</param-value>
   </init-param>
 </filter>
 
