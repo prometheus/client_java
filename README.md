@@ -400,6 +400,83 @@ or `EntityManagerFactory`, you can use this code to access the underlying `Sessi
 SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
 ```
 
+#### Servlet Filter
+
+There is a servlet filter available for measuring the duration taken by servlet
+requests. The `metric-name` init parameter is required, and is the name of the
+metric prometheus will expose for the timing metrics. Help text via the `help`
+init parameter is not required, although it is highly recommended.  The number
+of buckets is overridable, and can be configured by passing a comma-separated
+string of doubles as the `buckets` init parameter. The granularity of path
+measuring is also configurable, via the `path-components` init parameter. By
+default, the servlet filter will record each path differently, but by setting an
+integer here, you can tell the filter to only record up to the Nth slashes. That
+is, all reqeusts with greater than N "/" characters in the servlet URI path will
+be measured in the same bucket and you will lose that granularity.
+
+The code below is an example of the XML configuration for the filter. You will
+need to place this (replace your own values) code in your
+`webapp/WEB-INF/web.xml` file.
+
+```xml
+<filter>
+  <filter-name>prometheusFilter</filter-name>
+  <filter-class>net.cccnext.ssp.portal.spring.filter.PrometheusMetricsFilter</filter-class>
+  <init-param>
+    <param-name>metric-name</param-name>
+    <param-value>webapp_metrics_filter</param-value>
+  </init-param>
+  <init-param>
+    <param-name>help</param-name>
+    <param-value>This is the help for your metrics filter</param-value>
+  </init-param>
+  <init-param>
+    <param-name>buckets</param-name>
+    <param-value>0.005,0.01,0.025,0.05,0.075,0.1,0.25,0.5,0.75,1,2.5,5,7.5,10</param-value>
+  </init-param>
+  <!-- Optionally override path components; anything less than 1 (1 is the default)
+       means full granularity -->
+  <init-param>
+    <param-name>path-components</param-name>
+    <param-value>1</param-value>
+  </init-param>
+</filter>
+
+<!-- You will most likely want this to be the first filter in the chain
+(therefore the first <filter-mapping> in the web.xml file), so that you can get
+the most accurate measurement of latency. -->
+<filter-mapping>
+  <filter-name>prometheusFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+Additionally, you can instantiate your servlet filter directly in Java code. To
+do this, you just need to call the non-empty constructor. The first parameter,
+the metric name, is required. The second, help, is optional but highly
+recommended. The last two (path-components, and buckets) are optional and will
+default sensibly if omitted.
+
+#### Spring AOP
+
+There is a Spring AOP collector that allows you to annotate methods that you
+would like to instrument with a [Summary](#Summary), but without going through
+the process of manually instaniating and registering your metrics classes. To
+use the metrics annotations, simply add `simpleclient_spring_web` as a
+dependency, annotate a configuration class with `@EnablePrometheusTiming`, then
+annotate your Spring components as such:
+
+```java
+@Controller
+public class MyController {
+  @RequestMapping("/")
+  @PrometheusTimeMethod(name = "my_controller_path_duration_seconds", help = "Some helpful info here")
+  public Object handleMain() {
+    // Do something
+  }
+}
+```
+
 ## Exporting
 
 There are several options for exporting metrics.

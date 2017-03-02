@@ -12,6 +12,4 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import(PrometheusMetricsConfiguration.class)
-public @interface EnableSpringBootMetricsCollector {
-
-}
+public @interface EnableSpringBootMetricsCollector {}
