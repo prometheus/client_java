@@ -2,7 +2,6 @@ package io.prometheus.client.exporter.common;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collections;
 import java.util.Enumeration;
 
 import io.prometheus.client.Collector;
@@ -19,7 +18,8 @@ public class TextFormat {
   public static void write004(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
     /* See http://prometheus.io/docs/instrumenting/exposition_formats/
      * for the output format specification. */
-    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(mfs)) {
+    while(mfs.hasMoreElements()) {
+      Collector.MetricFamilySamples metricFamilySamples = mfs.nextElement();
       writer.write("# HELP ");
       writer.write(metricFamilySamples.name);
       writer.write(' ');
