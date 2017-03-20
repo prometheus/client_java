@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentMap;
  *     caffeine_cache_miss_total{cache="mycache"} 3.0
  *     caffeine_cache_requests_total{cache="mycache"} 13.0
  *     caffeine_cache_eviction_total{cache="mycache"} 1.0
+ *     caffeine_cache_estimated_size{cache="mycache"} 5.0
  * </pre>
  *
  * Additionally if the cache includes a loader, the following metrics would be provided:
@@ -128,6 +129,10 @@ public class CacheMetricsCollector extends Collector {
                 "Cache loads: both success and failures", labelNames);
         mfs.add(cacheLoadTotal);
 
+        GaugeMetricFamily cacheSize = new GaugeMetricFamily("caffeine_cache_estimated_size",
+                "Estimated cache size", labelNames);
+        mfs.add(cacheSize);
+
         SummaryMetricFamily cacheLoadSummary = new SummaryMetricFamily("caffeine_cache_load_duration_seconds",
                 "Cache load duration: both success and failures", labelNames);
         mfs.add(cacheLoadSummary);
@@ -146,6 +151,7 @@ public class CacheMetricsCollector extends Collector {
             cacheMissTotal.addMetric(cacheName, stats.missCount());
             cacheRequestsTotal.addMetric(cacheName, stats.requestCount());
             cacheEvictionTotal.addMetric(cacheName, stats.evictionCount());
+            cacheSize.addMetric(cacheName, c.getValue().estimatedSize());
 
             if(c.getValue() instanceof LoadingCache) {
                 cacheLoadFailure.addMetric(cacheName, stats.loadFailureCount());
