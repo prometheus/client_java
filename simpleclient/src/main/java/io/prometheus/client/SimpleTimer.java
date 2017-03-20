@@ -27,7 +27,7 @@ package io.prometheus.client;
  *        try {
  *          // Your code here.
  *        } finally {
- *          requestTimer.labels("aLabelValue").observe(requestTimer.elapsedSeconds());
+ *          requestLatency.labels("aLabelValue").observe(requestTimer.elapsedSeconds());
  *        }
  *     }
  *   }
