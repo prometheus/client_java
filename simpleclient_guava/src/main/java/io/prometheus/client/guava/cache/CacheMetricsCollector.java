@@ -5,6 +5,7 @@ import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.GaugeMetricFamily;
 import io.prometheus.client.SummaryMetricFamily;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.concurrent.ConcurrentMap;
  *     guava_cache_miss_total{cache="mycache"} 3.0
  *     guava_cache_requests_total{cache="mycache"} 13.0
  *     guava_cache_eviction_total{cache="mycache"} 1.0
+ *     guava_cache_size{cache="mycache"} 5.0
  * </pre>
  *
  * Additionally if the cache includes a loader, the following metrics would be provided:
@@ -110,6 +112,10 @@ public class CacheMetricsCollector extends Collector {
                 "Cache loads: both success and failures", labelNames);
         mfs.add(cacheLoadTotal);
 
+        GaugeMetricFamily cacheSize = new GaugeMetricFamily("guava_cache_size",
+                "Cache size", labelNames);
+        mfs.add(cacheSize);
+
         SummaryMetricFamily cacheLoadSummary = new SummaryMetricFamily("guava_cache_load_duration_seconds",
                 "Cache load duration: both success and failures", labelNames);
         mfs.add(cacheLoadSummary);
@@ -122,6 +128,7 @@ public class CacheMetricsCollector extends Collector {
             cacheMissTotal.addMetric(cacheName, stats.missCount());
             cacheRequestsTotal.addMetric(cacheName, stats.requestCount());
             cacheEvictionTotal.addMetric(cacheName, stats.evictionCount());
+            cacheSize.addMetric(cacheName, c.getValue().size());
 
             if(c.getValue() instanceof LoadingCache) {
                 cacheLoadFailure.addMetric(cacheName, stats.loadExceptionCount());
