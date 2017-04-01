@@ -299,7 +299,7 @@ These can be added individually or just use the `DefaultExports` to conveniently
 DefaultExports.initialize();
 ```
 
-###Logging
+### Logging
 
 There are logging collectors for log4j, log4j2 and logback.
 
