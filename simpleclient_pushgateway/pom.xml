@@ -45,6 +45,11 @@
             <artifactId>simpleclient_common</artifactId>
             <version>0.0.22-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.2</version>
+        </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>junit</groupId>
@@ -53,10 +58,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-           <groupId>org.mock-server</groupId>
-           <artifactId>mockserver-netty</artifactId>
-           <version>3.9.17</version>
-           <scope>test</scope>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <version>3.9.17</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
