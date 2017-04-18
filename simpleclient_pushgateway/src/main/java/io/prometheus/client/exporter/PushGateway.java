@@ -254,7 +254,7 @@ public class PushGateway {
 
     try {
       if (!method.equals("DELETE")) {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
         TextFormat.write004(writer, registry.metricFamilySamples());
         writer.flush();
         writer.close();
