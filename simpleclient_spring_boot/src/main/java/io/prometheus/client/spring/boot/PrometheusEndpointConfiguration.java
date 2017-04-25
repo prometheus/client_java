@@ -11,4 +11,9 @@ class PrometheusEndpointConfiguration {
   public PrometheusEndpoint prometheusEndpoint() {
     return new PrometheusEndpoint(CollectorRegistry.defaultRegistry);
   }
+
+  @Bean
+  public PrometheusEndpointProducer prometheusEndpointFix(PrometheusEndpoint prometheusEndpoint) {
+  	return new PrometheusEndpointProducer(prometheusEndpoint);
+  }
 }
