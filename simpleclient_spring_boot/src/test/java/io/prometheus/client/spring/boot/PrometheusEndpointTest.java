@@ -77,7 +77,7 @@ public class PrometheusEndpointTest {
     headers.setAccept(Arrays.asList( MediaType.valueOf("text/plain;version=0.0.4")));
     HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
         
-    ResponseEntity<String> metricsResponse = template.exchange(getBaseUrl() + "/prometheus/metrics", HttpMethod.GET, entity, String.class);
+    ResponseEntity<String> metricsResponse = template.exchange(getBaseUrl() + "/prometheus", HttpMethod.GET, entity, String.class);
 
     // then:
     assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());

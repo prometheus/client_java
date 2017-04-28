@@ -20,7 +20,7 @@ public class PrometheusMVCEndpoint extends EndpointMvcAdapter {
 	
 	@SuppressWarnings("unchecked")
 	@ResponseBody
-	@RequestMapping(value="/metrics", produces={TextFormat.CONTENT_TYPE_004})
+	@RequestMapping( produces={TextFormat.CONTENT_TYPE_004})
 	public ResponseEntity<String> metrics() {
 		if (!this.delegate.isEnabled()) {
 			// Shouldn't happen - MVC endpoint shouldn't be registered when delegate's
