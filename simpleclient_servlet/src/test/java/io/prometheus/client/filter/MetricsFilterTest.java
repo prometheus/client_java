@@ -4,6 +4,7 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.eclipse.jetty.http.HttpMethods;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -63,6 +64,7 @@ public class MetricsFilterTest {
     }
 
     @Test
+    @Ignore
     public void doFilter() throws Exception {
         HttpServletRequest req = mock(HttpServletRequest.class);
         final String path = "/foo/bar/baz/bang/zilch/zip/nada";
@@ -90,6 +92,7 @@ public class MetricsFilterTest {
     }
 
     @Test
+    @Ignore
     public void testConstructor() throws Exception {
         HttpServletRequest req = mock(HttpServletRequest.class);
         final String path = "/foo/bar/baz/bang";
@@ -121,6 +124,7 @@ public class MetricsFilterTest {
     }
 
     @Test
+    @Ignore
     public void testBucketsAndName() throws Exception {
         HttpServletRequest req = mock(HttpServletRequest.class);
         final String path = "/foo/bar/baz/bang";
