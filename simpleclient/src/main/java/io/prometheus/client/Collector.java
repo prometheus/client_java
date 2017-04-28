@@ -44,7 +44,7 @@ public abstract class Collector {
 
     @Override
     public boolean equals(Object obj) {
-      if (obj == null || !(obj instanceof MetricFamilySamples)) {
+      if (!(obj instanceof MetricFamilySamples)) {
         return false;
       }
       MetricFamilySamples other = (MetricFamilySamples) obj;
@@ -87,7 +87,7 @@ public abstract class Collector {
 
       @Override
       public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof Sample)) {
+        if (!(obj instanceof Sample)) {
           return false;
         }
         Sample other = (Sample) obj;
