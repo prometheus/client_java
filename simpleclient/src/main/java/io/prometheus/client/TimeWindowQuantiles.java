@@ -34,8 +34,8 @@ class TimeWindowQuantiles {
 
   public void insert(double value) {
     rotate();
-    for (int i=0; i<ringBuffer.length; i++) {
-      ringBuffer[i].insert(value);
+    for (CKMSQuantiles ckmsQuantiles : ringBuffer) {
+      ckmsQuantiles.insert(value);
     }
   }
 
