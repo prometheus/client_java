@@ -8,12 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-public class PrometheusEndpointProducer extends EndpointMvcAdapter {
+public class PrometheusMVCEndpoint extends EndpointMvcAdapter {
 
 	private final PrometheusEndpoint delegate;
 
 	@Autowired
-	public PrometheusEndpointProducer(PrometheusEndpoint delegate) {
+	public PrometheusMVCEndpoint(PrometheusEndpoint delegate) {
 		super(delegate);
 		this.delegate = delegate;
 	}
