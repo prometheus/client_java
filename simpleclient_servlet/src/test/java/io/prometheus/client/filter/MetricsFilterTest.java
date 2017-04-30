@@ -64,7 +64,6 @@ public class MetricsFilterTest {
     }
 
     @Test
-    @Ignore
     public void doFilter() throws Exception {
         HttpServletRequest req = mock(HttpServletRequest.class);
         final String path = "/foo/bar/baz/bang/zilch/zip/nada";
@@ -92,7 +91,6 @@ public class MetricsFilterTest {
     }
 
     @Test
-    @Ignore
     public void testConstructor() throws Exception {
         HttpServletRequest req = mock(HttpServletRequest.class);
         final String path = "/foo/bar/baz/bang";
