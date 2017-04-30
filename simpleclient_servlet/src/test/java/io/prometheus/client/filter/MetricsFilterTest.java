@@ -124,7 +124,6 @@ public class MetricsFilterTest {
     }
 
     @Test
-    @Ignore
     public void testBucketsAndName() throws Exception {
         HttpServletRequest req = mock(HttpServletRequest.class);
         final String path = "/foo/bar/baz/bang";
