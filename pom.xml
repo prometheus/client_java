@@ -60,12 +60,13 @@
         <module>simpleclient_spring_boot</module>
         <module>simpleclient_jetty</module>
         <module>simpleclient_vertx</module>
+        <module>simpleclient_executor</module>
         <module>benchmark</module>
     </modules>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        
+
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
     </properties>
