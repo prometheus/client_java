@@ -19,7 +19,7 @@ public class InstrumentedScheduledExecutorServiceTest {
 
   private final CollectorRegistry registry = CollectorRegistry.defaultRegistry;
 
-  private final String[] labelNames = {"serviceName"};
+  private final String[] labelNames = {"executor"};
 
   @Test
   public void testSubmitRunnable() throws Exception {
@@ -30,74 +30,74 @@ public class InstrumentedScheduledExecutorServiceTest {
 
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
 
     Future<?> future = instrumentedScheduledExecutor.submit(new Runnable() {
       public void run() {
         assertEquals(new Double(1),
-            registry.getSampleValue("instrumented_scheduled_executor_service_submitted_count",
+            registry.getSampleValue("scheduled_service_submitted_total",
                 labelNames,
                 labelValues));
         assertEquals(new Double(1),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+                .getSampleValue("scheduled_service_running", labelNames,
                     labelValues));
         assertEquals(new Double(0),
-            registry.getSampleValue("instrumented_scheduled_executor_service_completed_count",
+            registry.getSampleValue("scheduled_service_completed_total",
                 labelNames,
                 labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+                .getSampleValue("scheduled_service_duration_seconds_count",
                     labelNames,
                     labelValues));
 
         assertEquals(new Double(0),
-            registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+            registry.getSampleValue("scheduled_service_scheduled_once_total",
                 labelNames,
                 labelValues));
         assertEquals(new Double(0),
             registry.getSampleValue(
-                "instrumented_scheduled_executor_service_scheduled_repetitively_count", labelNames,
+                "scheduled_service_scheduled_repetitively_total", labelNames,
                 labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+                .getSampleValue("scheduled_service_scheduled_overrun_total",
                     labelNames,
                     labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+                .getSampleValue("scheduled_service_period_percentage_count",
                     labelNames,
                     labelValues));
       }
@@ -106,35 +106,35 @@ public class InstrumentedScheduledExecutorServiceTest {
     future.get();
     assertEquals(new Double(1),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertEquals(new Double(1),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertEquals(new Double(1),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
   }
@@ -148,35 +148,35 @@ public class InstrumentedScheduledExecutorServiceTest {
 
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
 
@@ -184,42 +184,42 @@ public class InstrumentedScheduledExecutorServiceTest {
       public void run() {
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_submitted_count",
+                .getSampleValue("scheduled_service_submitted_total",
                     labelNames,
                     labelValues));
         assertEquals(new Double(1),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+                .getSampleValue("scheduled_service_running", labelNames,
                     labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_completed_count",
+                .getSampleValue("scheduled_service_completed_total",
                     labelNames,
                     labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+                .getSampleValue("scheduled_service_duration_seconds_count",
                     labelNames,
                     labelValues));
 
         assertEquals(new Double(1),
-            registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+            registry.getSampleValue("scheduled_service_scheduled_once_total",
                 labelNames,
                 labelValues));
         assertEquals(new Double(0),
             registry
                 .getSampleValue(
-                    "instrumented_scheduled_executor_service_scheduled_repetitively_count",
+                    "scheduled_service_scheduled_repetitively_total",
                     labelNames,
                     labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+                .getSampleValue("scheduled_service_scheduled_overrun_total",
                     labelNames,
                     labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+                .getSampleValue("scheduled_service_period_percentage_count",
                     labelNames,
                     labelValues));
       }
@@ -229,35 +229,35 @@ public class InstrumentedScheduledExecutorServiceTest {
 
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertEquals(new Double(1),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertEquals(new Double(1),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(1),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
   }
@@ -271,35 +271,35 @@ public class InstrumentedScheduledExecutorServiceTest {
 
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
 
@@ -309,42 +309,42 @@ public class InstrumentedScheduledExecutorServiceTest {
       public Object call() {
         assertEquals(new Double(1),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_submitted_count",
+                .getSampleValue("scheduled_service_submitted_total",
                     labelNames,
                     labelValues));
         assertEquals(new Double(1),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+                .getSampleValue("scheduled_service_running", labelNames,
                     labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_completed_count",
+                .getSampleValue("scheduled_service_completed_total",
                     labelNames,
                     labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+                .getSampleValue("scheduled_service_duration_seconds_count",
                     labelNames,
                     labelValues));
 
         assertEquals(new Double(0),
-            registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+            registry.getSampleValue("scheduled_service_scheduled_once_total",
                 labelNames,
                 labelValues));
         assertEquals(new Double(0),
             registry
                 .getSampleValue(
-                    "instrumented_scheduled_executor_service_scheduled_repetitively_count",
+                    "scheduled_service_scheduled_repetitively_total",
                     labelNames,
                     labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+                .getSampleValue("scheduled_service_scheduled_overrun_total",
                     labelNames,
                     labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+                .getSampleValue("scheduled_service_period_percentage_count",
                     labelNames,
                     labelValues));
         return obj;
@@ -355,35 +355,35 @@ public class InstrumentedScheduledExecutorServiceTest {
 
     assertEquals(new Double(1),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertEquals(new Double(1),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertEquals(new Double(1),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
   }
@@ -397,35 +397,35 @@ public class InstrumentedScheduledExecutorServiceTest {
 
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
 
@@ -436,43 +436,43 @@ public class InstrumentedScheduledExecutorServiceTest {
           public Object call() {
             assertEquals(new Double(0),
                 registry
-                    .getSampleValue("instrumented_scheduled_executor_service_submitted_count",
+                    .getSampleValue("scheduled_service_submitted_total",
                         labelNames,
                         labelValues));
             assertEquals(new Double(1),
-                registry.getSampleValue("instrumented_scheduled_executor_service_running_count",
+                registry.getSampleValue("scheduled_service_running",
                     labelNames,
                     labelValues));
             assertEquals(new Double(0),
                 registry
-                    .getSampleValue("instrumented_scheduled_executor_service_completed_count",
+                    .getSampleValue("scheduled_service_completed_total",
                         labelNames,
                         labelValues));
             assertEquals(new Double(0),
                 registry.getSampleValue(
-                    "instrumented_scheduled_executor_service_duration_seconds_count",
+                    "scheduled_service_duration_seconds_count",
                     labelNames,
                     labelValues));
 
             assertEquals(new Double(1),
                 registry
-                    .getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+                    .getSampleValue("scheduled_service_scheduled_once_total",
                         labelNames,
                         labelValues));
             assertEquals(new Double(0),
                 registry
                     .getSampleValue(
-                        "instrumented_scheduled_executor_service_scheduled_repetitively_count",
+                        "scheduled_service_scheduled_repetitively_total",
                         labelNames,
                         labelValues));
             assertEquals(new Double(0),
                 registry.getSampleValue(
-                    "instrumented_scheduled_executor_service_scheduled_overrun_count",
+                    "scheduled_service_scheduled_overrun_total",
                     labelNames,
                     labelValues));
             assertEquals(new Double(0),
                 registry.getSampleValue(
-                    "instrumented_scheduled_executor_service_period_percentage_count",
+                    "scheduled_service_period_percentage_count",
                     labelNames,
                     labelValues));
             return obj;
@@ -483,35 +483,35 @@ public class InstrumentedScheduledExecutorServiceTest {
 
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertEquals(new Double(1),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertEquals(new Double(1),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(1),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
   }
@@ -525,35 +525,35 @@ public class InstrumentedScheduledExecutorServiceTest {
 
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
     ScheduledFuture<?> theFuture = instrumentedScheduledExecutor
@@ -561,43 +561,43 @@ public class InstrumentedScheduledExecutorServiceTest {
           public void run() {
             assertEquals(new Double(0),
                 registry
-                    .getSampleValue("instrumented_scheduled_executor_service_submitted_count",
+                    .getSampleValue("scheduled_service_submitted_total",
                         labelNames,
                         labelValues));
             assertEquals(new Double(1),
-                registry.getSampleValue("instrumented_scheduled_executor_service_running_count",
+                registry.getSampleValue("scheduled_service_running",
                     labelNames,
                     labelValues));
             assertEquals(new Double(0),
                 registry
-                    .getSampleValue("instrumented_scheduled_executor_service_completed_count",
+                    .getSampleValue("scheduled_service_completed_total",
                         labelNames,
                         labelValues));
             assertEquals(new Double(0),
                 registry.getSampleValue(
-                    "instrumented_scheduled_executor_service_duration_seconds_count",
+                    "scheduled_service_duration_seconds_count",
                     labelNames,
                     labelValues));
 
             assertEquals(new Double(0),
                 registry
-                    .getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+                    .getSampleValue("scheduled_service_scheduled_once_total",
                         labelNames,
                         labelValues));
             assertEquals(new Double(1),
                 registry
                     .getSampleValue(
-                        "instrumented_scheduled_executor_service_scheduled_repetitively_count",
+                        "scheduled_service_scheduled_repetitively_total",
                         labelNames,
                         labelValues));
             assertEquals(new Double(0),
                 registry.getSampleValue(
-                    "instrumented_scheduled_executor_service_scheduled_overrun_count",
+                    "scheduled_service_scheduled_overrun_total",
                     labelNames,
                     labelValues));
             assertEquals(new Double(0),
                 registry.getSampleValue(
-                    "instrumented_scheduled_executor_service_period_percentage_count",
+                    "scheduled_service_period_percentage_count",
                     labelNames,
                     labelValues));
             try {
@@ -616,35 +616,35 @@ public class InstrumentedScheduledExecutorServiceTest {
 
     assertEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_submitted_count", labelNames,
+            .getSampleValue("scheduled_service_submitted_total", labelNames,
                 labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_running_count", labelNames,
+        registry.getSampleValue("scheduled_service_running", labelNames,
             labelValues));
     assertNotEquals(new Double(0),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_completed_count", labelNames,
+            .getSampleValue("scheduled_service_completed_total", labelNames,
                 labelValues));
     assertNotEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_duration_seconds_count",
+        registry.getSampleValue("scheduled_service_duration_seconds_count",
             labelNames,
             labelValues));
 
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_once_count",
+        registry.getSampleValue("scheduled_service_scheduled_once_total",
             labelNames,
             labelValues));
     assertEquals(new Double(1),
         registry
-            .getSampleValue("instrumented_scheduled_executor_service_scheduled_repetitively_count",
+            .getSampleValue("scheduled_service_scheduled_repetitively_total",
                 labelNames,
                 labelValues));
     assertNotEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_scheduled_overrun_count",
+        registry.getSampleValue("scheduled_service_scheduled_overrun_total",
             labelNames,
             labelValues));
     assertNotEquals(new Double(0),
-        registry.getSampleValue("instrumented_scheduled_executor_service_period_percentage_count",
+        registry.getSampleValue("scheduled_service_period_percentage_count",
             labelNames,
             labelValues));
   }

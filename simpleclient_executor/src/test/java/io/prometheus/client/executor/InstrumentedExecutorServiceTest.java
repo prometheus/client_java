@@ -20,54 +20,54 @@ public class InstrumentedExecutorServiceTest {
 
   private final CollectorRegistry registry = CollectorRegistry.defaultRegistry;
 
-  private final String[] labelNames = {"serviceName"};
+  private final String[] labelNames = {"executor"};
   private final String[] labelValues = {NAME};
 
   @Test
   public void testSubmittingProcess() throws Exception {
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_executor_service_submitted_count", labelNames,
+        registry.getSampleValue("service_submitted_total", labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_executor_service_running_count", labelNames,
+        registry.getSampleValue("service_running", labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_executor_service_completed_count", labelNames,
+        registry.getSampleValue("service_completed_total", labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_executor_service_duration_seconds_count", labelNames,
+        registry.getSampleValue("service_duration_seconds_count", labelNames,
             labelValues));
 
     Future<?> future = instrumentedExecutorService.submit(new Runnable() {
       public void run() {
         assertEquals(new Double(1),
-            registry.getSampleValue("instrumented_executor_service_submitted_count", labelNames,
+            registry.getSampleValue("service_submitted_total", labelNames,
                 labelValues));
         assertEquals(new Double(1),
-            registry.getSampleValue("instrumented_executor_service_running_count", labelNames,
+            registry.getSampleValue("service_running", labelNames,
                 labelValues));
         assertEquals(new Double(0),
-            registry.getSampleValue("instrumented_executor_service_completed_count", labelNames,
+            registry.getSampleValue("service_completed_total", labelNames,
                 labelValues));
         assertEquals(new Double(0),
             registry
-                .getSampleValue("instrumented_executor_service_duration_seconds_count", labelNames,
+                .getSampleValue("service_duration_seconds_count", labelNames,
                     labelValues));
       }
     });
 
     future.get();
     assertEquals(new Double(1),
-        registry.getSampleValue("instrumented_executor_service_submitted_count", labelNames,
+        registry.getSampleValue("service_submitted_total", labelNames,
             labelValues));
     assertEquals(new Double(0),
-        registry.getSampleValue("instrumented_executor_service_running_count", labelNames,
+        registry.getSampleValue("service_running", labelNames,
             labelValues));
     assertEquals(new Double(1),
-        registry.getSampleValue("instrumented_executor_service_completed_count", labelNames,
+        registry.getSampleValue("service_completed_total", labelNames,
             labelValues));
     assertEquals(new Double(1),
-        registry.getSampleValue("instrumented_executor_service_duration_seconds_count", labelNames,
+        registry.getSampleValue("service_duration_seconds_count", labelNames,
             labelValues));
   }
 }

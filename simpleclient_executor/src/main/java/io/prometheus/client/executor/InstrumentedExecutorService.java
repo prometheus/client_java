@@ -17,53 +17,53 @@ import java.util.concurrent.atomic.AtomicLong;
 public class InstrumentedExecutorService implements ExecutorService {
 
   private static final AtomicLong NAME_COUNTER = new AtomicLong();
-  private static final Counter ST_COUNTER;
-  private static final Counter CT_COUNTER;
-  private static final Gauge R_GAUGE;
-  private static final Histogram D_HISTOGRAM;
-
-  private final ExecutorService delegate;
-  private final Counter.Child submittedCounter;
-  private final Counter.Child completedCounter;
-  private final Gauge.Child runningGauge;
-  private final Histogram.Child durationHistogram;
+  private static final Counter SUBMITTED_COUNTER;
+  private static final Counter COMPLETED_COUNTER;
+  private static final Gauge RUNNING_GAUGE;
+  private static final Histogram DURATION_HISTOGRAM;
 
   static {
-    ST_COUNTER = Counter.build()
-        .name("instrumented_executor_service_submitted_count")
-        .labelNames("serviceName")
+    SUBMITTED_COUNTER = Counter.build()
+        .name("service_submitted_total")
+        .labelNames("executor")
         .help("Instrumented executor service submitted total count")
         .register();
-    CT_COUNTER = Counter.build()
-        .name("instrumented_executor_service_completed_count")
-        .labelNames("serviceName")
+    COMPLETED_COUNTER = Counter.build()
+        .name("service_completed_total")
+        .labelNames("executor")
         .help("Instrumented executor service completed total count")
         .register();
 
-    R_GAUGE = Gauge.build()
-        .name("instrumented_executor_service_running_count")
-        .labelNames("serviceName")
+    RUNNING_GAUGE = Gauge.build()
+        .name("service_running")
+        .labelNames("executor")
         .help("Instrumented executor service running total count")
         .register();
 
-    D_HISTOGRAM = Histogram.build()
-        .name("instrumented_executor_service_duration_seconds")
-        .labelNames("serviceName")
+    DURATION_HISTOGRAM = Histogram.build()
+        .name("service_duration_seconds")
+        .labelNames("executor")
         .help("Instrumented executor service duration (s)")
         .register();
   }
 
+  private final ExecutorService delegate;
+  private final Counter.Child submittedCounterChild;
+  private final Counter.Child completedCounterChild;
+  private final Gauge.Child runningGaugeChild;
+  private final Histogram.Child durationHistogramChild;
+
 
   public InstrumentedExecutorService(ExecutorService delegate) {
-    this(delegate, "instrumented_delegate_" + NAME_COUNTER.incrementAndGet());
+    this(delegate, "unknown_" + NAME_COUNTER.incrementAndGet());
   }
 
   public InstrumentedExecutorService(ExecutorService delegate, String name) {
     this.delegate = delegate;
-    this.submittedCounter = ST_COUNTER.labels(name);
-    this.completedCounter = CT_COUNTER.labels(name);
-    this.runningGauge = R_GAUGE.labels(name);
-    this.durationHistogram = D_HISTOGRAM.labels(name);
+    this.submittedCounterChild = SUBMITTED_COUNTER.labels(name);
+    this.completedCounterChild = COMPLETED_COUNTER.labels(name);
+    this.runningGaugeChild = RUNNING_GAUGE.labels(name);
+    this.durationHistogramChild = DURATION_HISTOGRAM.labels(name);
   }
 
   @Override
@@ -93,26 +93,26 @@ public class InstrumentedExecutorService implements ExecutorService {
 
   @Override
   public <T> Future<T> submit(Callable<T> task) {
-    submittedCounter.inc();
+    submittedCounterChild.inc();
     return delegate.submit(new InstrumentedCallable<T>(task));
   }
 
   @Override
   public <T> Future<T> submit(Runnable task, T result) {
-    submittedCounter.inc();
+    submittedCounterChild.inc();
     return delegate.submit(new InstrumentedRunnable(task), result);
   }
 
   @Override
   public Future<?> submit(Runnable task) {
-    submittedCounter.inc();
+    submittedCounterChild.inc();
     return delegate.submit(new InstrumentedRunnable(task));
   }
 
   @Override
   public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
       throws InterruptedException {
-    submittedCounter.inc(tasks.size());
+    submittedCounterChild.inc(tasks.size());
     Collection<? extends Callable<T>> instrumented = instrument(tasks);
     return delegate.invokeAll(instrumented);
   }
@@ -121,7 +121,7 @@ public class InstrumentedExecutorService implements ExecutorService {
   public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout,
       TimeUnit unit)
       throws InterruptedException {
-    submittedCounter.inc(tasks.size());
+    submittedCounterChild.inc(tasks.size());
     Collection<? extends Callable<T>> instrumented = instrument(tasks);
     return delegate.invokeAll(instrumented, timeout, unit);
   }
@@ -129,7 +129,7 @@ public class InstrumentedExecutorService implements ExecutorService {
   @Override
   public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
       throws InterruptedException, ExecutionException {
-    submittedCounter.inc(tasks.size());
+    submittedCounterChild.inc(tasks.size());
     Collection<? extends Callable<T>> instrumented = instrument(tasks);
     return delegate.invokeAny(instrumented);
   }
@@ -137,14 +137,14 @@ public class InstrumentedExecutorService implements ExecutorService {
   @Override
   public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
       throws InterruptedException, ExecutionException, TimeoutException {
-    submittedCounter.inc(tasks.size());
+    submittedCounterChild.inc(tasks.size());
     Collection<? extends Callable<T>> instrumented = instrument(tasks);
     return delegate.invokeAny(instrumented, timeout, unit);
   }
 
   @Override
   public void execute(Runnable command) {
-    submittedCounter.inc();
+    submittedCounterChild.inc();
     delegate.execute(new InstrumentedRunnable(command));
   }
 
@@ -168,14 +168,14 @@ public class InstrumentedExecutorService implements ExecutorService {
 
     @Override
     public void run() {
-      runningGauge.inc();
-      Histogram.Timer timer = durationHistogram.startTimer();
+      runningGaugeChild.inc();
+      Histogram.Timer timer = durationHistogramChild.startTimer();
       try {
         task.run();
       } finally {
         timer.observeDuration();
-        runningGauge.dec();
-        completedCounter.inc();
+        runningGaugeChild.dec();
+        completedCounterChild.inc();
       }
     }
   }
@@ -190,14 +190,14 @@ public class InstrumentedExecutorService implements ExecutorService {
 
     @Override
     public T call() throws Exception {
-      runningGauge.inc();
-      Histogram.Timer timer = durationHistogram.startTimer();
+      runningGaugeChild.inc();
+      Histogram.Timer timer = durationHistogramChild.startTimer();
       try {
         return callable.call();
       } finally {
         timer.observeDuration();
-        runningGauge.dec();
-        completedCounter.inc();
+        runningGaugeChild.dec();
+        completedCounterChild.inc();
       }
     }
   }
