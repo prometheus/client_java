@@ -4,7 +4,6 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.eclipse.jetty.http.HttpMethods;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
