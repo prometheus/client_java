@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Counter metric, to track counts of events or running totals.
@@ -130,6 +131,8 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     public double get() {
       return value.sum();
     }
+
+    public void reset() { value.reset(); }
   }
 
   // Convenience methods.
@@ -152,6 +155,10 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
    */
   public double get() {
     return noLabelsChild.get();
+  }
+
+  public void reset() {
+    clear();
   }
 
   @Override
