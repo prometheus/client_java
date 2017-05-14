@@ -2,6 +2,11 @@ package io.prometheus.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +20,7 @@ import org.junit.Before;
 public class CollectorRegistryTest {
 
   CollectorRegistry registry;
+  CollectorRegistryListener listener = mock(CollectorRegistryListener.class);
 
   @Before
   public void setUp() {
@@ -135,6 +141,49 @@ public class CollectorRegistryTest {
     CollectorRegistry r = new CollectorRegistry(true);
     new MyCollector().register(r);
     new MyCollector().register(r);
+  }
+
+  @Test
+  public void registeringACollectorTriggersANotification() {
+    registry.addListener(listener);
+    Collector s = Summary.build().name("s").help("h").register(registry);
+
+    verify(listener).onCollectorRegistered(same(s));
+  }
+
+  @Test
+  public void removingACollectorTriggersANotification() {
+    registry.addListener(listener);
+    Collector s = Summary.build().name("s").help("h").register(registry);
+    registry.unregister(s);
+
+    verify(listener).onCollectorUnregistered(same(s));
+  }
+  
+  @Test
+  public void clearingRegisteryTriggersANotification() {
+    registry.addListener(listener);
+    Collector s = Summary.build().name("s").help("h").register(registry);
+    registry.clear();
+
+    verify(listener).onCollectorUnregistered(same(s));
+  }
+
+  @Test
+  public void addingAListenerWithExistingCollectorCatchesItUp() throws Exception {
+    Collector s = Summary.build().name("s").help("h").register(registry);
+    registry.addListener(listener);
+
+    verify(listener).onCollectorRegistered(same(s));
+  }
+  
+  @Test
+  public void aRemovedListenerDoesNotReceiveUpdates() throws Exception {
+    registry.addListener(listener);
+    registry.removeListener(listener);
+    Summary.build().name("s").help("h").register(registry);
+
+    verify(listener, never()).onCollectorRegistered(any(Collector.class));
   }
   
 }

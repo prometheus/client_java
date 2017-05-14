@@ -7,10 +7,11 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A registry of Collectors.
@@ -30,7 +31,7 @@ public class CollectorRegistry {
 
   private final Map<Collector, List<String>> collectorsToNames = new HashMap<Collector, List<String>>();
   private final Map<String, Collector> namesToCollectors = new HashMap<String, Collector>();
-
+  private final List<CollectorRegistryListener> listeners = new CopyOnWriteArrayList<CollectorRegistryListener>();
   private final boolean autoDescribe;
 
   public CollectorRegistry(){
@@ -58,6 +59,7 @@ public class CollectorRegistry {
         namesToCollectors.put(name, m);
       }
       collectorsToNames.put(m, names);
+      onRegister(m);
     }
   }
 
@@ -70,6 +72,7 @@ public class CollectorRegistry {
         namesToCollectors.remove(name);
       }
       collectorsToNames.remove(m);
+      onUnregister(m);
     }
   }
   /**
@@ -77,6 +80,9 @@ public class CollectorRegistry {
    */
   public void clear() {
     synchronized (collectorsToNames) {
+      for (Collector collector : collectorsToNames.keySet()) {
+        onUnregister(collector);
+      }
       collectorsToNames.clear();
       namesToCollectors.clear();
     }
@@ -189,6 +195,44 @@ public class CollectorRegistry {
       }
     }
     return null;
+  }
+  
+  /**
+   * Adds a {@link CollectorRegistryListener} to a collection of listeners that will be notified on
+   * collector registration. Listeners will be notified in the order in which they are added.
+   * <p>
+   * <b>N.B.:</b> The listener will be notified of all existing collector when it first registers.
+   *
+   * @param listener the listener that will be notified
+   */
+  public void addListener(CollectorRegistryListener listener) {
+    synchronized (collectorsToNames) {
+      listeners.add(listener);
+      for (Collector collector : collectorsToNames.keySet()) {
+        onRegister(collector);
+      }
+    }
+  }
+  
+  /**
+   * Removes a {@link CollectorRegistryListener} from this registry's collection of listeners.
+   *
+   * @param listener the listener that will be removed
+   */
+  public void removeListener(CollectorRegistryListener listener) {
+      listeners.remove(listener);
+  }
+
+  private void onRegister(Collector collector) {
+    for (CollectorRegistryListener listener : listeners) {
+      listener.onCollectorRegistered(collector);
+    }
+  }
+
+  private void onUnregister(Collector collector) {
+    for (CollectorRegistryListener listener : listeners) {
+      listener.onCollectorUnregistered(collector);
+    }
   }
 
 }

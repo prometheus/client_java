@@ -8,8 +8,11 @@
 .idea
 *.iml
 
+.project
+.settings
+.classpath
+
 target/
 simpleclient_pushgateway/mockserver.log
 simpleclient_pushgateway/mockserver_request.log
 nb-configuration.xml
-
