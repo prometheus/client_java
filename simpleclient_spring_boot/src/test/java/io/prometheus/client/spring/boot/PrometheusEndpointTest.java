@@ -1,7 +1,9 @@
 package io.prometheus.client.spring.boot;
 
 import io.prometheus.client.Counter;
+import io.prometheus.client.exporter.common.TextFormat;
 import io.prometheus.client.matchers.CustomMatchers;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +11,6 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
@@ -48,7 +49,7 @@ public class PrometheusEndpointTest {
 
     // then:
     assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
-    assertTrue(MediaType.TEXT_PLAIN.isCompatibleWith(metricsResponse.getHeaders().getContentType()));
+    assertTrue(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004).equals(metricsResponse.getHeaders().getContentType().toString()));
 
     List<String> responseLines = Arrays.asList(metricsResponse.getBody().split("\n"));
     assertThat(responseLines, CustomMatchers.<String>exactlyNItems(1,
