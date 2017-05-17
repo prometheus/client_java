@@ -5,7 +5,6 @@ import io.prometheus.client.CollectorRegistry;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
-import org.springframework.context.annotation.Import;
 
 import java.util.Enumeration;
 
