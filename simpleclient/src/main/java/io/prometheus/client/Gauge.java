@@ -135,7 +135,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
    */
   public static class Child {
-    private final DoubleAdder value = new DoubleAdder();
+    private volatile double value;
 
     static TimeProvider timeProvider = new TimeProvider();
     /**
@@ -148,7 +148,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
      * Increment the gauge by the given amount.
      */
     public void inc(double amt) {
-      value.add(amt);
+      value += amt;
     }
     /**
      * Decrement the gauge by 1.
@@ -160,19 +160,13 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
      * Decrement the gauge by the given amount.
      */
     public void dec(double amt) {
-      value.add(-amt);
+      value -=amt;
     }
     /**
      * Set the gauge to the given value.
      */
     public void set(double val) {
-      synchronized(this) {
-        value.reset();
-        // If get() were called here it'd see an invalid value, so use a lock.
-        // inc()/dec() don't need locks, as all the possible outcomes
-        // are still possible if set() were atomic so no new races are introduced.
-        value.add(val);
-      }
+      value = val;
     }
     /**
      * Set the gauge to the current unixtime.
@@ -216,9 +210,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
      * Get the value of the gauge.
      */
     public double get() {
-      synchronized(this) {
-        return value.sum();
-      }
+      return value;
     }
   }
 
