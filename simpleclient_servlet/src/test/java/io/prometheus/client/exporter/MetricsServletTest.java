@@ -1,23 +1,23 @@
 package io.prometheus.client.exporter;
 
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Gauge;
+import org.junit.Test;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.anyChar;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import io.prometheus.client.Gauge;
-import static org.assertj.core.api.Assertions.*;
-import io.prometheus.client.CollectorRegistry;
-import org.junit.Test;
 
 public class MetricsServletTest {
 
@@ -29,7 +29,7 @@ public class MetricsServletTest {
     Gauge.build("c","a help").register(registry);
 
     HttpServletRequest req = mock(HttpServletRequest.class);
-    when(req.getParameter("names[]")).thenReturn("a,b,oneThatDoesntExist,,b");
+    when(req.getParameterValues("names[]")).thenReturn(new String[] {"a,b,oneThatDoesntExist,,b","a,d"});
     HttpServletResponse resp = mock(HttpServletResponse.class);
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -49,7 +49,7 @@ public class MetricsServletTest {
     PrintWriter writer = mock(PrintWriter.class);
     when(resp.getWriter()).thenReturn(writer);
     CollectorRegistry registry = new CollectorRegistry();
-    Gauge a = Gauge.build("a","a help").register(registry);
+    Gauge a = Gauge.build("a", "a help").register(registry);
 
     new MetricsServlet(registry).doGet(req, resp);
     verify(writer).close();

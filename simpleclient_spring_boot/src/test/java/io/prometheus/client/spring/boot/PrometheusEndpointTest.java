@@ -37,7 +37,7 @@ public class PrometheusEndpointTest {
   @Test
   public void testMetricsExportedThroughPrometheusEndpoint() {
     // given:
-    final Counter promCounter = Counter.build("foo_bar","test counter" )
+    final Counter promCounter = Counter.build("foo_bar", "test counter" )
         .labelNames("label1", "label2")
         .register();
     final Counter filteredCounter = Counter.build("filtered_foo_bar","test counter" )

@@ -144,7 +144,7 @@ public class CollectorRegistry {
     }
 
     private Iterator<Collector> includedCollectorIterator(Set<String> includedNames) {
-      if(includedNames.isEmpty()) {
+      if (includedNames.isEmpty()) {
         return collectors().iterator();
       } else {
         HashSet<Collector> collectors = new HashSet<Collector>();
@@ -188,7 +188,7 @@ public class CollectorRegistry {
     }
 
     private Collector.MetricFamilySamples filter(Collector.MetricFamilySamples next) {
-      if(includedNames.isEmpty() || includedNames.contains(next.name)) {
+      if (includedNames.isEmpty() || includedNames.contains(next.name)) {
         return next;
       } else {
         return null;

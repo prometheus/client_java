@@ -49,12 +49,14 @@ public class MetricsServlet extends HttpServlet {
   }
 
   private Set<String> parse(HttpServletRequest req) {
-    String includedParam = req.getParameter("names[]");
-    if(includedParam == null) {
-      return Collections.emptySet();
-    } else {
-      return new HashSet<String>(Arrays.asList(includedParam.split(",")));
+    String[] includedParam = req.getParameterValues("names[]");
+    HashSet<String> names = new HashSet<String>();
+    if(includedParam != null) {
+      for(String nameList : includedParam) {
+        names.addAll(Arrays.asList(nameList.split(",")));
+      }
     }
+    return names;
   }
 
   @Override
