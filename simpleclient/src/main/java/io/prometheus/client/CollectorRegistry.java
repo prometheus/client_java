@@ -50,7 +50,7 @@ public class CollectorRegistry {
     List<String> names = collectorNames(m);
     synchronized (collectorsToNames) {
       for (String name : names) {
-        if(namesToCollectors.containsKey(name)) {
+        if (namesToCollectors.containsKey(name)) {
           throw new IllegalArgumentException("Collector already registered that provides name: " + name);
         }
       }
@@ -150,7 +150,7 @@ public class CollectorRegistry {
         HashSet<Collector> collectors = new HashSet<Collector>();
         synchronized (namesToCollectors) {
           for(Map.Entry<String,Collector> entry :namesToCollectors.entrySet()){
-            if(includedNames.contains(entry.getKey())) {
+            if (includedNames.contains(entry.getKey())) {
               collectors.add(entry.getValue());
             }
           }
@@ -169,7 +169,7 @@ public class CollectorRegistry {
 
       while(metricFamilySamples != null && metricFamilySamples.hasNext()) {
         next = filter(metricFamilySamples.next());
-        if(next != null) {
+        if (next != null) {
           return;
         }
       }
@@ -179,7 +179,7 @@ public class CollectorRegistry {
           metricFamilySamples = collectorIter.next().collect().iterator();
           while (metricFamilySamples.hasNext()) {
             next = filter(metricFamilySamples.next());
-            if(next != null) {
+            if (next != null) {
               return;
             }
           }
