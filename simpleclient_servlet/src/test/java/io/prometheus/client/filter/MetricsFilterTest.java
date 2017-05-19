@@ -148,14 +148,14 @@ public class MetricsFilterTest {
         f.doFilter(req, res, c);
 
         final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method"}, new String[]{"/foo", HttpMethods.POST});
-        assertEquals(0.1, sum, 0.001);
+        assertEquals(0.1, sum, 0.01);
 
         final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo", HttpMethods.POST, "0.05"});
         assertNotNull(le05);
-        assertEquals(0, le05, 0.0001);
+        assertEquals(0, le05, 0.01);
         final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo", HttpMethods.POST, "0.15"});
         assertNotNull(le15);
-        assertEquals(1, le15, 0.0001);
+        assertEquals(1, le15, 0.01);
 
 
         final Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.metricFamilySamples();
