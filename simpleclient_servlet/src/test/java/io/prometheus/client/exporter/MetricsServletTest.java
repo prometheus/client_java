@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.anyChar;
 import static org.mockito.Mockito.doThrow;
@@ -24,12 +25,12 @@ public class MetricsServletTest {
   @Test
   public void testWriterFiltersBasedOnParameter() throws IOException, ServletException {
     CollectorRegistry registry = new CollectorRegistry();
-    Gauge.build("a","a help").register(registry);
-    Gauge.build("b","a help").register(registry);
-    Gauge.build("c","a help").register(registry);
+    Gauge.build("a", "a help").register(registry);
+    Gauge.build("b", "a help").register(registry);
+    Gauge.build("c", "a help").register(registry);
 
     HttpServletRequest req = mock(HttpServletRequest.class);
-    when(req.getParameterValues("names[]")).thenReturn(new String[] {"a,b,oneThatDoesntExist,,b","a,d"});
+    when(req.getParameterValues("names[]")).thenReturn(new String[]{"a", "b", "oneTheDoesntExist", ""});
     HttpServletResponse resp = mock(HttpServletResponse.class);
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
@@ -63,12 +64,13 @@ public class MetricsServletTest {
     when(resp.getWriter()).thenReturn(writer);
     doThrow(new RuntimeException()).when(writer).write(anyChar());
     CollectorRegistry registry = new CollectorRegistry();
-    Gauge a = Gauge.build("a","a help").register(registry);
+    Gauge a = Gauge.build("a", "a help").register(registry);
 
-    try{
+    try {
       new MetricsServlet(registry).doGet(req, resp);
       fail("Exception expected");
-    } catch (Exception e){}
+    } catch (Exception e) {
+    }
 
     verify(writer).close();
   }
