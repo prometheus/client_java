@@ -7,10 +7,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.List;
 
 /**
  * A registry of Collectors.
@@ -33,7 +33,7 @@ public class CollectorRegistry {
 
   private final boolean autoDescribe;
 
-  public CollectorRegistry(){
+  public CollectorRegistry() {
     this(false);
   }
 
@@ -72,6 +72,7 @@ public class CollectorRegistry {
       collectorsToNames.remove(m);
     }
   }
+
   /**
    * Unregister all Collectors.
    */
@@ -94,7 +95,7 @@ public class CollectorRegistry {
   private List<String> collectorNames(Collector m) {
     List<Collector.MetricFamilySamples> mfs;
     if (m instanceof Collector.Describable) {
-      mfs = ((Collector.Describable)m).describe();
+      mfs = ((Collector.Describable) m).describe();
     } else if (autoDescribe) {
       mfs = m.collect();
     } else {
@@ -149,7 +150,7 @@ public class CollectorRegistry {
       } else {
         HashSet<Collector> collectors = new HashSet<Collector>();
         synchronized (namesToCollectors) {
-          for(Map.Entry<String,Collector> entry :namesToCollectors.entrySet()){
+          for (Map.Entry<String, Collector> entry : namesToCollectors.entrySet()) {
             if (includedNames.contains(entry.getKey())) {
               collectors.add(entry.getValue());
             }
@@ -167,7 +168,7 @@ public class CollectorRegistry {
     private void findNextElement() {
       next = null;
 
-      while(metricFamilySamples != null && metricFamilySamples.hasNext()) {
+      while (metricFamilySamples != null && metricFamilySamples.hasNext()) {
         next = filter(metricFamilySamples.next());
         if (next != null) {
           return;
@@ -224,11 +225,11 @@ public class CollectorRegistry {
    * This is inefficient, and intended only for use in unittests.
    */
   public Double getSampleValue(String name, String[] labelNames, String[] labelValues) {
-    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(metricFamilySamples())) {
-      for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
+    for (Collector.MetricFamilySamples metricFamilySamples : Collections.list(metricFamilySamples())) {
+      for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
         if (sample.name.equals(name)
-            && Arrays.equals(sample.labelNames.toArray(), labelNames)
-            && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
+                && Arrays.equals(sample.labelNames.toArray(), labelNames)
+                && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
           return sample.value;
         }
       }

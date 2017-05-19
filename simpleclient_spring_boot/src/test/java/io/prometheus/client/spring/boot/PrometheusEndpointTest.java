@@ -37,10 +37,10 @@ public class PrometheusEndpointTest {
   @Test
   public void testMetricsExportedThroughPrometheusEndpoint() {
     // given:
-    final Counter promCounter = Counter.build("foo_bar", "test counter" )
-        .labelNames("label1", "label2")
-        .register();
-    final Counter filteredCounter = Counter.build("filtered_foo_bar","test counter" )
+    final Counter promCounter = Counter.build("foo_bar", "test counter")
+            .labelNames("label1", "label2")
+            .register();
+    final Counter filteredCounter = Counter.build("filtered_foo_bar", "test counter")
             .labelNames("label1", "label2")
             .register();
 
@@ -55,7 +55,7 @@ public class PrometheusEndpointTest {
 
     List<String> responseLines = Arrays.asList(metricsResponse.getBody().split("\n"));
     assertThat(responseLines, CustomMatchers.<String>exactlyNItems(1,
-        matchesPattern("foo_bar\\{label1=\"val1\",label2=\"val2\",?\\} 3.0")));
+            matchesPattern("foo_bar\\{label1=\"val1\",label2=\"val2\",?\\} 3.0")));
   }
 
   private String getBaseUrl() {

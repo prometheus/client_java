@@ -16,13 +16,13 @@ import java.util.Set;
 
 /**
  * Metrics Handler for Vert.x Web.
- *
+ * <p>
  * This handler will allow the usage of Prometheus Client Java API with
  * Vert.x applications and expose a API compatible handler for the collector.
- *
+ * <p>
  * Usage:
- *
- *     router.route("/metrics").handler(new MetricsHandler());
+ * <p>
+ * router.route("/metrics").handler(new MetricsHandler());
  */
 public class MetricsHandler implements Handler<RoutingContext> {
 
@@ -85,11 +85,11 @@ public class MetricsHandler implements Handler<RoutingContext> {
   }
 
   private Set<String> parse(HttpServerRequest request) {
-      String includedParam = request.getParam("names[]");
-      if(includedParam == null) {
-        return Collections.emptySet();
-      } else {
-        return new HashSet<String>(Arrays.asList(includedParam.split(",")));
-      }
+    String includedParam = request.getParam("names[]");
+    if (includedParam == null) {
+      return Collections.emptySet();
+    } else {
+      return new HashSet<String>(Arrays.asList(includedParam.split(",")));
+    }
   }
 }

@@ -18,6 +18,6 @@ class PrometheusEndpointConfiguration {
   @ConditionalOnBean(PrometheusEndpoint.class)
   @ConditionalOnEnabledEndpoint("prometheus")
   public PrometheusMvcEndpoint prometheusEndpointFix(PrometheusEndpoint prometheusEndpoint) {
-  	return new PrometheusMvcEndpoint(prometheusEndpoint);
+    return new PrometheusMvcEndpoint(prometheusEndpoint);
   }
 }

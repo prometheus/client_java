@@ -36,9 +36,9 @@ public class MetricsHandlerTest {
     socket.close();
     vertx.createHttpServer().requestHandler(router::accept).listen(port);
 
-    Gauge.build("a","a help").register(registry);
-    Gauge.build("b","b help").register(registry);
-    Gauge.build("c","c help").register(registry);
+    Gauge.build("a", "a help").register(registry);
+    Gauge.build("b", "b help").register(registry);
+    Gauge.build("c", "c help").register(registry);
   }
 
   @AfterClass
@@ -57,7 +57,7 @@ public class MetricsHandlerTest {
 
   @Test
   public void metricsRequest_shouldAllowFilteringMetrics() throws IOException {
-    String out  = makeRequest("/metrics?names[]=b,c");
+    String out = makeRequest("/metrics?names[]=b,c");
 
     assertThat(out).doesNotContain("a 0.0");
     assertThat(out).contains("b 0.0");
@@ -66,7 +66,7 @@ public class MetricsHandlerTest {
 
 
   private String makeRequest(String url) throws IOException {
-    Scanner scanner  = new Scanner(new URL("http://localhost:"+port+url).openStream(), "UTF-8")
+    Scanner scanner = new Scanner(new URL("http://localhost:" + port + url).openStream(), "UTF-8")
             .useDelimiter("\\A");
     String out = scanner.next();
     scanner.close();
