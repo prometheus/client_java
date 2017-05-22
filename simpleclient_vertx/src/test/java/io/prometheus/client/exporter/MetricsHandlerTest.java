@@ -57,7 +57,7 @@ public class MetricsHandlerTest {
 
   @Test
   public void metricsRequest_shouldAllowFilteringMetrics() throws IOException {
-    String out = makeRequest("/metrics?names[]=b,c");
+    String out = makeRequest("/metrics?name[]=b&name[]=c");
 
     assertThat(out).doesNotContain("a 0.0");
     assertThat(out).contains("b 0.0");

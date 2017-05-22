@@ -47,7 +47,7 @@ public class PrometheusEndpointTest {
     // when:
     promCounter.labels("val1", "val2").inc(3);
     filteredCounter.labels("val1", "val2").inc(6);
-    ResponseEntity<String> metricsResponse = template.getForEntity(getBaseUrl() + "/prometheus?names[]=foo_bar", String.class);
+    ResponseEntity<String> metricsResponse = template.getForEntity(getBaseUrl() + "/prometheus?name[]=foo_bar", String.class);
 
     // then:
     assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());

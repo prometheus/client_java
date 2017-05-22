@@ -48,7 +48,7 @@ public class MetricsServlet extends HttpServlet {
   }
 
   private Set<String> parse(HttpServletRequest req) {
-    String[] includedParam = req.getParameterValues("names[]");
+    String[] includedParam = req.getParameterValues("name[]");
     if (includedParam == null) {
       return Collections.emptySet();
     } else {

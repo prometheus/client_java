@@ -30,7 +30,7 @@ public class MetricsServletTest {
     Gauge.build("c", "a help").register(registry);
 
     HttpServletRequest req = mock(HttpServletRequest.class);
-    when(req.getParameterValues("names[]")).thenReturn(new String[]{"a", "b", "oneTheDoesntExist", ""});
+    when(req.getParameterValues("name[]")).thenReturn(new String[]{"a", "b", "oneTheDoesntExist", ""});
     HttpServletResponse resp = mock(HttpServletResponse.class);
     StringWriter stringWriter = new StringWriter();
     PrintWriter writer = new PrintWriter(stringWriter);
