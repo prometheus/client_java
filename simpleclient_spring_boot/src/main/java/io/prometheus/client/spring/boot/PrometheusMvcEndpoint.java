@@ -28,7 +28,7 @@ public class PrometheusMvcEndpoint extends EndpointMvcAdapter {
   )
   @ResponseBody
   public ResponseEntity value(
-          @RequestParam(value = "names[]", required = false) Set<String> name) {
+          @RequestParam(value = "name[]", required = false) Set<String> name) {
     if (!getDelegate().isEnabled()) {
       // Shouldn't happen - MVC endpoint shouldn't be registered when delegate's
       // disabled

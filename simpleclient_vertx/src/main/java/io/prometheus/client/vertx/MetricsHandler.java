@@ -10,7 +10,6 @@ import io.vertx.ext.web.RoutingContext;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -85,11 +84,6 @@ public class MetricsHandler implements Handler<RoutingContext> {
   }
 
   private Set<String> parse(HttpServerRequest request) {
-    String includedParam = request.getParam("names[]");
-    if (includedParam == null) {
-      return Collections.emptySet();
-    } else {
-      return new HashSet<String>(Arrays.asList(includedParam.split(",")));
-    }
+    return new HashSet(request.params().getAll("name[]"));
   }
 }
