@@ -189,10 +189,19 @@ public class CollectorRegistry {
     }
 
     private Collector.MetricFamilySamples filter(Collector.MetricFamilySamples next) {
-      if (includedNames.isEmpty() || includedNames.contains(next.name)) {
+      if (includedNames.isEmpty()) {
         return next;
       } else {
-        return null;
+        Iterator<Collector.MetricFamilySamples.Sample> it = next.samples.iterator();
+        while (it.hasNext()) {
+            if (!includedNames.contains(it.next().name)) {
+                it.remove();
+            }
+        }
+        if (next.samples.size() == 0) {
+          return null;
+        }
+        return next;
       }
     }
 
