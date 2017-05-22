@@ -167,11 +167,15 @@ public class DropwizardExportsTest {
             Collector.MetricFamilySamples element =  metricFamilySamples.nextElement();
             elements.put(element.name, element);
         }
-        assertEquals(5, elements.size());
+        assertEquals(9, elements.size());
 
         assertTrue(elements.keySet().contains("my_application_namedTimer1"));
         assertTrue(elements.keySet().contains("my_application_namedCounter1"));
         assertTrue(elements.keySet().contains("my_application_namedMeter1_total"));
+        assertTrue(elements.keySet().contains("my_application_namedMeter1_one_minute_rate"));
+        assertTrue(elements.keySet().contains("my_application_namedMeter1_five_minute_rate"));
+        assertTrue(elements.keySet().contains("my_application_namedMeter1_fifteen_minute_rate"));
+        assertTrue(elements.keySet().contains("my_application_namedMeter1_mean_rate"));
         assertTrue(elements.keySet().contains("my_application_namedHistogram1"));
         assertTrue(elements.keySet().contains("my_application_namedGauge1"));
 
