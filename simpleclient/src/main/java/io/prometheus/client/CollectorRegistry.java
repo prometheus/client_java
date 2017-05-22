@@ -7,10 +7,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.List;
 
 /**
  * A registry of Collectors.
@@ -33,7 +33,7 @@ public class CollectorRegistry {
 
   private final boolean autoDescribe;
 
-  public CollectorRegistry(){
+  public CollectorRegistry() {
     this(false);
   }
 
@@ -50,7 +50,7 @@ public class CollectorRegistry {
     List<String> names = collectorNames(m);
     synchronized (collectorsToNames) {
       for (String name : names) {
-        if(namesToCollectors.containsKey(name)) {
+        if (namesToCollectors.containsKey(name)) {
           throw new IllegalArgumentException("Collector already registered that provides name: " + name);
         }
       }
@@ -72,6 +72,7 @@ public class CollectorRegistry {
       collectorsToNames.remove(m);
     }
   }
+
   /**
    * Unregister all Collectors.
    */
@@ -94,7 +95,7 @@ public class CollectorRegistry {
   private List<String> collectorNames(Collector m) {
     List<Collector.MetricFamilySamples> mfs;
     if (m instanceof Collector.Describable) {
-      mfs = ((Collector.Describable)m).describe();
+      mfs = ((Collector.Describable) m).describe();
     } else if (autoDescribe) {
       mfs = m.collect();
     } else {
@@ -125,28 +126,73 @@ public class CollectorRegistry {
   public Enumeration<Collector.MetricFamilySamples> metricFamilySamples() {
     return new MetricFamilySamplesEnumeration();
   }
+
+  public Enumeration<Collector.MetricFamilySamples> filteredMetricFamilySamples(Set<String> includedNames) {
+    return new MetricFamilySamplesEnumeration(includedNames);
+  }
+
   class MetricFamilySamplesEnumeration implements Enumeration<Collector.MetricFamilySamples> {
 
-    private final Iterator<Collector> collectorIter = collectors().iterator();
+    private final Iterator<Collector> collectorIter;
     private Iterator<Collector.MetricFamilySamples> metricFamilySamples;
     private Collector.MetricFamilySamples next;
+    private Set<String> includedNames;
 
-    MetricFamilySamplesEnumeration() {
+    MetricFamilySamplesEnumeration(Set<String> includedNames) {
+      this.includedNames = includedNames;
+      collectorIter = includedCollectorIterator(includedNames);
       findNextElement();
     }
 
-    private void findNextElement() {
-      if (metricFamilySamples != null && metricFamilySamples.hasNext()) {
-        next = metricFamilySamples.next();
+    private Iterator<Collector> includedCollectorIterator(Set<String> includedNames) {
+      if (includedNames.isEmpty()) {
+        return collectors().iterator();
       } else {
-        while (collectorIter.hasNext()) {
-          metricFamilySamples = collectorIter.next().collect().iterator();
-          if (metricFamilySamples.hasNext()) {
-            next = metricFamilySamples.next();
-            return;
+        HashSet<Collector> collectors = new HashSet<Collector>();
+        synchronized (namesToCollectors) {
+          for (Map.Entry<String, Collector> entry : namesToCollectors.entrySet()) {
+            if (includedNames.contains(entry.getKey())) {
+              collectors.add(entry.getValue());
+            }
           }
         }
-        next = null;
+
+        return collectors.iterator();
+      }
+    }
+
+    MetricFamilySamplesEnumeration() {
+      this(Collections.<String>emptySet());
+    }
+
+    private void findNextElement() {
+      next = null;
+
+      while (metricFamilySamples != null && metricFamilySamples.hasNext()) {
+        next = filter(metricFamilySamples.next());
+        if (next != null) {
+          return;
+        }
+      }
+
+      if (next == null) {
+        while (collectorIter.hasNext()) {
+          metricFamilySamples = collectorIter.next().collect().iterator();
+          while (metricFamilySamples.hasNext()) {
+            next = filter(metricFamilySamples.next());
+            if (next != null) {
+              return;
+            }
+          }
+        }
+      }
+    }
+
+    private Collector.MetricFamilySamples filter(Collector.MetricFamilySamples next) {
+      if (includedNames.isEmpty() || includedNames.contains(next.name)) {
+        return next;
+      } else {
+        return null;
       }
     }
 
@@ -179,11 +225,11 @@ public class CollectorRegistry {
    * This is inefficient, and intended only for use in unittests.
    */
   public Double getSampleValue(String name, String[] labelNames, String[] labelValues) {
-    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(metricFamilySamples())) {
-      for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
+    for (Collector.MetricFamilySamples metricFamilySamples : Collections.list(metricFamilySamples())) {
+      for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
         if (sample.name.equals(name)
-            && Arrays.equals(sample.labelNames.toArray(), labelNames)
-            && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
+                && Arrays.equals(sample.labelNames.toArray(), labelNames)
+                && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
           return sample.value;
         }
       }

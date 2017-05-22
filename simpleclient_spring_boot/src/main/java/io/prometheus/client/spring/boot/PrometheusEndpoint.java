@@ -4,16 +4,15 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import java.util.Collections;
+import java.util.Set;
 
 @ConfigurationProperties("endpoints.prometheus")
-class PrometheusEndpoint extends AbstractEndpoint<ResponseEntity<String>> {
+class PrometheusEndpoint extends AbstractEndpoint<String> {
 
   private final CollectorRegistry collectorRegistry;
 
@@ -23,13 +22,15 @@ class PrometheusEndpoint extends AbstractEndpoint<ResponseEntity<String>> {
   }
 
   @Override
-  public ResponseEntity<String> invoke() {
+  public String invoke() {
+    return writeRegistry(Collections.<String>emptySet());
+  }
+
+  public String writeRegistry(Set<String> metricsToInclude) {
     try {
       Writer writer = new StringWriter();
-      TextFormat.write004(writer, collectorRegistry.metricFamilySamples());
-      return ResponseEntity.ok()
-          .header(CONTENT_TYPE, TextFormat.CONTENT_TYPE_004)
-          .body(writer.toString());
+      TextFormat.write004(writer, collectorRegistry.filteredMetricFamilySamples(metricsToInclude));
+      return writer.toString();
     } catch (IOException e) {
       // This actually never happens since StringWriter::write() doesn't throw any IOException
       throw new RuntimeException("Writing metrics failed", e);

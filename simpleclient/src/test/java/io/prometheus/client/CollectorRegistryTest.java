@@ -1,15 +1,16 @@
 package io.prometheus.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import org.junit.Test;
-import org.junit.Before;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 
 public class CollectorRegistryTest {
@@ -53,7 +54,7 @@ public class CollectorRegistryTest {
   }
 
   class EmptyCollector extends Collector {
-    public List<MetricFamilySamples> collect(){
+    public List<MetricFamilySamples> collect() {
       return new ArrayList<MetricFamilySamples>();
     }
   }
@@ -65,10 +66,29 @@ public class CollectorRegistryTest {
     Collector s = Summary.build().name("s").help("h").register(registry);
     Collector ec = new EmptyCollector().register(registry);
     HashSet<String> names = new HashSet<String>();
-    for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(registry.metricFamilySamples())) {
+    for (Collector.MetricFamilySamples metricFamilySamples : Collections.list(registry.metricFamilySamples())) {
       names.add(metricFamilySamples.name);
     }
     assertEquals(new HashSet<String>(Arrays.asList("g", "c", "s")), names);
+  }
+
+  @Test
+  public void testMetricFamilySamples_filterNames() {
+    Collector g = Gauge.build().name("g").help("h").register(registry);
+    Collector c = Counter.build().name("c").help("h").register(registry);
+    Collector s = Summary.build().name("s").help("h").register(registry);
+    Collector ec = new EmptyCollector().register(registry);
+    SkippedCollector sr = new SkippedCollector().register(registry);
+    PartiallyFilterCollector pfr = new PartiallyFilterCollector().register(registry);
+    HashSet<String> names = new HashSet<String>();
+    for (Collector.MetricFamilySamples metricFamilySamples : Collections.list(registry.filteredMetricFamilySamples(
+            new HashSet<String>(Arrays.asList("", "s", "c", "part_filter_a", "part_filter_c"))))) {
+      names.add(metricFamilySamples.name);
+    }
+
+    assertEquals(1, sr.collectCallCount);
+    assertEquals(2, pfr.collectCallCount);
+    assertEquals(new HashSet<String>(Arrays.asList("s", "c", "part_filter_a", "part_filter_c")), names);
   }
 
   @Test
@@ -82,25 +102,25 @@ public class CollectorRegistryTest {
     assertFalse(registry.metricFamilySamples().hasMoreElements());
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testCounterAndGaugeWithSameNameThrows() {
     Gauge.build().name("g").help("h").register(registry);
     Counter.build().name("g").help("h").register(registry);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testCounterAndSummaryWithSameNameThrows() {
     Counter.build().name("s").help("h").register(registry);
     Summary.build().name("s").help("h").register(registry);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testCounterSumAndSummaryWithSameNameThrows() {
     Counter.build().name("s_sum").help("h").register(registry);
     Summary.build().name("s").help("h").register(registry);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testHistogramAndSummaryWithSameNameThrows() {
     Histogram.build().name("s").help("h").register(registry);
     Summary.build().name("s").help("h").register(registry);
@@ -130,11 +150,47 @@ public class CollectorRegistryTest {
     new MyCollector().register(r);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testAutoDescribeThrowsOnReregisteringCustomCollector() {
     CollectorRegistry r = new CollectorRegistry(true);
     new MyCollector().register(r);
     new MyCollector().register(r);
   }
-  
+
+  private static class SkippedCollector extends Collector implements Collector.Describable {
+    public int collectCallCount = 0;
+
+    @Override
+    public List<MetricFamilySamples> collect() {
+      collectCallCount++;
+      List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
+      mfs.add(new GaugeMetricFamily("slow_gauge", "help", 123));
+      return mfs;
+    }
+
+    @Override
+    public List<MetricFamilySamples> describe() {
+      return collect();
+    }
+  }
+
+  private static class PartiallyFilterCollector extends Collector implements Collector.Describable {
+    public int collectCallCount = 0;
+
+    @Override
+    public List<MetricFamilySamples> collect() {
+      collectCallCount++;
+      List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
+      mfs.add(new GaugeMetricFamily("part_filter_a", "help", 123));
+      mfs.add(new GaugeMetricFamily("part_filter_b", "help", 123));
+      mfs.add(new GaugeMetricFamily("part_filter_c", "help", 123));
+      return mfs;
+    }
+
+    @Override
+    public List<MetricFamilySamples> describe() {
+      return collect();
+    }
+  }
+
 }
