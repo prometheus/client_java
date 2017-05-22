@@ -1,4 +1,4 @@
-package io.prometheus.client.exporter;
+package io.prometheus.client.vertx;
 
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
