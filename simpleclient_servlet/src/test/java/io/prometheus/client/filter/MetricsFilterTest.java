@@ -111,13 +111,14 @@ public class MetricsFilterTest {
                 0,
                 null
         );
+        constructed.init(mock(FilterConfig.class));
 
         HttpServletResponse res = mock(HttpServletResponse.class);
         constructed.doFilter(req, res, c);
 
         final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foobar_baz_filter_duration_seconds_sum", new String[]{"path", "method"}, new String[]{path, HttpMethods.POST});
         assertNotNull(sum);
-        assertEquals(0.1, sum, 0.001);
+        assertEquals(0.1, sum, 0.01);
     }
 
     @Test
@@ -148,7 +149,7 @@ public class MetricsFilterTest {
         f.doFilter(req, res, c);
 
         final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method"}, new String[]{"/foo", HttpMethods.POST});
-        assertEquals(0.1, sum, 0.001);
+        assertEquals(0.1, sum, 0.01);
 
         final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo", HttpMethods.POST, "0.05"});
         assertNotNull(le05);

@@ -81,7 +81,6 @@ public class MetricsFilter implements Filter {
         if (pathComponents != null) {
             this.pathComponents = pathComponents;
         }
-        this.init(null);
     }
 
     private boolean isEmpty(String s) {
