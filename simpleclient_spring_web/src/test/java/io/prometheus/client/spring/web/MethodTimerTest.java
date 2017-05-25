@@ -40,7 +40,7 @@ public class MethodTimerTest {
 
         final Double tot = CollectorRegistry.defaultRegistry.getSampleValue("test_class_sum");
         Assert.assertNotNull(tot);
-        assertEquals(0.02, tot, 0.001);
+        assertEquals(0.02, tot, 0.01);
     }
 
     <T> T getProxy(T source){
@@ -68,13 +68,13 @@ public class MethodTimerTest {
         a.timeMe();
 
         final Double tot = CollectorRegistry.defaultRegistry.getSampleValue(name + "_sum");
-        assertEquals(0.035, tot,0.001);
+        assertEquals(0.035, tot,0.01);
 
         a.timeMe();
         a.timeMe();
         a.timeMe();
         final Double tot2 = CollectorRegistry.defaultRegistry.getSampleValue(name + "_sum");
-        assertEquals(0.035*4, tot2, 0.008);
+        assertEquals(0.035*4, tot2, 0.1);
     }
 
     @Test
@@ -173,7 +173,7 @@ public class MethodTimerTest {
         final Double total = CollectorRegistry.defaultRegistry.getSampleValue("second_method_name_seconds_sum");
 
         assertNotNull(total);
-        assertEquals(0.001*count*sleepTime, total, 0.01);
+        assertEquals(0.001*count*sleepTime, total, 0.1);
 
         assertNotNull(misnamedTotal);
         assertEquals(0.001*misnamedSleepTime, misnamedTotal, 0.01);
@@ -208,7 +208,7 @@ public class MethodTimerTest {
         final Double tot1 = CollectorRegistry.defaultRegistry.getSampleValue("dosomething_one_test_seconds_sum");
         final Double tot2 = CollectorRegistry.defaultRegistry.getSampleValue("dosomething_two_test_seconds_sum");
 
-        assertEquals(.001*sleep2, tot2,.001);
-        assertEquals(.001*sleep1, tot1, .001);
+        assertEquals(.001*sleep2, tot2,.01);
+        assertEquals(.001*sleep1, tot1, .01);
     }
 }
