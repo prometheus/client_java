@@ -3,7 +3,6 @@ package io.prometheus.client;
 import io.prometheus.client.CKMSQuantiles.Quantile;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -182,10 +181,9 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
     /**
      * Equivalent to calling {@link #observeDuration()}.
-     * @throws IOException
      */
     @Override
-    public void close() throws IOException {
+    public void close() {
       observeDuration();
     }
   }
