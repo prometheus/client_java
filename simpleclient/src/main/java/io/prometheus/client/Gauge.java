@@ -1,7 +1,6 @@
 package io.prometheus.client;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -120,10 +119,9 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
 
      /**
       * Equivalent to calling {@link #setDuration()}.
-      * @throws IOException
       */
      @Override
-     public void close() throws IOException {
+     public void close() {
        setDuration();
      }
    }

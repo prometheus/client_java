@@ -1,7 +1,6 @@
 package io.prometheus.client;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -175,10 +174,9 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
 
     /**
      * Equivalent to calling {@link #observeDuration()}.
-     * @throws IOException
      */
     @Override
-    public void close() throws IOException {
+    public void close() {
       observeDuration();
     }
   }
