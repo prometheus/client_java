@@ -411,7 +411,7 @@ string of doubles as the `buckets` init parameter. The granularity of path
 measuring is also configurable, via the `path-components` init parameter. By
 default, the servlet filter will record each path differently, but by setting an
 integer here, you can tell the filter to only record up to the Nth slashes. That
-is, all reqeusts with greater than N "/" characters in the servlet URI path will
+is, all requests with greater than N "/" characters in the servlet URI path will
 be measured in the same bucket and you will lose that granularity.
 
 The code below is an example of the XML configuration for the filter. You will
