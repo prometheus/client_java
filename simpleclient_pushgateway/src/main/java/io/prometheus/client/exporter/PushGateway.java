@@ -260,9 +260,10 @@ public class PushGateway {
         writer.close();
       }
 
-      int response = connection.getResponseCode();
-      if (response != HttpURLConnection.HTTP_ACCEPTED) {
-        throw new IOException("Response code from " + url + " was " + response);
+      int responseCode = connection.getResponseCode();
+      if (responseCode != HttpURLConnection.HTTP_ACCEPTED) {
+        throw new IOException("Response code from " + url + " was " + responseCode
+            + ", message: " + connection.getResponseMessage());
       }
     } finally {
       connection.disconnect();
