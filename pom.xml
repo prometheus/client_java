@@ -60,6 +60,7 @@
         <module>simpleclient_spring_boot</module>
         <module>simpleclient_jetty</module>
         <module>simpleclient_vertx</module>
+        <module>simpleclient_pushgateway_vertx</module>
         <module>benchmark</module>
     </modules>
     
