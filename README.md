@@ -61,7 +61,7 @@ version can be found on in the maven repository for
 </dependency>
 ```
 
-If you use Gradle,you can add the dependency.
+If you use Gradle, you can add the dependency.
 
 ````groovy
 dependencies {
