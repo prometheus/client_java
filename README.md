@@ -61,6 +61,21 @@ version can be found on in the maven repository for
 </dependency>
 ```
 
+If you use Gradle,you can add the dependency.
+
+````groovy
+dependencies {
+  /* The client */
+  compile "io.prometheus:simpleclient:0.0.23"
+  /* Hotspot JVM metrics */
+  compile "io.prometheus:simpleclient_hotspot:0.0.23"
+  /* Exposition servlet */
+  compile "io.prometheus:simpleclient_servlet:0.0.23"
+  /* Pushgateway exposition */
+  compile "io.prometheus:simpleclient_pushgateway:0.0.23"
+}
+````
+
 ### Javadocs
 There are canonical examples defined in the class definition Javadoc of the client packages.
 
