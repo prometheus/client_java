@@ -71,8 +71,7 @@ public class MetricsFilter implements Filter {
             String metricName,
             String help,
             Integer pathComponents,
-            double[] buckets
-    ) throws ServletException {
+            double[] buckets) {
         this.metricName = metricName;
         this.buckets = buckets;
         if (help != null) {
