@@ -501,7 +501,13 @@ server.setHandler(context);
 context.addServlet(new ServletHolder(new MetricsServlet()), "/metrics");
 ```
 
+To expose the metrics of MetricsServlet in Google Guice you would need 
+to add the following lines to your ServletModule: 
 
+```java
+bind(MetricsServlet.class).in(Scopes.SINGLETON);
+serve("/metrics").with(MetricsServlet.class);
+```
 
 ## Exporting to a Pushgateway
 
