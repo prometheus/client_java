@@ -2,8 +2,11 @@ package io.prometheus.client.dropwizard;
 
 
 import com.codahale.metrics.*;
+
 import io.prometheus.client.Collector;
+import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.CollectorRegistry;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,7 +14,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -37,6 +42,58 @@ public class DropwizardExportsTest {
         assertEquals(new Double(1),
                 registry.getSampleValue("foo_bar")
         );
+    }
+
+    @Test
+    public void testCounterWithLabel() {
+        metricRegistry.counter("foo_bar=\"baz\"").inc();
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry);
+        List<MetricFamilySamples> samples = dropwizardExports.collect();
+        assertEquals("foo", samples.get(0).name);
+        assertEquals(new Double(1), new Double(samples.get(0).samples.get(0).value));
+        assertEquals("bar", samples.get(0).samples.get(0).labelNames.get(0));
+        assertEquals("baz", samples.get(0).samples.get(0).labelValues.get(0));
+    }
+    
+    @Test
+    public void testTimerWithLabel() {
+        metricRegistry.timer("some_timer_bar=\"baz\"").update(10l, TimeUnit.SECONDS);
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry);
+        List<MetricFamilySamples> samples = dropwizardExports.collect();
+        assertEquals("some_timer", samples.get(0).name);
+        
+        assertEquals(new Double(10.0), new Double(samples.get(0).samples.get(0).value));
+        assertEquals("quantile", samples.get(0).samples.get(0).labelNames.get(0));
+        assertEquals("bar", samples.get(0).samples.get(0).labelNames.get(1));
+        assertEquals("baz", samples.get(0).samples.get(0).labelValues.get(1));
+    }
+
+    @Test
+    public void testCounterWithMultipleLabels() {
+        metricRegistry.counter("foo_bar=\"baz\"_gazonk=\"foo\"").inc();
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry);
+        List<MetricFamilySamples> samples = dropwizardExports.collect();
+        assertEquals("foo", samples.get(0).name);
+        assertEquals(new Double(1), new Double(samples.get(0).samples.get(0).value));
+        assertTrue(samples.get(0).samples.get(0).labelNames.contains("bar"));
+        assertTrue(samples.get(0).samples.get(0).labelValues.contains("baz"));
+        assertTrue(samples.get(0).samples.get(0).labelNames.contains("gazonk"));
+        assertTrue(samples.get(0).samples.get(0).labelValues.contains("foo"));
+    }
+    
+    @Test
+    public void testTimerWithMultipleLabels() {
+        metricRegistry.timer("some_timer_bar=\"baz\"_gazonk=\"foo\"").update(10l, TimeUnit.SECONDS);
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry);
+        List<MetricFamilySamples> samples = dropwizardExports.collect();
+        assertEquals("some_timer", samples.get(0).name);
+        
+        assertEquals(new Double(10.0), new Double(samples.get(0).samples.get(0).value));
+        assertTrue(samples.get(0).samples.get(0).labelNames.contains("quantile"));
+        assertTrue(samples.get(0).samples.get(0).labelNames.contains("bar"));
+        assertTrue(samples.get(0).samples.get(0).labelValues.contains("baz"));
+        assertTrue(samples.get(0).samples.get(0).labelNames.contains("gazonk"));
+        assertTrue(samples.get(0).samples.get(0).labelValues.contains("foo"));
     }
 
     @Test
