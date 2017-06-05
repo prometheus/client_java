@@ -111,8 +111,27 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
                         Arrays.asList(new MetricFamilySamples.Sample(name + "_total",
                                 new ArrayList<String>(),
                                 new ArrayList<String>(),
-                                meter.getCount())))
-
+                                meter.getCount()))),
+                new MetricFamilySamples(name + "_one_minute_rate", Type.COUNTER, getHelpMessage(dropwizardName, meter),
+                        Arrays.asList(new MetricFamilySamples.Sample(name + "_one_minute_rate",
+                                new ArrayList<String>(),
+                                new ArrayList<String>(),
+                                meter.getOneMinuteRate()))),
+                new MetricFamilySamples(name + "_five_minute_rate", Type.COUNTER, getHelpMessage(dropwizardName, meter),
+                        Arrays.asList(new MetricFamilySamples.Sample(name + "_five_minute_rate",
+                                new ArrayList<String>(),
+                                new ArrayList<String>(),
+                                meter.getFiveMinuteRate()))),
+                new MetricFamilySamples(name + "_fifteen_minute_rate", Type.COUNTER, getHelpMessage(dropwizardName, meter),
+                        Arrays.asList(new MetricFamilySamples.Sample(name + "_fifteen_minute_rate",
+                                new ArrayList<String>(),
+                                new ArrayList<String>(),
+                                meter.getFifteenMinuteRate()))),
+                new MetricFamilySamples(name + "_mean_rate", Type.COUNTER, getHelpMessage(dropwizardName, meter),
+                        Arrays.asList(new MetricFamilySamples.Sample(name + "_mean_rate",
+                                new ArrayList<String>(),
+                                new ArrayList<String>(),
+                                meter.getMeanRate())))
         );
     }
 
