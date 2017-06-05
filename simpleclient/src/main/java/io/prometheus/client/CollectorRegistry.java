@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 /**
  * A registry of Collectors.
@@ -39,6 +41,52 @@ public class CollectorRegistry {
 
   public CollectorRegistry(boolean autoDescribe) {
     this.autoDescribe = autoDescribe;
+  }
+
+  /**
+   * Registers a {@link Collector} conditionally.
+   * This register method provides if-not-exists functionality.
+   * This allows up to call register multiple times for a {@link Collector} of the same name.
+   * The creator {@link Callable}, should be side effect free, since there are not atomic guarantees
+   * between successfully registering the collector and invoking the callable.
+   * @param name Collector name.
+   * @param creator A side effect free callable.
+   * @param <T> The collector type.
+   * @return A new collector, or the existing collector.
+   * @throws Exception thrown by the {@link Callable}.
+   */
+  public <T extends Collector> T register(String name, Callable<T> creator) throws Exception {
+    Map<String, Collector> localNamesToCollectors = new HashMap<String, Collector>();
+    synchronized (collectorsToNames) {
+        localNamesToCollectors.putAll(namesToCollectors);
+    }
+
+    Set<String> localRegisteredNames = new HashSet<String>(localNamesToCollectors.keySet());
+
+    if (!localRegisteredNames.contains(name)) {
+      T collector = creator.call();
+      List<String> collectorNames = collectorNames(collector);
+
+      for(String collectorName: collectorNames) {
+        if(localRegisteredNames.contains(collectorName)) {
+          return (T) localNamesToCollectors.get(collectorName);
+        }
+      }
+
+      synchronized (collectorsToNames) {
+        for (String collectorName : namesToCollectors.keySet()) {
+          if (collectorNames.contains(collectorName)) {
+            return (T) namesToCollectors.get(collectorName);
+          }
+        }
+        for (String collectorName : collectorNames) {
+          namesToCollectors.put(collectorName, collector);
+        }
+        collectorsToNames.put(collector, collectorNames);
+        return collector;
+      }
+    }
+    return (T) localNamesToCollectors.get(name);
   }
 
   /**

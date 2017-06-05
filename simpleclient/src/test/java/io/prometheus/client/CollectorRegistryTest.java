@@ -8,10 +8,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Enumeration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import io.prometheus.client.Collector.MetricFamilySamples;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static junit.framework.TestCase.assertSame;
+import static org.junit.Assert.*;
 
 public class CollectorRegistryTest {
 
@@ -160,6 +167,91 @@ public class CollectorRegistryTest {
     CollectorRegistry r = new CollectorRegistry(true);
     new MyCollector().register(r);
     new MyCollector().register(r);
+  }
+
+  @Test
+  public void testRegisterWithCallable() throws Exception {
+    final Histogram h = Histogram.build().name("s").help("h").create();
+
+    assertSame(registry.register("s", new Callable<Histogram>() {
+      @Override
+      public Histogram call() throws Exception {
+        return h;
+      }
+    }), h);
+
+    Enumeration<MetricFamilySamples> samples = registry.metricFamilySamples();
+
+    assertTrue(samples.hasMoreElements());
+    assertEquals(samples.nextElement().name, "s");
+    assertFalse(samples.hasMoreElements());
+  }
+
+  @Test
+  public void testRegisterWithCallableSameName() throws Exception {
+    final Histogram h = Histogram.build().name("s").help("h").create();
+
+    assertSame(registry.register("s", new Callable<Histogram>() {
+      @Override
+      public Histogram call() throws Exception {
+        return h;
+      }
+    }), h);
+
+    final AtomicBoolean called = new AtomicBoolean(false);
+
+    assertSame(registry.register("s", new Callable<Histogram>() {
+      @Override
+      public Histogram call() throws Exception {
+        try {
+          return Histogram.build().name("s").help("h").create();
+        } finally {
+          called.set(true);
+        }
+      }
+    }), h);
+
+    assertFalse(called.get());
+
+    Enumeration<MetricFamilySamples> samples = registry.metricFamilySamples();
+
+    assertTrue(samples.hasMoreElements());
+    assertEquals(samples.nextElement().name, "s");
+    assertFalse(samples.hasMoreElements());
+
+  }
+
+  @Test
+  public void testRegisterWithCallableSameNameDifferentCollector() throws Exception {
+    final Histogram h = Histogram.build().name("s").help("h").create();
+
+    assertSame(registry.register("s", new Callable<Histogram>() {
+      @Override
+      public Histogram call() throws Exception {
+        return h;
+      }
+    }), h);
+
+    final AtomicBoolean called = new AtomicBoolean(false);
+
+    assertSame(registry.register("ss", new Callable<Histogram>() {
+      @Override
+      public Histogram call() throws Exception {
+        try {
+          return Histogram.build().name("s").help("h").create();
+        } finally {
+          called.set(true);
+        }
+      }
+    }), h);
+
+    assertTrue(called.get());
+
+    Enumeration<MetricFamilySamples> samples = registry.metricFamilySamples();
+
+    assertTrue(samples.hasMoreElements());
+    assertEquals(samples.nextElement().name, "s");
+    assertFalse(samples.hasMoreElements());
   }
 
   private static class SkippedCollector extends Collector implements Collector.Describable {
