@@ -40,7 +40,7 @@ public class GaugeResponseActuatorMetricConverter {
 	private List<String> retrieveLabelValues(String keyToRemove, String name) {
 		String method = name.split("\\.")[2];
 		String endpoint = name.substring(name.lastIndexOf(method) + method.length()).replaceAll("\\.","/");
-		return Arrays.asList(method, endpoint);
+		return Arrays.asList(endpoint, method);
 	}
 
 	private boolean containsHttpMethod(String name) {

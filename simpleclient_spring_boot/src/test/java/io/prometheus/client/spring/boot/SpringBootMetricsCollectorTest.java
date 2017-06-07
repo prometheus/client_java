@@ -56,7 +56,7 @@ public class SpringBootMetricsCollectorTest {
 
 
     CollectorRegistry defaultRegistry = CollectorRegistry.defaultRegistry;
-    assertThat(defaultRegistry.getSampleValue("gauge_response", new String[]{"endpoint", "method"}, new String[]{"GET", "/info/details"}), is(3.0));
+    assertThat(defaultRegistry.getSampleValue("gauge_response", new String[]{"endpoint", "method"}, new String[]{"/info/details", "GET"}), is(3.0));
     assertThat(defaultRegistry.getSampleValue("gauge_response", new String[]{"endpoint"}, new String[]{"/info/details"}), is(3.0));
   }
 
