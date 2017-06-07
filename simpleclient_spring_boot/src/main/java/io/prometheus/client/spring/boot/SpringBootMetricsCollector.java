@@ -25,26 +25,40 @@ import java.util.List;
 @Component
 public class SpringBootMetricsCollector extends Collector implements Collector.Describable {
   private final Collection<PublicMetrics> publicMetrics;
-
+  private final GaugeResponseActuatorMetricConverter gaugeResponseActuatorMetricConverter;
   @Autowired
   public SpringBootMetricsCollector(Collection<PublicMetrics> publicMetrics) {
-    this.publicMetrics = publicMetrics;
+  	this.publicMetrics = publicMetrics;
+  	this.gaugeResponseActuatorMetricConverter = new GaugeResponseActuatorMetricConverter();
   }
 
   @Override
   public List<MetricFamilySamples> collect() {
     ArrayList<MetricFamilySamples> samples = new ArrayList<MetricFamilySamples>();
+    ArrayList<MetricFamilySamples.Sample> gauges = new ArrayList<MetricFamilySamples.Sample>();
+
     for (PublicMetrics publicMetrics : this.publicMetrics) {
       for (Metric<?> metric : publicMetrics.metrics()) {
-        String name = Collector.sanitizeMetricName(metric.getName());
-        double value = metric.getValue().doubleValue();
-        MetricFamilySamples metricFamilySamples = new MetricFamilySamples(
-                name, Type.GAUGE, name, Collections.singletonList(
-                new MetricFamilySamples.Sample(name, Collections.<String>emptyList(), Collections.<String>emptyList(), value)));
-        samples.add(metricFamilySamples);
+		if (isResponseGaugeEndpointMetric(metric)) {
+			MetricFamilySamples.Sample metricFamilySamples = gaugeResponseActuatorMetricConverter.convert(metric);
+			gauges.add(metricFamilySamples);
+		} else {
+			String name = Collector.sanitizeMetricName(metric.getName());
+			double value = metric.getValue().doubleValue();
+			MetricFamilySamples metricFamilySamples = new MetricFamilySamples(
+					name, Type.GAUGE, name, Collections.singletonList(
+					new MetricFamilySamples.Sample(name, Collections.<String>emptyList(), Collections.<String>emptyList(), value)));
+			samples.add(metricFamilySamples);
+		}
       }
     }
+
+    samples.add(new MetricFamilySamples("gauge_response", Type.GAUGE, "gauge_response", gauges));
     return samples;
+  }
+
+  private boolean isResponseGaugeEndpointMetric(Metric<?> metric) {
+  	return metric.getName().startsWith("gauge.response");
   }
 
   @Override
