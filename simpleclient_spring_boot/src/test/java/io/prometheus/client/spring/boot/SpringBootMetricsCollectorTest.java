@@ -12,6 +12,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import static org.hamcrest.Matchers.is;
@@ -42,8 +43,21 @@ public class SpringBootMetricsCollectorTest {
     counterService.increment("foo");
     gaugeService.submit("bar", 3.14);
 
+
     CollectorRegistry defaultRegistry = CollectorRegistry.defaultRegistry;
     assertThat(defaultRegistry.getSampleValue("counter_foo"), is(1.0));
     assertThat(defaultRegistry.getSampleValue("gauge_bar"), is(3.14));
   }
+
+  @Test
+  public void collectConvertedMetrics() throws Exception {
+    gaugeService.submit("response.GET.info.details", 3.0);
+    gaugeService.submit("response.info.details", 3.0);
+
+
+    CollectorRegistry defaultRegistry = CollectorRegistry.defaultRegistry;
+    assertThat(defaultRegistry.getSampleValue("gauge_response", new String[]{"endpoint", "method"}, new String[]{"GET", "/info/details"}), is(3.0));
+    assertThat(defaultRegistry.getSampleValue("gauge_response", new String[]{"endpoint"}, new String[]{"/info/details"}), is(3.0));
+  }
+
 }
