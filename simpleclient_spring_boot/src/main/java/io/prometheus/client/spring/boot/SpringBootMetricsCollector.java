@@ -31,6 +31,13 @@ public class SpringBootMetricsCollector extends Collector implements Collector.D
     this.publicMetrics = publicMetrics;
   }
 
+  protected Type parseType(String name) {
+    if (name.startsWith("counter.")) {
+      return Type.COUNTER;
+    }
+    return Type.GAUGE;
+  }
+
   @Override
   public List<MetricFamilySamples> collect() {
     ArrayList<MetricFamilySamples> samples = new ArrayList<MetricFamilySamples>();
@@ -38,8 +45,9 @@ public class SpringBootMetricsCollector extends Collector implements Collector.D
       for (Metric<?> metric : publicMetrics.metrics()) {
         String name = Collector.sanitizeMetricName(metric.getName());
         double value = metric.getValue().doubleValue();
+        Type type = parseType(metric.getName());
         MetricFamilySamples metricFamilySamples = new MetricFamilySamples(
-                name, Type.GAUGE, name, Collections.singletonList(
+                name, type, name, Collections.singletonList(
                 new MetricFamilySamples.Sample(name, Collections.<String>emptyList(), Collections.<String>emptyList(), value)));
         samples.add(metricFamilySamples);
       }
