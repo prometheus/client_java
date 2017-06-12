@@ -19,9 +19,6 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by sunghyuk on 2017. 6. 11..
- */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(DummyBootApplication.class)
 @WebIntegrationTest(randomPort = true)
@@ -34,10 +31,8 @@ public class PrometheusMvcEndpointTest {
 
     @Test
     public void testNameParamIsNull() throws Exception {
-        // if name param is null, it should be initialized as an empty array.
-        // mvc endpoint should return 200 not 406 (caused by NPE)
         ResponseEntity metricsResponse = template.exchange(getBaseUrl() + "/prometheus", HttpMethod.GET, getEntity(), String.class);
-        // then:
+
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
         assertTrue(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004).equals(metricsResponse.getHeaders().getContentType().toString()));
     }
@@ -45,7 +40,7 @@ public class PrometheusMvcEndpointTest {
     @Test
     public void testNameParamIsNotNull() {
         ResponseEntity metricsResponse = template.exchange(getBaseUrl() + "/prometheus?name[]=foo_bar", HttpMethod.GET, getEntity(), String.class);
-        // then:
+
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
         assertTrue(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004).equals(metricsResponse.getHeaders().getContentType().toString()));
     }
