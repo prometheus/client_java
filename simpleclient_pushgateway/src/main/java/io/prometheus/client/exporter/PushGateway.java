@@ -7,6 +7,7 @@ import io.prometheus.client.exporter.common.TextFormat;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collections;
@@ -62,7 +63,18 @@ public class PushGateway {
    * @param address  host:port or ip:port of the Pushgateway.
    */
   public PushGateway(String address) {
-    this.address = address;
+    this(URI.create("http://" + address));
+  }
+
+  /**
+   * Construct a Pushgateway, with the given URI.
+   * <p>
+   * @param serverBaseURI the base URI and optional context path of the Pushgateway server.
+   */
+  public PushGateway(URI serverBaseURI) {
+    this.address = URI.create(serverBaseURI.toString() + "/metrics/job/")
+        .normalize()
+        .toString();
   }
 
   /**
@@ -235,12 +247,14 @@ public class PushGateway {
   }
 
   void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
-    String url = "http://" + address + "/metrics/job/" + URLEncoder.encode(job, "UTF-8");
+    String url = address + URLEncoder.encode(job, "UTF-8");
+
     if (groupingKey != null) {
       for (Map.Entry<String, String> entry: groupingKey.entrySet()) {
         url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
       }
     }
+
     HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
     connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
     if (!method.equals("DELETE")) {
