@@ -55,7 +55,7 @@ import java.io.OutputStreamWriter;
 public class PushGateway {
 
   private final String address;
-  private static final int SECONDS_PER_MILLISECOND = 1000;
+  private static final int MILLISECONDS_PER_SECOND = 1000;
   /**
    * Construct a Pushgateway, with the given address.
    * <p>
@@ -248,8 +248,8 @@ public class PushGateway {
     }
     connection.setRequestMethod(method);
 
-    connection.setConnectTimeout(10 * SECONDS_PER_MILLISECOND);
-    connection.setReadTimeout(10 * SECONDS_PER_MILLISECOND);
+    connection.setConnectTimeout(10 * MILLISECONDS_PER_SECOND);
+    connection.setReadTimeout(10 * MILLISECONDS_PER_SECOND);
     connection.connect();
 
     try {
