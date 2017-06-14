@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Collections;
 import java.util.Set;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -33,6 +34,11 @@ public class PrometheusMvcEndpoint extends EndpointMvcAdapter {
       // Shouldn't happen - MVC endpoint shouldn't be registered when delegate's
       // disabled
       return getDisabledResponse();
+    }
+    
+    // Delegate writeRegistry() isn't null safe
+    if (name==null) {
+      name = Collections.emptySet();
     }
 
     String result = delgate.writeRegistry(name);
