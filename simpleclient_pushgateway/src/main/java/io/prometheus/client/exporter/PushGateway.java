@@ -59,7 +59,6 @@ public class PushGateway {
   // Visible for testing
   final String gatewayBaseURL;
   private static final int MILLISECONDS_PER_SECOND = 1000;
-
   /**
    * Construct a Pushgateway, with the given address.
    * <p>
@@ -272,7 +271,6 @@ public class PushGateway {
         url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
       }
     }
-
     HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
     connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
     if (!method.equals("DELETE")) {
