@@ -70,7 +70,7 @@ public class PushGateway {
   }
 
   /**
-   * Construct a Pushgateway, with the given URI.
+   * Construct a Pushgateway, with the given URL.
    * <p>
    * @param serverBaseURL the base URL and optional context path of the Pushgateway server.
    */
