@@ -7,6 +7,7 @@ import io.prometheus.client.exporter.common.TextFormat;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -55,26 +56,43 @@ import java.io.OutputStreamWriter;
  */
 public class PushGateway {
 
-  private final String address;
+  // Visible for testing
+  final String gatewayBaseURL;
   private static final int MILLISECONDS_PER_SECOND = 1000;
+
   /**
    * Construct a Pushgateway, with the given address.
    * <p>
    * @param address  host:port or ip:port of the Pushgateway.
    */
   public PushGateway(String address) {
-    this(URI.create("http://" + address));
+    this(createURLSneakily("http://" + address));
   }
 
   /**
    * Construct a Pushgateway, with the given URI.
    * <p>
-   * @param serverBaseURI the base URI and optional context path of the Pushgateway server.
+   * @param serverBaseURL the base URL and optional context path of the Pushgateway server.
    */
-  public PushGateway(URI serverBaseURI) {
-    this.address = URI.create(serverBaseURI.toString() + "/metrics/job/")
-        .normalize()
-        .toString();
+  public PushGateway(URL serverBaseURL) {
+    this.gatewayBaseURL = URI.create(serverBaseURL.toString() + "/metrics/job/")
+      .normalize()
+      .toString();
+  }
+
+  /**
+   * Creates a URL instance from a String representation of a URL without throwing a checked exception.
+   * Required because you can't wrap a call to another constructor in a try statement.
+   *
+   * @param urlString the String representation of the URL.
+   * @return The URL instance.
+   */
+  private static URL createURLSneakily(final String urlString) {
+    try {
+      return new URL(urlString);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -247,7 +265,7 @@ public class PushGateway {
   }
 
   void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
-    String url = address + URLEncoder.encode(job, "UTF-8");
+    String url = gatewayBaseURL + URLEncoder.encode(job, "UTF-8");
 
     if (groupingKey != null) {
       for (Map.Entry<String, String> entry: groupingKey.entrySet()) {
