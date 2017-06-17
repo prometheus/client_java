@@ -40,7 +40,7 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
               }
             }
         ),
-        buildGauge("queued_thread_pool_idle_threads", "Number of idle threads",
+        buildGauge("queued_thread_pool_threads_idle", "Number of idle threads",
             new ValueProvider() {
               @Override
               public double getValue(QueuedThreadPool queuedThreadPool) {

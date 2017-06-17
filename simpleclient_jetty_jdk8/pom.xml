@@ -17,6 +17,11 @@
         Collector of data from Jetty Statistics for Jetty versions which require JDK 8.
     </description>
 
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>

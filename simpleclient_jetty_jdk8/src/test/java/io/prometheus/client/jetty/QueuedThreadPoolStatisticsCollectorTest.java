@@ -1,7 +1,7 @@
 package io.prometheus.client.jetty;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import io.prometheus.client.CollectorRegistry;
 import java.util.concurrent.BlockingQueue;
@@ -26,7 +26,7 @@ public class QueuedThreadPoolStatisticsCollectorTest {
 
   @Before
   public void setUp() {
-    BlockingQueue<Runnable> queue = new BlockingArrayQueue<Runnable>(8, 1024, 1024);
+    BlockingQueue<Runnable> queue = new BlockingArrayQueue<>(8, 1024, 1024);
     queuedThreadPool = new QueuedThreadPool(200, 8, 60000, queue);
     server = new Server(queuedThreadPool);
   }
@@ -44,12 +44,12 @@ public class QueuedThreadPoolStatisticsCollectorTest {
 
     server.start();
 
-    assertNotEquals(0d,
+    assertTrue(
         CollectorRegistry.defaultRegistry.getSampleValue("queued_thread_pool_threads",
-            LABEL_NAMES, labelValues));
-    assertNotEquals(0d,
-        CollectorRegistry.defaultRegistry.getSampleValue("queued_thread_pool_idle_threads",
-            LABEL_NAMES, labelValues));
+            LABEL_NAMES, labelValues) > 0);
+    assertTrue(
+        CollectorRegistry.defaultRegistry.getSampleValue("queued_thread_pool_threads_idle",
+            LABEL_NAMES, labelValues) > 0);
     assertNotNull(CollectorRegistry.defaultRegistry.getSampleValue("queued_thread_pool_jobs",
         LABEL_NAMES, labelValues));
   }

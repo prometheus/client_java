@@ -7,15 +7,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 public class QueuedThreadPoolStatisticsCollector extends Collector {
 
   private static final List<String> LABEL_NAMES = Collections.singletonList("unit");
 
-  private final Map<String, QueuedThreadPool> queuedThreadPoolMap = new ConcurrentHashMap<String, QueuedThreadPool>();
+  private final Map<String, QueuedThreadPool> queuedThreadPoolMap = new ConcurrentHashMap<>();
 
   public QueuedThreadPoolStatisticsCollector() {
   }
@@ -31,32 +31,13 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
 
   @Override
   public List<MetricFamilySamples> collect() {
-    return Arrays.<MetricFamilySamples>asList(
+    return Arrays.asList(
         buildGauge("queued_thread_pool_threads", "Number of total threads",
-            new ValueProvider() {
-              @Override
-              public double getValue(QueuedThreadPool queuedThreadPool) {
-                return queuedThreadPool.getThreads();
-              }
-            }
-        ),
-        buildGauge("queued_thread_pool_idle_threads", "Number of idle threads",
-            new ValueProvider() {
-              @Override
-              public double getValue(QueuedThreadPool queuedThreadPool) {
-                return queuedThreadPool.getIdleThreads();
-              }
-            }
-        ),
+            QueuedThreadPool::getThreads),
+        buildGauge("queued_thread_pool_threads_idle", "Number of idle threads",
+            QueuedThreadPool::getIdleThreads),
         buildGauge("queued_thread_pool_jobs", "Number of total jobs",
-            new ValueProvider() {
-              @Override
-              public double getValue(QueuedThreadPool queuedThreadPool) {
-                return queuedThreadPool.getQueueSize();
-              }
-            }
-        )
-    );
+            QueuedThreadPool::getQueueSize));
   }
 
   @Override
@@ -67,21 +48,13 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
     return super.register(registry);
   }
 
-  private GaugeMetricFamily buildGauge(String metric, String help, ValueProvider valueProvider) {
-
+  private GaugeMetricFamily buildGauge(String metric, String help,
+      Function<QueuedThreadPool, Integer> metricValueProvider) {
     final GaugeMetricFamily metricFamily = new GaugeMetricFamily(metric, help, LABEL_NAMES);
-
-    for (Entry<String, QueuedThreadPool> entry : queuedThreadPoolMap.entrySet()) {
-      metricFamily.addMetric(
-          Collections.singletonList(entry.getKey()),
-          valueProvider.getValue(entry.getValue())
-      );
-    }
+    queuedThreadPoolMap.forEach((key, value) -> metricFamily.addMetric(
+        Collections.singletonList(key),
+        metricValueProvider.apply(value)
+    ));
     return metricFamily;
-  }
-
-  private interface ValueProvider {
-
-    double getValue(QueuedThreadPool queuedThreadPool);
   }
 }
