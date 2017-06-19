@@ -32,11 +32,11 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
   @Override
   public List<MetricFamilySamples> collect() {
     return Arrays.asList(
-        buildGauge("queued_thread_pool_threads", "Number of total threads",
+        buildGauge("jetty_queued_thread_pool_threads", "Number of total threads",
             QueuedThreadPool::getThreads),
-        buildGauge("queued_thread_pool_threads_idle", "Number of idle threads",
+        buildGauge("jetty_queued_thread_pool_threads_idle", "Number of idle threads",
             QueuedThreadPool::getIdleThreads),
-        buildGauge("queued_thread_pool_jobs", "Number of total jobs",
+        buildGauge("jetty_queued_thread_pool_jobs", "Number of total jobs",
             QueuedThreadPool::getQueueSize));
   }
 

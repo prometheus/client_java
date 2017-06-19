@@ -32,7 +32,7 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
   @Override
   public List<MetricFamilySamples> collect() {
     return Arrays.<MetricFamilySamples>asList(
-        buildGauge("queued_thread_pool_threads", "Number of total threads",
+        buildGauge("jetty_queued_thread_pool_threads", "Number of total threads",
             new ValueProvider() {
               @Override
               public double getValue(QueuedThreadPool queuedThreadPool) {
@@ -40,7 +40,7 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
               }
             }
         ),
-        buildGauge("queued_thread_pool_threads_idle", "Number of idle threads",
+        buildGauge("jetty_queued_thread_pool_threads_idle", "Number of idle threads",
             new ValueProvider() {
               @Override
               public double getValue(QueuedThreadPool queuedThreadPool) {

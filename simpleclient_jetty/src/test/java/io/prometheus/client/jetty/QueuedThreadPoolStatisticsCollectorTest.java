@@ -44,10 +44,10 @@ public class QueuedThreadPoolStatisticsCollectorTest {
     server.start();
 
     assertTrue(
-        CollectorRegistry.defaultRegistry.getSampleValue("queued_thread_pool_threads",
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_queued_thread_pool_threads",
             LABEL_NAMES, labelValues) > 0);
     assertTrue(
-        CollectorRegistry.defaultRegistry.getSampleValue("queued_thread_pool_threads_idle",
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_queued_thread_pool_threads_idle",
             LABEL_NAMES, labelValues) > 0);
   }
 

@@ -57,7 +57,7 @@ public class JettyStatisticsCollector extends Collector {
             buildGauge("jetty_async_requests_waiting_max", "Maximum number of waiting async requests", statisticsHandler.getAsyncRequestsWaitingMax()),
             buildCounter("jetty_async_dispatches_total", "Number of requested that have been asynchronously dispatched", statisticsHandler.getAsyncDispatches()),
             buildCounter("jetty_expires_total", "Number of async requests requests that have expired", statisticsHandler.getExpires()),
-            buildStatusGauge(),
+            buildStatusCounter(),
             buildGauge("jetty_stats_seconds", "Time in seconds stats have been collected for", statisticsHandler.getStatsOnMs() / 1000.0),
             buildCounter("jetty_responses_bytes_total", "Total number of bytes across all responses", statisticsHandler.getResponsesBytesTotal())
     );
@@ -79,7 +79,7 @@ public class JettyStatisticsCollector extends Collector {
         Collections.singletonList(new MetricFamilySamples.Sample(name, EMPTY_LIST, EMPTY_LIST, value)));
   }
 
-  private MetricFamilySamples buildStatusGauge() {
+  private MetricFamilySamples buildStatusCounter() {
     String name = "jetty_responses_total";
     return new MetricFamilySamples(
             name,
