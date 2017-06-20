@@ -9,17 +9,40 @@ import io.prometheus.client.CollectorRegistry;
 import java.io.FileNotFoundException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.StatisticsHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public class JettyStatisticsCollectorTest {
 
-  private final Server server = new Server(0);
+  private final Server server = new Server();
+  private final ServerConnector connector = new ServerConnector(server);
+
+  @Before
+  public void setUp() throws Exception {
+    server.addConnector(connector);
+    HandlerCollection handlers = new HandlerCollection();
+
+    ServletContextHandler context = new ServletContextHandler();
+    context.setContextPath("/");
+    handlers.setHandlers(new Handler[]{context});
+
+    StatisticsHandler stats = new StatisticsHandler();
+    stats.setHandler(handlers);
+    server.setHandler(stats);
+
+    // register collector
+    new JettyStatisticsCollector(stats).register();
+
+    server.setHandler(stats);
+    server.start();
+  }
 
   @After
   public void tearDown() throws Exception {
@@ -28,31 +51,10 @@ public class JettyStatisticsCollectorTest {
 
   @Test
   public void collect() throws Exception {
-    HandlerCollection handlers = new HandlerCollection();
-
-    ServletContextHandler context = new ServletContextHandler();
-    context.setContextPath("/");
-
-    StatisticsHandler statisticsHandler = new StatisticsHandler();
-    statisticsHandler.setServer(server);
-    statisticsHandler.setHandler(context);
-
-    handlers.addHandler(statisticsHandler);
-
-    // register collector
-    new JettyStatisticsCollector(statisticsHandler).register();
-
-    server.setHandler(handlers);
-
-    server.start();
-
-    ServerConnector connector = (ServerConnector) server.getConnectors()[0];
-    int port = connector.getLocalPort();
-
     // send GET request
     try {
-      HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://127.0.0.1:" + port)
-          .openConnection();
+      final String spec = "http://127.0.0.1:" + connector.getLocalPort();
+      final HttpURLConnection urlConnection = (HttpURLConnection) new URL(spec).openConnection();
       urlConnection.getInputStream().close();
       urlConnection.disconnect();
     } catch (FileNotFoundException ignored) {
