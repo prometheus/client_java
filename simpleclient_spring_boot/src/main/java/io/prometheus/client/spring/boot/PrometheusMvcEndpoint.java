@@ -24,7 +24,7 @@ public class PrometheusMvcEndpoint extends EndpointMvcAdapter {
 
   @RequestMapping(
           method = {RequestMethod.GET},
-          produces = {TextFormat.CONTENT_TYPE_004}
+          produces = {TextFormat.CONTENT_TYPE_004, TextFormat.CONTENT_TYPE}
   )
   @ResponseBody
   public ResponseEntity value(
