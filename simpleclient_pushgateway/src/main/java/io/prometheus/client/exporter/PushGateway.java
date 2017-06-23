@@ -83,6 +83,8 @@ public class PushGateway {
    * Creates a URL instance from a String representation of a URL without throwing a checked exception.
    * Required because you can't wrap a call to another constructor in a try statement.
    *
+   * TODO: Remove this along with other deprecated methods before version 1.0 is released.
+   *
    * @param urlString the String representation of the URL.
    * @return The URL instance.
    */
