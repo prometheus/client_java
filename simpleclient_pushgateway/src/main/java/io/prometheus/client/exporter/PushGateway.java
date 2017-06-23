@@ -57,7 +57,7 @@ import java.io.OutputStreamWriter;
 public class PushGateway {
 
   // Visible for testing
-  final String gatewayBaseURL;
+  protected final String gatewayBaseURL;
   private static final int MILLISECONDS_PER_SECOND = 1000;
   /**
    * Construct a Pushgateway, with the given address.
