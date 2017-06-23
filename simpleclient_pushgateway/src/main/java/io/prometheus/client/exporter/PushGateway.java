@@ -1,23 +1,22 @@
 package io.prometheus.client.exporter;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.exporter.common.TextFormat;
-
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import io.prometheus.client.Collector;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.exporter.common.TextFormat;
 
 /**
  * Export metrics via the Prometheus Pushgateway.
@@ -58,6 +57,7 @@ public class PushGateway {
 
   // Visible for testing
   protected final String gatewayBaseURL;
+
   private static final int MILLISECONDS_PER_SECOND = 1000;
   /**
    * Construct a Pushgateway, with the given address.
