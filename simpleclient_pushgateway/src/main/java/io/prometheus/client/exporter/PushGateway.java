@@ -55,7 +55,7 @@ import io.prometheus.client.exporter.common.TextFormat;
  */
 public class PushGateway {
 
-  // Visible for testing
+  // Visible for testing.
   protected final String gatewayBaseURL;
 
   private static final int MILLISECONDS_PER_SECOND = 1000;
