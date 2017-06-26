@@ -4,37 +4,46 @@ import io.prometheus.client.exporter.common.TextFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
-import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.*;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(DummyBootApplication.class)
-@WebIntegrationTest(randomPort = true)
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = RANDOM_PORT, classes = DummyBootApplication.class)
+@TestPropertySource( properties = "management.security.enabled=false")
 public class PrometheusMvcEndpointTest {
 
     @Value("${local.server.port}")
     int localServerPort;
 
-    RestTemplate template = new TestRestTemplate();
+    @Autowired
+    TestRestTemplate template;
 
     @Test
     public void testNameParamIsNull() throws Exception {
         ResponseEntity metricsResponse = template.exchange(getBaseUrl() + "/prometheus", HttpMethod.GET, getEntity(), String.class);
 
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
-        assertTrue(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004).equals(metricsResponse.getHeaders().getContentType().toString()));
+        assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004),metricsResponse.getHeaders().getContentType().toString().toLowerCase());
+
+    }
+
+    @Test
+    public void testAcceptPlainText() throws Exception {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "text/plain");
+
+        ResponseEntity<String> metricsResponse = template.exchange(getBaseUrl() + "/prometheus", HttpMethod.GET, new HttpEntity(headers), String.class);
+
+        assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
     }
 
     @Test
@@ -42,7 +51,8 @@ public class PrometheusMvcEndpointTest {
         ResponseEntity metricsResponse = template.exchange(getBaseUrl() + "/prometheus?name[]=foo_bar", HttpMethod.GET, getEntity(), String.class);
 
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
-        assertTrue(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004).equals(metricsResponse.getHeaders().getContentType().toString()));
+        assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004),metricsResponse.getHeaders().getContentType().toString().toLowerCase());
+
     }
 
     public HttpEntity getEntity() {
