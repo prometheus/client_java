@@ -36,6 +36,20 @@ public class PushGatewayTest {
     groupingKey.put("l", "v");
   }
 
+  @Test(expected = RuntimeException.class)
+  public void testInvalidURLThrowsRuntimeException() {
+    new PushGateway("::"); // ":" is interpreted as port number, so parsing fails
+  }
+
+  @Test
+  public void testMultipleSlashesAreStrippedFromURL() {
+    final PushGateway pushGateway = new PushGateway("example.com:1234/context///path//");
+    Assert.assertEquals(
+        "http://example.com:1234/context/path/metrics/job/",
+        pushGateway.gatewayBaseURL
+    );
+  }
+
   @Test
   public void testPush() throws IOException {
     mockServerClient.when(

@@ -1,21 +1,22 @@
 package io.prometheus.client.exporter;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.exporter.common.TextFormat;
-
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import io.prometheus.client.Collector;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.exporter.common.TextFormat;
 
 /**
  * Export metrics via the Prometheus Pushgateway.
@@ -54,7 +55,9 @@ import java.io.OutputStreamWriter;
  */
 public class PushGateway {
 
-  private final String address;
+  // Visible for testing.
+  protected final String gatewayBaseURL;
+
   private static final int MILLISECONDS_PER_SECOND = 1000;
   /**
    * Construct a Pushgateway, with the given address.
@@ -62,7 +65,35 @@ public class PushGateway {
    * @param address  host:port or ip:port of the Pushgateway.
    */
   public PushGateway(String address) {
-    this.address = address;
+    this(createURLSneakily("http://" + address));
+  }
+
+  /**
+   * Construct a Pushgateway, with the given URL.
+   * <p>
+   * @param serverBaseURL the base URL and optional context path of the Pushgateway server.
+   */
+  public PushGateway(URL serverBaseURL) {
+    this.gatewayBaseURL = URI.create(serverBaseURL.toString() + "/metrics/job/")
+      .normalize()
+      .toString();
+  }
+
+  /**
+   * Creates a URL instance from a String representation of a URL without throwing a checked exception.
+   * Required because you can't wrap a call to another constructor in a try statement.
+   *
+   * TODO: Remove this along with other deprecated methods before version 1.0 is released.
+   *
+   * @param urlString the String representation of the URL.
+   * @return The URL instance.
+   */
+  private static URL createURLSneakily(final String urlString) {
+    try {
+      return new URL(urlString);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -235,7 +266,8 @@ public class PushGateway {
   }
 
   void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
-    String url = "http://" + address + "/metrics/job/" + URLEncoder.encode(job, "UTF-8");
+    String url = gatewayBaseURL + URLEncoder.encode(job, "UTF-8");
+
     if (groupingKey != null) {
       for (Map.Entry<String, String> entry: groupingKey.entrySet()) {
         url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
