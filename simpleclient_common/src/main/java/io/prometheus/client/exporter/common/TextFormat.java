@@ -11,7 +11,6 @@ public class TextFormat {
    * Content-type for text version 0.0.4.
    */
   public final static String CONTENT_TYPE_004 = "text/plain; version=0.0.4; charset=utf-8";
-  public final static String CONTENT_TYPE = "text/plain";
 
   /**
    * Write out the text version 0.0.4 of the given MetricFamilySamples.

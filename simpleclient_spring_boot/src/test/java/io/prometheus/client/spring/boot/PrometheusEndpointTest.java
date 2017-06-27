@@ -22,9 +22,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringRunner.class)
+@RunWith( SpringRunner.class)
 @EnablePrometheusEndpoint
-@SpringBootTest(webEnvironment = RANDOM_PORT, classes = DummyBootApplication.class)
+@SpringBootTest( webEnvironment = RANDOM_PORT, classes = DummyBootApplication.class)
 @TestPropertySource( properties = "management.security.enabled=false")
 public class PrometheusEndpointTest {
 
@@ -55,7 +55,7 @@ public class PrometheusEndpointTest {
 
     // then:
     assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
-    assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004),metricsResponse.getHeaders().getContentType().toString().toLowerCase());
+    assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004), metricsResponse.getHeaders().getContentType().toString().toLowerCase());
 
     List<String> responseLines = Arrays.asList(metricsResponse.getBody().split("\n"));
     assertThat(responseLines, CustomMatchers.<String>exactlyNItems(1,

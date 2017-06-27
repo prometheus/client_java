@@ -15,8 +15,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = RANDOM_PORT, classes = DummyBootApplication.class)
+@RunWith( SpringRunner.class)
+@SpringBootTest( webEnvironment = RANDOM_PORT, classes = DummyBootApplication.class)
 @TestPropertySource( properties = "management.security.enabled=false")
 public class PrometheusMvcEndpointTest {
 
@@ -31,7 +31,7 @@ public class PrometheusMvcEndpointTest {
         ResponseEntity metricsResponse = template.exchange(getBaseUrl() + "/prometheus", HttpMethod.GET, getEntity(), String.class);
 
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
-        assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004),metricsResponse.getHeaders().getContentType().toString().toLowerCase());
+        assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004), metricsResponse.getHeaders().getContentType().toString().toLowerCase());
 
     }
 
@@ -51,7 +51,7 @@ public class PrometheusMvcEndpointTest {
         ResponseEntity metricsResponse = template.exchange(getBaseUrl() + "/prometheus?name[]=foo_bar", HttpMethod.GET, getEntity(), String.class);
 
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
-        assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004),metricsResponse.getHeaders().getContentType().toString().toLowerCase());
+        assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004), metricsResponse.getHeaders().getContentType().toString().toLowerCase());
 
     }
 

@@ -18,9 +18,9 @@ import java.util.Collection;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-@RunWith(SpringRunner.class)
+@RunWith( SpringRunner.class)
 @EnableAutoConfiguration
-@SpringBootTest(classes = MetricsBootApplication.class)
+@SpringBootTest( classes = MetricsBootApplication.class)
 public class SpringBootMetricsCollectorTest {
 
   @Autowired
