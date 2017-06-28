@@ -1,44 +1,58 @@
 package io.prometheus.client.spring.resttemplate;
 
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Summary;
 import io.prometheus.client.Summary.Child;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
+/**
+ * Interceptor for Spring Rest Template to collect its execution time and result metrics <p>
+ * Usage: You need to create a MetricsClientHttpRequestInterceptor bean and set it to your rest
+ * template
+ * <pre>
+ * {@code
+ *   {@literal @}Bean
+ *   public MetricsClientHttpRequestInterceptor metricsClientHttpRequestInterceptor() {
+ *     return new MetricsClientHttpRequestInterceptor();
+ *   }
+ *
+ *   {@literal @}Bean
+ *   RestTemplate restTemplate(MetricsClientHttpRequestInterceptor interceptor) {
+ *     RestTemplate restTemplate = new RestTemplate();
+ *     restTemplate.setInterceptors(Collections.<ClientHttpRequestInterceptor>singletonList(interceptor));
+ *     return restTemplate;
+ *   }
+ * }
+ * </pre>
+ * Also, you can use your registry:
+ * <pre>
+ * {@code
+ *    new MetricsClientHttpRequestInterceptor(myRegistry);
+ * }
+ * </pre>
+ *
+ * @author Cenk Akin
+ */
 public class MetricsClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 
-  private static final List<MetricsRestTemplateLabelType> DEFAULT_LABELS =
-      Arrays.asList(MetricsRestTemplateLabelType.values());
+  private final static String[] LABELS = {"method", "host", "path"};
 
   private final Summary metricClientInterceptorSummary;
 
-  private final List<MetricsRestTemplateLabelType> labelTypes;
-
   public MetricsClientHttpRequestInterceptor() {
-    this(DEFAULT_LABELS);
+    this(CollectorRegistry.defaultRegistry);
   }
 
-  public MetricsClientHttpRequestInterceptor(List<MetricsRestTemplateLabelType> labelTypes) {
-    this.labelTypes = labelTypes;
+  public MetricsClientHttpRequestInterceptor(CollectorRegistry collectorRegistry) {
     metricClientInterceptorSummary = Summary.build()
-        .name("rest_template_request_duration_seconds")
-        .labelNames(getLabelNames())
+        .name("spring_rest_template_request_duration_seconds")
+        .labelNames(LABELS)
         .help("Rest template request duration (s)")
-        .register();
-  }
-
-  private String[] getLabelNames() {
-    final int size = labelTypes.size();
-    final String[] labelNames = new String[size];
-    for (int i = 0; i < size; i++) {
-      labelNames[i] = labelTypes.get(i).name().toLowerCase();
-    }
-    return labelNames;
+        .register(collectorRegistry);
   }
 
   @Override
@@ -53,11 +67,9 @@ public class MetricsClientHttpRequestInterceptor implements ClientHttpRequestInt
   }
 
   private Child timer(HttpRequest request) {
-    final int size = labelTypes.size();
-    final String[] labelValues = new String[size];
-    for (int i = 0; i < size; i++) {
-      labelValues[i] = labelTypes.get(i).resolve(request);
-    }
-    return metricClientInterceptorSummary.labels(labelValues);
+    final String method = MetricsRestTemplateLabelType.METHOD.resolve(request);
+    final String host = MetricsRestTemplateLabelType.HOST.resolve(request);
+    final String path = MetricsRestTemplateLabelType.PATH.resolve(request);
+    return metricClientInterceptorSummary.labels(method, host, path);
   }
 }

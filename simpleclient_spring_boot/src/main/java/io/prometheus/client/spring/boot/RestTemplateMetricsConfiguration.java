@@ -45,7 +45,7 @@ public class RestTemplateMetricsConfiguration {
       if (RestTemplate.class.isAssignableFrom(bean.getClass())) {
         RestTemplate restTemplate = (RestTemplate) bean;
         List<ClientHttpRequestInterceptor> currentInterceptors = restTemplate.getInterceptors();
-        boolean metricsInterceptorPresent = checkMetricsInterceptorPresent(currentInterceptors);
+        boolean metricsInterceptorPresent = isMetricsInterceptorPresent(currentInterceptors);
         if (metricsInterceptorPresent) {
           return bean;
         }
@@ -60,8 +60,7 @@ public class RestTemplateMetricsConfiguration {
       return bean;
     }
 
-    private boolean checkMetricsInterceptorPresent(
-        List<ClientHttpRequestInterceptor> interceptors) {
+    private boolean isMetricsInterceptorPresent(List<ClientHttpRequestInterceptor> interceptors) {
       for (ClientHttpRequestInterceptor interceptor : interceptors) {
         if (ClientHttpRequestInterceptor.class.isAssignableFrom(interceptor.getClass())) {
           return true;

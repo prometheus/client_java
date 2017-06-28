@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import io.prometheus.client.CollectorRegistry;
 import java.util.Collections;
-import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +23,16 @@ import org.springframework.web.client.RestTemplate;
 @ContextConfiguration(classes = {MetricsRestTemplateRestTemplateConfig.class})
 public class MetricsClientHttpRequestInterceptorTest {
 
-  private final String[] labelNames = {"method", "host"};
+  final static CollectorRegistry REGISTRY = new CollectorRegistry();
+
+  private final String[] labelNames = {"method", "host", "path"};
 
   @Autowired
   private RestTemplate restTemplate;
 
   @Test
-  public void metricsGathered() {
-    final String[] labelValues = {"GET", "unknown"};
+  public void testMetricsGathered() {
+    final String[] labelValues = {"GET", "unknown", "/test"};
     MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
     mockServer.expect(MockRestRequestMatchers.requestTo("/test"))
         .andExpect(MockRestRequestMatchers.method(HttpMethod.GET))
@@ -39,10 +40,9 @@ public class MetricsClientHttpRequestInterceptorTest {
     restTemplate.getForObject("/test", String.class);
 
     assertEquals(new Double(1),
-        CollectorRegistry.defaultRegistry
-            .getSampleValue("rest_template_request_duration_seconds_count",
-                labelNames,
-                labelValues));
+        REGISTRY.getSampleValue("spring_rest_template_request_duration_seconds_count",
+            labelNames,
+            labelValues));
 
     mockServer.verify();
   }
@@ -53,11 +53,8 @@ class MetricsRestTemplateRestTemplateConfig {
 
   @Bean
   public MetricsClientHttpRequestInterceptor metricsClientHttpRequestInterceptor() {
-    List<MetricsRestTemplateLabelType> labelTypes = new MetricsRestTemplateLabelsBuilder()
-        .withMethod()
-        .withHost()
-        .build();
-    return new MetricsClientHttpRequestInterceptor(labelTypes);
+    return new MetricsClientHttpRequestInterceptor(
+        MetricsClientHttpRequestInterceptorTest.REGISTRY);
   }
 
   @Bean
