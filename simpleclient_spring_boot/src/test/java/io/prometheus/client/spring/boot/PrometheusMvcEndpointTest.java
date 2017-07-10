@@ -15,9 +15,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@RunWith( SpringRunner.class)
-@SpringBootTest( webEnvironment = RANDOM_PORT, classes = DummyBootApplication.class)
-@TestPropertySource( properties = "management.security.enabled=false")
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = RANDOM_PORT, classes = DummyBootApplication.class)
+@TestPropertySource(properties = "management.security.enabled=false")
 public class PrometheusMvcEndpointTest {
 
     @Value("${local.server.port}")
