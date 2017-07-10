@@ -20,6 +20,7 @@ Table of Contents
      * [Logging](#logging)
      * [Caches](#caches)
      * [Hibernate](#hibernate)
+     * [Jetty](#jetty)
   * [Exporting](#exporting)
      * [HTTP](#http)
   * [Exporting to a Pushgateway](#exporting-to-a-pushgateway)
@@ -398,6 +399,35 @@ or `EntityManagerFactory`, you can use this code to access the underlying `Sessi
 
 ```java
 SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
+```
+### Jetty
+
+There is a collector for recording various Jetty server metrics. You can do it by  registering the collector like this:
+
+```java
+// Configure StatisticsHandler.
+StatisticsHandler stats = new StatisticsHandler();
+stats.setHandler(server.getHandler());
+server.setHandler(stats);
+// Register collector.
+new JettyStatisticsCollector(stats).register();
+
+```
+
+Also, you can collect `QueuedThreadPool` metrics. If there is a single `QueuedThreadPool`
+to keep track of, use the following: 
+
+```java
+new QueuedThreadPoolStatisticsCollector(queuedThreadPool, "myapp").register();
+```
+
+If you want to collect multiple `QueuedThreadPool` metrics, also you can achieve it like this:
+
+```java
+new QueuedThreadPoolStatisticsCollector()
+    .add(queuedThreadPool1, "myapp1")
+    .add(queuedThreadPool2, "myapp2")
+    .register();
 ```
 
 #### Servlet Filter
