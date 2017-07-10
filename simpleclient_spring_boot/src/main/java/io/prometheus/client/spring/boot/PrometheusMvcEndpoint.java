@@ -15,6 +15,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 @ConfigurationProperties("endpoints.prometheus")
 public class PrometheusMvcEndpoint extends EndpointMvcAdapter {
+
   private final PrometheusEndpoint delgate;
 
   public PrometheusMvcEndpoint(PrometheusEndpoint delegate) {
@@ -24,7 +25,7 @@ public class PrometheusMvcEndpoint extends EndpointMvcAdapter {
 
   @RequestMapping(
           method = {RequestMethod.GET},
-          produces = {TextFormat.CONTENT_TYPE_004}
+          produces = { "*/*" }
   )
   @ResponseBody
   public ResponseEntity value(
