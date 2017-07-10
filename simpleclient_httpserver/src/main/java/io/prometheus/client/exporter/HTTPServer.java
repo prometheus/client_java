@@ -7,6 +7,7 @@ import io.prometheus.client.exporter.common.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.InetSocketAddress;
 import java.util.Enumeration;
 import java.util.concurrent.Executors;
 
@@ -29,7 +30,7 @@ public class HTTPServer {
 
     }
 
-    private static ByteArrayOutputStream dump() throws java.io.IOException {
+    private static ByteArrayOutputStream dump() throws IOException {
         ByteArrayOutputStream response = new ByteArrayOutputStream(1 << 20);
         OutputStreamWriter osw = new OutputStreamWriter(response);
         TextFormat.write004(osw,
@@ -41,13 +42,13 @@ public class HTTPServer {
         return response;
     }
 
-    public HTTPServer(int port) throws java.io.IOException {
+    public HTTPServer(int port) throws IOException {
         HttpServer mServer = HttpServer.create();
-        mServer.bind(new java.net.InetSocketAddress(port), 3);
+        mServer.bind(new InetSocketAddress(port), 3);
         HttpHandler mHandler = new HTTPMetricHandler();
         mServer.createContext("/", mHandler);
         mServer.createContext("/metrics", mHandler);
-        mServer.setExecutor(Executors.newSingleThreadExecutor());
+        mServer.setExecutor(Executors.newFixedThreadPool(5));
         mServer.start();
     }
 }
