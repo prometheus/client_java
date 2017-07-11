@@ -14,13 +14,32 @@ import java.util.logging.Logger;
  * Collect Dropwizard metrics from a MetricRegistry.
  */
 public class DropwizardExports extends io.prometheus.client.Collector implements io.prometheus.client.Collector.Describable {
-    private MetricRegistry registry;
+    private final String prefix;
+    private final MetricRegistry registry;
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
 
     /**
      * @param registry a metric registry to export in prometheus.
      */
     public DropwizardExports(MetricRegistry registry) {
+        this("", registry);
+    }
+
+    /**
+     * @param prefix a prefix to put in front of each metric name.
+     * @param registry a metric registry to export in prometheus.
+     */
+    public DropwizardExports(String prefix, MetricRegistry registry) {
+
+        if (prefix == null) {
+            throw new NullPointerException("prefix is null");
+        }
+
+        if (registry == null) {
+            throw new NullPointerException("registry is null");
+        }
+
+        this.prefix = prefix.isEmpty() ? "" : prefix + "_";
         this.registry = registry;
     }
 
@@ -28,7 +47,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * Export counter as Prometheus <a href="https://prometheus.io/docs/concepts/metric_types/#gauge">Gauge</a>.
      */
     List<MetricFamilySamples> fromCounter(String dropwizardName, Counter counter) {
-        String name = sanitizeMetricName(dropwizardName);
+        String name = buildMetricName(dropwizardName);
         MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name, new ArrayList<String>(), new ArrayList<String>(),
                 new Long(counter.getCount()).doubleValue());
         return Arrays.asList(new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(dropwizardName, counter), Arrays.asList(sample)));
@@ -43,7 +62,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * Export gauge as a prometheus gauge.
      */
     List<MetricFamilySamples> fromGauge(String dropwizardName, Gauge gauge) {
-        String name = sanitizeMetricName(dropwizardName);
+        String name = buildMetricName(dropwizardName);
         Object obj = gauge.getValue();
         double value;
         if (obj instanceof Number) {
@@ -70,7 +89,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      *
      */
     List<MetricFamilySamples> fromSnapshotAndCount(String dropwizardName, Snapshot snapshot, long count, double factor, String helpMessage) {
-        String name = sanitizeMetricName(dropwizardName);
+        String name = buildMetricName(dropwizardName);
         List<MetricFamilySamples.Sample> samples = Arrays.asList(
                 new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.5"), snapshot.getMedian() * factor),
                 new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.75"), snapshot.get75thPercentile() * factor),
@@ -105,7 +124,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * Export a Meter as as prometheus COUNTER.
      */
     List<MetricFamilySamples> fromMeter(String dropwizardName, Meter meter) {
-        String name = sanitizeMetricName(dropwizardName);
+        String name = buildMetricName(dropwizardName);
         return Arrays.asList(
                 new MetricFamilySamples(name + "_total", Type.COUNTER, getHelpMessage(dropwizardName, meter),
                         Arrays.asList(new MetricFamilySamples.Sample(name + "_total",
@@ -124,6 +143,11 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      */
     public static String sanitizeMetricName(String dropwizardName){
         return dropwizardName.replaceAll("[^a-zA-Z0-9:_]", "_");
+    }
+
+    private String buildMetricName(String dropwizardName) {
+        final String sanitizedName = sanitizeMetricName(dropwizardName);
+        return prefix.isEmpty() ? sanitizedName : prefix + sanitizedName;
     }
 
     @Override
