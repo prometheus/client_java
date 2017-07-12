@@ -192,6 +192,35 @@ public class DropwizardExportsTest {
 
     }
 
+    @Test
+    public void testUsesMetricPrefix() {
+        final CollectorRegistry registry = new CollectorRegistry();
+        final MetricRegistry metricRegistry = new MetricRegistry();
+
+        new DropwizardExports("foo", metricRegistry).register(registry);
+
+        metricRegistry.timer("my.application.namedTimer1");
+        metricRegistry.counter("my.application.namedCounter1");
+        metricRegistry.meter("my.application.namedMeter1");
+        metricRegistry.histogram("my.application.namedHistogram1");
+        metricRegistry.register("my.application.namedGauge1", new ExampleDoubleGauge());
+
+        final Enumeration<Collector.MetricFamilySamples> metricFamilySamples = registry.metricFamilySamples();
+        final Map<String, Collector.MetricFamilySamples> elements = new HashMap<String, Collector.MetricFamilySamples>();
+
+        while (metricFamilySamples.hasMoreElements()) {
+            Collector.MetricFamilySamples element =  metricFamilySamples.nextElement();
+            elements.put(element.name, element);
+        }
+
+        assertEquals(5, elements.size());
+        assertTrue(elements.keySet().contains("foo_my_application_namedTimer1"));
+        assertTrue(elements.keySet().contains("foo_my_application_namedCounter1"));
+        assertTrue(elements.keySet().contains("foo_my_application_namedMeter1_total"));
+        assertTrue(elements.keySet().contains("foo_my_application_namedHistogram1"));
+        assertTrue(elements.keySet().contains("foo_my_application_namedGauge1"));
+    }
+
 
     private static class ExampleDoubleGauge implements Gauge<Double> {
         @Override
