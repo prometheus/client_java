@@ -515,9 +515,14 @@ There are several options for exporting metrics.
 
 Metrics are usually exposed over HTTP, to be read by the Prometheus server.
 
-There are Servlet, SpringBoot, and Vert.x integrations included in the client library.
+There are HTTPServer, Servlet, SpringBoot, and Vert.x integrations included in the client library.
+The simplest of these is the HTTPServer:
 
-To add Prometheus exposition to an existing HTTP server, see the `MetricsServlet`. 
+```java
+HTTPServer server = new HTTPServer(1234);
+```
+
+To add Prometheus exposition to an existing HTTP server using servlets, see the `MetricsServlet`. 
 It also serves as a simple example of how to write a custom endpoint.
 
 To expose the metrics used in your code, you would add the Prometheus servlet to your Jetty server:
@@ -531,6 +536,9 @@ server.setHandler(context);
 context.addServlet(new ServletHolder(new MetricsServlet()), "/metrics");
 ```
 
+All HTTP expostion integrations support restricting which time series to return
+using `?name[]=` URL parameters. Due to implementation limitations, this may
+have false negatives.
 
 
 ## Exporting to a Pushgateway
