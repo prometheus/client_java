@@ -42,14 +42,22 @@ public class HTTPServer {
         return response;
     }
 
-    public HTTPServer(int port) throws IOException {
+    public HTTPServer(InetSocketAddress addr) throws IOException {
         HttpServer mServer = HttpServer.create();
-        mServer.bind(new InetSocketAddress(port), 3);
+        mServer.bind(addr, 3);
         HttpHandler mHandler = new HTTPMetricHandler();
         mServer.createContext("/", mHandler);
         mServer.createContext("/metrics", mHandler);
         mServer.setExecutor(Executors.newFixedThreadPool(5));
         mServer.start();
+    }
+
+    public HTTPServer(int port) throws IOException {
+        this(new InetSocketAddress(port));
+    }
+
+    public HTTPServer(String host, int port) throws IOException {
+        this(new InetSocketAddress(host, port));
     }
 }
 
