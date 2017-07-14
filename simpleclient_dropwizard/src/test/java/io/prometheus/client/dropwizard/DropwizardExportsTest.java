@@ -4,6 +4,7 @@ package io.prometheus.client.dropwizard;
 import com.codahale.metrics.*;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -136,12 +137,22 @@ public class DropwizardExportsTest {
 
     @Test
     public void testTimer() throws IOException, InterruptedException {
+        assertTimerConvertedCorrectly(0.001);
+    }
+
+    @Test
+    public void testTimerWithTimeUnit() throws IOException, InterruptedException {
+        metricRegistry = new MetricRegistry();
+        new DropwizardExports(metricRegistry, TimeUnit.MILLISECONDS).register(registry);
+        assertTimerConvertedCorrectly(1D);
+    }
+    private void assertTimerConvertedCorrectly(double minP99) throws IOException, InterruptedException {
         Timer t = metricRegistry.timer("timer");
         Timer.Context time = t.time();
         Thread.sleep(1L);
         time.stop();
         // We slept for 1Ms so we ensure that all timers are above 1ms:
-        assertTrue(registry.getSampleValue("timer", new String[]{"quantile"}, new String[]{"0.99"}) > 0.001);
+        assertTrue(registry.getSampleValue("timer", new String[]{"quantile"}, new String[]{"0.99"}) > minP99);
         assertEquals(new Double(1.0D), registry.getSampleValue("timer_count"));
     }
 

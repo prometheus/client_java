@@ -14,14 +14,24 @@ import java.util.logging.Logger;
  * Collect Dropwizard metrics from a MetricRegistry.
  */
 public class DropwizardExports extends io.prometheus.client.Collector implements io.prometheus.client.Collector.Describable {
-    private MetricRegistry registry;
+    private final MetricRegistry registry;
+    private final TimeUnit timeUnit;
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
 
     /**
      * @param registry a metric registry to export in prometheus.
      */
     public DropwizardExports(MetricRegistry registry) {
+        this(registry, TimeUnit.SECONDS);
+    }
+
+    /**
+     * @param registry a metric registry to export in prometheus.
+     * @param timeUnit timeUnit to use for Timer metrics
+     */
+    public DropwizardExports(MetricRegistry registry, TimeUnit timeUnit) {
         this.registry = registry;
+        this.timeUnit = timeUnit;
     }
 
     /**
@@ -98,7 +108,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      */
     List<MetricFamilySamples> fromTimer(String dropwizardName, Timer timer) {
         return fromSnapshotAndCount(dropwizardName, timer.getSnapshot(), timer.getCount(),
-                1.0D / TimeUnit.SECONDS.toNanos(1L), getHelpMessage(dropwizardName, timer));
+                1.0D / timeUnit.toNanos(1L), getHelpMessage(dropwizardName, timer));
     }
 
     /**
@@ -149,6 +159,6 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
 
     @Override
     public List<MetricFamilySamples> describe() {
-      return new ArrayList<MetricFamilySamples>();
+        return new ArrayList<MetricFamilySamples>();
     }
 }
