@@ -36,7 +36,6 @@ public class StandardExports extends Collector {
   private final StatusReader statusReader;
   private final OperatingSystemMXBean osBean;
   private final RuntimeMXBean runtimeBean;
-  private final boolean unix;
   private final boolean linux;
 
   public StandardExports() {
@@ -49,7 +48,6 @@ public class StandardExports extends Collector {
       this.statusReader = statusReader;
       this.osBean = osBean;
       this.runtimeBean = runtimeBean;
-      this.unix = (osBean instanceof UnixOperatingSystemMXBean);
       this.linux = (osBean.getName().indexOf("Linux") == 0);
   }
 
@@ -58,29 +56,36 @@ public class StandardExports extends Collector {
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
 
-    try {
-      /*
-      There are two interfaces com.ibm.lang.management.OperatingSystemMXBean and com.sun.management.OperatingSystemMXBean,
-      but no common interface which exposes getProcessCpuTime. Hence call on the implementing class, which is default access,
-      so use reflection hack to set it accessible.
-      */
-      Method method = osBean.getClass().getMethod("getProcessCpuTime", null);
-      if (!method.isAccessible()) {
-        method.setAccessible(true);
-      }
-      Long l = (Long) method.invoke(osBean);
-      mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
-          l / NANOSECONDS_PER_SECOND));
-    }
-    catch (Exception e) {
-      LOGGER.log(Level.FINE,"Could not access process cpu time", e);
-    }
-
-
     mfs.add(new GaugeMetricFamily("process_start_time_seconds", "Start time of the process since unix epoch in seconds.",
-        runtimeBean.getStartTime() / MILLISECONDS_PER_SECOND));
+                                  runtimeBean.getStartTime() / MILLISECONDS_PER_SECOND));
 
-    if (unix) {
+    if (osBean instanceof com.sun.management.OperatingSystemMXBean) {
+      com.sun.management.OperatingSystemMXBean b = (com.sun.management.OperatingSystemMXBean) osBean;
+      mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
+                                      b.getProcessCpuTime() / NANOSECONDS_PER_SECOND));
+    } else {
+      try {
+        /*
+        Support com.ibm.lang.management.OperatingSystemMXBean, which is independent
+        of com.sun.management.OperatingSystemMXBean.  Use reflective access to
+        avoid a compile-time dependency.  Note that the method should be retrieved
+        from the class of com.ibm.lang.management.OperatingSystemMXBean rather than
+        any implementing class (osBean.getClass()), otherwise on Java 9 access may
+        be denied.
+        */
+        Class<?> ibmBeanClass = Class.forName("com.ibm.lang.management.OperatingSystemMXBean", true,
+                                              osBean.getClass().getClassLoader());
+        Method method = ibmBeanClass.getMethod("getProcessCpuTime", null);
+        Long l = (Long) method.invoke(osBean);
+        mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
+                                        l / NANOSECONDS_PER_SECOND));
+      }
+      catch (Exception e) {
+        LOGGER.log(Level.FINE,"Could not access process cpu time", e);
+      }
+    }
+
+    if (osBean instanceof UnixOperatingSystemMXBean) {
       UnixOperatingSystemMXBean unixBean = (UnixOperatingSystemMXBean) osBean;
       mfs.add(new GaugeMetricFamily("process_open_fds", "Number of open file descriptors.",
           unixBean.getOpenFileDescriptorCount()));
