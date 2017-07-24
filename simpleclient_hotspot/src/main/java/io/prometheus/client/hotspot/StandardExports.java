@@ -1,6 +1,5 @@
 package io.prometheus.client.hotspot;
 
-import com.sun.management.UnixOperatingSystemMXBean;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
@@ -36,7 +35,6 @@ public class StandardExports extends Collector {
   private final StatusReader statusReader;
   private final OperatingSystemMXBean osBean;
   private final RuntimeMXBean runtimeBean;
-  private final boolean unix;
   private final boolean linux;
 
   public StandardExports() {
@@ -49,7 +47,6 @@ public class StandardExports extends Collector {
       this.statusReader = statusReader;
       this.osBean = osBean;
       this.runtimeBean = runtimeBean;
-      this.unix = (osBean instanceof UnixOperatingSystemMXBean);
       this.linux = (osBean.getName().indexOf("Linux") == 0);
   }
 
@@ -65,9 +62,7 @@ public class StandardExports extends Collector {
       so use reflection hack to set it accessible.
       */
       Method method = osBean.getClass().getMethod("getProcessCpuTime", null);
-      if (!method.isAccessible()) {
-        method.setAccessible(true);
-      }
+      method.setAccessible(true);
       Long l = (Long) method.invoke(osBean);
       mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
           l / NANOSECONDS_PER_SECOND));
@@ -80,13 +75,7 @@ public class StandardExports extends Collector {
     mfs.add(new GaugeMetricFamily("process_start_time_seconds", "Start time of the process since unix epoch in seconds.",
         runtimeBean.getStartTime() / MILLISECONDS_PER_SECOND));
 
-    if (unix) {
-      UnixOperatingSystemMXBean unixBean = (UnixOperatingSystemMXBean) osBean;
-      mfs.add(new GaugeMetricFamily("process_open_fds", "Number of open file descriptors.",
-          unixBean.getOpenFileDescriptorCount()));
-      mfs.add(new GaugeMetricFamily("process_max_fds", "Maximum number of open file descriptors.",
-          unixBean.getMaxFileDescriptorCount()));
-    }
+    collectFileDescriptorMetricsUnix(mfs);
 
     // There's no standard Java or POSIX way to get memory stats,
     // so add support for just Linux for now.
@@ -129,6 +118,35 @@ public class StandardExports extends Collector {
           LOGGER.fine(e.toString());
         }
       }
+    }
+  }
+
+  void collectFileDescriptorMetricsUnix(List<MetricFamilySamples> mfs) {
+    // There exist at least 2 UnixOperatingSystemMXBean interfaces, in com.sun.management and 
+    // com.ibm.lang.management. There are also environments (such as Wildfly) where access to these
+    // interfaces is restricted. Hence call on the implementing class, which is default access,
+    // so use reflection hack to set it accessible.
+    java.lang.reflect.Method getOpenFdCount, getMaxFdCount;
+    try {
+      getOpenFdCount = osBean.getClass().getMethod("getOpenFileDescriptorCount");
+      getOpenFdCount.setAccessible(true);
+
+      getMaxFdCount = osBean.getClass().getMethod("getMaxFileDescriptorCount");
+      getMaxFdCount.setAccessible(true);
+    } catch (NoSuchMethodException e) {
+      // Abort, expected on non-Unix OS.
+      return;
+    }
+
+    try {
+      long openFdCount = (Long) getOpenFdCount.invoke(osBean);
+      mfs.add(new GaugeMetricFamily(
+          "process_open_fds", "Number of open file descriptors.", openFdCount));
+      long maxFdCount = (Long) getMaxFdCount.invoke(osBean);
+      mfs.add(new GaugeMetricFamily(
+          "process_max_fds", "Maximum number of open file descriptors.", maxFdCount));
+    } catch (Exception e) {
+      LOGGER.log(Level.WARNING, "Could not access file descriptor metrics", e);
     }
   }
 

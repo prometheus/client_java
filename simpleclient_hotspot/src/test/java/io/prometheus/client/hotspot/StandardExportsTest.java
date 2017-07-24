@@ -2,18 +2,18 @@ package io.prometheus.client.hotspot;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.sun.management.UnixOperatingSystemMXBean;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.io.FileNotFoundException;
+import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 
 import io.prometheus.client.CollectorRegistry;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class StandardExportsTest {
 
@@ -23,17 +23,37 @@ public class StandardExportsTest {
     }
   }
 
+  // Interface with a signature equivalent to com.sun.management.OperatingSystemMXBean and
+  // com.ibm.lang.management.OperatingSystemMXBean, without explicitly depending on either of
+  // these classes, used to test reflection.
+  interface GenericOperatingSystemMXBean extends OperatingSystemMXBean {
+    public long getCommittedVirtualMemorySize();
+    public long getTotalSwapSpaceSize();
+    public long getFreeSwapSpaceSize();
+    public long getProcessCpuTime();
+    public long getFreePhysicalMemorySize();
+    public long getTotalPhysicalMemorySize();
+  }
+
+  // Interface with a signature equivalent to com.sun.management.UnixOperatingSystemMXBean and
+  // com.ibm.lang.management.UnixOperatingSystemMXBean, without explicitly depending on either of
+  // these classes, used to test reflection.
+  interface UnixOperatingSystemMXBean extends GenericOperatingSystemMXBean {
+    public long getOpenFileDescriptorCount();
+    public long getMaxFileDescriptorCount();
+  }
+
   UnixOperatingSystemMXBean osBean;
   RuntimeMXBean runtimeBean;
 
   @Before
   public void setUp() {
-    osBean = Mockito.mock(UnixOperatingSystemMXBean.class);
+    osBean = mock(UnixOperatingSystemMXBean.class);
     when(osBean.getName()).thenReturn("Linux");
     when(osBean.getProcessCpuTime()).thenReturn(123L);
     when(osBean.getOpenFileDescriptorCount()).thenReturn(10L);
     when(osBean.getMaxFileDescriptorCount()).thenReturn(20L);
-    runtimeBean = Mockito.mock(RuntimeMXBean.class);
+    runtimeBean = mock(RuntimeMXBean.class);
     when(runtimeBean.getStartTime()).thenReturn(456L);
   }
 
@@ -54,6 +74,21 @@ public class StandardExportsTest {
         registry.getSampleValue("process_virtual_memory_bytes", new String[]{}, new String[]{}), .001);
     assertEquals(360 * 1024,
         registry.getSampleValue("process_resident_memory_bytes", new String[]{}, new String[]{}), .001);
+  }
+
+  @Test
+  public void testNonUnixStandardExports() {
+    GenericOperatingSystemMXBean genericOsBean = mock(GenericOperatingSystemMXBean.class);
+    when(genericOsBean.getName()).thenReturn("Windows");
+    when(genericOsBean.getProcessCpuTime()).thenReturn(123L);
+    
+    CollectorRegistry registry = new CollectorRegistry();
+    new StandardExports(new StatusReaderTest(), genericOsBean, runtimeBean).register(registry);
+
+    assertEquals(123 / 1.0E9,
+        registry.getSampleValue("process_cpu_seconds_total", new String[]{}, new String[]{}), .0000001);
+    assertEquals(456 / 1.0E3,
+        registry.getSampleValue("process_start_time_seconds", new String[]{}, new String[]{}), .0000001);
   }
 
   @Test
