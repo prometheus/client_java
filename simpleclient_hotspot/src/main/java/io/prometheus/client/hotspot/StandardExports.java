@@ -56,26 +56,35 @@ public class StandardExports extends Collector {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
 
     try {
-      /*
-      There are two interfaces com.ibm.lang.management.OperatingSystemMXBean and com.sun.management.OperatingSystemMXBean,
-      but no common interface which exposes getProcessCpuTime. Hence call on the implementing class, which is default access,
-      so use reflection hack to set it accessible.
-      */
-      Method method = osBean.getClass().getMethod("getProcessCpuTime", null);
-      method.setAccessible(true);
-      Long l = (Long) method.invoke(osBean);
+      // There exist at least 2 UnixOperatingSystemMXBean interfaces, in com.sun.management and 
+      // com.ibm.lang.management. There are also environments (such as Wildfly) where access to these
+      // interfaces is restricted. Hence use reflection and recursively go through implemented
+      // interfaces until the method can be made accessible and invoked.
+      Long processCpuTime = callLongGetter("getProcessCpuTime", osBean);
       mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
-          l / NANOSECONDS_PER_SECOND));
+          processCpuTime / NANOSECONDS_PER_SECOND));
     }
     catch (Exception e) {
       LOGGER.log(Level.FINE,"Could not access process cpu time", e);
     }
 
-
     mfs.add(new GaugeMetricFamily("process_start_time_seconds", "Start time of the process since unix epoch in seconds.",
         runtimeBean.getStartTime() / MILLISECONDS_PER_SECOND));
 
-    collectFileDescriptorMetricsUnix(mfs);
+    // There exist at least 2 UnixOperatingSystemMXBean interfaces, in com.sun.management and 
+    // com.ibm.lang.management. There are also environments (such as Wildfly) where access to these
+    // interfaces is restricted. Hence use reflection and recursively go through implemented
+    // interfaces until the method can be made accessible and invoked.
+    try {
+      Long openFdCount = callLongGetter("getOpenFileDescriptorCount", osBean);
+      mfs.add(new GaugeMetricFamily(
+          "process_open_fds", "Number of open file descriptors.", openFdCount));
+      Long maxFdCount = callLongGetter("getMaxFileDescriptorCount", osBean);
+      mfs.add(new GaugeMetricFamily(
+          "process_max_fds", "Maximum number of open file descriptors.", maxFdCount));
+    } catch (Exception e) {
+      LOGGER.log(Level.FINE, "Could not access file descriptor metrics", e);
+    }
 
     // There's no standard Java or POSIX way to get memory stats,
     // so add support for just Linux for now.
@@ -88,6 +97,71 @@ public class StandardExports extends Collector {
       }
     }
     return mfs;
+  }
+
+  static Long callLongGetter(String getterName, Object obj) throws NoSuchMethodException {
+    Method method = obj.getClass().getMethod(getterName);
+    return (Long) callMethod(method, obj).getValue();
+  }
+
+  /**
+   * Attempts to call a method either as is or via one of the interfaces it is defined in.
+   */
+  static ReturnValue callMethod(Method method, Object obj) {
+    try {
+      method.setAccessible(true);
+      return new ReturnValue(method.invoke(obj));
+    } catch (Exception e) {
+      LOGGER.log(Level.FINE,
+          "Invocation failed on " + method.getDeclaringClass().getName() + "." + method.getName(),
+          e);
+    }
+
+    for (Class<?> clazz : method.getDeclaringClass().getInterfaces()) {
+      Method interfaceMethod;
+      try {
+        interfaceMethod = clazz.getMethod(method.getName(), method.getParameterTypes());
+      } catch (NoSuchMethodException e) {
+        // Expected, object class might implement multiple interfaces.
+        continue;
+      }
+      ReturnValue result = callMethod(interfaceMethod, obj);
+      if (result.hasValue) {
+        return result;
+      }
+    }
+
+    return ReturnValue.NO_VALUE;
+  }
+
+  static class ReturnValue {
+    // Wraps a return value, similar to a Future but simplified.
+
+    static final ReturnValue NO_VALUE = new ReturnValue();
+
+    final boolean hasValue;
+    final Object value;
+
+    private ReturnValue() {
+      this.hasValue = false;
+      this.value = null;
+    }
+
+    ReturnValue(Object value) {
+      this.hasValue = true;
+      this.value = value;
+    }
+
+    boolean hasValue() {
+      return hasValue;
+    }
+
+    Object getValue() {
+      if (!hasValue) {
+        throw new IllegalStateException();
+      }
+      return value;
+    }
   }
 
   void collectMemoryMetricsLinux(List<MetricFamilySamples> mfs) {
@@ -118,35 +192,6 @@ public class StandardExports extends Collector {
           LOGGER.fine(e.toString());
         }
       }
-    }
-  }
-
-  void collectFileDescriptorMetricsUnix(List<MetricFamilySamples> mfs) {
-    // There exist at least 2 UnixOperatingSystemMXBean interfaces, in com.sun.management and 
-    // com.ibm.lang.management. There are also environments (such as Wildfly) where access to these
-    // interfaces is restricted. Hence call on the implementing class, which is default access,
-    // so use reflection hack to set it accessible.
-    java.lang.reflect.Method getOpenFdCount, getMaxFdCount;
-    try {
-      getOpenFdCount = osBean.getClass().getMethod("getOpenFileDescriptorCount");
-      getOpenFdCount.setAccessible(true);
-
-      getMaxFdCount = osBean.getClass().getMethod("getMaxFileDescriptorCount");
-      getMaxFdCount.setAccessible(true);
-    } catch (NoSuchMethodException e) {
-      // Abort, expected on non-Unix OS.
-      return;
-    }
-
-    try {
-      long openFdCount = (Long) getOpenFdCount.invoke(osBean);
-      mfs.add(new GaugeMetricFamily(
-          "process_open_fds", "Number of open file descriptors.", openFdCount));
-      long maxFdCount = (Long) getMaxFdCount.invoke(osBean);
-      mfs.add(new GaugeMetricFamily(
-          "process_max_fds", "Maximum number of open file descriptors.", maxFdCount));
-    } catch (Exception e) {
-      LOGGER.log(Level.WARNING, "Could not access file descriptor metrics", e);
     }
   }
 
