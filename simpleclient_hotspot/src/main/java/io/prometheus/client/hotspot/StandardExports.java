@@ -105,7 +105,7 @@ public class StandardExports extends Collector {
   }
 
   /**
-   * Attempts to call a method either as is or via one of the interfaces it is defined in.
+   * Attempts to call a method either directly or via one of the implemented interfaces.
    */
   static ReturnValue callMethod(Method method, Object obj) {
     try {
@@ -134,9 +134,10 @@ public class StandardExports extends Collector {
     return ReturnValue.NO_VALUE;
   }
 
+  /**
+   * Wraps a return value, similar to a Future but simplified.
+   */
   static class ReturnValue {
-    // Wraps a return value, similar to a Future but simplified.
-
     static final ReturnValue NO_VALUE = new ReturnValue();
 
     final boolean hasValue;
