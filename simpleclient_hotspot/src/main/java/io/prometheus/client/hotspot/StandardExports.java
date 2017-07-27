@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +99,8 @@ public class StandardExports extends Collector {
     return mfs;
   }
 
-  static Long callLongGetter(String getterName, Object obj) throws NoSuchMethodException {
+  static Long callLongGetter(String getterName, Object obj)
+      throws NoSuchMethodException, InvocationTargetException {
     return callLongGetter(obj.getClass().getMethod(getterName), obj);
   }
 
@@ -106,21 +108,20 @@ public class StandardExports extends Collector {
    * Attempts to call a method either directly or via one of the implemented interfaces.
    * <p>
    * A Method object refers to a specific method declared in a specific class. The first invocation
-   * might happen with method === SomeConcreteClass.publicLongGetter() and will fail if
+   * might happen with method == SomeConcreteClass.publicLongGetter() and will fail if
    * SomeConcreteClass is not public. We then recurse over all interfaces implemented by
    * SomeConcreteClass (or extended by those interfaces and so on) until we eventually invoke
-   * callMethod() with method === SomePublicInterface.publicLongGetter(), which will then succeed.
+   * callMethod() with method == SomePublicInterface.publicLongGetter(), which will then succeed.
    * <p>
    * There is a built-in assumption that the method will never return null (or, equivalently, that
-   * it returns the primitive data type, i.e. {@code long} rather than {@code Long}). Similarly,
-   * there is an assumption that the method doesn't throw an exception. If one of these assumptions
-   * doesn't hold, the method might be called repeatedly and the returned value will be null (any
-   * exception will be silently swallowed).
+   * it returns the primitive data type, i.e. {@code long} rather than {@code Long}). If this
+   * assumption doesn't hold, the method might be called repeatedly and the returned value will be
+   * the one produced by the last call.
    */
-  static Long callLongGetter(Method method, Object obj) {
+  static Long callLongGetter(Method method, Object obj) throws InvocationTargetException  {
     try {
       return (Long) method.invoke(obj);
-    } catch (Exception e) {
+    } catch (IllegalAccessException e) {
       // Expected, the declaring class or interface might not be public.
     }
 
