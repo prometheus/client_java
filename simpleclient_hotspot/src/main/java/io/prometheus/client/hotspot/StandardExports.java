@@ -103,6 +103,12 @@ public class StandardExports extends Collector {
 
   /**
    * Attempts to call a method either directly or via one of the implemented interfaces.
+   * <p>
+   * There is a built-in assumption that the method will never return null (or, equivalently, that
+   * it returns the primitive data type, i.e. {@code long} rather than {@code Long}). Similarly,
+   * there is an assumption that the method doesn't throw an exception. If one of these assumptions
+   * doesn't hold, the method might be called repeatedly and the returned value will be null (any
+   * exception will be silently swallowed).
    */
   static Long callLongGetter(Method method, Object obj) {
     try {
