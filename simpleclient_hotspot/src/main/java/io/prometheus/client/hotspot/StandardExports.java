@@ -52,6 +52,7 @@ public class StandardExports extends Collector {
 
   private final static double KB = 1024;
 
+  @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
 
@@ -104,6 +105,12 @@ public class StandardExports extends Collector {
   /**
    * Attempts to call a method either directly or via one of the implemented interfaces.
    * <p>
+   * A Method object refers to a specific method declared in a specific class. The first invocation
+   * might happen with method === SomeConcreteClass.publicLongGetter() and will fail if
+   * SomeConcreteClass is not public. We then recurse over all interfaces implemented by
+   * SomeConcreteClass (or extended by those interfaces and so on) until we eventually invoke
+   * callMethod() with method === SomePublicInterface.publicLongGetter(), which will then succeed.
+   * <p>
    * There is a built-in assumption that the method will never return null (or, equivalently, that
    * it returns the primitive data type, i.e. {@code long} rather than {@code Long}). Similarly,
    * there is an assumption that the method doesn't throw an exception. If one of these assumptions
@@ -112,12 +119,13 @@ public class StandardExports extends Collector {
    */
   static Long callLongGetter(Method method, Object obj) {
     try {
-      method.setAccessible(true);
       return (Long) method.invoke(obj);
     } catch (Exception e) {
-      // Expected, setAccessible() might fail across Java 9 module boundaries.
+      // Expected, the declaring class or interface might not be public.
     }
 
+    // Iterate over all implemented/extended interfaces and attempt invoking the method with the
+    // same name and parameters on each.
     for (Class<?> clazz : method.getDeclaringClass().getInterfaces()) {
       try {
         Method interfaceMethod = clazz.getMethod(method.getName(), method.getParameterTypes());
