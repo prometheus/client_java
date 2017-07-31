@@ -622,7 +622,7 @@ class YourCustomCollector extends Collector {
 static final YourCustomCollector requests = new YourCustomCollector().register()
 ```
 
-`SummaryMetricFamily` and `HistogramMetricFamily` work similarly.
+`SummaryMetricFamily` work similarly. The histogram metric is complicated so a `HistogramMetricFamily` helper would do basically nothing to reduce code complexity, thus it was not included.
 
 A collector may implement a `describe` method which returns metrics in the same
 format as `collect` (though you don't have to include the samples). This is
