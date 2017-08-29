@@ -132,6 +132,10 @@ public class DropwizardExportsTest {
         meter.mark();
         meter.mark();
         assertEquals(new Double(2), registry.getSampleValue("meter_total"));
+        assertTrue(meter.getMeanRate() >= registry.getSampleValue("meter", new String[]{"minuteRate"}, new String[]{"mean"}));
+        assertTrue(meter.getOneMinuteRate() >= registry.getSampleValue("meter", new String[]{"minuteRate"}, new String[]{"1"}));
+        assertTrue(meter.getFiveMinuteRate() >= registry.getSampleValue("meter", new String[]{"minuteRate"}, new String[]{"5"}));
+        assertTrue(meter.getFifteenMinuteRate() >= registry.getSampleValue("meter", new String[]{"minuteRate"}, new String[]{"15"}));
     }
 
     @Test
@@ -167,13 +171,14 @@ public class DropwizardExportsTest {
             Collector.MetricFamilySamples element =  metricFamilySamples.nextElement();
             elements.put(element.name, element);
         }
-        assertEquals(5, elements.size());
+        assertEquals(6, elements.size());
 
         assertTrue(elements.keySet().contains("my_application_namedTimer1"));
         assertTrue(elements.keySet().contains("my_application_namedCounter1"));
         assertTrue(elements.keySet().contains("my_application_namedMeter1_total"));
         assertTrue(elements.keySet().contains("my_application_namedHistogram1"));
         assertTrue(elements.keySet().contains("my_application_namedGauge1"));
+        assertTrue(elements.keySet().contains("my_application_namedMeter1"));
 
         assertThat(elements.get("my_application_namedTimer1").help,
                 is("Generated from Dropwizard metric import (metric=my.application.namedTimer1, type=com.codahale.metrics.Timer)"));
@@ -189,6 +194,9 @@ public class DropwizardExportsTest {
 
         assertThat(elements.get("my_application_namedGauge1").help,
                 is("Generated from Dropwizard metric import (metric=my.application.namedGauge1, type=io.prometheus.client.dropwizard.DropwizardExportsTest$ExampleDoubleGauge)"));
+
+        assertThat(elements.get("my_application_namedMeter1").help,
+                is("Generated from Dropwizard metric import (metric=my.application.namedMeter1, type=com.codahale.metrics.Meter)"));
 
     }
 

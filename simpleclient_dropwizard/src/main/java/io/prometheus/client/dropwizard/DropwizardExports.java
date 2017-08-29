@@ -4,6 +4,7 @@ import com.codahale.metrics.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
@@ -102,17 +103,22 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     }
 
     /**
-     * Export a Meter as as prometheus COUNTER.
+     * Export a Meter as as a combination of prometheus COUNTER and SUMMARY.
      */
     List<MetricFamilySamples> fromMeter(String dropwizardName, Meter meter) {
         String name = sanitizeMetricName(dropwizardName);
+        List<String> minuteRate = Collections.singletonList("minuteRate");
+        List<MetricFamilySamples.Sample> samples = Arrays.asList(
+                new MetricFamilySamples.Sample(name, minuteRate, Collections.singletonList("mean"), meter.getMeanRate()),
+                new MetricFamilySamples.Sample(name, minuteRate, Collections.singletonList("1"), meter.getOneMinuteRate()),
+                new MetricFamilySamples.Sample(name, minuteRate, Collections.singletonList("5"), meter.getFiveMinuteRate()),
+                new MetricFamilySamples.Sample(name, minuteRate, Collections.singletonList("15"), meter.getFifteenMinuteRate())
+        );
+
         return Arrays.asList(
                 new MetricFamilySamples(name + "_total", Type.COUNTER, getHelpMessage(dropwizardName, meter),
-                        Arrays.asList(new MetricFamilySamples.Sample(name + "_total",
-                                new ArrayList<String>(),
-                                new ArrayList<String>(),
-                                meter.getCount())))
-
+                        Collections.singletonList(new MetricFamilySamples.Sample(name + "_total", new ArrayList<String>(), new ArrayList<String>(), meter.getCount()))),
+                new MetricFamilySamples(name, Type.SUMMARY, getHelpMessage(dropwizardName, meter), samples)
         );
     }
 
