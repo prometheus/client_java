@@ -30,8 +30,16 @@ import com.sun.net.httpserver.HttpExchange;
  * </pre>
  * */
 public class HTTPServer {
+    private static class LocalByteArray extends ThreadLocal<ByteArrayOutputStream> {
+        protected ByteArrayOutputStream initialValue()
+        {
+            return new ByteArrayOutputStream(1 << 20);
+        }
+    }
+
     static class HTTPMetricHandler implements HttpHandler {
         private CollectorRegistry registry;
+        private final LocalByteArray response = new LocalByteArray();
 
         HTTPMetricHandler(CollectorRegistry registry) {
           this.registry = registry;
@@ -41,7 +49,8 @@ public class HTTPServer {
         public void handle(HttpExchange t) throws IOException {
             String query = t.getRequestURI().getRawQuery();
 
-            ByteArrayOutputStream response = new ByteArrayOutputStream(1 << 20);
+            ByteArrayOutputStream response = this.response.get();
+            response.reset();
             OutputStreamWriter osw = new OutputStreamWriter(response);
             TextFormat.write004(osw,
                     registry.filteredMetricFamilySamples(parseQuery(query)));
