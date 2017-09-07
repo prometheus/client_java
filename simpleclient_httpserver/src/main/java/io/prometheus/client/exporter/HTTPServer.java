@@ -6,11 +6,14 @@ import io.prometheus.client.exporter.common.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
+import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.concurrent.Executors;
+import java.util.zip.GZIPOutputStream;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -51,11 +54,34 @@ public class HTTPServer {
                     TextFormat.CONTENT_TYPE_004);
             t.getResponseHeaders().set("Content-Length",
                     String.valueOf(response.size()));
-            t.sendResponseHeaders(200, response.size());
-            response.writeTo(t.getResponseBody());
+            if (shouldUseCompression(t)) {
+                t.getResponseHeaders().set("Content-Encoding", "gzip");
+                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+                final GZIPOutputStream os = new GZIPOutputStream(t.getResponseBody());
+                response.writeTo(os);
+                os.finish();
+            } else {
+                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.size());
+                response.writeTo(t.getResponseBody());
+            }
             t.close();
         }
 
+    }
+
+    protected static boolean shouldUseCompression(HttpExchange exchange) {
+        List<String> encodingHeaders = exchange.getRequestHeaders().get("Accept-Encoding");
+        if (encodingHeaders == null) return false;
+
+        for (String encodingHeader : encodingHeaders) {
+            String[] encodings = encodingHeader.split(",");
+            for (String encoding : encodings) {
+                if (encoding.trim().toLowerCase().equals("gzip")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     protected static Set<String> parseQuery(String query) throws IOException {
