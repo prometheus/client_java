@@ -6,11 +6,14 @@ import io.prometheus.client.exporter.common.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
+import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.concurrent.Executors;
+import java.util.zip.GZIPOutputStream;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -27,8 +30,16 @@ import com.sun.net.httpserver.HttpExchange;
  * </pre>
  * */
 public class HTTPServer {
+    private static class LocalByteArray extends ThreadLocal<ByteArrayOutputStream> {
+        protected ByteArrayOutputStream initialValue()
+        {
+            return new ByteArrayOutputStream(1 << 20);
+        }
+    }
+
     static class HTTPMetricHandler implements HttpHandler {
         private CollectorRegistry registry;
+        private final LocalByteArray response = new LocalByteArray();
 
         HTTPMetricHandler(CollectorRegistry registry) {
           this.registry = registry;
@@ -38,7 +49,8 @@ public class HTTPServer {
         public void handle(HttpExchange t) throws IOException {
             String query = t.getRequestURI().getRawQuery();
 
-            ByteArrayOutputStream response = new ByteArrayOutputStream(1 << 20);
+            ByteArrayOutputStream response = this.response.get();
+            response.reset();
             OutputStreamWriter osw = new OutputStreamWriter(response);
             TextFormat.write004(osw,
                     registry.filteredMetricFamilySamples(parseQuery(query)));
@@ -51,11 +63,34 @@ public class HTTPServer {
                     TextFormat.CONTENT_TYPE_004);
             t.getResponseHeaders().set("Content-Length",
                     String.valueOf(response.size()));
-            t.sendResponseHeaders(200, response.size());
-            response.writeTo(t.getResponseBody());
+            if (shouldUseCompression(t)) {
+                t.getResponseHeaders().set("Content-Encoding", "gzip");
+                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+                final GZIPOutputStream os = new GZIPOutputStream(t.getResponseBody());
+                response.writeTo(os);
+                os.finish();
+            } else {
+                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.size());
+                response.writeTo(t.getResponseBody());
+            }
             t.close();
         }
 
+    }
+
+    protected static boolean shouldUseCompression(HttpExchange exchange) {
+        List<String> encodingHeaders = exchange.getRequestHeaders().get("Accept-Encoding");
+        if (encodingHeaders == null) return false;
+
+        for (String encodingHeader : encodingHeaders) {
+            String[] encodings = encodingHeader.split(",");
+            for (String encoding : encodings) {
+                if (encoding.trim().toLowerCase().equals("gzip")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     protected static Set<String> parseQuery(String query) throws IOException {

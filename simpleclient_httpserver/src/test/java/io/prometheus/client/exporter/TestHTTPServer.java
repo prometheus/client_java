@@ -7,6 +7,8 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
+import java.util.zip.GZIPInputStream;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +39,18 @@ public class TestHTTPServer {
     connection.setDoOutput(true);
     connection.connect();
     Scanner s = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
+    return s.hasNext() ? s.next() : "";
+  }
+
+  String requestWithCompression(String suffix) throws IOException {
+    String url = "http://localhost:" + s.server.getAddress().getPort() + "/metrics" + suffix;
+    URLConnection connection = new URL(url).openConnection();
+    connection.setDoOutput(true);
+    connection.setDoInput(true);
+    connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+    connection.connect();
+    GZIPInputStream gzs = new GZIPInputStream(connection.getInputStream());
+    Scanner s = new Scanner(gzs).useDelimiter("\\A");
     return s.hasNext() ? s.next() : "";
   }
 
@@ -80,4 +94,11 @@ public class TestHTTPServer {
     assertThat(response).doesNotContain("c 0.0");
   }
 
+  @Test
+  public void testGzipCompression() throws IOException {
+    String response = requestWithCompression("");
+    assertThat(response).contains("a 0.0");
+    assertThat(response).contains("b 0.0");
+    assertThat(response).contains("c 0.0");
+  }
 }
