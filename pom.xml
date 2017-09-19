@@ -63,6 +63,7 @@
         <module>simpleclient_jetty_jdk8</module>
         <module>simpleclient_vertx</module>
         <module>benchmark</module>
+        <module>simpleclient_playframework</module>
     </modules>
 
     <properties>
