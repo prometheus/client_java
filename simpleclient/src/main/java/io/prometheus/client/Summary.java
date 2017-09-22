@@ -120,7 +120,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       // Not sure if it makes sense to copy list
       // or remove 'final' from this.quantiles so that we can modify it.
       for (Quantile q : quantiles) {
-        quantiles.add(q);
+        this.quantiles.add(q);
       }
       return this;
     }
