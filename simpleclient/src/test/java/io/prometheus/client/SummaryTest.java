@@ -7,6 +7,8 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -18,10 +20,18 @@ public class SummaryTest {
 
   CollectorRegistry registry;
   Summary noLabels, labels, labelsAndQuantiles, noLabelsAndQuantiles;
+  final double[] quantiles = {0.5, 0.9, 0.99};
+  final double[] errors = {0.05, 0.01, 0.001};
+  List<CKMSQuantiles.Quantile> quantilesArray;
 
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
+    quantilesArray = Arrays.asList(
+                    new CKMSQuantiles.Quantile(0.5, 0.05),
+                    new CKMSQuantiles.Quantile(0.9, 0.01),
+                    new CKMSQuantiles.Quantile(0.99, 0.01)
+            );
     noLabels = Summary.build().name("nolabels").help("help").register(registry);
     labels = Summary.build().name("labels").help("help").labelNames("l").register(registry);
     noLabelsAndQuantiles = Summary.build()
