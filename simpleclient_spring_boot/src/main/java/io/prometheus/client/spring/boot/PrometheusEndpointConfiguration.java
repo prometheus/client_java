@@ -13,7 +13,7 @@ class PrometheusEndpointConfiguration {
   private final CollectorRegistry collectorRegistry;
 
   @Autowired(required = false)
-  public PrometheusKonfig(CollectorRegistry collectorRegistry) {
+  public PrometheusEndpointConfiguration(CollectorRegistry collectorRegistry) {
     this.collectorRegistry = collectorRegistry == null ? CollectorRegistry.defaultRegistry : collectorRegistry;
   }
 
