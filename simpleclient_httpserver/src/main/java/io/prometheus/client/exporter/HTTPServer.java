@@ -12,6 +12,7 @@ import java.net.URLDecoder;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.GZIPOutputStream;
 
@@ -108,6 +109,7 @@ public class HTTPServer {
     }
 
     protected HttpServer server;
+    protected final ExecutorService executorService;
 
 
     /**
@@ -119,7 +121,8 @@ public class HTTPServer {
         HttpHandler mHandler = new HTTPMetricHandler(registry);
         server.createContext("/", mHandler);
         server.createContext("/metrics", mHandler);
-        server.setExecutor(Executors.newFixedThreadPool(5));
+        executorService = Executors.newFixedThreadPool(5);
+        server.setExecutor(executorService);
         server.start();
     }
 
@@ -142,6 +145,7 @@ public class HTTPServer {
      */
     public void stop() {
         server.stop(0);
+        executorService.shutdown(); // Free any (parked/idle) threads in pool
     }
 }
 
