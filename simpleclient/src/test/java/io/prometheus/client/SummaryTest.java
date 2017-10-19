@@ -7,6 +7,8 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -17,11 +19,19 @@ import static org.junit.Assert.assertTrue;
 public class SummaryTest {
 
   CollectorRegistry registry;
-  Summary noLabels, labels, labelsAndQuantiles, noLabelsAndQuantiles;
+  Summary noLabels, labels, labelsAndQuantiles, noLabelsAndQuantiles, noLabelsAndArrayQuantiles;
+  final double[] quantiles = {0.5, 0.9, 0.99};
+  final double[] errors = {0.05, 0.01, 0.001};
+  List<CKMSQuantiles.Quantile> quantilesArray;
 
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
+    quantilesArray = Arrays.asList(
+                    new CKMSQuantiles.Quantile(0.5, 0.05),
+                    new CKMSQuantiles.Quantile(0.9, 0.01),
+                    new CKMSQuantiles.Quantile(0.99, 0.001)
+            );
     noLabels = Summary.build().name("nolabels").help("help").register(registry);
     labels = Summary.build().name("labels").help("help").labelNames("l").register(registry);
     noLabelsAndQuantiles = Summary.build()
@@ -30,11 +40,12 @@ public class SummaryTest {
             .quantile(0.99, 0.001)
             .name("no_labels_and_quantiles").help("help").register(registry);
     labelsAndQuantiles = Summary.build()
-            .quantile(0.5, 0.05)
-            .quantile(0.9, 0.01)
-            .quantile(0.99, 0.001)
+            .quantiles(quantiles, errors)
             .labelNames("l")
             .name("labels_and_quantiles").help("help").register(registry);
+    noLabelsAndArrayQuantiles = Summary.build()
+            .quantiles(quantilesArray)
+            .name("no_labels_and_array_quantiles").help("Testing Quantiles in List").register(registry);
   }
 
   @After
@@ -50,6 +61,9 @@ public class SummaryTest {
   }
   private double getNoLabelQuantile(double q) {
     return registry.getSampleValue("no_labels_and_quantiles", new String[]{"quantile"}, new String[]{Collector.doubleToGoString(q)}).doubleValue();
+  }
+  private double getNoLabelArrayQuantile(double q) {
+    return registry.getSampleValue("no_labels_and_array_quantiles", new String[]{"quantile"}, new String[]{Collector.doubleToGoString(q)}).doubleValue();
   }
   private double getLabeledQuantile(String labelValue, double q) {
     return registry.getSampleValue("labels_and_quantiles", new String[]{"l", "quantile"}, new String[]{labelValue, Collector.doubleToGoString(q)}).doubleValue();
@@ -78,10 +92,15 @@ public class SummaryTest {
       // because that makes it easy to verify if the quantiles are correct.
       labelsAndQuantiles.labels("a").observe(i);
       noLabelsAndQuantiles.observe(i);
+      noLabelsAndArrayQuantiles.observe(i);
     }
     assertEquals(getNoLabelQuantile(0.5), 0.5 * nSamples, 0.05 * nSamples);
     assertEquals(getNoLabelQuantile(0.9), 0.9 * nSamples, 0.01 * nSamples);
     assertEquals(getNoLabelQuantile(0.99), 0.99 * nSamples, 0.001 * nSamples);
+
+    assertEquals(getNoLabelArrayQuantile(0.5), 0.5 * nSamples, 0.05 * nSamples);
+    assertEquals(getNoLabelArrayQuantile(0.9), 0.9 * nSamples, 0.01 * nSamples);
+    assertEquals(getNoLabelArrayQuantile(0.99), 0.99 * nSamples, 0.001 * nSamples);
 
     assertEquals(getLabeledQuantile("a", 0.5), 0.5 * nSamples, 0.05 * nSamples);
     assertEquals(getLabeledQuantile("a", 0.9), 0.9 * nSamples, 0.01 * nSamples);

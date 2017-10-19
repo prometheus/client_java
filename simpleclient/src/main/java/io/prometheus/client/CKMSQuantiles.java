@@ -278,10 +278,24 @@ class CKMSQuantiles {
         public final double v;
 
         public Quantile(double quantile, double error) {
+            if (quantile < 0.0 || quantile > 1.0) {
+                throw new IllegalArgumentException("Quantile " + quantile + " invalid: Expected number between 0.0 and 1.0.");
+            }
+            if (error < 0.0 || error > 1.0) {
+                throw new IllegalArgumentException("Error " + error + " invalid: Expected number between 0.0 and 1.0.");
+            }
+
             this.quantile = quantile;
             this.error = error;
             u = 2.0 * error / (1.0 - quantile);
             v = 2.0 * error / quantile;
+        }
+
+        public Quantile(Quantile q) {
+            this.quantile = q.quantile;
+            this.error = q.error;
+            this.u = q.u;
+            this.v = q.v;
         }
 
         @Override

@@ -3,12 +3,7 @@ package io.prometheus.client;
 import io.prometheus.client.CKMSQuantiles.Quantile;
 
 import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -98,13 +93,35 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private int ageBuckets = 5;
 
     public Builder quantile(double quantile, double error) {
-      if (quantile < 0.0 || quantile > 1.0) {
-        throw new IllegalArgumentException("Quantile " + quantile + " invalid: Expected number between 0.0 and 1.0.");
+      this.quantiles.add(new Quantile(quantile, error));
+      return this;
+    }
+
+    public Builder quantiles(double[] quantiles, double error) {
+      for(double q: quantiles) {
+        this.quantiles.add(new Quantile(q, error));
       }
-      if (error < 0.0 || error > 1.0) {
-        throw new IllegalArgumentException("Error " + error + " invalid: Expected number between 0.0 and 1.0.");
+      return this;
+    }
+
+    public Builder quantiles(double[] quantiles, double[] errors) {
+      if (quantiles.length != errors.length) {
+        throw new IllegalArgumentException("Quantiles and errors array need to have equal number of values.");
       }
-      quantiles.add(new Quantile(quantile, error));
+
+      for(int i=0; i < quantiles.length; i++) {
+        quantile(quantiles[i], errors[i]);
+      }
+
+      return this;
+    }
+
+    public Builder quantiles(List<Quantile> quantiles) {
+      // Not sure if it makes sense to copy list
+      // or remove 'final' from this.quantiles so that we can modify it.
+      for (Quantile q : quantiles) {
+        this.quantiles.add(q);
+      }
       return this;
     }
 
