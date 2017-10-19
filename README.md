@@ -40,25 +40,25 @@ version can be found on in the maven repository for
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient</artifactId>
-  <version>0.0.26</version>
+  <version>0.1.0</version>
 </dependency>
 <!-- Hotspot JVM metrics-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_hotspot</artifactId>
-  <version>0.0.26</version>
+  <version>0.1.0</version>
 </dependency>
-<!-- Exposition servlet-->
+<!-- Exposition HTTPServer-->
 <dependency>
   <groupId>io.prometheus</groupId>
-  <artifactId>simpleclient_servlet</artifactId>
-  <version>0.0.26</version>
+  <artifactId>simpleclient_httpserver</artifactId>
+  <version>0.1.0</version>
 </dependency>
 <!-- Pushgateway exposition-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_pushgateway</artifactId>
-  <version>0.0.26</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 
