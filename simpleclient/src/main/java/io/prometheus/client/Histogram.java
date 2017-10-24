@@ -55,8 +55,9 @@ import java.util.Map;
  *         .name("requests_latency_seconds").help("Request latency in seconds.").register();
  * }
  * </pre>
- * {@link Histogram.Builder#linearBuckets(double, double, int) linearBuckets} and
- * {@link Histogram.Builder#exponentialBuckets(double, double, int) exponentialBuckets}
+ * {@link Histogram.Builder#linearBuckets(double, double, int) linearBuckets},
+ * {@link Histogram.Builder#exponentialBuckets(double, double, int) exponentialBuckets} and
+ * {@link Histogram.Builder#preferredBuckets(double, double, int) preferredBuckets}
  * offer easy ways to set common bucket patterns.
  */
 public class Histogram extends SimpleCollector<Histogram.Child> implements Collector.Describable {
@@ -126,6 +127,44 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
         buckets[i] = start * Math.pow(factor, i);
       }
       return this;
+    }
+    /**
+    * Set the upper bounds of buckets for the histogram with a preferred sequence (1-2-5, 1-1.6-2.5-4.0-6.3).
+    */
+    public Builder preferredBuckets(double start, int bucketsPerDecade, int count) {
+        double[] numbers = new double[bucketsPerDecade];
+
+        double scale = 100;
+
+        // Single significant digit for 3 or less buckets per decade.
+        if (bucketsPerDecade <= 3) {
+            scale = 1;
+        } else if (bucketsPerDecade <= 25) {
+            // Two significant digits for 4 to 25 buckets per decade.
+            scale = 10;
+        }
+
+        for (int i = 0; i < bucketsPerDecade; i++) {
+            numbers[i] = Math.round(Math.pow(10, i / (double) bucketsPerDecade) * scale) / scale;
+        }
+
+        buckets = new double[count];
+        int initialPosition = (int) Math.floor(Math.log10(start) * bucketsPerDecade);
+        for (int i = 0; i < count; i++) {
+            int position = ((i + initialPosition) % bucketsPerDecade);
+            position += position < 0 ? bucketsPerDecade : 0; // Ensure modulo is non-negative
+
+            int decade = (int) Math.floor((i + initialPosition) / (double) bucketsPerDecade);
+
+            // Multiplying by 0.1 can introduce floating point issues, prefer divide by 10.
+            if (decade >= 0) {
+              buckets[i] = numbers[position] * Math.pow(10, decade);
+            } else {
+              buckets[i] = numbers[position] / Math.pow(10, -decade);
+            }
+
+        }
+        return this;
     }
 
   }

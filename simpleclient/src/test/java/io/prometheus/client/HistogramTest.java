@@ -102,6 +102,21 @@ public class HistogramTest {
   }
 
   @Test
+  public void testPreferredBuckets() {
+    Histogram h = Histogram.build().name("h").help("help").preferredBuckets(0.11, 5, 10).create();
+    assertArrayEquals(new double[]{0.1, 0.16, 0.25, 0.4, 0.63, 1, 1.6, 2.5, 4.0, 6.3,
+            Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+
+    h = Histogram.build().name("h").help("help").preferredBuckets(0.09, 3, 10).create();
+    assertArrayEquals(new double[]{0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50,
+            Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+
+    h = Histogram.build().name("h").help("help").preferredBuckets(0.1, 6, 13).create();
+    assertArrayEquals(new double[]{0.1, 0.15, 0.22, 0.32, 0.46, 0.68, 1.0, 1.5, 2.2, 3.2, 4.6, 6.8, 10,
+            Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+  }
+
+  @Test
   public void testTimer() {
     SimpleTimer.defaultTimeProvider = new SimpleTimer.TimeProvider() {
       long value = (long)(30 * 1e9);
