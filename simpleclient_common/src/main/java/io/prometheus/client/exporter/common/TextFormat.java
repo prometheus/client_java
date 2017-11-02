@@ -20,38 +20,45 @@ public class TextFormat {
      * for the output format specification. */
     while(mfs.hasMoreElements()) {
       Collector.MetricFamilySamples metricFamilySamples = mfs.nextElement();
-      writer.write("# HELP ");
-      writer.write(metricFamilySamples.name);
-      writer.write(' ');
-      writeEscapedHelp(writer, metricFamilySamples.help);
-      writer.write('\n');
-
-      writer.write("# TYPE ");
-      writer.write(metricFamilySamples.name);
-      writer.write(' ');
-      writer.write(typeString(metricFamilySamples.type));
-      writer.write('\n');
-
+      writeHeader(writer, metricFamilySamples);
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
-        writer.write(sample.name);
-        if (sample.labelNames.size() > 0) {
-          writer.write('{');
-          for (int i = 0; i < sample.labelNames.size(); ++i) {
-            writer.write(sample.labelNames.get(i));
-            writer.write("=\"");
-            writeEscapedLabelValue(writer, sample.labelValues.get(i));
-            writer.write("\",");
-          }
-          writer.write('}');
-        }
-        writer.write(' ');
-        writer.write(Collector.doubleToGoString(sample.value));
-        writer.write('\n');
+        writeSample(writer, sample);
       }
     }
   }
 
-  private static void writeEscapedHelp(Writer writer, String s) throws IOException {
+  protected static void writeHeader(Writer writer, Collector.MetricFamilySamples metric) throws IOException {
+    writer.write("# HELP ");
+    writer.write(metric.name);
+    writer.write(' ');
+    writeEscapedHelp(writer, metric.help);
+    writer.write('\n');
+
+    writer.write("# TYPE ");
+    writer.write(metric.name);
+    writer.write(' ');
+    writer.write(typeString(metric.type));
+    writer.write('\n');
+  }
+
+  protected static void writeSample(Writer writer, Collector.MetricFamilySamples.Sample sample) throws IOException {
+    writer.write(sample.name);
+    if (sample.labelNames.size() > 0) {
+      writer.write('{');
+      for (int i = 0; i < sample.labelNames.size(); ++i) {
+        writer.write(sample.labelNames.get(i));
+        writer.write("=\"");
+        writeEscapedLabelValue(writer, sample.labelValues.get(i));
+        writer.write("\",");
+      }
+      writer.write('}');
+    }
+    writer.write(' ');
+    writer.write(Collector.doubleToGoString(sample.value));
+    writer.write('\n');
+  }
+
+  protected static void writeEscapedHelp(Writer writer, String s) throws IOException {
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
       switch (c) {
@@ -67,7 +74,7 @@ public class TextFormat {
     }
   }
 
-  private static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
+  protected static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
       switch (c) {
@@ -86,7 +93,7 @@ public class TextFormat {
     }
   }
 
-  private static String typeString(Collector.Type t) {
+  protected static String typeString(Collector.Type t) {
     switch (t) {
       case GAUGE:
         return "gauge";
