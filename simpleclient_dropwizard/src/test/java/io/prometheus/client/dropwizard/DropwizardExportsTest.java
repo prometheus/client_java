@@ -151,6 +151,11 @@ public class DropwizardExportsTest {
     }
 
     @Test
+    public void testSanitizeMetricNameStartingWithDigit() {
+        assertEquals("_42Foo_Bar_metric_mame", DropwizardExports.sanitizeMetricName("42Foo.Bar-metric,mame"));
+    }
+
+    @Test
     public void testThatMetricHelpUsesOriginalDropwizardName() {
         metricRegistry.timer("my.application.namedTimer1");
         metricRegistry.counter("my.application.namedCounter1");
