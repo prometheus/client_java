@@ -117,7 +117,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
         );
     }
 
-    private static final Pattern sanitizeNamePattern = Pattern.compile("[^a-zA-Z0-9:_]");
+    private static final Pattern METRIC_NAME_RE = Pattern.compile("[^a-zA-Z0-9:_]");
 
     /**
      * Replace all unsupported chars with '_', prepend '_' if name starts with digit.
@@ -127,7 +127,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * @return the sanitized metric name.
      */
     public static String sanitizeMetricName(String dropwizardName) {
-        String name = sanitizeNamePattern.matcher(dropwizardName).replaceAll("_");
+        String name = METRIC_NAME_RE.matcher(dropwizardName).replaceAll("_");
         if (!name.isEmpty() && Character.isDigit(name.charAt(0))) {
             name = "_" + name;
         }
