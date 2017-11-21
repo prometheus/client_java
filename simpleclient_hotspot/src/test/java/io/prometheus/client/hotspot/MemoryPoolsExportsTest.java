@@ -36,9 +36,11 @@ public class MemoryPoolsExportsTest {
     when(mockUsage1.getUsed()).thenReturn(500000L);
     when(mockUsage1.getCommitted()).thenReturn(1000000L);
     when(mockUsage1.getMax()).thenReturn(2000000L);
+    when(mockUsage1.getInit()).thenReturn(1000L);
     when(mockUsage2.getUsed()).thenReturn(10000L);
     when(mockUsage2.getCommitted()).thenReturn(20000L);
     when(mockUsage2.getMax()).thenReturn(3000000L);
+    when(mockUsage2.getInit()).thenReturn(2000L);
     collectorUnderTest = new MemoryPoolsExports(mockMemoryBean, mockList).register(registry);
   }
 
@@ -66,6 +68,13 @@ public class MemoryPoolsExportsTest {
             new String[]{"PS Eden Space"}),
         .0000001);
     assertEquals(
+        1000L,
+        registry.getSampleValue(
+            "jvm_memory_pool_bytes_init",
+            new String[]{"pool"},
+            new String[]{"PS Eden Space"}),
+        .0000001);
+    assertEquals(
         10000L,
         registry.getSampleValue(
             "jvm_memory_pool_bytes_used",
@@ -83,6 +92,13 @@ public class MemoryPoolsExportsTest {
         3000000L,
         registry.getSampleValue(
             "jvm_memory_pool_bytes_max",
+            new String[]{"pool"},
+            new String[]{"PS Old Gen"}),
+        .0000001);
+    assertEquals(
+        2000L,
+        registry.getSampleValue(
+            "jvm_memory_pool_bytes_init",
             new String[]{"pool"},
             new String[]{"PS Old Gen"}),
         .0000001);
@@ -112,6 +128,13 @@ public class MemoryPoolsExportsTest {
             new String[]{"heap"}),
         .0000001);
     assertEquals(
+        1000L,
+        registry.getSampleValue(
+           "jvm_memory_bytes_init",
+           new String[]{"area"},
+           new String[]{"heap"}),
+        .0000001);
+    assertEquals(
         10000L,
         registry.getSampleValue(
             "jvm_memory_bytes_used",
@@ -129,6 +152,13 @@ public class MemoryPoolsExportsTest {
         3000000L,
         registry.getSampleValue(
             "jvm_memory_bytes_max",
+            new String[]{"area"},
+            new String[]{"nonheap"}),
+        .0000001);
+    assertEquals(
+        2000L,
+        registry.getSampleValue(
+            "jvm_memory_bytes_init",
             new String[]{"area"},
             new String[]{"nonheap"}),
         .0000001);
