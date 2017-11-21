@@ -74,7 +74,7 @@ public class MemoryPoolsExports extends Collector {
 
     GaugeMetricFamily init = new GaugeMetricFamily(
         "jvm_memory_bytes_init",
-        "Init bytes of a given JVM memory area.",
+        "Initial bytes of a given JVM memory area.",
         Collections.singletonList("area"));
     init.addMetric(Collections.singletonList("heap"), heapUsage.getInit());
     init.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getInit());
@@ -99,7 +99,7 @@ public class MemoryPoolsExports extends Collector {
     sampleFamilies.add(max);
     GaugeMetricFamily init = new GaugeMetricFamily(
         "jvm_memory_pool_bytes_init",
-        "Init bytes of a given JVM memory pool.",
+        "Initial bytes of a given JVM memory pool.",
         Collections.singletonList("pool"));
     sampleFamilies.add(init);
     for (final MemoryPoolMXBean pool : poolBeans) {
