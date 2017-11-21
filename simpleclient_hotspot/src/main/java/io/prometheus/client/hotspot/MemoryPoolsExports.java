@@ -58,7 +58,7 @@ public class MemoryPoolsExports extends Collector {
 
     GaugeMetricFamily committed = new GaugeMetricFamily(
         "jvm_memory_bytes_committed",
-        "Committed bytes of a given JVM memory area.",
+        "Committed (bytes) of a given JVM memory area.",
         Collections.singletonList("area"));
     committed.addMetric(Collections.singletonList("heap"), heapUsage.getCommitted());
     committed.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getCommitted());
@@ -66,7 +66,7 @@ public class MemoryPoolsExports extends Collector {
 
     GaugeMetricFamily max = new GaugeMetricFamily(
         "jvm_memory_bytes_max",
-        "Max bytes of a given JVM memory area.",
+        "Max (bytes) of a given JVM memory area.",
         Collections.singletonList("area"));
     max.addMetric(Collections.singletonList("heap"), heapUsage.getMax());
     max.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getMax());
@@ -89,12 +89,12 @@ public class MemoryPoolsExports extends Collector {
     sampleFamilies.add(used);
     GaugeMetricFamily committed = new GaugeMetricFamily(
         "jvm_memory_pool_bytes_committed",
-        "Committed (bytes) of a given JVM memory pool.",
+        "Committed bytes of a given JVM memory pool.",
         Collections.singletonList("pool"));
     sampleFamilies.add(committed);
     GaugeMetricFamily max = new GaugeMetricFamily(
         "jvm_memory_pool_bytes_max",
-        "Max (bytes) of a given JVM memory pool.",
+        "Max bytes of a given JVM memory pool.",
         Collections.singletonList("pool"));
     sampleFamilies.add(max);
     GaugeMetricFamily init = new GaugeMetricFamily(
