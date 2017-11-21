@@ -29,10 +29,6 @@ import java.util.List;
  * </pre>
  */
 public class MemoryPoolsExports extends Collector {
-  private static final List<String> AREA_LABELS = Collections.singletonList("area");
-  private static final List<String> POOL_LABELS = Collections.singletonList("pool");
-  private static final List<String> HEAP_LABELS = Collections.singletonList("heap");
-  private static final List<String> NON_HEAP_LABELS = Collections.singletonList("nonheap");
   private final MemoryMXBean memoryBean;
   private final List<MemoryPoolMXBean> poolBeans;
 
@@ -55,33 +51,33 @@ public class MemoryPoolsExports extends Collector {
     GaugeMetricFamily used = new GaugeMetricFamily(
         "jvm_memory_bytes_used",
         "Used bytes of a given JVM memory area.",
-        AREA_LABELS);
-    used.addMetric(HEAP_LABELS, heapUsage.getUsed());
-    used.addMetric(NON_HEAP_LABELS, nonHeapUsage.getUsed());
+        Collections.singletonList("area"));
+    used.addMetric(Collections.singletonList("heap"), heapUsage.getUsed());
+    used.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getUsed());
     sampleFamilies.add(used);
 
     GaugeMetricFamily committed = new GaugeMetricFamily(
         "jvm_memory_bytes_committed",
         "Committed bytes of a given JVM memory area.",
-        AREA_LABELS);
-    committed.addMetric(HEAP_LABELS, heapUsage.getCommitted());
-    committed.addMetric(NON_HEAP_LABELS, nonHeapUsage.getCommitted());
+        Collections.singletonList("area"));
+    committed.addMetric(Collections.singletonList("heap"), heapUsage.getCommitted());
+    committed.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getCommitted());
     sampleFamilies.add(committed);
 
     GaugeMetricFamily max = new GaugeMetricFamily(
         "jvm_memory_bytes_max",
         "Max bytes of a given JVM memory area.",
-        AREA_LABELS);
-    max.addMetric(HEAP_LABELS, heapUsage.getMax());
-    max.addMetric(NON_HEAP_LABELS, nonHeapUsage.getMax());
+        Collections.singletonList("area"));
+    max.addMetric(Collections.singletonList("heap"), heapUsage.getMax());
+    max.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getMax());
     sampleFamilies.add(max);
 
     GaugeMetricFamily init = new GaugeMetricFamily(
         "jvm_memory_bytes_init",
         "Init bytes of a given JVM memory area.",
-        AREA_LABELS);
-    init.addMetric(HEAP_LABELS, heapUsage.getInit());
-    init.addMetric(NON_HEAP_LABELS, nonHeapUsage.getInit());
+        Collections.singletonList("area"));
+    init.addMetric(Collections.singletonList("heap"), heapUsage.getInit());
+    init.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getInit());
     sampleFamilies.add(init);
   }
 
@@ -89,37 +85,36 @@ public class MemoryPoolsExports extends Collector {
     GaugeMetricFamily used = new GaugeMetricFamily(
         "jvm_memory_pool_bytes_used",
         "Used bytes of a given JVM memory pool.",
-        POOL_LABELS);
+        Collections.singletonList("pool"));
     sampleFamilies.add(used);
     GaugeMetricFamily committed = new GaugeMetricFamily(
         "jvm_memory_pool_bytes_committed",
-        "Committed bytes of a given JVM memory pool.",
-        POOL_LABELS);
+        "Committed (bytes) of a given JVM memory pool.",
+        Collections.singletonList("pool"));
     sampleFamilies.add(committed);
     GaugeMetricFamily max = new GaugeMetricFamily(
         "jvm_memory_pool_bytes_max",
-        "Max bytes of a given JVM memory pool.",
-        POOL_LABELS);
+        "Max (bytes) of a given JVM memory pool.",
+        Collections.singletonList("pool"));
     sampleFamilies.add(max);
     GaugeMetricFamily init = new GaugeMetricFamily(
         "jvm_memory_pool_bytes_init",
         "Init bytes of a given JVM memory pool.",
-        POOL_LABELS);
+        Collections.singletonList("pool"));
     sampleFamilies.add(init);
     for (final MemoryPoolMXBean pool : poolBeans) {
-      List<String> poolNameLabels = Collections.singletonList(pool.getName());
       MemoryUsage poolUsage = pool.getUsage();
       used.addMetric(
-          poolNameLabels,
+          Collections.singletonList(pool.getName()),
           poolUsage.getUsed());
       committed.addMetric(
-          poolNameLabels,
+          Collections.singletonList(pool.getName()),
           poolUsage.getCommitted());
       max.addMetric(
-          poolNameLabels,
+          Collections.singletonList(pool.getName()),
           poolUsage.getMax());
       init.addMetric(
-          poolNameLabels,
+          Collections.singletonList(pool.getName()),
           poolUsage.getInit());
     }
   }
