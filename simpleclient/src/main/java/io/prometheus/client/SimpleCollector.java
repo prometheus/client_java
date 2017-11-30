@@ -73,8 +73,9 @@ public abstract class SimpleCollector<Child> extends Collector {
     if (c != null) {
       return c;
     }
-    children.putIfAbsent(key, newChild());
-    return children.get(key);
+    Child c2 = newChild();
+    Child tmp = children.putIfAbsent(key, c2);
+    return tmp == null ? c2 : tmp;
   }
 
   /**
