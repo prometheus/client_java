@@ -36,10 +36,10 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
             QueuedThreadPool::getThreads),
         buildGauge("jetty_queued_thread_pool_threads_idle", "Number of idle threads",
             QueuedThreadPool::getIdleThreads),
+        buildGauge("jetty_queued_thread_pool_threads_max", "Max size of thread pool",
+            QueuedThreadPool::getMaxThreads),
         buildGauge("jetty_queued_thread_pool_jobs", "Number of total jobs",
-            QueuedThreadPool::getQueueSize),
-        buildGauge("jetty_queued_thread_pool_max", "Max size of thread pool",
-            QueuedThreadPool::getMaxThreads));
+            QueuedThreadPool::getQueueSize));
   }
 
   @Override
