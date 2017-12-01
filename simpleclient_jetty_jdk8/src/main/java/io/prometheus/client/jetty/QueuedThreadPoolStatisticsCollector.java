@@ -39,7 +39,7 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
         buildGauge("jetty_queued_thread_pool_jobs", "Number of total jobs",
             QueuedThreadPool::getQueueSize),
         buildGauge("jetty_queued_thread_pool_max", "Max size of thread pool",
-            QueuedThreadPool::getQueueSize));
+            QueuedThreadPool::getMaxThreads));
   }
 
   @Override
