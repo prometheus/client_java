@@ -1,6 +1,10 @@
 package io.prometheus.client;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
+import static io.prometheus.client.LabelMapper.CLASS_NAME;
+import static io.prometheus.client.LabelMapper.CUSTOM_RESULT_LABEL;
+import static io.prometheus.client.LabelMapper.METHOD_NAME;
+import static io.prometheus.client.LabelMapper.RESULT_TO_STRING;
 import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -13,16 +17,19 @@ public class PrometheusMonitorTest extends MetricsTest {
         @CountInvocations
         @CountCompletions
         @Summarize(namespace = "summary")
-        void theFunction();
+        String theFunction();
+        static String getResultLabel(Object result) {
+            return ((String)result).substring(1);
+        }
     }
 
-    private final OneFunction annotated = () -> {};
+    private final OneFunction annotated = () -> "";
     private final OneFunction throwing = new OneFunction() {
         @Override
         @CountInvocations(namespace = "exception")
         @CountCompletions(namespace = "exception")
         @Summarize(namespace = "exception_summary")
-        public void theFunction() { throw new RuntimeException("error"); }
+        public String theFunction() { throw new RuntimeException("error"); }
     };
 
     public class Duration implements OneFunction {
@@ -31,14 +38,32 @@ public class PrometheusMonitorTest extends MetricsTest {
         @CountInvocations(namespace = "duration")
         @CountCompletions(namespace = "duration")
         @Summarize(namespace = "duration_summary")
-        public void theFunction() {
+        public String theFunction() {
             try {
                 sleep(milliseconds);
             } catch (InterruptedException e) {
             }
+            return "";
         }
-    };
+    }
     private final Duration duration = new Duration();
+
+    private final OneFunction customLabels = new OneFunction() {
+        @Override
+        @CountInvocations(
+                namespace = "custom",
+                labelNames = {"method_name", "class_name"},
+                labelMappers = {METHOD_NAME, CLASS_NAME})
+        @CountCompletions(
+                namespace = "custom",
+                labelNames = {"method_name", "class_name", "custom_result", "string"},
+                labelMappers = {METHOD_NAME, CLASS_NAME, CUSTOM_RESULT_LABEL, RESULT_TO_STRING})
+        @Summarize(
+                namespace = "custom_summary",
+                labelNames = {"method_name", "class_name", "result"},
+                labelMappers = {METHOD_NAME, CLASS_NAME, RESULT_TO_STRING})
+        public String theFunction() {return "result";}
+    };
 
     public interface NotAnnotated {
         void run();
@@ -95,6 +120,24 @@ public class PrometheusMonitorTest extends MetricsTest {
     @Test
     public void testNotAnnotatedDoesNotThrowException() {
         PrometheusMonitor.monitor(notAnnotated).run();
+    }
+
+    @Test
+    public void testCustomLabels() throws Exception {
+        PrometheusMonitor.monitor(customLabels).theFunction();
+        assertThat(defaultRegistry.getSampleValue(
+                "custom_the_function_total",
+                new String[]{"method_name", "class_name"},
+                new String[]{"the_function", "one_function"})).isEqualTo(1);
+        assertThat(defaultRegistry.getSampleValue(
+                "custom_the_function_completed_total",
+                new String[]{"method_name", "class_name", "custom_result", "string"},
+                new String[]{"the_function", "one_function", "esult", "result"})).isEqualTo(1);
+
+        assertThat(defaultRegistry.getSampleValue(
+                "custom_summary_the_function_total_count",
+                new String[]{"method_name", "class_name", "result"},
+                new String[]{"the_function", "one_function", "result"})).isEqualTo(1);
     }
 
     //TODO(audun): Test how we handle name concurrently and cross-metric

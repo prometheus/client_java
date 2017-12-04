@@ -45,55 +45,88 @@ public class PrometheusMonitor<T> implements InvocationHandler {
     @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args)
             throws Throwable {
-        final Summary summary = summarizeDuration(method);
-        final Instant startTime = summary == null ? null : Instant.now();
+        final SummaryTimer summary = new SummaryTimer(method);
+        Object result = null;
         try {
             countInvocation(method);
-            final Object result = method.invoke(manager, args);
-            countComplete(method);
-            return result;
+            result = method.invoke(manager, args);
+            countComplete(method, result);
         } catch (final InvocationTargetException e) {
             countException(e, method);
             throw e.getCause();
         } finally {
-            if (summary != null) {
-                summary.observe(calculateDuration(startTime));
+            if (summary.isStarted()) {
+                summary.observe(method, result);
             }
         }
+        return result;
     }
 
-    private Summary summarizeDuration(final Method method) {
-        final Summarize annotation = getDefiningAnnotation(method, Summarize.class);
-        if (annotation != null) {
-            final String counterName = expandCounterName(annotation.name(), method);
-            return SUMMARIES.computeIfAbsent(annotation.namespace() + counterName, value ->
-                    createSummary(counterName, annotation));
-        }
-        return null;
-    }
+    private class SummaryTimer {
+        private final Summary summary;
+        private final Instant startTime;
+        private final LabelMapper[] labelMappers;
 
-    private Summary createSummary(final String counterName, final Summarize annotation) {
-        final Summary.Builder summary = Summary.build()
-                .namespace(annotation.namespace())
-                .name(counterName)
-                .help(annotation.help());
-        for (int i = 0; i < annotation.quantiles().length; i++) {
-            summary.quantile(annotation.quantiles()[i], annotation.quantileErrors()[i]);
+        private SummaryTimer(final Method method) {
+            final Summarize annotation = getDefiningAnnotation(method, Summarize.class);
+            if (annotation != null) {
+                startTime = Instant.now();
+                final String counterName = expandCounterName(annotation.name(), method);
+                summary = SUMMARIES.computeIfAbsent(annotation.namespace() + counterName, value ->
+                        createSummary(counterName, annotation));
+                labelMappers = annotation.labelMappers();
+            } else {
+                summary = null;
+                startTime = null;
+                labelMappers = null;
+            }
         }
-        return summary.register();
+
+        private Summary createSummary(final String counterName, final Summarize annotation) {
+            final Summary.Builder summary = Summary.build()
+                    .namespace(annotation.namespace())
+                    .name(counterName)
+                    .help(annotation.help())
+                    .labelNames(annotation.labelNames());
+            for (int i = 0; i < annotation.quantiles().length; i++) {
+                summary.quantile(annotation.quantiles()[i], annotation.quantileErrors()[i]);
+            }
+            return summary.register();
+        }
+
+        boolean isStarted() {
+            return summary != null;
+        }
+
+        void observe(final Method method, final Object result) {
+            String[] labels = (String[]) Arrays.stream(labelMappers)
+                    .map(mapper -> mapper.getLabel(method, null, result))
+                    .toArray(String[]::new);
+            summary.labels(labels)
+                    .observe(calculateDuration(startTime));
+        }
+
+        private double calculateDuration(final Instant start) {
+            return Duration.between(start, Instant.now()).toMillis() / 1000d;
+        }
     }
 
     private void countInvocation(final Method method) {
         final CountInvocations annotation = getDefiningAnnotation(method, CountInvocations.class);
         if (annotation != null) {
             final String counterName = expandCounterName(annotation.name(), method);
+            String[] labels = (String[]) Arrays.stream(annotation.labelMappers())
+                    .map(mapper -> mapper.getLabel(method, null, null))
+                    .toArray(String[]::new);
             COUNTERS.computeIfAbsent(
                     annotation.namespace() + counterName,
                     value -> Counter.build()
                             .namespace(annotation.namespace())
                             .name(counterName)
                             .help(annotation.help())
+                            .labelNames(annotation.labelNames())
                             .register())
+                    .labels(labels)
                     .inc();
         }
     }
@@ -127,23 +160,29 @@ public class PrometheusMonitor<T> implements InvocationHandler {
     }
 
     private String expandCounterName(final String name, final Method method) {
-        final String toLowercaseKey = METHOD_NAME_TO_LOWER_UNDERSCORE;
-        if (name.contains(toLowercaseKey)) {
+        if (name.contains(METHOD_NAME_TO_LOWER_UNDERSCORE)) {
             final String leadingName = removeMockitoPostfix(method.getName());
-            return name.replace(toLowercaseKey, LOWER_CAMEL.to(LOWER_UNDERSCORE, leadingName));
+            return name.replace(
+                    METHOD_NAME_TO_LOWER_UNDERSCORE,
+                    LOWER_CAMEL.to(LOWER_UNDERSCORE, leadingName));
         }
         return name;
     }
 
-    private void countComplete(final Method method) {
+    private void countComplete(final Method method, final Object result) {
         final CountCompletions annotation = getDefiningAnnotation(method, CountCompletions.class);
         if (annotation != null) {
             final String counterName = expandCounterName(annotation.name(), method);
+            String[] labels = (String[]) Arrays.stream(annotation.labelMappers())
+                    .map(mapper -> mapper.getLabel(method, null, result))
+                    .toArray(String[]::new);
             COUNTERS.computeIfAbsent(annotation.namespace() + counterName, value -> Counter.build()
                     .namespace(annotation.namespace())
                     .name(counterName)
                     .help(annotation.help())
+                    .labelNames(annotation.labelNames())
                     .register())
+                    .labels(labels)
                     .inc();
         }
     }
@@ -153,7 +192,7 @@ public class PrometheusMonitor<T> implements InvocationHandler {
         if (isCorrectException(e.getTargetException(), annotation)) {
             final String counterName = expandCounterName(annotation.name(), method);
             String[] labels = (String[]) Arrays.stream(annotation.labelMappers())
-                    .map(mapper -> mapper.getLabel(method, e.getCause()))
+                    .map(mapper -> mapper.getLabel(method, e.getCause(), null))
                     .toArray(String[]::new);
             COUNTERS.computeIfAbsent(annotation.namespace() + counterName, value -> Counter.build()
                     .namespace(annotation.namespace())
@@ -178,9 +217,5 @@ public class PrometheusMonitor<T> implements InvocationHandler {
             }
         }
         return false;
-    }
-
-    private static double calculateDuration(final Instant start) {
-        return Duration.between(start, Instant.now()).toMillis() / 1000d;
     }
 };

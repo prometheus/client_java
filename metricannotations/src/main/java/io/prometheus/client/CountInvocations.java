@@ -10,4 +10,6 @@ public @interface CountInvocations {
     String namespace() default "";
     String name() default METHOD_NAME_TO_LOWER_UNDERSCORE + "_total";
     String help() default "No description";
+    String[] labelNames() default {};
+    LabelMapper[] labelMappers() default {};
 }

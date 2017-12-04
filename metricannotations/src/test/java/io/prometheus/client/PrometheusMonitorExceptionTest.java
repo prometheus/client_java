@@ -2,7 +2,7 @@ package io.prometheus.client;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
 import static io.prometheus.client.LabelMapper.CLASS_NAME;
-import static io.prometheus.client.LabelMapper.CUSTOM;
+import static io.prometheus.client.LabelMapper.CUSTOM_EXCEPTION_LABEL;
 import static io.prometheus.client.LabelMapper.EXCEPTION_TYPE;
 import static io.prometheus.client.LabelMapper.METHOD_NAME;
 import static io.prometheus.client.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
@@ -88,7 +88,7 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
         @CountExceptions(
                 namespace = "labeled",
                 labelNames = {"manually_mapped"},
-                labelMappers = {CUSTOM})
+                labelMappers = {CUSTOM_EXCEPTION_LABEL})
         public void throwIOException() throws IOException {
             throw new IOException("error");
         }
