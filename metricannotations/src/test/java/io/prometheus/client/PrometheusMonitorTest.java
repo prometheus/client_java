@@ -1,4 +1,4 @@
-package com.comoyo.creditcard.metricannotations;
+package io.prometheus.client;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
 import static java.lang.Thread.sleep;

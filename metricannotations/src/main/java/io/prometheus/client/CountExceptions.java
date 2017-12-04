@@ -1,6 +1,6 @@
-package com.comoyo.creditcard.metricannotations;
+package io.prometheus.client;
 
-import static com.comoyo.creditcard.metricannotations.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
+import static io.prometheus.client.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

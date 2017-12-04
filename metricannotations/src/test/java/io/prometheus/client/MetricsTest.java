@@ -1,8 +1,7 @@
-package com.comoyo.creditcard.metricannotations;
+package io.prometheus.client;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
 
-import io.prometheus.client.Collector;
 import java.util.Enumeration;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;

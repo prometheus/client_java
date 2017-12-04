@@ -1,6 +1,7 @@
-package com.comoyo.creditcard.metricannotations;
-import static com.comoyo.creditcard.metricannotations.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
+package io.prometheus.client;
+
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
+import static io.prometheus.client.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
