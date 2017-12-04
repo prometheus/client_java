@@ -2,6 +2,7 @@ package io.prometheus.client;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
 import static io.prometheus.client.LabelMapper.CLASS_NAME;
+import static io.prometheus.client.LabelMapper.CUSTOM;
 import static io.prometheus.client.LabelMapper.EXCEPTION_TYPE;
 import static io.prometheus.client.LabelMapper.METHOD_NAME;
 import static io.prometheus.client.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
@@ -16,6 +17,9 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
     public interface ThrowingExceptions {
         void throwRuntimeException();
         void throwIOException() throws IOException;
+        static String getLabel(Throwable e) {
+            return e.getMessage();
+        }
     }
 
     private final ThrowingExceptions interfaceAnnotations
@@ -83,8 +87,8 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
         @Override
         @CountExceptions(
                 namespace = "labeled",
-                labelNames = {"method_name", "class_name", "exception"},
-                labelMappers = {METHOD_NAME, CLASS_NAME, EXCEPTION_TYPE})
+                labelNames = {"manually_mapped"},
+                labelMappers = {CUSTOM})
         public void throwIOException() throws IOException {
             throw new IOException("error");
         }
@@ -146,6 +150,13 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
                 new String[]{"method_name", "class_name", "exception"},
                 new String[]{
                         "throw_runtime_exception", "throwing_exceptions", "runtime_exception"}))
+                .isEqualTo(1);
+        assertThatExceptionOfType(IOException.class).isThrownBy(() ->
+                usingLabels.throwIOException());
+        assertThat(defaultRegistry.getSampleValue(
+                "labeled_throw_i_o_exception_exceptions_total",
+                new String[]{"manually_mapped"},
+                new String[]{"error"}))
                 .isEqualTo(1);
     }
 }

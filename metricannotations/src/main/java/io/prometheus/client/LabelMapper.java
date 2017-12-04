@@ -24,5 +24,18 @@ public enum LabelMapper implements LabelMapperInterface {
         public String getLabel(final Method method, final Throwable e) {
             return UPPER_CAMEL.to(LOWER_UNDERSCORE, e.getClass().getSimpleName());
         }
+    },
+    CUSTOM {
+        @Override
+        public String getLabel(final Method method, final Throwable error) {
+            try {
+                return (String) method.getDeclaringClass()
+                        .getMethod("getLabel", Throwable.class)
+                        .invoke(null, error);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
