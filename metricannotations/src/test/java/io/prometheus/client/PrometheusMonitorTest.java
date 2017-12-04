@@ -40,6 +40,11 @@ public class PrometheusMonitorTest extends MetricsTest {
     };
     private final Duration duration = new Duration();
 
+    public interface NotAnnotated {
+        void run();
+    }
+    private final NotAnnotated notAnnotated = () -> {};
+
     @Test
     public void testAnnotatedMethod() throws Exception {
         final OneFunction monitor = PrometheusMonitor.monitor(annotated);
@@ -85,5 +90,10 @@ public class PrometheusMonitorTest extends MetricsTest {
                 "duration_summary_the_function_total",
                 new String[]{"quantile"},
                 new String[]{"0.99"})).isEqualTo(.1, offset(.1));
+    }
+
+    @Test
+    public void testNotAnnotatedDoesNotThrowException() {
+        PrometheusMonitor.monitor(notAnnotated).run();
     }
 }

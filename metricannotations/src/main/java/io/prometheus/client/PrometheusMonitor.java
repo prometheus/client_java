@@ -33,9 +33,12 @@ public class PrometheusMonitor<T> implements InvocationHandler {
 
     private PrometheusMonitor(final T manager) {
         this.manager = manager;
-        final String simpleName = manager.getClass().getSimpleName();
-        final String nameWithoutMockitoPostfix = simpleName.split("\\$\\$")[0];
-        className = UPPER_CAMEL.to(LOWER_UNDERSCORE, nameWithoutMockitoPostfix);
+        final String readableName = removeMockitoPostfix(manager.getClass().getSimpleName());
+        className = UPPER_CAMEL.to(LOWER_UNDERSCORE, readableName);
+    }
+
+    private String removeMockitoPostfix(final String simpleName) {
+        return simpleName.split("\\$\\$")[0];
     }
 
     @Override
@@ -59,7 +62,7 @@ public class PrometheusMonitor<T> implements InvocationHandler {
     }
 
     private Summary summarizeDuration(final Method method) {
-        final Summarize annotation = getAnnotation(method, Summarize.class);
+        final Summarize annotation = getDefiningAnnotation(method, Summarize.class);
         if (annotation != null) {
             final String counterName = expandCounterName(annotation.name(), method);
             return SUMMARIES.computeIfAbsent(annotation.namespace() + counterName, value ->
@@ -80,7 +83,7 @@ public class PrometheusMonitor<T> implements InvocationHandler {
     }
 
     private void countInvocation(final Method method) {
-        final CountInvocations annotation = getAnnotation(method, CountInvocations.class);
+        final CountInvocations annotation = getDefiningAnnotation(method, CountInvocations.class);
         if (annotation != null) {
             final String counterName = expandCounterName(annotation.name(), method);
             COUNTERS.computeIfAbsent(
@@ -94,22 +97,30 @@ public class PrometheusMonitor<T> implements InvocationHandler {
         }
     }
 
-    private <T extends Annotation> T getAnnotation(final Method method, final Class<T> type) {
-        T annotation = getMethod(manager.getClass(), method).getAnnotation(type);
-        final Class<?>[] interfaces = manager.getClass().getInterfaces();
+    private <T extends Annotation> T getDefiningAnnotation(
+            final Method method,
+            final Class<T> type) {
+        final Class<?> managerClass = manager.getClass();
+        T annotation = getAnnotation(managerClass, method, type);
+        final Class<?>[] interfaces = managerClass.getInterfaces();
         for (int i = 0; annotation == null && i < interfaces.length; i++) {
             annotation = interfaces[i].getAnnotation(type);
             if (annotation == null) {
-                annotation = getMethod(interfaces[i], method).getAnnotation(type);
+                annotation = getAnnotation(interfaces[i], method, type);
             }
         }
         return annotation;
     }
 
-    private Method getMethod(final Class<?> aClass, final Method method) {
-        try {
-            return aClass.getMethod(method.getName());
-        } catch (NoSuchMethodException e) {
+    private <T extends Annotation> T getAnnotation(
+            final Class<?> aClass,
+            final Method method,
+            final Class<T> type) {
+        final String methodName = removeMockitoPostfix(method.getName());
+        for (final Method methodToMatch : aClass.getMethods()) {
+            if (removeMockitoPostfix(methodToMatch.getName()).equals(methodName)) {
+                return methodToMatch.getAnnotation(type);
+            }
         }
         return null;
     }
@@ -117,13 +128,14 @@ public class PrometheusMonitor<T> implements InvocationHandler {
     private String expandCounterName(final String name, final Method method) {
         final String toLowercaseKey = METHOD_NAME_TO_LOWER_UNDERSCORE;
         if (name.contains(toLowercaseKey)) {
-            return name.replace(toLowercaseKey, LOWER_CAMEL.to(LOWER_UNDERSCORE, method.getName()));
+            final String leadingName = removeMockitoPostfix(method.getName());
+            return name.replace(toLowercaseKey, LOWER_CAMEL.to(LOWER_UNDERSCORE, leadingName));
         }
         return name;
     }
 
     private void countComplete(final Method method) {
-        final CountCompletions annotation = getAnnotation(method, CountCompletions.class);
+        final CountCompletions annotation = getDefiningAnnotation(method, CountCompletions.class);
         if (annotation != null) {
             final String counterName = expandCounterName(annotation.name(), method);
             COUNTERS.computeIfAbsent(annotation.namespace() + counterName, value -> Counter.build()
@@ -136,7 +148,7 @@ public class PrometheusMonitor<T> implements InvocationHandler {
     }
 
     private void countException(final InvocationTargetException e, final Method method) {
-        final CountExceptions annotation = getAnnotation(method, CountExceptions.class);
+        final CountExceptions annotation = getDefiningAnnotation(method, CountExceptions.class);
         if (isCorrectException(e.getTargetException(), annotation)) {
             final String counterName = expandCounterName(annotation.name(), method);
             COUNTERS.computeIfAbsent(annotation.namespace() + counterName, value -> Counter.build()
