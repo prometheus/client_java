@@ -11,4 +11,6 @@ public @interface CountExceptions {
     String name() default METHOD_NAME_TO_LOWER_UNDERSCORE + "_exceptions_total";
     String help() default "No description";
     Class[] exceptionTypes() default {};
+    String[] labelNames() default {};
+    LabelMapper[] labelMappers() default {};
 }

@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public class PrometheusMonitor<T> implements InvocationHandler {
         className = UPPER_CAMEL.to(LOWER_UNDERSCORE, readableName);
     }
 
-    private String removeMockitoPostfix(final String simpleName) {
+    public static String removeMockitoPostfix(final String simpleName) {
         return simpleName.split("\\$\\$")[0];
     }
 
@@ -151,11 +152,16 @@ public class PrometheusMonitor<T> implements InvocationHandler {
         final CountExceptions annotation = getDefiningAnnotation(method, CountExceptions.class);
         if (isCorrectException(e.getTargetException(), annotation)) {
             final String counterName = expandCounterName(annotation.name(), method);
+            String[] labels = (String[]) Arrays.stream(annotation.labelMappers())
+                    .map(mapper -> mapper.getLabel(method, e.getCause()))
+                    .toArray(String[]::new);
             COUNTERS.computeIfAbsent(annotation.namespace() + counterName, value -> Counter.build()
                     .namespace(annotation.namespace())
                     .name(counterName)
                     .help(annotation.help())
+                    .labelNames(annotation.labelNames())
                     .register())
+                    .labels(labels)
                     .inc();
         }
     }

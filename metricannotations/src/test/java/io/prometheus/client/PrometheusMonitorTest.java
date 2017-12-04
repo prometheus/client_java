@@ -96,4 +96,6 @@ public class PrometheusMonitorTest extends MetricsTest {
     public void testNotAnnotatedDoesNotThrowException() {
         PrometheusMonitor.monitor(notAnnotated).run();
     }
+
+    //TODO(audun): Test how we handle name concurrently and cross-metric
 }

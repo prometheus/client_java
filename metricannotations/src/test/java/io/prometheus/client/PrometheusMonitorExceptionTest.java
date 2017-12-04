@@ -1,6 +1,9 @@
 package io.prometheus.client;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
+import static io.prometheus.client.LabelMapper.CLASS_NAME;
+import static io.prometheus.client.LabelMapper.EXCEPTION_TYPE;
+import static io.prometheus.client.LabelMapper.METHOD_NAME;
 import static io.prometheus.client.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -66,6 +69,27 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
         }
     });
 
+    public final ThrowingExceptions usingLabels
+            = PrometheusMonitor.monitor(new ThrowingExceptions() {
+        @Override
+        @CountExceptions(
+                namespace = "labeled",
+                labelNames = {"method_name", "class_name", "exception"},
+                labelMappers = {METHOD_NAME, CLASS_NAME, EXCEPTION_TYPE})
+        public void throwRuntimeException() {
+            throw new RuntimeException("error");
+        }
+
+        @Override
+        @CountExceptions(
+                namespace = "labeled",
+                labelNames = {"method_name", "class_name", "exception"},
+                labelMappers = {METHOD_NAME, CLASS_NAME, EXCEPTION_TYPE})
+        public void throwIOException() throws IOException {
+            throw new IOException("error");
+        }
+    });
+
     @Test
     public void testExceptionCounter() throws Exception {
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
@@ -111,5 +135,17 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
                 wrongExceptionTypes.throwIOException());
         assertThat(defaultRegistry.getSampleValue(
                 "wrong_throw_i_o_exception_exceptions_total")).isNull();
+    }
+
+    @Test
+    public void testMappingLabels() throws Exception {
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+                usingLabels.throwRuntimeException());
+        assertThat(defaultRegistry.getSampleValue(
+                "labeled_throw_runtime_exception_exceptions_total",
+                new String[]{"method_name", "class_name", "exception"},
+                new String[]{
+                        "throw_runtime_exception", "throwing_exceptions", "runtime_exception"}))
+                .isEqualTo(1);
     }
 }
