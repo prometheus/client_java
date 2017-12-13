@@ -451,7 +451,7 @@ need to place this (replace your own values) code in your
 ```xml
 <filter>
   <filter-name>prometheusFilter</filter-name>
-  <filter-class>net.cccnext.ssp.portal.spring.filter.PrometheusMetricsFilter</filter-class>
+  <filter-class>io.prometheus.client.filter.MetricsFilter</filter-class>
   <init-param>
     <param-name>metric-name</param-name>
     <param-value>webapp_metrics_filter</param-value>
