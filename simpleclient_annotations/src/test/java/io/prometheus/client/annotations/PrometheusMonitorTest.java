@@ -141,6 +141,4 @@ public class PrometheusMonitorTest extends MetricsTest {
                 new String[]{"method_name", "class_name", "result"},
                 new String[]{"the_function", "custom_labels", "result"})).isEqualTo(1);
     }
-
-    //TODO(audun): Test how we handle name concurrently and cross-metric
 }

@@ -14,15 +14,15 @@ import java.lang.reflect.Proxy;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PrometheusMonitor<T> implements InvocationHandler {
     private final T manager;
     private final String className;
 
-    public static final Map<String, Counter> COUNTERS = new HashMap<>();
-    public static final Map<String, Summary> SUMMARIES = new HashMap<>();
+    public static final Map<String, Counter> COUNTERS = new ConcurrentHashMap<>();
+    public static final Map<String, Summary> SUMMARIES = new ConcurrentHashMap<>();
     public static final String METHOD_NAME_TO_LOWER_UNDERSCORE
             = "<method-name-to-lower-underscore>";
 
