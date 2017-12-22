@@ -1,4 +1,4 @@
-package io.prometheus.client;
+package io.prometheus.client.annotations;
 
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;

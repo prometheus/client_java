@@ -62,6 +62,7 @@
         <module>simpleclient_jetty</module>
         <module>simpleclient_jetty_jdk8</module>
         <module>simpleclient_vertx</module>
+        <module>simpleclient_annotations</module>
         <module>benchmark</module>
     </modules>
 

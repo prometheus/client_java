@@ -1,16 +1,15 @@
-package io.prometheus.client;
+package io.prometheus.client.annotations;
 
-import static io.prometheus.client.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
+import static io.prometheus.client.annotations.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CountExceptions {
+public @interface CountCompletions {
     String namespace() default "";
-    String name() default METHOD_NAME_TO_LOWER_UNDERSCORE + "_exceptions_total";
+    String name() default METHOD_NAME_TO_LOWER_UNDERSCORE + "_completed_total";
     String help() default "No description";
-    Class[] exceptionTypes() default {};
     String[] labelNames() default {};
     LabelMapper[] labelMappers() default {};
 }

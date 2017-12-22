@@ -1,9 +1,11 @@
-package io.prometheus.client;
+package io.prometheus.client.annotations;
 
 import static com.google.common.base.CaseFormat.LOWER_CAMEL;
 import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
 import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 
+import io.prometheus.client.Counter;
+import io.prometheus.client.Summary;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;

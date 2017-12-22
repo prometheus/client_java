@@ -1,10 +1,10 @@
-package io.prometheus.client;
+package io.prometheus.client.annotations;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
-import static io.prometheus.client.LabelMapper.CLASS_NAME;
-import static io.prometheus.client.LabelMapper.CUSTOM_RESULT_LABEL;
-import static io.prometheus.client.LabelMapper.METHOD_NAME;
-import static io.prometheus.client.LabelMapper.RESULT_TO_STRING;
+import static io.prometheus.client.annotations.LabelMapper.CLASS_NAME;
+import static io.prometheus.client.annotations.LabelMapper.CUSTOM_RESULT_LABEL;
+import static io.prometheus.client.annotations.LabelMapper.METHOD_NAME;
+import static io.prometheus.client.annotations.LabelMapper.RESULT_TO_STRING;
 import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

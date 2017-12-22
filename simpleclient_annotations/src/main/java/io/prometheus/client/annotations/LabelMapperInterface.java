@@ -1,4 +1,4 @@
-package io.prometheus.client;
+package io.prometheus.client.annotations;
 
 import java.lang.reflect.Method;
 

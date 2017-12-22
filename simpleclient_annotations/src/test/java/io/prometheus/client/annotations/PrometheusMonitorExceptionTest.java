@@ -1,11 +1,11 @@
-package io.prometheus.client;
+package io.prometheus.client.annotations;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
-import static io.prometheus.client.LabelMapper.CLASS_NAME;
-import static io.prometheus.client.LabelMapper.CUSTOM_EXCEPTION_LABEL;
-import static io.prometheus.client.LabelMapper.EXCEPTION_TYPE;
-import static io.prometheus.client.LabelMapper.METHOD_NAME;
-import static io.prometheus.client.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
+import static io.prometheus.client.annotations.LabelMapper.CLASS_NAME;
+import static io.prometheus.client.annotations.LabelMapper.CUSTOM_EXCEPTION_LABEL;
+import static io.prometheus.client.annotations.LabelMapper.EXCEPTION_TYPE;
+import static io.prometheus.client.annotations.LabelMapper.METHOD_NAME;
+import static io.prometheus.client.annotations.PrometheusMonitor.METHOD_NAME_TO_LOWER_UNDERSCORE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 

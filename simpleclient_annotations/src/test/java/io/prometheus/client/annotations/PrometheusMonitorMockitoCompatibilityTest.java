@@ -1,4 +1,4 @@
-package io.prometheus.client;
+package io.prometheus.client.annotations;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PrometheusMonitorMockitoCompatibilityTest extends MetricsTest {
