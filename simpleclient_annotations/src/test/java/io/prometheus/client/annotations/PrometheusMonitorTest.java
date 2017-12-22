@@ -24,6 +24,21 @@ public class PrometheusMonitorTest extends MetricsTest {
     }
 
     private final OneFunction annotated = () -> "";
+    @Test
+    public void testAnnotatedMethod() throws Exception {
+        final OneFunction monitor = PrometheusMonitor.monitor(annotated);
+        monitor.theFunction();
+        assertThat(defaultRegistry.getSampleValue("the_function_total")).isEqualTo(1);
+        assertThat(defaultRegistry.getSampleValue("the_function_completed_total")).isEqualTo(1);
+        assertThat(defaultRegistry.getSampleValue("summary_the_function_total_count")).isEqualTo(1);
+        monitor.theFunction();
+        assertThat(defaultRegistry.getSampleValue("the_function_total")).isEqualTo(2);
+        assertThat(defaultRegistry.getSampleValue("the_function_completed_total")).isEqualTo(2);
+        assertThat(defaultRegistry.getSampleValue("summary_the_function_total_count")).isEqualTo(2);
+        assertThat(defaultRegistry.getSampleValue("summary_the_function_total_sum"))
+                .isBetween(0.0, 0.1);
+    }
+
     private final OneFunction throwing = new OneFunction() {
         @Override
         @CountInvocations(namespace = "exception")
@@ -31,6 +46,15 @@ public class PrometheusMonitorTest extends MetricsTest {
         @Summarize(namespace = "exception_summary")
         public String theFunction() { throw new RuntimeException("error"); }
     };
+
+    @Test
+    public void testException() throws Exception {
+        final OneFunction monitor = PrometheusMonitor.monitor(throwing);
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> monitor.theFunction());
+        assertThat(defaultRegistry.getSampleValue("exception_the_function_total")).isEqualTo(1);
+        assertThat(defaultRegistry.getSampleValue("exception_the_function_completed_total"))
+                .isNull();
+    }
 
     public class Duration implements OneFunction {
         public long milliseconds = 10L;
@@ -47,54 +71,6 @@ public class PrometheusMonitorTest extends MetricsTest {
         }
     }
     private final Duration duration = new Duration();
-
-    public static class CustomLabels implements OneFunction {
-        @Override
-        @CountInvocations(
-                namespace = "custom",
-                labelNames = {"method_name", "class_name"},
-                labelMappers = {METHOD_NAME, CLASS_NAME})
-        @CountCompletions(
-                namespace = "custom",
-                labelNames = {"method_name", "class_name", "custom_result", "string"},
-                labelMappers = {METHOD_NAME, CLASS_NAME, CUSTOM_RESULT_LABEL, RESULT_TO_STRING})
-        @Summarize(
-                namespace = "custom_summary",
-                labelNames = {"method_name", "class_name", "result"},
-                labelMappers = {METHOD_NAME, CLASS_NAME, RESULT_TO_STRING})
-        public String theFunction() {return "result";}
-    }
-    private final OneFunction customLabels = new CustomLabels();
-
-    public interface NotAnnotated {
-
-        void run();
-    }
-    private final NotAnnotated notAnnotated = () -> {};
-
-    @Test
-    public void testAnnotatedMethod() throws Exception {
-        final OneFunction monitor = PrometheusMonitor.monitor(annotated);
-        monitor.theFunction();
-        assertThat(defaultRegistry.getSampleValue("the_function_total")).isEqualTo(1);
-        assertThat(defaultRegistry.getSampleValue("the_function_completed_total")).isEqualTo(1);
-        assertThat(defaultRegistry.getSampleValue("summary_the_function_total_count")).isEqualTo(1);
-        monitor.theFunction();
-        assertThat(defaultRegistry.getSampleValue("the_function_total")).isEqualTo(2);
-        assertThat(defaultRegistry.getSampleValue("the_function_completed_total")).isEqualTo(2);
-        assertThat(defaultRegistry.getSampleValue("summary_the_function_total_count")).isEqualTo(2);
-        assertThat(defaultRegistry.getSampleValue("summary_the_function_total_sum"))
-                .isBetween(0.0, 0.1);
-    }
-
-    @Test
-    public void testException() throws Exception {
-        final OneFunction monitor = PrometheusMonitor.monitor(throwing);
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> monitor.theFunction());
-        assertThat(defaultRegistry.getSampleValue("exception_the_function_total")).isEqualTo(1);
-        assertThat(defaultRegistry.getSampleValue("exception_the_function_completed_total"))
-                .isNull();
-    }
 
     @Test
     public void testTiming() throws Exception {
@@ -119,10 +95,34 @@ public class PrometheusMonitorTest extends MetricsTest {
                 new String[]{"0.99"})).isEqualTo(.1, offset(.1));
     }
 
+    public interface NotAnnotated {
+
+        void run();
+    }
+    private final NotAnnotated notAnnotated = () -> {};
+
     @Test
     public void testNotAnnotatedDoesNotThrowException() {
         PrometheusMonitor.monitor(notAnnotated).run();
     }
+
+    public static class CustomLabels implements OneFunction {
+        @Override
+        @CountInvocations(
+                namespace = "custom",
+                labelNames = {"method_name", "class_name"},
+                labelMappers = {METHOD_NAME, CLASS_NAME})
+        @CountCompletions(
+                namespace = "custom",
+                labelNames = {"method_name", "class_name", "custom_result", "string"},
+                labelMappers = {METHOD_NAME, CLASS_NAME, CUSTOM_RESULT_LABEL, RESULT_TO_STRING})
+        @Summarize(
+                namespace = "custom_summary",
+                labelNames = {"method_name", "class_name", "result"},
+                labelMappers = {METHOD_NAME, CLASS_NAME, RESULT_TO_STRING})
+        public String theFunction() {return "result";}
+    }
+    private final OneFunction customLabels = new CustomLabels();
 
     @Test
     public void testCustomLabels() throws Exception {
