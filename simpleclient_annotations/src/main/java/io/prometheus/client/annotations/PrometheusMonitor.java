@@ -102,7 +102,7 @@ public class PrometheusMonitor<T> implements InvocationHandler {
 
         void observe(final Method method, final Object result) {
             String[] labels = (String[]) Arrays.stream(labelMappers)
-                    .map(mapper -> mapper.getLabel(method, null, result))
+                    .map(mapper -> mapper.getLabel(manager, method, result))
                     .toArray(String[]::new);
             summary.labels(labels)
                     .observe(calculateDuration(startTime));
@@ -118,7 +118,7 @@ public class PrometheusMonitor<T> implements InvocationHandler {
         if (annotation != null) {
             final String counterName = expandCounterName(annotation.name(), method);
             String[] labels = (String[]) Arrays.stream(annotation.labelMappers())
-                    .map(mapper -> mapper.getLabel(method, null, null))
+                    .map(mapper -> mapper.getLabel(manager, method, null))
                     .toArray(String[]::new);
             COUNTERS.computeIfAbsent(
                     annotation.namespace() + counterName,
@@ -176,7 +176,7 @@ public class PrometheusMonitor<T> implements InvocationHandler {
         if (annotation != null) {
             final String counterName = expandCounterName(annotation.name(), method);
             String[] labels = (String[]) Arrays.stream(annotation.labelMappers())
-                    .map(mapper -> mapper.getLabel(method, null, result))
+                    .map(mapper -> mapper.getLabel(manager, method, result))
                     .toArray(String[]::new);
             COUNTERS.computeIfAbsent(annotation.namespace() + counterName, value -> Counter.build()
                     .namespace(annotation.namespace())
@@ -194,7 +194,7 @@ public class PrometheusMonitor<T> implements InvocationHandler {
         if (isCorrectException(e.getTargetException(), annotation)) {
             final String counterName = expandCounterName(annotation.name(), method);
             String[] labels = (String[]) Arrays.stream(annotation.labelMappers())
-                    .map(mapper -> mapper.getLabel(method, e.getCause(), null))
+                    .map(mapper -> mapper.getLabel(manager, method, e.getCause()))
                     .toArray(String[]::new);
             COUNTERS.computeIfAbsent(annotation.namespace() + counterName, value -> Counter.build()
                     .namespace(annotation.namespace())

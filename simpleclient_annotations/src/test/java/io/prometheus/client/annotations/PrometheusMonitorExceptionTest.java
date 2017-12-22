@@ -73,8 +73,7 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
         }
     });
 
-    public final ThrowingExceptions usingLabels
-            = PrometheusMonitor.monitor(new ThrowingExceptions() {
+    public class UsingLabels implements ThrowingExceptions {
         @Override
         @CountExceptions(
                 namespace = "labeled",
@@ -83,7 +82,6 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
         public void throwRuntimeException() {
             throw new RuntimeException("error");
         }
-
         @Override
         @CountExceptions(
                 namespace = "labeled",
@@ -92,7 +90,9 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
         public void throwIOException() throws IOException {
             throw new IOException("error");
         }
-    });
+
+    }
+    public final ThrowingExceptions usingLabels = PrometheusMonitor.monitor(new UsingLabels());
 
     @Test
     public void testExceptionCounter() throws Exception {
@@ -149,7 +149,7 @@ public class PrometheusMonitorExceptionTest extends MetricsTest {
                 "labeled_throw_runtime_exception_exceptions_total",
                 new String[]{"method_name", "class_name", "exception"},
                 new String[]{
-                        "throw_runtime_exception", "throwing_exceptions", "runtime_exception"}))
+                        "throw_runtime_exception", "using_labels", "runtime_exception"}))
                 .isEqualTo(1);
         assertThatExceptionOfType(IOException.class).isThrownBy(() ->
                 usingLabels.throwIOException());

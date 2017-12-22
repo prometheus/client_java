@@ -48,7 +48,7 @@ public class PrometheusMonitorTest extends MetricsTest {
     }
     private final Duration duration = new Duration();
 
-    private final OneFunction customLabels = new OneFunction() {
+    public static class CustomLabels implements OneFunction {
         @Override
         @CountInvocations(
                 namespace = "custom",
@@ -63,9 +63,11 @@ public class PrometheusMonitorTest extends MetricsTest {
                 labelNames = {"method_name", "class_name", "result"},
                 labelMappers = {METHOD_NAME, CLASS_NAME, RESULT_TO_STRING})
         public String theFunction() {return "result";}
-    };
+    }
+    private final OneFunction customLabels = new CustomLabels();
 
     public interface NotAnnotated {
+
         void run();
     }
     private final NotAnnotated notAnnotated = () -> {};
@@ -128,16 +130,16 @@ public class PrometheusMonitorTest extends MetricsTest {
         assertThat(defaultRegistry.getSampleValue(
                 "custom_the_function_total",
                 new String[]{"method_name", "class_name"},
-                new String[]{"the_function", "one_function"})).isEqualTo(1);
+                new String[]{"the_function", "custom_labels"})).isEqualTo(1);
         assertThat(defaultRegistry.getSampleValue(
                 "custom_the_function_completed_total",
                 new String[]{"method_name", "class_name", "custom_result", "string"},
-                new String[]{"the_function", "one_function", "esult", "result"})).isEqualTo(1);
+                new String[]{"the_function", "custom_labels", "esult", "result"})).isEqualTo(1);
 
         assertThat(defaultRegistry.getSampleValue(
                 "custom_summary_the_function_total_count",
                 new String[]{"method_name", "class_name", "result"},
-                new String[]{"the_function", "one_function", "result"})).isEqualTo(1);
+                new String[]{"the_function", "custom_labels", "result"})).isEqualTo(1);
     }
 
     //TODO(audun): Test how we handle name concurrently and cross-metric
