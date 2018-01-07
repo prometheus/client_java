@@ -109,10 +109,13 @@ public class CollectorRegistry {
           names.add(family.name + "_count");
           names.add(family.name + "_sum");
           names.add(family.name);
+          break;
         case HISTOGRAM:
           names.add(family.name + "_count");
           names.add(family.name + "_sum");
           names.add(family.name + "_bucket");
+          names.add(family.name);
+          break;
         default:
           names.add(family.name);
       }
