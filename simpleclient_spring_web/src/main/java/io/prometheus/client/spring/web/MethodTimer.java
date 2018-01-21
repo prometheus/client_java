@@ -1,5 +1,7 @@
 package io.prometheus.client.spring.web;
 
+import io.prometheus.client.Histogram;
+import io.prometheus.client.SimpleCollector;
 import io.prometheus.client.Summary;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -10,6 +12,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -25,8 +28,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Scope("prototype")
 @ControllerAdvice
 public class MethodTimer {
-    private final ReadWriteLock summaryLock = new ReentrantReadWriteLock();
-    private final HashMap<String, Summary> summaries = new HashMap<String, Summary>();
+    private final ReadWriteLock collectorLock = new ReentrantReadWriteLock();
+    private final HashMap<String, SimpleCollector> collectors = new HashMap<String, SimpleCollector>();
 
     @Pointcut("@annotation(io.prometheus.client.spring.web.PrometheusTimeMethod)")
     public void annotatedMethod() {}
@@ -50,7 +53,7 @@ public class MethodTimer {
         return AnnotationUtils.findAnnotation(pjp.getTarget().getClass().getDeclaredMethod(name, parameterTypes), PrometheusTimeMethod.class);
     }
 
-    private Summary ensureSummary(ProceedingJoinPoint pjp, String key) throws IllegalStateException {
+    private SimpleCollector ensureCollector(ProceedingJoinPoint pjp, String key) throws IllegalStateException {
         PrometheusTimeMethod annot;
         try {
             annot = getAnnotation(pjp);
@@ -62,29 +65,43 @@ public class MethodTimer {
 
         assert(annot != null);
 
-        Summary summary;
+        SimpleCollector simpleCollector;
 
         // We use a writeLock here to guarantee no concurrent reads.
-        final Lock writeLock = summaryLock.writeLock();
+        final Lock writeLock = collectorLock.writeLock();
         writeLock.lock();
         try {
             // Check one last time with full mutual exclusion in case multiple readers got null before creation.
-            summary = summaries.get(key);
-            if (summary != null) {
-                return summary;
+            simpleCollector = collectors.get(key);
+            if (simpleCollector != null) {
+                return simpleCollector;
             }
 
-            // Now we know for sure that we have never before registered.
-            summary = Summary.build()
-                    .name(annot.name())
-                    .help(annot.help())
-                    .register();
+            try {
+                SimpleCollector.Builder builder = (SimpleCollector.Builder) annot.collectorClass()
+                        .getMethod("build").invoke(null);
 
-            // Even a rehash of the underlying table will not cause issues as we mutually exclude readers while we
-            // perform our updates.
-            summaries.put(key, summary);
+                // Now we know for sure that we have never before registered.
+                simpleCollector = builder
+                        .name(annot.name())
+                        .help(annot.help())
+                        .register();
 
-            return summary;
+                // Even a rehash of the underlying table will not cause issues as we mutually exclude readers while we
+                // perform our updates.
+                collectors.put(key, simpleCollector);
+
+                return simpleCollector;
+            } catch (NoSuchMethodException noSuchMethodException) {
+                throw new IllegalArgumentException("Invalid collectorClass specified. Only Summary and " +
+                        "Histogram collectors are supported for PrometheusTimedMethod collection.", noSuchMethodException);
+            } catch (IllegalAccessException illegalAccessException) {
+                throw new IllegalArgumentException("Invalid collectorClass specified. Only Summary and " +
+                        "Histogram collectors are supported for PrometheusTimedMethod collection.", illegalAccessException);
+            } catch (InvocationTargetException invocationTargetException) {
+                throw new IllegalArgumentException("Invalid collectorClass specified. Only Summary and " +
+                        "Histogram collectors are supported for PrometheusTimedMethod collection.", invocationTargetException);
+            }
         } finally {
             writeLock.unlock();
         }
@@ -94,25 +111,37 @@ public class MethodTimer {
     public Object timeMethod(ProceedingJoinPoint pjp) throws Throwable {
         String key = pjp.getSignature().toLongString();
 
-        Summary summary;
-        final Lock r = summaryLock.readLock();
+        SimpleCollector collector;
+        final Lock r = collectorLock.readLock();
         r.lock();
         try {
-            summary = summaries.get(key);
+            collector = collectors.get(key);
         } finally {
             r.unlock();
         }
 
-        if (summary == null) {
-            summary = ensureSummary(pjp, key);
+        if (collector == null) {
+            collector = ensureCollector(pjp, key);
         }
 
-        final Summary.Timer t = summary.startTimer();
+        if (collector.getClass().equals(Summary.class)) {
+            final Summary.Timer t = ((Summary) collector).startTimer();
 
-        try {
-            return pjp.proceed();
-        } finally {
-            t.observeDuration();
+            try {
+                return pjp.proceed();
+            } finally {
+                t.observeDuration();
+            }
+        } else if (collector.getClass().equals(Histogram.class)) {
+            final Histogram.Timer t = ((Histogram) collector).startTimer();
+
+            try {
+                return pjp.proceed();
+            } finally {
+                t.observeDuration();
+            }
+        } else {
+            throw new IllegalStateException("Unsupported Collector class: " + collector.getClass().getCanonicalName());
         }
     }
 }

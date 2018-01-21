@@ -2,6 +2,7 @@ package io.prometheus.client.spring.web;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Histogram;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
@@ -14,6 +15,7 @@ import static org.junit.Assert.assertNotNull;
 public class MethodTimerTest {
     private interface Timeable {
         void timeMe() throws Exception;
+        void timeMeWithHistogram() throws Exception;
     }
 
     private final class TestClass implements Timeable {
@@ -22,10 +24,16 @@ public class MethodTimerTest {
             Thread.sleep(20);
         }
 
+        @PrometheusTimeMethod(name = "test_class_histogram", help = "help two", collectorClass = Histogram.class)
+        public void timeMeWithHistogram() throws Exception {
+            Thread.sleep(100);
+        }
+
     }
 
     private interface Time2 {
         void timeMe() throws Exception;
+        void timeMeWithHistogram() throws Exception;
         void aSecondMethod() throws Exception;
     }
 
@@ -41,6 +49,17 @@ public class MethodTimerTest {
         final Double tot = CollectorRegistry.defaultRegistry.getSampleValue("test_class_sum");
         Assert.assertNotNull(tot);
         assertEquals(0.02, tot, 0.01);
+
+        proxy.timeMeWithHistogram();
+
+        final Double histogramTotalFiveMillisBucket = CollectorRegistry.defaultRegistry.getSampleValue("test_class_histogram_bucket",
+                new String[] { "le" }, new String[] { "0.005" });
+        assertEquals(histogramTotalFiveMillisBucket, Double.valueOf(0.0));
+
+        final Double histogramTotal500msBucket = CollectorRegistry.defaultRegistry.getSampleValue("test_class_histogram_bucket",
+                new String[] { "le" }, new String[] { "0.5" });
+        assertEquals(histogramTotal500msBucket, Double.valueOf(1.0));
+
     }
 
     <T> T getProxy(T source){
@@ -52,11 +71,18 @@ public class MethodTimerTest {
     @Test
     public void testValueParam() throws Exception {
         final String name = "foobar";
+        final String nameHistogram = "foobarHistogram";
         Time2 a = getProxy(new Time2() {
             @PrometheusTimeMethod(name = name, help="help")
             @Override
             public void timeMe() throws Exception {
                 Thread.sleep(35);
+            }
+
+            @Override
+            @PrometheusTimeMethod(name = nameHistogram, help="help", collectorClass = Histogram.class)
+            public void timeMeWithHistogram() throws Exception {
+                Thread.sleep(40);
             }
 
             @Override
@@ -75,12 +101,22 @@ public class MethodTimerTest {
         a.timeMe();
         final Double tot2 = CollectorRegistry.defaultRegistry.getSampleValue(name + "_sum");
         assertEquals(0.035*4, tot2, 0.1);
+
+        a.timeMeWithHistogram();
+
+        final Double histogramTotalOneTenthBucket = CollectorRegistry.defaultRegistry.getSampleValue(nameHistogram + "_bucket", new String[] { "le" }, new String[] { "0.1" });
+        assertEquals(histogramTotalOneTenthBucket, Double.valueOf(1.0));
+
+        final Double histogramTotOneHundredthSecond = CollectorRegistry.defaultRegistry.getSampleValue(nameHistogram + "_bucket", new String[] { "le" }, new String[] { "0.01" });
+        assertEquals(histogramTotOneHundredthSecond, Double.valueOf(0.0));
     }
 
     @Test
     public void testHelpParam() throws Exception {
         final String name = "foo";
         final String help = "help";
+        final String nameHistogram = "fooHistogram";
+        final String helpHistogram = "help histogram";
 
         Time2 a = getProxy(new Time2() {
             @Override
@@ -90,24 +126,37 @@ public class MethodTimerTest {
             }
 
             @Override
+            @PrometheusTimeMethod(name = nameHistogram, help= helpHistogram, collectorClass = Histogram.class)
+            public void timeMeWithHistogram() throws Exception {
+                Thread.sleep(25);
+            }
+
+            @Override
             public void aSecondMethod() throws Exception {
 
             }
         });
 
         a.timeMe();
+        a.timeMeWithHistogram();
 
         final Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.metricFamilySamples();
 
-        Collector.MetricFamilySamples sample = null;
+        Collector.MetricFamilySamples sampleSummary = null;
+        Collector.MetricFamilySamples sampleHistogram = null;
         while (samples.hasMoreElements()) {
-            sample = samples.nextElement();
+            Collector.MetricFamilySamples sample = samples.nextElement();
             if (name.equals(sample.name)) {
-                break;
+                sampleSummary = sample;
+            } else if (nameHistogram.equals(sample.name)) {
+                sampleHistogram = sample;
             }
         }
-        Assert.assertNotNull(sample);
-        assertEquals(help, sample.help);
+        Assert.assertNotNull(sampleSummary);
+        assertEquals(help, sampleSummary.help);
+
+        Assert.assertNotNull(sampleHistogram);
+        assertEquals(helpHistogram, sampleHistogram.help);
     }
 
     private class MyException extends Exception {
@@ -124,6 +173,12 @@ public class MethodTimerTest {
             public void timeMe() throws Exception {
                 Thread.sleep(10);
                 throw new MyException("Yo this is an exception");
+            }
+
+            @Override
+            @PrometheusTimeMethod(name = "fooasdf2", help="help", collectorClass = Histogram.class)
+            public void timeMeWithHistogram() throws Exception {
+                Thread.sleep(25);
             }
 
             @Override
@@ -153,6 +208,12 @@ public class MethodTimerTest {
             @PrometheusTimeMethod(name="fooasdf2", help="bar")
             public void timeMe() throws Exception {
                 Thread.sleep(misnamedSleepTime);
+            }
+
+            @Override
+            @PrometheusTimeMethod(name = "fooasdf3", help="help", collectorClass = Histogram.class)
+            public void timeMeWithHistogram() throws Exception {
+                Thread.sleep(25);
             }
 
             @Override
