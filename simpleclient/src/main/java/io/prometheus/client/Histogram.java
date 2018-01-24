@@ -271,7 +271,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
    * Observe the given amount on the histogram with no labels.
    */
   public void observe(double amt) {
-    noLabelsChild.observe(amt);
+    getNoLabelsChild().observe(amt);
   }
   /**
    * Start a timer to track a duration on the histogram with no labels.
@@ -279,7 +279,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
    * Call {@link Timer#observeDuration} at the end of what you want to measure the duration of.
    */
   public Timer startTimer() {
-    return noLabelsChild.startTimer();
+    return getNoLabelsChild().startTimer();
   }
 
   /**
@@ -289,7 +289,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
    * @return Measured duration in seconds for timeable to complete.
    */
   public double time(Runnable timeable){
-    return noLabelsChild.time(timeable);
+    return getNoLabelsChild().time(timeable);
   }
 
   @Override

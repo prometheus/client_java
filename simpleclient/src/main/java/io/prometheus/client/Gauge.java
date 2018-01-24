@@ -231,7 +231,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    * Increment the gauge with no labels by the given amount.
    */
   public void inc(double amt) {
-    noLabelsChild.inc(amt);
+    getNoLabelsChild().inc(amt);
   }
   /**
    * Increment the gauge with no labels by 1.
@@ -243,19 +243,19 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    * Decrement the gauge with no labels by the given amount.
    */
   public void dec(double amt) {
-    noLabelsChild.dec(amt);
+    getNoLabelsChild().dec(amt);
   }
   /**
    * Set the gauge with no labels to the given value.
    */
   public void set(double val) {
-    noLabelsChild.set(val);
+    getNoLabelsChild().set(val);
   }
   /**
    * Set the gauge with no labels to the current unixtime.
    */
   public void setToCurrentTime() {
-    noLabelsChild.setToCurrentTime();
+    getNoLabelsChild().setToCurrentTime();
   }
   /**
    * Start a timer to track a duration, for the gauge with no labels.
@@ -267,7 +267,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    * Call {@link Timer#setDuration} at the end of what you want to measure the duration of.
    */
   public Timer startTimer() {
-    return noLabelsChild.startTimer();
+    return getNoLabelsChild().startTimer();
   }
 
   /**
@@ -277,14 +277,14 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    * @return Measured duration in seconds for timeable to complete.
    */
   public double setToTime(Runnable timeable){
-    return noLabelsChild.setToTime(timeable);
+    return getNoLabelsChild().setToTime(timeable);
   }
   
   /**
    * Get the value of the gauge.
    */
   public double get() {
-    return noLabelsChild.get();
+    return getNoLabelsChild().get();
   }
 
 

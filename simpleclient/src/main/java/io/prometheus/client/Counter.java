@@ -144,14 +144,14 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
    * @throws IllegalArgumentException If amt is negative.
    */
   public void inc(double amt) {
-    noLabelsChild.inc(amt);
+    getNoLabelsChild().inc(amt);
   }
   
   /**
    * Get the value of the counter.
    */
   public double get() {
-    return noLabelsChild.get();
+    return getNoLabelsChild().get();
   }
 
   @Override

@@ -285,7 +285,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
    * Observe the given amount on the summary with no labels.
    */
   public void observe(double amt) {
-    noLabelsChild.observe(amt);
+    getNoLabelsChild().observe(amt);
   }
   /**
    * Start a timer to track a duration on the summary with no labels.
@@ -293,7 +293,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
    * Call {@link Timer#observeDuration} at the end of what you want to measure the duration of.
    */
   public Timer startTimer() {
-    return noLabelsChild.startTimer();
+    return getNoLabelsChild().startTimer();
   }
 
   /**
@@ -303,7 +303,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
    * @return Measured duration in seconds for timeable to complete.
    */
   public double time(Runnable timeable){
-    return noLabelsChild.time(timeable);
+    return getNoLabelsChild().time(timeable);
   }
   
   /**
@@ -312,7 +312,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
    * <em>Warning:</em> The definition of {@link Child.Value} is subject to change.
    */
   public Child.Value get() {
-    return noLabelsChild.get();
+    return getNoLabelsChild().get();
   }
 
   @Override

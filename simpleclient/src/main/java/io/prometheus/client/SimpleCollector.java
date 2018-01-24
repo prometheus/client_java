@@ -52,7 +52,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   protected final List<String> labelNames;
 
   protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
-  protected Child noLabelsChild;
+  private Child noLabelsChild;
 
   /**
    * Return the Child with the given labels, creating it if needed.
@@ -106,6 +106,17 @@ public abstract class SimpleCollector<Child> extends Collector {
     if (labelNames.size() == 0) {
       noLabelsChild = labels();
     }
+  }
+
+  /**
+   * Return the child with no labels, which should have been already initialised. It is an error to call this method
+   * if the collector is labelled.
+   */
+  protected Child getNoLabelsChild() throws IllegalArgumentException {
+    if (noLabelsChild == null) {
+      throw new IllegalArgumentException("For a labelled metric you must specify the labels");
+    }
+    return noLabelsChild;
   }
 
   /**
