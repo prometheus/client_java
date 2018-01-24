@@ -112,7 +112,7 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Return the child with no labels, which should have been already initialised. It is an error to call this method
    * if the collector is labelled.
    */
-  protected Child getNoLabelsChild() throws IllegalArgumentException {
+  protected Child getNoLabelsChild() {
     if (noLabelsChild == null) {
       throw new IllegalArgumentException("For a labelled metric you must specify the labels");
     }
