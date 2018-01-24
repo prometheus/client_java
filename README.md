@@ -193,7 +193,7 @@ class YourClass {
 ```
 
 The default buckets are intended to cover a typical web/rpc request from milliseconds to seconds.
-They can be overridden with the `buckets()` method on the [Histogram.Builder](https://prometheus.io/client_java/io/prometheus/client/Histogram.Builder.html#buckets-double...-).
+They can be overridden with the `buckets()` method on the [Histogram.Builder](https://prometheus.github.io/client_java/io/prometheus/client/Histogram.Builder.html#buckets-double...-).
 
 There are utilities for timing code:
 
