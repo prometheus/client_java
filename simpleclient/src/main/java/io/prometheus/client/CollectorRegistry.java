@@ -66,10 +66,10 @@ public class CollectorRegistry {
    */
   public void unregister(Collector m) {
     synchronized (collectorsToNames) {
-      for (String name : collectorsToNames.get(m)) {
+      List<String> names = collectorsToNames.remove(m);
+      for (String name : names) {
         namesToCollectors.remove(name);
       }
-      collectorsToNames.remove(m);
     }
   }
 
