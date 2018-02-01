@@ -46,6 +46,10 @@ public class TextFormat {
         }
         writer.write(' ');
         writer.write(Collector.doubleToGoString(sample.value));
+        if (sample.timestamp != null){
+        	writer.write(' ');
+        	writer.write(sample.timestamp.toString());
+        }
         writer.write('\n');
       }
     }

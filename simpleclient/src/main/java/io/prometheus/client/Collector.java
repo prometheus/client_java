@@ -77,12 +77,18 @@ public abstract class Collector {
       public final List<String> labelNames;
       public final List<String> labelValues;  // Must have same length as labelNames.
       public final double value;
+      public final Long timestamp;
 
-      public Sample(String name, List<String> labelNames, List<String> labelValues, double value) {
+      public Sample(String name, List<String> labelNames, List<String> labelValues, double value, Long timestamp) {
         this.name = name;
         this.labelNames = labelNames;
         this.labelValues = labelValues;
         this.value = value;
+        this.timestamp = timestamp;
+      }
+
+      public Sample(String name, List<String> labelNames, List<String> labelValues, double value) {
+    	  this(name, labelNames, labelValues, value, null);
       }
 
       @Override
@@ -92,7 +98,8 @@ public abstract class Collector {
         }
         Sample other = (Sample) obj;
         return other.name.equals(name) && other.labelNames.equals(labelNames)
-          && other.labelValues.equals(labelValues) && other.value == value;
+          && other.labelValues.equals(labelValues) && other.value == value
+		  && other.timestamp.equals(timestamp);
       }
 
       @Override
@@ -103,13 +110,14 @@ public abstract class Collector {
         hash = 37 * hash + labelValues.hashCode();
         long d = Double.doubleToLongBits(value);
         hash = 37 * hash + (int)(d ^ (d >>> 32));
+        hash = 37 * hash + timestamp.hashCode();
         return hash;
       }
 
       @Override
       public String toString() {
         return "Name: " + name + " LabelNames: " + labelNames + " labelValues: " + labelValues +
-          " Value: " + value;
+          " Value: " + value + " Timestamp: " + timestamp;
       }
     }
   }
