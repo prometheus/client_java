@@ -97,9 +97,16 @@ public abstract class Collector {
           return false;
         }
         Sample other = (Sample) obj;
+        boolean timestampEquals = true;
+        if ((timestamp != null && other.timestamp == null) || (timestamp == null && other.timestamp != null)) {
+        	timestampEquals = false;
+        }
+        if (timestamp != null && other.timestamp != null) {
+        	timestampEquals = timestamp.equals(other.timestamp);
+        }
         return other.name.equals(name) && other.labelNames.equals(labelNames)
           && other.labelValues.equals(labelValues) && other.value == value
-		  && other.timestamp.equals(timestamp);
+		  && timestampEquals;
       }
 
       @Override
