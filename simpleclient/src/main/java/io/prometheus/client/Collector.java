@@ -117,7 +117,8 @@ public abstract class Collector {
         hash = 37 * hash + labelValues.hashCode();
         long d = Double.doubleToLongBits(value);
         hash = 37 * hash + (int)(d ^ (d >>> 32));
-        hash = 37 * hash + timestamp.hashCode();
+        if (timestamp != null)
+        	hash = 37 * hash + timestamp.hashCode();
         return hash;
       }
 
