@@ -106,7 +106,7 @@ public abstract class Collector {
         }
         return other.name.equals(name) && other.labelNames.equals(labelNames)
           && other.labelValues.equals(labelValues) && other.value == value
-		  && timestampEquals;
+          && timestampEquals;
       }
 
       @Override
@@ -118,7 +118,7 @@ public abstract class Collector {
         long d = Double.doubleToLongBits(value);
         hash = 37 * hash + (int)(d ^ (d >>> 32));
         if (timestamp != null)
-        	hash = 37 * hash + timestamp.hashCode();
+          hash = 37 * hash + timestamp.hashCode();
         return hash;
       }
 
