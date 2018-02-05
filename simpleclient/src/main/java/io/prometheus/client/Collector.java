@@ -97,13 +97,15 @@ public abstract class Collector {
           return false;
         }
         Sample other = (Sample) obj;
+
         boolean timestampEquals = true;
         if ((timestamp != null && other.timestamp == null) || (timestamp == null && other.timestamp != null)) {
-        	timestampEquals = false;
+          timestampEquals = false;
         }
         if (timestamp != null && other.timestamp != null) {
-        	timestampEquals = timestamp.equals(other.timestamp);
+          timestampEquals = other.timestamp.equals(timestamp);
         }
+        
         return other.name.equals(name) && other.labelNames.equals(labelNames)
           && other.labelValues.equals(labelValues) && other.value == value
           && timestampEquals;
@@ -117,8 +119,9 @@ public abstract class Collector {
         hash = 37 * hash + labelValues.hashCode();
         long d = Double.doubleToLongBits(value);
         hash = 37 * hash + (int)(d ^ (d >>> 32));
-        if (timestamp != null)
+        if (timestamp != null) {
           hash = 37 * hash + timestamp.hashCode();
+        }
         return hash;
       }
 
