@@ -84,8 +84,8 @@ public class CounterTest {
 
   @Test
   public void testCollectWithTimestamp() {
-  	Long now = System.currentTimeMillis();
-  	labels.labels("a").inc();
+    Long now = System.currentTimeMillis();
+    labels.labels("a").inc();
     labels.labels("a").setTimestamp(now);
     List<Collector.MetricFamilySamples> mfs = labels.collect();
     
