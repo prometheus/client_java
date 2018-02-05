@@ -109,6 +109,16 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   public static class Child {
     private final DoubleAdder value = new DoubleAdder();
     /**
+     *  Milliseconds since epoch. Optional value.
+     */
+    private Long timestamp;
+    /**
+     * Set the optional value for time stamp in epoch format.
+     */
+    public void setTimestamp(Long timestamp) {
+      this.timestamp = timestamp;
+    }
+    /**
      * Increment the counter by 1.
      */
     public void inc() {
@@ -129,6 +139,12 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
      */
     public double get() {
       return value.sum();
+    }
+    /**
+     * Get the optional value for time stamp in epoch format. It could be null.
+     */
+    public Long getTimestamp() {
+      return timestamp;
     }
   }
 
@@ -158,7 +174,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
+      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get(), c.getValue().getTimestamp()));
     }
     return familySamplesList(Type.COUNTER, samples);
   }
