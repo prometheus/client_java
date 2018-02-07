@@ -13,3 +13,8 @@ simpleclient_pushgateway/mockserver.log
 simpleclient_pushgateway/mockserver_request.log
 nb-configuration.xml
 
+# Visual Studio Code
+.classpath
+.project
+.settings/
+
