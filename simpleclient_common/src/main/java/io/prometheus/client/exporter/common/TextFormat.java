@@ -46,9 +46,9 @@ public class TextFormat {
         }
         writer.write(' ');
         writer.write(Collector.doubleToGoString(sample.value));
-        if (sample.timestamp != null){
+        if (sample.timestampMs != null){
           writer.write(' ');
-          writer.write(sample.timestamp.toString());
+          writer.write(sample.timestampMs.toString());
         }
         writer.write('\n');
       }
