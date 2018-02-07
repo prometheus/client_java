@@ -77,14 +77,14 @@ public abstract class Collector {
       public final List<String> labelNames;
       public final List<String> labelValues;  // Must have same length as labelNames.
       public final double value;
-      public final Long timestamp;
+      public final Long timestampMs;  // It's an epoch format with milliseconds value included (this field is subject to change).
 
-      public Sample(String name, List<String> labelNames, List<String> labelValues, double value, Long timestamp) {
+      public Sample(String name, List<String> labelNames, List<String> labelValues, double value, Long timestampMs) {
         this.name = name;
         this.labelNames = labelNames;
         this.labelValues = labelValues;
         this.value = value;
-        this.timestamp = timestamp;
+        this.timestampMs = timestampMs;
       }
 
       public Sample(String name, List<String> labelNames, List<String> labelValues, double value) {
@@ -98,17 +98,9 @@ public abstract class Collector {
         }
         Sample other = (Sample) obj;
 
-        boolean timestampEquals = true;
-        if ((timestamp != null && other.timestamp == null) || (timestamp == null && other.timestamp != null)) {
-          timestampEquals = false;
-        }
-        if (timestamp != null && other.timestamp != null) {
-          timestampEquals = other.timestamp.equals(timestamp);
-        }
-        
         return other.name.equals(name) && other.labelNames.equals(labelNames)
           && other.labelValues.equals(labelValues) && other.value == value
-          && timestampEquals;
+          && ((timestampMs == null && other.timestampMs == null) || (other.timestampMs != null) && (other.timestampMs.equals(timestampMs)));
       }
 
       @Override
@@ -119,8 +111,8 @@ public abstract class Collector {
         hash = 37 * hash + labelValues.hashCode();
         long d = Double.doubleToLongBits(value);
         hash = 37 * hash + (int)(d ^ (d >>> 32));
-        if (timestamp != null) {
-          hash = 37 * hash + timestamp.hashCode();
+        if (timestampMs != null) {
+          hash = 37 * hash + timestampMs.hashCode();
         }
         return hash;
       }
@@ -128,7 +120,7 @@ public abstract class Collector {
       @Override
       public String toString() {
         return "Name: " + name + " LabelNames: " + labelNames + " labelValues: " + labelValues +
-          " Value: " + value + " Timestamp: " + timestamp;
+          " Value: " + value + " TimestampMs: " + timestampMs;
       }
     }
   }
