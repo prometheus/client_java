@@ -113,12 +113,6 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
      */
     private Long timestamp;
     /**
-     * Set the optional value for time stamp in epoch format.
-     */
-    public void setTimestamp(Long timestamp) {
-      this.timestamp = timestamp;
-    }
-    /**
      * Increment the counter by 1.
      */
     public void inc() {
@@ -133,6 +127,12 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
         throw new IllegalArgumentException("Amount to increment must be non-negative.");
       }
       value.add(amt);
+    }
+    /**
+     * Set the optional value for time stamp in epoch format.
+     */
+    public void setTimestamp(Long timestamp) {
+      this.timestamp = timestamp;
     }
     /**
      * Get the value of the counter.

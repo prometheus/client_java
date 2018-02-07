@@ -142,12 +142,6 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     static TimeProvider timeProvider = new TimeProvider();
 
     /**
-     * Set the optional value for time stamp in epoch format,
-     */
-    public void setTimestamp(Long timestamp) {
-      this.timestamp = timestamp;
-    }
-    /**
      * Increment the gauge by 1.
      */
     public void inc() {
@@ -182,6 +176,12 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
         // are still possible if set() were atomic so no new races are introduced.
         value.add(val);
       }
+    }
+    /**
+     * Set the optional value for time stamp in epoch format,
+     */
+    public void setTimestamp(Long timestamp) {
+      this.timestamp = timestamp;
     }
     /**
      * Set the gauge to the current unixtime.
