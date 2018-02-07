@@ -270,6 +270,13 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     noLabelsChild.set(val);
   }
   /**
+   * Set the optional value for time stamp in epoch format,
+   */
+  public void setTimestamp(Long timestamp) {
+    noLabelsChild.setTimestamp(timestamp);
+  }
+
+  /**
    * Set the gauge with no labels to the current unixtime.
    */
   public void setToCurrentTime() {
@@ -303,6 +310,12 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    */
   public double get() {
     return noLabelsChild.get();
+  }
+  /**
+   * Get the optional value for time stamp in epoch format. It could be null.
+   */
+  public Long getTimestamp() {
+    return noLabelsChild.getTimestamp();
   }
 
 

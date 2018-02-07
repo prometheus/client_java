@@ -164,10 +164,22 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   }
   
   /**
+   * Set the optional value for time stamp in epoch format.
+   */
+  public void setTimestamp(Long timestamp) {
+    noLabelsChild.setTimestamp(timestamp);
+  }
+  /**
    * Get the value of the counter.
    */
   public double get() {
     return noLabelsChild.get();
+  }
+  /**
+   * Get the optional value for time stamp in epoch format. It could be null.
+   */
+  public Long getTimestamp() {
+    return noLabelsChild.getTimestamp();
   }
 
   @Override
