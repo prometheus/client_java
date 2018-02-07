@@ -35,6 +35,18 @@ public class TextFormatTest {
   }
 
   @Test
+  public void testGaugeOutputWithTimetamp() throws IOException {
+    Long now = System.currentTimeMillis();
+    Gauge noLabels = Gauge.build().name("nolabels").help("help").register(registry);
+    noLabels.inc();
+    noLabels.setTimestamp(now);
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP nolabels help\n"
+                 + "# TYPE nolabels gauge\n"
+                 + "nolabels 1.0 "+ now +"\n", writer.toString());
+  }
+
+  @Test
   public void testValueInfinity() throws IOException {
     Gauge noLabels = Gauge.build().name("nolabels").help("help").register(registry);
     noLabels.set(Double.POSITIVE_INFINITY);
@@ -52,6 +64,18 @@ public class TextFormatTest {
     assertEquals("# HELP nolabels help\n"
                  + "# TYPE nolabels counter\n"
                  + "nolabels 1.0\n", writer.toString());
+  }
+
+  @Test
+  public void testCounterOutputWithTimetamp() throws IOException {
+    Long now = System.currentTimeMillis();
+    Counter noLabels = Counter.build().name("nolabels").help("help").register(registry);
+    noLabels.inc();
+    noLabels.setTimestamp(now);
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP nolabels help\n"
+                 + "# TYPE nolabels counter\n"
+                 + "nolabels 1.0 "+ now +"\n", writer.toString());
   }
 
   @Test
