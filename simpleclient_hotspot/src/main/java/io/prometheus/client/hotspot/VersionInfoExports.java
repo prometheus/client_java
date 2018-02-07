@@ -18,7 +18,7 @@ import java.util.List;
  * </pre>
  * Metrics being exported:
  * <pre>
- *   jvm_info{version="1.8.0_45-b14",vendor="Oracle Corporation"} 1.0
+ *   jvm_info{version="1.8.0_151-b12",vendor="Oracle Corporation",runtime="OpenJDK Runtime Environment",} 1.0
  * </pre>
  */
 
@@ -31,8 +31,13 @@ public class VersionInfoExports extends Collector {
         GaugeMetricFamily jvmInfo = new GaugeMetricFamily(
                 "jvm_info",
                 "JVM version info",
-                Arrays.asList("version", "vendor"));
-        jvmInfo.addMetric(Arrays.asList(System.getProperty("java.runtime.version", "unknown"), System.getProperty("java.vm.vendor", "unknown")), 1L);
+                Arrays.asList("version", "vendor", "runtime"));
+        jvmInfo.addMetric(
+                Arrays.asList(
+                    System.getProperty("java.runtime.version", "unknown"),
+                    System.getProperty("java.vm.vendor", "unknown"),
+                    System.getProperty("java.runtime.name", "unknown")),
+                    1L);
         mfs.add(jvmInfo);
 
         return mfs;
