@@ -4,10 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
@@ -65,7 +68,7 @@ public class TextFormatTest {
                  + "# TYPE nolabels counter\n"
                  + "nolabels 1.0\n", writer.toString());
   }
-
+  
   @Test
   public void testCounterOutputWithTimetamp() throws IOException {
     Long now = System.currentTimeMillis();
@@ -75,6 +78,30 @@ public class TextFormatTest {
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP nolabels help\n"
                  + "# TYPE nolabels counter\n"
+                 + "nolabels 1.0 "+ now +"\n", writer.toString());
+  }
+
+  @Test
+  public void testMetricOutputWithTimetamp() throws IOException {
+    final Long now = System.currentTimeMillis();
+
+    class CustomCollector extends Collector {
+      public List<MetricFamilySamples> collect() {
+        List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
+        ArrayList<String> labelNames = new ArrayList<String>();
+        ArrayList<String> labelValues = new ArrayList<String>();
+        ArrayList<MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample("nolabels", labelNames, labelValues, 1.0, now);
+        samples.add(sample);
+        mfs.add(new MetricFamilySamples("nolabels", Collector.Type.UNTYPED, "help", samples));
+        return mfs;
+      }
+    }
+    
+    new CustomCollector().register(registry);
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP nolabels help\n"
+                 + "# TYPE nolabels untyped\n"
                  + "nolabels 1.0 "+ now +"\n", writer.toString());
   }
 
