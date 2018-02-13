@@ -58,7 +58,7 @@ public class TextFormatTest {
   }
 
   @Test
-  public void testMetricOutputWithTimetamp() throws IOException {
+  public void testMetricOutputWithTimestamp() throws IOException {
     final Long now = System.currentTimeMillis();
 
     class CustomCollector extends Collector {
