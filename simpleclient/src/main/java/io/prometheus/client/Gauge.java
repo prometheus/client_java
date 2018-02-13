@@ -134,10 +134,6 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    */
   public static class Child {
     private final DoubleAdder value = new DoubleAdder();
-    /**
-     *  Milliseconds since epoch. Optional value.
-     */
-    private Long timestamp;
 
     static TimeProvider timeProvider = new TimeProvider();
 
@@ -176,12 +172,6 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
         // are still possible if set() were atomic so no new races are introduced.
         value.add(val);
       }
-    }
-    /**
-     * Set the optional value for time stamp in epoch format,
-     */
-    public void setTimestamp(Long timestamp) {
-      this.timestamp = timestamp;
     }
     /**
      * Set the gauge to the current unixtime.
@@ -229,13 +219,6 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
         return value.sum();
       }
     }
-    
-    /**
-     * Get the optional value for time stamp in epoch format. It could be null.
-     */
-    public Long getTimestamp() {
-      return timestamp;
-    }
   }
 
   // Convenience methods.
@@ -269,13 +252,6 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   public void set(double val) {
     noLabelsChild.set(val);
   }
-  /**
-   * Set the optional value for time stamp in epoch format,
-   */
-  public void setTimestamp(Long timestamp) {
-    noLabelsChild.setTimestamp(timestamp);
-  }
-
   /**
    * Set the gauge with no labels to the current unixtime.
    */
@@ -311,19 +287,12 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   public double get() {
     return noLabelsChild.get();
   }
-  /**
-   * Get the optional value for time stamp in epoch format. It could be null.
-   */
-  public Long getTimestamp() {
-    return noLabelsChild.getTimestamp();
-  }
-
 
   @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get(), c.getValue().getTimestamp()));
+      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
     }
     return familySamplesList(Type.GAUGE, samples);
   }

@@ -109,10 +109,6 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   public static class Child {
     private final DoubleAdder value = new DoubleAdder();
     /**
-     *  Milliseconds since epoch. Optional value.
-     */
-    private Long timestamp;
-    /**
      * Increment the counter by 1.
      */
     public void inc() {
@@ -129,22 +125,10 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
       value.add(amt);
     }
     /**
-     * Set the optional value for time stamp in epoch format.
-     */
-    public void setTimestamp(Long timestamp) {
-      this.timestamp = timestamp;
-    }
-    /**
      * Get the value of the counter.
      */
     public double get() {
       return value.sum();
-    }
-    /**
-     * Get the optional value for time stamp in epoch format. It could be null.
-     */
-    public Long getTimestamp() {
-      return timestamp;
     }
   }
 
@@ -164,29 +148,17 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   }
   
   /**
-   * Set the optional value for time stamp in epoch format.
-   */
-  public void setTimestamp(Long timestamp) {
-    noLabelsChild.setTimestamp(timestamp);
-  }
-  /**
    * Get the value of the counter.
    */
   public double get() {
     return noLabelsChild.get();
-  }
-  /**
-   * Get the optional value for time stamp in epoch format. It could be null.
-   */
-  public Long getTimestamp() {
-    return noLabelsChild.getTimestamp();
   }
 
   @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get(), c.getValue().getTimestamp()));
+      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
     }
     return familySamplesList(Type.COUNTER, samples);
   }

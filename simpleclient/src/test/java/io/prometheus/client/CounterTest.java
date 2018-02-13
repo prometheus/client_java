@@ -82,44 +82,4 @@ public class CounterTest {
     assertEquals(mfsFixture, mfs.get(0));
   }
 
-  @Test
-  public void testCollectLabelsWithTimestamp() {
-    Long now = System.currentTimeMillis();
-    labels.labels("a").inc();
-    labels.labels("a").setTimestamp(now);
-    List<Collector.MetricFamilySamples> mfs = labels.collect();
-    
-    ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
-    ArrayList<String> labelNames = new ArrayList<String>();
-    labelNames.add("l");
-    ArrayList<String> labelValues = new ArrayList<String>();
-    labelValues.add("a");
-    samples.add(new Collector.MetricFamilySamples.Sample("labels", labelNames, labelValues, 1.0, now));
-    Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.COUNTER, "help", samples);
-
-    assertEquals(1, mfs.size());
-    assertEquals(mfsFixture, mfs.get(0));
-    Long timestamp = mfs.get(0).samples.get(0).timestampMs;
-    assertEquals(now, timestamp);
-  }
-
-  @Test
-  public void testCollectNoLabelsWithTimestamp() {
-    Long now = System.currentTimeMillis();
-    noLabels.inc();
-    noLabels.setTimestamp(now);
-    List<Collector.MetricFamilySamples> mfs = noLabels.collect();
-    
-    ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
-    ArrayList<String> labelNames = new ArrayList<String>();
-    ArrayList<String> labelValues = new ArrayList<String>();
-    samples.add(new Collector.MetricFamilySamples.Sample("nolabels", labelNames, labelValues, 1.0, now));
-    Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("nolabels", Collector.Type.COUNTER, "help", samples);
-
-    assertEquals(1, mfs.size());
-    assertEquals(mfsFixture, mfs.get(0));
-    Long timestamp = mfs.get(0).samples.get(0).timestampMs;
-    assertEquals(now, timestamp);
-  }
-
 }
