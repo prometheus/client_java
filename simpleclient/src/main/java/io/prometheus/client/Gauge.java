@@ -136,6 +136,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     private final DoubleAdder value = new DoubleAdder();
 
     static TimeProvider timeProvider = new TimeProvider();
+
     /**
      * Increment the gauge by 1.
      */
@@ -286,7 +287,6 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   public double get() {
     return noLabelsChild.get();
   }
-
 
   @Override
   public List<MetricFamilySamples> collect() {

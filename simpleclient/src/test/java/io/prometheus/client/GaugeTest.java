@@ -138,5 +138,4 @@ public class GaugeTest {
     assertEquals(1, mfs.size());
     assertEquals(mfsFixture, mfs.get(0));
   }
-
 }
