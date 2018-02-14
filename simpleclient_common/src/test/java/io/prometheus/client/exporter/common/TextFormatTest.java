@@ -59,7 +59,6 @@ public class TextFormatTest {
 
   @Test
   public void testMetricOutputWithTimestamp() throws IOException {
-    final Long now = System.currentTimeMillis();
 
     class CustomCollector extends Collector {
       public List<MetricFamilySamples> collect() {
@@ -67,7 +66,7 @@ public class TextFormatTest {
         ArrayList<String> labelNames = new ArrayList<String>();
         ArrayList<String> labelValues = new ArrayList<String>();
         ArrayList<MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
-        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample("nolabels", labelNames, labelValues, 1.0, now);
+        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample("nolabels", labelNames, labelValues, 1.0, 1518123456L);
         samples.add(sample);
         mfs.add(new MetricFamilySamples("nolabels", Collector.Type.UNTYPED, "help", samples));
         return mfs;
@@ -78,7 +77,7 @@ public class TextFormatTest {
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP nolabels help\n"
                  + "# TYPE nolabels untyped\n"
-                 + "nolabels 1.0 "+ now +"\n", writer.toString());
+                 + "nolabels 1.0 1518123456\n", writer.toString());
   }
 
   @Test
