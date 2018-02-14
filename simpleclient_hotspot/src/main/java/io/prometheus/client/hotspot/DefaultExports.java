@@ -22,6 +22,7 @@ public class DefaultExports {
     if (!initialized) {
       new StandardExports().register();
       new MemoryPoolsExports().register();
+      new BufferPoolsExports().register();
       new GarbageCollectorExports().register();
       new ThreadExports().register();
       new ClassLoadingExports().register();
