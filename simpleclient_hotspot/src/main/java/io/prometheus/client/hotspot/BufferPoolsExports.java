@@ -12,12 +12,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * A backward compatible way to get the buffer MX beans as well
+ * Exports metrics about JVM buffers.
  *
  * Can be replaced with a simple access once JDK 1.7 compatibility is baseline.
  *
- * @author marcus
- * @since 1.0.0
  */
 public class BufferPoolsExports extends Collector {
 
@@ -40,9 +38,9 @@ public class BufferPoolsExports extends Collector {
             getCount = bufferPoolMXBeanClass.getMethod("getCount");
 
         } catch (ClassNotFoundException e) {
-            LOGGER.info("BufferPoolMXBean not available, not metrics for buffer pools will be exported");
+            LOGGER.fine("BufferPoolMXBean not available, no metrics for buffer pools will be exported");
         } catch (NoSuchMethodException e) {
-            LOGGER.info("Can not get necessary accessor from BufferPoolMXBean: " + e.getMessage());
+            LOGGER.fine("Can not get necessary accessor from BufferPoolMXBean: " + e.getMessage());
         }
     }
 
@@ -54,13 +52,13 @@ public class BufferPoolsExports extends Collector {
             return (List<Object>) listOfBufferPoolMXBeanInstances;
 
         } catch (NoSuchMethodException e) {
-            LOGGER.info("ManagementFactory.getPlatformMXBeans not available, not metrics for buffer pools will be exported");
+            LOGGER.fine("ManagementFactory.getPlatformMXBeans not available, no metrics for buffer pools will be exported");
             return Collections.emptyList();
         } catch (IllegalAccessException e) {
-            LOGGER.info("ManagementFactory.getPlatformMXBeans not accessible, not metrics for buffer pools will be exported");
+            LOGGER.fine("ManagementFactory.getPlatformMXBeans not accessible, no metrics for buffer pools will be exported");
             return Collections.emptyList();
         } catch (InvocationTargetException e) {
-            LOGGER.warning("ManagementFactory.getPlatformMXBeans could not be invoked, not metrics for buffer pools will be exported");
+            LOGGER.warning("ManagementFactory.getPlatformMXBeans could not be invoked, no metrics for buffer pools will be exported");
             return Collections.emptyList();
         }
     }
@@ -68,26 +66,21 @@ public class BufferPoolsExports extends Collector {
     @Override
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-        addBufferPoolMetrics(mfs);
-        return mfs;
-    }
-
-    void addBufferPoolMetrics(List<MetricFamilySamples> sampleFamilies) {
         GaugeMetricFamily used = new GaugeMetricFamily(
-                "jvm_buffer_pool_bytes_used",
+                "jvm_buffer_pool_used_bytes",
                 "Used bytes of a given JVM buffer pool.",
                 Collections.singletonList("pool"));
-        sampleFamilies.add(used);
+        mfs.add(used);
         GaugeMetricFamily capacity = new GaugeMetricFamily(
-                "jvm_buffer_pool_bytes_capacity",
+                "jvm_buffer_pool_capacity_bytes",
                 "Bytes capacity of a given JVM buffer pool.",
                 Collections.singletonList("pool"));
-        sampleFamilies.add(capacity);
+        mfs.add(capacity);
         GaugeMetricFamily buffers = new GaugeMetricFamily(
-                "jvm_buffer_pool_buffers_used",
+                "jvm_buffer_pool_used_buffers",
                 "Used buffers of a given JVM buffer pool.",
                 Collections.singletonList("pool"));
-        sampleFamilies.add(buffers);
+        mfs.add(buffers);
         for (final Object pool : bufferPoolMXBeans) {
             used.addMetric(
                     Collections.singletonList(getName(pool)),
@@ -99,15 +92,16 @@ public class BufferPoolsExports extends Collector {
                     Collections.singletonList(getName(pool)),
                     callLongMethond(getCount,pool));
         }
+        return mfs;
     }
 
     private long callLongMethond(final Method method, final Object pool) {
         try {
             return (Long)method.invoke(pool);
         } catch (IllegalAccessException e) {
-            LOGGER.info("Couldn't call " + method.getName() + ": " + e.getMessage());
+            LOGGER.fine("Couldn't call " + method.getName() + ": " + e.getMessage());
         } catch (InvocationTargetException e) {
-            LOGGER.info("Couldn't call " + method.getName() + ": " + e.getMessage());
+            LOGGER.fine("Couldn't call " + method.getName() + ": " + e.getMessage());
         }
         return 0L;
     }
@@ -116,9 +110,9 @@ public class BufferPoolsExports extends Collector {
         try {
             return (String)getName.invoke(pool);
         } catch (IllegalAccessException e) {
-            LOGGER.info("Couldn't call getName " + e.getMessage());
+            LOGGER.fine("Couldn't call getName " + e.getMessage());
         } catch (InvocationTargetException e) {
-            LOGGER.info("Couldn't call getName " + e.getMessage());
+            LOGGER.fine("Couldn't call getName " + e.getMessage());
         }
         return "<unknown>";
     }
