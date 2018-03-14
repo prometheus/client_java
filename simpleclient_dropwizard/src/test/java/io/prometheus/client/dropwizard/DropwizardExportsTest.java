@@ -102,6 +102,18 @@ public class DropwizardExportsTest {
         assertEquals(null, registry.getSampleValue("invalid_gauge"));
     }
 
+    @Test
+    public void testGaugeReturningNullValue() {
+        Gauge<String> invalidGauge = new Gauge<String>() {
+            @Override
+            public String getValue() {
+                return null;
+            }
+        };
+        metricRegistry.register("invalid_gauge", invalidGauge);
+        assertEquals(null, registry.getSampleValue("invalid_gauge"));
+    }
+
     void assertRegistryContainsMetrics(String... metrics) {
         for (String metric : metrics) {
             assertNotEquals(String.format("Metric %s should exist", metric), null,
@@ -196,7 +208,6 @@ public class DropwizardExportsTest {
                 is("Generated from Dropwizard metric import (metric=my.application.namedGauge1, type=io.prometheus.client.dropwizard.DropwizardExportsTest$ExampleDoubleGauge)"));
 
     }
-
 
     private static class ExampleDoubleGauge implements Gauge<Double> {
         @Override
