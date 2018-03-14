@@ -107,7 +107,7 @@ public class MetricsFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Histogram.Builder builder = Histogram.build()
-                .labelNames("path", "method");
+                .labelNames("host", "path", "method");
 
         if (filterConfig == null && isEmpty(metricName)) {
             throw new ServletException("No configuration object provided, and no metricName passed via constructor");
@@ -162,8 +162,14 @@ public class MetricsFilter implements Filter {
 
         String path = request.getRequestURI();
 
+        String hostName = request.getHeader("Host");
+
+        if (hostName == null || hostName.isEmpty()) {
+            hostName = "";
+        }
+
         Histogram.Timer timer = histogram
-            .labels(getComponents(path), request.getMethod())
+            .labels(hostName, getComponents(path), request.getMethod())
             .startTimer();
 
         try {
