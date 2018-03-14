@@ -53,7 +53,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
             value = ((Boolean) obj) ? 1 : 0;
         } else {
             LOGGER.log(Level.FINE, String.format("Invalid type for Gauge %s: %s", name,
-                    obj.getClass().getName()));
+                obj == null ? "null" : obj.getClass().getName()));
             return new ArrayList<MetricFamilySamples>();
         }
         MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name,
