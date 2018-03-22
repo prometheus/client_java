@@ -4,6 +4,7 @@ import com.codahale.metrics.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
@@ -15,14 +16,29 @@ import java.util.regex.Pattern;
  * Collect Dropwizard metrics from a MetricRegistry.
  */
 public class DropwizardExports extends io.prometheus.client.Collector implements io.prometheus.client.Collector.Describable {
-    private MetricRegistry registry;
+
+    private final List<String> labelNames;
+    private final List<String> labelValues;
+    private final MetricRegistry registry;
+
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
 
     /**
      * @param registry a metric registry to export in prometheus.
      */
     public DropwizardExports(MetricRegistry registry) {
+        this(registry, Collections.<String>emptyList(), Collections.<String>emptyList());
+    }
+
+    /**
+     * @param registry a metric registry to export in prometheus.
+     * @param labelNames additional label names that will be added to all created metrics
+     * @param labelValues additional label values that will be added to all created metrics
+     */
+    public DropwizardExports(MetricRegistry registry, List<String> labelNames, List<String> labelValues) {
         this.registry = registry;
+        this.labelNames = new ArrayList<String>(labelNames);
+        this.labelValues = new ArrayList<String>(labelValues);
     }
 
     /**
@@ -30,7 +46,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      */
     List<MetricFamilySamples> fromCounter(String dropwizardName, Counter counter) {
         String name = sanitizeMetricName(dropwizardName);
-        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name, new ArrayList<String>(), new ArrayList<String>(),
+        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name, labelNames, labelValues,
                 new Long(counter.getCount()).doubleValue());
         return Arrays.asList(new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(dropwizardName, counter), Arrays.asList(sample)));
     }
@@ -57,7 +73,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
             return new ArrayList<MetricFamilySamples>();
         }
         MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name,
-                new ArrayList<String>(), new ArrayList<String>(), value);
+                labelNames, labelValues, value);
         return Arrays.asList(new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(dropwizardName, gauge), Arrays.asList(sample)));
     }
 
@@ -72,18 +88,28 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      */
     List<MetricFamilySamples> fromSnapshotAndCount(String dropwizardName, Snapshot snapshot, long count, double factor, String helpMessage) {
         String name = sanitizeMetricName(dropwizardName);
+        final List<String> labelNames = new ArrayList<String>(this.labelNames);
+        labelNames.add("quantile");
+
         List<MetricFamilySamples.Sample> samples = Arrays.asList(
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.5"), snapshot.getMedian() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.75"), snapshot.get75thPercentile() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.95"), snapshot.get95thPercentile() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.98"), snapshot.get98thPercentile() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.99"), snapshot.get99thPercentile() * factor),
-                new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.999"), snapshot.get999thPercentile() * factor),
+                new MetricFamilySamples.Sample(name, labelNames, append(labelValues, "0.5"), snapshot.getMedian() * factor),
+                new MetricFamilySamples.Sample(name, labelNames, append(labelValues, "0.75"), snapshot.get75thPercentile() * factor),
+                new MetricFamilySamples.Sample(name, labelNames, append(labelValues, "0.95"), snapshot.get95thPercentile() * factor),
+                new MetricFamilySamples.Sample(name, labelNames, append(labelValues, "0.98"), snapshot.get98thPercentile() * factor),
+                new MetricFamilySamples.Sample(name, labelNames, append(labelValues, "0.99"), snapshot.get99thPercentile() * factor),
+                new MetricFamilySamples.Sample(name, labelNames, append(labelValues, "0.999"), snapshot.get999thPercentile() * factor),
                 new MetricFamilySamples.Sample(name + "_count", new ArrayList<String>(), new ArrayList<String>(), count)
         );
         return Arrays.asList(
                 new MetricFamilySamples(name, Type.SUMMARY, helpMessage, samples)
         );
+    }
+
+    private List<String> append(final List<String> values, final String s) {
+        final ArrayList newList = new ArrayList(values.size() + 1);
+        newList.addAll(values);
+        newList.add(s);
+        return newList;
     }
 
     /**
@@ -110,8 +136,8 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
         return Arrays.asList(
                 new MetricFamilySamples(name + "_total", Type.COUNTER, getHelpMessage(dropwizardName, meter),
                         Arrays.asList(new MetricFamilySamples.Sample(name + "_total",
-                                new ArrayList<String>(),
-                                new ArrayList<String>(),
+                                labelNames,
+                                labelValues,
                                 meter.getCount())))
 
         );
