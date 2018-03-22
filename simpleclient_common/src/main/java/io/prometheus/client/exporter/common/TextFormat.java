@@ -40,7 +40,10 @@ public class TextFormat {
             writer.write(sample.labelNames.get(i));
             writer.write("=\"");
             writeEscapedLabelValue(writer, sample.labelValues.get(i));
-            writer.write("\",");
+            writer.write("\"");
+            if (i + 1 < sample.labelNames.size()) {
+              writer.write(",");
+            }
           }
           writer.write('}');
         }

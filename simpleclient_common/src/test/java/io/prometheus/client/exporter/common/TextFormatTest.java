@@ -1,20 +1,19 @@
 package io.prometheus.client.exporter.common;
 
-import static org.junit.Assert.assertEquals;
+import io.prometheus.client.Collector;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Counter;
+import io.prometheus.client.Gauge;
+import io.prometheus.client.Summary;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
-import io.prometheus.client.Gauge;
-import io.prometheus.client.Summary;
+import static org.junit.Assert.assertEquals;
 
 
 public class TextFormatTest {
@@ -101,11 +100,11 @@ public class TextFormatTest {
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP labelsAndQuantiles help\n"
             + "# TYPE labelsAndQuantiles summary\n"
-            + "labelsAndQuantiles{l=\"a\",quantile=\"0.5\",} 2.0\n"
-            + "labelsAndQuantiles{l=\"a\",quantile=\"0.9\",} 2.0\n"
-            + "labelsAndQuantiles{l=\"a\",quantile=\"0.99\",} 2.0\n"
-            + "labelsAndQuantiles_count{l=\"a\",} 1.0\n"
-            + "labelsAndQuantiles_sum{l=\"a\",} 2.0\n", writer.toString());
+            + "labelsAndQuantiles{l=\"a\",quantile=\"0.5\"} 2.0\n"
+            + "labelsAndQuantiles{l=\"a\",quantile=\"0.9\"} 2.0\n"
+            + "labelsAndQuantiles{l=\"a\",quantile=\"0.99\"} 2.0\n"
+            + "labelsAndQuantiles_count{l=\"a\"} 1.0\n"
+            + "labelsAndQuantiles_sum{l=\"a\"} 2.0\n", writer.toString());
   }
 
   @Test
@@ -115,7 +114,7 @@ public class TextFormatTest {
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP labels help\n"
                  + "# TYPE labels gauge\n"
-                 + "labels{l=\"a\",} 1.0\n", writer.toString());
+                 + "labels{l=\"a\"} 1.0\n", writer.toString());
   }
 
   @Test
@@ -125,7 +124,7 @@ public class TextFormatTest {
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP labels help\n"
                  + "# TYPE labels gauge\n"
-                 + "labels{l=\"ąćčęntěd a\\nb\\\\c\\\"d\",} 1.0\n", writer.toString());
+                 + "labels{l=\"ąćčęntěd a\\nb\\\\c\\\"d\"} 1.0\n", writer.toString());
   }
 
   @Test
