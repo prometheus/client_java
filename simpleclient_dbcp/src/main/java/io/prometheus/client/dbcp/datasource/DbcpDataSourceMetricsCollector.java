@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentMap;
  * It replaces commons-dbcp classes to have MBeans automatically registered:
  *
  * Original class	                                        Mbean enabled class
- * org.apache.commons.dbcp.BasicDataSource	        => org.apache.commons.dbcp.ManagedBasicDataSource
- * org.apache.commons.dbcp.BasicDataSourceFactory	=> org.apache.commons.dbcp.ManagedBasicDataSourceFactory
+ * org.apache.commons.dbcp.BasicDataSource	         org.apache.commons.dbcp.ManagedBasicDataSource
+ * org.apache.commons.dbcp.BasicDataSourceFactory	 org.apache.commons.dbcp.ManagedBasicDataSourceFactory
  *
  * <pre>{@code
  * public ManagedBasicDataSource buildDataSource(String type,
@@ -65,7 +65,6 @@ import java.util.concurrent.ConcurrentMap;
  *     datasource_num_idle{datasource="pgsql_write"} 0.0
  * </pre>
  *
- * @author Eduardo Mucelli Rezende Oliveira
  */
 
 public class DbcpDataSourceMetricsCollector extends Collector {
