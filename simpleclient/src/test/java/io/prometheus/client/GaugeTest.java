@@ -1,12 +1,15 @@
 package io.prometheus.client;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class GaugeTest {
@@ -27,9 +30,13 @@ public class GaugeTest {
   }
 
   private double getValue() {
-    return registry.getSampleValue("nolabels").doubleValue();
+    return getValue("nolabels");
   }
-  
+
+  private double getValue(String name) {
+    return registry.getSampleValue(name).doubleValue();
+  }
+
   @Test
   public void testIncrement() {
     noLabels.inc();
@@ -45,7 +52,7 @@ public class GaugeTest {
     assertEquals(8.0, getValue(), .001);
     assertEquals(8.0, noLabels.get(), .001);
   }
-    
+
   @Test
   public void testDecrement() {
     noLabels.dec();
@@ -57,7 +64,7 @@ public class GaugeTest {
     noLabels.labels().dec();
     assertEquals(-8.0, getValue(), .001);
   }
-  
+
   @Test
   public void testSet() {
     noLabels.set(42);
@@ -105,9 +112,13 @@ public class GaugeTest {
   public void noLabelsDefaultZeroValue() {
     assertEquals(0.0, getValue(), .001);
   }
-  
+
   private Double getLabelsValue(String labelValue) {
-    return registry.getSampleValue("labels", new String[]{"l"}, new String[]{labelValue});
+    return getLabelsValue("labels", labelValue);
+  }
+
+  private Double getLabelsValue(String name, String labelValue) {
+    return registry.getSampleValue(name, new String[]{"l"}, new String[]{labelValue});
   }
 
   @Test
@@ -123,10 +134,56 @@ public class GaugeTest {
   }
 
   @Test
+  public void testFromCallbackWithoutLables() {
+    final AtomicInteger counter = new AtomicInteger(3);
+    String name = "fromCallbackWithoutLables";
+    Gauge.build().name(name).help("help")
+            .fromCallback(new Callable<Double>() {
+              @Override
+              public Double call() throws Exception {
+                return (double) counter.getAndAdd(2);
+              }
+            })
+            .register(registry);
+    assertEquals(3.0, getValue(name), .001);
+    assertEquals(5.0, getValue(name), .001);
+    assertEquals(7.0, getValue(name), .001);
+  }
+
+  @Test
+  public void testFromCallbackWithLables() {
+    final AtomicInteger counter1 = new AtomicInteger(100);
+    final AtomicInteger counter2 = new AtomicInteger(200);
+    String name = "fromCallbackWithLables";
+    Gauge.build().name(name).help("help")
+            .labelNames("l")
+            .fromCallback(new Callable<Double>() {
+              @Override
+              public Double call() throws Exception {
+                return (double) counter1.getAndAdd(2);
+              }
+            }, "a")
+            .fromCallback(new Callable<Double>() {
+              @Override
+              public Double call() throws Exception {
+                return (double) counter2.getAndAdd(2);
+              }
+            }, "b")
+            .register(registry);
+    assertEquals(100.0, getLabelsValue(name, "a"), .001);
+    assertEquals(102.0, getLabelsValue(name, "a"), .001);
+    assertEquals(104.0, getLabelsValue(name, "a"), .001);
+    // note each scrape invokes both callbacks and increases both counters
+    assertEquals(206.0, getLabelsValue(name, "b"), .001);
+    assertEquals(208.0, getLabelsValue(name, "b"), .001);
+    assertEquals(210.0, getLabelsValue(name, "b"), .001);
+  }
+
+  @Test
   public void testCollect() {
     labels.labels("a").inc();
     List<Collector.MetricFamilySamples> mfs = labels.collect();
-    
+
     ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
     ArrayList<String> labelNames = new ArrayList<String>();
     labelNames.add("l");

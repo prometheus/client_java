@@ -1,10 +1,10 @@
 package io.prometheus.client;
 
 import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Gauge metric, to report instantaneous values.
@@ -69,9 +69,49 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   }
 
   public static class Builder extends SimpleCollector.Builder<Builder, Gauge> {
+    private ConcurrentMap<List<String>, Callable<Double>> callbacks = new ConcurrentHashMap<List<String>, Callable<Double>>();;
+
     @Override
     public Gauge create() {
-      return new Gauge(this);
+      Gauge gauge = new Gauge(this);
+      for (final Map.Entry<List<String>, Callable<Double>> entry : callbacks.entrySet()) {
+        final Callable<Double> callback = entry.getValue();
+        gauge.setChild(new Child() {
+          @Override
+          public double get() {
+            try {
+              return callback.call();
+            } catch (Exception e) {
+              return 0.0;
+            }
+          }
+        }, entry.getKey().toArray(new String[0]));
+      }
+      return gauge;
+    }
+
+    /**
+     * Specify callback for returning gauge value.
+     * Can provide multiple callbacks for different lists of label values.
+     * <p>
+     * Make sure your callback is thread safe.
+     * <p>
+     * Callback throwing an exception reports 0.0 value.
+     * <p>
+     * Example:
+     * <pre>
+     * {@code Gauge.build().name("queue_size").help("Current queue length.")
+     *       .fromCallback(new Callable<Double>() {
+     *         public Double call() throws Exception {
+     *           return (double) queue.size();
+     *         }
+     *       }).register();
+     * }
+     * </pre>
+     */
+    public Builder fromCallback(Callable<Double> callback, String... labelValues) {
+      this.callbacks.put(Arrays.asList(labelValues), callback);
+      return this;
     }
   }
 
@@ -280,7 +320,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   public double setToTime(Runnable timeable){
     return noLabelsChild.setToTime(timeable);
   }
-  
+
   /**
    * Get the value of the gauge.
    */
