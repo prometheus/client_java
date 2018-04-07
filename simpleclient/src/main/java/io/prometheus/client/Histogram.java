@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * Histogram metric, to track distributions of events.
@@ -190,7 +191,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
   public static class Child {
 
     /**
-     * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+     * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
      *
      * @param timeable Code that is being timed
      * @return Measured duration in seconds for timeable to complete.
@@ -205,6 +206,24 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
         elapsed = timer.observeDuration();
       }
       return elapsed;
+    }
+
+    /**
+     * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
+     *
+     * @param timeable Code that is being timed
+     * @return Result returned by callable.
+     */
+    public <E> E time(Callable<E> timeable) {
+      Timer timer = startTimer();
+
+      try {
+        return timeable.call();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      } finally {
+        timer.observeDuration();
+      }
     }
 
     public static class Value {
@@ -283,12 +302,22 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
   }
 
   /**
-   * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+   * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
    *
    * @param timeable Code that is being timed
    * @return Measured duration in seconds for timeable to complete.
    */
   public double time(Runnable timeable){
+    return noLabelsChild.time(timeable);
+  }
+
+  /**
+   * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
+   *
+   * @param timeable Code that is being timed
+   * @return Result returned by callable.
+   */
+  public <E> E time(Callable<E> timeable){
     return noLabelsChild.time(timeable);
   }
 
