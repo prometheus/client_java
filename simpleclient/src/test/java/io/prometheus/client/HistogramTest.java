@@ -61,6 +61,24 @@ public class HistogramTest {
   }
 
   @Test
+  public void testObserveMany() {
+    noLabels.observeMany(2, 10);
+    assertEquals(10.0, getCount(), .001);
+    assertEquals(20.0, getSum(), .001);
+    assertEquals(0.0, getBucket(1), .001);
+    assertEquals(10.0, getBucket(2.5), .001);
+    noLabels.labels().observeMany(4, 10);
+    assertEquals(20.0, getCount(), .001);
+    assertEquals(60.0, getSum(), .001);
+    assertEquals(0.0, getBucket(1), .001);
+    assertEquals(10.0, getBucket(2.5), .001);
+    assertEquals(20.0, getBucket(5), .001);
+    assertEquals(20.0, getBucket(7.5), .001);
+    assertEquals(20.0, getBucket(10), .001);
+    assertEquals(20.0, getBucket(Double.POSITIVE_INFINITY), .001);
+  }
+
+  @Test
   public void testBoundaryConditions() {
     // Equal to a bucket.
     noLabels.observe(2.5);
@@ -150,11 +168,11 @@ public class HistogramTest {
     assertEquals(2.0, getLabelsSum("a").doubleValue(), .001);
     assertEquals(null, getLabelsCount("b"));
     assertEquals(null, getLabelsSum("b"));
-    labels.labels("b").observe(3);
+    labels.labels("b").observeMany(3, 10);
     assertEquals(1.0, getLabelsCount("a").doubleValue(), .001);
     assertEquals(2.0, getLabelsSum("a").doubleValue(), .001);
-    assertEquals(1.0, getLabelsCount("b").doubleValue(), .001);
-    assertEquals(3.0, getLabelsSum("b").doubleValue(), .001);
+    assertEquals(10.0, getLabelsCount("b").doubleValue(), .001);
+    assertEquals(30.0, getLabelsSum("b").doubleValue(), .001);
   }
 
   @Test(expected=IllegalStateException.class)

@@ -233,14 +233,23 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
      * Observe the given amount.
      */
     public void observe(double amt) {
+      observeMany(amt, 1);
+    }
+    /**
+     * Observe the given amount multiple times.
+     */
+    public void observeMany(double amt, int numObservations) {
+      if (numObservations < 0) {
+        throw new IllegalArgumentException("numObservations must be non-negative");
+      }
       for (int i = 0; i < upperBounds.length; ++i) {
         // The last bucket is +Inf, so we always increment.
         if (amt <= upperBounds[i]) {
-          cumulativeCounts[i].add(1);
+          cumulativeCounts[i].add(numObservations);
           break;
         }
       }
-      sum.add(amt);
+      sum.add(amt * numObservations);
     }
     /**
      * Start a timer to track a duration.
@@ -272,6 +281,9 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
    */
   public void observe(double amt) {
     noLabelsChild.observe(amt);
+  }
+  public void observeMany(double amt, int numObservations) {
+    noLabelsChild.observeMany(amt, numObservations);
   }
   /**
    * Start a timer to track a duration on the histogram with no labels.
