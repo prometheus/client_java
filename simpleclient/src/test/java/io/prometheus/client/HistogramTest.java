@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,11 +38,11 @@ public class HistogramTest {
     return registry.getSampleValue("nolabels_sum").doubleValue();
   }
   private double getBucket(double b) {
-    return registry.getSampleValue("nolabels_bucket", 
+    return registry.getSampleValue("nolabels_bucket",
         new String[]{"le"},
         new String[]{Collector.doubleToGoString(b)}).doubleValue();
   }
-  
+
   @Test
   public void testObserve() {
     noLabels.observe(2);
@@ -119,19 +120,27 @@ public class HistogramTest {
     });
     assertEquals(10, elapsed, .001);
 
+    int result = noLabels.time(new Callable<Integer>() {
+      @Override
+      public Integer call() {
+        return 123;
+      }
+    });
+    assertEquals(123, result);
+
     Histogram.Timer timer = noLabels.startTimer();
     elapsed = timer.observeDuration();
-    assertEquals(2, getCount(), .001);
-    assertEquals(20, getSum(), .001);
+    assertEquals(3, getCount(), .001);
+    assertEquals(30, getSum(), .001);
     assertEquals(10, elapsed, .001);
   }
-  
+
   @Test
   public void noLabelsDefaultZeroValue() {
     assertEquals(0.0, getCount(), .001);
     assertEquals(0.0, getSum(), .001);
   }
-  
+
   private Double getLabelsCount(String labelValue) {
     return registry.getSampleValue("labels_count", new String[]{"l"}, new String[]{labelValue});
   }
@@ -166,7 +175,7 @@ public class HistogramTest {
   public void testCollect() {
     labels.labels("a").observe(2);
     List<Collector.MetricFamilySamples> mfs = labels.collect();
-    
+
     ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
     ArrayList<String> labelNames = new ArrayList<String>();
     labelNames.add("l");

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -214,6 +215,24 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       return elapsed;
     }
 
+    /**
+     * Executes callable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+     *
+     * @param timeable Code that is being timed
+     * @return Result returned by callable.
+     */
+    public <E> E time(Callable<E> timeable) {
+      Timer timer = startTimer();
+
+      try {
+        return timeable.call();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      } finally {
+        timer.observeDuration();
+      }
+    }
+
     public static class Value {
       public final double count;
       public final double sum;
@@ -305,7 +324,17 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   public double time(Runnable timeable){
     return noLabelsChild.time(timeable);
   }
-  
+
+  /**
+   * Executes callable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+   *
+   * @param timeable Code that is being timed
+   * @return Result returned by callable.
+   */
+  public <E> E time(Callable<E> timeable){
+    return noLabelsChild.time(timeable);
+  }
+
   /**
    * Get the value of the Summary.
    * <p>
