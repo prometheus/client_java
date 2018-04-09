@@ -430,6 +430,27 @@ new QueuedThreadPoolStatisticsCollector()
     .register();
 ```
 
+### Kafka
+
+There is a collector for recording metrics from Kafka clients. Use the `metric.reporters` to
+add a `MetricReporter` when constructing a consumer or producer:
+
+```java
+Properties props = new Properties();
+// ...
+props.put("client.id", "cookie-monster");
+props.put("metric.reporters", "io.prometheus.client.kafka.PrometheusMetricsReporter");
+// ...
+KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+```
+
+Note that the `client.id` is included as a label in all metrics, so if you are using
+multiple consumers and/or producers, you'll likely want to set this to some meaningful
+value in order to be able to distinguish different instances.
+
+By default, Kafka assigns `client.id`s with format `consumer_N` and `producer_N` where 
+`N` is an integer starting from 1 and increasing for each new instance.
+
 #### Servlet Filter
 
 There is a servlet filter available for measuring the duration taken by servlet
