@@ -32,11 +32,10 @@ import com.sun.net.httpserver.HttpExchange;
  * HTTPServer server = new HTTPServer(1234);
  * }
  * </pre>
- * */
+ */
 public class HTTPServer {
     private static class LocalByteArray extends ThreadLocal<ByteArrayOutputStream> {
-        protected ByteArrayOutputStream initialValue()
-        {
+        protected ByteArrayOutputStream initialValue() {
             return new ByteArrayOutputStream(1 << 20);
         }
     }
@@ -46,7 +45,7 @@ public class HTTPServer {
         private final LocalByteArray response = new LocalByteArray();
 
         HTTPMetricHandler(CollectorRegistry registry) {
-          this.registry = registry;
+            this.registry = registry;
         }
 
 
@@ -67,6 +66,7 @@ public class HTTPServer {
                     TextFormat.CONTENT_TYPE_004);
             t.getResponseHeaders().set("Content-Length",
                     String.valueOf(response.size()));
+            t.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
             if (shouldUseCompression(t)) {
                 t.getResponseHeaders().set("Content-Encoding", "gzip");
                 t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
