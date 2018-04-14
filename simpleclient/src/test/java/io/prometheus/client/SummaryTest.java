@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -124,19 +125,27 @@ public class SummaryTest {
     });
     assertEquals(10, elapsed, .001);
 
+    int result = noLabels.time(new Callable<Integer>() {
+      @Override
+      public Integer call() {
+        return 123;
+      }
+    });
+    assertEquals(123, result);
+
     Summary.Timer timer = noLabels.startTimer();
     elapsed = timer.observeDuration();
-    assertEquals(2, getCount(), .001);
-    assertEquals(20, getSum(), .001);
+    assertEquals(3, getCount(), .001);
+    assertEquals(30, getSum(), .001);
     assertEquals(10, elapsed, .001);
   }
-  
+
   @Test
   public void noLabelsDefaultZeroValue() {
     assertEquals(0.0, getCount(), .001);
     assertEquals(0.0, getSum(), .001);
   }
-  
+
   private Double getLabelsCount(String labelValue) {
     return registry.getSampleValue("labels_count", new String[]{"l"}, new String[]{labelValue});
   }
