@@ -191,7 +191,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
   public static class Child {
 
     /**
-     * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+     * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
      *
      * @param timeable Code that is being timed
      * @return Measured duration in seconds for timeable to complete.
@@ -209,7 +209,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
     }
 
     /**
-     * Executes callable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+     * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
      *
      * @param timeable Code that is being timed
      * @return Result returned by callable.
@@ -302,7 +302,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
   }
 
   /**
-   * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+   * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
    *
    * @param timeable Code that is being timed
    * @return Measured duration in seconds for timeable to complete.
@@ -312,7 +312,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
   }
 
   /**
-   * Executes callable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+   * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
    *
    * @param timeable Code that is being timed
    * @return Result returned by callable.
