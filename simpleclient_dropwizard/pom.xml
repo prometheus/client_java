@@ -17,6 +17,10 @@
         Collector of data from Dropwizard metrics library.
     </description>
 
+    <properties>
+        <dropwizard.metrics.version>3.1.2</dropwizard.metrics.version>
+    </properties>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -35,12 +39,18 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.3.1-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_pushgateway</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
-            <version>3.1.2</version>
+            <version>${dropwizard.metrics.version}</version>
         </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
@@ -49,5 +59,12 @@
             <version>4.11</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.18.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>
