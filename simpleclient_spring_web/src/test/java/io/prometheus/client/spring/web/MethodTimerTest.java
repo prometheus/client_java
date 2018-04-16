@@ -16,11 +16,16 @@ public class MethodTimerTest {
         void timeMe() throws Exception;
     }
 
-    private final class TestClass implements Timeable {
+    private class TestClass implements Timeable {
         @PrometheusTimeMethod(name = "test_class", help = "help one")
         public void timeMe() throws Exception {
             Thread.sleep(20);
         }
+
+    }
+
+    //mock cglib proxy by subclass and in this class don't contain timMe() method
+    private final class MockCglibProxyTestClass extends TestClass {
 
     }
 
@@ -31,7 +36,7 @@ public class MethodTimerTest {
 
     @Test
     public void timeMethod() throws Exception {
-        Timeable cprime = new TestClass();
+        Timeable cprime = new MockCglibProxyTestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(cprime);
         factory.addAspect(MethodTimer.class);
         Timeable proxy = factory.getProxy();
