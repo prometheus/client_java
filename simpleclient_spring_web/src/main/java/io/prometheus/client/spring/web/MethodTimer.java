@@ -8,8 +8,10 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -46,7 +48,8 @@ public class MethodTimer {
         // When target is an AOP interface proxy but annotation is on class method (rather than Interface method).
         final String name = signature.getName();
         final Class[] parameterTypes = signature.getParameterTypes();
-        return AnnotationUtils.findAnnotation(pjp.getSignature().getDeclaringType().getDeclaredMethod(name, parameterTypes), PrometheusTimeMethod.class);
+        Method method = ReflectionUtils.findMethod(pjp.getTarget().getClass(), name, parameterTypes);
+        return AnnotationUtils.findAnnotation(method, PrometheusTimeMethod.class);
     }
 
     private Summary ensureSummary(ProceedingJoinPoint pjp, String key) throws IllegalStateException {
