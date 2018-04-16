@@ -16,7 +16,7 @@ public class MethodTimerTest {
         void timeMe() throws Exception;
     }
 
-    private class TestClass implements Timeable {
+    private final class TestClass implements Timeable {
         @PrometheusTimeMethod(name = "test_class", help = "help one")
         public void timeMe() throws Exception {
             Thread.sleep(20);
@@ -24,8 +24,17 @@ public class MethodTimerTest {
 
     }
 
-    //mock cglib proxy by subclass and in this class don't contain timMe() method
-    private final class MockCglibProxyTestClass extends TestClass {
+    private class TestCglibClassParent implements Timeable{
+        @PrometheusTimeMethod(name = "test_sub_class", help = "help one sub")
+        public void timeMe() throws Exception {
+            Thread.sleep(20);
+        }
+    }
+
+    /**
+     *  mock cglib proxy by subclass and in this class don't contain timMe() method
+     */
+    private final class MockCglibProxyTestClass extends TestCglibClassParent {
 
     }
 
@@ -35,8 +44,23 @@ public class MethodTimerTest {
     }
 
     @Test
-    public void timeMethod() throws Exception {
+    public void timeMethodInSubClassModel() throws Exception {
         Timeable cprime = new MockCglibProxyTestClass();
+        AspectJProxyFactory factory = new AspectJProxyFactory(cprime);
+        factory.addAspect(MethodTimer.class);
+        Timeable proxy = factory.getProxy();
+
+        proxy.timeMe();
+
+        final Double tot = CollectorRegistry.defaultRegistry.getSampleValue("test_sub_class_sum");
+        Assert.assertNotNull(tot);
+        assertEquals(0.02, tot, 0.01);
+    }
+
+
+    @Test
+    public void timeMethod() throws Exception {
+        Timeable cprime = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(cprime);
         factory.addAspect(MethodTimer.class);
         Timeable proxy = factory.getProxy();
@@ -192,7 +216,7 @@ public class MethodTimerTest {
     @Test
     public void testOverloadedMethodName() throws Exception {
         final int sleep1 = 100, sleep2 = 200;
-        
+
         SameMethodNameTest r = getProxy(new SameMethodNameTest() {
             @Override
             @PrometheusTimeMethod(name="dosomething_one_test_seconds", help = "halp")
@@ -206,7 +230,7 @@ public class MethodTimerTest {
                 Thread.sleep(sleep2);
             }
         });
-        
+
         r.doSomething();
         r.doSomething("foobar");
 
