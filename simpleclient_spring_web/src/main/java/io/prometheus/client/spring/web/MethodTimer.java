@@ -47,7 +47,7 @@ public class MethodTimer {
         final String name = signature.getName();
         final Class[] parameterTypes = signature.getParameterTypes();
 
-        return AnnotationUtils.findAnnotation(pjp.getTarget().getClass().getDeclaredMethod(name, parameterTypes), PrometheusTimeMethod.class);
+        return AnnotationUtils.findAnnotation(pjp.getSignature().getDeclaringType().getDeclaredMethod(name, parameterTypes), PrometheusTimeMethod.class);
     }
 
     private Summary ensureSummary(ProceedingJoinPoint pjp, String key) throws IllegalStateException {
