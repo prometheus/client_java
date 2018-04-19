@@ -1,7 +1,5 @@
 package io.prometheus.client.dropwizard;
 
-import com.codahale.metrics.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,18 +9,41 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Snapshot;
+import com.codahale.metrics.Timer;
+import io.prometheus.client.Collector;
+
 /**
  * Collect Dropwizard metrics from a MetricRegistry.
  */
-public class DropwizardExports extends io.prometheus.client.Collector implements io.prometheus.client.Collector.Describable {
-    private MetricRegistry registry;
+public class DropwizardExports extends Collector implements Collector.Describable {
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
+
+    private final MetricSource source;
+
+    public DropwizardExports(SortedMap<String, Gauge> gauges,
+            SortedMap<String, Counter> counters,
+            SortedMap<String, Histogram> histograms,
+            SortedMap<String, Meter> meters,
+            SortedMap<String, Timer> timers) {
+        this(new StaticSource(gauges, counters, histograms, meters, timers));
+    }
 
     /**
      * @param registry a metric registry to export in prometheus.
      */
     public DropwizardExports(MetricRegistry registry) {
-        this.registry = registry;
+        this(new RegistrySource(registry));
+    }
+
+    private DropwizardExports(MetricSource source) {
+        this.source = source;
     }
 
     /**
@@ -137,19 +158,19 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     @Override
     public List<MetricFamilySamples> collect() {
         ArrayList<MetricFamilySamples> mfSamples = new ArrayList<MetricFamilySamples>();
-        for (SortedMap.Entry<String, Gauge> entry : registry.getGauges().entrySet()) {
+        for (SortedMap.Entry<String, Gauge> entry : source.getGauges().entrySet()) {
             mfSamples.addAll(fromGauge(entry.getKey(), entry.getValue()));
         }
-        for (SortedMap.Entry<String, Counter> entry : registry.getCounters().entrySet()) {
+        for (SortedMap.Entry<String, Counter> entry : source.getCounters().entrySet()) {
             mfSamples.addAll(fromCounter(entry.getKey(), entry.getValue()));
         }
-        for (SortedMap.Entry<String, Histogram> entry : registry.getHistograms().entrySet()) {
+        for (SortedMap.Entry<String, Histogram> entry : source.getHistograms().entrySet()) {
             mfSamples.addAll(fromHistogram(entry.getKey(), entry.getValue()));
         }
-        for (SortedMap.Entry<String, Timer> entry : registry.getTimers().entrySet()) {
+        for (SortedMap.Entry<String, Timer> entry : source.getTimers().entrySet()) {
             mfSamples.addAll(fromTimer(entry.getKey(), entry.getValue()));
         }
-        for (SortedMap.Entry<String, Meter> entry : registry.getMeters().entrySet()) {
+        for (SortedMap.Entry<String, Meter> entry : source.getMeters().entrySet()) {
             mfSamples.addAll(fromMeter(entry.getKey(), entry.getValue()));
         }
         return mfSamples;
@@ -158,5 +179,92 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     @Override
     public List<MetricFamilySamples> describe() {
       return new ArrayList<MetricFamilySamples>();
+    }
+
+    private interface MetricSource {
+        SortedMap<String, Gauge> getGauges();
+        SortedMap<String, Counter> getCounters();
+        SortedMap<String, Histogram> getHistograms();
+        SortedMap<String, Meter> getMeters();
+        SortedMap<String, Timer> getTimers();
+    }
+
+    private static class StaticSource implements MetricSource {
+        private final SortedMap<String, Gauge> gauges;
+        private final SortedMap<String, Counter> counters;
+        private final SortedMap<String, Histogram> histograms;
+        private final SortedMap<String, Meter> meters;
+        private final SortedMap<String, Timer> timers;
+
+        StaticSource(SortedMap<String, Gauge> gauges,
+                SortedMap<String, Counter> counters,
+                SortedMap<String, Histogram> histograms,
+                SortedMap<String, Meter> meters,
+                SortedMap<String, Timer> timers) {
+            this.gauges = gauges;
+            this.counters = counters;
+            this.histograms = histograms;
+            this.meters = meters;
+            this.timers = timers;
+        }
+
+        @Override
+        public SortedMap<String, Gauge> getGauges() {
+            return gauges;
+        }
+
+        @Override
+        public SortedMap<String, Counter> getCounters() {
+            return counters;
+        }
+
+        @Override
+        public SortedMap<String, Histogram> getHistograms() {
+            return histograms;
+        }
+
+        @Override
+        public SortedMap<String, Meter> getMeters() {
+            return meters;
+        }
+
+        @Override
+        public SortedMap<String, Timer> getTimers() {
+            return timers;
+        }
+    }
+
+    private static class RegistrySource implements MetricSource {
+
+        private final MetricRegistry registry;
+
+        RegistrySource(MetricRegistry registry) {
+            this.registry = registry;
+        }
+
+        @Override
+        public SortedMap<String, Gauge> getGauges() {
+            return registry.getGauges();
+        }
+
+        @Override
+        public SortedMap<String, Counter> getCounters() {
+            return registry.getCounters();
+        }
+
+        @Override
+        public SortedMap<String, Histogram> getHistograms() {
+            return registry.getHistograms();
+        }
+
+        @Override
+        public SortedMap<String, Meter> getMeters() {
+            return registry.getMeters();
+        }
+
+        @Override
+        public SortedMap<String, Timer> getTimers() {
+            return registry.getTimers();
+        }
     }
 }
