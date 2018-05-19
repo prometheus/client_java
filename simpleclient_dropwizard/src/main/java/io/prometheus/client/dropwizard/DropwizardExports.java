@@ -9,6 +9,7 @@ import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * Collect Dropwizard metrics from a MetricRegistry.
@@ -52,7 +53,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
             value = ((Boolean) obj) ? 1 : 0;
         } else {
             LOGGER.log(Level.FINE, String.format("Invalid type for Gauge %s: %s", name,
-                    obj.getClass().getName()));
+                obj == null ? "null" : obj.getClass().getName()));
             return new ArrayList<MetricFamilySamples>();
         }
         MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample(name,
@@ -116,14 +117,21 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
         );
     }
 
+    private static final Pattern METRIC_NAME_RE = Pattern.compile("[^a-zA-Z0-9:_]");
+
     /**
-     * Replace all unsupported chars with '_'.
+     * Replace all unsupported chars with '_', prepend '_' if name starts with digit.
      *
-     * @param dropwizardName original metric name.
+     * @param dropwizardName
+     *            original metric name.
      * @return the sanitized metric name.
      */
-    public static String sanitizeMetricName(String dropwizardName){
-        return dropwizardName.replaceAll("[^a-zA-Z0-9:_]", "_");
+    public static String sanitizeMetricName(String dropwizardName) {
+        String name = METRIC_NAME_RE.matcher(dropwizardName).replaceAll("_");
+        if (!name.isEmpty() && Character.isDigit(name.charAt(0))) {
+            name = "_" + name;
+        }
+        return name;
     }
 
     @Override

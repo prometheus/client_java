@@ -50,6 +50,9 @@ public class QueuedThreadPoolStatisticsCollectorTest {
     assertTrue(
         CollectorRegistry.defaultRegistry.getSampleValue("jetty_queued_thread_pool_threads_idle",
             LABEL_NAMES, labelValues) > 0);
+    assertTrue(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_queued_thread_pool_threads_max",
+            LABEL_NAMES, labelValues) == 200);
     assertNotNull(CollectorRegistry.defaultRegistry.getSampleValue("jetty_queued_thread_pool_jobs",
         LABEL_NAMES, labelValues));
   }

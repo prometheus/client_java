@@ -21,7 +21,7 @@ public class VersionInfoExportsTest {
         assertEquals(
                 1L,
                 registry.getSampleValue(
-                        "jvm_info", new String[]{"version", "vendor"}, new String[]{System.getProperty("java.runtime.version", "unknown"), System.getProperty("java.vm.vendor", "unknown")}),
+                        "jvm_info", new String[]{"version", "vendor", "runtime"}, new String[]{System.getProperty("java.runtime.version", "unknown"), System.getProperty("java.vm.vendor", "unknown"), System.getProperty("java.runtime.name", "unknown")}),
                 .0000001);
     }
 }

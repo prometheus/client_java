@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * Gauge metric, to report instantaneous values.
@@ -136,6 +137,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     private final DoubleAdder value = new DoubleAdder();
 
     static TimeProvider timeProvider = new TimeProvider();
+
     /**
      * Increment the gauge by 1.
      */
@@ -192,7 +194,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     }
 
     /**
-     * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+     * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
      *
      * @param timeable Code that is being timed
      * @return Measured duration in seconds for timeable to complete.
@@ -208,6 +210,24 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
       }
 
       return elapsed;
+    }
+
+    /**
+     * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
+     *
+     * @param timeable Code that is being timed
+     * @return Result returned by callable.
+     */
+    public <E> E setToTime(Callable<E> timeable){
+      Timer timer = startTimer();
+
+      try {
+        return timeable.call();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      } finally {
+        timer.setDuration();
+      }
     }
 
     /**
@@ -271,7 +291,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   }
 
   /**
-   * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+   * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
    *
    * @param timeable Code that is being timed
    * @return Measured duration in seconds for timeable to complete.
@@ -279,14 +299,23 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   public double setToTime(Runnable timeable){
     return noLabelsChild.setToTime(timeable);
   }
-  
+
+  /**
+   * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
+   *
+   * @param timeable Code that is being timed
+   * @return Result returned by callable.
+   */
+  public <E> E setToTime(Callable<E> timeable){
+    return noLabelsChild.setToTime(timeable);
+  }
+
   /**
    * Get the value of the gauge.
    */
   public double get() {
     return noLabelsChild.get();
   }
-
 
   @Override
   public List<MetricFamilySamples> collect() {
