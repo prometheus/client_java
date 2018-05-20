@@ -40,25 +40,25 @@ version can be found on in the maven repository for
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient</artifactId>
-  <version>0.0.26</version>
+  <version>0.4.0</version>
 </dependency>
 <!-- Hotspot JVM metrics-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_hotspot</artifactId>
-  <version>0.0.26</version>
+  <version>0.4.0</version>
 </dependency>
-<!-- Exposition servlet-->
+<!-- Exposition HTTPServer-->
 <dependency>
   <groupId>io.prometheus</groupId>
-  <artifactId>simpleclient_servlet</artifactId>
-  <version>0.0.26</version>
+  <artifactId>simpleclient_httpserver</artifactId>
+  <version>0.4.0</version>
 </dependency>
 <!-- Pushgateway exposition-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_pushgateway</artifactId>
-  <version>0.0.26</version>
+  <version>0.4.0</version>
 </dependency>
 ```
 
@@ -193,7 +193,7 @@ class YourClass {
 ```
 
 The default buckets are intended to cover a typical web/rpc request from milliseconds to seconds.
-They can be overridden with the `buckets()` method on the [Histogram.Builder](https://prometheus.io/client_java/io/prometheus/client/Histogram.Builder.html#buckets-double...-).
+They can be overridden with the `buckets()` method on the [Histogram.Builder](https://prometheus.github.io/client_java/io/prometheus/client/Histogram.Builder.html#buckets-double...-).
 
 There are utilities for timing code:
 
@@ -451,7 +451,7 @@ need to place this (replace your own values) code in your
 ```xml
 <filter>
   <filter-name>prometheusFilter</filter-name>
-  <filter-class>net.cccnext.ssp.portal.spring.filter.PrometheusMetricsFilter</filter-class>
+  <filter-class>io.prometheus.client.filter.MetricsFilter</filter-class>
   <init-param>
     <param-name>metric-name</param-name>
     <param-value>webapp_metrics_filter</param-value>

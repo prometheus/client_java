@@ -66,10 +66,10 @@ public class CollectorRegistry {
    */
   public void unregister(Collector m) {
     synchronized (collectorsToNames) {
-      for (String name : collectorsToNames.get(m)) {
+      List<String> names = collectorsToNames.remove(m);
+      for (String name : names) {
         namesToCollectors.remove(name);
       }
-      collectorsToNames.remove(m);
     }
   }
 
@@ -109,10 +109,13 @@ public class CollectorRegistry {
           names.add(family.name + "_count");
           names.add(family.name + "_sum");
           names.add(family.name);
+          break;
         case HISTOGRAM:
           names.add(family.name + "_count");
           names.add(family.name + "_sum");
           names.add(family.name + "_bucket");
+          names.add(family.name);
+          break;
         default:
           names.add(family.name);
       }

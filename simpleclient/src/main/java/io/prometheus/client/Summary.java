@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -197,7 +198,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   public static class Child {
 
     /**
-     * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+     * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
      *
      * @param timeable Code that is being timed
      * @return Measured duration in seconds for timeable to complete.
@@ -212,6 +213,24 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
         elapsed = timer.observeDuration();
       }
       return elapsed;
+    }
+
+    /**
+     * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
+     *
+     * @param timeable Code that is being timed
+     * @return Result returned by callable.
+     */
+    public <E> E time(Callable<E> timeable) {
+      Timer timer = startTimer();
+
+      try {
+        return timeable.call();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      } finally {
+        timer.observeDuration();
+      }
     }
 
     public static class Value {
@@ -297,7 +316,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   }
 
   /**
-   * Executes runnable code (i.e. a Java 8 Lambda) and observes a duration of how long it took to run.
+   * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
    *
    * @param timeable Code that is being timed
    * @return Measured duration in seconds for timeable to complete.
@@ -305,7 +324,17 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   public double time(Runnable timeable){
     return noLabelsChild.time(timeable);
   }
-  
+
+  /**
+   * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
+   *
+   * @param timeable Code that is being timed
+   * @return Result returned by callable.
+   */
+  public <E> E time(Callable<E> timeable){
+    return noLabelsChild.time(timeable);
+  }
+
   /**
    * Get the value of the Summary.
    * <p>
