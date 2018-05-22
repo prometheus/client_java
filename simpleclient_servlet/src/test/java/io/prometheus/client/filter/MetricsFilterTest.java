@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +43,6 @@ public class MetricsFilterTest {
         when(cfg.getInitParameter(MetricsFilter.PATH_COMPONENT_PARAM)).thenReturn("4");
 
         f.init(cfg);
-
-        assertEquals(f.pathComponents, 4);
 
         HttpServletRequest req = mock(HttpServletRequest.class);
 
@@ -179,5 +178,36 @@ public class MetricsFilterTest {
         // +1 because of the final le=+infinity bucket
         assertEquals(buckets.split(",").length+1, count);
     }
+
+    @Test
+    public void testCustomPathToLabelMapping() throws Exception {
+        HttpServletRequest request1 = mock(HttpServletRequest.class);
+        when(request1.getRequestURI()).thenReturn("/firstRequest/middle/last");
+        when(request1.getMethod()).thenReturn(HttpMethods.POST);
+
+        HttpServletRequest request2 = mock(HttpServletRequest.class);
+        when(request2.getRequestURI()).thenReturn("/secondRequest/middle/last");
+        when(request2.getMethod()).thenReturn(HttpMethods.POST);
+
+        FilterChain c = mock(FilterChain.class);
+        FilterConfig cfg = mock(FilterConfig.class);
+
+        HttpServletResponse res = mock(HttpServletResponse.class);
+
+        Filter f = new MetricsFilter("METRIC", "help", new PathToLabelMapper() {
+            @Override
+            public String getLabel(String path) {
+                String[] arr = path.split("/");
+                return arr[arr.length-1];
+            }
+        }, new double[] {10});
+        f.init(cfg);
+        f.doFilter(request1, res, c);
+        f.doFilter(request2, res, c);
+
+        final Double count = CollectorRegistry.defaultRegistry.getSampleValue("METRIC_count", new String[]{"path", "method"}, new String[]{"last", HttpMethods.POST});
+        assertEquals(2, count, 0.01);
+    }
+
 
 }
