@@ -42,7 +42,6 @@ public class CacheMetricsCollectorTest {
 
         assertMetric(registry, "ehcache2_cache_hit_total", "testCache", 1.0);
         assertMetric(registry, "ehcache2_cache_miss_total", "testCache", 2.0);
-        assertMetric(registry, "ehcache2_cache_hit_total", "testCache", 3.0);
         singletonManager.removeCache("testCache");
     }
 
