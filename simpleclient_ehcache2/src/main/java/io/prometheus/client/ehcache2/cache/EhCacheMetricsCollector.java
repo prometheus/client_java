@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 /**
  * Collect metrics from Ehcache's v2 net.sf.ehcache.Ehcache.
  * <p>
@@ -27,9 +28,9 @@ import java.util.concurrent.ConcurrentMap;
  * cacheMetrics.register()
  *
  * }</pre>
- *
+ * <p>
  * Exposed metrics are labeled with the provided cache name.
- *
+ * <p>
  * With the example above, sample metric names would be:
  * <pre>
  *     ehcache2_cache_hit_total{cache="mycache"} 10.0
@@ -37,10 +38,8 @@ import java.util.concurrent.ConcurrentMap;
  *     ehcache2_cache_miss_total{cache="mycache"} 3.0
  *     ehcache2_cache_miss_total{cache="othercache"} 55.0
  * </pre>
- *
- *
  */
-public class EhCacheMetricsCollector  extends Collector {
+public class EhCacheMetricsCollector extends Collector {
 
     protected final ConcurrentMap<String, Ehcache> children = new ConcurrentHashMap<String, Ehcache>();
 
@@ -51,7 +50,7 @@ public class EhCacheMetricsCollector  extends Collector {
      * Any references any previous cache with this name is invalidated.
      *
      * @param cacheName The name of the cache, will be the metrics label value
-     * @param cache The cache being monitored
+     * @param cache     The cache being monitored
      */
     public void addCache(String cacheName, Ehcache cache) {
         children.put(cacheName, cache);
@@ -73,7 +72,7 @@ public class EhCacheMetricsCollector  extends Collector {
      * <p>
      * Any references to all caches are invalidated.
      */
-    public void clear(){
+    public void clear() {
         children.clear();
     }
 
@@ -86,6 +85,10 @@ public class EhCacheMetricsCollector  extends Collector {
         mfs.add(cacheHitRatio);
         CounterMetricFamily cacheHitTotal = new CounterMetricFamily("ehcache2_cache_hit_total", "Cache hit totals", labelNames);
         mfs.add(cacheHitTotal);
+
+        CounterMetricFamily cacheEvictionTotal = new CounterMetricFamily("ehcache2_cache_eviction_total", "Cache eviction totals", labelNames);
+        mfs.add(cacheEvictionTotal);
+
         CounterMetricFamily cacheInMemoryHitTotal = new CounterMetricFamily("ehcache2_cache_in_memory_hit_total", "Cache in-memory hit totals", labelNames);
         mfs.add(cacheInMemoryHitTotal);
         CounterMetricFamily cacheOffHeapHitTotal = new CounterMetricFamily("ehcache2_cache_off_heap_hit_total", "Cache off-heap hit totals", labelNames);
@@ -148,12 +151,13 @@ public class EhCacheMetricsCollector  extends Collector {
         GaugeMetricFamily cacheWriterQueueLength = new GaugeMetricFamily("ehcache2_cache_writer_queue_length", "Cache writer queue length", labelNames);
         mfs.add(cacheWriterQueueLength);
 
-        for(Map.Entry<String, Ehcache> c: children.entrySet()) {
+        for (Map.Entry<String, Ehcache> c : children.entrySet()) {
             List<String> cacheName = Arrays.asList(c.getKey());
             StatisticsGateway stats = c.getValue().getStatistics();
 
-            cacheHitRatio.addMetric(cacheName,stats.cacheHitRatio());
+            cacheHitRatio.addMetric(cacheName, stats.cacheHitRatio());
             cacheHitTotal.addMetric(cacheName, stats.cacheHitCount());
+            cacheEvictionTotal.addMetric(cacheName, stats.cacheEvictedCount());
             cacheInMemoryHitTotal.addMetric(cacheName, stats.localHeapHitCount());
             cacheOffHeapHitTotal.addMetric(cacheName, stats.localOffHeapHitCount());
             cacheOnDiskHitTotal.addMetric(cacheName, stats.localDiskHitCount());
@@ -169,8 +173,8 @@ public class EhCacheMetricsCollector  extends Collector {
             cacheOffHeapSize.addMetric(cacheName, stats.getLocalOffHeapSize());
             cacheOnDiskSize.addMetric(cacheName, stats.getLocalDiskSize());
 
-            cacheExpiredTotal.addMetric(cacheName,stats.cacheExpiredCount());
-            cacheEvictedTotal.addMetric(cacheName,stats.cacheEvictedCount());
+            cacheExpiredTotal.addMetric(cacheName, stats.cacheExpiredCount());
+            cacheEvictedTotal.addMetric(cacheName, stats.cacheEvictedCount());
 
             ExtendedStatistics.Result cacheGetOperation = stats.cacheGetOperation();
             ExtendedStatistics.Result cacheSearchOperation = stats.cacheSearchOperation();
