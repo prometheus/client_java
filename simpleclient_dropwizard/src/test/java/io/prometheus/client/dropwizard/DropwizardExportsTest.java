@@ -209,6 +209,69 @@ public class DropwizardExportsTest {
 
     }
 
+    @Test
+    public void testLabels() {
+        MetricRegistry metricRegistry = new MetricRegistry();
+        CollectorRegistry registry = new CollectorRegistry();
+        DropwizardExports exports = new DropwizardExports(metricRegistry);
+
+        exports.register(registry);
+
+        exports.addLabel("label1", "value1");
+        exports.addLabel("label2", "value2");
+
+        metricRegistry.counter("labelCounter");
+        metricRegistry.timer("labelTimer");
+        metricRegistry.meter("labelMeter");
+        metricRegistry.histogram("labelHistogram");
+        metricRegistry.register("labelGauge", new ExampleDoubleGauge());
+
+        Enumeration<Collector.MetricFamilySamples> metricFamilySamples = registry.metricFamilySamples();
+        Map<String, Collector.MetricFamilySamples> elements = new HashMap<String, Collector.MetricFamilySamples>();
+
+        while (metricFamilySamples.hasMoreElements()) {
+            Collector.MetricFamilySamples element =  metricFamilySamples.nextElement();
+            elements.put(element.name, element);
+        }
+
+        assertTrue(elements.keySet().contains("labelCounter"));
+        assertTrue(elements.keySet().contains("labelTimer"));
+        assertTrue(elements.keySet().contains("labelMeter_total"));
+        assertTrue(elements.keySet().contains("labelHistogram"));
+        assertTrue(elements.keySet().contains("labelGauge"));
+
+        assertEquals(2, elements.get("labelCounter").samples.get(0).labelNames.size());
+        assertEquals("label1", elements.get("labelCounter").samples.get(0).labelNames.get(0));
+        assertEquals("label2", elements.get("labelCounter").samples.get(0).labelNames.get(1));
+
+        assertEquals(2, elements.get("labelCounter").samples.get(0).labelValues.size());
+        assertEquals("value1", elements.get("labelCounter").samples.get(0).labelValues.get(0));
+        assertEquals("value2", elements.get("labelCounter").samples.get(0).labelValues.get(1));
+
+        assertEquals(2, elements.get("labelGauge").samples.get(0).labelNames.size());
+        assertEquals("label1", elements.get("labelGauge").samples.get(0).labelNames.get(0));
+        assertEquals("label2", elements.get("labelGauge").samples.get(0).labelNames.get(1));
+
+        assertEquals(2, elements.get("labelGauge").samples.get(0).labelValues.size());
+        assertEquals("value1", elements.get("labelGauge").samples.get(0).labelValues.get(0));
+        assertEquals("value2", elements.get("labelGauge").samples.get(0).labelValues.get(1));
+
+        assertEquals(3, elements.get("labelTimer").samples.get(0).labelNames.size());
+        assertEquals("label1", elements.get("labelTimer").samples.get(0).labelNames.get(0));
+        assertEquals("label2", elements.get("labelTimer").samples.get(0).labelNames.get(1));
+        assertEquals("quantile", elements.get("labelTimer").samples.get(0).labelNames.get(2));
+
+        assertEquals(3, elements.get("labelTimer").samples.get(0).labelValues.size());
+        assertEquals("value1", elements.get("labelTimer").samples.get(0).labelValues.get(0));
+        assertEquals("value2", elements.get("labelTimer").samples.get(0).labelValues.get(1));
+        assertEquals("0.5", elements.get("labelTimer").samples.get(0).labelValues.get(2));
+        assertEquals("0.75", elements.get("labelTimer").samples.get(1).labelValues.get(2));
+        assertEquals("0.95", elements.get("labelTimer").samples.get(2).labelValues.get(2));
+        assertEquals("0.98", elements.get("labelTimer").samples.get(3).labelValues.get(2));
+        assertEquals("0.99", elements.get("labelTimer").samples.get(4).labelValues.get(2));
+        assertEquals("0.999", elements.get("labelTimer").samples.get(5).labelValues.get(2));
+    }
+
     private static class ExampleDoubleGauge implements Gauge<Double> {
         @Override
         public Double getValue() {
