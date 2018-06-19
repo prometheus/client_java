@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.prometheus</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.4.1-SNAPSHOT</version>
+  </parent>
+
+  <groupId>io.prometheus</groupId>
+  <artifactId>simpleclient_eclipselink</artifactId>
+  <packaging>bundle</packaging>
+
+  <name>Prometheus Java Simpleclient EclipseLink</name>
+  <description>
+    Collectors of data from EclipseLink.
+  </description>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>vitanuova</id>
+      <name>Viktoriia Bakalova</name>
+      <email>vitanuova0512@gmail.com</email>
+    </developer>
+    <developer>
+      <id>chkal</id>
+      <name>Christian Kaltepoth</name>
+      <email>christian@kaltepoth.de</email>
+    </developer>
+  </developers>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient</artifactId>
+      <version>0.4.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>eclipselink</artifactId>
+      <version>2.5.2</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>2.18.0</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+</project>
