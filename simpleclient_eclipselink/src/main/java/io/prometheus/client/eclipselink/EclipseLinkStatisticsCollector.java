@@ -90,7 +90,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
   private List<MetricFamilySamples> getCounters() {
     return Arrays.<MetricFamilySamples>asList(
         createCounter(
-            "eclipselink_uow_commits_total",
+            "eclipselink_unit_of_work_commits_total",
             "Total number of unit of work commits",
             new ValueProvider() {
               @Override
@@ -104,7 +104,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createCounter(
-            "eclipselink_uow_created_total",
+            "eclipselink_unit_of_work_created_total",
             "Total number of created units of work",
             new ValueProvider() {
               @Override
@@ -118,7 +118,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createCounter(
-            "eclipselink_uow_released_total",
+            "eclipselink_unit_of_work_released_total",
             "Total number of released units of work",
             new ValueProvider() {
               @Override
@@ -132,7 +132,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createCounter(
-            "eclipselink_uow_rollbacks_total",
+            "eclipselink_unit_of_work_rollbacks_total",
             "Total number of unit of work rollbacks",
             new ValueProvider() {
               @Override
@@ -174,6 +174,21 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createCounter(
+            "eclipselink_cache_requests_total",
+            "Total number of cache requests",
+            new ValueProvider() {
+                @Override
+                public double getValue(Map<String, Object> metrics) {
+                    Object hits = metrics.get(SessionProfiler.CacheHits);
+                    Object misses = metrics.get(SessionProfiler.CacheMisses);
+                    if (hits != null && misses != null) {
+                        return ((Integer) hits).doubleValue() + ((Integer) misses).doubleValue();
+                    }
+                    return 0;
+                }
+            }
+        ),
+        createCounter(
             "eclipselink_change_sets_processed_total",
             "Total number of processed change sets",
             new ValueProvider() {
@@ -199,6 +214,21 @@ public class EclipseLinkStatisticsCollector extends Collector {
                 }
                 return 0;
               }
+            }
+        ),
+        createCounter(
+            "eclipselink_change_sets_total",
+            "Total number of change sets",
+            new ValueProvider() {
+                @Override
+                public double getValue(Map<String, Object> metrics) {
+                    Object processed = metrics.get(SessionProfiler.ChangeSetsProcessed);
+                    Object nonProcessed = metrics.get(SessionProfiler.ChangeSetsNotProcessed);
+                    if (processed != null && nonProcessed != null) {
+                        return ((Integer) processed).doubleValue() + ((Integer) nonProcessed).doubleValue();
+                    }
+                    return 0;
+                }
             }
         ),
         createCounter(
@@ -288,7 +318,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createCounter(
-            "eclipselink_rcm_received_total",
+            "eclipselink_remote_command_manager_received_total",
             "Total number of messages received",
             new ValueProvider() {
               @Override
@@ -302,7 +332,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createCounter(
-            "eclipselink_rcm_sent_total",
+            "eclipselink_remote_command_manager_sent_total",
             "Total number of sent messages",
             new ValueProvider() {
               @Override
@@ -321,7 +351,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
   private List<MetricFamilySamples> getTimers() {
     return Arrays.<MetricFamilySamples>asList(
         createGauge(
-            "eclipselink_uow_commits_seconds",
+            "eclipselink_unit_of_work_commits_duration_seconds",
             "Total duration of unit of work commits",
             new ValueProvider() {
               @Override
@@ -336,7 +366,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_remote_seconds",
+            "eclipselink_remote_duration_seconds",
             "Total duration of remote operations",
             new ValueProvider() {
               @Override
@@ -351,7 +381,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_assign_sequence_seconds",
+            "eclipselink_assign_sequence_duration_seconds",
             "Total duration of assign sequence operations",
             new ValueProvider() {
               @Override
@@ -366,7 +396,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_cache_coordination_seconds",
+            "eclipselink_cache_coordination_duration_seconds",
             "Total duration of cache coordination",
             new ValueProvider() {
               @Override
@@ -381,7 +411,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_cache_coordination_serialize_seconds",
+            "eclipselink_cache_coordination_serialize_duration_seconds",
             "Total duration of cache coordination serialization",
             new ValueProvider() {
               @Override
@@ -397,7 +427,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
 
         ),
         createGauge(
-            "eclipselink_caching_seconds",
+            "eclipselink_caching_duration_seconds",
             "Total duration of caching",
             new ValueProvider() {
               @Override
@@ -413,7 +443,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
 
         ),
         createGauge(
-            "eclipselink_connection_management_seconds",
+            "eclipselink_connection_management_duration_seconds",
             "Total duration of connection management operations",
             new ValueProvider() {
               @Override
@@ -428,7 +458,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_connection_ping_seconds",
+            "eclipselink_connection_ping_duration_seconds",
             "Total duration of connection pings",
             new ValueProvider() {
               @Override
@@ -444,7 +474,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
 
         ),
         createGauge(
-            "eclipselink_descriptor_events_seconds",
+            "eclipselink_descriptor_events_duration_seconds",
             "Total duration of descriptor events",
             new ValueProvider() {
               @Override
@@ -460,7 +490,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
 
         ),
         createGauge(
-            "eclipselink_distributed_merge_seconds",
+            "eclipselink_distributed_merge_duration_seconds",
             "Total duration of distributed merges",
             new ValueProvider() {
               @Override
@@ -476,7 +506,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
 
         ),
         createGauge(
-            "eclipselink_jts_after_completion_seconds",
+            "eclipselink_jts_after_completion_duration_seconds",
             "Total duration of JTS after completion",
             new ValueProvider() {
               @Override
@@ -491,7 +521,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_jts_before_completion_seconds",
+            "eclipselink_jts_before_completion_duration_seconds",
             "Total duration of JTS before completion",
             new ValueProvider() {
               @Override
@@ -507,7 +537,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
 
         ),
         createGauge(
-            "eclipselink_logging_seconds",
+            "eclipselink_logging_duration_seconds",
             "Total duration of logging",
             new ValueProvider() {
               @Override
@@ -522,7 +552,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_merge_seconds",
+            "eclipselink_merge_duration_seconds",
             "Total duration of merges",
             new ValueProvider() {
               @Override
@@ -537,7 +567,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_object_building_seconds",
+            "eclipselink_object_building_duration_seconds",
             "Total duration of object building",
             new ValueProvider() {
               @Override
@@ -552,7 +582,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_query_preparation_seconds",
+            "eclipselink_query_preparation_duration_seconds",
             "Total duration of query preparation",
             new ValueProvider() {
               @Override
@@ -567,7 +597,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_register_seconds",
+            "eclipselink_register_duration_seconds",
             "Total duration of registrations",
             new ValueProvider() {
               @Override
@@ -582,7 +612,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_remote_lazy_seconds",
+            "eclipselink_remote_lazy_duration_seconds",
             "Total duration of remote lazy operations",
             new ValueProvider() {
               @Override
@@ -597,7 +627,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_remote_metadata_seconds",
+            "eclipselink_remote_metadata_duration_seconds",
             "Total duration of remote metadata operations",
             new ValueProvider() {
               @Override
@@ -612,7 +642,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_row_fetch_seconds",
+            "eclipselink_row_fetch_duration_seconds",
             "Total duration of row fetch operations",
             new ValueProvider() {
               @Override
@@ -627,7 +657,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_session_event_seconds",
+            "eclipselink_session_event_duration_seconds",
             "Total duration of session events",
             new ValueProvider() {
               @Override
@@ -642,7 +672,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_sql_generation_seconds",
+            "eclipselink_sql_generation_duration_seconds",
             "Total duration of SQL generation operations",
             new ValueProvider() {
               @Override
@@ -657,7 +687,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_sql_prepare_seconds",
+            "eclipselink_sql_prepare_duration_seconds",
             "Total duration of SQL preparation operations",
             new ValueProvider() {
               @Override
@@ -672,7 +702,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_statement_execute_seconds",
+            "eclipselink_statement_execute_duration_seconds",
             "Total duration of statement executions",
             new ValueProvider() {
               @Override
@@ -687,7 +717,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
             }
         ),
         createGauge(
-            "eclipselink_transaction_seconds",
+            "eclipselink_transaction_duration_seconds",
             "Total duration of transactions",
             new ValueProvider() {
               @Override

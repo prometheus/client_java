@@ -82,52 +82,54 @@ public class EclipseLinkStatisticsCollectorTest {
   @Test
   public void shouldPublishCounters() {
     new EclipseLinkStatisticsCollector().add(session, "session1").register(registry);
-    assertThat(getSample("eclipselink_uow_commits_total", "session1"), is(1.0));
-    assertThat(getSample("eclipselink_uow_created_total", "session1"), is(2.0));
-    assertThat(getSample("eclipselink_uow_released_total", "session1"), is(3.0));
-    assertThat(getSample("eclipselink_uow_rollbacks_total", "session1"), is(4.0));
+    assertThat(getSample("eclipselink_unit_of_work_commits_total", "session1"), is(1.0));
+    assertThat(getSample("eclipselink_unit_of_work_created_total", "session1"), is(2.0));
+    assertThat(getSample("eclipselink_unit_of_work_released_total", "session1"), is(3.0));
+    assertThat(getSample("eclipselink_unit_of_work_rollbacks_total", "session1"), is(4.0));
     assertThat(getSample("eclipselink_cache_hits_total", "session1"), is(5.0));
     assertThat(getSample("eclipselink_cache_misses_total", "session1"), is(6.0));
+    assertThat(getSample("eclipselink_cache_requests_total", "session1"), is(11.0));
     assertThat(getSample("eclipselink_change_sets_processed_total", "session1"), is(7.0));
     assertThat(getSample("eclipselink_change_sets_not_processed_total", "session1"), is(8.0));
+    assertThat(getSample("eclipselink_change_sets_total", "session1"), is(15.0));
     assertThat(getSample("eclipselink_remote_change_sets_total", "session1"), is(9.0));
     assertThat(getSample("eclipselink_client_sessions_created_total", "session1"), is(10.0));
     assertThat(getSample("eclipselink_client_sessions_released_total", "session1"), is(11.0));
     assertThat(getSample("eclipselink_connects_total", "session1"), is(12.0));
     assertThat(getSample("eclipselink_disconnects_total", "session1"), is(13.0));
     assertThat(getSample("eclipselink_optimistic_lock_exceptions_total", "session1"), is(14.0));
-    assertThat(getSample("eclipselink_rcm_received_total", "session1"), is(15.0));
-    assertThat(getSample("eclipselink_rcm_sent_total", "session1"), is(16.0));
+    assertThat(getSample("eclipselink_remote_change_manager_received_total", "session1"), is(15.0));
+    assertThat(getSample("eclipselink_remote_change_manager_sent_total", "session1"), is(16.0));
   }
 
   @Test
   public void shouldPublishTimers() {
     new EclipseLinkStatisticsCollector().add(session, "session2").register(registry);
-    assertThat(getSample("eclipselink_uow_commits_seconds", "session2"), is(.1));
-    assertThat(getSample("eclipselink_remote_seconds", "session2"), is(.11));
-    assertThat(getSample("eclipselink_assign_sequence_seconds", "session2"), is(.12));
-    assertThat(getSample("eclipselink_cache_coordination_seconds", "session2"), is(.13));
-    assertThat(getSample("eclipselink_cache_coordination_serialize_seconds", "session2"), is(.14));
-    assertThat(getSample("eclipselink_caching_seconds", "session2"), is(.15));
-    assertThat(getSample("eclipselink_connection_management_seconds", "session2"), is(.16));
-    assertThat(getSample("eclipselink_connection_ping_seconds", "session2"), is(.17));
-    assertThat(getSample("eclipselink_descriptor_events_seconds", "session2"), is(.18));
-    assertThat(getSample("eclipselink_distributed_merge_seconds", "session2"), is(.19));
-    assertThat(getSample("eclipselink_jts_after_completion_seconds", "session2"), is(0.2));
-    assertThat(getSample("eclipselink_jts_before_completion_seconds", "session2"), is(.21));
-    assertThat(getSample("eclipselink_logging_seconds", "session2"), is(.22));
-    assertThat(getSample("eclipselink_merge_seconds", "session2"), is(.23));
-    assertThat(getSample("eclipselink_object_building_seconds", "session2"), is(.24));
-    assertThat(getSample("eclipselink_query_preparation_seconds", "session2"), is(.25));
-    assertThat(getSample("eclipselink_register_seconds", "session2"), is(.26));
-    assertThat(getSample("eclipselink_remote_lazy_seconds", "session2"), is(.27));
-    assertThat(getSample("eclipselink_remote_metadata_seconds", "session2"), is(.28));
-    assertThat(getSample("eclipselink_row_fetch_seconds", "session2"), is(.29));
-    assertThat(getSample("eclipselink_session_event_seconds", "session2"), is(.3));
-    assertThat(getSample("eclipselink_sql_generation_seconds", "session2"), is(.31));
-    assertThat(getSample("eclipselink_sql_prepare_seconds", "session2"), is(.32));
-    assertThat(getSample("eclipselink_statement_execute_seconds", "session2"), is(.33));
-    assertThat(getSample("eclipselink_transaction_seconds", "session2"), is(.34));
+    assertThat(getSample("eclipselink_unit_of_work_commits_duration_seconds", "session2"), is(.1));
+    assertThat(getSample("eclipselink_remote_duration_seconds", "session2"), is(.11));
+    assertThat(getSample("eclipselink_assign_sequence_duration_seconds", "session2"), is(.12));
+    assertThat(getSample("eclipselink_cache_coordination_duration_seconds", "session2"), is(.13));
+    assertThat(getSample("eclipselink_cache_coordination_serialize_duration_seconds", "session2"), is(.14));
+    assertThat(getSample("eclipselink_caching_duration_seconds", "session2"), is(.15));
+    assertThat(getSample("eclipselink_connection_management_duration_seconds", "session2"), is(.16));
+    assertThat(getSample("eclipselink_connection_ping_duration_seconds", "session2"), is(.17));
+    assertThat(getSample("eclipselink_descriptor_events_duration_seconds", "session2"), is(.18));
+    assertThat(getSample("eclipselink_distributed_merge_duration_seconds", "session2"), is(.19));
+    assertThat(getSample("eclipselink_jts_after_completion_duration_seconds", "session2"), is(0.2));
+    assertThat(getSample("eclipselink_jts_before_completion_duration_seconds", "session2"), is(.21));
+    assertThat(getSample("eclipselink_logging_duration_seconds", "session2"), is(.22));
+    assertThat(getSample("eclipselink_merge_duration_seconds", "session2"), is(.23));
+    assertThat(getSample("eclipselink_object_building_duration_seconds", "session2"), is(.24));
+    assertThat(getSample("eclipselink_query_preparation_duration_seconds", "session2"), is(.25));
+    assertThat(getSample("eclipselink_register_duration_seconds", "session2"), is(.26));
+    assertThat(getSample("eclipselink_remote_lazy_duration_seconds", "session2"), is(.27));
+    assertThat(getSample("eclipselink_remote_metadata_duration_seconds", "session2"), is(.28));
+    assertThat(getSample("eclipselink_row_fetch_duration_seconds", "session2"), is(.29));
+    assertThat(getSample("eclipselink_session_event_duration_seconds", "session2"), is(.3));
+    assertThat(getSample("eclipselink_sql_generation_duration_seconds", "session2"), is(.31));
+    assertThat(getSample("eclipselink_sql_prepare_duration_seconds", "session2"), is(.32));
+    assertThat(getSample("eclipselink_statement_execute_duration_seconds", "session2"), is(.33));
+    assertThat(getSample("eclipselink_transaction_duration_seconds", "session2"), is(.34));
 
   }
 
