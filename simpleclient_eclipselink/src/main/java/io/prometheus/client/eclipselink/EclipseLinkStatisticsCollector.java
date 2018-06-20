@@ -35,6 +35,7 @@ import org.eclipse.persistence.tools.profiler.PerformanceMonitor;
  * </pre>
  *
  * @author Viktoriia Bakalova (based on HibernateStatisticsCollector from Christian Kaltepoth);
+ * </p>
  */
 public class EclipseLinkStatisticsCollector extends Collector {
 
