@@ -4,16 +4,13 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.persistence.sessions.Session;
 import org.eclipse.persistence.sessions.SessionProfiler;
 import org.eclipse.persistence.tools.profiler.PerformanceMonitor;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Collect metrics from one or more EclipseLink Session instances.
@@ -54,7 +51,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
      * creating an empty collector and adding the session using {@link #add(Session, String)}.
      *
      * @param session The EclipseLink Session to collect metrics for
-     * @param name A unique name for this Session
+     * @param name    A unique name for this Session
      */
     public EclipseLinkStatisticsCollector(Session session, String name) {
         add(session, name);
@@ -64,7 +61,7 @@ public class EclipseLinkStatisticsCollector extends Collector {
      * Registers an EclipseLink Session with this collector.
      *
      * @param session The EclipseLink Session to collect metrics for
-     * @param name A unique name for this Session
+     * @param name    A unique name for this Session
      * @return Returns the collector
      */
     public EclipseLinkStatisticsCollector add(Session session, String name) {
@@ -96,9 +93,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.UowCommits, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -107,9 +104,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.UowCreated, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -118,9 +115,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.UowReleased, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -129,9 +126,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.UowRollbacks, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -140,9 +137,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.CacheHits, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -151,9 +148,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.CacheMisses, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -165,14 +162,14 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             double hitsValue;
                             double missesValue;
                             if (hits instanceof Long) {
-                                hitsValue = ((Long)hits).doubleValue();
+                                hitsValue = ((Long) hits).doubleValue();
                             } else {
-                                hitsValue = ((Integer)hits).doubleValue();
+                                hitsValue = ((Integer) hits).doubleValue();
                             }
                             if (misses instanceof Long) {
-                                missesValue = ((Long)misses).doubleValue();
+                                missesValue = ((Long) misses).doubleValue();
                             } else {
-                                missesValue = ((Integer)misses).doubleValue();
+                                missesValue = ((Integer) misses).doubleValue();
                             }
                             return hitsValue + missesValue;
                         }
@@ -183,9 +180,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.ChangeSetsProcessed, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -194,9 +191,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.ChangeSetsNotProcessed, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -208,14 +205,14 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             double processedValue;
                             double notProcessedValue;
                             if (processed instanceof Long) {
-                                processedValue = ((Long)processed).doubleValue();
+                                processedValue = ((Long) processed).doubleValue();
                             } else {
-                                processedValue = ((Integer)processed).doubleValue();
+                                processedValue = ((Integer) processed).doubleValue();
                             }
                             if (notProcessed instanceof Long) {
-                                notProcessedValue = ((Long)notProcessed).doubleValue();
+                                notProcessedValue = ((Long) notProcessed).doubleValue();
                             } else {
-                                notProcessedValue = ((Integer)notProcessed).doubleValue();
+                                notProcessedValue = ((Integer) notProcessed).doubleValue();
                             }
                             return processedValue + notProcessedValue;
                         }
@@ -226,9 +223,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.RemoteChangeSet, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -237,9 +234,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.ClientSessionCreated, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -248,9 +245,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.ClientSessionReleased, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -259,9 +256,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.Connects, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -270,9 +267,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.Disconnects, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -281,9 +278,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.OptimisticLockException, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -292,9 +289,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.RcmReceived, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 ),
                 createCounter(
@@ -303,9 +300,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                         metrics -> {
                             Object value = metrics.getOrDefault(SessionProfiler.RcmSent, 0);
                             if (value instanceof Long) {
-                                return ((Long)value).doubleValue();
+                                return ((Long) value).doubleValue();
                             }
-                            return ((Integer)value).doubleValue();
+                            return ((Integer) value).doubleValue();
                         }
                 )
         );
@@ -320,9 +317,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.UowCommit, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -332,9 +329,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.Remote, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -344,9 +341,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.AssignSequence, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -356,9 +353,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.CacheCoordination, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -368,21 +365,21 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.CacheCoordinationSerialize, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
                         "eclipselink_caching_duration_seconds",
                         "Total duration of caching",
                         metrics -> {
-                            Object value = metrics.getOrDefault(SessionProfiler.Caching,0);
+                            Object value = metrics.getOrDefault(SessionProfiler.Caching, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -392,9 +389,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.ConnectionManagement, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -404,9 +401,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.ConnectionPing, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -416,9 +413,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.DescriptorEvent, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -428,9 +425,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.DistributedMerge, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -440,9 +437,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.JtsAfterCompletion, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -452,9 +449,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.JtsBeforeCompletion, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -464,9 +461,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.Logging, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -476,9 +473,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.Merge, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -488,9 +485,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.ObjectBuilding, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -500,9 +497,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.QueryPreparation, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -512,9 +509,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.Register, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -524,9 +521,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.RemoteLazy, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -536,9 +533,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.RemoteMetadata, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -548,9 +545,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.RowFetch, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -560,9 +557,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.SessionEvent, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -572,9 +569,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.SqlGeneration, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -584,9 +581,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.SqlPrepare, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -596,9 +593,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.StatementExecute, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 ),
                 createGauge(
@@ -608,9 +605,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                             Object value = metrics.getOrDefault(SessionProfiler.Transaction, 0);
                             if (value instanceof Long) {
                                 // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                                return ((Long)value).doubleValue() / 1000000000;
+                                return ((Long) value).doubleValue() / 1000000000;
                             }
-                            return ((Integer)value).doubleValue() / 1000000000;
+                            return ((Integer) value).doubleValue() / 1000000000;
                         }
                 )
         );
