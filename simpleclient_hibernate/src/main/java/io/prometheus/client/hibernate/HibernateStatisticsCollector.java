@@ -85,6 +85,9 @@ public class HibernateStatisticsCollector extends Collector {
 
   /**
    * Enables collection of per-query metrics. Produces a lot of monitoring data, so use with caution.
+   * <p>
+   * Per-query metrics have a label "query" with the actual HQL query as value. Parameters within
+   * the query will not be replaced (example: {@code select u from User u where id=?}).
    *
    * @return Returns the collector
    */
@@ -526,7 +529,7 @@ public class HibernateStatisticsCollector extends Collector {
             }
         ),
         createGaugeForQuery("hibernate_per_query_execution_min_time",
-                "Minimum execution time of query (getExecutionMinTime)",
+                "Minimum execution time of query in milliseconds (getExecutionMinTime)",
             new ValueProviderPerQuery() {
               @Override
               public double getValue(Statistics statistics, String query) {
@@ -536,7 +539,7 @@ public class HibernateStatisticsCollector extends Collector {
             }
         ),
         createGaugeForQuery("hibernate_per_query_execution_max_time",
-                "Maximum execution time of query (getExecutionMaxTime)",
+                "Maximum execution time of query in milliseconds (getExecutionMaxTime)",
             new ValueProviderPerQuery() {
               @Override
               public double getValue(Statistics statistics, String query) {
@@ -546,7 +549,7 @@ public class HibernateStatisticsCollector extends Collector {
             }
         ),
         createGaugeForQuery("hibernate_per_query_execution_avg_time",
-                "Average execution time of query (getExecutionAvgTime)",
+                "Average execution time of query in milliseconds (getExecutionAvgTime)",
             new ValueProviderPerQuery() {
               @Override
               public double getValue(Statistics statistics, String query) {
