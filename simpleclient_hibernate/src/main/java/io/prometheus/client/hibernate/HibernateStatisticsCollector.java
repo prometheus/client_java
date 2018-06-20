@@ -505,7 +505,7 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         ),
-        createCounterForQuery("hibernate_per_query_executions_total",
+        createCounterForQuery("hibernate_per_query_execution_total",
                 "Global number of executions for query (getExecutionCount)",
             new ValueProviderPerQuery() {
               @Override
