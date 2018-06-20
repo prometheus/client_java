@@ -52,7 +52,7 @@ public class EclipseLinkStatisticsCollectorTest {
 
     metrics.put(SessionProfiler.UowCommit, 100000000L);
     metrics.put(SessionProfiler.Remote, 110000000);
-    metrics.put(SessionProfiler.AssignSequence, 120000000);
+    metrics.put(SessionProfiler.AssignSequence, 120000000L);
     metrics.put(SessionProfiler.CacheCoordination, 130000000);
     metrics.put(SessionProfiler.CacheCoordinationSerialize, 140000000);
     metrics.put(SessionProfiler.Caching, 150000000L);

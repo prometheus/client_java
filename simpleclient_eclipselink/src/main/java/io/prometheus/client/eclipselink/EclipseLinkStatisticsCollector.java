@@ -389,9 +389,9 @@ public class EclipseLinkStatisticsCollector extends Collector {
                 Object value = metrics.get(SessionProfiler.AssignSequence);
                 if (value != null) {
                   // divide by 1 000 000 000 because EclipseLink returns statistics in nanoseconds
-                  return ((Integer) value).doubleValue() / 1000000000;
+                  return ((Long) value).doubleValue() / 1000000000;
                 }
-                return 0;
+                return 0L;
               }
             }
         ),
