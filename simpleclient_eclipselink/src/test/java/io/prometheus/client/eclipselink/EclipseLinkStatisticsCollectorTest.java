@@ -98,8 +98,8 @@ public class EclipseLinkStatisticsCollectorTest {
     assertThat(getSample("eclipselink_connects_total", "session1"), is(12.0));
     assertThat(getSample("eclipselink_disconnects_total", "session1"), is(13.0));
     assertThat(getSample("eclipselink_optimistic_lock_exceptions_total", "session1"), is(14.0));
-    assertThat(getSample("eclipselink_remote_change_manager_received_total", "session1"), is(15.0));
-    assertThat(getSample("eclipselink_remote_change_manager_sent_total", "session1"), is(16.0));
+    assertThat(getSample("eclipselink_remote_command_manager_received_total", "session1"), is(15.0));
+    assertThat(getSample("eclipselink_remote_command_manager_sent_total", "session1"), is(16.0));
   }
 
   @Test
