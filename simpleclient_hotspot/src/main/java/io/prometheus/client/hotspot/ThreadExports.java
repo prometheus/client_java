@@ -84,27 +84,28 @@ public class ThreadExports extends Collector {
       Collections.singletonList("state"));
 
     Map<Thread.State, Integer> threadStateCounts = getThreadStateCountMap();
-    for (Thread.State state : Thread.State.values()) {
-      String stateName = state.toString().toLowerCase();
+    for (Map.Entry<Thread.State, Integer> entry : threadStateCounts.entrySet()) {
       threadStateFamily.addMetric(
-        Collections.singletonList(stateName),
-        (threadStateCounts.containsKey(stateName)) ? threadStateCounts.get(stateName) : 0.0d
+        Collections.singletonList(entry.getKey().toString()),
+        entry.getValue()
       );
     }
   }
 
   private Map<Thread.State, Integer> getThreadStateCountMap() {
     ThreadInfo[] allThreads = threadBean.getThreadInfo(threadBean.getAllThreadIds(), StackTraceDepth);
-    HashMap<Thread.State, Integer> threadCounts = new HashMap<Thread.State, Integer>();
 
+    // Initialize the map with all thread states
+    HashMap<Thread.State, Integer> threadCounts = new HashMap<Thread.State, Integer>();
+    for (Thread.State state : Thread.State.values()) {
+      threadCounts.put(state, 0);
+    }
+
+    // Collect the actual thread counts
     for (ThreadInfo curThread : allThreads) {
       if (curThread != null) {
         Thread.State threadState = curThread.getThreadState();
-        if (threadCounts.containsKey(threadState)) {
-          threadCounts.put(threadState, threadCounts.get(threadState) + 1);
-        } else {
-          threadCounts.put(threadState, 1);
-        }
+        threadCounts.put(threadState, threadCounts.get(threadState) + 1);
       }
     }
 
