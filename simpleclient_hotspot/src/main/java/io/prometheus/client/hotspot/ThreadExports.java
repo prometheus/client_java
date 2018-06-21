@@ -93,7 +93,8 @@ public class ThreadExports extends Collector {
   }
 
   private Map<Thread.State, Integer> getThreadStateCountMap() {
-    ThreadInfo[] allThreads = threadBean.getThreadInfo(threadBean.getAllThreadIds(), StackTraceDepth);
+    // Get thread information without computing any stack traces
+    ThreadInfo[] allThreads = threadBean.getThreadInfo(threadBean.getAllThreadIds(), 0);
 
     // Initialize the map with all thread states
     HashMap<Thread.State, Integer> threadCounts = new HashMap<Thread.State, Integer>();
@@ -111,8 +112,6 @@ public class ThreadExports extends Collector {
 
     return threadCounts;
   }
-
-  private static int StackTraceDepth = 0; // Don't compute any stack traces
 
   private static double nullSafeArrayLength(long[] array) {
     return null == array ? 0 : array.length;
