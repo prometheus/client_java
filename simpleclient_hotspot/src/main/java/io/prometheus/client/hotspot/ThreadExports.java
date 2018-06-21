@@ -5,9 +5,9 @@ import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
 
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Exports metrics about JVM thread areas.
@@ -73,7 +73,37 @@ public class ThreadExports extends Collector {
         "jvm_threads_deadlocked_monitor",
         "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors",
         nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())));
+
+    Map<Thread.State, Integer> threadStateCounts = getThreadStateCountMap();
+    for (Map.Entry<Thread.State, Integer> entry : threadStateCounts.entrySet()) {
+      String stateName = entry.getKey().toString().toLowerCase();
+      sampleFamilies.add(
+        new GaugeMetricFamily(
+          String.format("jvm_threads_%s", stateName),
+          String.format("Current count of threads in state '%s'", stateName),
+          entry.getValue().doubleValue()));
+    }
   }
+
+  private Map<Thread.State, Integer> getThreadStateCountMap() {
+    ThreadInfo[] allThreads = threadBean.getThreadInfo(threadBean.getAllThreadIds(), StackTraceDepth);
+    HashMap<Thread.State, Integer> threadCounts = new HashMap<Thread.State, Integer>();
+
+    for (ThreadInfo curThread : allThreads) {
+      if (curThread != null) {
+        Thread.State threadState = curThread.getThreadState();
+        if (threadCounts.containsKey(threadState)) {
+          threadCounts.put(threadState, threadCounts.get(threadState) + 1);
+        } else {
+          threadCounts.put(threadState, 1);
+        }
+      }
+    }
+
+    return threadCounts;
+  }
+
+  private static int StackTraceDepth = 0; // Don't compute any stack traces
 
   private static double nullSafeArrayLength(long[] array) {
     return null == array ? 0 : array.length;

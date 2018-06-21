@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 
 import static org.junit.Assert.assertEquals;
@@ -26,6 +27,8 @@ public class ThreadExportsTest {
     when(mockThreadsBean.getTotalStartedThreadCount()).thenReturn(503L);
     when(mockThreadsBean.findDeadlockedThreads()).thenReturn(new long[]{1L,2L,3L});
     when(mockThreadsBean.findMonitorDeadlockedThreads()).thenReturn(new long[]{2L,3L,4L});
+    when(mockThreadsBean.getAllThreadIds()).thenReturn(new long[]{3L,4L,5L});
+    when(mockThreadsBean.getThreadInfo(new long[]{3L,4L,5L}, 0)).thenReturn(new ThreadInfo[] {});
     collectorUnderTest = new ThreadExports(mockThreadsBean).register(registry);
   }
 
