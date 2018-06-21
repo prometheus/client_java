@@ -7,10 +7,7 @@ import io.prometheus.client.GaugeMetricFamily;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Exports metrics about JVM thread areas.
@@ -77,14 +74,18 @@ public class ThreadExports extends Collector {
         "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors",
         nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())));
 
+    GaugeMetricFamily threadStateFamily = new GaugeMetricFamily(
+      "jvm_threads_state",
+      "Current count of threads by state",
+      Collections.singletonList("state"));
+
     Map<Thread.State, Integer> threadStateCounts = getThreadStateCountMap();
-    for (Map.Entry<Thread.State, Integer> entry : threadStateCounts.entrySet()) {
-      String stateName = entry.getKey().toString().toLowerCase();
-      sampleFamilies.add(
-        new GaugeMetricFamily(
-          String.format("jvm_threads_%s", stateName),
-          String.format("Current count of threads in state '%s'", stateName),
-          entry.getValue().doubleValue()));
+    for (Thread.State state : Thread.State.values()) {
+      String stateName = state.toString().toLowerCase();
+      threadStateFamily.addMetric(
+        Collections.singletonList(stateName),
+        (threadStateCounts.containsKey(stateName)) ? threadStateCounts.get(stateName) : 0.0d
+      );
     }
   }
 
