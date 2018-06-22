@@ -62,6 +62,24 @@ version can be found on in the maven repository for
 </dependency>
 ```
 
+Or if you use Gradle:
+
+```gradle
+dependencies {
+    // The client
+    compile 'io.prometheus:simpleclient:0.4.0'
+    
+    // Hotspot JVM metrics
+    compile 'io.prometheus:simpleclient_hotspot:0.4.0'
+    
+    // Exposition HTTPServer
+    compile 'io.prometheus:simpleclient_httpserver:0.4.0'
+    
+    // Pushgateway exposition
+    compile 'io.prometheus:simpleclient_pushgateway:0.4.0'
+}
+```
+
 ### Javadocs
 There are canonical examples defined in the class definition Javadoc of the client packages.
 
