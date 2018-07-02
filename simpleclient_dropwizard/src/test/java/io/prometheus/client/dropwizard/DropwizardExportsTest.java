@@ -2,6 +2,7 @@ package io.prometheus.client.dropwizard;
 
 
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.junit.Before;
@@ -9,9 +10,12 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -207,6 +211,46 @@ public class DropwizardExportsTest {
         assertThat(elements.get("my_application_namedGauge1").help,
                 is("Generated from Dropwizard metric import (metric=my.application.namedGauge1, type=io.prometheus.client.dropwizard.DropwizardExportsTest$ExampleDoubleGauge)"));
 
+    }
+
+    @Test
+    public void testFilter() {
+        metricRegistry.counter("counter_foo").inc();
+        metricRegistry.counter("counter_bar").inc();
+        metricRegistry.register("gauge_foo", new Gauge<Integer>() {
+            @Override
+            public Integer getValue() {
+                return 1234;
+            }
+        });
+        metricRegistry.register("gauge_bar", new Gauge<Integer>() {
+            @Override
+            public Integer getValue() {
+                return 1234;
+            }
+        });
+        metricRegistry.histogram("hist_foo");
+        metricRegistry.histogram("hist_bar");
+        metricRegistry.timer("timer_foo");
+        metricRegistry.timer("timer_bar");
+        metricRegistry.meter("meter_foo");
+        metricRegistry.meter("meter_bar");
+
+        Set<String> expected = new HashSet<String>(Arrays.asList("counter_foo", "gauge_foo", "hist_foo", "timer_foo", "meter_foo_total"));
+
+        registry.register(new DropwizardExports(metricRegistry));
+
+        HashSet<String> metrics = new HashSet<String>();
+        HashSet<String> series = new HashSet<String>();
+        for (Collector.MetricFamilySamples metricFamilySamples : Collections.list(registry.filteredMetricFamilySamples(
+                expected))) {
+            metrics.add(metricFamilySamples.name);
+            for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
+                series.add(sample.name);
+            }
+        }
+
+        assertEquals(expected, metrics);
     }
 
     private static class ExampleDoubleGauge implements Gauge<Double> {
