@@ -130,6 +130,7 @@ public class DropwizardExportsTest {
             i += 1;
         }
         assertEquals(new Double(100), registry.getSampleValue("hist_count"));
+        assertEquals(new Double(4950), registry.getSampleValue("hist_sum"));
         for (Double d : Arrays.asList(0.75, 0.95, 0.98, 0.99)) {
             assertEquals(new Double((d - 0.01) * 100), registry.getSampleValue("hist",
                     new String[]{"quantile"}, new String[]{d.toString()}));

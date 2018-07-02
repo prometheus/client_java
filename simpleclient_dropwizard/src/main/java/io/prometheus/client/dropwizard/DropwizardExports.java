@@ -79,7 +79,8 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
                 new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.98"), snapshot.get98thPercentile() * factor),
                 new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.99"), snapshot.get99thPercentile() * factor),
                 new MetricFamilySamples.Sample(name, Arrays.asList("quantile"), Arrays.asList("0.999"), snapshot.get999thPercentile() * factor),
-                new MetricFamilySamples.Sample(name + "_count", new ArrayList<String>(), new ArrayList<String>(), count)
+                new MetricFamilySamples.Sample(name + "_count", new ArrayList<String>(), new ArrayList<String>(), count),
+                new MetricFamilySamples.Sample(name + "_sum", new ArrayList<String>(), new ArrayList<String>(), Arrays.stream(snapshot.getValues()).sum())
         );
         return Arrays.asList(
                 new MetricFamilySamples(name, Type.SUMMARY, helpMessage, samples)
