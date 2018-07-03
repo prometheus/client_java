@@ -557,6 +557,16 @@ public class HibernateStatisticsCollector extends Collector {
                         .getExecutionAvgTime();
               }
             }
+        ),
+        createGaugeForQuery("hibernate_per_query_execution_total_time",
+            "Accumulated execution time of query in milliseconds (getExecutionTotalTime)",
+            new ValueProviderPerQuery() {
+              @Override
+              public double getValue(Statistics statistics, String query) {
+                return statistics.getQueryStatistics(query)
+                    .getExecutionTotalTime();
+              }
+            }
         )
     ));
 
