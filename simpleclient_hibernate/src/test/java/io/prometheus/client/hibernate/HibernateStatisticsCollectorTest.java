@@ -182,6 +182,7 @@ public class HibernateStatisticsCollectorTest {
     assertThat(getSampleForQuery("hibernate_per_query_execution_min_time", "factory6", query), is(6.0));
     assertThat(getSampleForQuery("hibernate_per_query_execution_rows_total", "factory6", query), is(7.0));
     assertThat(getSampleForQuery("hibernate_per_query_execution_total", "factory6", query), is(8.0));
+    assertThat(getSampleForQuery("hibernate_per_query_execution_total_time", "factory6", query), is(9.0));
 
   }
 
