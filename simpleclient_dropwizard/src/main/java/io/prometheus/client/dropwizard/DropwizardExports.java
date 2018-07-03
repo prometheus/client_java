@@ -157,6 +157,6 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
 
     @Override
     public List<MetricFamilySamples> describe() {
-      return new ArrayList<MetricFamilySamples>();
+      return collect();
     }
 }

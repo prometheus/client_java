@@ -195,16 +195,17 @@ public class CollectorRegistry {
       if (includedNames.isEmpty()) {
         return next;
       } else {
-        Iterator<Collector.MetricFamilySamples.Sample> it = next.samples.iterator();
-        while (it.hasNext()) {
-            if (!includedNames.contains(it.next().name)) {
-                it.remove();
-            }
+        List<Collector.MetricFamilySamples.Sample> filteredSamples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+
+        for (Collector.MetricFamilySamples.Sample sample : next.samples) {
+          if(includedNames.contains(sample.name)) { filteredSamples.add(sample); }
         }
-        if (next.samples.size() == 0) {
+
+        if (filteredSamples.size() > 0) {
+          return new Collector.MetricFamilySamples(next.name, next.type, next.help, filteredSamples);
+        } else {
           return null;
         }
-        return next;
       }
     }
 
