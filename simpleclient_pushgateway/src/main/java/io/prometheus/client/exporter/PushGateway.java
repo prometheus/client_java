@@ -265,6 +265,10 @@ public class PushGateway {
     delete(job, Collections.singletonMap("instance", instance));
   }
 
+  protected void authenticate(HttpURLConnection connection) {
+    // should be overridden if authentication is required
+  }
+
   void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
     String url = gatewayBaseURL + URLEncoder.encode(job, "UTF-8");
 
@@ -274,6 +278,7 @@ public class PushGateway {
       }
     }
     HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    authenticate(connection);
     connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
     if (!method.equals("DELETE")) {
       connection.setDoOutput(true);
