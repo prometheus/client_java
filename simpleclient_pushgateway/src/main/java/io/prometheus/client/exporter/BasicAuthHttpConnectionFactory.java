@@ -3,6 +3,7 @@ package io.prometheus.client.exporter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import javax.xml.bind.DatatypeConverter;
 
 public class BasicAuthHttpConnectionFactory implements HttpConnectionFactory {
     private final HttpConnectionFactory originConnectionFactory;
@@ -26,8 +27,8 @@ public class BasicAuthHttpConnectionFactory implements HttpConnectionFactory {
 
     private String encode(String user, String password) {
         try {
-            byte[] message = (user + ":" + password).getBytes("UTF-8");
-            String encoded = javax.xml.bind.DatatypeConverter.printBase64Binary(message);
+            byte[] credentialsBytes = (user + ":" + password).getBytes("UTF-8");
+            String encoded = DatatypeConverter.printBase64Binary(credentialsBytes);
             return String.format("Basic %s", encoded);
         } catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException(e);
