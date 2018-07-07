@@ -574,7 +574,7 @@ void executeBatchJob() throws Exception {
  for more information.
 
 
-#### with Basic Auth
+#### with Basic Auth 
 ```java
 PushGateway pushgateway = new BasicAuthPushGateway("127.0.0.1:9091", "my_user", "my_password");
 ```
