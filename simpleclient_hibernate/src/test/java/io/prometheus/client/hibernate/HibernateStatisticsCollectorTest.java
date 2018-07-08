@@ -177,12 +177,11 @@ public class HibernateStatisticsCollectorTest {
     assertThat(getSampleForQuery("hibernate_per_query_cache_hit_total", "factory6", query), is(1.0));
     assertThat(getSampleForQuery("hibernate_per_query_cache_miss_total", "factory6", query), is(2.0));
     assertThat(getSampleForQuery("hibernate_per_query_cache_put_total", "factory6", query), is(3.0));
-    assertThat(getSampleForQuery("hibernate_per_query_execution_avg_time", "factory6", query), is(4.0));
-    assertThat(getSampleForQuery("hibernate_per_query_execution_max_time", "factory6", query), is(5.0));
-    assertThat(getSampleForQuery("hibernate_per_query_execution_min_time", "factory6", query), is(6.0));
+    assertThat(getSampleForQuery("hibernate_per_query_execution_max_time_ms", "factory6", query), is(5.0));
+    assertThat(getSampleForQuery("hibernate_per_query_execution_min_time_ms", "factory6", query), is(6.0));
     assertThat(getSampleForQuery("hibernate_per_query_execution_rows_total", "factory6", query), is(7.0));
     assertThat(getSampleForQuery("hibernate_per_query_execution_total", "factory6", query), is(8.0));
-    assertThat(getSampleForQuery("hibernate_per_query_execution_total_time", "factory6", query), is(9.0));
+    assertThat(getSampleForQuery("hibernate_per_query_execution_time_ms", "factory6", query), is(9.0));
 
   }
 
@@ -198,12 +197,11 @@ public class HibernateStatisticsCollectorTest {
     assertThat(getSampleForQuery("hibernate_per_query_cache_hit_total", "factory7", query), nullValue());
     assertThat(getSampleForQuery("hibernate_per_query_cache_miss_total", "factory7", query), nullValue());
     assertThat(getSampleForQuery("hibernate_per_query_cache_put_total", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_avg_time", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_max_time", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_min_time", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_max_time_ms", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_min_time_ms", "factory7", query), nullValue());
     assertThat(getSampleForQuery("hibernate_per_query_execution_rows_total", "factory7", query), nullValue());
     assertThat(getSampleForQuery("hibernate_per_query_execution_total", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_total_time", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_time_ms", "factory7", query), nullValue());
 
   }
 

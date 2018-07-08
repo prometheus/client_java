@@ -86,8 +86,8 @@ public class HibernateStatisticsCollector extends Collector {
   /**
    * Enables collection of per-query metrics. Produces a lot of monitoring data, so use with caution.
    * <p>
-   * Per-query metrics have a label "query" with the actual HQL query as value. Parameters within
-   * the query will not be replaced (example: {@code select u from User u where id=?}).
+   * Per-query metrics have a label "query" with the actual HQL query as value. The query will contain
+   * placeholders ("?") instead of the real parameter values (example: {@code select u from User u where id=?}).
    *
    * @return Returns the collector
    */
@@ -528,7 +528,7 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_min_time",
+        createGaugeForQuery("hibernate_per_query_execution_min_time_ms",
                 "Minimum execution time of query in milliseconds (getExecutionMinTime)",
             new ValueProviderPerQuery() {
               @Override
@@ -538,7 +538,7 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_max_time",
+        createGaugeForQuery("hibernate_per_query_execution_max_time_ms",
                 "Maximum execution time of query in milliseconds (getExecutionMaxTime)",
             new ValueProviderPerQuery() {
               @Override
@@ -548,17 +548,7 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_avg_time",
-                "Average execution time of query in milliseconds (getExecutionAvgTime)",
-            new ValueProviderPerQuery() {
-              @Override
-              public double getValue(Statistics statistics, String query) {
-                return statistics.getQueryStatistics(query)
-                        .getExecutionAvgTime();
-              }
-            }
-        ),
-        createGaugeForQuery("hibernate_per_query_execution_total_time",
+        createGaugeForQuery("hibernate_per_query_execution_time_ms",
             "Accumulated execution time of query in milliseconds (getExecutionTotalTime)",
             new ValueProviderPerQuery() {
               @Override
