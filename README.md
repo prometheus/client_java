@@ -568,10 +568,10 @@ void executeBatchJob() throws Exception {
 }
  ```
 
- A separate registry is used, as the default registry may contain other metrics
- such as those from the Process Collector. See the 
- [Pushgateway documentation](https://github.com/prometheus/pushgateway/blob/master/README.md)
- for more information.
+A separate registry is used, as the default registry may contain other metrics 
+such as those from the Process Collector. See the 
+[Pushgateway documentation](https://github.com/prometheus/pushgateway/blob/master/README.md)
+for more information.
 
 
 #### with Basic Auth
