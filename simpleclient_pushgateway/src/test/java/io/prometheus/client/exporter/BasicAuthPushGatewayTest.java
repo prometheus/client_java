@@ -22,17 +22,14 @@ public class BasicAuthPushGatewayTest {
 
   CollectorRegistry registry;
   Gauge gauge;
-  BasicAuthPushGateway pushGateway;
+  PushGateway pushGateway;
 
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
     gauge = Gauge.build().name("g").help("help").create();
-    pushGateway = new BasicAuthPushGateway(
-        "localhost:" + mockServerRule.getHttpPort(),
-        "testUser",
-        "testPwd"
-    );
+    pushGateway = new PushGateway("localhost:" + mockServerRule.getHttpPort());
+    pushGateway.setConnectionFactory(new BasicAuthHttpConnectionFactory("testUser", "testPwd"));
   }
 
   @Test
