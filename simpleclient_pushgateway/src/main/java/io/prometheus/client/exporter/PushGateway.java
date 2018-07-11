@@ -55,10 +55,13 @@ import io.prometheus.client.exporter.common.TextFormat;
  */
 public class PushGateway {
 
+  private static final int MILLISECONDS_PER_SECOND = 1000;
+
   // Visible for testing.
   protected final String gatewayBaseURL;
 
-  private static final int MILLISECONDS_PER_SECOND = 1000;
+  private HttpConnectionFactory connectionFactory = new DefaultHttpConnectionFactory();
+
   /**
    * Construct a Pushgateway, with the given address.
    * <p>
@@ -77,6 +80,10 @@ public class PushGateway {
     this.gatewayBaseURL = URI.create(serverBaseURL.toString() + "/metrics/job/")
       .normalize()
       .toString();
+  }
+
+  public void setConnectionFactory(HttpConnectionFactory connectionFactory) {
+    this.connectionFactory = connectionFactory;
   }
 
   /**
@@ -273,7 +280,7 @@ public class PushGateway {
         url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
       }
     }
-    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+    HttpURLConnection connection = connectionFactory.create(url);
     connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
     if (!method.equals("DELETE")) {
       connection.setDoOutput(true);
