@@ -528,33 +528,33 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_min_time_ms",
-                "Minimum execution time of query in milliseconds (getExecutionMinTime)",
+        createGaugeForQuery("hibernate_per_query_execution_min_time",
+                "Minimum execution time of query in seconds (based on getExecutionMinTime)",
             new ValueProviderPerQuery() {
               @Override
               public double getValue(Statistics statistics, String query) {
-                return statistics.getQueryStatistics(query)
-                        .getExecutionMinTime();
+                return toSeconds(statistics.getQueryStatistics(query)
+                        .getExecutionMinTime());
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_max_time_ms",
-                "Maximum execution time of query in milliseconds (getExecutionMaxTime)",
+        createGaugeForQuery("hibernate_per_query_execution_max_time",
+                "Maximum execution time of query in seconds (based on getExecutionMaxTime)",
             new ValueProviderPerQuery() {
               @Override
               public double getValue(Statistics statistics, String query) {
-                return statistics.getQueryStatistics(query)
-                        .getExecutionMaxTime();
+                return toSeconds(statistics.getQueryStatistics(query)
+                        .getExecutionMaxTime());
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_time_ms",
-            "Accumulated execution time of query in milliseconds (getExecutionTotalTime)",
+        createGaugeForQuery("hibernate_per_query_execution_time",
+            "Accumulated execution time of query in seconds (based on getExecutionTotalTime)",
             new ValueProviderPerQuery() {
               @Override
               public double getValue(Statistics statistics, String query) {
-                return statistics.getQueryStatistics(query)
-                    .getExecutionTotalTime();
+                return toSeconds(statistics.getQueryStatistics(query)
+                    .getExecutionTotalTime());
               }
             }
         )
@@ -619,6 +619,10 @@ public class HibernateStatisticsCollector extends Collector {
         samples.addMetric(Arrays.asList(unitName, query), provider.getValue(stats, query));
       }
     }
+  }
+
+  private double toSeconds(long milliseconds){
+    return milliseconds / 1000d;
   }
 
   private interface PerQuerySamples {
