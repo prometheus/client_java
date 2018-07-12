@@ -568,11 +568,34 @@ void executeBatchJob() throws Exception {
 }
  ```
 
-A separate registry is used, as the default registry may contain other metrics
+A separate registry is used, as the default registry may contain other metrics 
 such as those from the Process Collector. See the 
 [Pushgateway documentation](https://github.com/prometheus/pushgateway/blob/master/README.md)
 for more information.
 
+
+#### with Basic Auth
+```java
+PushGateway pushgateway = new PushGateway("127.0.0.1:9091");
+pushgateway.setConnectionFactory(new BasicAuthHttpConnectionFactory("my_user", "my_password"));
+```
+
+#### with Custom Connection Preparation Logic
+```java
+PushGateway pushgateway = new PushGateway("127.0.0.1:9091");
+pushgateway.setConnectionFactory(new MyHttpConnectionFactory());
+```
+where
+```java
+class MyHttpConnectionFactory implements HttpConnectionFactory {
+    @Override
+    public HttpURLConnection create(String url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        // add any connection preparation logic you need
+        return connection;
+    }    
+}
+```
 
 ## Bridges
 
