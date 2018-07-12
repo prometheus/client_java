@@ -528,7 +528,7 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_min_time",
+        createGaugeForQuery("hibernate_per_query_execution_min_seconds",
                 "Minimum execution time of query in seconds (based on getExecutionMinTime)",
             new ValueProviderPerQuery() {
               @Override
@@ -538,7 +538,7 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_max_time",
+        createGaugeForQuery("hibernate_per_query_execution_max_seconds",
                 "Maximum execution time of query in seconds (based on getExecutionMaxTime)",
             new ValueProviderPerQuery() {
               @Override
@@ -548,7 +548,7 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_time",
+        createGaugeForQuery("hibernate_per_query_execution_seconds",
             "Accumulated execution time of query in seconds (based on getExecutionTotalTime)",
             new ValueProviderPerQuery() {
               @Override
