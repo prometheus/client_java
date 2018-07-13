@@ -548,7 +548,7 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         ),
-        createGaugeForQuery("hibernate_per_query_execution_seconds",
+        createCounterForQuery("hibernate_per_query_execution_seconds_total",
             "Accumulated execution time of query in seconds (based on getExecutionTotalTime)",
             new ValueProviderPerQuery() {
               @Override
