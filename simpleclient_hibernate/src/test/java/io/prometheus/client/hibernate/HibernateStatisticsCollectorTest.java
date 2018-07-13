@@ -1,12 +1,15 @@
 package io.prometheus.client.hibernate;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.prometheus.client.CollectorRegistry;
 import org.hibernate.SessionFactory;
+import org.hibernate.stat.QueryStatistics;
 import org.hibernate.stat.Statistics;
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,6 +23,7 @@ public class HibernateStatisticsCollectorTest {
 
   private SessionFactory sessionFactory;
   private Statistics statistics;
+  private QueryStatistics queryStatistics;
   private CollectorRegistry registry;
 
   @Before
@@ -27,6 +31,7 @@ public class HibernateStatisticsCollectorTest {
     registry = new CollectorRegistry();
     sessionFactory = mock(SessionFactory.class);
     statistics = mock(Statistics.class);
+    queryStatistics = mock(QueryStatistics.class);
     when(sessionFactory.getStatistics()).thenReturn(statistics);
   }
 
@@ -160,6 +165,60 @@ public class HibernateStatisticsCollectorTest {
   }
 
   @Test
+  public void shouldPublishPerQueryMetricsWhenEnabled() {
+    String query = "query";
+    mockQueryStatistics(query);
+
+    new HibernateStatisticsCollector()
+            .add(sessionFactory, "factory6")
+            .enablePerQueryMetrics()
+            .register(registry);
+
+    assertThat(getSampleForQuery("hibernate_per_query_cache_hit_total", "factory6", query), is(1.0));
+    assertThat(getSampleForQuery("hibernate_per_query_cache_miss_total", "factory6", query), is(2.0));
+    assertThat(getSampleForQuery("hibernate_per_query_cache_put_total", "factory6", query), is(3.0));
+    assertThat(getSampleForQuery("hibernate_per_query_execution_max_seconds", "factory6", query), is(0.555d));
+    assertThat(getSampleForQuery("hibernate_per_query_execution_min_seconds", "factory6", query), is(0.123d));
+    assertThat(getSampleForQuery("hibernate_per_query_execution_rows_total", "factory6", query), is(7.0));
+    assertThat(getSampleForQuery("hibernate_per_query_execution_total", "factory6", query), is(8.0));
+    assertThat(getSampleForQuery("hibernate_per_query_execution_seconds_total", "factory6", query), is(102.540d));
+
+  }
+
+  @Test
+  public void shouldNotPublishPerQueryMetricsByDefault() {
+    String query = "query";
+    mockQueryStatistics(query);
+
+    new HibernateStatisticsCollector()
+            .add(sessionFactory, "factory7")
+            .register(registry);
+
+    assertThat(getSampleForQuery("hibernate_per_query_cache_hit_total", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_cache_miss_total", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_cache_put_total", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_max_seconds", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_min_seconds", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_rows_total", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_total", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_seconds", "factory7", query), nullValue());
+
+  }
+
+  private void mockQueryStatistics(String query) {
+    when(statistics.getQueries()).thenReturn(new String[]{query});
+    when(statistics.getQueryStatistics(eq(query))).thenReturn(queryStatistics);
+    when(queryStatistics.getCacheHitCount()).thenReturn(1L);
+    when(queryStatistics.getCacheMissCount()).thenReturn(2L);
+    when(queryStatistics.getCachePutCount()).thenReturn(3L);
+    when(queryStatistics.getExecutionMaxTime()).thenReturn(555L);
+    when(queryStatistics.getExecutionMinTime()).thenReturn(123L);
+    when(queryStatistics.getExecutionRowCount()).thenReturn(7L);
+    when(queryStatistics.getExecutionCount()).thenReturn(8L);
+    when(queryStatistics.getExecutionTotalTime()).thenReturn(102540L);
+  }
+
+  @Test
   public void shouldFailIfNoSessionFactoriesAreRegistered() {
 
     expectedException.expect(IllegalStateException.class);
@@ -172,6 +231,12 @@ public class HibernateStatisticsCollectorTest {
   private Double getSample(String metric, String factory) {
     return registry.getSampleValue(
         metric, new String[]{"unit"}, new String[]{factory}
+    );
+  }
+
+  private Double getSampleForQuery(String metric, String factory, String query) {
+    return registry.getSampleValue(
+            metric, new String[]{"unit", "query"}, new String[]{factory, query}
     );
   }
 

@@ -3,6 +3,7 @@ package io.prometheus.client.hibernate;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.GaugeMetricFamily;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +33,10 @@ import org.hibernate.stat.Statistics;
  * SessionFactory sessionFactory =
  *     entityManagerFactory.unwrap(SessionFactory.class);
  * </pre>
+ * <p>
+ * When {@code enablePerQueryMetrics()} has been called, certain metrics like execution
+ * time are collected per query. This may create a lot of monitoring data, so it should
+ * be used with caution.
  *
  * @author Christian Kaltepoth
  */
@@ -39,7 +44,11 @@ public class HibernateStatisticsCollector extends Collector {
 
   private static final List<String> LABEL_NAMES = Collections.singletonList("unit");
 
+  private static final List<String> LABEL_NAMES_PER_QUERY = Arrays.asList("unit", "query");
+
   private final Map<String, SessionFactory> sessionFactories = new ConcurrentHashMap<String, SessionFactory>();
+
+  private boolean perQueryMetricsEnabled;
 
   /**
    * Creates an empty collector. If you use this constructor, you have to add one or more
@@ -74,6 +83,19 @@ public class HibernateStatisticsCollector extends Collector {
     return this;
   }
 
+  /**
+   * Enables collection of per-query metrics. Produces a lot of monitoring data, so use with caution.
+   * <p>
+   * Per-query metrics have a label "query" with the actual HQL query as value. The query will contain
+   * placeholders ("?") instead of the real parameter values (example: {@code select u from User u where id=?}).
+   *
+   * @return Returns the collector
+   */
+  public HibernateStatisticsCollector enablePerQueryMetrics() {
+    this.perQueryMetricsEnabled = true;
+    return this;
+  }
+
   @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples> metrics = new ArrayList<MetricFamilySamples>();
@@ -82,6 +104,9 @@ public class HibernateStatisticsCollector extends Collector {
     metrics.addAll(getCacheMetrics());
     metrics.addAll(getEntityMetrics());
     metrics.addAll(getQueryExecutionMetrics());
+    if (perQueryMetricsEnabled) {
+      metrics.addAll(getPerQueryMetrics());
+    }
     return metrics;
   }
 
@@ -448,14 +473,104 @@ public class HibernateStatisticsCollector extends Collector {
     );
   }
 
+  private List<MetricFamilySamples> getPerQueryMetrics() {
+    List<MetricFamilySamples> metrics = new ArrayList<MetricFamilySamples>();
+
+    metrics.addAll(Arrays.asList(
+
+        createCounterForQuery("hibernate_per_query_cache_hit_total",
+                "Global number of cache hits for query (getCacheHitCount)",
+            new ValueProviderPerQuery() {
+              @Override
+              public double getValue(Statistics statistics, String query) {
+                return statistics.getQueryStatistics(query)
+                        .getCacheHitCount();
+              }
+            }
+        ),
+        createCounterForQuery("hibernate_per_query_cache_miss_total",
+                "Global number of cache misses for query (getCacheMissCount)",
+            new ValueProviderPerQuery() {
+              @Override
+              public double getValue(Statistics statistics, String query) {
+                return statistics.getQueryStatistics(query)
+                        .getCacheMissCount();
+              }
+            }
+        ),
+        createCounterForQuery("hibernate_per_query_cache_put_total",
+                "Global number of cache puts for query (getCachePutCount)",
+            new ValueProviderPerQuery() {
+              @Override
+              public double getValue(Statistics statistics, String query) {
+                return statistics.getQueryStatistics(query)
+                        .getCachePutCount();
+              }
+            }
+        ),
+        createCounterForQuery("hibernate_per_query_execution_total",
+                "Global number of executions for query (getExecutionCount)",
+            new ValueProviderPerQuery() {
+              @Override
+              public double getValue(Statistics statistics, String query) {
+                return statistics.getQueryStatistics(query)
+                        .getExecutionCount();
+              }
+            }
+        ),
+        createCounterForQuery("hibernate_per_query_execution_rows_total",
+                "Global number of rows for all executions of query (getExecutionRowCount)",
+            new ValueProviderPerQuery() {
+              @Override
+              public double getValue(Statistics statistics, String query) {
+                return statistics.getQueryStatistics(query)
+                        .getExecutionRowCount();
+              }
+            }
+        ),
+        createGaugeForQuery("hibernate_per_query_execution_min_seconds",
+                "Minimum execution time of query in seconds (based on getExecutionMinTime)",
+            new ValueProviderPerQuery() {
+              @Override
+              public double getValue(Statistics statistics, String query) {
+                return toSeconds(statistics.getQueryStatistics(query)
+                        .getExecutionMinTime());
+              }
+            }
+        ),
+        createGaugeForQuery("hibernate_per_query_execution_max_seconds",
+                "Maximum execution time of query in seconds (based on getExecutionMaxTime)",
+            new ValueProviderPerQuery() {
+              @Override
+              public double getValue(Statistics statistics, String query) {
+                return toSeconds(statistics.getQueryStatistics(query)
+                        .getExecutionMaxTime());
+              }
+            }
+        ),
+        createCounterForQuery("hibernate_per_query_execution_seconds_total",
+            "Accumulated execution time of query in seconds (based on getExecutionTotalTime)",
+            new ValueProviderPerQuery() {
+              @Override
+              public double getValue(Statistics statistics, String query) {
+                return toSeconds(statistics.getQueryStatistics(query)
+                    .getExecutionTotalTime());
+              }
+            }
+        )
+    ));
+
+    return metrics;
+  }
+
   private CounterMetricFamily createCounter(String metric, String help, ValueProvider provider) {
 
     CounterMetricFamily metricFamily = new CounterMetricFamily(metric, help, LABEL_NAMES);
 
     for (Entry<String, SessionFactory> entry : sessionFactories.entrySet()) {
       metricFamily.addMetric(
-          Collections.singletonList(entry.getKey()),
-          provider.getValue(entry.getValue().getStatistics())
+              Collections.singletonList(entry.getKey()),
+              provider.getValue(entry.getValue().getStatistics())
       );
     }
 
@@ -463,10 +578,71 @@ public class HibernateStatisticsCollector extends Collector {
 
   }
 
+  private CounterMetricFamily createCounterForQuery(String metric, String help, ValueProviderPerQuery provider) {
+
+    final CounterMetricFamily counters = new CounterMetricFamily(metric, help, LABEL_NAMES_PER_QUERY);
+
+    addMetricsForQuery(new PerQuerySamples() {
+      @Override
+      public void addMetric(List<String> labelValues, double value) {
+        counters.addMetric(labelValues, value);
+      }
+    }, provider);
+
+    return counters;
+
+  }
+
+  private GaugeMetricFamily createGaugeForQuery(String metric, String help, ValueProviderPerQuery provider) {
+
+    final GaugeMetricFamily gauges = new GaugeMetricFamily(metric, help, LABEL_NAMES_PER_QUERY);
+
+    addMetricsForQuery(new PerQuerySamples() {
+      @Override
+      public void addMetric(List<String> labelValues, double value) {
+        gauges.addMetric(labelValues, value);
+      }
+    }, provider);
+
+    return gauges;
+
+  }
+
+  private void addMetricsForQuery(PerQuerySamples samples, ValueProviderPerQuery provider) {
+
+    for (Entry<String, SessionFactory> entry : sessionFactories.entrySet()) {
+      SessionFactory sessionFactory = entry.getValue();
+      Statistics stats = sessionFactory.getStatistics();
+      String unitName = entry.getKey();
+
+      for (String query : stats.getQueries()) {
+        samples.addMetric(Arrays.asList(unitName, query), provider.getValue(stats, query));
+      }
+    }
+  }
+
+  private double toSeconds(long milliseconds){
+    return milliseconds / 1000d;
+  }
+
+  private interface PerQuerySamples {
+
+    void addMetric(List<String> labelValues, double value);
+
+  }
+
+
   private interface ValueProvider {
 
     double getValue(Statistics statistics);
 
   }
+
+  private interface ValueProviderPerQuery {
+
+    double getValue(Statistics statistics, String query);
+
+  }
+
 
 }
