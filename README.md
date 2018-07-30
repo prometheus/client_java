@@ -156,7 +156,7 @@ class YourClass {
     .name("requests_latency_seconds").help("Request latency in seconds.").register();
   
   void processRequest(Request req) {
-    requestLatency.timer(new Runnable() {
+    requestLatency.time(new Runnable() {
       public abstract void run() {
         // Your code here.    
       }
@@ -164,7 +164,7 @@ class YourClass {
       
       
     // Or the Java 8 lambda equivalent   
-    requestLatency.timer(() -> {
+    requestLatency.time(() -> {
       // Your code here.
     });
   }
@@ -203,7 +203,7 @@ class YourClass {
      .name("requests_latency_seconds").help("Request latency in seconds.").register();
   
   void processRequest(Request req) {
-    requestLatency.timer(new Runnable() {
+    requestLatency.time(new Runnable() {
       public abstract void run() {
         // Your code here.    
       }
