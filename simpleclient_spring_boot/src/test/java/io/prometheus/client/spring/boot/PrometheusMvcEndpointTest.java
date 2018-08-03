@@ -44,6 +44,15 @@ public class PrometheusMvcEndpointTest {
     }
 
     @Test
+    public void testInvokeWithOtherAcceptHeader() {
+        ResponseEntity metricsResponse = template.exchange(getBaseUrl() + INVOKE_PATH, HttpMethod.GET,
+                getEntityWithAlternateAcceptHeader(), String.class);
+
+        assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
+        assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004), metricsResponse.getHeaders().getContentType().toString().toLowerCase());
+    }
+
+    @Test
     public void testNameParamIsNull() throws Exception {
         ResponseEntity metricsResponse = template.exchange(getBaseUrl() + FILTERED_PATH, HttpMethod.GET, getEntity(), String.class);
 
@@ -76,6 +85,12 @@ public class PrometheusMvcEndpointTest {
     public HttpEntity getEntity() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", "text/plain; version=0.0.4; charset=utf-8");
+        return new HttpEntity(headers);
+    }
+
+    public HttpEntity getEntityWithAlternateAcceptHeader() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "text/html");
         return new HttpEntity(headers);
     }
 

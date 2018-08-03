@@ -1,6 +1,9 @@
 package io.prometheus.client.spring.boot;
 
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+
 import io.prometheus.client.exporter.common.TextFormat;
+
 import org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.ResponseEntity;
@@ -9,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Collections;
 import java.util.Set;
-
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 @ConfigurationProperties("endpoints.prometheus")
 public class PrometheusMvcEndpoint extends EndpointMvcAdapter {
@@ -25,11 +27,12 @@ public class PrometheusMvcEndpoint extends EndpointMvcAdapter {
 
   @RequestMapping(
           method = {RequestMethod.GET},
-          produces = {TextFormat.CONTENT_TYPE_004}
+          produces = { "*/*" }
   )
+  @ResponseBody
   @Override
   public Object invoke() {
-    return super.invoke();
+    return value(Collections.<String>emptySet());
   }
 
   @RequestMapping(
