@@ -25,6 +25,16 @@ public class PrometheusMvcEndpoint extends EndpointMvcAdapter {
 
   @RequestMapping(
           method = {RequestMethod.GET},
+          produces = {TextFormat.CONTENT_TYPE_004}
+  )
+  @Override
+  public Object invoke() {
+    return super.invoke();
+  }
+
+  @RequestMapping(
+          value = "/filtered",
+          method = {RequestMethod.GET},
           produces = { "*/*" }
   )
   @ResponseBody

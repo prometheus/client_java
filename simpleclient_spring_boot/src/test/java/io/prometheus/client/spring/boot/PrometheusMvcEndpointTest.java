@@ -1,6 +1,10 @@
 package io.prometheus.client.spring.boot;
 
+import static org.junit.Assert.assertEquals;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
 import io.prometheus.client.exporter.common.TextFormat;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,13 +20,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = DummyBootApplication.class)
 @TestPropertySource(properties = "management.security.enabled=false")
 public class PrometheusMvcEndpointTest {
+
+    private static final String INVOKE_PATH = "/prometheus";
+    private static final String FILTERED_PATH = INVOKE_PATH + "/filtered";
 
     @Value("${local.server.port}")
     int localServerPort;
@@ -31,8 +35,17 @@ public class PrometheusMvcEndpointTest {
     TestRestTemplate template;
 
     @Test
+    public void testInvoke() {
+        ResponseEntity metricsResponse = template.exchange(getBaseUrl() + INVOKE_PATH, HttpMethod.GET,
+                getEntity(), String.class);
+
+        assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
+        assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004), metricsResponse.getHeaders().getContentType().toString().toLowerCase());
+    }
+
+    @Test
     public void testNameParamIsNull() throws Exception {
-        ResponseEntity metricsResponse = template.exchange(getBaseUrl() + "/prometheus", HttpMethod.GET, getEntity(), String.class);
+        ResponseEntity metricsResponse = template.exchange(getBaseUrl() + FILTERED_PATH, HttpMethod.GET, getEntity(), String.class);
 
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
         assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004), metricsResponse.getHeaders().getContentType().toString().toLowerCase());
@@ -45,14 +58,15 @@ public class PrometheusMvcEndpointTest {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", "text/plain");
 
-        ResponseEntity<String> metricsResponse = template.exchange(getBaseUrl() + "/prometheus", HttpMethod.GET, new HttpEntity(headers), String.class);
+        ResponseEntity<String> metricsResponse = template.exchange(getBaseUrl() + FILTERED_PATH, HttpMethod.GET, new HttpEntity(headers), String.class);
 
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
     }
 
     @Test
     public void testNameParamIsNotNull() {
-        ResponseEntity metricsResponse = template.exchange(getBaseUrl() + "/prometheus?name[]=foo_bar", HttpMethod.GET, getEntity(), String.class);
+        ResponseEntity metricsResponse = template.exchange(getBaseUrl() + FILTERED_PATH + "?name[]=foo_bar",
+                HttpMethod.GET, getEntity(), String.class);
 
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
         assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_004), metricsResponse.getHeaders().getContentType().toString().toLowerCase());
