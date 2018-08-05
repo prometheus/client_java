@@ -1,6 +1,7 @@
 package io.prometheus.client.filter;
 
 import io.prometheus.client.Histogram;
+import io.prometheus.client.SimpleTimer;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -9,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -65,7 +67,8 @@ public class MetricsFilter implements Filter {
     private String help = "The time taken fulfilling servlet requests";
     private double[] buckets = null;
 
-    public MetricsFilter() {}
+    public MetricsFilter() {
+    }
 
     public MetricsFilter(
             String metricName,
@@ -91,7 +94,7 @@ public class MetricsFilter implements Filter {
             return str;
         }
         int count = 0;
-        int i =  -1;
+        int i = -1;
         do {
             i = str.indexOf("/", i + 1);
             if (i < 0) {
@@ -107,7 +110,7 @@ public class MetricsFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Histogram.Builder builder = Histogram.build()
-                .labelNames("path", "method");
+                .labelNames("path", "method", "status_code");
 
         if (filterConfig == null && isEmpty(metricName)) {
             throw new ServletException("No configuration object provided, and no metricName passed via constructor");
@@ -153,23 +156,26 @@ public class MetricsFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if (!(servletRequest instanceof HttpServletRequest)) {
+        if (!(servletRequest instanceof HttpServletRequest) || !(servletResponse instanceof HttpServletResponse)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+
         String path = request.getRequestURI();
 
-        Histogram.Timer timer = histogram
-            .labels(getComponents(path), request.getMethod())
-            .startTimer();
+        SimpleTimer timer = new SimpleTimer();
 
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
-            timer.observeDuration();
+            double time =timer.elapsedSeconds();
+            histogram
+                    .labels(getComponents(path), request.getMethod(), Integer.toString(response.getStatus()))
+                    .observe(time);
         }
     }
 
