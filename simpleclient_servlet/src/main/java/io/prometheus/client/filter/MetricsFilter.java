@@ -110,7 +110,7 @@ public class MetricsFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Histogram.Builder builder = Histogram.build()
-                .labelNames("path", "method", "status_code");
+                .labelNames("path", "method", "status");
 
         if (filterConfig == null && isEmpty(metricName)) {
             throw new ServletException("No configuration object provided, and no metricName passed via constructor");

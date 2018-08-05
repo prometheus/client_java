@@ -61,7 +61,7 @@ public class MetricsFilterTest {
 
         verify(c).doFilter(req, res);
 
-        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(metricName + "_count", new String[]{"path", "method", "status_code"}, new String[]{"/foo/bar/baz/bang", HttpMethods.GET, Integer.toString(HttpServletResponse.SC_OK)});
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(metricName + "_count", new String[]{"path", "method", "status"}, new String[]{"/foo/bar/baz/bang", HttpMethods.GET, Integer.toString(HttpServletResponse.SC_OK)});
         assertNotNull(sampleValue);
         assertEquals(1, sampleValue, 0.0001);
     }
@@ -90,7 +90,7 @@ public class MetricsFilterTest {
         verify(c).doFilter(req, res);
 
 
-        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(name + "_count", new String[]{"path", "method", "status_code"}, new String[]{path, HttpMethods.GET, Integer.toString(HttpServletResponse.SC_OK)});
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(name + "_count", new String[]{"path", "method", "status"}, new String[]{path, HttpMethods.GET, Integer.toString(HttpServletResponse.SC_OK)});
         assertNotNull(sampleValue);
         assertEquals(1, sampleValue, 0.0001);
     }
@@ -124,7 +124,7 @@ public class MetricsFilterTest {
 
         constructed.doFilter(req, res, c);
 
-        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foobar_baz_filter_duration_seconds_sum", new String[]{"path", "method", "status_code"}, new String[]{path, HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK)});
+        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foobar_baz_filter_duration_seconds_sum", new String[]{"path", "method", "status"}, new String[]{path, HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK)});
         assertNotNull(sum);
         assertEquals(0.1, sum, 0.01);
     }
@@ -157,13 +157,13 @@ public class MetricsFilterTest {
 
         f.doFilter(req, res, c);
 
-        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method", "status_code"}, new String[]{"/foo", HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK)});
+        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method", "status"}, new String[]{"/foo", HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK)});
         assertEquals(0.1, sum, 0.01);
 
-        final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "status_code", "le"}, new String[]{"/foo", HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK), "0.05"});
+        final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "status", "le"}, new String[]{"/foo", HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK), "0.05"});
         assertNotNull(le05);
         assertEquals(0, le05, 0.01);
-        final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "status_code", "le"}, new String[]{"/foo", HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK), "0.15"});
+        final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "status", "le"}, new String[]{"/foo", HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK), "0.15"});
         assertNotNull(le15);
         assertEquals(1, le15, 0.01);
 
@@ -227,7 +227,7 @@ public class MetricsFilterTest {
 
             final Double sampleValue = CollectorRegistry.defaultRegistry
                     .getSampleValue(metricName + "_count",
-                            new String[]{"path", "method", "status_code"},
+                            new String[]{"path", "method", "status"},
                             new String[]{uri, HttpMethods.GET,
                                     Integer.toString(sampleStatusCodes.get(uri))});
             assertNotNull(sampleValue);
