@@ -26,10 +26,11 @@ import java.io.IOException;
  * The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list
  * of valid {@code double} values.
  *
+ * <pre>
  * {@code
  * <filter>
  *   <filter-name>prometheusFilter</filter-name>
- *   <filter-class>net.cccnext.ssp.portal.spring.filter.PrometheusMetricsFilter</filter-class>
+ *   <filter-class>io.prometheus.client.filter.MetricsFilter</filter-class>
  *   <init-param>
  *      <param-name>metric-name</param-name>
  *      <param-value>webapp_metrics_filter</param-value>
@@ -48,6 +49,7 @@ import java.io.IOException;
  *   </init-param>
  * </filter>
  * }
+ * </pre>
  *
  * @author Andrew Stuart &lt;andrew.stuart2@gmail.com&gt;
  */

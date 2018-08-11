@@ -27,6 +27,7 @@ public class MetricsServlet extends HttpServlet {
 
   /**
    * Construct a MetricsServlet for the given registry.
+   * @param registry collector registry
    */
   public MetricsServlet(CollectorRegistry registry) {
     this.registry = registry;
