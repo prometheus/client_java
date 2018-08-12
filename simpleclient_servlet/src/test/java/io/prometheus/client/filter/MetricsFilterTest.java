@@ -53,15 +53,13 @@ public class MetricsFilterTest {
         when(req.getMethod()).thenReturn(HttpMethods.GET);
 
         HttpServletResponse res = mock(HttpServletResponse.class);
-        when(res.getStatus()).thenReturn(HttpServletResponse.SC_OK);
-
         FilterChain c = mock(FilterChain.class);
 
         f.doFilter(req, res, c);
 
         verify(c).doFilter(req, res);
 
-        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(metricName + "_count", new String[]{"path", "method", "status"}, new String[]{"/foo/bar/baz/bang", HttpMethods.GET, Integer.toString(HttpServletResponse.SC_OK)});
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(metricName + "_count", new String[]{"path", "method"}, new String[]{"/foo/bar/baz/bang", HttpMethods.GET});
         assertNotNull(sampleValue);
         assertEquals(1, sampleValue, 0.0001);
     }
@@ -75,8 +73,6 @@ public class MetricsFilterTest {
         when(req.getMethod()).thenReturn(HttpMethods.GET);
 
         HttpServletResponse res = mock(HttpServletResponse.class);
-        when(res.getStatus()).thenReturn(HttpServletResponse.SC_OK);
-
         FilterChain c = mock(FilterChain.class);
 
         String name = "foo";
@@ -90,7 +86,7 @@ public class MetricsFilterTest {
         verify(c).doFilter(req, res);
 
 
-        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(name + "_count", new String[]{"path", "method", "status"}, new String[]{path, HttpMethods.GET, Integer.toString(HttpServletResponse.SC_OK)});
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(name + "_count", new String[]{"path", "method"}, new String[]{path, HttpMethods.GET});
         assertNotNull(sampleValue);
         assertEquals(1, sampleValue, 0.0001);
     }
@@ -120,11 +116,9 @@ public class MetricsFilterTest {
         constructed.init(mock(FilterConfig.class));
 
         HttpServletResponse res = mock(HttpServletResponse.class);
-        when(res.getStatus()).thenReturn(HttpServletResponse.SC_OK);
-
         constructed.doFilter(req, res, c);
 
-        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foobar_baz_filter_duration_seconds_sum", new String[]{"path", "method", "status"}, new String[]{path, HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK)});
+        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foobar_baz_filter_duration_seconds_sum", new String[]{"path", "method"}, new String[]{path, HttpMethods.POST});
         assertNotNull(sum);
         assertEquals(0.1, sum, 0.01);
     }
@@ -151,26 +145,25 @@ public class MetricsFilterTest {
         when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn("foo");
 
         HttpServletResponse res = mock(HttpServletResponse.class);
-        when(res.getStatus()).thenReturn(HttpServletResponse.SC_OK);
 
         f.init(cfg);
 
         f.doFilter(req, res, c);
 
-        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method", "status"}, new String[]{"/foo", HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK)});
+        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method"}, new String[]{"/foo", HttpMethods.POST});
         assertEquals(0.1, sum, 0.01);
 
-        final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "status", "le"}, new String[]{"/foo", HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK), "0.05"});
+        final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo", HttpMethods.POST, "0.05"});
         assertNotNull(le05);
         assertEquals(0, le05, 0.01);
-        final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "status", "le"}, new String[]{"/foo", HttpMethods.POST, Integer.toString(HttpServletResponse.SC_OK), "0.15"});
+        final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo", HttpMethods.POST, "0.15"});
         assertNotNull(le15);
         assertEquals(1, le15, 0.01);
 
 
         final Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.metricFamilySamples();
         Collector.MetricFamilySamples sample = null;
-        while (samples.hasMoreElements()) {
+        while(samples.hasMoreElements()) {
             sample = samples.nextElement();
             if (sample.name.equals("foo")) {
                 break;
@@ -186,9 +179,8 @@ public class MetricsFilterTest {
             }
         }
         // +1 because of the final le=+infinity bucket
-        assertEquals(buckets.split(",").length + 1, count);
+        assertEquals(buckets.split(",").length+1, count);
     }
-
 
     @Test
     public void testStatusCode() throws Exception {
@@ -202,6 +194,7 @@ public class MetricsFilterTest {
 
         String metricName = "foo";
 
+        when(cfg.getInitParameter(MetricsFilter.REPORT_STATUS)).thenReturn("true");
         when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn(metricName);
         when(cfg.getInitParameter(MetricsFilter.PATH_COMPONENT_PARAM)).thenReturn("4");
 

@@ -48,6 +48,10 @@ import java.io.IOException;
  *      <param-name>path-components</param-name>
  *      <param-value>0</param-value>
  *   </init-param>
+ * <init-param> <!-- report the HTTP status within labels / disabled by default -->
+ * <param-name>report-status</param-name>
+ * <param-value>false</param-value>
+ * </init-param>
  * </filter>
  * }
  *
@@ -58,6 +62,7 @@ public class MetricsFilter implements Filter {
     static final String HELP_PARAM = "help";
     static final String METRIC_NAME_PARAM = "metric-name";
     static final String BUCKET_CONFIG_PARAM = "buckets";
+    static final String REPORT_STATUS = "report-status";
 
     private Histogram histogram = null;
 
@@ -66,6 +71,7 @@ public class MetricsFilter implements Filter {
     private String metricName = null;
     private String help = "The time taken fulfilling servlet requests";
     private double[] buckets = null;
+    private boolean reportStatus;
 
     public MetricsFilter() {
     }
@@ -109,8 +115,7 @@ public class MetricsFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        Histogram.Builder builder = Histogram.build()
-                .labelNames("path", "method", "status");
+        Histogram.Builder builder = Histogram.build();
 
         if (filterConfig == null && isEmpty(metricName)) {
             throw new ServletException("No configuration object provided, and no metricName passed via constructor");
@@ -142,7 +147,17 @@ public class MetricsFilter implements Filter {
                     buckets[i] = Double.parseDouble(bucketParams[i]);
                 }
             }
+
+            // Allow users to track the HTTP status of responses (disabled by default)
+            reportStatus = (!isEmpty(filterConfig.getInitParameter(REPORT_STATUS)) && filterConfig.getInitParameter(REPORT_STATUS).toUpperCase().equals("TRUE"));
         }
+
+        if (!reportStatus)
+            builder = builder
+                    .labelNames("path", "method");
+        else
+            builder = builder
+                    .labelNames("path", "method", "status");
 
         if (buckets != null) {
             builder = builder.buckets(buckets);
@@ -156,14 +171,12 @@ public class MetricsFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if (!(servletRequest instanceof HttpServletRequest) || !(servletResponse instanceof HttpServletResponse)) {
+        if (!(servletRequest instanceof HttpServletRequest)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String path = request.getRequestURI();
 
@@ -172,10 +185,19 @@ public class MetricsFilter implements Filter {
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
-            double time =timer.elapsedSeconds();
-            histogram
-                    .labels(getComponents(path), request.getMethod(), Integer.toString(response.getStatus()))
-                    .observe(time);
+            double time = timer.elapsedSeconds();
+            Histogram.Child child;
+            if (!reportStatus)
+                child = histogram
+                        .labels(getComponents(path), request.getMethod());
+            else {
+                String status = (servletResponse instanceof HttpServletResponse) ?
+                        Integer.toString(((HttpServletResponse) servletResponse).getStatus()) : "undef";
+                child = histogram
+                        .labels(getComponents(path), request.getMethod(), status);
+            }
+
+            child.observe(time);
         }
     }
 
