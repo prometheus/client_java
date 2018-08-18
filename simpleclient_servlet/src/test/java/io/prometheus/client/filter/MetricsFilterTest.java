@@ -25,8 +25,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class MetricsFilterTest {
-    MetricsFilter f = new MetricsFilter();
+public class MetricsFilterTest extends MetricsFilterCommonTest {
+    public MetricsFilter getMetricsFilter(){
+        return new MetricsFilter();
+    }
+
 
     @After
     public void clear() {
@@ -182,50 +185,6 @@ public class MetricsFilterTest {
         assertEquals(buckets.split(",").length+1, count);
     }
 
-    @Test
-    public void testStatusCode() throws Exception {
-        Map<String, Integer> sampleStatusCodes = new HashMap<String, Integer>();
-        sampleStatusCodes.put("/a/page/that/exists", HttpServletResponse.SC_OK);
-        sampleStatusCodes.put("/a/page/that/doesn-t-exist", HttpServletResponse.SC_NOT_FOUND);
-        sampleStatusCodes.put("/a/page/that/crashes", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
-        FilterConfig cfg = mock(FilterConfig.class);
-        when(cfg.getInitParameter(anyString())).thenReturn(null);
-
-        String metricName = "foo";
-
-        when(cfg.getInitParameter(MetricsFilter.REPORT_STATUS)).thenReturn("true");
-        when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn(metricName);
-        when(cfg.getInitParameter(MetricsFilter.PATH_COMPONENT_PARAM)).thenReturn("4");
-
-        f.init(cfg);
-
-        for (String uri : sampleStatusCodes.keySet()) {
-            HttpServletRequest req = mock(HttpServletRequest.class);
-
-            when(req.getRequestURI()).thenReturn(uri);
-            when(req.getMethod()).thenReturn(HttpMethods.GET);
-
-            HttpServletResponse res = mock(HttpServletResponse.class);
-            when(res.getStatus()).thenReturn(sampleStatusCodes.get(uri));
-
-            FilterChain c = mock(FilterChain.class);
-
-            f.doFilter(req, res, c);
-
-            verify(c).doFilter(req, res);
-        }
-
-        for (String uri : sampleStatusCodes.keySet()) {
-
-            final Double sampleValue = CollectorRegistry.defaultRegistry
-                    .getSampleValue(metricName + "_count",
-                            new String[]{"path", "method", "status"},
-                            new String[]{uri, HttpMethods.GET,
-                                    Integer.toString(sampleStatusCodes.get(uri))});
-            assertNotNull(sampleValue);
-            assertEquals(1, sampleValue, 0.0001);
-        }
-    }
 
 }
