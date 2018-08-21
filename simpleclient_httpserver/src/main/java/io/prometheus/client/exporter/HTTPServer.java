@@ -65,8 +65,6 @@ public class HTTPServer {
 
             t.getResponseHeaders().set("Content-Type",
                     TextFormat.CONTENT_TYPE_004);
-            t.getResponseHeaders().set("Content-Length",
-                    String.valueOf(response.size()));
             if (shouldUseCompression(t)) {
                 t.getResponseHeaders().set("Content-Encoding", "gzip");
                 t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
@@ -74,6 +72,8 @@ public class HTTPServer {
                 response.writeTo(os);
                 os.finish();
             } else {
+                t.getResponseHeaders().set("Content-Length",
+                        String.valueOf(response.size()));
                 t.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.size());
                 response.writeTo(t.getResponseBody());
             }
