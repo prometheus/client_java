@@ -220,5 +220,12 @@ public class HTTPServer {
         server.stop(0);
         executorService.shutdown(); // Free any (parked/idle) threads in pool
     }
+
+    /**
+     * Gets the port number.
+     */
+    public int getPort() {
+        return server.getAddress().getPort();
+    }
 }
 
