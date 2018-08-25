@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A registry of Collectors.
@@ -28,6 +30,7 @@ public class CollectorRegistry {
   public static final CollectorRegistry defaultRegistry = new CollectorRegistry(true);
 
 
+  private final ReadWriteLock lock = new ReentrantReadWriteLock();
   private final Map<Collector, List<String>> collectorsToNames = new HashMap<Collector, List<String>>();
   private final Map<String, Collector> namesToCollectors = new HashMap<String, Collector>();
 
@@ -48,7 +51,8 @@ public class CollectorRegistry {
    */
   public void register(Collector m) {
     List<String> names = collectorNames(m);
-    synchronized (collectorsToNames) {
+    lock.writeLock().lock();
+    try {
       for (String name : names) {
         if (namesToCollectors.containsKey(name)) {
           throw new IllegalArgumentException("Collector already registered that provides name: " + name);
@@ -58,6 +62,8 @@ public class CollectorRegistry {
         namesToCollectors.put(name, m);
       }
       collectorsToNames.put(m, names);
+    } finally {
+      lock.writeLock().unlock();
     }
   }
 
@@ -65,11 +71,14 @@ public class CollectorRegistry {
    * Unregister a Collector.
    */
   public void unregister(Collector m) {
-    synchronized (collectorsToNames) {
+    lock.writeLock().lock();
+    try {
       List<String> names = collectorsToNames.remove(m);
       for (String name : names) {
         namesToCollectors.remove(name);
       }
+    } finally {
+      lock.writeLock().unlock();
     }
   }
 
@@ -77,9 +86,12 @@ public class CollectorRegistry {
    * Unregister all Collectors.
    */
   public void clear() {
-    synchronized (collectorsToNames) {
+    lock.writeLock().lock();
+    try {
       collectorsToNames.clear();
       namesToCollectors.clear();
+    } finally {
+      lock.writeLock().unlock();
     }
   }
 
@@ -87,8 +99,11 @@ public class CollectorRegistry {
    * A snapshot of the current collectors.
    */
   private Set<Collector> collectors() {
-    synchronized (collectorsToNames) {
+    lock.readLock().lock();
+    try {
       return new HashSet<Collector>(collectorsToNames.keySet());
+    } finally {
+      lock.readLock().unlock();
     }
   }
 
@@ -152,12 +167,15 @@ public class CollectorRegistry {
         return collectors().iterator();
       } else {
         HashSet<Collector> collectors = new HashSet<Collector>();
-        synchronized (namesToCollectors) {
+        lock.readLock().lock();
+        try {
           for (Map.Entry<String, Collector> entry : namesToCollectors.entrySet()) {
             if (includedNames.contains(entry.getKey())) {
               collectors.add(entry.getValue());
             }
           }
+        } finally {
+          lock.readLock().unlock();
         }
 
         return collectors.iterator();
