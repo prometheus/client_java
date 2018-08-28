@@ -14,6 +14,26 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * The MetricsServlet class exists to provide a simple way of exposing the metrics values.
+ *
+ * <p>This servlet might be used with a filter such the {@link io.prometheus.client.filter.MetricsFilter}
+ *
+ * <p>Usage example (in webapp's {@code web.xml}):
+ * <pre>{@code
+ * <!-- instance of the servlet -->
+ * <servlet>
+ *   <servlet-name>metrics</servlet-name>
+ *   <servlet-class>io.prometheus.client.exporter.MetricsServlet</servlet-class>
+ * </servlet>
+ *
+ * <!-- map it to an URL -->
+ * <servlet-mapping>
+ *   <servlet-name>metrics</servlet-name>
+ *   <url-pattern>/metrics/*</url-pattern>
+ * </servlet-mapping>
+ * }</pre>
+ */
 public class MetricsServlet extends HttpServlet {
 
   private CollectorRegistry registry;
