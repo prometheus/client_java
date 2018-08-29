@@ -17,7 +17,6 @@ import java.util.Set;
 /**
  * The MetricsServlet class exists to provide a simple way of exposing the metrics values.
  *
- * <p>This servlet might be used with a filter such the {@link io.prometheus.client.filter.MetricsFilter}
  */
 public class MetricsServlet extends HttpServlet {
 
