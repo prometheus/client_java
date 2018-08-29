@@ -14,6 +14,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * The MetricsServlet class exists to provide a simple way of exposing the metrics values.
+ *
+ */
 public class MetricsServlet extends HttpServlet {
 
   private CollectorRegistry registry;
@@ -27,6 +31,7 @@ public class MetricsServlet extends HttpServlet {
 
   /**
    * Construct a MetricsServlet for the given registry.
+   * @param registry collector registry
    */
   public MetricsServlet(CollectorRegistry registry) {
     this.registry = registry;

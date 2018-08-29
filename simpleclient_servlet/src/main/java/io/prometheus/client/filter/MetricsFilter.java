@@ -15,21 +15,21 @@ import java.io.IOException;
  * The MetricsFilter class exists to provide a high-level filter that enables tunable collection of metrics for Servlet
  * performance.
  *
- * The Histogram name itself is required, and configured with a {@code metric-name} init parameter.
+ * <p>The Histogram name itself is required, and configured with a {@code metric-name} init parameter.
  *
- * The help parameter, configured with the {@code help} init parameter, is not required but strongly recommended.
+ * <p>The help parameter, configured with the {@code help} init parameter, is not required but strongly recommended.
  *
- * By default, this filter will provide metrics that distinguish only 1 level deep for the request path
+ * <p>By default, this filter will provide metrics that distinguish only 1 level deep for the request path
  * (including servlet context path), but can be configured with the {@code path-components} init parameter. Any number
  * provided that is less than 1 will provide the full path granularity (warning, this may affect performance).
  *
- * The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list
+ * <p>The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list
  * of valid {@code double} values.
  *
- * {@code
+ * <pre>{@code
  * <filter>
  *   <filter-name>prometheusFilter</filter-name>
- *   <filter-class>net.cccnext.ssp.portal.spring.filter.PrometheusMetricsFilter</filter-class>
+ *   <filter-class>io.prometheus.client.filter.MetricsFilter</filter-class>
  *   <init-param>
  *      <param-name>metric-name</param-name>
  *      <param-value>webapp_metrics_filter</param-value>
@@ -47,7 +47,7 @@ import java.io.IOException;
  *      <param-value>0</param-value>
  *   </init-param>
  * </filter>
- * }
+ * }</pre>
  *
  * @author Andrew Stuart &lt;andrew.stuart2@gmail.com&gt;
  */
