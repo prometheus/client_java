@@ -90,6 +90,7 @@ public class ThreadExports extends Collector {
         entry.getValue()
       );
     }
+    sampleFamilies.add(threadStateFamily);
   }
 
   private Map<Thread.State, Integer> getThreadStateCountMap() {
