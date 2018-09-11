@@ -1,7 +1,9 @@
 package io.prometheus.client.exporter;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
@@ -301,7 +303,15 @@ public class PushGateway {
 
       int response = connection.getResponseCode();
       if (response != HttpURLConnection.HTTP_ACCEPTED) {
-        throw new IOException("Response code from " + url + " was " + response);
+        String errorMessage;
+        InputStream errorStream = connection.getErrorStream();
+        if(response >= 400 && errorStream != null) {
+          String errBody = readFromStream(errorStream);
+          errorMessage = "Response code from " + url + " was " + response + ", response body: " + errBody;
+        } else {
+          errorMessage = "Response code from " + url + " was " + response;
+        }
+        throw new IOException(errorMessage);
       }
     } finally {
       connection.disconnect();
@@ -320,4 +330,13 @@ public class PushGateway {
     return groupingKey;
   }
 
+  private static String readFromStream(InputStream is) throws IOException {
+    ByteArrayOutputStream result = new ByteArrayOutputStream();
+    byte[] buffer = new byte[1024];
+    int length;
+    while ((length = is.read(buffer)) != -1) {
+      result.write(buffer, 0, length);
+    }
+    return result.toString("UTF-8");
+  }
 }
