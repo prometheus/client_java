@@ -83,12 +83,14 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   final List<Quantile> quantiles; // Can be empty, but can never be null.
   final long maxAgeSeconds;
   final int ageBuckets;
+  final boolean batchMode;  // real-time mode or batch mode?
 
   Summary(Builder b) {
     super(b);
     quantiles = Collections.unmodifiableList(new ArrayList<Quantile>(b.quantiles));
     this.maxAgeSeconds = b.maxAgeSeconds;
     this.ageBuckets = b.ageBuckets;
+    this.batchMode = b.batchMode;
     initializeNoLabelsChild();
   }
 
@@ -97,6 +99,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private final List<Quantile> quantiles = new ArrayList<Quantile>();
     private long maxAgeSeconds = TimeUnit.MINUTES.toSeconds(10);
     private int ageBuckets = 5;
+    private boolean batchMode = false;  // default to real-time mode
 
     public Builder quantile(double quantile, double error) {
       if (quantile < 0.0 || quantile > 1.0) {
@@ -122,6 +125,11 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
         throw new IllegalArgumentException("ageBuckets cannot be " + ageBuckets);
       }
       this.ageBuckets = ageBuckets;
+      return this;
+    }
+
+    public Builder batchMode(boolean batchMode) {
+      this.batchMode = batchMode;
       return this;
     }
 
@@ -156,7 +164,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
   @Override
   protected Child newChild() {
-    return new Child(quantiles, maxAgeSeconds, ageBuckets);
+    return new Child(quantiles, maxAgeSeconds, ageBuckets, batchMode);
   }
 
 
@@ -262,10 +270,14 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private final List<Quantile> quantiles;
     private final TimeWindowQuantiles quantileValues;
 
-    private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets) {
+    private boolean batchMode;  // real-time mode or batch mode?
+    private long timestampMs;   // timestamp of last observation
+
+    private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets, boolean batchMode) {
+      this.batchMode = batchMode;
       this.quantiles = quantiles;
       if (quantiles.size() > 0) {
-        quantileValues = new TimeWindowQuantiles(quantiles.toArray(new Quantile[]{}), maxAgeSeconds, ageBuckets);
+        quantileValues = new TimeWindowQuantiles(quantiles.toArray(new Quantile[]{}), maxAgeSeconds, ageBuckets, batchMode);
       } else {
         quantileValues = null;
       }
@@ -274,12 +286,17 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     /**
      * Observe the given amount.
      */
-    public void observe(double amt) {
+    public void observe(double amt, long timestampMs) {
       count.add(1);
       sum.add(amt);
+      this.timestampMs = timestampMs;
       if (quantileValues != null) {
-        quantileValues.insert(amt);
+        quantileValues.insert(amt, timestampMs);
       }
+    }
+
+    public void observe(double amt) {
+      this.observe(amt, System.currentTimeMillis());
     }
     /**
      * Start a timer to track a duration.
@@ -303,8 +320,12 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   /**
    * Observe the given amount on the summary with no labels.
    */
+  public void observe(double amt, long timestampMs) {
+    noLabelsChild.observe(amt, timestampMs);
+  }
+
   public void observe(double amt) {
-    noLabelsChild.observe(amt);
+    this.observe(amt, System.currentTimeMillis());
   }
   /**
    * Start a timer to track a duration on the summary with no labels.
@@ -348,16 +369,31 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      Child.Value v = c.getValue().get();
+      Child child = c.getValue();
+      Child.Value v = child.get();
+      if (v == null) {
+        continue;
+      }
       List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
       labelNamesWithQuantile.add("quantile");
       for(Map.Entry<Double, Double> q : v.quantiles.entrySet()) {
         List<String> labelValuesWithQuantile = new ArrayList<String>(c.getKey());
         labelValuesWithQuantile.add(doubleToGoString(q.getKey()));
-        samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, q.getValue()));
+        if (batchMode) {
+          samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, q.getValue(), child.timestampMs));
+        }
+        else {
+          samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, q.getValue()));
+        }
       }
-      samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
-      samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
+      if (batchMode) {
+        samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count, child.timestampMs));
+        samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum, child.timestampMs));
+      }
+      else {
+        samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
+        samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
+      }
     }
 
     return familySamplesList(Type.SUMMARY, samples);
