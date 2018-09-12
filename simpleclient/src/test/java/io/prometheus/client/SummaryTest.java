@@ -18,13 +18,14 @@ import static org.junit.Assert.assertTrue;
 public class SummaryTest {
 
   CollectorRegistry registry;
-  Summary noLabels, labels, labelsAndQuantiles, noLabelsAndQuantiles;
+  Summary noLabels, labels, labelsBatch, labelsAndQuantiles, noLabelsAndQuantiles;
 
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
     noLabels = Summary.build().name("nolabels").help("help").register(registry);
     labels = Summary.build().name("labels").help("help").labelNames("l").register(registry);
+    labelsBatch = Summary.build().name("labelsBatch").help("help").labelNames("l").batchMode(true).register(registry);
     noLabelsAndQuantiles = Summary.build()
             .quantile(0.5, 0.05)
             .quantile(0.9, 0.01)
@@ -108,6 +109,24 @@ public class SummaryTest {
   }
 
   @Test
+  public void testMaxAgeBatchMode() throws InterruptedException {
+    long maxAgeSecs = 2;
+    Summary summary = Summary.build()
+            .batchMode(true)
+            .quantile(0.99, 0.001)
+            .maxAgeSeconds(maxAgeSecs)
+            .ageBuckets(2)   // We got 2 buckets, so we discard one bucket every 500ms.
+            .name("short_attention_span").help("help").register(registry);
+    long timestampMs = System.currentTimeMillis() - maxAgeSecs * 1000;
+    summary.observe(8.0, timestampMs);
+    double val = registry.getSampleValue("short_attention_span", new String[]{"quantile"}, new String[]{Collector.doubleToGoString(0.99)}).doubleValue();
+    assertEquals(8.0, val, 0.0);
+    summary.observe(3.0, timestampMs + maxAgeSecs * 1000);
+    val = registry.getSampleValue("short_attention_span", new String[]{"quantile"}, new String[]{Collector.doubleToGoString(0.99)}).doubleValue();
+    assertEquals(3.0, val, 0.0);
+  }
+
+  @Test
   public void testTimer() {
     SimpleTimer.defaultTimeProvider = new SimpleTimer.TimeProvider() {
       long value = (long)(30 * 1e9);
@@ -184,6 +203,25 @@ public class SummaryTest {
     samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
     samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.SUMMARY, "help", samples);
+
+    assertEquals(1, mfs.size());
+    assertEquals(mfsFixture, mfs.get(0));
+  }
+
+  @Test
+  public void testCollectBatchMode() {
+    long timestampMs = System.currentTimeMillis() - 5000;
+    labelsBatch.labels("a").observe(2, timestampMs);
+    List<Collector.MetricFamilySamples> mfs = labelsBatch.collect();
+
+    ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+    ArrayList<String> labelNames = new ArrayList<String>();
+    labelNames.add("l");
+    ArrayList<String> labelValues = new ArrayList<String>();
+    labelValues.add("a");
+    samples.add(new Collector.MetricFamilySamples.Sample("labelsBatch_count", labelNames, labelValues, 1.0, timestampMs));
+    samples.add(new Collector.MetricFamilySamples.Sample("labelsBatch_sum", labelNames, labelValues, 2.0, timestampMs));
+    Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labelsBatch", Collector.Type.SUMMARY, "help", samples);
 
     assertEquals(1, mfs.size());
     assertEquals(mfsFixture, mfs.get(0));
