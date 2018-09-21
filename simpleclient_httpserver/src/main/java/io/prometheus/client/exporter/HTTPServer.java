@@ -70,7 +70,7 @@ public class HTTPServer {
                 t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
                 final GZIPOutputStream os = new GZIPOutputStream(t.getResponseBody());
                 response.writeTo(os);
-                os.finish();
+                os.close();
             } else {
                 t.getResponseHeaders().set("Content-Length",
                         String.valueOf(response.size()));
