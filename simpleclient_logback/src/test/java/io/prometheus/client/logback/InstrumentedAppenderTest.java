@@ -7,18 +7,38 @@ import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
+import java.util.Collection;
+
+@RunWith(Parameterized.class)
 public class InstrumentedAppenderTest {
 
   private InstrumentedAppender appender;
   private ILoggingEvent event;
 
+  @Parameterized.Parameters
+  public static CollectorRegistry[] data() {
+    return new CollectorRegistry[]{
+      CollectorRegistry.defaultRegistry,
+      new CollectorRegistry(true)
+    };
+  }
+
+  @Parameterized.Parameter
+  public CollectorRegistry registry;
+
   @Before
   public void setUp() throws Exception {
-    appender = new InstrumentedAppender();
+    registry.clear();
+
+    appender = new InstrumentedAppender(registry);
     appender.start();
     
     event = mock(ILoggingEvent.class);
@@ -70,7 +90,7 @@ public class InstrumentedAppenderTest {
   }
 
   private int getLogLevelCount(String level) {
-    return CollectorRegistry.defaultRegistry.getSampleValue(COUNTER_NAME, 
+    return registry.getSampleValue(COUNTER_NAME,
             new String[]{"level"}, new String[]{level}).intValue();
   }
 }
