@@ -1,5 +1,6 @@
 package io.prometheus.client.filter;
 
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Histogram;
 
 import javax.servlet.Filter;
@@ -64,6 +65,7 @@ public class MetricsFilter implements Filter {
     private String metricName = null;
     private String help = "The time taken fulfilling servlet requests";
     private double[] buckets = null;
+    private CollectorRegistry collectorRegistry = CollectorRegistry.defaultRegistry;
 
     public MetricsFilter() {}
 
@@ -80,6 +82,13 @@ public class MetricsFilter implements Filter {
         if (pathComponents != null) {
             this.pathComponents = pathComponents;
         }
+    }
+
+    public void setCollectorRegistry(CollectorRegistry collectorRegistry) {
+      if (collectorRegistry == null) {
+        throw new IllegalArgumentException("CollectorRegistry must not be null!");
+      }
+      this.collectorRegistry = collectorRegistry;
     }
 
     private boolean isEmpty(String s) {
@@ -148,7 +157,7 @@ public class MetricsFilter implements Filter {
         histogram = builder
                 .help(help)
                 .name(metricName)
-                .register();
+                .register(collectorRegistry);
     }
 
     @Override
@@ -175,5 +184,6 @@ public class MetricsFilter implements Filter {
 
     @Override
     public void destroy() {
+      collectorRegistry.unregister(histogram);
     }
 }
