@@ -254,7 +254,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     noLabelsChild.inc(amt);
   }
   /**
-   * Increment the gauge with no labels by 1.
+   * Decrement the gauge with no labels by 1.
    */
   public void dec() {
     dec(1);
