@@ -61,7 +61,7 @@ public class MemoryAllocationExports extends Collector {
     }
 
     @Override
-    public void handleNotification(Notification notification, Object handback) {
+    public synchronized void handleNotification(Notification notification, Object handback) {
       GarbageCollectionNotificationInfo info = GarbageCollectionNotificationInfo.from((CompositeData) notification.getUserData());
       GcInfo gcInfo = info.getGcInfo();
       Map<String, MemoryUsage> memoryUsageBeforeGc = gcInfo.getMemoryUsageBeforeGc();
