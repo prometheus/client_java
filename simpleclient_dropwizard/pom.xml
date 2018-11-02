@@ -30,6 +30,11 @@
             <name>Francois Visconte</name>
             <email>f.visconte@gmail.com</email>
         </developer>
+        <developer>
+            <id>alessandro-ciccimarra</id>
+            <name>Alessandro Ciccimarra</name>
+            <email>alessandro.ciccimarra@gmail.com</email>
+        </developer>
     </developers>
     <dependencies>
         <dependency>
@@ -42,11 +47,28 @@
             <artifactId>metrics-core</artifactId>
             <version>3.1.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.6</version>
+        </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>2.9.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.10.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

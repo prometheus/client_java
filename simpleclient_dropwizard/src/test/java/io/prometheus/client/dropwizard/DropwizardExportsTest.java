@@ -1,23 +1,19 @@
 package io.prometheus.client.dropwizard;
 
-
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class DropwizardExportsTest {
@@ -25,14 +21,18 @@ public class DropwizardExportsTest {
     private CollectorRegistry registry = new CollectorRegistry();
     private MetricRegistry metricRegistry;
 
+    private SampleBuilder sampleBuilder;
+
     @Before
     public void setUp() {
         metricRegistry = new MetricRegistry();
-        new DropwizardExports(metricRegistry).register(registry);
+        sampleBuilder = Mockito.mock(SampleBuilder.class);
+        new DropwizardExports(metricRegistry, sampleBuilder).register(registry);
     }
 
     @Test
     public void testCounter() {
+        Mockito.when(sampleBuilder.createSample("foo_bar", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1d)).thenReturn(new Collector.MetricFamilySamples.Sample("foo_bar", Collections.<String>emptyList(), Collections.<String>emptyList(), 1d));
         metricRegistry.counter("foo_bar").inc();
         assertEquals(new Double(1),
                 registry.getSampleValue("foo_bar")
@@ -72,6 +72,12 @@ public class DropwizardExportsTest {
             }
         };
 
+        Mockito.when(sampleBuilder.createSample("integer_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234)).thenReturn(new Collector.MetricFamilySamples.Sample("integer_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
+        Mockito.when(sampleBuilder.createSample("long_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234)).thenReturn(new Collector.MetricFamilySamples.Sample("long_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
+        Mockito.when(sampleBuilder.createSample("double_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1.234)).thenReturn(new Collector.MetricFamilySamples.Sample("double_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1.234));
+        Mockito.when(sampleBuilder.createSample("float_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 0.1234F)).thenReturn(new Collector.MetricFamilySamples.Sample("float_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 0.1234F));
+        Mockito.when(sampleBuilder.createSample("boolean_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1)).thenReturn(new Collector.MetricFamilySamples.Sample("boolean_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1));
+
         metricRegistry.register("double_gauge", doubleGauge);
         metricRegistry.register("long_gauge", longGauge);
         metricRegistry.register("integer_gauge", integerGauge);
@@ -98,8 +104,10 @@ public class DropwizardExportsTest {
                 return "foobar";
             }
         };
+
         metricRegistry.register("invalid_gauge", invalidGauge);
         assertEquals(null, registry.getSampleValue("invalid_gauge"));
+        Mockito.verifyZeroInteractions(sampleBuilder);
     }
 
     @Test
@@ -112,6 +120,7 @@ public class DropwizardExportsTest {
         };
         metricRegistry.register("invalid_gauge", invalidGauge);
         assertEquals(null, registry.getSampleValue("invalid_gauge"));
+        Mockito.verifyZeroInteractions(sampleBuilder);
     }
 
     void assertRegistryContainsMetrics(String... metrics) {
@@ -123,6 +132,10 @@ public class DropwizardExportsTest {
 
     @Test
     public void testHistogram() throws IOException {
+        // just test the standard mapper
+        final MetricRegistry metricRegistry = new MetricRegistry();
+        final CollectorRegistry registry = new CollectorRegistry();
+        new DropwizardExports(metricRegistry).register(registry);
         Histogram hist = metricRegistry.histogram("hist");
         int i = 0;
         while (i < 100) {
@@ -140,6 +153,7 @@ public class DropwizardExportsTest {
 
     @Test
     public void testMeter() throws IOException, InterruptedException {
+        Mockito.when(sampleBuilder.createSample("meter", "_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 2)).thenReturn(new Collector.MetricFamilySamples.Sample("meter_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 2));
         Meter meter = metricRegistry.meter("meter");
         meter.mark();
         meter.mark();
@@ -148,6 +162,11 @@ public class DropwizardExportsTest {
 
     @Test
     public void testTimer() throws IOException, InterruptedException {
+        // just test the standard mapper
+        final MetricRegistry metricRegistry = new MetricRegistry();
+        final CollectorRegistry registry = new CollectorRegistry();
+        new DropwizardExports(metricRegistry).register(registry);
+
         Timer t = metricRegistry.timer("timer");
         Timer.Context time = t.time();
         Thread.sleep(1L);
@@ -155,16 +174,6 @@ public class DropwizardExportsTest {
         // We slept for 1Ms so we ensure that all timers are above 1ms:
         assertTrue(registry.getSampleValue("timer", new String[]{"quantile"}, new String[]{"0.99"}) > 0.001);
         assertEquals(new Double(1.0D), registry.getSampleValue("timer_count"));
-    }
-
-    @Test
-    public void testSanitizeMetricName() {
-        assertEquals("Foo_Bar_metric_mame", DropwizardExports.sanitizeMetricName("Foo.Bar-metric,mame"));
-    }
-
-    @Test
-    public void testSanitizeMetricNameStartingWithDigit() {
-        assertEquals("_42Foo_Bar_metric_mame", DropwizardExports.sanitizeMetricName("42Foo.Bar-metric,mame"));
     }
 
     @Test
@@ -181,7 +190,7 @@ public class DropwizardExportsTest {
         Map<String, Collector.MetricFamilySamples> elements = new HashMap<String, Collector.MetricFamilySamples>();
 
         while (metricFamilySamples.hasMoreElements()) {
-            Collector.MetricFamilySamples element =  metricFamilySamples.nextElement();
+            Collector.MetricFamilySamples element = metricFamilySamples.nextElement();
             elements.put(element.name, element);
         }
         assertEquals(5, elements.size());
