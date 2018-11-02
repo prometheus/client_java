@@ -1,6 +1,6 @@
 # Prometheus JVM Client
 It supports Java, Clojure, Scala, JRuby, and anything else that runs on the JVM.
- 
+
 [![Build Status](https://travis-ci.org/prometheus/client_java.png?branch=master)](https://travis-ci.org/prometheus/client_java)
 
 Table of Contents
@@ -85,7 +85,7 @@ import io.prometheus.client.Counter;
 class YourClass {
   static final Counter requests = Counter.build()
      .name("requests_total").help("Total requests.").register();
-  
+
   void processRequest() {
     requests.inc();
     // Your code here.
@@ -101,7 +101,7 @@ Gauges can go up and down.
 class YourClass {
   static final Gauge inprogressRequests = Gauge.build()
      .name("inprogress_requests").help("Inprogress requests.").register();
-  
+
   void processRequest() {
     inprogressRequests.inc();
     // Your code here.
@@ -116,9 +116,9 @@ There are utilities for common use cases:
 gauge.setToCurrentTime(); // Set to current unixtime.
 ```
 
-As an advanced use case, a `Gauge` can also take its value from a callback by using the 
-[setChild()](https://prometheus.io/client_java/io/prometheus/client/SimpleCollector.html#setChild-Child-java.lang.String...-) 
-method. Keep in mind that the default `inc()`, `dec()` and `set()` methods on Gauge take care of thread safety, so 
+As an advanced use case, a `Gauge` can also take its value from a callback by using the
+[setChild()](https://prometheus.io/client_java/io/prometheus/client/SimpleCollector.html#setChild-Child-java.lang.String...-)
+method. Keep in mind that the default `inc()`, `dec()` and `set()` methods on Gauge take care of thread safety, so
 when using this approach ensure the value you are reporting accounts for concurrency.
 
 
@@ -132,7 +132,7 @@ class YourClass {
      .name("requests_size_bytes").help("Request size in bytes.").register();
   static final Summary requestLatency = Summary.build()
      .name("requests_latency_seconds").help("Request latency in seconds.").register();
-  
+
   void processRequest(Request req) {
     Summary.Timer requestTimer = requestLatency.startTimer();
     try {
@@ -154,16 +154,16 @@ class YourClass {
     .quantile(0.5, 0.05)   // Add 50th percentile (= median) with 5% tolerated error
     .quantile(0.9, 0.01)   // Add 90th percentile with 1% tolerated error
     .name("requests_latency_seconds").help("Request latency in seconds.").register();
-  
+
   void processRequest(Request req) {
     requestLatency.time(new Runnable() {
       public abstract void run() {
-        // Your code here.    
+        // Your code here.
       }
-    });  
-      
-      
-    // Or the Java 8 lambda equivalent   
+    });
+
+
+    // Or the Java 8 lambda equivalent
     requestLatency.time(() -> {
       // Your code here.
     });
@@ -201,18 +201,18 @@ There are utilities for timing code:
 class YourClass {
   static final Histogram requestLatency = Histogram.build()
      .name("requests_latency_seconds").help("Request latency in seconds.").register();
-  
+
   void processRequest(Request req) {
     requestLatency.time(new Runnable() {
       public abstract void run() {
-        // Your code here.    
+        // Your code here.
       }
-    });  
-      
-      
-    // Or the Java 8 lambda equivalent  
+    });
+
+
+    // Or the Java 8 lambda equivalent
     requestLatency.time(() -> {
-      // Your code here.  
+      // Your code here.
     });
   }
 }
@@ -232,7 +232,7 @@ class YourClass {
   static final Counter requests = Counter.build()
      .name("my_library_requests_total").help("Total requests.")
      .labelNames("method").register();
-  
+
   void processGetRequest() {
     requests.labels("get").inc();
     // Your code here.
@@ -248,10 +248,10 @@ The best way to register a metric is via a `static final` class variable as is c
 static final Counter requests = Counter.build()
    .name("my_library_requests_total").help("Total requests.").labelNames("path").register();
 ```
- 
-Using the default registry with variables that are `static` is ideal since registering a metric with the same name 
-is not allowed and the default registry is also itself static. You can think of registering a metric, more like 
-registering a definition (as in the `TYPE` and `HELP` sections). The metric 'definition' internally holds the samples 
+
+Using the default registry with variables that are `static` is ideal since registering a metric with the same name
+is not allowed and the default registry is also itself static. You can think of registering a metric, more like
+registering a definition (as in the `TYPE` and `HELP` sections). The metric 'definition' internally holds the samples
 that are reported and pulled out by Prometheus. Here is an example of registering a metric that has no labels.
 
 ```java
@@ -260,11 +260,11 @@ class YourClass {
      .name("my_library_transactions_active")
      .help("Active transactions.")
      .register();
-  
+
   void processThatCalculates(String key) {
     activeTransactions.inc();
     try {
-        // Perform work.    
+        // Perform work.
     } finally{
         activeTransactions.dec();
     }
@@ -272,7 +272,7 @@ class YourClass {
 }
 ```
 
-To create timeseries with labels, include `labelNames()` with the builder. The `labels()` method looks up or creates 
+To create timeseries with labels, include `labelNames()` with the builder. The `labels()` method looks up or creates
 the corresponding labelled timeseries. You might also consider storing the labelled timeseries as an instance variable if it is
 appropriate. It is thread safe and can be used multiple times, which can help performance.
 
@@ -282,7 +282,7 @@ class YourClass {
   static final Counter calculationsCounter = Counter.build()
      .name("my_library_calculations_total").help("Total calls.")
      .labelNames("key").register();
-  
+
   void processThatCalculates(String key) {
     calculationsCounter.labels(key).inc();
     // Run calculations.
@@ -294,7 +294,7 @@ class YourClass {
 ## Included Collectors
 
 The Java client includes collectors for garbage collection, memory pools, JMX, classloading, and thread counts.
-These can be added individually or just use the `DefaultExports` to conveniently register them. 
+These can be added individually or just use the `DefaultExports` to conveniently register them.
 
 ```java
 DefaultExports.initialize();
@@ -353,7 +353,7 @@ To register the log4j2 collector at root level:
 ### Caches
 
 To register the Guava cache collector, be certain to add `recordStats()` when building
-the cache and adding it to the registered collector. 
+the cache and adding it to the registered collector.
 
 ```java
 CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
@@ -374,8 +374,8 @@ cacheMetrics.addCache("myCacheLabel", cache);
 
 ### Hibernate
 
-There is a collector for Hibernate which allows to collect metrics from one or more 
-`SessionFactory` instances. 
+There is a collector for Hibernate which allows to collect metrics from one or more
+`SessionFactory` instances.
 
 If you want to collect metrics from a single `SessionFactory`, you can register
 the collector like this:
@@ -415,7 +415,7 @@ new JettyStatisticsCollector(stats).register();
 ```
 
 Also, you can collect `QueuedThreadPool` metrics. If there is a single `QueuedThreadPool`
-to keep track of, use the following: 
+to keep track of, use the following:
 
 ```java
 new QueuedThreadPoolStatisticsCollector(queuedThreadPool, "myapp").register();
@@ -522,7 +522,7 @@ The simplest of these is the HTTPServer:
 HTTPServer server = new HTTPServer(1234);
 ```
 
-To add Prometheus exposition to an existing HTTP server using servlets, see the `MetricsServlet`. 
+To add Prometheus exposition to an existing HTTP server using servlets, see the `MetricsServlet`.
 It also serves as a simple example of how to write a custom endpoint.
 
 To expose the metrics used in your code, you would add the Prometheus servlet to your Jetty server:
@@ -554,7 +554,7 @@ void executeBatchJob() throws Exception {
   Gauge.Timer durationTimer = duration.startTimer();
   try {
     // Your code here.
-  
+
     // This is only added to the registry after success,
     // so that a previous success in the Pushgateway isn't overwritten on failure.
     Gauge lastSuccess = Gauge.build()
@@ -568,8 +568,8 @@ void executeBatchJob() throws Exception {
 }
  ```
 
-A separate registry is used, as the default registry may contain other metrics 
-such as those from the Process Collector. See the 
+A separate registry is used, as the default registry may contain other metrics
+such as those from the Process Collector. See the
 [Pushgateway documentation](https://github.com/prometheus/pushgateway/blob/master/README.md)
 for more information.
 
@@ -593,7 +593,7 @@ class MyHttpConnectionFactory implements HttpConnectionFactory {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         // add any connection preparation logic you need
         return connection;
-    }    
+    }
 }
 ```
 
@@ -658,6 +658,56 @@ not implemented and the CollectorRegistry was created with `auto_desribe=True`
 registration time instead of `describe`. If this could cause problems, either
 implement a proper `describe`, or if that's not practical have `describe`
 return an empty list.
+
+### DropwizardExports Collector
+
+DropwizardExports collector is available to proxy metrics from Dropwizard.
+
+```java
+// Dropwizard MetricRegistry
+MetricRegistry metricRegistry = new MetricRegistry();
+new DropwizardExports(metricRegistry).register();
+```
+
+By default Dropwizard metrics are translated to Prometheus sample sanitizing their names, i.e. replacing unsupported chars with `_`, for example:
+```
+Dropwizard metric name:
+org.company.controller.save.status.400
+Prometheus metric:
+org_company_controller__save_status_400
+```
+
+It is also possible add custom labels and name to newly created `Sample`s by using a `CustomMappingSampleBuilder` with custom `MapperConfig`s:
+
+```java
+// Dropwizard MetricRegistry
+MetricRegistry metricRegistry = new MetricRegistry();
+MapperConfig config = new MapperConfig();
+// The match field in MapperConfig is a simplified glob expression that only allows * wildcard.
+config.setMatch("org.company.controller.*.status.*");
+// The new Sample's template name.
+config.setName("org.company.controller");
+Map<String, String> labels = new HashMap<String,String>();
+// ... more configs
+// Labels to be extracted from the metric. Key=label name. Value= label template
+labels.put("name", "${0}");
+labels.put("status", "${1}");
+config.setLabels(labels);
+
+SampleBuilder sampleBuilder = new CustomMappingSampleBuilder(Arrays.asList(config, ...));
+new DropwizardExports(metricRegistry, sampleBuilder).register();
+```
+
+When a new metric comes to the collector, `MapperConfig`s are scanned to find the first one that matches the incoming metric name. The name set in the configuration will
+be used and labels will be extracted. Using the `CustomMappingSampleBuilder` in the previous example leads to the following result:
+```
+Dropwizard metric name
+org.company.controller.save.status.400
+Prometheus metric
+org_company_controller {"name": "save", "status": "400"}
+```
+
+Template with placeholders can be used both as names and label values. Placeholders are in the `${n}` format where n is the zero based index of the Dropwizard metric name wildcard group we want to extract.
 
 ## Contact
 The [Prometheus Users Mailinglist](https://groups.google.com/forum/?fromgroups#!forum/prometheus-users) is the best place to ask questions.

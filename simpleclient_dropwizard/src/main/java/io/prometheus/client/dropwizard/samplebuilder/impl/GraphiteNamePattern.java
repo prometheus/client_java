@@ -63,7 +63,7 @@ class GraphiteNamePattern {
         final Map<String, String> params = new HashMap<String, String>();
         if (matcher.find()) {
             for (int i = 1; i <= matcher.groupCount(); i++) {
-                params.put(String.valueOf(i - 1), matcher.group(i));
+                params.put(String.format("${%d}", i - 1), matcher.group(i));
             }
         }
 

@@ -48,17 +48,15 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * Export counter as Prometheus <a href="https://prometheus.io/docs/concepts/metric_types/#gauge">Gauge</a>.
      */
     List<MetricFamilySamples> fromCounter(String dropwizardName, Counter counter) {
-        String name = sanitizeMetricName(dropwizardName);
         MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "", new ArrayList<String>(), new ArrayList<String>(),
                 new Long(counter.getCount()).doubleValue());
-        return Arrays.asList(new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(dropwizardName, counter), Arrays.asList(sample)));
+        return Arrays.asList(new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName, counter), Arrays.asList(sample)));
     }
 
     /**
      * Export gauge as a prometheus gauge.
      */
     List<MetricFamilySamples> fromGauge(String dropwizardName, Gauge gauge) {
-        String name = sanitizeMetricName(dropwizardName);
         Object obj = gauge.getValue();
         double value;
         if (obj instanceof Number) {
@@ -66,13 +64,13 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
         } else if (obj instanceof Boolean) {
             value = ((Boolean) obj) ? 1 : 0;
         } else {
-            LOGGER.log(Level.FINE, String.format("Invalid type for Gauge %s: %s", name,
+            LOGGER.log(Level.FINE, String.format("Invalid type for Gauge %s: %s", sanitizeMetricName(dropwizardName),
                     obj == null ? "null" : obj.getClass().getName()));
             return new ArrayList<MetricFamilySamples>();
         }
         MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "",
                 new ArrayList<String>(), new ArrayList<String>(), value);
-        return Arrays.asList(new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(dropwizardName, gauge), Arrays.asList(sample)));
+        return Arrays.asList(new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName, gauge), Arrays.asList(sample)));
     }
 
     /**
@@ -84,7 +82,6 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * @param factor         a factor to apply to histogram values.
      */
     List<MetricFamilySamples> fromSnapshotAndCount(String dropwizardName, Snapshot snapshot, long count, double factor, String helpMessage) {
-        String name = sanitizeMetricName(dropwizardName);
         List<MetricFamilySamples.Sample> samples = Arrays.asList(
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.5"), snapshot.getMedian() * factor),
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.75"), snapshot.get75thPercentile() * factor),
@@ -95,7 +92,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
                 sampleBuilder.createSample(dropwizardName, "_count", new ArrayList<String>(), new ArrayList<String>(), count)
         );
         return Arrays.asList(
-                new MetricFamilySamples(name, Type.SUMMARY, helpMessage, samples)
+                new MetricFamilySamples(samples.get(0).name, Type.SUMMARY, helpMessage, samples)
         );
     }
 
@@ -119,13 +116,13 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * Export a Meter as as prometheus COUNTER.
      */
     List<MetricFamilySamples> fromMeter(String dropwizardName, Meter meter) {
-        String name = sanitizeMetricName(dropwizardName);
+        final MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "_total",
+                new ArrayList<String>(),
+                new ArrayList<String>(),
+                meter.getCount());
         return Arrays.asList(
-                new MetricFamilySamples(name + "_total", Type.COUNTER, getHelpMessage(dropwizardName, meter),
-                        Arrays.asList(sampleBuilder.createSample(dropwizardName, "_total",
-                                new ArrayList<String>(),
-                                new ArrayList<String>(),
-                                meter.getCount())))
+                new MetricFamilySamples(sample.name, Type.COUNTER, getHelpMessage(dropwizardName, meter),
+                        Arrays.asList(sample))
 
         );
     }

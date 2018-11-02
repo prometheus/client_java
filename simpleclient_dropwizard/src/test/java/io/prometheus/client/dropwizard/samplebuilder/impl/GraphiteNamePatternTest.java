@@ -105,16 +105,16 @@ public class GraphiteNamePatternTest {
     public void extractParameters() {
         GraphiteNamePattern pattern;
         Map<String, String> expected = new HashMap<String, String>();
-        expected.put("0", "gather");
-        expected.put("1", "400");
+        expected.put("${0}", "gather");
+        expected.put("${1}", "400");
         pattern = new GraphiteNamePattern("org.test.controller.*.status.*");
         Assertions.assertThat(pattern.extractParameters("org.test.controller.gather.status.400"))
                 .isEqualTo(expected);
 
         expected = new HashMap<String, String>();
-        expected.put("0", "org");
-        expected.put("1", "gather");
-        expected.put("2", "400");
+        expected.put("${0}", "org");
+        expected.put("${1}", "gather");
+        expected.put("${2}", "400");
         pattern = new GraphiteNamePattern("*.test.controller.*.status.*");
         Assertions.assertThat(pattern.extractParameters("org.test.controller.gather.status.400"))
                 .isEqualTo(expected);

@@ -2,7 +2,6 @@ package io.prometheus.client.dropwizard.samplebuilder.impl;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
-import org.apache.commons.text.StringSubstitutor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +32,7 @@ public class CustomMappingSampleBuilder implements SampleBuilder {
     @Override
     public Collector.MetricFamilySamples.Sample createSample(final String dropwizardName, final String nameSuffix, final List<String> additionalLabelNames, final List<String> additionalLabelValues, final double value) {
         if (dropwizardName == null) {
-            throw new IllegalArgumentException("Graphite metric name cannot be null");
+            throw new IllegalArgumentException("Dropwizard metric name cannot be null");
         }
 
         CompiledMapperConfig matchingConfig = null;
@@ -67,16 +66,24 @@ public class CustomMappingSampleBuilder implements SampleBuilder {
     }
 
     protected NameAndLabels getNameAndLabels(final MapperConfig config, final Map<String, String> parameters) {
-        final StringSubstitutor strSubstitutor = new StringSubstitutor(parameters);
-        final String metricName = strSubstitutor.replace(config.getName());
+        final String metricName = formatTemplate(config.getName(), parameters);
         final List<String> labels = new ArrayList<String>(config.getLabels().size());
         final List<String> labelValues = new ArrayList<String>(config.getLabels().size());
         for (Map.Entry<String, String> entry : config.getLabels().entrySet()) {
             labels.add(entry.getKey());
-            labelValues.add(strSubstitutor.replace(entry.getValue()));
+            labelValues.add(formatTemplate(entry.getValue(), parameters));
         }
 
         return new NameAndLabels(metricName, labels, labelValues);
+    }
+
+    private String formatTemplate(final String template, final Map<String, String> params) {
+        String result = template;
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            result = result.replace(entry.getKey(), entry.getValue());
+        }
+
+        return result;
     }
 
     static class CompiledMapperConfig {
