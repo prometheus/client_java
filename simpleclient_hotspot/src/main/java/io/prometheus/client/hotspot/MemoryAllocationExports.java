@@ -3,7 +3,7 @@ package io.prometheus.client.hotspot;
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
 import io.prometheus.client.Collector;
-import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.Counter;
 
 import javax.management.Notification;
 import javax.management.NotificationEmitter;
@@ -12,52 +12,35 @@ import javax.management.openmbean.CompositeData;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class MemoryAllocationExports extends Collector {
-  private final Map<String, AtomicLong> allocatedMap;
+  private final Counter allocatedCounter = Counter.build()
+          .name("jvm_memory_pool_allocated_bytes_total")
+          .help("Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.")
+          .labelNames("pool")
+          .create();
 
   public MemoryAllocationExports() {
-    this(ManagementFactory.getGarbageCollectorMXBeans(), new ConcurrentHashMap<String, AtomicLong>());
-  }
-
-  // Visible for testing
-  MemoryAllocationExports(List<GarbageCollectorMXBean> garbageCollectorMXBeans, Map<String, AtomicLong> allocatedMap) {
-    this.allocatedMap = allocatedMap;
-    AllocationCountingNotificationListener listener = new AllocationCountingNotificationListener(allocatedMap);
-    for (GarbageCollectorMXBean garbageCollectorMXBean : garbageCollectorMXBeans) {
+    AllocationCountingNotificationListener listener = new AllocationCountingNotificationListener(allocatedCounter);
+    for (GarbageCollectorMXBean garbageCollectorMXBean : ManagementFactory.getGarbageCollectorMXBeans()) {
       ((NotificationEmitter) garbageCollectorMXBean).addNotificationListener(listener, null, null);
     }
   }
 
   @Override
   public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples> sampleFamilies = new ArrayList<MetricFamilySamples>();
-    CounterMetricFamily allocated = new CounterMetricFamily(
-            "jvm_memory_pool_allocated_bytes",
-            "Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.",
-            Collections.singletonList("pool"));
-    sampleFamilies.add(allocated);
-
-    for (Map.Entry<String, AtomicLong> entry : allocatedMap.entrySet()) {
-      String memoryPool = entry.getKey();
-      AtomicLong bytesAllocated = entry.getValue();
-      allocated.addMetric(Collections.singletonList(memoryPool), bytesAllocated.doubleValue());
-    }
-    return sampleFamilies;
+    return allocatedCounter.collect();
   }
 
   static class AllocationCountingNotificationListener implements NotificationListener {
-    private final Map<String, AtomicLong> lastMemoryUsage = new ConcurrentHashMap<String, AtomicLong>();
-    private final Map<String, AtomicLong> bytesAllocatedMap;
+    private final Map<String, Long> lastMemoryUsage = new HashMap<String, Long>();
+    private final Counter counter;
 
-    AllocationCountingNotificationListener(Map<String, AtomicLong> bytesAllocatedMap) {
-      this.bytesAllocatedMap = bytesAllocatedMap;
+    AllocationCountingNotificationListener(Counter counter) {
+      this.counter = counter;
     }
 
     @Override
@@ -76,9 +59,27 @@ public class MemoryAllocationExports extends Collector {
 
     // Visible for testing
     void handleMemoryPool(String memoryPool, long before, long after) {
-      AtomicLong last = getOrCreate(lastMemoryUsage, memoryPool);
-      long diff1 = before - last.getAndSet(after);
+      /*
+       * Calculate increase in the memory pool by comparing memory used
+       * after last GC, before this GC, and after this GC.
+       * See ascii illustration below.
+       * Make sure to count only increases and ignore decreases.
+       * (Typically a pool will only increase between GCs or during GCs, not both.
+       * E.g. eden pools between GCs. Survivor and old generation pools during GCs.)
+       *
+       *                         |<-- diff1 -->|<-- diff2 -->|
+       * Timeline: |-- last GC --|             |---- GC -----|
+       *                      ___^__        ___^____      ___^___
+       * Mem. usage vars:    / last \      / before \    / after \
+       */
+
+      // Get last memory usage after GC and remember memory used after for next time
+      long last = getAndSet(lastMemoryUsage, memoryPool, after);
+      // Difference since last GC
+      long diff1 = before - last;
+      // Difference during this GC
       long diff2 = after - before;
+      // Make sure to only count increases
       if (diff1 < 0) {
         diff1 = 0;
       }
@@ -87,18 +88,13 @@ public class MemoryAllocationExports extends Collector {
       }
       long increase = diff1 + diff2;
       if (increase > 0) {
-        AtomicLong bytesAllocated = getOrCreate(bytesAllocatedMap, memoryPool);
-        bytesAllocated.getAndAdd(increase);
+        counter.labels(memoryPool).inc(increase);
       }
     }
 
-    private AtomicLong getOrCreate(Map<String, AtomicLong> map, String key) {
-      AtomicLong result = map.get(key);
-      if (result == null) {
-        result = new AtomicLong(0);
-        map.put(key, result);
-      }
-      return result;
+    private static long getAndSet(Map<String, Long> map, String key, long value) {
+      Long last = map.put(key, value);
+      return last == null ? 0 : last;
     }
   }
 }
