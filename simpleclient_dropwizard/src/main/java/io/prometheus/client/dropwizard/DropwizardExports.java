@@ -49,7 +49,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      */
     List<MetricFamilySamples> fromCounter(String dropwizardName, Counter counter) {
         String name = sanitizeMetricName(dropwizardName);
-        MetricFamilySamples.Sample sample = sampleBuilder.createSample(name, "", new ArrayList<String>(), new ArrayList<String>(),
+        MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "", new ArrayList<String>(), new ArrayList<String>(),
                 new Long(counter.getCount()).doubleValue());
         return Arrays.asList(new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(dropwizardName, counter), Arrays.asList(sample)));
     }
@@ -70,7 +70,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
                     obj == null ? "null" : obj.getClass().getName()));
             return new ArrayList<MetricFamilySamples>();
         }
-        MetricFamilySamples.Sample sample = sampleBuilder.createSample(name, "",
+        MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "",
                 new ArrayList<String>(), new ArrayList<String>(), value);
         return Arrays.asList(new MetricFamilySamples(name, Type.GAUGE, getHelpMessage(dropwizardName, gauge), Arrays.asList(sample)));
     }
@@ -86,13 +86,13 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     List<MetricFamilySamples> fromSnapshotAndCount(String dropwizardName, Snapshot snapshot, long count, double factor, String helpMessage) {
         String name = sanitizeMetricName(dropwizardName);
         List<MetricFamilySamples.Sample> samples = Arrays.asList(
-                sampleBuilder.createSample(name, "", Arrays.asList("quantile"), Arrays.asList("0.5"), snapshot.getMedian() * factor),
-                sampleBuilder.createSample(name, "", Arrays.asList("quantile"), Arrays.asList("0.75"), snapshot.get75thPercentile() * factor),
-                sampleBuilder.createSample(name, "", Arrays.asList("quantile"), Arrays.asList("0.95"), snapshot.get95thPercentile() * factor),
-                sampleBuilder.createSample(name, "", Arrays.asList("quantile"), Arrays.asList("0.98"), snapshot.get98thPercentile() * factor),
-                sampleBuilder.createSample(name, "", Arrays.asList("quantile"), Arrays.asList("0.99"), snapshot.get99thPercentile() * factor),
-                sampleBuilder.createSample(name, "", Arrays.asList("quantile"), Arrays.asList("0.999"), snapshot.get999thPercentile() * factor),
-                sampleBuilder.createSample(name, "_count", new ArrayList<String>(), new ArrayList<String>(), count)
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.5"), snapshot.getMedian() * factor),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.75"), snapshot.get75thPercentile() * factor),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.95"), snapshot.get95thPercentile() * factor),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.98"), snapshot.get98thPercentile() * factor),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.99"), snapshot.get99thPercentile() * factor),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.999"), snapshot.get999thPercentile() * factor),
+                sampleBuilder.createSample(dropwizardName, "_count", new ArrayList<String>(), new ArrayList<String>(), count)
         );
         return Arrays.asList(
                 new MetricFamilySamples(name, Type.SUMMARY, helpMessage, samples)
@@ -122,7 +122,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
         String name = sanitizeMetricName(dropwizardName);
         return Arrays.asList(
                 new MetricFamilySamples(name + "_total", Type.COUNTER, getHelpMessage(dropwizardName, meter),
-                        Arrays.asList(sampleBuilder.createSample(name, "_total",
+                        Arrays.asList(sampleBuilder.createSample(dropwizardName, "_total",
                                 new ArrayList<String>(),
                                 new ArrayList<String>(),
                                 meter.getCount())))

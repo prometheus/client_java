@@ -32,8 +32,8 @@ public class DropwizardExportsTest {
 
     @Test
     public void testCounter() {
-        Mockito.when(sampleBuilder.createSample("foo_bar", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1d)).thenReturn(new Collector.MetricFamilySamples.Sample("foo_bar", Collections.<String>emptyList(), Collections.<String>emptyList(), 1d));
-        metricRegistry.counter("foo_bar").inc();
+        Mockito.when(sampleBuilder.createSample("foo.bar", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1d)).thenReturn(new Collector.MetricFamilySamples.Sample("foo_bar", Collections.<String>emptyList(), Collections.<String>emptyList(), 1d));
+        metricRegistry.counter("foo.bar").inc();
         assertEquals(new Double(1),
                 registry.getSampleValue("foo_bar")
         );
@@ -72,17 +72,17 @@ public class DropwizardExportsTest {
             }
         };
 
-        Mockito.when(sampleBuilder.createSample("integer_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234)).thenReturn(new Collector.MetricFamilySamples.Sample("integer_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
-        Mockito.when(sampleBuilder.createSample("long_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234)).thenReturn(new Collector.MetricFamilySamples.Sample("long_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
-        Mockito.when(sampleBuilder.createSample("double_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1.234)).thenReturn(new Collector.MetricFamilySamples.Sample("double_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1.234));
-        Mockito.when(sampleBuilder.createSample("float_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 0.1234F)).thenReturn(new Collector.MetricFamilySamples.Sample("float_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 0.1234F));
-        Mockito.when(sampleBuilder.createSample("boolean_gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1)).thenReturn(new Collector.MetricFamilySamples.Sample("boolean_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1));
+        Mockito.when(sampleBuilder.createSample("integer.gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234)).thenReturn(new Collector.MetricFamilySamples.Sample("integer_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
+        Mockito.when(sampleBuilder.createSample("long.gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234)).thenReturn(new Collector.MetricFamilySamples.Sample("long_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
+        Mockito.when(sampleBuilder.createSample("double.gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1.234)).thenReturn(new Collector.MetricFamilySamples.Sample("double_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1.234));
+        Mockito.when(sampleBuilder.createSample("float.gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 0.1234F)).thenReturn(new Collector.MetricFamilySamples.Sample("float_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 0.1234F));
+        Mockito.when(sampleBuilder.createSample("boolean.gauge", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 1)).thenReturn(new Collector.MetricFamilySamples.Sample("boolean_gauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1));
 
-        metricRegistry.register("double_gauge", doubleGauge);
-        metricRegistry.register("long_gauge", longGauge);
-        metricRegistry.register("integer_gauge", integerGauge);
-        metricRegistry.register("float_gauge", floatGauge);
-        metricRegistry.register("boolean_gauge", booleanGauge);
+        metricRegistry.register("double.gauge", doubleGauge);
+        metricRegistry.register("long.gauge", longGauge);
+        metricRegistry.register("integer.gauge", integerGauge);
+        metricRegistry.register("float.gauge", floatGauge);
+        metricRegistry.register("boolean.gauge", booleanGauge);
 
         assertEquals(new Double(1234),
                 registry.getSampleValue("integer_gauge", new String[]{}, new String[]{}));
