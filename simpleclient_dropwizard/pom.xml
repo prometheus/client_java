@@ -30,11 +30,6 @@
             <name>Francois Visconte</name>
             <email>f.visconte@gmail.com</email>
         </developer>
-        <developer>
-            <id>alessandro-ciccimarra</id>
-            <name>Alessandro Ciccimarra</name>
-            <email>alessandro.ciccimarra@gmail.com</email>
-        </developer>
     </developers>
     <dependencies>
         <dependency>
