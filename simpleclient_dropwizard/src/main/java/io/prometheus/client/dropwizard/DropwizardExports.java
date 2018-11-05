@@ -2,7 +2,7 @@ package io.prometheus.client.dropwizard;
 
 import com.codahale.metrics.*;
 import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
-import io.prometheus.client.dropwizard.samplebuilder.impl.DefaultSampleBuilder;
+import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;

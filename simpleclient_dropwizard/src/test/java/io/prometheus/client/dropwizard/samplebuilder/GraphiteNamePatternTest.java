@@ -1,5 +1,6 @@
-package io.prometheus.client.dropwizard.samplebuilder.impl;
+package io.prometheus.client.dropwizard.samplebuilder;
 
+import io.prometheus.client.dropwizard.samplebuilder.GraphiteNamePattern;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

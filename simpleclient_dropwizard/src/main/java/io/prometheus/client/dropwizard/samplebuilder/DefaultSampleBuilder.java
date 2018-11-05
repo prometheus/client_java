@@ -1,19 +1,17 @@
-package io.prometheus.client.dropwizard.samplebuilder.impl;
+package io.prometheus.client.dropwizard.samplebuilder;
 
 import io.prometheus.client.Collector;
-import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static io.prometheus.client.dropwizard.Utils.sanitizeMetricName;
 
 /**
  * Default implementation of {@link SampleBuilder}.
  * Sanitises the metric name if necessary.
  *
- * @see io.prometheus.client.dropwizard.Utils#sanitizeMetricName(String)
+ * @see io.prometheus.client.Collector#sanitizeMetricName(String)
  */
 public class DefaultSampleBuilder implements SampleBuilder {
     @Override
@@ -22,7 +20,7 @@ public class DefaultSampleBuilder implements SampleBuilder {
         final List<String> labelNames = additionalLabelNames == null ? Collections.<String>emptyList() : additionalLabelNames;
         final List<String> labelValues = additionalLabelValues == null ? Collections.<String>emptyList() : additionalLabelValues;
         return new Collector.MetricFamilySamples.Sample(
-                sanitizeMetricName(dropwizardName + suffix),
+                Collector.sanitizeMetricName(dropwizardName + suffix),
                 new ArrayList<String>(labelNames),
                 new ArrayList<String>(labelValues),
                 value

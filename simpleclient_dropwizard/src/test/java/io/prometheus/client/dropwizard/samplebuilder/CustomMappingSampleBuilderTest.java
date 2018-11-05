@@ -1,6 +1,8 @@
-package io.prometheus.client.dropwizard.samplebuilder.impl;
+package io.prometheus.client.dropwizard.samplebuilder;
 
 import io.prometheus.client.Collector;
+import io.prometheus.client.dropwizard.samplebuilder.CustomMappingSampleBuilder;
+import io.prometheus.client.dropwizard.samplebuilder.MapperConfig;
 import org.junit.Test;
 
 import java.util.*;

@@ -1,11 +1,11 @@
-package io.prometheus.client.dropwizard.samplebuilder.impl;
+package io.prometheus.client.dropwizard.samplebuilder;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.prometheus.client.dropwizard.samplebuilder.impl.MapperConfig.METRIC_GLOB_REGEX;
+import static io.prometheus.client.dropwizard.samplebuilder.MapperConfig.METRIC_GLOB_REGEX;
 
 /**
  * GraphiteNamePattern is initialised with a simplified glob pattern that only allows '*' as special character.

@@ -674,7 +674,7 @@ By default Dropwizard metrics are translated to Prometheus sample sanitizing the
 Dropwizard metric name:
 org.company.controller.save.status.400
 Prometheus metric:
-org_company_controller__save_status_400
+org_company_controller_save_status_400
 ```
 
 It is also possible add custom labels and name to newly created `Sample`s by using a `CustomMappingSampleBuilder` with custom `MapperConfig`s:
@@ -689,7 +689,7 @@ config.setMatch("org.company.controller.*.status.*");
 config.setName("org.company.controller");
 Map<String, String> labels = new HashMap<String,String>();
 // ... more configs
-// Labels to be extracted from the metric. Key=label name. Value= label template
+// Labels to be extracted from the metric. Key=label name. Value=label template
 labels.put("name", "${0}");
 labels.put("status", "${1}");
 config.setLabels(labels);
@@ -704,7 +704,7 @@ be used and labels will be extracted. Using the `CustomMappingSampleBuilder` in 
 Dropwizard metric name
 org.company.controller.save.status.400
 Prometheus metric
-org_company_controller {"name": "save", "status": "400"}
+org_company_controller{name="save",status="400"}
 ```
 
 Template with placeholders can be used both as names and label values. Placeholders are in the `${n}` format where n is the zero based index of the Dropwizard metric name wildcard group we want to extract.

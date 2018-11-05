@@ -1,4 +1,4 @@
-package io.prometheus.client.dropwizard.samplebuilder.impl;
+package io.prometheus.client.dropwizard.samplebuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,13 +74,16 @@ public class MapperConfig {
 
     // for tests
     MapperConfig(final String match) {
+        validateMatch(match);
         this.match = match;
     }
 
     public MapperConfig(final String match, final String name, final Map<String, String> labels) {
-        setMatch(match);
         this.name = name;
-        setLabels(labels);
+        validateMatch(match);
+        this.match = match;
+        validateLabels(labels);
+        this.labels = labels;
     }
 
     public String getMatch() {
@@ -88,9 +91,7 @@ public class MapperConfig {
     }
 
     public void setMatch(final String match) {
-        if (!MATCH_EXPRESSION_PATTERN.matcher(match).matches()) {
-            throw new IllegalArgumentException(String.format("Match expression [%s] does not match required pattern %s", match, MATCH_EXPRESSION_PATTERN));
-        }
+        validateMatch(match);
         this.match = match;
     }
 
@@ -108,6 +109,19 @@ public class MapperConfig {
     }
 
     public void setLabels(final Map<String, String> labels) {
+        validateLabels(labels);
+        this.labels = labels;
+    }
+
+    private void validateMatch(final String match)
+    {
+        if (!MATCH_EXPRESSION_PATTERN.matcher(match).matches()) {
+            throw new IllegalArgumentException(String.format("Match expression [%s] does not match required pattern %s", match, MATCH_EXPRESSION_PATTERN));
+        }
+    }
+
+    private void validateLabels(final Map<String, String> labels)
+    {
         if (labels != null) {
             for (final String key : labels.keySet()) {
                 if (!LABEL_PATTERN.matcher(key).matches()) {
@@ -116,7 +130,6 @@ public class MapperConfig {
             }
 
         }
-        this.labels = labels;
     }
 
     @Override
