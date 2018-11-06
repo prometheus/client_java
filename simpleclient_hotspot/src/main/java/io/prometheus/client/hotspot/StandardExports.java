@@ -61,7 +61,7 @@ public class StandardExports extends Collector {
       // There exist at least 2 similar but unrelated UnixOperatingSystemMXBean interfaces, in
       // com.sun.management and com.ibm.lang.management. Hence use reflection and recursively go
       // through implemented interfaces until the method can be made accessible and invoked.
-      Long processCpuTime = callLongGetter("getProcessCpuTime", osBean);
+      Long processCpuTime = callGetter("getProcessCpuTime", osBean);
       mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
           processCpuTime / NANOSECONDS_PER_SECOND));
     }
@@ -76,10 +76,10 @@ public class StandardExports extends Collector {
     // com.sun.management and com.ibm.lang.management. Hence use reflection and recursively go
     // through implemented interfaces until the method can be made accessible and invoked.
     try {
-      Long openFdCount = callLongGetter("getOpenFileDescriptorCount", osBean);
+      Long openFdCount = callGetter("getOpenFileDescriptorCount", osBean);
       mfs.add(new GaugeMetricFamily(
           "process_open_fds", "Number of open file descriptors.", openFdCount));
-      Long maxFdCount = callLongGetter("getMaxFileDescriptorCount", osBean);
+      Long maxFdCount = callGetter("getMaxFileDescriptorCount", osBean);
       mfs.add(new GaugeMetricFamily(
           "process_max_fds", "Maximum number of open file descriptors.", maxFdCount));
     } catch (Exception e) {
@@ -96,31 +96,47 @@ public class StandardExports extends Collector {
         LOGGER.warning(e.toString());
       }
     }
+
+    try {
+      // since 1.7 com.sun.management.OperatingSystemMXBean add method:
+      // getProcessCpuLoad()
+
+      Double processCpuLoad = callGetter("getProcessCpuLoad", osBean);
+
+      mfs.add(new GaugeMetricFamily(
+          "process_cpu_load",
+          "\"Recent cpu usage\" for the Java Virtual Machine process.",
+          processCpuLoad));
+
+    } catch (Exception e) {
+      // Ignore, expected on jdk 1.6 or previous version.
+    }
+
     return mfs;
   }
 
-  static Long callLongGetter(String getterName, Object obj)
+  static <T> T callGetter(String getterName, Object obj)
       throws NoSuchMethodException, InvocationTargetException {
-    return callLongGetter(obj.getClass().getMethod(getterName), obj);
+    return callGetter(obj.getClass().getMethod(getterName), obj);
   }
 
   /**
    * Attempts to call a method either directly or via one of the implemented interfaces.
    * <p>
    * A Method object refers to a specific method declared in a specific class. The first invocation
-   * might happen with method == SomeConcreteClass.publicLongGetter() and will fail if
+   * might happen with method == SomeConcreteClass.publicGetter() and will fail if
    * SomeConcreteClass is not public. We then recurse over all interfaces implemented by
    * SomeConcreteClass (or extended by those interfaces and so on) until we eventually invoke
-   * callMethod() with method == SomePublicInterface.publicLongGetter(), which will then succeed.
+   * callMethod() with method == SomePublicInterface.publicGetter(), which will then succeed.
    * <p>
    * There is a built-in assumption that the method will never return null (or, equivalently, that
    * it returns the primitive data type, i.e. {@code long} rather than {@code Long}). If this
    * assumption doesn't hold, the method might be called repeatedly and the returned value will be
    * the one produced by the last call.
    */
-  static Long callLongGetter(Method method, Object obj) throws InvocationTargetException  {
+  static <T> T callGetter(Method method, Object obj) throws InvocationTargetException  {
     try {
-      return (Long) method.invoke(obj);
+      return (T) method.invoke(obj);
     } catch (IllegalAccessException e) {
       // Expected, the declaring class or interface might not be public.
     }
@@ -130,7 +146,7 @@ public class StandardExports extends Collector {
     for (Class<?> clazz : method.getDeclaringClass().getInterfaces()) {
       try {
         Method interfaceMethod = clazz.getMethod(method.getName(), method.getParameterTypes());
-        Long result = callLongGetter(interfaceMethod, obj);
+        T result = callGetter(interfaceMethod, obj);
         if (result != null) {
           return result;
         }

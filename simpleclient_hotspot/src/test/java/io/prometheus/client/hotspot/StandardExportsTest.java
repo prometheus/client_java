@@ -33,6 +33,8 @@ public class StandardExportsTest {
     public long getProcessCpuTime();
     public long getFreePhysicalMemorySize();
     public long getTotalPhysicalMemorySize();
+    public double getProcessCpuLoad();
+    public double getSystemCpuLoad();
   }
 
   // Interface with a signature equivalent to com.sun.management.UnixOperatingSystemMXBean and
@@ -53,6 +55,8 @@ public class StandardExportsTest {
     when(osBean.getProcessCpuTime()).thenReturn(123L);
     when(osBean.getOpenFileDescriptorCount()).thenReturn(10L);
     when(osBean.getMaxFileDescriptorCount()).thenReturn(20L);
+    when(osBean.getProcessCpuLoad()).thenReturn(0.1D);
+
     runtimeBean = mock(RuntimeMXBean.class);
     when(runtimeBean.getStartTime()).thenReturn(456L);
   }
@@ -74,6 +78,8 @@ public class StandardExportsTest {
         registry.getSampleValue("process_virtual_memory_bytes", new String[]{}, new String[]{}), .001);
     assertEquals(360 * 1024,
         registry.getSampleValue("process_resident_memory_bytes", new String[]{}, new String[]{}), .001);
+    assertEquals(0.1D,
+        registry.getSampleValue("process_cpu_load", new String[]{}, new String[]{}), .001);
   }
 
   @Test
@@ -106,4 +112,5 @@ public class StandardExportsTest {
       registry.getSampleValue("process_cpu_seconds_total", new String[]{}, new String[]{}), .0000001);
     assertNull(registry.getSampleValue("process_resident_memory_bytes", new String[]{}, new String[]{}));
   }
+
 }
