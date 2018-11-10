@@ -1,11 +1,13 @@
 package io.prometheus.client.dropwizard.samplebuilder;
 
 import io.prometheus.client.Collector;
-import io.prometheus.client.dropwizard.samplebuilder.CustomMappingSampleBuilder;
-import io.prometheus.client.dropwizard.samplebuilder.MapperConfig;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 

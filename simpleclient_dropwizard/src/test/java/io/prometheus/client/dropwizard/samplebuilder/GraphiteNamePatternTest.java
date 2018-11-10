@@ -1,6 +1,5 @@
 package io.prometheus.client.dropwizard.samplebuilder;
 
-import io.prometheus.client.dropwizard.samplebuilder.GraphiteNamePattern;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -68,7 +67,7 @@ public class GraphiteNamePatternTest {
 
         for (Map.Entry<String, String> expected : validPatterns.entrySet()) {
             final GraphiteNamePattern pattern = new GraphiteNamePattern(expected.getKey());
-            Assertions.assertThat(pattern.getPatterString()).isEqualTo(expected.getValue());
+            Assertions.assertThat(pattern.getPatternString()).isEqualTo(expected.getValue());
         }
     }
 
@@ -84,7 +83,7 @@ public class GraphiteNamePatternTest {
         );
 
         for (String metricName : notMatchingMetricNamed) {
-            Assertions.assertThat(pattern.matches(metricName)).as("Matching [%s] against [%s]", metricName, pattern.getPatterString()).isFalse();
+            Assertions.assertThat(pattern.matches(metricName)).as("Matching [%s] against [%s]", metricName, pattern.getPatternString()).isFalse();
         }
     }
 
@@ -98,7 +97,7 @@ public class GraphiteNamePatternTest {
         );
 
         for (String metricName : matchingMetricNamed) {
-            Assertions.assertThat(pattern.matches(metricName)).as("Matching [%s] against [%s]", metricName, pattern.getPatterString()).isTrue();
+            Assertions.assertThat(pattern.matches(metricName)).as("Matching [%s] against [%s]", metricName, pattern.getPatternString()).isTrue();
         }
     }
 

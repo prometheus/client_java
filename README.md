@@ -694,7 +694,7 @@ labels.put("name", "${0}");
 labels.put("status", "${1}");
 config.setLabels(labels);
 
-SampleBuilder sampleBuilder = new CustomMappingSampleBuilder(Arrays.asList(config, ...));
+SampleBuilder sampleBuilder = new CustomMappingSampleBuilder(Arrays.asList(config));
 new DropwizardExports(metricRegistry, sampleBuilder).register();
 ```
 

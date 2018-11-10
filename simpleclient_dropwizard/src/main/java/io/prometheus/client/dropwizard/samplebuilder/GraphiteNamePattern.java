@@ -88,7 +88,7 @@ class GraphiteNamePattern {
         this.pattern = Pattern.compile(regex);
     }
 
-    String getPatterString() {
+    String getPatternString() {
         return this.patternStr;
     }
 }
