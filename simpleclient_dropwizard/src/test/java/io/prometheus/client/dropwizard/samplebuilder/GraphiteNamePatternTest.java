@@ -93,7 +93,7 @@ public class GraphiteNamePatternTest {
                 "org.test.controller.gather.status.400",
                 "org.test.controller.gather2.status.500",
                 "org.test.controller.gather1.status.",
-                "org.test.controller.*.status.*", // this should not matches but let's keep it for simplicity
+                "org.test.controller.*.status.*",
                 "org.test.controller..status.*"
         );
 
