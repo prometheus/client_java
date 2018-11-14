@@ -80,7 +80,7 @@ class GraphiteNamePattern {
         final StringBuilder escapedPattern = new StringBuilder(Pattern.quote(split[0]));
         for (int i = 1; i < split.length; i++) {
             String quoted = Pattern.quote(split[i]);
-            escapedPattern.append("(.+)").append(quoted);
+            escapedPattern.append("([^.]*)").append(quoted);
         }
 
         final String regex = "^" + escapedPattern.toString() + "$";

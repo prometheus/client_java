@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +62,9 @@ public class GraphiteNamePatternTest {
     public void createNew_WHEN_ValidPattern_THEN_ShouldInitInternalPatternSuccessfully() {
         final Map<String, String> validPatterns = new HashMap<String, String>();
         validPatterns.put("org.test.controller.gather.status.400", "^\\Qorg.test.controller.gather.status.400\\E$");
-        validPatterns.put("org.test.controller.*.status.400", "^\\Qorg.test.controller.\\E(.+)\\Q.status.400\\E$");
-        validPatterns.put("org.test.controller.*.status.*", "^\\Qorg.test.controller.\\E(.+)\\Q.status.\\E(.+)\\Q\\E$");
-        validPatterns.put("*.test.controller.*.status.*", "^\\Q\\E(.+)\\Q.test.controller.\\E(.+)\\Q.status.\\E(.+)\\Q\\E$");
+        validPatterns.put("org.test.controller.*.status.400", "^\\Qorg.test.controller.\\E([^.]*)\\Q.status.400\\E$");
+        validPatterns.put("org.test.controller.*.status.*", "^\\Qorg.test.controller.\\E([^.]*)\\Q.status.\\E([^.]*)\\Q\\E$");
+        validPatterns.put("*.test.controller.*.status.*", "^\\Q\\E([^.]*)\\Q.test.controller.\\E([^.]*)\\Q.status.\\E([^.]*)\\Q\\E$");
 
         for (Map.Entry<String, String> expected : validPatterns.entrySet()) {
             final GraphiteNamePattern pattern = new GraphiteNamePattern(expected.getKey());
@@ -75,10 +76,8 @@ public class GraphiteNamePatternTest {
     public void match_WHEN_NotMatchingMetricNameProvided_THEN_ShouldNotMatch() {
         final GraphiteNamePattern pattern = new GraphiteNamePattern("org.test.controller.*.status.*");
         final List<String> notMatchingMetricNamed = Arrays.asList(
-                "org.test.controller.gather1.status.",
                 "org.test.controller.status.400",
                 "",
-                "org.test.controller..status.*",
                 null
         );
 
@@ -93,7 +92,9 @@ public class GraphiteNamePatternTest {
         final List<String> matchingMetricNamed = Arrays.asList(
                 "org.test.controller.gather.status.400",
                 "org.test.controller.gather2.status.500",
-                "org.test.controller.*.status.*" // this should not matches but let's keep it for simplicity
+                "org.test.controller.gather1.status.",
+                "org.test.controller.*.status.*", // this should not matches but let's keep it for simplicity
+                "org.test.controller..status.*"
         );
 
         for (String metricName : matchingMetricNamed) {
@@ -118,5 +119,26 @@ public class GraphiteNamePatternTest {
         pattern = new GraphiteNamePattern("*.test.controller.*.status.*");
         Assertions.assertThat(pattern.extractParameters("org.test.controller.gather.status.400"))
                 .isEqualTo(expected);
+    }
+
+    @Test
+    public void extractParameters_WHEN_emptyStringInDottedMetricsName_THEN_ShouldReturnEmptyString() {
+        GraphiteNamePattern pattern;
+        Map<String, String> expected = new HashMap<String, String>();
+        expected.put("${0}", "");
+        expected.put("${1}", "400");
+        pattern = new GraphiteNamePattern("org.test.controller.*.status.*");
+        Assertions.assertThat(pattern.extractParameters("org.test.controller..status.400"))
+                .isEqualTo(expected);
+
+    }
+
+    @Test
+    public void extractParameters_WHEN_moreDots_THEN_ShouldReturnNoMatches() {
+        GraphiteNamePattern pattern;
+        pattern = new GraphiteNamePattern("org.test.controller.*.status.*");
+        Assertions.assertThat(pattern.extractParameters("org.test.controller...status.400"))
+                .isEqualTo(Collections.emptyMap());
+
     }
 }
