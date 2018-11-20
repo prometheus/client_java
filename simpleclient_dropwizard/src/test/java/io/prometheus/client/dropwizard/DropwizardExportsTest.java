@@ -7,14 +7,13 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -165,11 +164,22 @@ public class DropwizardExportsTest {
 
     @Test
     public void testMeter() throws IOException, InterruptedException {
-        Mockito.when(sampleBuilder.createSample("meter", "_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 2)).thenReturn(new Collector.MetricFamilySamples.Sample("meter_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 2));
+
+        Mockito.when(sampleBuilder.createSample(eq("meter"), eq(""), ArgumentMatchers.<String>anyList(), ArgumentMatchers.<String>anyList(), anyDouble()))
+                .thenAnswer(new Answer<Collector.MetricFamilySamples.Sample>() {
+                                @Override
+                                public Collector.MetricFamilySamples.Sample answer(InvocationOnMock invocation) throws Throwable {
+                                    Object[] args = invocation.getArguments();
+                                    return new Collector.MetricFamilySamples.Sample((String) args[0], (List<String>) args[2], (List<String>) args[3], (Double) args[4]);
+                                }
+                            }
+                );
+
         Meter meter = metricRegistry.meter("meter");
         meter.mark();
         meter.mark();
-        assertEquals(new Double(2), registry.getSampleValue("meter_total"));
+        meter.mark();
+        assertEquals(new Double(3), registry.getSampleValue("meter", new String[]{"count"}, new String[]{"total"}));
     }
 
     @Test
@@ -197,7 +207,7 @@ public class DropwizardExportsTest {
                 .thenReturn(new Collector.MetricFamilySamples.Sample("my_application_namedCounter1", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
 
         Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
-                .thenReturn(new Collector.MetricFamilySamples.Sample("my_application_namedMeter1_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
+                .thenReturn(new Collector.MetricFamilySamples.Sample("my_application_namedMeter1", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
 
         Mockito.when(sampleBuilder.createSample(eq("my.application.namedHistogram1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
                 .thenReturn(new Collector.MetricFamilySamples.Sample("my_application_namedHistogram1", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
@@ -224,7 +234,7 @@ public class DropwizardExportsTest {
 
         assertTrue(elements.keySet().contains("my_application_namedTimer1"));
         assertTrue(elements.keySet().contains("my_application_namedCounter1"));
-        assertTrue(elements.keySet().contains("my_application_namedMeter1_total"));
+        assertTrue(elements.keySet().contains("my_application_namedMeter1"));
         assertTrue(elements.keySet().contains("my_application_namedHistogram1"));
         assertTrue(elements.keySet().contains("my_application_namedGauge1"));
 
@@ -234,7 +244,7 @@ public class DropwizardExportsTest {
         assertThat(elements.get("my_application_namedCounter1").help,
                 is("Generated from Dropwizard metric import (metric=my.application.namedCounter1, type=com.codahale.metrics.Counter)"));
 
-        assertThat(elements.get("my_application_namedMeter1_total").help,
+        assertThat(elements.get("my_application_namedMeter1").help,
                 is("Generated from Dropwizard metric import (metric=my.application.namedMeter1, type=com.codahale.metrics.Meter)"));
 
         assertThat(elements.get("my_application_namedHistogram1").help,
@@ -263,11 +273,11 @@ public class DropwizardExportsTest {
         Mockito.when(sampleBuilder.createSample(eq("my.application.namedCounter2"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
                 .thenReturn(namedCounter2);
 
-        final Collector.MetricFamilySamples.Sample namedMeter1 = new Collector.MetricFamilySamples.Sample("my_application_namedMeter_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
+        final Collector.MetricFamilySamples.Sample namedMeter1 = new Collector.MetricFamilySamples.Sample("my_application_namedMeter", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
         Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
                 .thenReturn(namedMeter1);
 
-        final Collector.MetricFamilySamples.Sample namedMeter2 = new Collector.MetricFamilySamples.Sample("my_application_namedMeter_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
+        final Collector.MetricFamilySamples.Sample namedMeter2 = new Collector.MetricFamilySamples.Sample("my_application_namedMeter", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
         Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter2"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
                 .thenReturn(namedMeter2);
 
@@ -321,10 +331,10 @@ public class DropwizardExportsTest {
         assertTrue(namedCounter.samples.contains(namedCounter1));
         assertTrue(namedCounter.samples.contains(namedCounter2));
 
-        final Collector.MetricFamilySamples namedMeter = elements.get("my_application_namedMeter_total");
+        final Collector.MetricFamilySamples namedMeter = elements.get("my_application_namedMeter");
         assertNotNull(namedMeter);
         assertEquals(Collector.Type.COUNTER, namedMeter.type);
-        assertEquals(2, namedMeter.samples.size());
+        assertEquals(10, namedMeter.samples.size());
         assertTrue(namedMeter.samples.contains(namedMeter1));
         assertTrue(namedMeter.samples.contains(namedMeter2));
 

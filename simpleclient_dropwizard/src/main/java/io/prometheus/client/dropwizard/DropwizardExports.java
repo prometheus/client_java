@@ -116,12 +116,15 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * Export a Meter as as prometheus COUNTER.
      */
     MetricFamilySamples fromMeter(String dropwizardName, Meter meter) {
-        final MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "_total",
-                new ArrayList<String>(),
-                new ArrayList<String>(),
-                meter.getCount());
-        return new MetricFamilySamples(sample.name, Type.COUNTER, getHelpMessage(dropwizardName, meter),
-                        Arrays.asList(sample));
+        System.err.println("Passou Aqui!!!");
+        List<MetricFamilySamples.Sample> samples = Arrays.asList(
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("total"), meter.getCount()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("mean"), meter.getMeanRate()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("1min"), meter.getOneMinuteRate()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("5min"), meter.getFiveMinuteRate()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("15min"), meter.getFifteenMinuteRate())
+        );
+        return new MetricFamilySamples(samples.get(0).name, Type.COUNTER, getHelpMessage(dropwizardName, meter), samples);
     }
 
     @Override
