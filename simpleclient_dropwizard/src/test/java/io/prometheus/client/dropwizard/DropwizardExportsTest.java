@@ -16,15 +16,8 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyListOf;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 
 
 public class DropwizardExportsTest {
@@ -164,7 +157,6 @@ public class DropwizardExportsTest {
 
     @Test
     public void testMeter() throws IOException, InterruptedException {
-
         Mockito.when(sampleBuilder.createSample(eq("meter"), eq(""), ArgumentMatchers.<String>anyList(), ArgumentMatchers.<String>anyList(), anyDouble()))
                 .thenAnswer(new Answer<Collector.MetricFamilySamples.Sample>() {
                                 @Override
@@ -176,10 +168,16 @@ public class DropwizardExportsTest {
                 );
 
         Meter meter = metricRegistry.meter("meter");
-        meter.mark();
-        meter.mark();
-        meter.mark();
-        assertEquals(new Double(3), registry.getSampleValue("meter", new String[]{"count"}, new String[]{"total"}));
+
+        int i = 0;
+        int markCount = 10;
+
+        while (i++ < markCount) {
+            meter.mark();
+        }
+
+        assertEquals(new Double(markCount), registry.getSampleValue("meter", new String[]{"count"}, new String[]{"total"}));
+        assertTrue(registry.getSampleValue("meter", new String[]{"rate"}, new String[]{"mean"}) > 0);
     }
 
     @Test

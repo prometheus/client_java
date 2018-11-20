@@ -118,10 +118,10 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     MetricFamilySamples fromMeter(String dropwizardName, Meter meter) {
         List<MetricFamilySamples.Sample> samples = Arrays.asList(
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("total"), meter.getCount()),
-                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("mean"), meter.getMeanRate()),
-                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("1min"), meter.getOneMinuteRate()),
-                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("5min"), meter.getFiveMinuteRate()),
-                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("count"), Arrays.asList("15min"), meter.getFifteenMinuteRate())
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("rate"), Arrays.asList("mean"), meter.getMeanRate()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("rate"), Arrays.asList("1min"), meter.getOneMinuteRate()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("rate"), Arrays.asList("5min"), meter.getFiveMinuteRate()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("rate"), Arrays.asList("15min"), meter.getFifteenMinuteRate())
         );
         return new MetricFamilySamples(samples.get(0).name, Type.COUNTER, getHelpMessage(dropwizardName, meter), samples);
     }
