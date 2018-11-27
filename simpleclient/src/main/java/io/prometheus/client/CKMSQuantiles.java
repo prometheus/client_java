@@ -267,7 +267,7 @@ class CKMSQuantiles {
 
         @Override
         public String toString() {
-            return String.format("%d, %d, %d", value, g, delta);
+            return String.format("I{val=%.3f, g=%d, del=%d}", value, g, delta);
         }
     }
 
@@ -286,7 +286,7 @@ class CKMSQuantiles {
 
         @Override
         public String toString() {
-            return String.format("Q{q=%.3f, eps=%.3f})", quantile, error);
+            return String.format("Q{q=%.3f, eps=%.3f}", quantile, error);
         }
     }
 
