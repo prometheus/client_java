@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>parent</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.6.0</version>
     </parent>
 
     <groupId>io.prometheus</groupId>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>0.6.0</version>
         </dependency>
 
         <!-- We support Hibernate versions >= 4.2 -->
