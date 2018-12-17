@@ -58,8 +58,8 @@ public class CustomMappingSampleBuilder implements SampleBuilder {
 
         return defaultMetricSampleBuilder.createSample(
                 dropwizardName, nameSuffix,
-                Collections.<String>emptyList(),
-                Collections.<String>emptyList(),
+                additionalLabelNames,
+                additionalLabelValues,
                 value
         );
     }

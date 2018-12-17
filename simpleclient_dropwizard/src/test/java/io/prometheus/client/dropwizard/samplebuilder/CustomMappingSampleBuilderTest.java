@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 public class CustomMappingSampleBuilderTest {
     @Test(expected = IllegalArgumentException.class)
-    public void test_WHEN_EmptyConfig_THEN_ShouldReturnDefaultSample() {
+    public void test_WHEN_EmptyConfig_THEN_Fail() {
         final CustomMappingSampleBuilder converter = new CustomMappingSampleBuilder(Collections.<MapperConfig>emptyList());
     }
 
@@ -26,9 +26,9 @@ public class CustomMappingSampleBuilderTest {
         );
         final CustomMappingSampleBuilder converter = new CustomMappingSampleBuilder(mapperConfigs);
         final Collector.MetricFamilySamples.Sample result = converter.createSample(
-                "app.okhttpclient.client.HttpClient.service.total", "", Collections.<String>emptyList(), Collections.<String>emptyList(), 0d);
+                "app.okhttpclient.client.HttpClient.service.total", "", Collections.singletonList("quantile"), Collections.singletonList("0.99"), 0d);
 
-        assertEquals(new Collector.MetricFamilySamples.Sample("app_okhttpclient_client_HttpClient_service_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 0d), result);
+        assertEquals(new Collector.MetricFamilySamples.Sample("app_okhttpclient_client_HttpClient_service_total", Collections.singletonList("quantile"), Collections.singletonList("0.99"), 0d), result);
     }
 
     @Test
