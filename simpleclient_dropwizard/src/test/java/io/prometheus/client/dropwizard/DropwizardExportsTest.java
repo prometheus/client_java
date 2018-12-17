@@ -5,9 +5,11 @@ import com.codahale.metrics.Timer;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.internal.matchers.GreaterThan;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -186,6 +188,10 @@ public class DropwizardExportsTest {
         // We slept for 1Ms so we ensure that all timers are above 1ms:
         assertTrue(registry.getSampleValue("timer", new String[]{"quantile"}, new String[]{"0.99"}) > 0.001);
         assertEquals(new Double(1.0D), registry.getSampleValue("timer_count"));
+        assertTrue(registry.getSampleValue("timer_mean") > 1000000.0);
+        assertTrue(registry.getSampleValue("timer_min") > 1000000.0);
+        assertEquals(registry.getSampleValue("timer_max"), registry.getSampleValue("timer_min"));
+        assertEquals(0.0, registry.getSampleValue("timer_stddev"), 0.0);
     }
 
     @Test
@@ -312,7 +318,7 @@ public class DropwizardExportsTest {
         final Collector.MetricFamilySamples namedTimer = elements.get("my_application_namedTimer");
         assertNotNull(namedTimer);
         assertEquals(Collector.Type.SUMMARY, namedTimer.type);
-        assertEquals(14, namedTimer.samples.size());
+        assertEquals(22, namedTimer.samples.size());
 
         final Collector.MetricFamilySamples namedCounter = elements.get("my_application_namedCounter");
         assertNotNull(namedCounter);
@@ -332,7 +338,7 @@ public class DropwizardExportsTest {
         assertNotNull(namedHistogram);
         assertEquals(Collector.Type.SUMMARY, namedHistogram.type);
         assertEquals(Collector.Type.SUMMARY, namedHistogram.type);
-        assertEquals(14, namedHistogram.samples.size());
+        assertEquals(22, namedHistogram.samples.size());
 
         final Collector.MetricFamilySamples namedGauge = elements.get("my_application_namedGauge");
         assertNotNull(namedGauge);
