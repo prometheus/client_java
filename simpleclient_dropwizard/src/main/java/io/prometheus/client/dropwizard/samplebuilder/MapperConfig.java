@@ -86,6 +86,11 @@ public class MapperConfig {
         this.labels = labels;
     }
 
+    @Override
+    public String toString() {
+        return String.format("MapperConfig{match=%s, name=%s, labels=%s}", match, name, labels);
+    }
+
     public String getMatch() {
         return match;
     }
