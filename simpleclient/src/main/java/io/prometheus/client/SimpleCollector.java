@@ -53,6 +53,7 @@ public abstract class SimpleCollector<Child> extends Collector {
 
   protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
   protected Child noLabelsChild;
+  protected final boolean shared;
 
   /**
    * Return the Child with the given labels, creating it if needed.
@@ -152,6 +153,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   }
 
   protected SimpleCollector(Builder b) {
+    shared = b.shared;
     if (b.name.isEmpty()) throw new IllegalStateException("Name hasn't been set.");
     String name = b.name;
     if (!b.subsystem.isEmpty()) {
@@ -187,6 +189,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     String[] labelNames = new String[]{};
     // Some metrics require additional setup before the initialization can be done.
     boolean dontInitializeNoLabelsChild;
+    boolean shared = true;
 
     /**
      * Set the name of the metric. Required.
@@ -202,6 +205,15 @@ public abstract class SimpleCollector<Child> extends Collector {
       this.subsystem = subsystem;
       return (B)this;
     }
+
+    /**
+     * Set if {@code true} shared between multiple producer threads. Optional ({@code true} by default).
+     */
+    public B shared(boolean shared) {
+      this.shared = shared;
+      return (B) this;
+    }
+
     /**
      * Set the namespace of the metric. Optional.
      */

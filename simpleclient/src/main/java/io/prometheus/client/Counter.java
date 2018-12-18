@@ -97,7 +97,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
 
   @Override
   protected Child newChild() {
-    return new Child();
+    return new Child(shared);
   }
 
   /**
@@ -107,7 +107,11 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
    */
   public static class Child {
-    private final DoubleAdder value = new DoubleAdder();
+    private final DoubleCounter value;
+
+    public Child(boolean shared) {
+      value = shared ? DoubleCounters.shared() : DoubleCounters.exclusive();
+    }
     /**
      * Increment the counter by 1.
      */

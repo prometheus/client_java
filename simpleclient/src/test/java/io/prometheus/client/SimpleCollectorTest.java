@@ -123,8 +123,8 @@ public class SimpleCollectorTest {
   }
 
   @Test
-  public void testSetChild() {
-    metric.setChild(new Gauge.Child(){
+  public void testSetSharedChild() {
+    metric.setChild(new Gauge.Child(true){
       public double get() {
         return 42;
       }
@@ -133,8 +133,27 @@ public class SimpleCollectorTest {
   }
 
   @Test
-  public void testSetChildReturnsGauge() {
-    Gauge g = metric.setChild(new Gauge.Child(){
+  public void testSetSharedChildReturnsGauge() {
+    Gauge g = metric.setChild(new Gauge.Child(true){
+      public double get() {
+        return 42;
+      }
+    }, "a");
+  }
+
+  @Test
+  public void testSetExclusiveChild() {
+    metric.setChild(new Gauge.Child(false){
+      public double get() {
+        return 42;
+      }
+    }, "a");
+    assertEquals(42.0, getValue("a").doubleValue(), .001);
+  }
+
+  @Test
+  public void testSetExclusiveChildReturnsGauge() {
+    Gauge g = metric.setChild(new Gauge.Child(false){
       public double get() {
         return 42;
       }

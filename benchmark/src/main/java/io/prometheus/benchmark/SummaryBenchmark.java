@@ -3,13 +3,16 @@ package io.prometheus.benchmark;
 import com.codahale.metrics.MetricRegistry;
 
 import java.util.concurrent.TimeUnit;
+
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -17,6 +20,9 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 @State(Scope.Benchmark)
 public class SummaryBenchmark {
+
+  @Param({"true", "false"})
+  public boolean shared;
 
   MetricRegistry registry;
   com.codahale.metrics.Histogram codahaleHistogram;
@@ -31,7 +37,10 @@ public class SummaryBenchmark {
   io.prometheus.client.Histogram prometheusSimpleHistogramNoLabels;
 
   @Setup
-  public void setup() {
+  public void setup(BenchmarkParams params) {
+    if (params.getThreads() > 1 && !shared) {
+      throw new IllegalStateException("Exclusive counters are supported only if threads = 1");
+    }
     prometheusSummary = io.prometheus.client.metrics.Summary.newBuilder()
       .name("name")
       .documentation("some description..")
@@ -41,23 +50,26 @@ public class SummaryBenchmark {
     prometheusSimpleSummary = io.prometheus.client.Summary.build()
       .name("name")
       .help("some description..")
-      .labelNames("some", "group").create();
+      .labelNames("some", "group")
+      .shared(shared).create();
     prometheusSimpleSummaryChild = prometheusSimpleSummary.labels("test", "group");
 
     prometheusSimpleSummaryNoLabels = io.prometheus.client.Summary.build()
       .name("name")
       .help("some description..")
+      .shared(shared)
       .create();
 
     prometheusSimpleHistogram = io.prometheus.client.Histogram.build()
       .name("name")
       .help("some description..")
-      .labelNames("some", "group").create();
+      .labelNames("some", "group").shared(shared).create();
     prometheusSimpleHistogramChild = prometheusSimpleHistogram.labels("test", "group");
 
     prometheusSimpleHistogramNoLabels = io.prometheus.client.Histogram.build()
       .name("name")
       .help("some description..")
+      .shared(shared)
       .create();
 
     registry = new MetricRegistry();
@@ -133,7 +145,7 @@ public class SummaryBenchmark {
       .include(SummaryBenchmark.class.getSimpleName())
       .warmupIterations(5)
       .measurementIterations(4)
-      .threads(4)
+      .threads(1)
       .forks(1)
       .build();
 

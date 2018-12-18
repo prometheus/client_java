@@ -3,13 +3,16 @@ package io.prometheus.benchmark;
 import com.codahale.metrics.MetricRegistry;
 
 import java.util.concurrent.TimeUnit;
+
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -17,6 +20,9 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 @State(Scope.Benchmark)
 public class CounterBenchmark {
+
+  @Param({"true", "false"})
+  public boolean shared;
 
   MetricRegistry registry;
   com.codahale.metrics.Counter codahaleCounter;
@@ -29,7 +35,10 @@ public class CounterBenchmark {
   io.prometheus.client.Counter prometheusSimpleCounterNoLabels;
 
   @Setup
-  public void setup() {
+  public void setup(BenchmarkParams params) {
+    if (params.getThreads() > 1 && !shared) {
+      throw new IllegalStateException("Exclusive counters are supported only if threads = 1");
+    }
     prometheusCounter = io.prometheus.client.metrics.Counter.newBuilder()
       .name("name")
       .documentation("some description..")
@@ -39,12 +48,13 @@ public class CounterBenchmark {
     prometheusSimpleCounter = io.prometheus.client.Counter.build()
       .name("name")
       .help("some description..")
-      .labelNames("some", "group").create();
+      .labelNames("some", "group").shared(shared).create();
     prometheusSimpleCounterChild = prometheusSimpleCounter.labels("test", "group");
 
     prometheusSimpleCounterNoLabels = io.prometheus.client.Counter.build()
       .name("name")
       .help("some description..")
+      .shared(shared)
       .create();
 
     registry = new MetricRegistry();
@@ -107,7 +117,7 @@ public class CounterBenchmark {
       .include(CounterBenchmark.class.getSimpleName())
       .warmupIterations(5)
       .measurementIterations(4)
-      .threads(4)
+      .threads(1)
       .forks(1)
       .build();
 

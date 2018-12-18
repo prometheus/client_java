@@ -150,7 +150,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
 
   @Override
   protected Child newChild() {
-    return new Child(buckets);
+    return new Child(buckets, shared);
   }
 
   /**
@@ -236,30 +236,17 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       }
     }
 
-    private Child(double[] buckets) {
-      upperBounds = buckets;
-      cumulativeCounts = new DoubleAdder[buckets.length];
-      for (int i = 0; i < buckets.length; ++i) {
-        cumulativeCounts[i] = new DoubleAdder();
-      }
-    }
-    private final double[] upperBounds;
-    private final DoubleAdder[] cumulativeCounts;
-    private final DoubleAdder sum = new DoubleAdder();
+    private final DoubleHistogram observations;
 
+    private Child(double[] buckets, boolean shared) {
+      observations = shared ? DoubleHistograms.shared(buckets) : DoubleHistograms.exclusive(buckets);
+    }
 
     /**
      * Observe the given amount.
      */
     public void observe(double amt) {
-      for (int i = 0; i < upperBounds.length; ++i) {
-        // The last bucket is +Inf, so we always increment.
-        if (amt <= upperBounds[i]) {
-          cumulativeCounts[i].add(1);
-          break;
-        }
-      }
-      sum.add(amt);
+      observations.observe(amt);
     }
     /**
      * Start a timer to track a duration.
@@ -275,13 +262,9 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
      * <em>Warning:</em> The definition of {@link Value} is subject to change.
      */
     public Value get() {
-      double[] buckets = new double[cumulativeCounts.length];
-      double acc = 0;
-      for (int i = 0; i < cumulativeCounts.length; ++i) {
-        acc += cumulativeCounts[i].sum();
-        buckets[i] = acc;
-      }
-      return new Value(sum.sum(), buckets);
+      double[] buckets = new double[observations.buckets()];
+      observations.observedValues(buckets);
+      return new Value(observations.observationsSum(), buckets);
     }
   }
 

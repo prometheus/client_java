@@ -95,7 +95,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
 
   @Override
   protected Child newChild() {
-    return new Child();
+    return new Child(shared);
   }
 
    /**
@@ -134,9 +134,13 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
    */
   public static class Child {
-    private final DoubleAdder value = new DoubleAdder();
+    private final DoubleCounter value;
 
     static TimeProvider timeProvider = new TimeProvider();
+
+    public Child(boolean shared) {
+      value = shared ? DoubleCounters.shared() : DoubleCounters.exclusive();
+    }
 
     /**
      * Increment the gauge by 1.

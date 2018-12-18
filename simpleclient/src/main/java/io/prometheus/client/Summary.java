@@ -156,7 +156,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
   @Override
   protected Child newChild() {
-    return new Child(quantiles, maxAgeSeconds, ageBuckets);
+    return new Child(quantiles, maxAgeSeconds, ageBuckets, shared);
   }
 
 
@@ -257,18 +257,20 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     // however Prometheus as whole has other races
     // that mean adding atomicity here wouldn't be useful.
     // This should be reevaluated in the future.
-    private final DoubleAdder count = new DoubleAdder();
-    private final DoubleAdder sum = new DoubleAdder();
+    private final DoubleCounter count;
+    private final DoubleCounter sum;
     private final List<Quantile> quantiles;
     private final TimeWindowQuantiles quantileValues;
 
-    private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets) {
+    private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets, boolean shared) {
       this.quantiles = quantiles;
       if (quantiles.size() > 0) {
         quantileValues = new TimeWindowQuantiles(quantiles.toArray(new Quantile[]{}), maxAgeSeconds, ageBuckets);
       } else {
         quantileValues = null;
       }
+      count = shared ? DoubleCounters.shared() : DoubleCounters.exclusive();
+      sum = shared ? DoubleCounters.shared() : DoubleCounters.exclusive();
     }
 
     /**
