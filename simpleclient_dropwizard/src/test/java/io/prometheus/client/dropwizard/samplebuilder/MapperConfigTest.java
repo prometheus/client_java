@@ -3,6 +3,7 @@ package io.prometheus.client.dropwizard.samplebuilder;
 import io.prometheus.client.dropwizard.samplebuilder.MapperConfig;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,5 +39,20 @@ public class MapperConfigTest {
         labels.put("valid", "${0}");
         labels.put("not valid", "${0}");
         mapperConfig.setLabels(labels);
+    }
+
+    @Test
+    public void toString_WHEN_EmptyConfig_AllGood() {
+        final MapperConfig mapperConfig = new MapperConfig();
+        assertEquals("MapperConfig{match=null, name=null, labels={}}", mapperConfig.toString());
+    }
+
+    @Test
+    public void toString_WHEN_FullyConfigured_AllGood() {
+        final MapperConfig mapperConfig = new MapperConfig();
+        mapperConfig.setMatch("com.company.meter.*.foo");
+        mapperConfig.setName("foo");
+        mapperConfig.setLabels(Collections.singletonMap("type", "${0}"));
+        assertEquals("MapperConfig{match=com.company.meter.*.foo, name=foo, labels={type=${0}}}", mapperConfig.toString());
     }
 }
