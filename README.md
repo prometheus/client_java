@@ -430,6 +430,22 @@ new QueuedThreadPoolStatisticsCollector()
     .register();
 ```
 
+### Retrofit
+
+There is an interceptor for OkHttp which allows for the measuring the duration taken for
+Retrofit requests. You can do it by registering the interceptor with OkHttp like this:
+
+```java
+OkHttpClient client = new OkHttpClient.Builder()
+    .addInterceptor(new MetricsInterceptor("retrofit_calls", null, null))
+    .build();
+
+  Retrofit retrofit = new Retrofit.Builder()
+    .baseUrl("http://acme.com")
+    .client(client)
+    .build();
+```
+
 #### Servlet Filter
 
 There is a servlet filter available for measuring the duration taken by servlet
