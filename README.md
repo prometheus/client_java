@@ -440,7 +440,7 @@ OkHttpClient client = new OkHttpClient.Builder()
     .addInterceptor(new MetricsInterceptor("retrofit_calls", null, null))
     .build();
 
-  Retrofit retrofit = new Retrofit.Builder()
+Retrofit retrofit = new Retrofit.Builder()
     .baseUrl("http://acme.com")
     .client(client)
     .build();
