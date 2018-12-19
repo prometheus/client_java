@@ -1,5 +1,7 @@
 package io.prometheus.client.hotspot;
 
+import io.prometheus.client.CollectorRegistry;
+
 /**
  * Registers the default Hotspot collectors.
  * <p>
@@ -15,21 +17,31 @@ package io.prometheus.client.hotspot;
  */
 public class DefaultExports {
   private static boolean initialized = false;
+
   /**
-   * Register the default Hotspot collectors.
+   * Register the default Hotspot collectors with the default
+   * registry. It is safe to call this method multiple times, as
+   * this will only register the collectors once.
    */
   public static synchronized void initialize() {
     if (!initialized) {
-      new StandardExports().register();
-      new MemoryPoolsExports().register();
-      new MemoryAllocationExports().register();
-      new BufferPoolsExports().register();
-      new GarbageCollectorExports().register();
-      new ThreadExports().register();
-      new ClassLoadingExports().register();
-      new VersionInfoExports().register();
+      register(CollectorRegistry.defaultRegistry);
       initialized = true;
     }
+  }
+
+  /**
+   * Register the default Hotspot collectors with the given registry.
+   */
+  public static void register(CollectorRegistry registry) {
+    new StandardExports().register(registry);
+    new MemoryPoolsExports().register(registry);
+    new MemoryAllocationExports().register(registry);
+    new BufferPoolsExports().register(registry);
+    new GarbageCollectorExports().register(registry);
+    new ThreadExports().register(registry);
+    new ClassLoadingExports().register(registry);
+    new VersionInfoExports().register(registry);
   }
 
 }
