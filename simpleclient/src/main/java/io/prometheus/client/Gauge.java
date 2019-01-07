@@ -29,9 +29,9 @@ import java.util.concurrent.Callable;
  *         .name("inprogress_requests").help("Inprogress requests.").register();
  *
  *     void processRequest() {
- *        inprogressRequest.inc();
+ *        inprogressRequests.inc();
  *        // Your code here.
- *        inprogressRequest.dec();
+ *        inprogressRequests.dec();
  *     }
  *   }
  * }
