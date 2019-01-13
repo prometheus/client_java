@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
 import com.sun.net.httpserver.HttpHandler;
@@ -112,11 +113,15 @@ public class HTTPServer {
     }
 
 
-    static class DaemonThreadFactory implements ThreadFactory {
-        private ThreadFactory delegate;
+    static class NamedDaemonThreadFactory implements ThreadFactory {
+        private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
+
+        private final int poolNumber = POOL_NUMBER.getAndIncrement();
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+        private final ThreadFactory delegate;
         private final boolean daemon;
 
-        DaemonThreadFactory(ThreadFactory delegate, boolean daemon) {
+        NamedDaemonThreadFactory(ThreadFactory delegate, boolean daemon) {
             this.delegate = delegate;
             this.daemon = daemon;
         }
@@ -124,12 +129,13 @@ public class HTTPServer {
         @Override
         public Thread newThread(Runnable r) {
             Thread t = delegate.newThread(r);
+            t.setName(String.format("prometheus-http-%d-%d", poolNumber, threadNumber.getAndIncrement()));
             t.setDaemon(daemon);
             return t;
         }
 
         static ThreadFactory defaultThreadFactory(boolean daemon) {
-            return new DaemonThreadFactory(Executors.defaultThreadFactory(), daemon);
+            return new NamedDaemonThreadFactory(Executors.defaultThreadFactory(), daemon);
         }
     }
 
@@ -146,7 +152,7 @@ public class HTTPServer {
         HttpHandler mHandler = new HTTPMetricHandler(registry);
         server.createContext("/", mHandler);
         server.createContext("/metrics", mHandler);
-        executorService = Executors.newFixedThreadPool(5, DaemonThreadFactory.defaultThreadFactory(daemon));
+        executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
         server.setExecutor(executorService);
         start(daemon);
     }
@@ -199,7 +205,7 @@ public class HTTPServer {
                     server.start();
                 }
             }, null);
-            DaemonThreadFactory.defaultThreadFactory(daemon).newThread(startTask).start();
+            NamedDaemonThreadFactory.defaultThreadFactory(daemon).newThread(startTask).start();
             try {
                 startTask.get();
             } catch (ExecutionException e) {
