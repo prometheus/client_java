@@ -162,7 +162,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     }
     fullname = name;
     checkMetricName(fullname);
-    if (b.help.isEmpty()) throw new IllegalStateException("Help hasn't been set.");
+    if (b.help != null && b.help.isEmpty()) throw new IllegalStateException("Help hasn't been set.");
     help = b.help;
     labelNames = Arrays.asList(b.labelNames);
 
