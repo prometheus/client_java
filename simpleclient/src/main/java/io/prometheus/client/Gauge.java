@@ -143,7 +143,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
      * Increment the gauge by 1.
      */
     public void inc() {
-      inc(1);
+      inc(1.0);
     }
     /**
      * Increment the gauge by the given amount.
@@ -155,7 +155,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
      * Decrement the gauge by 1.
      */
     public void dec() {
-      dec(1);
+      dec(1.0);
     }
     /**
      * Decrement the gauge by the given amount.
@@ -238,7 +238,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    * Increment the gauge with no labels by 1.
    */
   public void inc() {
-    inc(1);
+    inc(1.0);
   }
   /**
    * Increment the gauge with no labels by the given amount.
@@ -250,7 +250,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    * Decrement the gauge with no labels by 1.
    */
   public void dec() {
-    dec(1);
+    dec(1.0);
   }
   /**
    * Decrement the gauge with no labels by the given amount.
@@ -312,9 +312,12 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
 
   @Override
   public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
-    for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
+    final Map.Entry<List<String>, Child>[] children = children();
+    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.length);
+    for(Map.Entry<List<String>, Child> c : children) {
+      if (c != null) {
+        samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
+      }
     }
     return familySamplesList(Type.GAUGE, samples);
   }

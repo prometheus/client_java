@@ -112,14 +112,14 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
      * Increment the counter by 1.
      */
     public void inc() {
-      inc(1);
+      inc(1.0);
     }
     /**
      * Increment the counter by the given amount.
      * @throws IllegalArgumentException If amt is negative.
      */
     public void inc(double amt) {
-      if (amt < 0) {
+      if (amt < 0.0) {
         throw new IllegalArgumentException("Amount to increment must be non-negative.");
       }
       value.add(amt);
@@ -137,7 +137,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
    * Increment the counter with no labels by 1.
    */
   public void inc() {
-    inc(1);
+    inc(1.0);
   }
   /**
    * Increment the counter with no labels by the given amount.
@@ -156,9 +156,12 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
 
   @Override
   public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
-    for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
+    final Map.Entry<List<String>, Child>[] children = children();
+    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.length);
+    for(Map.Entry<List<String>, Child> c : children) {
+      if (c != null) {
+        samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
+      }
     }
     return familySamplesList(Type.COUNTER, samples);
   }

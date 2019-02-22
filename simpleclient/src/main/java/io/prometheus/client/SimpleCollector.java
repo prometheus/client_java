@@ -1,10 +1,12 @@
 package io.prometheus.client;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Common functionality for {@link Gauge}, {@link Counter}, {@link Summary} and {@link Histogram}.
@@ -50,32 +52,265 @@ public abstract class SimpleCollector<Child> extends Collector {
   protected final String fullname;
   protected final String help;
   protected final List<String> labelNames;
+  protected final int labelCount;
+  
+  @SuppressWarnings("rawtypes")
+  private static final ChildEntry[] EMPTY = new ChildEntry[1]; // one null slot
 
-  protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
+  @SuppressWarnings("rawtypes")
+  private static final AtomicReferenceFieldUpdater<SimpleCollector, ChildEntry[]> UPDATER
+    = AtomicReferenceFieldUpdater.newUpdater(
+        SimpleCollector.class, ChildEntry[].class, "children");
+
+  // linear-probe table, updated via copy-on-write
+  @SuppressWarnings("unchecked")
+  private volatile ChildEntry<Child>[] children = EMPTY;
+
   protected Child noLabelsChild;
+
+  static final class ChildEntry<Child> extends AbstractList<String>
+    implements Entry<List<String>, Child> {
+      final String[] labels; // should be considered immutable
+      final int hashCode;
+      final Child child;
+
+      public ChildEntry(String[] labels, int hash, Child child) {
+          this.labels = labels;
+          this.hashCode = hash;
+          this.child = child;
+      }
+      @Override
+      public String get(int index) {
+        return labels[index];
+      }
+      @Override
+      public int size() {
+        return labels.length;
+      }
+      @Override
+      public List<String> getKey() {
+        return this;
+      }
+      @Override
+      public Child getValue() {
+        return child;
+      }
+      @Override
+      public Child setValue(Child value) {
+        throw new UnsupportedOperationException();
+      }
+  }
+  
+  Map.Entry<List<String>,Child>[] children() {
+    return children;
+  }
+
+  /**
+   * @throws IllegalArgumentException for null label
+   */
+  private static int labelsHashCode(String... labelValues) {
+    int hashCode = 1;
+    for (String label : labelValues) {
+      hashCode = buildHashCode(hashCode, label);
+    }
+    return hashCode;
+  }
+
+  private static int hash(int hashCode, int length) {
+    // Multiply by -127, and left-shift to use least bit as part of hash
+    // Based on the equivalent function in java.util.IdentityHashMap
+    return ((hashCode << 1) - (hashCode << 8)) & (length - 1);
+  }
+
+  /**
+   * @throws IllegalArgumentException for null label
+   */
+  private static int buildHashCode(int hashCode, String label) {
+    if (label == null) {
+      throw new IllegalArgumentException("Label cannot be null.");
+    }
+    return 31 * hashCode + label.hashCode();
+  }
+
+  private static int nextIdx(int i, int len) {
+    return (i == len - 1) ? 0 : (i + 1);
+  }
+
+  private void validateCount(int count) {
+    if (count != labelCount) {
+      throw new IllegalArgumentException("Incorrect number of labels.");
+    }
+  }
 
   /**
    * Return the Child with the given labels, creating it if needed.
    * <p>
-   * Must be passed the same number of labels are were passed to {@link #labelNames}.
+   * Must be passed the same number of labels as were passed to {@link #labelNames}.
    */
   public Child labels(String... labelValues) {
-    if (labelValues.length != labelNames.size()) {
-      throw new IllegalArgumentException("Incorrect number of labels.");
-    }
-    for (String label: labelValues) {
-      if (label == null) {
-        throw new IllegalArgumentException("Label cannot be null.");
+    validateCount(labelValues.length);
+
+    int hashCode = labelsHashCode(labelValues); // also checks for null values
+    final ChildEntry<Child>[] arr = children;
+    int arrLen = arr.length, i = hash(hashCode, arrLen);
+    for (ChildEntry<Child> ce; (ce = arr[i]) != null; i = nextIdx(i, arrLen)) {
+      if (ce.hashCode == hashCode && Arrays.equals(ce.labels, labelValues)) {
+        return ce.child;
       }
     }
-    List<String> key = Arrays.asList(labelValues);
-    Child c = children.get(key);
-    if (c != null) {
-      return c;
+    return labelsMiss(hashCode, arr, i, labelValues);
+  }
+  
+  public Child labels() {
+    validateCount(0);
+    return noLabelsChild;
+  }
+
+  public Child labels(String v1) {
+    validateCount(1);
+
+    int hashCode = buildHashCode(1, v1);
+    final ChildEntry<Child>[] arr = children;
+    int arrLen = arr.length, i = hash(hashCode, arrLen);
+    for (ChildEntry<Child> ce; (ce = arr[i]) != null; i = nextIdx(i, arrLen)) {
+      if (v1.equals(ce.labels[0])) {
+        return ce.child;
+      }
     }
-    Child c2 = newChild();
-    Child tmp = children.putIfAbsent(key, c2);
-    return tmp == null ? c2 : tmp;
+    return labelsMiss(hashCode, arr, i, v1);
+  }
+
+  public Child labels(String v1, String v2) {
+    validateCount(2);
+
+    int hashCode = buildHashCode(buildHashCode(1, v1), v2);
+    final ChildEntry<Child>[] arr = children;
+    int arrLen = arr.length, i = hash(hashCode, arrLen);
+    for (ChildEntry<Child> ce; (ce = arr[i]) != null; i = nextIdx(i, arrLen)) {
+      if (ce.hashCode == hashCode) {
+        String[] ls = ce.labels;
+        if (ls[0].equals(v1) && ls[1].equals(v2)) {
+          return ce.child;
+        }
+      }
+    }
+    return labelsMiss(hashCode, arr, i, v1, v2);
+  }
+
+  public Child labels(String v1, String v2, String v3) {
+    validateCount(3);
+
+    int hashCode = buildHashCode(buildHashCode(buildHashCode(1, v1), v2), v3);
+    final ChildEntry<Child>[] arr = children;
+    int arrLen = arr.length, i = hash(hashCode, arrLen);
+    for (ChildEntry<Child> ce; (ce = arr[i]) != null; i = nextIdx(i, arrLen)) {
+      if (ce.hashCode == hashCode) {
+        String[] ls = ce.labels;
+        if (ls[0].equals(v1) && ls[1].equals(v2) && ls[2].equals(v3)) {
+          return ce.child;
+        }
+      }
+    }
+    return labelsMiss(hashCode, arr, i, v1, v2, v3);
+  }
+
+  public Child labels(String v1, String v2, String v3, String v4) {
+    validateCount(4);
+
+    int hashCode = buildHashCode(buildHashCode(buildHashCode(buildHashCode(1, v1), v2), v3), v4);
+    final ChildEntry<Child>[] arr = children;
+    int arrLen = arr.length, i = hash(hashCode, arrLen);
+    for (ChildEntry<Child> ce; (ce = arr[i]) != null; i = nextIdx(i, arrLen)) {
+      if (ce.hashCode == hashCode) {
+        String[] ls = ce.labels;
+        if (ls[0].equals(v1) && ls[1].equals(v2) && ls[2].equals(v3) && ls[3].equals(v4)) {
+          return ce.child;
+        }
+      }
+    }
+    return labelsMiss(hashCode, arr, i, v1, v2, v3, v4);
+  }
+
+  private Child labelsMiss(int hashCode, ChildEntry<Child>[] arr, int pos, String... values) {
+    return updateChild(values, hashCode, arr, pos,
+        new ChildEntry<Child>(values, hashCode, newChild()));
+  }
+
+  /**
+   * Multi-purpose used for set, remove and get after not found (cache miss)
+   *
+   * @param pos -1 for set and remove, otherwise insert (null) position in arr
+   * @param newEntry null for remove, otherwise new entry to add
+   * @return new/existing Child in case of get, prior Child in case of set/remove
+   */
+  @SuppressWarnings("unchecked")
+  private Child updateChild(String[] values, int hashCode,
+      ChildEntry<Child>[] arr, int pos, ChildEntry<Child> newEntry) {
+    final boolean set = pos == -1;
+    int arrLen = arr.length;
+    while (true) {
+      final ChildEntry<Child>[] newArr;
+      ChildEntry<Child> replacing = null;
+      if (pos == -1) {
+        pos = hash(hashCode, arrLen);
+        while (true) {
+          ChildEntry<Child> ce = arr[pos];
+          if (ce == null) {
+            if (newEntry == null) {
+              return null;
+            }
+            break;
+          }
+          if (ce.hashCode == hashCode && Arrays.equals(ce.labels, values)) {
+            if (set) {
+              replacing = ce;
+              break;
+            }
+            return ce.child;
+          }
+          pos = nextIdx(pos, arrLen);
+        }
+      }
+      boolean resizeNeeded;
+      if (newEntry == null | replacing != null) {
+        resizeNeeded = false;
+      } else {
+        int count = 1;
+        for (ChildEntry<Child> ce : arr) {
+          if (ce != null) {
+            count++;
+          }
+        }
+        resizeNeeded = count > arrLen / 2;
+      }
+      if (resizeNeeded) {
+        newArr = new ChildEntry[arrLen * 2];
+        int newArrLen = newArr.length;
+        newArr[hash(hashCode, newArrLen)] = newEntry;
+        for (ChildEntry<Child> ce : arr) {
+          if (ce != null & ce != replacing) {
+            for (int j = hash(ce.hashCode, newArrLen);; j = nextIdx(j, newArrLen)) {
+              if (newArr[j] == null) {
+                newArr[j] = ce;
+                break;
+              }
+            }
+          }
+        }
+      } else {
+        newArr = Arrays.copyOf(arr, arrLen, ChildEntry[].class);
+        newArr[pos] = newEntry;
+      }
+      if (UPDATER.compareAndSet(this, arr, newArr)) {
+        if (set) {
+          return replacing != null ? replacing.child : null;
+        }
+        return newEntry.child;
+      }
+      arr = children;
+      arrLen = arr.length;
+      pos = -1;
+    }
   }
 
   /**
@@ -84,7 +319,7 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Any references to the Child are invalidated.
    */
   public void remove(String... labelValues) {
-    children.remove(Arrays.asList(labelValues));
+    updateChild(labelValues, labelsHashCode(labelValues), children, -1, null);
     initializeNoLabelsChild();
   }
   
@@ -94,7 +329,7 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Any references to any children are invalidated.
    */
   public void clear() {
-    children.clear();
+    UPDATER.set(this, EMPTY);
     initializeNoLabelsChild();
   }
   
@@ -103,8 +338,8 @@ public abstract class SimpleCollector<Child> extends Collector {
    */
   protected void initializeNoLabelsChild() {
     // Initialize metric if it has no labels.
-    if (labelNames.size() == 0) {
-      noLabelsChild = labels();
+    if (labelCount == 0) {
+      noLabelsChild = labels(new String[0]);
     }
   }
 
@@ -132,10 +367,10 @@ public abstract class SimpleCollector<Child> extends Collector {
    * A metric should be either all callbacks, or none.
    */
   public <T extends Collector> T setChild(Child child, String... labelValues) {
-    if (labelValues.length != labelNames.size()) {
-      throw new IllegalArgumentException("Incorrect number of labels.");
-    }
-    children.put(Arrays.asList(labelValues), child);
+    validateCount(labelValues.length);
+    int hashCode = labelsHashCode(labelValues);
+    updateChild(labelValues, hashCode, children, -1,
+        new ChildEntry<Child>(labelValues, hashCode, child));
     return (T)this;
   }
 
@@ -165,6 +400,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     if (b.help.isEmpty()) throw new IllegalStateException("Help hasn't been set.");
     help = b.help;
     labelNames = Arrays.asList(b.labelNames);
+    labelCount = b.labelNames.length;
 
     for (String n: labelNames) {
       checkMetricLabelName(n);

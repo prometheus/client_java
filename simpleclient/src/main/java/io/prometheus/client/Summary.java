@@ -275,7 +275,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
      * Observe the given amount.
      */
     public void observe(double amt) {
-      count.add(1);
+      count.add(1.0);
       sum.add(amt);
       if (quantileValues != null) {
         quantileValues.insert(amt);
@@ -346,8 +346,12 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
   @Override
   public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
-    for(Map.Entry<List<String>, Child> c: children.entrySet()) {
+    final Map.Entry<List<String>, Child>[] children = children();
+    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.length);
+    for(Map.Entry<List<String>,Child> c : children) {
+      if (c == null) {
+        continue;
+      }
       Child.Value v = c.getValue().get();
       List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
       labelNamesWithQuantile.add("quantile");

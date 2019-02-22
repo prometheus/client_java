@@ -255,7 +255,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       for (int i = 0; i < upperBounds.length; ++i) {
         // The last bucket is +Inf, so we always increment.
         if (amt <= upperBounds[i]) {
-          cumulativeCounts[i].add(1);
+          cumulativeCounts[i].add(1.0);
           break;
         }
       }
@@ -323,8 +323,12 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
 
   @Override
   public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
-    for(Map.Entry<List<String>, Child> c: children.entrySet()) {
+    final Map.Entry<List<String>, Child>[] children = children();
+    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.length);
+    for(Map.Entry<List<String>,Child> c : children) {
+      if (c == null) {
+        continue;
+      }
       Child.Value v = c.getValue().get();
       List<String> labelNamesWithLe = new ArrayList<String>(labelNames);
       labelNamesWithLe.add("le");
