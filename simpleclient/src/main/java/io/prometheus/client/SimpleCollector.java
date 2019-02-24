@@ -117,9 +117,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   }
 
   private static int hash(int hashCode, int length) {
-    // Multiply by -127, and left-shift to use least bit as part of hash
-    // Based on the equivalent function in java.util.IdentityHashMap
-    return ((hashCode << 1) - (hashCode << 8)) & (length - 1);
+    return hashCode & (length - 1); // length is a power of 2
   }
 
   /**
@@ -165,6 +163,9 @@ public abstract class SimpleCollector<Child> extends Collector {
     validateCount(0);
     return noLabelsChild;
   }
+  
+  // Logic for the fixed-arg overloads is identical apart from number of strings
+  // used for hashcode generation and key comparison
 
   public Child labels(String v1) {
     validateCount(1);
@@ -232,49 +233,64 @@ public abstract class SimpleCollector<Child> extends Collector {
   }
 
   private Child labelsMiss(int hashCode, ChildEntry<Child>[] arr, int pos, String... values) {
-    return updateChild(values, hashCode, arr, pos,
+    return updateChild(values, hashCode, true, arr, pos,
         new ChildEntry<Child>(values, hashCode, newChild()));
   }
 
   /**
    * Multi-purpose used for set, remove and get after not found (cache miss)
    *
-   * @param pos -1 for set and remove, otherwise insert (null) position in arr
+   * @param getIfPresent if true, entry won't be updated if it already exists
+   * @param pos insertion position for new entry if known (get case), otherwise -1
    * @param newEntry null for remove, otherwise new entry to add
    * @return new/existing Child in case of get, prior Child in case of set/remove
    */
   @SuppressWarnings("unchecked")
-  private Child updateChild(String[] values, int hashCode,
+  private Child updateChild(String[] values, int hashCode, boolean getIfPresent,
       ChildEntry<Child>[] arr, int pos, ChildEntry<Child> newEntry) {
-    final boolean set = pos == -1;
-    int arrLen = arr.length;
+    // This loop is just for retries after CAS failures of the children field
     while (true) {
+      final int arrLen = arr.length;
       final ChildEntry<Child>[] newArr;
+      // This gets set to the entry we're replacing, if/when applicable
       ChildEntry<Child> replacing = null;
+      // If pos >= 0, we already know where the new entry should go
       if (pos == -1) {
+        // Scan the table looking for the a matching entry starting at
+        // the labels' hash position
         pos = hash(hashCode, arrLen);
         while (true) {
           ChildEntry<Child> ce = arr[pos];
           if (ce == null) {
+            // If we reach a null entry then the labels aren't present, and
+            // our current pos is the target location for inserting the new entry
             if (newEntry == null) {
+              // Nothing to do in removal case
               return null;
             }
             break;
           }
           if (ce.hashCode == hashCode && Arrays.equals(ce.labels, values)) {
-            if (set) {
-              replacing = ce;
-              break;
+            // We found an entry matching the target labels
+            if (getIfPresent) {
+              return ce.child;
             }
-            return ce.child;
+            replacing = ce;
+            break;
           }
-          pos = nextIdx(pos, arrLen);
+          pos = nextIdx(pos, arrLen); // wrap around
         }
       }
       boolean resizeNeeded;
+      // If we reached here we'll be updating the table by either inserting
+      // replacing, or removing an entry
       if (newEntry == null | replacing != null) {
+        // No need to increase the table capacity if removing or replacing
         resizeNeeded = false;
       } else {
+        // We are inserting a new entry so count the existing entries to determine
+        // how full the table is - we resize (double) it if greater than half full.
+        // This avoids having to separately track the count
         int count = 1;
         for (ChildEntry<Child> ce : arr) {
           if (ce != null) {
@@ -284,10 +300,14 @@ public abstract class SimpleCollector<Child> extends Collector {
         resizeNeeded = count > arrLen / 2;
       }
       if (resizeNeeded) {
-        newArr = new ChildEntry[arrLen * 2];
-        int newArrLen = newArr.length;
+        // Double the size of the table
+        final int newArrLen = arrLen * 2;
+        newArr = new ChildEntry[newArrLen];
+        // Insert our new entry first
         newArr[hash(hashCode, newArrLen)] = newEntry;
+        // Then re-hash/insert the existing entries
         for (ChildEntry<Child> ce : arr) {
+          // Exclude the entry we're replacing (if applicable - replacing will be non-null)
           if (ce != null & ce != replacing) {
             for (int j = hash(ce.hashCode, newArrLen);; j = nextIdx(j, newArrLen)) {
               if (newArr[j] == null) {
@@ -298,17 +318,20 @@ public abstract class SimpleCollector<Child> extends Collector {
           }
         }
       } else {
+        // If we're not resizing the table, just make a straight copy
+        // and insert our new entry at the target position
         newArr = Arrays.copyOf(arr, arrLen, ChildEntry[].class);
         newArr[pos] = newEntry;
       }
+      // Attempt to update the shared field atomically
       if (UPDATER.compareAndSet(this, arr, newArr)) {
-        if (set) {
-          return replacing != null ? replacing.child : null;
-        }
-        return newEntry.child;
+        // Successful table modification
+        // Return the new entry in the get case, old entry in the remove/set cases
+        return getIfPresent ? newEntry.child
+            : (replacing != null ? replacing.child : null);
       }
+      // Someone else changed the table, read it and start again
       arr = children;
-      arrLen = arr.length;
       pos = -1;
     }
   }
@@ -319,7 +342,7 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Any references to the Child are invalidated.
    */
   public void remove(String... labelValues) {
-    updateChild(labelValues, labelsHashCode(labelValues), children, -1, null);
+    updateChild(labelValues, labelsHashCode(labelValues), false, children, -1, null);
     initializeNoLabelsChild();
   }
   
@@ -369,7 +392,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   public <T extends Collector> T setChild(Child child, String... labelValues) {
     validateCount(labelValues.length);
     int hashCode = labelsHashCode(labelValues);
-    updateChild(labelValues, hashCode, children, -1,
+    updateChild(labelValues, hashCode, false, children, -1,
         new ChildEntry<Child>(labelValues, hashCode, child));
     return (T)this;
   }
