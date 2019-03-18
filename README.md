@@ -491,7 +491,7 @@ default sensibly if omitted.
 
 There is a Spring AOP collector that allows you to annotate methods that you
 would like to instrument with a [Summary](#Summary), but without going through
-the process of manually instaniating and registering your metrics classes. To
+the process of manually instantiating and registering your metrics classes. To
 use the metrics annotations, simply add `simpleclient_spring_web` as a
 dependency, annotate a configuration class with `@EnablePrometheusTiming`, then
 annotate your Spring components as such:
