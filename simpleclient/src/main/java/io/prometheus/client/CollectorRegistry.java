@@ -130,6 +130,13 @@ public class CollectorRegistry {
     return new MetricFamilySamplesEnumeration();
   }
 
+  /**
+   * Enumeration of metrics matching the specified names.
+   * <p>
+   * Note that the provided set of names will be matched against the time series
+   * name and not the metric name. For instance, to retrieve all samples from a
+   * histogram, you must include the '_count', '_sum' and '_bucket' names.
+   */
   public Enumeration<Collector.MetricFamilySamples> filteredMetricFamilySamples(Set<String> includedNames) {
     return new MetricFamilySamplesEnumeration(includedNames);
   }
