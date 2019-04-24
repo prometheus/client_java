@@ -29,19 +29,22 @@ public class SimpleCollectorTest {
     return registry.getSampleValue("nolabels");
   }
 
-  @Test(expected=IllegalArgumentException.class)
-  public void testTooFewLabelsThrows() {
-    metric.labels();
+  @Test
+  public void testTooFewLabelsSilent() {
+    metric.labels().inc();
+    assertEquals(getValue(SimpleCollector.DEFAULT_LABEL_VALUE), 1.0, .001);
   }
 
-  @Test(expected=IllegalArgumentException.class)
-  public void testNullLabelThrows() {
-    metric.labels(new String[]{null});
+  @Test
+  public void testNullLabelSilent() {
+    metric.labels(new String[]{null}).inc();
+    assertEquals(getValue(SimpleCollector.DEFAULT_LABEL_VALUE), 1.0, .001);
   }
 
-  @Test(expected=IllegalArgumentException.class)
-  public void testTooManyLabelsThrows() {
-    metric.labels("a", "b");
+  @Test
+  public void testTooManyLabelsSilent() {
+    metric.labels("a", "b").inc();
+    assertEquals(getValue("a"), 1.0, .001);
   }
   
   @Test

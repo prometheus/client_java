@@ -25,7 +25,7 @@ import java.util.List;
  * The fullname of the metric is <code>namespace_subsystem_name</code>, but only <code>name</code> is required.
  *
  * <h2>Labels</h2>
- * {@link SimpleCollector.Builder#labelNames labelNames} specifies which (if any) labels the metrics will have, and 
+ * {@link SimpleCollector.Builder#labelNames labelNames} specifies which (if any) labels the metrics will have, and
  * {@link #labels} returns the Child of the metric that represents that particular set of labels.
  * {@link Gauge}, {@link Counter} and {@link Summary} all offer convenience methods to avoid needing to call
  * {@link #labels} for metrics with no labels.
@@ -36,7 +36,7 @@ import java.util.List;
  * what labels will be in use you should initialise them be calling {@link #labels}.
  * This is done for you for metrics with no labels.
  * <p>
- * <em>Warning #2:</em> While labels are very powerful, avoid overly granular metric labels. 
+ * <em>Warning #2:</em> While labels are very powerful, avoid overly granular metric labels.
  * The combinatorial explosion of breaking out a metric in many dimensions can produce huge numbers
  * of timeseries, which will then take longer and more resources to process.
  * <p>
@@ -47,6 +47,7 @@ import java.util.List;
  * by one of the dimensions altogether.
  */
 public abstract class SimpleCollector<Child> extends Collector {
+  public static final String DEFAULT_LABEL_VALUE = "unknown";
   protected final String fullname;
   protected final String help;
   protected final List<String> labelNames;
@@ -57,18 +58,28 @@ public abstract class SimpleCollector<Child> extends Collector {
   /**
    * Return the Child with the given labels, creating it if needed.
    * <p>
-   * Must be passed the same number of labels are were passed to {@link #labelNames}.
+   * It should be passed the same number of labels are were passed to {@link #labelNames}.
+   * If null or less than number of labels defined, a default label {@link #DEFAULT_LABEL_VALUE} value was applied
+   * to the label value.
    */
   public Child labels(String... labelValues) {
-    if (labelValues.length != labelNames.size()) {
-      throw new IllegalArgumentException("Incorrect number of labels.");
+    /*
+      For best practise, we should void any fatal exception on instrumentation
+      The basic principal was that the instrumentation code in application should never impact the business logic
+      We can accept monitoring data error but no application fault on instrumentation error
+      The silent strategy may case some metric data error, but it's a trade off between service error and monitoring data error
+    */
+    List<String> key = new ArrayList<String>(labelNames.size());
+    for (int i = 0; i< labelNames.size(); i++) {
+        if (labelValues != null
+                && labelValues.length > i
+                && labelValues[i] != null) {
+          key.add(labelValues[i]);
+        } else {
+          key.add(DEFAULT_LABEL_VALUE);
+        }
     }
-    for (String label: labelValues) {
-      if (label == null) {
-        throw new IllegalArgumentException("Label cannot be null.");
-      }
-    }
-    List<String> key = Arrays.asList(labelValues);
+
     Child c = children.get(key);
     if (c != null) {
       return c;
@@ -87,7 +98,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     children.remove(Arrays.asList(labelValues));
     initializeNoLabelsChild();
   }
-  
+
   /**
    * Remove all children.
    * <p>
@@ -97,7 +108,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     children.clear();
     initializeNoLabelsChild();
   }
-  
+
   /**
    * Initialize the child with no labels.
    */
@@ -128,7 +139,7 @@ public abstract class SimpleCollector<Child> extends Collector {
    * }
    * </pre>
    * <p>
-   * Any references any previous Child with these labelValues are invalidated. 
+   * Any references any previous Child with these labelValues are invalidated.
    * A metric should be either all callbacks, or none.
    */
   public <T extends Collector> T setChild(Child child, String... labelValues) {
