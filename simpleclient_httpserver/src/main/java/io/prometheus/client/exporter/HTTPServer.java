@@ -142,19 +142,28 @@ public class HTTPServer {
     protected final HttpServer server;
     protected final ExecutorService executorService;
 
-
     /**
-     * Start a HTTP server serving Prometheus metrics from the given registry.
+     * Start a HTTP server serving Prometheus metrics from the given registry using the given {@link HttpServer}.
+     * The {@code httpServer} is expected to already be bound to an address
      */
-    public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean daemon) throws IOException {
-        server = HttpServer.create();
-        server.bind(addr, 3);
+    public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
+        if (httpServer.getAddress() == null)
+            throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
+
+        server = httpServer;
         HttpHandler mHandler = new HTTPMetricHandler(registry);
         server.createContext("/", mHandler);
         server.createContext("/metrics", mHandler);
         executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
         server.setExecutor(executorService);
         start(daemon);
+    }
+
+    /**
+     * Start a HTTP server serving Prometheus metrics from the given registry.
+     */
+    public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean daemon) throws IOException {
+        this(HttpServer.create(addr, 3), registry, daemon);
     }
 
     /**

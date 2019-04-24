@@ -1,5 +1,6 @@
 package io.prometheus.client.exporter;
 
+import com.sun.net.httpserver.HttpServer;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.CollectorRegistry;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class TestHTTPServer {
 
@@ -52,6 +54,17 @@ public class TestHTTPServer {
     GZIPInputStream gzs = new GZIPInputStream(connection.getInputStream());
     Scanner s = new Scanner(gzs).useDelimiter("\\A");
     return s.hasNext() ? s.next() : "";
+  }
+
+  @Test
+  public void testUnbound() throws IOException {
+    CollectorRegistry registry = new CollectorRegistry();
+    try {
+      HTTPServer s = new HTTPServer(HttpServer.create(), registry, true);
+      s.stop();
+      fail("Should refuse to use an unbound HttpServer");
+    }
+    catch (IllegalArgumentException expected) {}
   }
 
   @Test
