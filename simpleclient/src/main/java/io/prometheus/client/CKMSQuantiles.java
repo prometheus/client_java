@@ -87,7 +87,7 @@ class CKMSQuantiles {
      * 
      * @param value
      */
-    public synchronized void insert(double value) {
+    public void insert(double value) {
         buffer[bufferCount] = value;
         bufferCount++;
 
@@ -104,7 +104,7 @@ class CKMSQuantiles {
      *            Queried quantile, e.g. 0.50 or 0.99.
      * @return Estimated value at that quantile.
      */
-    public synchronized double get(double q) {
+    public double get(double q) {
         // clear the buffer
         insertBatch();
         compress();

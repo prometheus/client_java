@@ -27,19 +27,19 @@ class TimeWindowQuantiles {
     this.durationBetweenRotatesMillis = TimeUnit.SECONDS.toMillis(maxAgeSeconds) / ageBuckets;
   }
 
-  public double get(double q) {
+  public synchronized double get(double q) {
     CKMSQuantiles currentBucket = rotate();
     return currentBucket.get(q);
   }
 
-  public void insert(double value) {
+  public synchronized void insert(double value) {
     rotate();
     for (CKMSQuantiles ckmsQuantiles : ringBuffer) {
       ckmsQuantiles.insert(value);
     }
   }
 
-  private synchronized CKMSQuantiles rotate() {
+  private CKMSQuantiles rotate() {
     long timeSinceLastRotateMillis = System.currentTimeMillis() - lastRotateTimestampMillis;
     while (timeSinceLastRotateMillis > durationBetweenRotatesMillis) {
       ringBuffer[currentBucket] = new CKMSQuantiles(quantiles);
