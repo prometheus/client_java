@@ -1,7 +1,10 @@
 package io.prometheus.client;
 
 import io.prometheus.client.CKMSQuantiles.Quantile;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Wrapper around CKMSQuantiles.
@@ -11,44 +14,60 @@ import java.util.concurrent.TimeUnit;
 class TimeWindowQuantiles {
 
   private final Quantile[] quantiles;
-  private final CKMSQuantiles[] ringBuffer;
-  private int currentBucket;
-  private long lastRotateTimestampMillis;
+  private final ConcurrentLinkedQueue<CKMSQuantiles> buckets;
+  private final AtomicLong lastRotateTimestampMillis;
   private final long durationBetweenRotatesMillis;
 
   public TimeWindowQuantiles(Quantile[] quantiles, long maxAgeSeconds, int ageBuckets) {
     this.quantiles = quantiles;
-    this.ringBuffer = new CKMSQuantiles[ageBuckets];
+    this.buckets = new ConcurrentLinkedQueue<CKMSQuantiles>();
     for (int i = 0; i < ageBuckets; i++) {
-      this.ringBuffer[i] = new CKMSQuantiles(quantiles);
+      this.buckets.add(new CKMSQuantiles(quantiles));
     }
-    this.currentBucket = 0;
-    this.lastRotateTimestampMillis = System.currentTimeMillis();
+    this.lastRotateTimestampMillis = new AtomicLong(System.currentTimeMillis());
     this.durationBetweenRotatesMillis = TimeUnit.SECONDS.toMillis(maxAgeSeconds) / ageBuckets;
   }
 
   public double get(double q) {
-    CKMSQuantiles currentBucket = rotate();
+    // On concurrent `get` and `rotate`:
+    //  - it is acceptable to `get` the sample from an outdated `bucket`.
+    //  - `currentBucket` could be `null` when there is only a single bucket (edge case).
+    rotate();
+
+    CKMSQuantiles currentBucket;
+    do {
+      currentBucket = buckets.peek();
+    } while (currentBucket == null);
+
     return currentBucket.get(q);
   }
 
   public void insert(double value) {
+    // On concurrent `insert` and `rotate`, it might be acceptable to lose the measurement in the newest `bucket`.
     rotate();
-    for (CKMSQuantiles ckmsQuantiles : ringBuffer) {
-      ckmsQuantiles.insert(value);
+
+    for (CKMSQuantiles bucket : buckets) {
+      bucket.insert(value);
     }
   }
 
-  private synchronized CKMSQuantiles rotate() {
-    long timeSinceLastRotateMillis = System.currentTimeMillis() - lastRotateTimestampMillis;
-    while (timeSinceLastRotateMillis > durationBetweenRotatesMillis) {
-      ringBuffer[currentBucket] = new CKMSQuantiles(quantiles);
-      if (++currentBucket >= ringBuffer.length) {
-        currentBucket = 0;
+  private void rotate() {
+    // On concurrent `rotate` and `rotate`:
+    //  - `currentTimeMillis` is cached to reduce thread contention.
+    //  - `lastRotateTimestampMillis` is used to ensure the correct number of rotations.
+    //  - `currentBucket` could be `null` when there is only a single bucket (edge case).
+    long currentTimeMillis = System.currentTimeMillis();
+    long lastRotateTimestampMillis = this.lastRotateTimestampMillis.get();
+    CKMSQuantiles currentBucket = buckets.peek();
+    while (currentTimeMillis - lastRotateTimestampMillis > durationBetweenRotatesMillis) {
+      CKMSQuantiles bucket = new CKMSQuantiles(quantiles);
+      if (this.lastRotateTimestampMillis.compareAndSet(
+          lastRotateTimestampMillis, lastRotateTimestampMillis + durationBetweenRotatesMillis)
+          && buckets.remove(currentBucket)) {
+        buckets.add(bucket);
       }
-      timeSinceLastRotateMillis -= durationBetweenRotatesMillis;
-      lastRotateTimestampMillis += durationBetweenRotatesMillis;
+      lastRotateTimestampMillis = this.lastRotateTimestampMillis.get();
+      currentBucket = buckets.peek();
     }
-    return ringBuffer[currentBucket];
   }
 }
