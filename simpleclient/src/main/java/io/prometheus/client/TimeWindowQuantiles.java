@@ -29,17 +29,8 @@ class TimeWindowQuantiles {
   }
 
   public double get(double q) {
-    // On concurrent `get` and `rotate`:
-    //  - it is acceptable to `get` the sample from an outdated `bucket`.
-    //  - `currentBucket` could be `null` when there is only a single bucket (edge case).
-    rotate();
-
-    CKMSQuantiles currentBucket;
-    do {
-      currentBucket = buckets.peek();
-    } while (currentBucket == null);
-
-    return currentBucket.get(q);
+    // On concurrent `get` and `rotate`, it is acceptable to `get` the sample from an outdated `bucket`.
+    return getCurrentBucket().get(q);
   }
 
   public void insert(double value) {
@@ -51,23 +42,28 @@ class TimeWindowQuantiles {
     }
   }
 
+  private CKMSQuantiles getCurrentBucket() {
+    rotate();
+
+    return buckets.peek();
+  }
+
   private void rotate() {
     // On concurrent `rotate` and `rotate`:
     //  - `currentTimeMillis` is cached to reduce thread contention.
     //  - `lastRotateTimestampMillis` is used to ensure the correct number of rotations.
-    //  - `currentBucket` could be `null` when there is only a single bucket (edge case).
     long currentTimeMillis = System.currentTimeMillis();
     long lastRotateTimestampMillis = this.lastRotateTimestampMillis.get();
-    CKMSQuantiles currentBucket = buckets.peek();
     while (currentTimeMillis - lastRotateTimestampMillis > durationBetweenRotatesMillis) {
-      CKMSQuantiles bucket = new CKMSQuantiles(quantiles);
       if (this.lastRotateTimestampMillis.compareAndSet(
-          lastRotateTimestampMillis, lastRotateTimestampMillis + durationBetweenRotatesMillis)
-          && buckets.remove(currentBucket)) {
+          lastRotateTimestampMillis, lastRotateTimestampMillis + durationBetweenRotatesMillis)) {
+        CKMSQuantiles bucket = new CKMSQuantiles(quantiles);
+        // rotate buckets (not atomic)
         buckets.add(bucket);
+        buckets.remove();
       }
       lastRotateTimestampMillis = this.lastRotateTimestampMillis.get();
-      currentBucket = buckets.peek();
     }
   }
+
 }
