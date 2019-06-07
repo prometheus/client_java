@@ -118,6 +118,37 @@ public class DoubleAdder extends Striped64 implements Serializable {
         internalReset(0L);
     }
 
+    public void set(double x) {
+        for (;;) {
+            Cell[] as;
+            if ((as = cells) != null) { // have cells
+                if (busy == 0 && casBusy()) {
+                    try {
+                        if (cells == as) { // recheck under lock
+                            // allocate new cells instead of updating existing cells
+                            int n = as.length;
+                            Cell[] rs = new Cell[n];
+                            for (int i = 0; i < n; ++i) {
+                                Cell a = as[i];
+                                if (a != null) // avoid unused cells
+                                    rs[i] = new Cell(0L);
+                            }
+                            // update cells and base (not atomic)
+                            cells = rs;
+                            base = Double.doubleToLongBits(x);
+                            break;
+                        }
+                    } finally {
+                        busy = 0;
+                    }
+                }
+            } else { // no cells
+                base = Double.doubleToLongBits(x); // update base (atomic)
+                break;
+            }
+        }
+    }
+
     /**
      * Equivalent in effect to {@link #sum} followed by {@link
      * #reset}. This method may apply for example during quiescent
