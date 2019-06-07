@@ -56,35 +56,25 @@ class HdrTimeWindowQuantiles {
   }
 
   private ConcurrentDoubleHistogram getCurrentBucket() {
-    // On concurrent `get` and `rotate`:
-    //  - `currentBucket` could be `null` when there is only a single bucket (edge case).
     rotate();
 
-    ConcurrentDoubleHistogram currentBucket;
-    do {
-      currentBucket = buckets.peek();
-    } while (currentBucket == null);
-
-    return currentBucket;
+    return buckets.peek();
   }
 
   private void rotate() {
     // On concurrent `rotate` and `rotate`:
     //  - `currentTimeMillis` is cached to reduce thread contention.
     //  - `lastRotateTimestampMillis` is used to ensure the correct number of rotations.
-    //  - `currentBucket` could be `null` when there is only a single bucket (edge case).
     long currentTimeMillis = System.currentTimeMillis();
     long lastRotateTimestampMillis = this.lastRotateTimestampMillis.get();
-    ConcurrentDoubleHistogram currentBucket = buckets.peek();
     while (currentTimeMillis - lastRotateTimestampMillis > durationBetweenRotatesMillis) {
-      ConcurrentDoubleHistogram bucket = new ConcurrentDoubleHistogram(numberOfSignificantValueDigits);
       if (this.lastRotateTimestampMillis.compareAndSet(
-          lastRotateTimestampMillis, lastRotateTimestampMillis + durationBetweenRotatesMillis)
-          && buckets.remove(currentBucket)) {
+          lastRotateTimestampMillis, lastRotateTimestampMillis + durationBetweenRotatesMillis)) {
+        ConcurrentDoubleHistogram bucket = new ConcurrentDoubleHistogram(numberOfSignificantValueDigits);
         buckets.add(bucket);
+        buckets.remove();
       }
       lastRotateTimestampMillis = this.lastRotateTimestampMillis.get();
-      currentBucket = buckets.peek();
     }
   }
 
