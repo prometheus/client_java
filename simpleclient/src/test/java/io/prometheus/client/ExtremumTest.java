@@ -8,9 +8,9 @@ import java.util.concurrent.TimeUnit;
 import static junit.framework.TestCase.assertEquals;
 
 
-public class ExtremumCollectorTest {
+public class ExtremumTest {
 
-    private ExtremumCollector collector;
+    private Extremum collector;
     private TestClock clock;
 
 
@@ -19,8 +19,8 @@ public class ExtremumCollectorTest {
     public void init() {
         clock = new TestClock();
         clock.setNanos(1);
-        collector = ExtremumCollector.build("test", "extremumCollectorTest").
-                setSamplingPeriod(100, TimeUnit.NANOSECONDS).
+        collector = Extremum.build("test", "extremumCollectorTest").
+                samplingPeriod(100, TimeUnit.NANOSECONDS).
                 withClock(clock).
                 create();
     }
@@ -36,9 +36,9 @@ public class ExtremumCollectorTest {
 
     @Test
     public void testTakeSmallestSample() {
-        collector = ExtremumCollector.build("test", "extremumCollectorTest").
-                setDirection(ExtremumCollector.Direction.LOW).
-                setSamplingPeriod(100, TimeUnit.MILLISECONDS).
+        collector = Extremum.build("test", "extremumCollectorTest").
+                direction(Extremum.Direction.MIN).
+                samplingPeriod(100, TimeUnit.MILLISECONDS).
                 create();
         collector.set(1);
         collector.set(2);
@@ -66,7 +66,7 @@ public class ExtremumCollectorTest {
     }
 
     @Test
-    public void testIgnoreOldValues() throws InterruptedException {
+    public void testIgnoreOldValues() {
         collector.set(1);
         clock.setNanos(10);
         collector.set(2);
@@ -78,7 +78,7 @@ public class ExtremumCollectorTest {
     }
 
     @Test
-    public void testDelaySameSample() throws InterruptedException {
+    public void testDelaySameSample() {
         collector.set(3);
         clock.setNanos(9);
         collector.set(1);
@@ -88,7 +88,7 @@ public class ExtremumCollectorTest {
     }
 
     @Test
-    public void testDelayDifferentSample() throws InterruptedException {
+    public void testDelayDifferentSample() {
         collector.set(3);
         clock.setNanos(51);
         collector.set(1);

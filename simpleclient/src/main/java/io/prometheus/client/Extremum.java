@@ -10,9 +10,10 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 import static io.prometheus.client.CollectorClock.DEFAULT_CLOCK;
 
 /**
- * Extremum metric, to report maximum/minimum values observed within within configurable sliding window.
+ * Extremum metric, to report non-averaged  maximum/minimum values observed within configurable sliding window.
+ * This metric can be helpful in addition to Histogram or Summary metrics to show the worst/best case.
  * <p>
- * Examples of ExtremumCollector include:
+ * Examples of Extremum include:
  * <ul>
  *  <li>The worst http request handling time</li>
  *  <li>The smallest message latency on network channel</li>
@@ -23,18 +24,24 @@ import static io.prometheus.client.CollectorClock.DEFAULT_CLOCK;
  * Extremum metric can go up and down in time.
  * You can look at it as a gauge that shows you only biggest/smallest values.
  *
- * In order for this collector to work properly it should be configured correctly.
- * I.e. sampling period should be somewhere between 5 and 90 seconds.
- * Sample rate should be at least 2 and not too big (< 100) in order to keep collector's performance on high level.
+ * The extrema are calculated over a sliding window of time. There are two options to configure this time window:
+ * <ul>
+ *   <li>samplingPeriod(long, TimeUnit): Set the duration of the time window, i.e. how long observations are kept before they are discarded.
+ *       Default is 1 minute.
+ *   <li>samplingRate(int): Set the number of buckets used to implement the sliding time window. If your time window is 1 minute, and you have samplingRate=60,
+ *       buckets will be switched every second. The value is a trade-off between resources (memory and cpu for maintaining the bucket)
+ *       and how smooth the time window is moved. Default value is 60.
+ * </ul>
  *
- * By default ExtremumCollector has sample period of 60 seconds and sample rate of 60, which gives 1 second discretion.
+ * Extremum can collect maximum or minimum values depending on direction(Direction) option.
+ * Default direction is MAX.
  *
  * <p>
- * An example ExtremumCollector:
+ * An example Extremum:
  * <pre>
  * {@code
  *   class YourClass {
- *     static final ExtremumCollector maxInProgressRequests = ExtremumCollector.build()
+ *     static final Extremum maxInProgressRequests = Extremum.build()
  *         .name("max_in_progress_requests").help("Biggest amount of the request in process in time.").register();
  *     static final AtomicInteger inProgressRequests = new AtomicInteger(0);
  *
@@ -52,7 +59,7 @@ import static io.prometheus.client.CollectorClock.DEFAULT_CLOCK;
  * <pre>
  * {@code
  *   class YourClass {
- *     static final Gauge maxInProgressRequests = ExtremumCollector.build()
+ *     static final Gauge maxInProgressRequests = Extremum.build()
  *           .name("max_in_progress_requests").help("Biggest amount of the request in process in time.")
  *           .labelNames("method").register();
  *     static final AtomicInteger inProgressGetRequests = new AtomicInteger(0);
@@ -75,14 +82,14 @@ import static io.prometheus.client.CollectorClock.DEFAULT_CLOCK;
  * These can be aggregated and processed together much more easily in the Prometheus
  * server than individual metrics for each labelset.
  */
-public class ExtremumCollector extends SimpleCollector<ExtremumCollector.Child> implements Collector.Describable {
+public class Extremum extends SimpleCollector<Extremum.Child> implements Collector.Describable {
 
     private final Direction direction;
     private final long samplingPeriodNanos;
     private final int samplingRate;
     private final CollectorClock clock;
 
-    private ExtremumCollector(Builder b) {
+    private Extremum(Builder b) {
         super(b);
         direction = b.direction;
         samplingPeriodNanos = b.samplingPeriodNanos;
@@ -91,24 +98,24 @@ public class ExtremumCollector extends SimpleCollector<ExtremumCollector.Child> 
         initializeNoLabelsChild();
     }
 
-    public static class Builder extends SimpleCollector.Builder<Builder, ExtremumCollector> {
+    public static class Builder extends SimpleCollector.Builder<Builder, Extremum> {
 
-        private Direction direction = Direction.HIGH;
+        private Direction direction = Direction.MAX;
         private long samplingPeriodNanos = TimeUnit.SECONDS.toNanos(60);
         private int samplingRate = 60;
         private CollectorClock clock = DEFAULT_CLOCK;
 
-        Builder setDirection(Direction direction) {
+        Builder direction(Direction direction) {
             this.direction = direction;
             return this;
         }
 
-        Builder setSamplingPeriod(long period, TimeUnit unit) {
+        Builder samplingPeriod(long period, TimeUnit unit) {
             this.samplingPeriodNanos = unit.toNanos(period);
             return this;
         }
 
-        Builder setSamplingRate(int rate) {
+        Builder samplingRate(int rate) {
             if (rate < 2) throw new IllegalArgumentException("Rate can not be smaller than 2.");
             this.samplingRate = rate;
             return this;
@@ -121,14 +128,14 @@ public class ExtremumCollector extends SimpleCollector<ExtremumCollector.Child> 
 
 
         @Override
-        public ExtremumCollector create() {
+        public Extremum create() {
             dontInitializeNoLabelsChild = true;
-            return new ExtremumCollector(this);
+            return new Extremum(this);
         }
     }
 
     /**
-     * Return a Builder to allow configuration of a new ExtremumCollector. Ensures required fields are provided.
+     * Return a Builder to allow configuration of a new Extremum. Ensures required fields are provided.
      *
      * @param name The name of the metric
      * @param help The help string of the metric
@@ -138,7 +145,7 @@ public class ExtremumCollector extends SimpleCollector<ExtremumCollector.Child> 
     }
 
     /**
-     * Return a Builder to allow configuration of a new ExtremumCollector.
+     * Return a Builder to allow configuration of a new Extremum.
      */
     public static Builder build() {
         return new Builder();
@@ -150,7 +157,7 @@ public class ExtremumCollector extends SimpleCollector<ExtremumCollector.Child> 
     }
 
     /**
-     * The value of a single ExtremumCollector.
+     * The value of a single Extremum.
      * <p>
      * <em>Warning:</em> References to a Child become invalid after using
      * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
@@ -214,7 +221,7 @@ public class ExtremumCollector extends SimpleCollector<ExtremumCollector.Child> 
     }
 
     public enum Direction {
-        HIGH {
+        MAX {
             @Override
             boolean compare(double current, double candidate) {
                 return candidate > current;
@@ -226,7 +233,7 @@ public class ExtremumCollector extends SimpleCollector<ExtremumCollector.Child> 
             }
         },
 
-        LOW {
+        MIN {
             @Override
             boolean compare(double current, double candidate) {
                 return candidate < current;
@@ -280,7 +287,7 @@ public class ExtremumCollector extends SimpleCollector<ExtremumCollector.Child> 
     @Override
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
-        for(Map.Entry<List<String>, ExtremumCollector.Child> c: children.entrySet()) {
+        for(Map.Entry<List<String>, Extremum.Child> c: children.entrySet()) {
             samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
         }
         return familySamplesList(Type.GAUGE, samples);
