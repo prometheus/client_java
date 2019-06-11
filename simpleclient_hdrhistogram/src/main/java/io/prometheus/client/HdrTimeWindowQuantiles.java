@@ -63,18 +63,17 @@ class HdrTimeWindowQuantiles {
 
   private void rotate() {
     // On concurrent `rotate` and `rotate`:
-    //  - `currentTimeMillis` is cached to reduce thread contention.
-    //  - `lastRotateTimestampMillis` is used to ensure the correct number of rotations.
-    long currentTimeMillis = System.currentTimeMillis();
-    long lastRotateTimestampMillis = this.lastRotateTimestampMillis.get();
-    while (currentTimeMillis - lastRotateTimestampMillis > durationBetweenRotatesMillis) {
-      if (this.lastRotateTimestampMillis.compareAndSet(
-          lastRotateTimestampMillis, lastRotateTimestampMillis + durationBetweenRotatesMillis)) {
+    //  - `currentTime` is cached to reduce thread contention.
+    //  - `lastRotate` is used to ensure the correct number of rotations.
+    long currentTime = System.currentTimeMillis();
+    long lastRotate = lastRotateTimestampMillis.get();
+    while (currentTime - lastRotate > durationBetweenRotatesMillis) {
+      if (lastRotateTimestampMillis.compareAndSet(lastRotate, lastRotate + durationBetweenRotatesMillis)) {
         ConcurrentDoubleHistogram bucket = new ConcurrentDoubleHistogram(numberOfSignificantValueDigits);
         buckets.add(bucket);
         buckets.remove();
       }
-      lastRotateTimestampMillis = this.lastRotateTimestampMillis.get();
+      lastRotate = lastRotateTimestampMillis.get();
     }
   }
 
