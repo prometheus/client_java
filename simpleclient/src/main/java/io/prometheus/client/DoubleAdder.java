@@ -131,7 +131,7 @@ public class DoubleAdder extends Striped64 implements Serializable {
                             for (int i = 0; i < n; ++i) {
                                 Cell a = as[i];
                                 if (a != null) // avoid unused cells
-                                    rs[i] = new Cell(0L);
+                                    rs[i] = a.value == 0L ? a : new Cell(0L); // reuse or initialize cell
                             }
                             // update cells and base (not atomic)
                             cells = rs;
