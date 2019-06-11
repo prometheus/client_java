@@ -94,8 +94,32 @@ public class DoubleAdder extends Striped64 implements Serializable {
      * @return the sum
      */
     public double sum() {
-        Cell[] as = cells;
-        double sum = Double.longBitsToDouble(base);
+        // Correctness is guaranteed by `volatile` memory access ordering and visibility semantics.
+        // Program order:
+        //  - writes in `set` - `busy` (CAS), `cells` (Wc), `base` (Wb), `busy`
+        //  - reads in `sum` - `cells` (Rc), `base` (Rb), `busy`, `cells` (Cc), `base` (Cb)
+        // Note that:
+        //  - `busy` is written after `cells` and `base`
+        //  - `busy` is read after `cells` and `base`, `cells` and `base` is re-read after `busy`
+        // In other words:
+        //  - if we see the write to `busy`, then we must see the write to `cells` and `busy` on re-read
+        //  - if we don't see the write to `busy`, then we must retry as we have no guarantees
+        // Execution order (in the former case):
+        //  - serial
+        //    - old result - Rc, Rb, Cc, Cb, Wc, Wb
+        //    - new result - Wc, Wb, Rc, Rb, Cc, Cb
+        //  - concurrent
+        //    - old result - Rc, Wc, Rb, Wb, Cc, Cb - retry (superfluous)
+        //    - new result - Wc, Rc, Wb, Rb, Cc, Cb
+        //    - invalid result - Rc, Wc, Wb, Rb, Cc, Cb - retry
+        //    - invalid result - Wc, Rc, Rb, Wb, Cc, Cb - retry
+        Cell[] as = cells; long b = base;
+        while (as != null && !(busy == 0 && cells == as && base == b)) {
+            Thread.yield(); // busy waiting, retry loop
+            as = cells; b = base;
+        }
+
+        double sum = Double.longBitsToDouble(b);
         if (as != null) {
             int n = as.length;
             for (int i = 0; i < n; ++i) {
@@ -143,7 +167,8 @@ public class DoubleAdder extends Striped64 implements Serializable {
                     }
                 }
             } else { // no cells
-                base = Double.doubleToLongBits(x); // update base (atomic)
+                // update base (atomic)
+                base = Double.doubleToLongBits(x);
                 break;
             }
         }

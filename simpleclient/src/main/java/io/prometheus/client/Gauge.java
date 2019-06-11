@@ -233,7 +233,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     public double get() {
       // On concurrent `get` and `set`, it is acceptable to `get` an outdated `value`.
       // On concurrent `get` and `inc / dec`, it is acceptable to `get` an outdated `value`.
-      // On concurrent `get` and `set` and `inc / dec`, it is possible to `get` an invalid `value`.
+      // On concurrent `get` and `set` and `inc / dec`, it is possible to `get` an outdated `value`.
       return value.sum();
     }
   }
