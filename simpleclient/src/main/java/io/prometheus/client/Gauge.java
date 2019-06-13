@@ -167,8 +167,6 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
      * Set the gauge to the given value.
      */
     public void set(double val) {
-      // On concurrent `set` and `set`, it should be acceptable to lose one `set` measurement.
-      // On concurrent `set` and `inc / dec`, it might be acceptable to lose the `inc / dec` measurement.
       value.set(val);
     }
     /**
@@ -231,9 +229,6 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
      * Get the value of the gauge.
      */
     public double get() {
-      // On concurrent `get` and `set`, it is acceptable to `get` an outdated `value`.
-      // On concurrent `get` and `inc / dec`, it is acceptable to `get` an outdated `value`.
-      // On concurrent `get` and `set` and `inc / dec`, it is possible to `get` an outdated `value`.
       return value.sum();
     }
   }

@@ -94,13 +94,17 @@ public class DoubleAdder extends Striped64 implements Serializable {
      * @return the sum
      */
     public double sum() {
+        // On concurrent `sum` and `set`, it is acceptable to `get` an outdated `value`.
+        // On concurrent `sum` and `add`, it is acceptable to `get` an outdated `value`.
+        // On concurrent `sum` and `set` and `add`, it is possible to `get` an outdated `value`.
+
         // Correctness is guaranteed by `volatile` memory access ordering and visibility semantics.
         // Program order:
         //  - writes in `set` - `busy` (CAS), `cells` (Wc), `base` (Wb), `busy`
         //  - reads in `sum` - `cells` (Rc), `base` (Rb), `busy`, `cells` (Cc), `base` (Cb)
         // Note that:
         //  - `busy` is written after `cells` and `base`
-        //  - `busy` is read after `cells` and `base`, `cells` and `base` is re-read after `busy`
+        //  - `busy` is read after `cells` and `base`, then `cells` and `base` is re-read after `busy`
         // In other words:
         //  - if we see the write to `busy`, then we must see the write to `cells` and `busy` on re-read
         //  - if we don't see the write to `busy`, then we must retry as we have no guarantees
@@ -115,7 +119,8 @@ public class DoubleAdder extends Striped64 implements Serializable {
         //    - invalid result - Wc, Rc, Rb, Wb, Cc, Cb - retry
         Cell[] as = cells; long b = base;
         while (as != null && !(busy == 0 && cells == as && base == b)) {
-            Thread.yield(); // busy waiting, retry loop
+            // busy waiting, retry loop
+            Thread.yield();
             as = cells; b = base;
         }
 
@@ -143,22 +148,25 @@ public class DoubleAdder extends Striped64 implements Serializable {
     }
 
     public void set(double x) {
+        // On concurrent `set` and `set`, it should be acceptable to lose one `set` measurement.
+        // On concurrent `set` and `add`, it should be acceptable to lose the `add` measurement.
+
+        // Correctness is ensured by different techniques:
+        //  - `set` waits on contention (blocking)
+        //  - `add` avoids contention (non-blocking)
+        //  - `sum` retries on conflicts (non-blocking)
+        // Performance characteristics by use cases:
+        //  - only `set` - `cells` is always `null` - no allocations
+        //  - only `add` - `cells` allocated on contention
+        //  - mixed `set` and `add` - `cells` allocated on contention, `cells` deallocated on `set`
         for (;;) {
             Cell[] as;
             if ((as = cells) != null) { // have cells
                 if (busy == 0 && casBusy()) {
                     try {
                         if (cells == as) { // recheck under lock
-                            // allocate new cells instead of updating existing cells
-                            int n = as.length;
-                            Cell[] rs = new Cell[n];
-                            for (int i = 0; i < n; ++i) {
-                                Cell a = as[i];
-                                if (a != null) // avoid unused cells
-                                    rs[i] = a.value == 0L ? a : new Cell(0L); // reuse or initialize cell
-                            }
                             // update cells and base (not atomic)
-                            cells = rs;
+                            cells = null;
                             base = Double.doubleToLongBits(x);
                             break;
                         }
