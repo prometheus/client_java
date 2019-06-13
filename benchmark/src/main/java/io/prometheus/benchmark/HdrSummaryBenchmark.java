@@ -49,7 +49,7 @@ public class HdrSummaryBenchmark {
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleHdrSummaryBenchmark() {
-    prometheusSimpleHdrSummary.labels("test", "group").observe(1) ;
+    prometheusSimpleHdrSummary.labels("test", "group").observe(1);
   }
 
   @Benchmark
@@ -70,7 +70,7 @@ public class HdrSummaryBenchmark {
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleHdrSummaryQuantilesBenchmark() {
-    prometheusSimpleHdrSummaryQuantiles.labels("test", "group").observe(1) ;
+    prometheusSimpleHdrSummaryQuantiles.labels("test", "group").observe(1);
   }
 
   @Benchmark
