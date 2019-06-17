@@ -2,9 +2,9 @@ package io.prometheus.client;
 
 import io.prometheus.client.CKMSQuantiles.Quantile;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Wrapper around CKMSQuantiles.
@@ -14,16 +14,17 @@ import java.util.concurrent.atomic.AtomicLong;
 class TimeWindowQuantiles {
 
   private final Quantile[] quantiles;
-  private final ConcurrentLinkedQueue<CKMSQuantiles> buckets;
+  private final AtomicReference<CKMSQuantiles[]> buckets;
   private final AtomicLong lastRotateTimestampNanos;
   private final long durationBetweenRotatesNanos;
 
   public TimeWindowQuantiles(Quantile[] quantiles, long maxAgeSeconds, int ageBuckets) {
     this.quantiles = quantiles;
-    this.buckets = new ConcurrentLinkedQueue<CKMSQuantiles>();
+    CKMSQuantiles[] emptyBuckets = new CKMSQuantiles[ageBuckets];
     for (int i = 0; i < ageBuckets; i++) {
-      this.buckets.add(new CKMSQuantiles(quantiles));
+      emptyBuckets[i] = new CKMSQuantiles(this.quantiles);
     }
+    this.buckets = new AtomicReference<CKMSQuantiles[]>(emptyBuckets);
     this.lastRotateTimestampNanos = new AtomicLong(System.nanoTime());
     this.durationBetweenRotatesNanos = TimeUnit.SECONDS.toNanos(maxAgeSeconds) / ageBuckets;
   }
@@ -37,7 +38,7 @@ class TimeWindowQuantiles {
     // On concurrent `insert` and `rotate`, it should be acceptable to lose the measurement in the newest `bucket`.
     rotate();
 
-    for (CKMSQuantiles bucket : buckets) {
+    for (CKMSQuantiles bucket : buckets.get()) {
       bucket.insert(value);
     }
   }
@@ -45,21 +46,31 @@ class TimeWindowQuantiles {
   private CKMSQuantiles getCurrentBucket() {
     rotate();
 
-    return buckets.peek();
+    return buckets.get()[0]; // oldest bucket
   }
 
   private void rotate() {
     // On concurrent `rotate` and `rotate`:
     //  - `currentTime` is cached to reduce thread contention.
     //  - `lastRotate` is used to ensure the correct number of rotations.
+
+    // Correctness is guaranteed by `volatile` memory access ordering and visibility semantics.
+    // Note that it is not possible for other threads to read partially initialized `buckets`.
+    // In other words the `volatile` write to `buckets` propagates preceding `plain` writes to `buckets[i]`.
     long currentTime = System.nanoTime();
     long lastRotate = lastRotateTimestampNanos.get();
     while (currentTime - lastRotate > durationBetweenRotatesNanos) {
       if (lastRotateTimestampNanos.compareAndSet(lastRotate, lastRotate + durationBetweenRotatesNanos)) {
-        CKMSQuantiles bucket = new CKMSQuantiles(quantiles);
-        // rotate buckets (not atomic)
-        buckets.add(bucket);
-        buckets.remove();
+        // rotate buckets (atomic)
+        CKMSQuantiles[] oldBuckets = buckets.get();
+        int ageBuckets = oldBuckets.length;
+        CKMSQuantiles[] newBuckets = new CKMSQuantiles[ageBuckets];
+        newBuckets[ageBuckets - 1] = new CKMSQuantiles(quantiles); // newest bucket
+        System.arraycopy(oldBuckets, 1, newBuckets, 0, ageBuckets - 1); // older buckets
+        while (!buckets.compareAndSet(oldBuckets, newBuckets)) {
+          oldBuckets = buckets.get();
+          System.arraycopy(oldBuckets, 1, newBuckets, 0, ageBuckets - 1); // older buckets
+        }
       }
       lastRotate = lastRotateTimestampNanos.get();
     }
