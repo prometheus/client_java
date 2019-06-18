@@ -15,6 +15,7 @@
     <name>Prometheus Java Simpleclient</name>
     <description>
         Core instrumentation library for the simpleclient.
+        Collectors using HdrHistogram.
     </description>
 
     <licenses>
@@ -31,6 +32,11 @@
             <name>Brian Brazil</name>
             <email>brian.brazil@boxever.com</email>
         </developer>
+        <developer>
+            <id>rrakos-evo</id>
+            <name>Rudolf Rakos</name>
+            <email>rrakos@evolutiongaming.com</email>
+        </developer>
     </developers>
 
 
@@ -38,6 +44,13 @@
         <!-- The simpleclient has no dependencies by design, so that
              it can be included into any other project without having
              to worry about conflicts. -->
+        <dependency>
+            <groupId>org.hdrhistogram</groupId>
+            <artifactId>HdrHistogram</artifactId>
+            <version>2.1.12</version>
+            <type>bundle</type>
+        </dependency>
+
         <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>junit</groupId>

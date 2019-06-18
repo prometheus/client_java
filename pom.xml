@@ -50,7 +50,6 @@
         <module>simpleclient_graphite_bridge</module>
         <module>simpleclient_hibernate</module>
         <module>simpleclient_guava</module>
-        <module>simpleclient_hdrhistogram</module>
         <module>simpleclient_hotspot</module>
         <module>simpleclient_httpserver</module>
         <module>simpleclient_log4j</module>
