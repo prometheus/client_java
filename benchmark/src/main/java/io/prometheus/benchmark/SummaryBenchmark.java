@@ -10,7 +10,6 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -30,7 +29,6 @@ public class SummaryBenchmark {
   io.prometheus.client.Histogram prometheusSimpleHistogram;
   io.prometheus.client.Histogram.Child prometheusSimpleHistogramChild;
   io.prometheus.client.Histogram prometheusSimpleHistogramNoLabels;
-  String[] labelNames;
 
   @Setup
   public void setup() {
@@ -44,9 +42,7 @@ public class SummaryBenchmark {
       .name("name")
       .help("some description..")
       .labelNames("some", "group").create();
-
-    labelNames = new String[]{"tests", "group"};
-    prometheusSimpleSummaryChild = prometheusSimpleSummary.labels(labelNames);
+    prometheusSimpleSummaryChild = prometheusSimpleSummary.labels("test", "group");
 
     prometheusSimpleSummaryNoLabels = io.prometheus.client.Summary.build()
       .name("name")
@@ -57,7 +53,7 @@ public class SummaryBenchmark {
       .name("name")
       .help("some description..")
       .labelNames("some", "group").create();
-    prometheusSimpleHistogramChild = prometheusSimpleHistogram.labels(labelNames);
+    prometheusSimpleHistogramChild = prometheusSimpleHistogram.labels("test", "group");
 
     prometheusSimpleHistogramNoLabels = io.prometheus.client.Histogram.build()
       .name("name")
@@ -92,13 +88,6 @@ public class SummaryBenchmark {
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusSimpleSummaryPooledLabelNamesBenchmark() {
-    prometheusSimpleSummary.labels(labelNames).observe(1) ;
-  }
-
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleSummaryChildBenchmark() {
     prometheusSimpleSummaryChild.observe(1); 
   }
@@ -115,26 +104,6 @@ public class SummaryBenchmark {
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleHistogramBenchmark() {
     prometheusSimpleHistogram.labels("test", "group").observe(1) ;
-  }
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusSimpleHistogramPooledLabelNamesBenchmark() {
-    prometheusSimpleHistogram.labels(labelNames).observe(1) ;
-  }
-
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public double prometheusSimpleHistogramTimerBenchmark() {
-    return prometheusSimpleHistogram.labels("test", "group").startTimer().observeDuration();
-  }
-
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public double prometheusSimpleHistogramTimerPooledLabelNamesBenchmark() {
-    return prometheusSimpleHistogram.labels(labelNames).startTimer().observeDuration();
   }
 
   @Benchmark
@@ -162,8 +131,6 @@ public class SummaryBenchmark {
 
     Options opt = new OptionsBuilder()
       .include(SummaryBenchmark.class.getSimpleName())
-      .jvmArgs("-XX:+UseBiasedLocking", "-XX:BiasedLockingStartupDelay=0")
-      .addProfiler(GCProfiler.class)
       .warmupIterations(5)
       .measurementIterations(4)
       .threads(4)

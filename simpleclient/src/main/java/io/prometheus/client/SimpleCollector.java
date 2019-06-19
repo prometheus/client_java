@@ -123,26 +123,53 @@ public abstract class SimpleCollector<Child> extends Collector {
      * Must be passed the same number of labels are were passed to {@link #labelNames}.
      */
     public Child labels(String... labelValues) {
-        validateLabels(labelValues);
         final List<String> labels;
         if (labelValues.length > 0) {
-            labels = pooledLabelNamesOf(labelValues);
+          labels = getPooledLabels();
+          for (String label : labelValues) {
+            labels.add(label);
+          }
         } else {
             labels = Collections.emptyList();
         }
         return getOrCreateChild(labels);
     }
 
-    private List<String> pooledLabelNamesOf(String... labelValues) {
+    public Child labels(String l1) {
+        ArrayList<String> pooledLabels = getPooledLabels();
+        pooledLabels.add(l1);
+        return getOrCreateChild(pooledLabels);
+    }
+    public Child labels(String l1, String l2) {
+        ArrayList<String> pooledLabels = getPooledLabels();
+        pooledLabels.add(l1);
+        pooledLabels.add(l2);
+        return getOrCreateChild(pooledLabels);
+    }
+    public Child labels(String l1, String l2, String l3) {
+        ArrayList<String> pooledLabels = getPooledLabels();
+        pooledLabels.add(l1);
+        pooledLabels.add(l2);
+        pooledLabels.add(l3);
+        return getOrCreateChild(pooledLabels);
+    }
+    public Child labels(String l1, String l2, String l3, String l4) {
+        ArrayList<String> pooledLabels = getPooledLabels();
+        pooledLabels.add(l1);
+        pooledLabels.add(l2);
+        pooledLabels.add(l3);
+        pooledLabels.add(l4);
+        return getOrCreateChild(pooledLabels);
+    }
+
+    private ArrayList<String> getPooledLabels() {
         final ThreadLocal<ArrayList<String>> labelNamesPool = this.labelNamesPool;
         ArrayList<String> pooledLabels = labelNamesPool.get();
-        final int labelValuesCount = labelValues.length;
         if (pooledLabels == null) {
-            pooledLabels = new LabelNames(labelValuesCount);
+            pooledLabels = new LabelNames(10);
             labelNamesPool.set(pooledLabels);
-        }
-        for (String label : labelValues) {
-            pooledLabels.add(label);
+        } else {
+          pooledLabels.clear();
         }
         return pooledLabels;
     }
@@ -150,30 +177,29 @@ public abstract class SimpleCollector<Child> extends Collector {
     private Child getOrCreateChild(List<String> labels) {
         Child c = children.get(labels);
         if (c != null) {
-            labels.clear();
             return c;
         }
         return tryCreateChild(labels);
     }
 
     private Child tryCreateChild(List<String> labels) {
+        validateLabels(labels);
         Child c2 = newChild();
         Child tmp = children.putIfAbsent(labels, c2);
         if (tmp == null) {
-            //given that putIfAbsent return null only when a new
-            //labels has been added, we need to clear up
-            //the pool to avoid labels to be both in the pool
-            //and as children key
+            // given that putIfAbsent return null only when a new
+            // labels has been added, we need to clear up
+            // the pool to avoid labels to be both in the pool
+            // and as children key
             labelNamesPool.set(null);
             return c2;
         } else {
-            labels.clear();
             return tmp;
         }
     }
 
-    private void validateLabels(String... labelValues) {
-        if (labelValues.length != labelNames.size()) {
+    private void validateLabels(List<String> labelValues) {
+        if (labelValues.size() != labelNames.size()) {
             throw new IllegalArgumentException("Incorrect number of labels.");
         }
         for (String label : labelValues) {
@@ -181,32 +207,6 @@ public abstract class SimpleCollector<Child> extends Collector {
                 throw new IllegalArgumentException("Label cannot be null.");
             }
         }
-    }
-
-    private void validateLabel(String labelValue) {
-        if (labelNames.size() != 1) {
-            throw new IllegalArgumentException("Incorrect number of labels.");
-        }
-        if (labelValue == null) {
-            throw new IllegalArgumentException("Label cannot be null.");
-        }
-    }
-
-    /**
-     * Return the Child with the given labels, creating it if needed.
-     * <p>
-     * Must be passed the same number of labels are were passed to {@link #labelNames}.
-     */
-    public Child labels(String labelValue) {
-        validateLabel(labelValue);
-        final ThreadLocal<ArrayList<String>> labelNamesPool = this.labelNamesPool;
-        ArrayList<String> labels = labelNamesPool.get();
-        if (labels == null) {
-            labels = new LabelNames(1);
-            labelNamesPool.set(labels);
-        }
-        labels.add(labelValue);
-        return getOrCreateChild(labels);
     }
 
   /**
