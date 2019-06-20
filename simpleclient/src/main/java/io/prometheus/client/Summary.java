@@ -226,6 +226,8 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
       try {
         return timeable.call();
+      } catch (RuntimeException e) {
+        throw e;
       } catch (Exception e) {
         throw new RuntimeException(e);
       } finally {
