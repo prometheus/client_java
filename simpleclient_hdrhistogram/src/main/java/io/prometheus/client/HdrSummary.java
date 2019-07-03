@@ -76,6 +76,7 @@ import java.util.concurrent.TimeUnit;
 public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Counter.Describable {
 
   private final List<Double> quantiles; // Can be empty, but can never be null.
+  private final long highestToLowestValueRatio;
   private final int numberOfSignificantValueDigits;
   private final long maxAgeSeconds;
   private final int ageBuckets;
@@ -83,6 +84,7 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
   private HdrSummary(Builder b) {
     super(b);
     this.quantiles = Collections.unmodifiableList(new ArrayList<Double>(b.quantiles));
+    this.highestToLowestValueRatio = b.highestToLowestValueRatio;
     this.numberOfSignificantValueDigits = b.numberOfSignificantValueDigits;
     this.maxAgeSeconds = b.maxAgeSeconds;
     this.ageBuckets = b.ageBuckets;
@@ -92,6 +94,7 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
   public static class Builder extends SimpleCollector.Builder<Builder, HdrSummary> {
 
     private final List<Double> quantiles = new ArrayList<Double>();
+    private long highestToLowestValueRatio = 1000;
     private int numberOfSignificantValueDigits = 3;
     private long maxAgeSeconds = TimeUnit.MINUTES.toSeconds(10);
     private int ageBuckets = 5;
@@ -101,6 +104,14 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
         throw new IllegalArgumentException("Quantile " + quantile + " invalid: Expected number between 0.0 and 1.0.");
       }
       quantiles.add(quantile);
+      return this;
+    }
+
+    public Builder highestToLowestValueRatio(long highestToLowestValueRatio) {
+      if (highestToLowestValueRatio < 2) {
+        throw new IllegalArgumentException("highestToLowestValueRatio cannot be " + highestToLowestValueRatio);
+      }
+      this.highestToLowestValueRatio = highestToLowestValueRatio;
       return this;
     }
 
@@ -160,7 +171,7 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
 
   @Override
   protected Child newChild() {
-    return new Child(quantiles, numberOfSignificantValueDigits, maxAgeSeconds, ageBuckets);
+    return new Child(quantiles, highestToLowestValueRatio, numberOfSignificantValueDigits, maxAgeSeconds, ageBuckets);
   }
 
   /**
@@ -241,9 +252,9 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
     private final List<Double> quantiles;
     private final HdrTimeWindowQuantiles quantileValues;
 
-    private Child(List<Double> quantiles, int numberOfSignificantValueDigits, long maxAgeSeconds, int ageBuckets) {
+    private Child(List<Double> quantiles, long highestToLowestValueRatio, int numberOfSignificantValueDigits, long maxAgeSeconds, int ageBuckets) {
       this.quantiles = quantiles;
-      this.quantileValues = quantiles.isEmpty() ? null : new HdrTimeWindowQuantiles(numberOfSignificantValueDigits, maxAgeSeconds, ageBuckets);
+      this.quantileValues = quantiles.isEmpty() ? null : new HdrTimeWindowQuantiles(highestToLowestValueRatio, numberOfSignificantValueDigits, maxAgeSeconds, ageBuckets);
     }
 
     /**

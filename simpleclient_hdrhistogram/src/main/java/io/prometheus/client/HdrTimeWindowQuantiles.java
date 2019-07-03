@@ -13,20 +13,29 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 class HdrTimeWindowQuantiles {
 
+  private final long highestToLowestValueRatio;
   private final int numberOfSignificantValueDigits;
   private final AtomicReference<ConcurrentDoubleHistogram[]> buckets;
   private final AtomicLong lastRotateTimestampNanos;
   private final long durationBetweenRotatesNanos;
 
-  public HdrTimeWindowQuantiles(int numberOfSignificantValueDigits, long maxAgeSeconds, int ageBuckets) {
+  public HdrTimeWindowQuantiles(long highestToLowestValueRatio, int numberOfSignificantValueDigits, long maxAgeSeconds, int ageBuckets) {
+    this.highestToLowestValueRatio = highestToLowestValueRatio;
     this.numberOfSignificantValueDigits = numberOfSignificantValueDigits;
     ConcurrentDoubleHistogram[] emptyBuckets = new ConcurrentDoubleHistogram[ageBuckets];
     for (int i = 0; i < ageBuckets; i++) {
-      emptyBuckets[i] = new ConcurrentDoubleHistogram(numberOfSignificantValueDigits);
+      emptyBuckets[i] = createBucket();
     }
     this.buckets = new AtomicReference<ConcurrentDoubleHistogram[]>(emptyBuckets);
     this.lastRotateTimestampNanos = new AtomicLong(System.nanoTime());
     this.durationBetweenRotatesNanos = TimeUnit.SECONDS.toNanos(maxAgeSeconds) / ageBuckets;
+  }
+
+  private ConcurrentDoubleHistogram createBucket() {
+    ConcurrentDoubleHistogram bucket = new ConcurrentDoubleHistogram(highestToLowestValueRatio, numberOfSignificantValueDigits);
+    bucket.setAutoResize(true);
+
+    return bucket;
   }
 
   public double get(double quantile) {
@@ -76,7 +85,7 @@ class HdrTimeWindowQuantiles {
         ConcurrentDoubleHistogram[] oldBuckets = buckets.get();
         int ageBuckets = oldBuckets.length;
         ConcurrentDoubleHistogram[] newBuckets = new ConcurrentDoubleHistogram[ageBuckets];
-        newBuckets[ageBuckets - 1] = new ConcurrentDoubleHistogram(numberOfSignificantValueDigits); // newest bucket
+        newBuckets[ageBuckets - 1] = createBucket(); // newest bucket
         System.arraycopy(oldBuckets, 1, newBuckets, 0, ageBuckets - 1); // older buckets
         while (!buckets.compareAndSet(oldBuckets, newBuckets)) {
           oldBuckets = buckets.get();
