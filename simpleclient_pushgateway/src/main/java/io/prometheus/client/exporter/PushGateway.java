@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -15,6 +16,7 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.bind.DatatypeConverter;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
@@ -79,7 +81,7 @@ public class PushGateway {
    * @param serverBaseURL the base URL and optional context path of the Pushgateway server.
    */
   public PushGateway(URL serverBaseURL) {
-    this.gatewayBaseURL = URI.create(serverBaseURL.toString() + "/metrics/job/")
+    this.gatewayBaseURL = URI.create(serverBaseURL.toString() + "/metrics/")
       .normalize()
       .toString();
   }
@@ -275,11 +277,20 @@ public class PushGateway {
   }
 
   void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
-    String url = gatewayBaseURL + URLEncoder.encode(job, "UTF-8");
+    String url = gatewayBaseURL;
+    if (job.contains("/")) {
+      url += "job@base64/" + base64url(job);
+    } else {
+      url += "job/" + URLEncoder.encode(job, "UTF-8");
+    }
 
     if (groupingKey != null) {
       for (Map.Entry<String, String> entry: groupingKey.entrySet()) {
-        url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
+        if (entry.getValue().contains("/")) {
+          url += "/" + entry.getKey() + "@base64/" + base64url(entry.getValue());
+        } else {
+          url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
+        }
       }
     }
     HttpURLConnection connection = connectionFactory.create(url);
@@ -315,6 +326,15 @@ public class PushGateway {
       }
     } finally {
       connection.disconnect();
+    }
+  }
+
+  private static String base64url(String v) {
+    // Per RFC4648 table 2. We support Java 6, and java.util.Base64 was only added in Java 8,
+    try {
+      return DatatypeConverter.printBase64Binary(v.getBytes("UTF-8")).replace("+", "-").replace("/", "_");
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);  // Unreachable.
     }
   }
 

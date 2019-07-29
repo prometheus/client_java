@@ -45,7 +45,7 @@ public class PushGatewayTest {
   public void testMultipleSlashesAreStrippedFromURL() {
     final PushGateway pushGateway = new PushGateway("example.com:1234/context///path//");
     Assert.assertEquals(
-        "http://example.com:1234/context/path/metrics/job/",
+        "http://example.com:1234/context/path/metrics/",
         pushGateway.gatewayBaseURL
     );
   }
@@ -106,9 +106,9 @@ public class PushGatewayTest {
     mockServerClient.when(
         request()
           .withMethod("PUT")
-          .withPath("/metrics/job/a%2Fb/l/v/l2/v%2F2")
+          .withPath("/metrics/job@base64/YS9i/l/v/l2@base64/75-_Lw==")
       ).respond(response().withStatusCode(202));
-    groupingKey.put("l2", "v/2");
+    groupingKey.put("l2", "\uF7FF/");
     pg.push(registry, "a/b", groupingKey);
   }
 
@@ -219,7 +219,7 @@ public class PushGatewayTest {
     mockServerClient.when(
         request()
           .withMethod("PUT")
-          .withPath("/metrics/job/a%2Fb/instance/c%2Fd")
+          .withPath("/metrics/job@base64/YS9i/instance@base64/Yy9k")
       ).respond(response().withStatusCode(202));
     pg.push(registry, "a/b", "c/d");
   }
