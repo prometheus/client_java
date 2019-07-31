@@ -95,7 +95,7 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
 
     private final List<Double> quantiles = new ArrayList<Double>();
     private long highestToLowestValueRatio = 1000;
-    private int numberOfSignificantValueDigits = 3;
+    private int numberOfSignificantValueDigits = 2;
     private long maxAgeSeconds = TimeUnit.MINUTES.toSeconds(10);
     private int ageBuckets = 5;
 

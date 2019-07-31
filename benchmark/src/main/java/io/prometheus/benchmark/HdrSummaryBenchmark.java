@@ -21,26 +21,24 @@ public class HdrSummaryBenchmark {
   @Setup
   public void setup() {
     prometheusSimpleHdrSummary = io.prometheus.client.HdrSummary.build()
-      .name("name")
-      .help("some description..")
-      .labelNames("some", "group").create();
+      .name("name").help("some description..")
+      .labelNames("some", "group")
+      .create();
     prometheusSimpleHdrSummaryChild = prometheusSimpleHdrSummary.labels("test", "group");
 
     prometheusSimpleHdrSummaryNoLabels = io.prometheus.client.HdrSummary.build()
-      .name("name")
-      .help("some description..")
+      .name("name").help("some description..")
       .create();
 
     prometheusSimpleHdrSummaryQuantiles = io.prometheus.client.HdrSummary.build()
-      .name("name")
-      .help("some description..")
+      .name("name").help("some description..")
+      .labelNames("some", "group")
       .quantile(0.5).quantile(0.9).quantile(0.95).quantile(0.99)
-      .labelNames("some", "group").create();
+      .create();
     prometheusSimpleHdrSummaryQuantilesChild = prometheusSimpleHdrSummaryQuantiles.labels("test", "group");
 
     prometheusSimpleHdrSummaryQuantilesNoLabels = io.prometheus.client.HdrSummary.build()
-      .name("name")
-      .help("some description..")
+      .name("name").help("some description..")
       .quantile(0.5).quantile(0.9).quantile(0.95).quantile(0.99)
       .create();
   }
