@@ -261,6 +261,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private final DoubleAdder sum = new DoubleAdder();
     private final List<Quantile> quantiles;
     private final TimeWindowQuantiles quantileValues;
+    private Long timestampMs;
 
     private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets) {
       this.quantiles = quantiles;
@@ -297,6 +298,19 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     public Value get() {
       return new Value(count.sum(), sum.sum(), quantiles, quantileValues);
     }
+    /**
+     * If set, get the timestamp of the Summary.
+     */
+	public Long getTimestampMs() {
+		return timestampMs;
+	}
+    /**
+     * Optionally sets an external timestamp for the summary.
+     */
+	public Child setTimestampMs(Long timestampMs) {
+		this.timestampMs = timestampMs;
+		return this;
+	}
   }
 
   // Convenience methods.
@@ -354,10 +368,10 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       for(Map.Entry<Double, Double> q : v.quantiles.entrySet()) {
         List<String> labelValuesWithQuantile = new ArrayList<String>(c.getKey());
         labelValuesWithQuantile.add(doubleToGoString(q.getKey()));
-        samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, q.getValue()));
+        samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, q.getValue(), c.getValue().getTimestampMs()));
       }
-      samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
-      samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
+      samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count, c.getValue().getTimestampMs()));
+      samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum, c.getValue().getTimestampMs()));
     }
 
     return familySamplesList(Type.SUMMARY, samples);

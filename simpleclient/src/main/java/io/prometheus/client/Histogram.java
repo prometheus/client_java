@@ -246,6 +246,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
     private final double[] upperBounds;
     private final DoubleAdder[] cumulativeCounts;
     private final DoubleAdder sum = new DoubleAdder();
+    private Long timestampMs;
 
 
     /**
@@ -283,6 +284,19 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       }
       return new Value(sum.sum(), buckets);
     }
+    /**
+     * Get the optionally defined timestamp for the histogram.
+     */
+	public Long getTimestampMs() {
+		return timestampMs;
+	}
+    /**
+     * Optionally sets an external timestamp for the histogram. 
+     */
+	public Child setTimestampMs(Long timestampMs) {
+		this.timestampMs = timestampMs;
+		return this;
+	}
   }
 
   // Convenience methods.
@@ -331,10 +345,10 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       for (int i = 0; i < v.buckets.length; ++i) {
         List<String> labelValuesWithLe = new ArrayList<String>(c.getKey());
         labelValuesWithLe.add(doubleToGoString(buckets[i]));
-        samples.add(new MetricFamilySamples.Sample(fullname + "_bucket", labelNamesWithLe, labelValuesWithLe, v.buckets[i]));
+        samples.add(new MetricFamilySamples.Sample(fullname + "_bucket", labelNamesWithLe, labelValuesWithLe, v.buckets[i], c.getValue().getTimestampMs()));
       }
-      samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.buckets[buckets.length-1]));
-      samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
+      samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.buckets[buckets.length-1], c.getValue().getTimestampMs()));
+      samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum, c.getValue().getTimestampMs()));
     }
 
     return familySamplesList(Type.HISTOGRAM, samples);

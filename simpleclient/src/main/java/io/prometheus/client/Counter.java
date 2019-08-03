@@ -108,6 +108,8 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
    */
   public static class Child {
     private final DoubleAdder value = new DoubleAdder();
+    
+    private Long timestampMs;
     /**
      * Increment the counter by 1.
      */
@@ -130,6 +132,19 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     public double get() {
       return value.sum();
     }
+    /**
+     * Get the optionally defined timestamp for the counter.
+     */
+	public Long getTimestampMs() {
+		return timestampMs;
+	}
+    /**
+     * Optionally sets an external timestamp for the counter. 
+     */
+	public Child setTimestampMs(Long timestampMs) {
+		this.timestampMs = timestampMs;
+		return this;
+	}
   }
 
   // Convenience methods.
@@ -158,7 +173,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
+      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get(), c.getValue().getTimestampMs()));
     }
     return familySamplesList(Type.COUNTER, samples);
   }
