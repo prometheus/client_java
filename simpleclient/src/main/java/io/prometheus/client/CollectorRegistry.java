@@ -27,7 +27,7 @@ public class CollectorRegistry {
    */
   public static final CollectorRegistry defaultRegistry = new CollectorRegistry(true);
 
-
+  private final Object namesCollectorsLock = new Object();
   private final Map<Collector, List<String>> collectorsToNames = new HashMap<Collector, List<String>>();
   private final Map<String, Collector> namesToCollectors = new HashMap<String, Collector>();
 
@@ -48,7 +48,7 @@ public class CollectorRegistry {
    */
   public void register(Collector m) {
     List<String> names = collectorNames(m);
-    synchronized (collectorsToNames) {
+    synchronized (namesCollectorsLock) {
       for (String name : names) {
         if (namesToCollectors.containsKey(name)) {
           throw new IllegalArgumentException("Collector already registered that provides name: " + name);
@@ -65,7 +65,7 @@ public class CollectorRegistry {
    * Unregister a Collector.
    */
   public void unregister(Collector m) {
-    synchronized (collectorsToNames) {
+    synchronized (namesCollectorsLock) {
       List<String> names = collectorsToNames.remove(m);
       for (String name : names) {
         namesToCollectors.remove(name);
@@ -77,7 +77,7 @@ public class CollectorRegistry {
    * Unregister all Collectors.
    */
   public void clear() {
-    synchronized (collectorsToNames) {
+    synchronized (namesCollectorsLock) {
       collectorsToNames.clear();
       namesToCollectors.clear();
     }
@@ -87,7 +87,7 @@ public class CollectorRegistry {
    * A snapshot of the current collectors.
    */
   private Set<Collector> collectors() {
-    synchronized (collectorsToNames) {
+    synchronized (namesCollectorsLock) {
       return new HashSet<Collector>(collectorsToNames.keySet());
     }
   }
@@ -159,7 +159,7 @@ public class CollectorRegistry {
         return collectors().iterator();
       } else {
         HashSet<Collector> collectors = new HashSet<Collector>();
-        synchronized (namesToCollectors) {
+        synchronized (namesCollectorsLock) {
           for (Map.Entry<String, Collector> entry : namesToCollectors.entrySet()) {
             if (includedNames.contains(entry.getKey())) {
               collectors.add(entry.getValue());
