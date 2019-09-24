@@ -1,7 +1,8 @@
 # Prometheus JVM Client
 It supports Java, Clojure, Scala, JRuby, and anything else that runs on the JVM.
 
-[![Build Status](https://travis-ci.org/prometheus/client_java.png?branch=master)](https://travis-ci.org/prometheus/client_java)
+[![Build Status](https://circleci.com/gh/prometheus/client_java.svg?style=svg)](https://circleci.com/gh/prometheus/client_java)
+
 
 Table of Contents
 =================
@@ -40,25 +41,25 @@ version can be found on in the maven repository for
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient</artifactId>
-  <version>0.6.0</version>
+  <version>0.7.0</version>
 </dependency>
 <!-- Hotspot JVM metrics-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_hotspot</artifactId>
-  <version>0.6.0</version>
+  <version>0.7.0</version>
 </dependency>
 <!-- Exposition HTTPServer-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_httpserver</artifactId>
-  <version>0.6.0</version>
+  <version>0.7.0</version>
 </dependency>
 <!-- Pushgateway exposition-->
 <dependency>
   <groupId>io.prometheus</groupId>
   <artifactId>simpleclient_pushgateway</artifactId>
-  <version>0.6.0</version>
+  <version>0.7.0</version>
 </dependency>
 ```
 
