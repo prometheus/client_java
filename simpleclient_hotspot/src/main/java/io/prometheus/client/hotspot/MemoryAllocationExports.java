@@ -25,8 +25,10 @@ public class MemoryAllocationExports extends Collector {
 
   public MemoryAllocationExports() {
     AllocationCountingNotificationListener listener = new AllocationCountingNotificationListener(allocatedCounter);
-    for (GarbageCollectorMXBean garbageCollectorMXBean : ManagementFactory.getGarbageCollectorMXBeans()) {
-      ((NotificationEmitter) garbageCollectorMXBean).addNotificationListener(listener, null, null);
+    for (GarbageCollectorMXBean garbageCollectorMXBean : getGarbageCollectorMXBeans()) {
+      if (garbageCollectorMXBean instanceof NotificationEmitter) {
+        ((NotificationEmitter) garbageCollectorMXBean).addNotificationListener(listener, null, null);
+      }
     }
   }
 
@@ -96,5 +98,9 @@ public class MemoryAllocationExports extends Collector {
       Long last = map.put(key, value);
       return last == null ? 0 : last;
     }
+  }
+
+  protected List<GarbageCollectorMXBean> getGarbageCollectorMXBeans() {
+    return ManagementFactory.getGarbageCollectorMXBeans();
   }
 }
