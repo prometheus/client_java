@@ -2,6 +2,13 @@ package io.prometheus.client.hotspot;
 
 import io.prometheus.client.Counter;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import javax.management.NotificationEmitter;
+import javax.management.NotificationFilter;
+import java.lang.management.GarbageCollectorMXBean;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -41,5 +48,21 @@ public class MemoryAllocationExportsTest {
     // Decrease to 17, then increase by 3
     listener.handleMemoryPool("TestPool", 17, 20);
     assertEquals(153, child.get(), 0.001);
+  }
+
+  @Test
+  public void testConstructorShouldIgnoreNotNotificationEmitterClasses() {
+    final GarbageCollectorMXBean notificationEmitterMXBean = Mockito.mock(GarbageCollectorMXBean.class, Mockito.withSettings().extraInterfaces(NotificationEmitter.class));
+    final GarbageCollectorMXBean notNotificationEmitterMXBean = Mockito.mock(GarbageCollectorMXBean.class);
+
+    new MemoryAllocationExports() {
+      @Override
+      protected List<GarbageCollectorMXBean> getGarbageCollectorMXBeans() {
+          return Arrays.asList(notificationEmitterMXBean, notNotificationEmitterMXBean);
+      }
+    };
+
+    Mockito.verify((NotificationEmitter) notificationEmitterMXBean).addNotificationListener(Mockito.any(MemoryAllocationExports.AllocationCountingNotificationListener.class), Mockito.isNull(NotificationFilter.class), Mockito.isNull());
+    Mockito.verifyZeroInteractions(notNotificationEmitterMXBean);
   }
 }
