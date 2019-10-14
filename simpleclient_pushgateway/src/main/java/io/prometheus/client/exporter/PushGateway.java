@@ -313,10 +313,10 @@ public class PushGateway {
       }
 
       int response = connection.getResponseCode();
-      if (response != HttpURLConnection.HTTP_ACCEPTED) {
+      if (response/100 != 2) {
         String errorMessage;
         InputStream errorStream = connection.getErrorStream();
-        if(response >= 400 && errorStream != null) {
+        if(errorStream != null) {
           String errBody = readFromStream(errorStream);
           errorMessage = "Response code from " + url + " was " + response + ", response body: " + errBody;
         } else {

@@ -60,6 +60,16 @@ public class PushGatewayTest {
     pg.push(registry, "j");
   }
 
+  @Test
+  public void testPush200Response() throws IOException {
+    mockServerClient.when(
+        request()
+          .withMethod("PUT")
+          .withPath("/metrics/job/j")
+      ).respond(response().withStatusCode(200));
+    pg.push(registry, "j");
+  }
+
   @Test(expected=IOException.class)
   public void testNon202ResponseThrows() throws IOException {
     mockServerClient.when(
