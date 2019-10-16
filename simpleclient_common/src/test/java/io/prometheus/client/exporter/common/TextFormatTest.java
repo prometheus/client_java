@@ -104,6 +104,8 @@ public class TextFormatTest {
             + "labelsAndQuantiles{l=\"a\",quantile=\"0.5\",} 2.0\n"
             + "labelsAndQuantiles{l=\"a\",quantile=\"0.9\",} 2.0\n"
             + "labelsAndQuantiles{l=\"a\",quantile=\"0.99\",} 2.0\n"
+            + "labelsAndQuantiles_min{l=\"a\",} 2.0\n"
+            + "labelsAndQuantiles_max{l=\"a\",} 2.0\n"
             + "labelsAndQuantiles_count{l=\"a\",} 1.0\n"
             + "labelsAndQuantiles_sum{l=\"a\",} 2.0\n", writer.toString());
   }
