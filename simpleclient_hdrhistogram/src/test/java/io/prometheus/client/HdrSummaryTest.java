@@ -131,6 +131,16 @@ public class HdrSummaryTest {
     assertEquals(0.99 * nSamples, getLabelsQuantile(0.99), error * nSamples);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testObserveNegative() {
+    noLabels.observe(-2.0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testObserveNegativeQuantiles() {
+    noLabelsAndQuantiles.observe(-2.0);
+  }
+
   @Test
   public void testError() {
     for (int n = 1; n <= 5; ++n) {

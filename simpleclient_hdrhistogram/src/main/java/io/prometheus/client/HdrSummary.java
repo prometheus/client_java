@@ -261,6 +261,11 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
      * Observe the given amount.
      */
     public void observe(double amt) {
+      if (amt < 0.0) {
+        // See DoubleHistogram#autoAdjustRangeForValueSlowPath
+        throw new IllegalArgumentException("Value " + amt + " invalid: Negative values are not supported by HdrHistogram.");
+      }
+
       count.add(1);
       sum.add(amt);
       if (quantileValues != null) {
