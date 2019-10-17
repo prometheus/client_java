@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  *  <li>Request size</li>
  * </ul>
  *
- * See http://hdrhistogram.org and https://github.com/HdrHistogram/HdrHistogram for more info on HdrHistogram.
+ * Note that observing negative measurements are not supported and will cause an {@link IllegalArgumentException}.
  *
  * <p>
  * Example Summaries:
@@ -69,9 +69,14 @@ import java.util.concurrent.TimeUnit;
  *   <li>ageBuckets(int): Set the number of buckets used to implement the sliding time window. If your time window is 10 minutes, and you have ageBuckets=5,
  *       buckets will be switched every 2 minutes. The value is a trade-off between resources (memory and cpu for maintaining the bucket)
  *       and how smooth the time window is moved. Default value is 5.
+ *   <li>numberOfSignificantValueDigits(int): Set the precision (significant decimal digits) of the underlying HdrHistogram.
+ *       Default value is 2. See {@link org.HdrHistogram.ConcurrentDoubleHistogram}
+ *   <li>highestToLowestValueRatio(long): Set the initial dynamic range (and memory usage) of the underlying HdrHistogram.
+ *       Default value is 1000. See {@link org.HdrHistogram.ConcurrentDoubleHistogram}
  * </ul>
  *
  * See https://prometheus.io/docs/practices/histograms/ for more info on quantiles.
+ * See http://hdrhistogram.org and https://github.com/HdrHistogram/HdrHistogram for more info on HdrHistogram.
  */
 public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Counter.Describable {
 
@@ -109,7 +114,7 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
 
     public Builder highestToLowestValueRatio(long highestToLowestValueRatio) {
       if (highestToLowestValueRatio < 2) {
-        throw new IllegalArgumentException("highestToLowestValueRatio cannot be " + highestToLowestValueRatio);
+        throw new IllegalArgumentException("highestToLowestValueRatio cannot be " + highestToLowestValueRatio + " : Expected at least 2.");
       }
       this.highestToLowestValueRatio = highestToLowestValueRatio;
       return this;
@@ -117,7 +122,7 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
 
     public Builder numberOfSignificantValueDigits(int numberOfSignificantValueDigits) {
       if (numberOfSignificantValueDigits < 0 || numberOfSignificantValueDigits > 5) {
-        throw new IllegalArgumentException("numberOfSignificantValueDigits cannot be " + numberOfSignificantValueDigits);
+        throw new IllegalArgumentException("numberOfSignificantValueDigits cannot be " + numberOfSignificantValueDigits + " : Expected number between 0 and 5.");
       }
       this.numberOfSignificantValueDigits = numberOfSignificantValueDigits;
       return this;
@@ -125,7 +130,7 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
 
     public Builder maxAgeSeconds(long maxAgeSeconds) {
       if (maxAgeSeconds <= 0) {
-        throw new IllegalArgumentException("maxAgeSeconds cannot be " + maxAgeSeconds);
+        throw new IllegalArgumentException("maxAgeSeconds cannot be " + maxAgeSeconds + " : Expected non negative number.");
       }
       this.maxAgeSeconds = maxAgeSeconds;
       return this;
@@ -133,7 +138,7 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
 
     public Builder ageBuckets(int ageBuckets) {
       if (ageBuckets <= 0) {
-        throw new IllegalArgumentException("ageBuckets cannot be " + ageBuckets);
+        throw new IllegalArgumentException("ageBuckets cannot be " + ageBuckets + " : Expected non negative number.");
       }
       this.ageBuckets = ageBuckets;
       return this;
@@ -259,6 +264,8 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
 
     /**
      * Observe the given amount.
+     *
+     * @throws IllegalArgumentException If amt is negative.
      */
     public void observe(double amt) {
       if (amt < 0.0) {
@@ -331,6 +338,8 @@ public class HdrSummary extends SimpleCollector<HdrSummary.Child> implements Cou
 
   /**
    * Observe the given amount on the summary with no labels.
+   *
+   * @throws IllegalArgumentException If amt is negative.
    */
   public void observe(double amt) {
     noLabelsChild.observe(amt);
