@@ -1,10 +1,9 @@
 package io.prometheus.client;
 
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.Arrays;
 import java.util.List;
+import io.prometheus.client.ConcurrentChildMap.ConcurrentChildHashMap;
 
 /**
  * Common functionality for {@link Gauge}, {@link Counter}, {@link Summary} and {@link Histogram}.
@@ -46,12 +45,12 @@ import java.util.List;
  * by each. If the cardinality is in the hundreds, you may wish to consider removing the breakout
  * by one of the dimensions altogether.
  */
-public abstract class SimpleCollector<Child> extends Collector {
+public abstract class SimpleCollector<Child> extends Collector implements ConcurrentChildMap.ChildFactory<Child> {
   protected final String fullname;
   protected final String help;
   protected final List<String> labelNames;
 
-  protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
+  protected final ConcurrentChildMap<Child> children;
   protected Child noLabelsChild;
 
   /**
@@ -60,22 +59,39 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Must be passed the same number of labels are were passed to {@link #labelNames}.
    */
   public Child labels(String... labelValues) {
-    if (labelValues.length != labelNames.size()) {
+    validateCount(labelValues.length);
+    return children.labels(this, labelValues);
+  }
+
+  public Child labels() {
+    validateCount(0);
+    return noLabelsChild;
+  }
+
+  public Child labels(String lv1) {
+    validateCount(1);
+    return children.labels(this, lv1);
+  }
+
+  public Child labels(String lv1, String lv2) {
+    validateCount(2);
+    return children.labels(this, lv1, lv2);
+  }
+
+  public Child labels(String lv1, String lv2, String lv3) {
+    validateCount(3);
+    return children.labels(this, lv1, lv2, lv3);
+  }
+
+  public Child labels(String lv1, String lv2, String lv3, String lv4) {
+    validateCount(4);
+    return children.labels(this, lv1, lv2, lv3, lv4);
+  }
+
+  private void validateCount(int count) {
+    if (count != labelNames.size()) {
       throw new IllegalArgumentException("Incorrect number of labels.");
     }
-    for (String label: labelValues) {
-      if (label == null) {
-        throw new IllegalArgumentException("Label cannot be null.");
-      }
-    }
-    List<String> key = Arrays.asList(labelValues);
-    Child c = children.get(key);
-    if (c != null) {
-      return c;
-    }
-    Child c2 = newChild();
-    Child tmp = children.putIfAbsent(key, c2);
-    return tmp == null ? c2 : tmp;
   }
 
   /**
@@ -84,7 +100,7 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Any references to the Child are invalidated.
    */
   public void remove(String... labelValues) {
-    children.remove(Arrays.asList(labelValues));
+    children.remove(labelValues);
     initializeNoLabelsChild();
   }
   
@@ -104,7 +120,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   protected void initializeNoLabelsChild() {
     // Initialize metric if it has no labels.
     if (labelNames.size() == 0) {
-      noLabelsChild = labels();
+      noLabelsChild = labels(new String[0]);
     }
   }
 
@@ -132,10 +148,8 @@ public abstract class SimpleCollector<Child> extends Collector {
    * A metric should be either all callbacks, or none.
    */
   public <T extends Collector> T setChild(Child child, String... labelValues) {
-    if (labelValues.length != labelNames.size()) {
-      throw new IllegalArgumentException("Incorrect number of labels.");
-    }
-    children.put(Arrays.asList(labelValues), child);
+    validateCount(labelValues.length);
+    children.setChild(child, labelValues);
     return (T)this;
   }
 
@@ -143,6 +157,11 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Return a new child, workaround for Java generics limitations.
    */
   protected abstract Child newChild();
+
+  @Override
+  public Child newChild(String[] labels) {
+    return newChild();
+  }
 
   protected List<MetricFamilySamples> familySamplesList(Collector.Type type, List<MetricFamilySamples.Sample> samples) {
     MetricFamilySamples mfs = new MetricFamilySamples(fullname, type, help, samples);
@@ -152,6 +171,11 @@ public abstract class SimpleCollector<Child> extends Collector {
   }
 
   protected SimpleCollector(Builder b) {
+    try {
+      children = (ConcurrentChildMap) b.childMapClass.newInstance();
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException("Error instantiating child map class", e);
+    }
     if (b.name.isEmpty()) throw new IllegalStateException("Name hasn't been set.");
     String name = b.name;
     if (!b.subsystem.isEmpty()) {
@@ -187,6 +211,15 @@ public abstract class SimpleCollector<Child> extends Collector {
     String[] labelNames = new String[]{};
     // Some metrics require additional setup before the initialization can be done.
     boolean dontInitializeNoLabelsChild;
+    Class<? extends ConcurrentChildMap> childMapClass = ConcurrentChildHashMap.class;
+
+    /**
+     * Set a custom implementation for the internal labels-to-Child map.
+     */
+    public B childMap(Class<? extends ConcurrentChildMap> childMapClass) {
+      this.childMapClass = childMapClass;
+      return (B)this;
+    }
 
     /**
      * Set the name of the metric. Required.
