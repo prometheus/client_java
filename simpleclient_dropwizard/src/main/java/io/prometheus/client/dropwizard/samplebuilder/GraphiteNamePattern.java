@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.prometheus.client.dropwizard.samplebuilder.MapperConfig.METRIC_GLOB_REGEX;
 
 /**
  * GraphiteNamePattern is initialised with a simplified glob pattern that only allows '*' as special character.
@@ -20,7 +19,6 @@ import static io.prometheus.client.dropwizard.samplebuilder.MapperConfig.METRIC_
  * It contains logic to match a metric name and to extract named parameters from it.
  */
 class GraphiteNamePattern {
-    private static final Pattern VALIDATION_PATTERN = Pattern.compile(METRIC_GLOB_REGEX);
 
     private Pattern pattern;
     private String patternStr;
@@ -30,10 +28,7 @@ class GraphiteNamePattern {
      *
      * @param pattern The glob style pattern to be used.
      */
-    GraphiteNamePattern(final String pattern) throws IllegalArgumentException {
-        if (!VALIDATION_PATTERN.matcher(pattern).matches()) {
-            throw new IllegalArgumentException(String.format("Provided pattern [%s] does not matches [%s]", pattern, METRIC_GLOB_REGEX));
-        }
+    GraphiteNamePattern(final String pattern) {
         initializePattern(pattern);
     }
 

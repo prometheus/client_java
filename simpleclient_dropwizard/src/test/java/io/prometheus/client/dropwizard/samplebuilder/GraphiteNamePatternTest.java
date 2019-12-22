@@ -8,39 +8,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class GraphiteNamePatternTest {
-
-    @Test(expected = IllegalArgumentException.class)
-    public void createNew_WHEN_InvalidPattern_THEN_ShouldThrowException() {
-        final List<String> invalidPatterns = Arrays.asList(
-                "",
-                "a",
-                "1org",
-                "1org.",
-                "org.",
-                "org.**",
-                "org.**",
-                "org.company-",
-                "org.company-.",
-                "org.company-*",
-                "org.company.**",
-                "org.company.**-",
-                "org.com*pany.*",
-                "org.test.contr.oller.gather.status..400",
-                "org.test.controller.gather.status..400"
-        );
-        final GraphiteNamePattern graphiteNamePattern = new GraphiteNamePattern("");
-        for (String pattern : invalidPatterns) {
-            try {
-                new GraphiteNamePattern(pattern);
-
-                Assertions.failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
-            } catch (IllegalArgumentException e) {
-                Assertions.assertThat(e).hasMessageContaining(pattern);
-            }
-        }
-    }
 
     @Test
     public void createNew_WHEN_ValidPattern_THEN_ShouldCreateThePatternSuccessfully() {
@@ -58,6 +28,7 @@ public class GraphiteNamePatternTest {
         }
     }
 
+
     @Test
     public void createNew_WHEN_ValidPattern_THEN_ShouldInitInternalPatternSuccessfully() {
         final Map<String, String> validPatterns = new HashMap<String, String>();
@@ -72,6 +43,7 @@ public class GraphiteNamePatternTest {
         }
     }
 
+
     @Test
     public void match_WHEN_NotMatchingMetricNameProvided_THEN_ShouldNotMatch() {
         final GraphiteNamePattern pattern = new GraphiteNamePattern("org.test.controller.*.status.*");
@@ -85,6 +57,7 @@ public class GraphiteNamePatternTest {
             Assertions.assertThat(pattern.matches(metricName)).as("Matching [%s] against [%s]", metricName, pattern.getPatternString()).isFalse();
         }
     }
+
 
     @Test
     public void match_WHEN_MatchingMetricNameProvided_THEN_ShouldMatch() {
@@ -102,6 +75,28 @@ public class GraphiteNamePatternTest {
         }
     }
 
+
+    @Test
+    public void match_WHEN_onlyGlob_THEN_ShouldMatchAny() {
+        GraphiteNamePattern pattern = new GraphiteNamePattern("*");
+        Assertions.assertThat(pattern.matches("foo")).isTrue();
+        Assertions.assertThat(pattern.matches("bar")).isTrue();
+    }
+
+
+    @Test
+    public void match_WHEN_varyingFormats_THEN_ShouldMatchRegardless() {
+        Map<String, String> metricsToPatterns = new HashMap<String, String>();
+        metricsToPatterns.put("snake_case_example_metric", "snake_case_*_metric");
+        metricsToPatterns.put("CamelCasedExampleMetric", "CamelCased*Metric");
+        metricsToPatterns.put("Weird.Mixture_Of_Formats.Example_metric", "Weird.Mixture_Of_Formats.*_metric");
+
+        for (Entry<String, String> metricToPattern : metricsToPatterns.entrySet()) {
+            Assertions.assertThat(new GraphiteNamePattern(metricToPattern.getValue()).matches(metricToPattern.getKey())).isTrue();
+        }
+    }
+
+
     @Test
     public void extractParameters() {
         GraphiteNamePattern pattern;
@@ -110,7 +105,7 @@ public class GraphiteNamePatternTest {
         expected.put("${1}", "400");
         pattern = new GraphiteNamePattern("org.test.controller.*.status.*");
         Assertions.assertThat(pattern.extractParameters("org.test.controller.gather.status.400"))
-                .isEqualTo(expected);
+                  .isEqualTo(expected);
 
         expected = new HashMap<String, String>();
         expected.put("${0}", "org");
@@ -118,8 +113,9 @@ public class GraphiteNamePatternTest {
         expected.put("${2}", "400");
         pattern = new GraphiteNamePattern("*.test.controller.*.status.*");
         Assertions.assertThat(pattern.extractParameters("org.test.controller.gather.status.400"))
-                .isEqualTo(expected);
+                  .isEqualTo(expected);
     }
+
 
     @Test
     public void extractParameters_WHEN_emptyStringInDottedMetricsName_THEN_ShouldReturnEmptyString() {
@@ -129,16 +125,42 @@ public class GraphiteNamePatternTest {
         expected.put("${1}", "400");
         pattern = new GraphiteNamePattern("org.test.controller.*.status.*");
         Assertions.assertThat(pattern.extractParameters("org.test.controller..status.400"))
-                .isEqualTo(expected);
+                  .isEqualTo(expected);
 
     }
+
 
     @Test
     public void extractParameters_WHEN_moreDots_THEN_ShouldReturnNoMatches() {
         GraphiteNamePattern pattern;
         pattern = new GraphiteNamePattern("org.test.controller.*.status.*");
         Assertions.assertThat(pattern.extractParameters("org.test.controller...status.400"))
-                .isEqualTo(Collections.emptyMap());
+                  .isEqualTo(Collections.emptyMap());
 
+    }
+
+    @Test
+    public void extractParameters_WHEN_onlyGlob_THEN_ShouldExtractEntireMetric() {
+        String metric = "http_requests";
+        GraphiteNamePattern pattern = new GraphiteNamePattern("*");
+        Map<String, String> expected = new HashMap<String, String>();
+        expected.put("${0}", metric);
+        Assertions.assertThat(pattern.extractParameters(metric)).isEqualTo(expected);
+    }
+
+
+    @Test
+    public void  extractParameters_WHEN_varyingFormats_THEN_ShouldExtractRegardless() {
+        Map<String, String> metricsToPatterns = new HashMap<String, String>();
+        metricsToPatterns.put("snake_case_example_metric", "snake_case_*_metric");
+        metricsToPatterns.put("CamelCasedExampleMetric", "CamelCased*Metric");
+        metricsToPatterns.put("Weird.Mixture_Of_Formats.Example_metric", "Weird.Mixture_Of_Formats.*_metric");
+
+        for (Entry<String, String> metricToPattern : metricsToPatterns.entrySet()) {
+            GraphiteNamePattern graphiteNamePattern = new GraphiteNamePattern(metricToPattern.getValue());
+            Entry<String, String> actual = graphiteNamePattern.extractParameters(metricToPattern.getKey()).entrySet().iterator().next();
+            Assertions.assertThat(actual.getKey()).isEqualTo("${0}");
+            Assertions.assertThat(actual.getValue()).isEqualToIgnoringCase("example");
+        }
     }
 }
