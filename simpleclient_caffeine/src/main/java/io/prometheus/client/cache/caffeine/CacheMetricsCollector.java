@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentMap;
 
 
 /**
- * Collect metrics from Caffiene's com.github.benmanes.caffeine.cache.Cache.
+ * Collect metrics from Caffeine's com.github.benmanes.caffeine.cache.Cache.
  * <p>
  * <pre>{@code
  *
