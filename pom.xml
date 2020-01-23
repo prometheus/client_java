@@ -117,6 +117,8 @@
                     <encoding>UTF-8</encoding>
                     <docencoding>UTF-8</docencoding>
                     <linksource>true</linksource>
+                    <source>8</source>
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                 </configuration>
                 <executions>
                     <execution>
