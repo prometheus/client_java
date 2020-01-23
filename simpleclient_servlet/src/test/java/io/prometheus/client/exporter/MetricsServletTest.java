@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.anyChar;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -63,6 +64,7 @@ public class MetricsServletTest {
     PrintWriter writer = mock(PrintWriter.class);
     when(resp.getWriter()).thenReturn(writer);
     doThrow(new RuntimeException()).when(writer).write(anyChar());
+    doThrow(new RuntimeException()).when(writer).write(anyInt());
     CollectorRegistry registry = new CollectorRegistry();
     Gauge a = Gauge.build("a", "a help").register(registry);
 
