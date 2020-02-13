@@ -294,7 +294,7 @@ class YourClass {
 
 ## Included Collectors
 
-The Java client includes collectors for garbage collection, memory pools, JMX, classloading, and thread counts.
+The Java client includes collectors for garbage collection, memory pools, classloading, and thread counts.
 These can be added individually or just use the `DefaultExports` to conveniently register them.
 
 ```java
