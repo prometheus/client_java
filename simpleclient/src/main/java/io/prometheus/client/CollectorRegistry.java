@@ -28,7 +28,7 @@ public class CollectorRegistry {
   public static final CollectorRegistry defaultRegistry = new CollectorRegistry(true);
 
   private final Object namesCollectorsLock = new Object();
-  private final Map<Collector, List<String>> collectorsToNames = new HashMap<Collector, List<String>>();
+  protected final Map<Collector, List<String>> collectorsToNames = new HashMap<Collector, List<String>>();
   private final Map<String, Collector> namesToCollectors = new HashMap<String, Collector>();
 
   private final boolean autoDescribe;
@@ -86,7 +86,7 @@ public class CollectorRegistry {
   /**
    * A snapshot of the current collectors.
    */
-  private Set<Collector> collectors() {
+  protected Set<Collector> collectors() {
     synchronized (namesCollectorsLock) {
       return new HashSet<Collector>(collectorsToNames.keySet());
     }

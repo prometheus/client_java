@@ -20,7 +20,7 @@ import java.util.Set;
  */
 public class MetricsServlet extends HttpServlet {
 
-  private CollectorRegistry registry;
+  protected CollectorRegistry registry;
 
   /**
    * Construct a MetricsServlet for the default registry.
