@@ -182,7 +182,7 @@ public class HibernateStatisticsCollectorTest {
     assertThat(getSampleForQuery("hibernate_per_query_execution_rows_total", "factory6", query), is(7.0));
     assertThat(getSampleForQuery("hibernate_per_query_execution_total", "factory6", query), is(8.0));
     assertThat(getSampleForQuery("hibernate_per_query_execution_seconds_total", "factory6", query), is(102.540d));
-
+    assertThat(getSampleForQuery("hibernate_per_query_execution_seconds_avg", "factory6", query), is(0.255d));
   }
 
   @Test
@@ -201,7 +201,8 @@ public class HibernateStatisticsCollectorTest {
     assertThat(getSampleForQuery("hibernate_per_query_execution_min_seconds", "factory7", query), nullValue());
     assertThat(getSampleForQuery("hibernate_per_query_execution_rows_total", "factory7", query), nullValue());
     assertThat(getSampleForQuery("hibernate_per_query_execution_total", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_seconds", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_seconds_total", "factory7", query), nullValue());
+    assertThat(getSampleForQuery("hibernate_per_query_execution_seconds_avg", "factory7", query), nullValue());
 
   }
 
@@ -216,6 +217,7 @@ public class HibernateStatisticsCollectorTest {
     when(queryStatistics.getExecutionRowCount()).thenReturn(7L);
     when(queryStatistics.getExecutionCount()).thenReturn(8L);
     when(queryStatistics.getExecutionTotalTime()).thenReturn(102540L);
+    when(queryStatistics.getExecutionAvgTime()).thenReturn(255L);
   }
 
   @Test
