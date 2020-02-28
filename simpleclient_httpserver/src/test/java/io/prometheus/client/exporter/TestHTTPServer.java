@@ -35,8 +35,9 @@ public class TestHTTPServer {
     s.stop();
   }
 
-  String request(String suffix) throws IOException {
-    String url = "http://localhost:" + s.server.getAddress().getPort() + "/metrics" + suffix;
+
+  String request(String context, String suffix) throws IOException {
+    String url = "http://localhost:" + s.server.getAddress().getPort() + context + suffix;
     URLConnection connection = new URL(url).openConnection();
     connection.setDoOutput(true);
     connection.connect();
@@ -44,8 +45,16 @@ public class TestHTTPServer {
     return s.hasNext() ? s.next() : "";
   }
 
+  String request(String suffix) throws IOException {
+    return request("/metrics", suffix);
+  }
+
   String requestWithCompression(String suffix) throws IOException {
-    String url = "http://localhost:" + s.server.getAddress().getPort() + "/metrics" + suffix;
+    return requestWithCompression("/metrics", suffix);
+  }
+
+  String requestWithCompression(String context, String suffix) throws IOException {
+    String url = "http://localhost:" + s.server.getAddress().getPort() + context + suffix;
     URLConnection connection = new URL(url).openConnection();
     connection.setDoOutput(true);
     connection.setDoInput(true);
@@ -63,8 +72,8 @@ public class TestHTTPServer {
       HTTPServer s = new HTTPServer(HttpServer.create(), registry, true);
       s.stop();
       fail("Should refuse to use an unbound HttpServer");
+    } catch (IllegalArgumentException expected) {
     }
-    catch (IllegalArgumentException expected) {}
   }
 
   @Test
@@ -113,5 +122,17 @@ public class TestHTTPServer {
     assertThat(response).contains("a 0.0");
     assertThat(response).contains("b 0.0");
     assertThat(response).contains("c 0.0");
+  }
+
+  @Test
+  public void testHealth() throws IOException {
+    String response = request("/-/healthy", "");
+    assertThat(response).contains("Exporter is Healthy");
+  }
+
+  @Test
+  public void testHealthGzipCompression() throws IOException {
+    String response = requestWithCompression("/-/healthy", "");
+    assertThat(response).contains("Exporter is Healthy");
   }
 }
