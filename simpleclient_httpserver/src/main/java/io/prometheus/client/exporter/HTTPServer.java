@@ -42,9 +42,13 @@ public class HTTPServer {
         }
     }
 
+    /**
+     * Handles Metrics collections from the given registry.
+     */
     static class HTTPMetricHandler implements HttpHandler {
         private CollectorRegistry registry;
         private final LocalByteArray response = new LocalByteArray();
+        private final static String HEALTHY_RESPONSE = "Exporter is Healthy.";
 
         HTTPMetricHandler(CollectorRegistry registry) {
           this.registry = registry;
@@ -54,16 +58,21 @@ public class HTTPServer {
         public void handle(HttpExchange t) throws IOException {
             String query = t.getRequestURI().getRawQuery();
 
+            String contextPath = t.getHttpContext().getPath();
             ByteArrayOutputStream response = this.response.get();
             response.reset();
             OutputStreamWriter osw = new OutputStreamWriter(response);
-            TextFormat.write004(osw,
-                    registry.filteredMetricFamilySamples(parseQuery(query)));
+            if ("/-/healthy".equals(contextPath)) {
+                osw.write(HEALTHY_RESPONSE);
+            } else {
+                TextFormat.write004(osw,
+                        registry.filteredMetricFamilySamples(parseQuery(query)));
+            }
+
             osw.flush();
             osw.close();
             response.flush();
             response.close();
-
             t.getResponseHeaders().set("Content-Type",
                     TextFormat.CONTENT_TYPE_004);
             if (shouldUseCompression(t)) {
@@ -154,6 +163,7 @@ public class HTTPServer {
         HttpHandler mHandler = new HTTPMetricHandler(registry);
         server.createContext("/", mHandler);
         server.createContext("/metrics", mHandler);
+        server.createContext("/-/healthy", mHandler);
         executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
         server.setExecutor(executorService);
         start(daemon);
