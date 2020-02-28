@@ -42,15 +42,13 @@ public class HTTPServer {
         }
     }
 
-    private static final String HEALTH_PATH = "/-/healthy";
-
     /**
      * Handles Metrics collections from the given registry.
      */
     static class HTTPMetricHandler implements HttpHandler {
         private CollectorRegistry registry;
         private final LocalByteArray response = new LocalByteArray();
-        private final static String RESPONSE = "Exporter is Healthy.";
+        private final static String HEALTHY_RESPONSE = "Exporter is Healthy.";
 
         HTTPMetricHandler(CollectorRegistry registry) {
           this.registry = registry;
@@ -64,9 +62,8 @@ public class HTTPServer {
             ByteArrayOutputStream response = this.response.get();
             response.reset();
             OutputStreamWriter osw = new OutputStreamWriter(response);
-            if (HEALTH_PATH.equals(contextPath)) {
-
-                osw.write(RESPONSE);
+            if ("/-/healthy".equals(contextPath)) {
+                osw.write(HEALTHY_RESPONSE);
             } else {
                 TextFormat.write004(osw,
                         registry.filteredMetricFamilySamples(parseQuery(query)));
@@ -166,7 +163,7 @@ public class HTTPServer {
         HttpHandler mHandler = new HTTPMetricHandler(registry);
         server.createContext("/", mHandler);
         server.createContext("/metrics", mHandler);
-        server.createContext(HEALTH_PATH, mHandler);
+        server.createContext("/-/healthy", mHandler);
         executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
         server.setExecutor(executorService);
         start(daemon);
