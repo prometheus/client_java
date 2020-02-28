@@ -65,6 +65,7 @@ public class HTTPServer {
             response.reset();
             OutputStreamWriter osw = new OutputStreamWriter(response);
             if (HEALTH_PATH.equals(contextPath)) {
+
                 osw.write(RESPONSE);
             } else {
                 TextFormat.write004(osw,
