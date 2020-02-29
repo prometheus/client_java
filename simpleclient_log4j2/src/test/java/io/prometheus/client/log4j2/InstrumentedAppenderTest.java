@@ -1,85 +1,47 @@
 package io.prometheus.client.log4j2;
 
-import static io.prometheus.client.log4j2.InstrumentedAppender.COUNTER_NAME;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.prometheus.client.CollectorRegistry;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 import static org.apache.logging.log4j.Level.*;
 
+@RunWith(Parameterized.class)
 public class InstrumentedAppenderTest {
 
+    private final Level level;
+    private LogCounter logCounter;
     private InstrumentedAppender appender;
     private LogEvent event;
 
-    @Before
-    public void setUp() throws Exception {
+    @Parameterized.Parameters(name = "{index}: level = {0}")
+    public static Collection<Level> data() {
+        return Arrays.asList(TRACE, DEBUG, INFO, WARN, ERROR, FATAL);
+    }
+
+    public InstrumentedAppenderTest(Level level)
+    {
+        this.level = level;
         appender = InstrumentedAppender.createAppender("Prometheus-Appender",
                 true, null, null);
         event = mock(LogEvent.class);
+        logCounter = new LogCounter();
     }
 
     @Test
-    public void metersTraceEvents() throws Exception {
-        when(event.getLevel()).thenReturn(TRACE);
+    public void shouldCountLogLevelCorrectly() {
+        when(event.getLevel()).thenReturn(level);
 
         appender.append(event);
 
-        assertEquals(1, getLogLevelCount("trace"));
-    }
-
-    @Test
-    public void metersDebugEvents() throws Exception {
-        when(event.getLevel()).thenReturn(DEBUG);
-
-        appender.append(event);
-
-        assertEquals(1, getLogLevelCount("debug"));
-    }
-
-    @Test
-    public void metersInfoEvents() throws Exception {
-        when(event.getLevel()).thenReturn(INFO);
-
-        appender.append(event);
-
-        assertEquals(1, getLogLevelCount("trace"));
-    }
-
-    @Test
-    public void metersWarnEvents() throws Exception {
-        when(event.getLevel()).thenReturn(WARN);
-
-        appender.append(event);
-
-        assertEquals(1, getLogLevelCount("warn"));
-    }
-
-    @Test
-    public void metersErrorEvents() throws Exception {
-        when(event.getLevel()).thenReturn(ERROR);
-
-        appender.append(event);
-
-        assertEquals(1, getLogLevelCount("error"));
-    }
-
-    @Test
-    public void metersFatalEvents() throws Exception {
-        when(event.getLevel()).thenReturn(FATAL);
-
-        appender.append(event);
-
-        assertEquals(1, getLogLevelCount("fatal"));
-    }
-
-    private int getLogLevelCount(String level) {
-        return CollectorRegistry.defaultRegistry.getSampleValue(COUNTER_NAME,
-                new String[]{"level"}, new String[]{level}).intValue();
+        logCounter.assertLogLevelCountIncreasedByOne(level);
     }
 }

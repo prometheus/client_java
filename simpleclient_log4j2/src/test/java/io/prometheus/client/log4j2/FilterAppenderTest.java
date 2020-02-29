@@ -1,22 +1,27 @@
 package io.prometheus.client.log4j2;
 
-import io.prometheus.client.CollectorRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static io.prometheus.client.log4j2.InstrumentedAppender.COUNTER_NAME;
-import static org.junit.Assert.assertEquals;
+import static org.apache.logging.log4j.Level.DEBUG;
+import static org.apache.logging.log4j.Level.ERROR;
+import static org.apache.logging.log4j.Level.FATAL;
+import static org.apache.logging.log4j.Level.INFO;
+import static org.apache.logging.log4j.Level.TRACE;
+import static org.apache.logging.log4j.Level.WARN;
 
 public class FilterAppenderTest
 {
     private static Logger logger;
+    private static LogCounter logCounter;
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUpSpec() {
         System.setProperty("log4j.configurationFile", "log4j2-filtered-appender-test.xml");
         logger = LogManager.getLogger();
+        logCounter = new LogCounter();
     }
 
     @Test
@@ -31,18 +36,13 @@ public class FilterAppenderTest
         logger.fatal("in");
 
         // THEN: there are no messages below INFO because they are configured to be filtered out
-        assertEquals(0, getLogLevelCount("trace"));
-        assertEquals(0, getLogLevelCount("debug"));
+        logCounter.assertLogLevelCountNotIncreased(TRACE);
+        logCounter.assertLogLevelCountNotIncreased(DEBUG);
 
         // AND: there are messages at INFO and above
-        assertEquals(1, getLogLevelCount("info"));
-        assertEquals(1, getLogLevelCount("warn"));
-        assertEquals(1, getLogLevelCount("error"));
-        assertEquals(1, getLogLevelCount("fatal"));
-    }
-
-    private int getLogLevelCount(String level) {
-        return CollectorRegistry.defaultRegistry.getSampleValue(COUNTER_NAME,
-                new String[]{"level"}, new String[]{level}).intValue();
+        logCounter.assertLogLevelCountIncreasedByOne(INFO);
+        logCounter.assertLogLevelCountIncreasedByOne(WARN);
+        logCounter.assertLogLevelCountIncreasedByOne(ERROR);
+        logCounter.assertLogLevelCountIncreasedByOne(FATAL);
     }
 }
