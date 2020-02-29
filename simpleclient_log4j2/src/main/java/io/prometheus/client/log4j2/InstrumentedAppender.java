@@ -2,11 +2,17 @@ package io.prometheus.client.log4j2;
 
 import io.prometheus.client.Counter;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
+import org.apache.logging.log4j.core.layout.PatternLayout;
+
+import java.io.Serializable;
 
 import static org.apache.logging.log4j.Level.*;
 
@@ -67,8 +73,9 @@ public final class InstrumentedAppender extends AbstractAppender {
     /**
      * Create a new instrumented appender using the default registry.
      */
-    protected InstrumentedAppender(String name) {
-        super(name, null, null);
+    protected InstrumentedAppender(String name, Filter filter, Layout<? extends Serializable> layout,
+                                   boolean ignoreExceptions) {
+        super(name, filter, layout, ignoreExceptions);
     }
 
     @Override
@@ -84,12 +91,20 @@ public final class InstrumentedAppender extends AbstractAppender {
 
     @PluginFactory
     public static InstrumentedAppender createAppender(
-            @PluginAttribute("name") String name) {
+            @PluginAttribute("name") String name,
+            @PluginAttribute("ignoreExceptions") boolean ignoreExceptions,
+            @PluginElement("Layout") Layout<? extends Serializable> layout,
+            @PluginElement("Filters") Filter filter) {
         if (name == null) {
             LOGGER.error("No name provided for InstrumentedAppender");
             return null;
         }
-        return new InstrumentedAppender(name);
+
+        if (layout == null) {
+            layout = PatternLayout.createDefaultLayout();
+        }
+
+        return new InstrumentedAppender(name, filter, layout, ignoreExceptions);
     }
 
 }

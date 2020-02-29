@@ -1,0 +1,12 @@
+<Configuration monitorInterval="30" packages="io.prometheus.client.log4j2">
+    <Appenders>
+        <Prometheus name="metrics">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Prometheus>
+    </Appenders>
+    <Loggers>
+        <Root level="TRACE">
+            <AppenderRef ref="metrics"/>
+        </Root>
+    </Loggers>
+</Configuration>

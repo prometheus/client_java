@@ -19,7 +19,8 @@ public class InstrumentedAppenderTest {
 
     @Before
     public void setUp() throws Exception {
-        appender = InstrumentedAppender.createAppender("Prometheus-Appender");
+        appender = InstrumentedAppender.createAppender("Prometheus-Appender",
+                true, null, null);
         event = mock(LogEvent.class);
     }
 
