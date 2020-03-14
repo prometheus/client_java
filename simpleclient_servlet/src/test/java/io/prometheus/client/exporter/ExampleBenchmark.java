@@ -23,13 +23,13 @@ public class ExampleBenchmark {
         context.setContextPath("/");
         context.addServlet(new ServletHolder(new MetricsServlet()), "/metrics");
 
-        Server server = new Server(1234);
+        Server server = new Server(0);
         server.setHandler(context);
         server.start();
         Thread.sleep(1000);
 
         byte[] bytes = new byte[8192];
-        URL url = new URL("http://localhost:1234/metrics");
+        URL url = new URL("http", "localhost", server.getConnectors()[0].getLocalPort(), "/metrics");
 
         long start = System.nanoTime();
         for (int i = 0; i < 100; i++) {
