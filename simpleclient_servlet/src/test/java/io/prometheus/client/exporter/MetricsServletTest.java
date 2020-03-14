@@ -12,9 +12,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.Matchers.anyChar;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -63,8 +62,7 @@ public class MetricsServletTest {
     HttpServletResponse resp = mock(HttpServletResponse.class);
     PrintWriter writer = mock(PrintWriter.class);
     when(resp.getWriter()).thenReturn(writer);
-    doThrow(new RuntimeException()).when(writer).write(anyChar());
-    doThrow(new RuntimeException()).when(writer).write(anyInt());
+    doThrow(new RuntimeException()).when(writer).write(any(char[].class), anyInt(), anyInt());
     CollectorRegistry registry = new CollectorRegistry();
     Gauge a = Gauge.build("a", "a help").register(registry);
 
