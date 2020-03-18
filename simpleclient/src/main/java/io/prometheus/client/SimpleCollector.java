@@ -179,14 +179,14 @@ public abstract class SimpleCollector<Child> extends Collector {
    * Builders let you configure and then create collectors.
    */
   public abstract static class Builder<B extends Builder<B, C>, C extends SimpleCollector> {
-    String namespace = "";
-    String subsystem = "";
-    String name = "";
-    String fullname = "";
-    String help = "";
-    String[] labelNames = new String[]{};
+    protected String namespace = "";
+    protected String subsystem = "";
+    protected String name = "";
+    protected String fullname = "";
+    protected String help = "";
+    protected String[] labelNames = new String[]{};
     // Some metrics require additional setup before the initialization can be done.
-    boolean dontInitializeNoLabelsChild;
+    protected boolean dontInitializeNoLabelsChild;
 
     /**
      * Set the name of the metric. Required.
