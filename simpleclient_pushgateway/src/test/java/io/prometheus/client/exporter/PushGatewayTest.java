@@ -112,6 +112,17 @@ public class PushGatewayTest {
   }
 
   @Test
+  public void testPushWithEmptyLabelGroupingKey() throws IOException {
+    mockServerClient.when(
+        request()
+          .withMethod("PUT")
+          .withPath("/metrics/job/j/l/v/l2@base64/=")
+      ).respond(response().withStatusCode(202));
+    groupingKey.put("l2", "");
+    pg.push(registry, "j", groupingKey);
+  }
+
+  @Test
   public void testPushWithGroupingKeyWithSlashes() throws IOException {
     mockServerClient.when(
         request()
@@ -192,14 +203,12 @@ public class PushGatewayTest {
     pg.delete("j", groupingKey);
   }
 
-
-
   @Test
   public void testOldPushWithoutInstance() throws IOException {
     mockServerClient.when(
         request()
           .withMethod("PUT")
-          .withPath("/metrics/job/j/instance/")
+          .withPath("/metrics/job/j/instance@base64/=")
       ).respond(response().withStatusCode(202));
     pg.push(registry, "j", "");
   }

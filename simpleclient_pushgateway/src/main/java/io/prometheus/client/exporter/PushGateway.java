@@ -286,7 +286,9 @@ public class PushGateway {
 
     if (groupingKey != null) {
       for (Map.Entry<String, String> entry: groupingKey.entrySet()) {
-        if (entry.getValue().contains("/")) {
+        if (entry.getValue().isEmpty()) {
+          url += "/" + entry.getKey() + "@base64/=";
+        } else if (entry.getValue().contains("/")) {
           url += "/" + entry.getKey() + "@base64/" + base64url(entry.getValue());
         } else {
           url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
