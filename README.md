@@ -1,7 +1,7 @@
 # Prometheus JVM Client
 It supports Java, Clojure, Scala, JRuby, and anything else that runs on the JVM.
 
-[![Build Status](https://travis-ci.org/prometheus/client_java.png?branch=master)](https://travis-ci.org/prometheus/client_java)
+[![Build Status](https://travis-ci.org/MattiasSeeman/prometheus_client_java.svg?branch=master)](https://travis-ci.org/MattiasSeeman/prometheus_client_java)
 
 Table of Contents
 =================
