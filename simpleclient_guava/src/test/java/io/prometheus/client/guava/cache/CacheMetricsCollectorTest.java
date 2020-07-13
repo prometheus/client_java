@@ -7,11 +7,8 @@ import com.google.common.cache.LoadingCache;
 import io.prometheus.client.CollectorRegistry;
 import org.junit.Test;
 
-
-import java.util.Arrays;
-
 import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
