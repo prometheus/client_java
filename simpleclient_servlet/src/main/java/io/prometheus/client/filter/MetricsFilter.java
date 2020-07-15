@@ -156,7 +156,7 @@ public class MetricsFilter implements Filter {
                 .name(metricName)
                 .register();
 
-        statusCounter = Counter.build(metricName + "_status", "HTTP status codes of " + help)
+        statusCounter = Counter.build(metricName + "_total", "HTTP status codes of " + help)
                 .labelNames("path", "method", "status")
                 .register();
     }

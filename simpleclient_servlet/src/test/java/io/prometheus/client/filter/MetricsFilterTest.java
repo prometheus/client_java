@@ -202,7 +202,7 @@ public class MetricsFilterTest {
 
         constructed.doFilter(req, res, c);
 
-        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue("foobar_filter_status", new String[]{"path", "method", "status"}, new String[]{"/foo/bar", HttpMethods.GET, "200"});
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue("foobar_filter_total", new String[]{"path", "method", "status"}, new String[]{"/foo/bar", HttpMethods.GET, "200"});
         assertNotNull(sampleValue);
         assertEquals(1, sampleValue, 0.0001);
     }
@@ -227,7 +227,7 @@ public class MetricsFilterTest {
 
         constructed.doFilter(req, res, c);
 
-        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue("foobar_filter_status", new String[]{"path", "method", "status"}, new String[]{"/foo/bar", HttpMethods.GET, MetricsFilter.UNKNOWN_HTTP_STATUS_CODE});
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue("foobar_filter_total", new String[]{"path", "method", "status"}, new String[]{"/foo/bar", HttpMethods.GET, MetricsFilter.UNKNOWN_HTTP_STATUS_CODE});
         assertNotNull(sampleValue);
         assertEquals(1, sampleValue, 0.0001);
     }
