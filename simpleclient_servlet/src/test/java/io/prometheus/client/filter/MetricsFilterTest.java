@@ -10,6 +10,7 @@ import org.mockito.stubbing.Answer;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Enumeration;
@@ -180,4 +181,54 @@ public class MetricsFilterTest {
         assertEquals(buckets.split(",").length+1, count);
     }
 
+    @Test
+    public void testStatusCode() throws Exception {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
+        when(req.getMethod()).thenReturn(HttpMethods.GET);
+
+        HttpServletResponse res = mock(HttpServletResponse.class);
+        when(res.getStatus()).thenReturn(200);
+
+        FilterChain c = mock(FilterChain.class);
+
+        MetricsFilter constructed = new MetricsFilter(
+                "foobar_filter",
+                "Help for my filter",
+                2,
+                null
+        );
+        constructed.init(mock(FilterConfig.class));
+
+        constructed.doFilter(req, res, c);
+
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue("foobar_filter_status_total", new String[]{"path", "method", "status"}, new String[]{"/foo/bar", HttpMethods.GET, "200"});
+        assertNotNull(sampleValue);
+        assertEquals(1, sampleValue, 0.0001);
+    }
+
+    @Test
+    public void testStatusCodeWithNonHttpServletResponse() throws Exception {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
+        when(req.getMethod()).thenReturn(HttpMethods.GET);
+
+        ServletResponse res = mock(ServletResponse.class);
+
+        FilterChain c = mock(FilterChain.class);
+
+        MetricsFilter constructed = new MetricsFilter(
+                "foobar_filter",
+                "Help for my filter",
+                2,
+                null
+        );
+        constructed.init(mock(FilterConfig.class));
+
+        constructed.doFilter(req, res, c);
+
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue("foobar_filter_status_total", new String[]{"path", "method", "status"}, new String[]{"/foo/bar", HttpMethods.GET, MetricsFilter.UNKNOWN_HTTP_STATUS_CODE});
+        assertNotNull(sampleValue);
+        assertEquals(1, sampleValue, 0.0001);
+    }
 }

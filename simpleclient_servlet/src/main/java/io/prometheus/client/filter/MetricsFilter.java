@@ -1,5 +1,6 @@
 package io.prometheus.client.filter;
 
+import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 
 import javax.servlet.Filter;
@@ -9,13 +10,14 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
  * The MetricsFilter class exists to provide a high-level filter that enables tunable collection of metrics for Servlet
  * performance.
  *
- * <p>The Histogram name itself is required, and configured with a {@code metric-name} init parameter.
+ * <p>The metric name itself is required, and configured with a {@code metric-name} init parameter.
  *
  * <p>The help parameter, configured with the {@code help} init parameter, is not required but strongly recommended.
  *
@@ -26,6 +28,8 @@ import java.io.IOException;
  * <p>The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list
  * of valid {@code double} values.
  *
+ * <p>HTTP statuses will be aggregated via Counter. The name for this counter will be derived from the {@code metric-name} init parameter.
+ *
  * <pre>{@code
  * <filter>
  *   <filter-name>prometheusFilter</filter-name>
@@ -34,7 +38,7 @@ import java.io.IOException;
  *      <param-name>metric-name</param-name>
  *      <param-value>webapp_metrics_filter</param-value>
  *   </init-param>
- *    <init-param>
+ *   <init-param>
  *      <param-name>help</param-name>
  *      <param-value>The time taken fulfilling servlet requests</param-value>
  *   </init-param>
@@ -56,8 +60,10 @@ public class MetricsFilter implements Filter {
     static final String HELP_PARAM = "help";
     static final String METRIC_NAME_PARAM = "metric-name";
     static final String BUCKET_CONFIG_PARAM = "buckets";
+    static final String UNKNOWN_HTTP_STATUS_CODE = "";
 
     private Histogram histogram = null;
+    private Counter statusCounter = null;
 
     // Package-level for testing purposes.
     int pathComponents = 1;
@@ -149,6 +155,10 @@ public class MetricsFilter implements Filter {
                 .help(help)
                 .name(metricName)
                 .register();
+
+        statusCounter = Counter.build(metricName + "_status_total", "HTTP status codes of " + help)
+                .labelNames("path", "method", "status")
+                .register();
     }
 
     @Override
@@ -162,15 +172,26 @@ public class MetricsFilter implements Filter {
 
         String path = request.getRequestURI();
 
+        String components = getComponents(path);
+        String method = request.getMethod();
         Histogram.Timer timer = histogram
-            .labels(getComponents(path), request.getMethod())
+            .labels(components, method)
             .startTimer();
 
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
             timer.observeDuration();
+            statusCounter.labels(components, method, getStatusCode(servletResponse)).inc();
         }
+    }
+
+    private String getStatusCode(ServletResponse servletResponse) {
+        if (!(servletResponse instanceof HttpServletResponse)) {
+            return UNKNOWN_HTTP_STATUS_CODE;
+        }
+
+        return Integer.toString(((HttpServletResponse) servletResponse).getStatus());
     }
 
     @Override
