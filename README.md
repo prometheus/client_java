@@ -537,7 +537,7 @@ server.setHandler(context);
 context.addServlet(new ServletHolder(new MetricsServlet()), "/metrics");
 ```
 
-All HTTP expostion integrations support restricting which time series to return
+All HTTP exposition integrations support restricting which time series to return
 using `?name[]=` URL parameters. Due to implementation limitations, this may
 have false negatives.
 
