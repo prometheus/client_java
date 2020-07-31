@@ -5,8 +5,10 @@ import io.prometheus.client.CollectorRegistry;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,7 +52,7 @@ public class Graphite {
    */
   public void push(CollectorRegistry registry) throws IOException {
     Socket s = new Socket(host, port);
-    BufferedWriter writer = new BufferedWriter(new PrintWriter(s.getOutputStream()));
+    BufferedWriter writer = new BufferedWriter(new PrintWriter(new OutputStreamWriter(s.getOutputStream(), Charset.forName("UTF-8"))));
     Matcher m = INVALID_GRAPHITE_CHARS.matcher("");
     long now = System.currentTimeMillis() / 1000;
     for (Collector.MetricFamilySamples metricFamilySamples: Collections.list(registry.metricFamilySamples())) {
