@@ -1,10 +1,12 @@
 package io.prometheus.client;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Common functionality for {@link Gauge}, {@link Counter}, {@link Summary} and {@link Histogram}.
@@ -53,30 +55,159 @@ public abstract class SimpleCollector<Child> extends Collector {
 
   protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
   protected Child noLabelsChild;
+  private final ThreadLocal<ArrayList<String>> labelNamesPool = new ThreadLocal<ArrayList<String>>();
 
-  /**
-   * Return the Child with the given labels, creating it if needed.
-   * <p>
-   * Must be passed the same number of labels are were passed to {@link #labelNames}.
-   */
-  public Child labels(String... labelValues) {
-    if (labelValues.length != labelNames.size()) {
-      throw new IllegalArgumentException("Incorrect number of labels.");
+    /**
+     * It is just reimplementing in a more JIT-friendly way both equals/hashCode to avoid
+     * using Iterators like the original {@link AbstractList}.
+     */
+    private static final class LabelNames extends ArrayList<String> {
+
+        public LabelNames(int capacity) {
+            super(capacity);
+        }
+
+        public boolean equals(Object o) {
+            if (o == this)
+                return true;
+            if (!(o instanceof ArrayList)) {
+                //what if o is a singleton list or empty?
+                //We can just use the common fast path
+                if (o instanceof List) {
+                    if (((List) o).size() > 1) {
+                        return super.equals(o);
+                    }
+                } else {
+                    return super.equals(o);
+                }
+            }
+            final int size = size();
+            final List<?> other = (List<?>) o;
+            if (size != other.size()) {
+                return false;
+            }
+            for (int i = 0; i < size; i++) {
+                final Object a = get(i);
+                final Object b = other.get(i);
+                final boolean eq = (a == b) || (a != null && a.equals(b));
+                if (!eq) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Returns the hash code value for this list.
+         *
+         * <p>This implementation uses exactly the code that is used to define the
+         * list hash function in the documentation for the {@link List#hashCode}
+         * method.
+         *
+         * @return the hash code value for this list
+         */
+        public int hashCode() {
+            int hashCode = 1;
+            for (int i = 0, size = size(); i < size; i++) {
+                final Object e = get(i);
+                final int objHash = (e == null ? 0 : e.hashCode());
+                hashCode = 31 * hashCode + objHash;
+            }
+            return hashCode;
+        }
     }
-    for (String label: labelValues) {
-      if (label == null) {
-        throw new IllegalArgumentException("Label cannot be null.");
-      }
+
+    /**
+     * Return the Child with the given labels, creating it if needed.
+     * <p>
+     * Must be passed the same number of labels are were passed to {@link #labelNames}.
+     */
+    public Child labels(String... labelValues) {
+        final List<String> labels;
+        if (labelValues.length > 0) {
+          labels = getPooledLabels();
+          for (String label : labelValues) {
+            labels.add(label);
+          }
+        } else {
+            labels = Collections.emptyList();
+        }
+        return getOrCreateChild(labels);
     }
-    List<String> key = Arrays.asList(labelValues);
-    Child c = children.get(key);
-    if (c != null) {
-      return c;
+
+    public Child labels(String l1) {
+        ArrayList<String> pooledLabels = getPooledLabels();
+        pooledLabels.add(l1);
+        return getOrCreateChild(pooledLabels);
     }
-    Child c2 = newChild();
-    Child tmp = children.putIfAbsent(key, c2);
-    return tmp == null ? c2 : tmp;
-  }
+    public Child labels(String l1, String l2) {
+        ArrayList<String> pooledLabels = getPooledLabels();
+        pooledLabels.add(l1);
+        pooledLabels.add(l2);
+        return getOrCreateChild(pooledLabels);
+    }
+    public Child labels(String l1, String l2, String l3) {
+        ArrayList<String> pooledLabels = getPooledLabels();
+        pooledLabels.add(l1);
+        pooledLabels.add(l2);
+        pooledLabels.add(l3);
+        return getOrCreateChild(pooledLabels);
+    }
+    public Child labels(String l1, String l2, String l3, String l4) {
+        ArrayList<String> pooledLabels = getPooledLabels();
+        pooledLabels.add(l1);
+        pooledLabels.add(l2);
+        pooledLabels.add(l3);
+        pooledLabels.add(l4);
+        return getOrCreateChild(pooledLabels);
+    }
+
+    private ArrayList<String> getPooledLabels() {
+        final ThreadLocal<ArrayList<String>> labelNamesPool = this.labelNamesPool;
+        ArrayList<String> pooledLabels = labelNamesPool.get();
+        if (pooledLabels == null) {
+            pooledLabels = new LabelNames(10);
+            labelNamesPool.set(pooledLabels);
+        } else {
+          pooledLabels.clear();
+        }
+        return pooledLabels;
+    }
+
+    private Child getOrCreateChild(List<String> labels) {
+        Child c = children.get(labels);
+        if (c != null) {
+            return c;
+        }
+        return tryCreateChild(labels);
+    }
+
+    private Child tryCreateChild(List<String> labels) {
+        validateLabels(labels);
+        Child c2 = newChild();
+        Child tmp = children.putIfAbsent(labels, c2);
+        if (tmp == null) {
+            // given that putIfAbsent return null only when a new
+            // labels has been added, we need to clear up
+            // the pool to avoid labels to be both in the pool
+            // and as children key
+            labelNamesPool.set(null);
+            return c2;
+        } else {
+            return tmp;
+        }
+    }
+
+    private void validateLabels(List<String> labelValues) {
+        if (labelValues.size() != labelNames.size()) {
+            throw new IllegalArgumentException("Incorrect number of labels.");
+        }
+        for (String label : labelValues) {
+            if (label == null) {
+                throw new IllegalArgumentException("Label cannot be null.");
+            }
+        }
+    }
 
   /**
    * Remove the Child with the given labels.
@@ -164,9 +295,11 @@ public abstract class SimpleCollector<Child> extends Collector {
     checkMetricName(fullname);
     if (b.help != null && b.help.isEmpty()) throw new IllegalStateException("Help hasn't been set.");
     help = b.help;
-    labelNames = Arrays.asList(b.labelNames);
-
-    for (String n: labelNames) {
+    labelNames = new LabelNames(b.labelNames.length);
+    for (String label : b.labelNames) {
+        labelNames.add(label);
+    }
+    for (String n: b.labelNames) {
       checkMetricLabelName(n);
     }
 
