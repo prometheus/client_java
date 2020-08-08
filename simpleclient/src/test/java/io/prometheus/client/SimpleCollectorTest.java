@@ -3,9 +3,12 @@ package io.prometheus.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.rules.ExpectedException.none;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;
+import org.junit.rules.ExpectedException;
 
 
 public class SimpleCollectorTest {
@@ -13,6 +16,9 @@ public class SimpleCollectorTest {
   CollectorRegistry registry;
   Gauge metric;
   Gauge noLabels;
+
+  @Rule
+  public final ExpectedException thrown = none();
 
   @Before
   public void setUp() {
@@ -29,18 +35,24 @@ public class SimpleCollectorTest {
     return registry.getSampleValue("nolabels");
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test
   public void testTooFewLabelsThrows() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("Incorrect number of labels.");
     metric.labels();
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test
   public void testNullLabelThrows() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("Label cannot be null.");
     metric.labels(new String[]{null});
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test
   public void testTooManyLabelsThrows() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("Incorrect number of labels.");
     metric.labels("a", "b");
   }
   
@@ -97,28 +109,39 @@ public class SimpleCollectorTest {
     assertEquals("a_b_c", Gauge.build().name("c").subsystem("b").namespace("a").help("h").create().fullname);
   }
 
-  @Test(expected=IllegalStateException.class)
+  @Test
   public void testNameIsRequired() {
+    thrown.expect(IllegalStateException.class);
+    thrown.expectMessage("Name hasn't been set.");
     Gauge.build().help("h").create();
   }
 
-  @Test(expected=IllegalStateException.class)
+  @Test
   public void testHelpIsRequired() {
+    thrown.expect(IllegalStateException.class);
+    thrown.expectMessage("Help hasn't been set.");
     Gauge.build().name("c").create();
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test
   public void testInvalidNameThrows() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("Invalid metric name: c'a");
     Gauge.build().name("c'a").create();
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test
   public void testInvalidLabelNameThrows() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("Invalid metric label name: c:d");
     Gauge.build().name("a").labelNames("c:d").help("h").create();
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test
   public void testReservedLabelNameThrows() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage(
+            "Invalid metric label name, reserved for internal use: __name__");
     Gauge.build().name("a").labelNames("__name__").help("h").create();
   }
 
