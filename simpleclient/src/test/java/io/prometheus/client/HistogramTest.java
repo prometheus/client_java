@@ -3,6 +3,7 @@ package io.prometheus.client;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.rules.ExpectedException.none;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -11,13 +12,19 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 
 public class HistogramTest {
 
   CollectorRegistry registry;
   Histogram noLabels, labels;
+
+
+  @Rule
+  public final ExpectedException thrown = none();
 
   @Before
   public void setUp() {
@@ -166,8 +173,10 @@ public class HistogramTest {
     assertEquals(3.0, getLabelsSum("b").doubleValue(), .001);
   }
 
-  @Test(expected=IllegalStateException.class)
+  @Test
   public void testLeLabelThrows() {
+    thrown.expect(IllegalStateException.class);
+    thrown.expectMessage("Histogram cannot have a label named 'le'.");
     Histogram.build().name("labels").help("help").labelNames("le").create();
   }
 

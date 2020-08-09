@@ -1,16 +1,23 @@
 package io.prometheus.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.rules.ExpectedException.none;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;
+import org.junit.rules.ExpectedException;
 
 
 public class CounterTest {
   CollectorRegistry registry;
   Counter noLabels, labels;
+
+  @Rule
+  public final ExpectedException thrown = none();
 
   @Before
   public void setUp() {
@@ -39,8 +46,10 @@ public class CounterTest {
     assertEquals(8.0, noLabels.get(), .001);
   }
     
-  @Test(expected=IllegalArgumentException.class)
+  @Test
   public void testNegativeIncrementFails() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("Amount to increment must be non-negative.");
     noLabels.inc(-1);
   }
   

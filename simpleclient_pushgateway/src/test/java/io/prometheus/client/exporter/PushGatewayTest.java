@@ -1,6 +1,7 @@
 package io.prometheus.client.exporter;
 
 
+import static org.junit.rules.ExpectedException.none;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -13,10 +14,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.client.server.MockServerClient;
 
 public class PushGatewayTest {
+
+
+  @Rule
+  public final ExpectedException thrown = none();
 
   @Rule
   public MockServerRule mockServerRule = new MockServerRule(this);
@@ -70,13 +76,18 @@ public class PushGatewayTest {
     pg.push(registry, "j");
   }
 
-  @Test(expected=IOException.class)
+  @Test
   public void testNon202ResponseThrows() throws IOException {
     mockServerClient.when(
         request()
           .withMethod("PUT")
           .withPath("/metrics/job/j")
       ).respond(response().withStatusCode(500));
+    thrown.expect(IOException.class);
+    thrown.expectMessage(
+            "Response code from http://localhost:"
+                    + mockServerRule.getHttpPort()
+                    + "/metrics/job/j was 500");
     pg.push(registry, "j");
   }
 
@@ -223,13 +234,18 @@ public class PushGatewayTest {
     pg.push(registry, "j", "i");
   }
 
-  @Test(expected=IOException.class)
+  @Test
   public void testOldNon202ResponseThrows() throws IOException {
     mockServerClient.when(
         request()
           .withMethod("PUT")
           .withPath("/metrics/job/j/instance/i")
       ).respond(response().withStatusCode(500));
+    thrown.expect(IOException.class);
+    thrown.expectMessage(
+            "Response code from http://localhost:"
+                    + mockServerRule.getHttpPort()
+                    + "/metrics/job/j/instance/i was 500");
     pg.push(registry,"j", "i");
   }
 
