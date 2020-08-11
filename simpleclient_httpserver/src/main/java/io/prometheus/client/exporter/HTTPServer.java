@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
@@ -61,7 +62,7 @@ public class HTTPServer {
             String contextPath = t.getHttpContext().getPath();
             ByteArrayOutputStream response = this.response.get();
             response.reset();
-            OutputStreamWriter osw = new OutputStreamWriter(response);
+            OutputStreamWriter osw = new OutputStreamWriter(response, Charset.forName("UTF-8"));
             if ("/-/healthy".equals(contextPath)) {
                 osw.write(HEALTHY_RESPONSE);
             } else {
