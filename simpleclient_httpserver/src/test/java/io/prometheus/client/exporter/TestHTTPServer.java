@@ -65,15 +65,11 @@ public class TestHTTPServer {
     return s.hasNext() ? s.next() : "";
   }
 
-  @Test
-  public void testUnbound() throws IOException {
+  @Test(expected = IllegalArgumentException.class)
+  public void testRefuseUsingUnbound() throws IOException {
     CollectorRegistry registry = new CollectorRegistry();
-    try {
-      HTTPServer s = new HTTPServer(HttpServer.create(), registry, true);
-      s.stop();
-      fail("Should refuse to use an unbound HttpServer");
-    } catch (IllegalArgumentException expected) {
-    }
+    HTTPServer s = new HTTPServer(HttpServer.create(), registry, true);
+    s.stop();
   }
 
   @Test
