@@ -629,7 +629,7 @@ To do so you need to create a custom collector (which will need to be registered
 
 ```java
 class YourCustomCollector extends Collector {
-  List<MetricFamilySamples> collect() {
+  public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
     // With no labels.
     mfs.add(new GaugeMetricFamily("my_gauge", "help", 42));
