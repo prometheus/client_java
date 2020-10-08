@@ -1,6 +1,14 @@
 package io.prometheus.client.dropwizard;
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.Snapshot;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricFilter;
+import com.codahale.metrics.MetricRegistry;
 import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
 
