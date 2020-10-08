@@ -35,7 +35,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     }
 
     /**
-     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and custom MetricFilter
+     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and custom {@link MetricFilter}
      *
      * @param registry a metric registry to export in prometheus.
      * @param metricFilter a custom metric filter
