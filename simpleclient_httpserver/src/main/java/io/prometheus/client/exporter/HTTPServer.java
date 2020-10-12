@@ -5,6 +5,7 @@ import io.prometheus.client.exporter.common.TextFormat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -36,19 +37,12 @@ import com.sun.net.httpserver.HttpExchange;
  * </pre>
  * */
 public class HTTPServer {
-    private static class LocalByteArray extends ThreadLocal<ByteArrayOutputStream> {
-        protected ByteArrayOutputStream initialValue()
-        {
-            return new ByteArrayOutputStream(1 << 20);
-        }
-    }
 
     /**
      * Handles Metrics collections from the given registry.
      */
     static class HTTPMetricHandler implements HttpHandler {
         private CollectorRegistry registry;
-        private final LocalByteArray response = new LocalByteArray();
         private final static String HEALTHY_RESPONSE = "Exporter is Healthy.";
 
         HTTPMetricHandler(CollectorRegistry registry) {
@@ -60,34 +54,24 @@ public class HTTPServer {
             String query = t.getRequestURI().getRawQuery();
 
             String contextPath = t.getHttpContext().getPath();
-            ByteArrayOutputStream response = this.response.get();
-            response.reset();
-            OutputStreamWriter osw = new OutputStreamWriter(response, Charset.forName("UTF-8"));
+
+            t.getResponseHeaders().set("Content-Type",
+                    TextFormat.CONTENT_TYPE_004);
+            t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+            OutputStream bodyStream = t.getResponseBody();
+            if (shouldUseCompression(t)) {
+                t.getResponseHeaders().set("Content-Encoding", "gzip");
+                bodyStream = new GZIPOutputStream(bodyStream);
+            }
+
+            OutputStreamWriter osw = new OutputStreamWriter(bodyStream, Charset.forName("UTF-8"));
             if ("/-/healthy".equals(contextPath)) {
                 osw.write(HEALTHY_RESPONSE);
             } else {
                 TextFormat.write004(osw,
                         registry.filteredMetricFamilySamples(parseQuery(query)));
             }
-
-            osw.flush();
             osw.close();
-            response.flush();
-            response.close();
-            t.getResponseHeaders().set("Content-Type",
-                    TextFormat.CONTENT_TYPE_004);
-            if (shouldUseCompression(t)) {
-                t.getResponseHeaders().set("Content-Encoding", "gzip");
-                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-                final GZIPOutputStream os = new GZIPOutputStream(t.getResponseBody());
-                response.writeTo(os);
-                os.close();
-            } else {
-                t.getResponseHeaders().set("Content-Length",
-                        String.valueOf(response.size()));
-                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.size());
-                response.writeTo(t.getResponseBody());
-            }
             t.close();
         }
 
