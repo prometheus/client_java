@@ -1,14 +1,14 @@
 package io.prometheus.client.dropwizard;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Metric;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Timer;
-import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Snapshot;
+import com.codahale.metrics.Timer;
 import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
 
@@ -32,7 +32,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     private SampleBuilder sampleBuilder;
 
     /**
-     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and {@link MetricFilter#ALL}
+     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and {@link MetricFilter#ALL}.
      *
      * @param registry a metric registry to export in prometheus.
      */
@@ -43,10 +43,10 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     }
 
     /**
-     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and custom {@link MetricFilter}
+     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and custom {@link MetricFilter}.
      *
      * @param registry a metric registry to export in prometheus.
-     * @param metricFilter a custom metric filter
+     * @param metricFilter a custom metric filter.
      */
     public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter) {
         this.registry = registry;
@@ -66,7 +66,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
 
     /**
      * @param registry      a metric registry to export in prometheus.
-     * @param metricFilter a custom metric filter
+     * @param metricFilter a custom metric filter.
      * @param sampleBuilder sampleBuilder to use to create prometheus samples.
      */
     public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter, SampleBuilder sampleBuilder) {
