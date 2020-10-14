@@ -1,6 +1,14 @@
 package io.prometheus.client.dropwizard;
 
-import com.codahale.metrics.*;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricFilter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Snapshot;
+import com.codahale.metrics.Timer;
 import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
 
@@ -20,15 +28,29 @@ import java.util.logging.Logger;
 public class DropwizardExports extends io.prometheus.client.Collector implements io.prometheus.client.Collector.Describable {
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
     private MetricRegistry registry;
+    private MetricFilter metricFilter;
     private SampleBuilder sampleBuilder;
 
     /**
-     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder}.
+     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and {@link MetricFilter#ALL}.
      *
      * @param registry a metric registry to export in prometheus.
      */
     public DropwizardExports(MetricRegistry registry) {
         this.registry = registry;
+        this.metricFilter = MetricFilter.ALL;
+        this.sampleBuilder = new DefaultSampleBuilder();
+    }
+
+    /**
+     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and custom {@link MetricFilter}.
+     *
+     * @param registry     a metric registry to export in prometheus.
+     * @param metricFilter a custom metric filter.
+     */
+    public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter) {
+        this.registry = registry;
+        this.metricFilter = metricFilter;
         this.sampleBuilder = new DefaultSampleBuilder();
     }
 
@@ -38,6 +60,18 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      */
     public DropwizardExports(MetricRegistry registry, SampleBuilder sampleBuilder) {
         this.registry = registry;
+        this.metricFilter = MetricFilter.ALL;
+        this.sampleBuilder = sampleBuilder;
+    }
+
+    /**
+     * @param registry      a metric registry to export in prometheus.
+     * @param metricFilter  a custom metric filter.
+     * @param sampleBuilder sampleBuilder to use to create prometheus samples.
+     */
+    public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter, SampleBuilder sampleBuilder) {
+        this.registry = registry;
+        this.metricFilter = metricFilter;
         this.sampleBuilder = sampleBuilder;
     }
 
@@ -128,19 +162,19 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     public List<MetricFamilySamples> collect() {
         Map<String, MetricFamilySamples> mfSamplesMap = new HashMap<String, MetricFamilySamples>();
 
-        for (SortedMap.Entry<String, Gauge> entry : registry.getGauges().entrySet()) {
+        for (SortedMap.Entry<String, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
             addToMap(mfSamplesMap, fromGauge(entry.getKey(), entry.getValue()));
         }
-        for (SortedMap.Entry<String, Counter> entry : registry.getCounters().entrySet()) {
+        for (SortedMap.Entry<String, Counter> entry : registry.getCounters(metricFilter).entrySet()) {
             addToMap(mfSamplesMap, fromCounter(entry.getKey(), entry.getValue()));
         }
-        for (SortedMap.Entry<String, Histogram> entry : registry.getHistograms().entrySet()) {
+        for (SortedMap.Entry<String, Histogram> entry : registry.getHistograms(metricFilter).entrySet()) {
             addToMap(mfSamplesMap, fromHistogram(entry.getKey(), entry.getValue()));
         }
-        for (SortedMap.Entry<String, Timer> entry : registry.getTimers().entrySet()) {
+        for (SortedMap.Entry<String, Timer> entry : registry.getTimers(metricFilter).entrySet()) {
             addToMap(mfSamplesMap, fromTimer(entry.getKey(), entry.getValue()));
         }
-        for (SortedMap.Entry<String, Meter> entry : registry.getMeters().entrySet()) {
+        for (SortedMap.Entry<String, Meter> entry : registry.getMeters(metricFilter).entrySet()) {
             addToMap(mfSamplesMap, fromMeter(entry.getKey(), entry.getValue()));
         }
         return new ArrayList<MetricFamilySamples>(mfSamplesMap.values());
