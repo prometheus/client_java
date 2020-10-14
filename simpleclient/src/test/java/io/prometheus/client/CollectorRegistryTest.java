@@ -139,6 +139,13 @@ public class CollectorRegistryTest {
     registry.register(h);
   }
 
+  @Test
+  public void testUnregisterWhenItIsNotRegisteredIsANoOp() {
+    Histogram h = Histogram.build().name("s").help("h").create();
+    // This doesn't throw.
+    registry.unregister(h);
+  }
+
   class MyCollector extends Collector {
     public List<MetricFamilySamples> collect() {
       List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();

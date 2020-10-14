@@ -67,6 +67,7 @@ public class CollectorRegistry {
   public void unregister(Collector m) {
     synchronized (namesCollectorsLock) {
       List<String> names = collectorsToNames.remove(m);
+      if (names == null) return;
       for (String name : names) {
         namesToCollectors.remove(name);
       }
