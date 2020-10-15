@@ -10,20 +10,20 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpExchange;
 
 /**
  * Expose Prometheus metrics using a plain Java HttpServer.
@@ -37,6 +37,7 @@ import com.sun.net.httpserver.HttpExchange;
  * */
 public class HTTPServer {
     private static class LocalByteArray extends ThreadLocal<ByteArrayOutputStream> {
+        @Override
         protected ByteArrayOutputStream initialValue()
         {
             return new ByteArrayOutputStream(1 << 20);
@@ -47,7 +48,7 @@ public class HTTPServer {
      * Handles Metrics collections from the given registry.
      */
     static class HTTPMetricHandler implements HttpHandler {
-        private CollectorRegistry registry;
+        private final CollectorRegistry registry;
         private final LocalByteArray response = new LocalByteArray();
         private final static String HEALTHY_RESPONSE = "Exporter is Healthy.";
 
@@ -55,7 +56,7 @@ public class HTTPServer {
           this.registry = registry;
         }
 
-
+        @Override
         public void handle(HttpExchange t) throws IOException {
             String query = t.getRequestURI().getRawQuery();
 
@@ -70,18 +71,18 @@ public class HTTPServer {
                         registry.filteredMetricFamilySamples(parseQuery(query)));
             }
 
-            osw.flush();
             osw.close();
-            response.flush();
-            response.close();
             t.getResponseHeaders().set("Content-Type",
                     TextFormat.CONTENT_TYPE_004);
             if (shouldUseCompression(t)) {
                 t.getResponseHeaders().set("Content-Encoding", "gzip");
                 t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
                 final GZIPOutputStream os = new GZIPOutputStream(t.getResponseBody());
-                response.writeTo(os);
-                os.close();
+                try {
+                    response.writeTo(os);
+                } finally {
+                    os.close();
+                }
             } else {
                 t.getResponseHeaders().set("Content-Length",
                         String.valueOf(response.size()));
@@ -100,7 +101,7 @@ public class HTTPServer {
         for (String encodingHeader : encodingHeaders) {
             String[] encodings = encodingHeader.split(",");
             for (String encoding : encodings) {
-                if (encoding.trim().toLowerCase().equals("gzip")) {
+                if (encoding.trim().equalsIgnoreCase("gzip")) {
                     return true;
                 }
             }
