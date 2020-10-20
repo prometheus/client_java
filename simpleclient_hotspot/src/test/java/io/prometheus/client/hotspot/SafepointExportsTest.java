@@ -31,12 +31,12 @@ public class SafepointExportsTest {
     assertEquals(
             300L,
             registry.getSampleValue(
-                    "jvm_safepoint_count_total", EMPTY_LABEL, EMPTY_LABEL),
+                    "jvm_safepoint_seconds_count", EMPTY_LABEL, EMPTY_LABEL),
             .0000001);
     assertEquals(
             0.013,
             registry.getSampleValue(
-                    "jvm_safepoint_total_time_seconds", EMPTY_LABEL, EMPTY_LABEL),
+                    "jvm_safepoint_seconds_sum", EMPTY_LABEL, EMPTY_LABEL),
             .0000001);
     assertEquals(
             0.031,
