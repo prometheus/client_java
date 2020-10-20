@@ -31,7 +31,7 @@ public class SafepointExportsTest {
     assertEquals(
             300L,
             registry.getSampleValue(
-                    "jvm_safepoint_count", EMPTY_LABEL, EMPTY_LABEL),
+                    "jvm_safepoint_count_total", EMPTY_LABEL, EMPTY_LABEL),
             .0000001);
     assertEquals(
             0.013,

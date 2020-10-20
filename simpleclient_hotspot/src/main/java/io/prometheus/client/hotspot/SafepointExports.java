@@ -19,7 +19,7 @@ import java.util.List;
  * </pre>
  * Example metrics being exported:
  * <pre>
- *   jvm_safepoint_count{} 200
+ *   jvm_safepoint_count_total{} 200
  *   jvm_safepoint_total_time_seconds{} 6.7
  *   jvm_safepoint_sync_time_seconds{} 6.7
  * </pre>
@@ -37,7 +37,7 @@ public class SafepointExports extends Collector {
 
   public List<MetricFamilySamples> collect() {
     CounterMetricFamily safepointCount = new CounterMetricFamily(
-        "jvm_safepoint_count",
+        "jvm_safepoint_count_total",
         "The number of safepoints taken place since the JVM started.",
             hotspotRuntimeMBean.getSafepointCount());
 
