@@ -10,7 +10,7 @@ import io.prometheus.client.GaugeMetricFamily;
 import io.prometheus.client.SummaryMetricFamily;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,7 +51,25 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class CacheMetricsCollector extends Collector {
     protected final ConcurrentMap<String, Cache> children = new ConcurrentHashMap<String, Cache>();
-
+    
+    private final Map<String, String> customLabels;
+    
+    /**
+     * Initialize collector without custom labels.
+     */
+    public CacheMetricsCollector() {
+        this(Collections.<String, String>emptyMap());
+    }
+    
+    /**
+     * Initialize collector with custom labels.
+     *
+     * @param customLabels labels to add to each metric being recorded.
+     */
+    public CacheMetricsCollector(Map<String, String> customLabels) {
+        this.customLabels = Collections.unmodifiableMap(customLabels);
+    }
+    
     /**
      * Add or replace the cache with the given name.
      * <p>
@@ -99,7 +117,12 @@ public class CacheMetricsCollector extends Collector {
     @Override
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-        List<String> labelNames = Arrays.asList("cache");
+        List<String> labelNames = new ArrayList<String>(customLabels.size() + 1) {{
+            add("cache");
+            for (Map.Entry<String, String> entry : customLabels.entrySet()) {
+                add(entry.getKey());
+            }
+        }};
 
         CounterMetricFamily cacheHitTotal = new CounterMetricFamily("caffeine_cache_hit_total",
                 "Cache hit totals", labelNames);
@@ -137,27 +160,34 @@ public class CacheMetricsCollector extends Collector {
                 "Cache load duration: both success and failures", labelNames);
         mfs.add(cacheLoadSummary);
 
-        for(Map.Entry<String, Cache> c: children.entrySet()) {
-            List<String> cacheName = Arrays.asList(c.getKey());
+        for(final Map.Entry<String, Cache> c: children.entrySet()) {
+            
+            List<String> labelValues = new ArrayList<String>(customLabels.size() + 1) {{
+                add(c.getKey());
+                for (Map.Entry<String, String> entry : customLabels.entrySet()) {
+                    add(entry.getValue());
+                }
+            }};
+            
             CacheStats stats = c.getValue().stats();
 
             try{
-                cacheEvictionWeight.addMetric(cacheName, stats.evictionWeight());
+                cacheEvictionWeight.addMetric(labelValues, stats.evictionWeight());
             } catch (Exception e) {
                 // EvictionWeight metric is unavailable, newer version of Caffeine is needed.
             }
 
-            cacheHitTotal.addMetric(cacheName, stats.hitCount());
-            cacheMissTotal.addMetric(cacheName, stats.missCount());
-            cacheRequestsTotal.addMetric(cacheName, stats.requestCount());
-            cacheEvictionTotal.addMetric(cacheName, stats.evictionCount());
-            cacheSize.addMetric(cacheName, c.getValue().estimatedSize());
+            cacheHitTotal.addMetric(labelValues, stats.hitCount());
+            cacheMissTotal.addMetric(labelValues, stats.missCount());
+            cacheRequestsTotal.addMetric(labelValues, stats.requestCount());
+            cacheEvictionTotal.addMetric(labelValues, stats.evictionCount());
+            cacheSize.addMetric(labelValues, c.getValue().estimatedSize());
 
             if(c.getValue() instanceof LoadingCache) {
-                cacheLoadFailure.addMetric(cacheName, stats.loadFailureCount());
-                cacheLoadTotal.addMetric(cacheName, stats.loadCount());
+                cacheLoadFailure.addMetric(labelValues, stats.loadFailureCount());
+                cacheLoadTotal.addMetric(labelValues, stats.loadCount());
 
-                cacheLoadSummary.addMetric(cacheName, stats.loadCount(), stats.totalLoadTime() / Collector.NANOSECONDS_PER_SECOND);
+                cacheLoadSummary.addMetric(labelValues, stats.loadCount(), stats.totalLoadTime() / Collector.NANOSECONDS_PER_SECOND);
             }
         }
         return mfs;
