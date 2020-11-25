@@ -146,6 +146,15 @@ public class SimpleCollectorTest {
   }
 
   @Test
+  public void testUnitsAdded() {
+    Gauge g = Gauge.build().name("a").unit("seconds").help("h").create();
+    assertEquals("a_seconds", g.fullname);
+
+    Gauge g2 = Gauge.build().name("a_seconds").unit("seconds").help("h").create();
+    assertEquals("a_seconds", g2.fullname);
+  }
+
+  @Test
   public void testSetChild() {
     metric.setChild(new Gauge.Child(){
       public double get() {

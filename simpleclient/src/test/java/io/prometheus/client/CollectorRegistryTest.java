@@ -83,7 +83,7 @@ public class CollectorRegistryTest {
     HashSet<String> metrics = new HashSet<String>();
     HashSet<String> series = new HashSet<String>();
     for (Collector.MetricFamilySamples metricFamilySamples : Collections.list(registry.filteredMetricFamilySamples(
-            new HashSet<String>(Arrays.asList("", "s_sum", "c", "part_filter_a", "part_filter_c"))))) {
+            new HashSet<String>(Arrays.asList("", "s_sum", "c_total", "part_filter_a", "part_filter_c"))))) {
       metrics.add(metricFamilySamples.name);
       for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
         series.add(sample.name);
@@ -93,7 +93,7 @@ public class CollectorRegistryTest {
     assertEquals(1, sr.collectCallCount);
     assertEquals(2, pfr.collectCallCount);
     assertEquals(new HashSet<String>(Arrays.asList("s", "c", "part_filter_a", "part_filter_c")), metrics);
-    assertEquals(new HashSet<String>(Arrays.asList("s_sum", "c", "part_filter_a", "part_filter_c")), series);
+    assertEquals(new HashSet<String>(Arrays.asList("s_sum", "c_total", "part_filter_a", "part_filter_c")), series);
   }
 
   @Test

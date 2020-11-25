@@ -20,20 +20,27 @@ public class TextFormat {
      * for the output format specification. */
     while(mfs.hasMoreElements()) {
       Collector.MetricFamilySamples metricFamilySamples = mfs.nextElement();
+      String name = metricFamilySamples.name;
+      if (metricFamilySamples.type == Collector.Type.COUNTER) {
+        name += "_total";
+      }
       writer.write("# HELP ");
-      writer.write(metricFamilySamples.name);
+      writer.write(name);
       writer.write(' ');
       writeEscapedHelp(writer, metricFamilySamples.help);
       writer.write('\n');
 
       writer.write("# TYPE ");
-      writer.write(metricFamilySamples.name);
+      writer.write(name);
       writer.write(' ');
       writer.write(typeString(metricFamilySamples.type));
       writer.write('\n');
 
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
         writer.write(sample.name);
+        if (metricFamilySamples.type == Collector.Type.COUNTER && sample.name.equals(metricFamilySamples.name)) {
+          writer.write("_total");
+        }
         if (sample.labelNames.size() > 0) {
           writer.write('{');
           for (int i = 0; i < sample.labelNames.size(); ++i) {

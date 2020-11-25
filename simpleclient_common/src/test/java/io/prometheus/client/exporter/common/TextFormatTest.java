@@ -52,9 +52,32 @@ public class TextFormatTest {
     Counter noLabels = Counter.build().name("nolabels").help("help").register(registry);
     noLabels.inc();
     TextFormat.write004(writer, registry.metricFamilySamples());
-    assertEquals("# HELP nolabels help\n"
-                 + "# TYPE nolabels counter\n"
-                 + "nolabels 1.0\n", writer.toString());
+    assertEquals("# HELP nolabels_total help\n"
+                 + "# TYPE nolabels_total counter\n"
+                 + "nolabels_total 1.0\n", writer.toString());
+  }
+
+  @Test
+  public void testCounterSamplesMissingTotal() throws IOException {
+
+    class CustomCollector extends Collector {
+      public List<MetricFamilySamples> collect() {
+        List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
+        ArrayList<String> labelNames = new ArrayList<String>();
+        ArrayList<String> labelValues = new ArrayList<String>();
+        ArrayList<MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+        MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample("nolabels", labelNames, labelValues, 1.0);
+        samples.add(sample);
+        mfs.add(new MetricFamilySamples("nolabels", Collector.Type.COUNTER, "help", samples));
+        return mfs;
+      }
+    }
+
+    new CustomCollector().register(registry);
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP nolabels_total help\n"
+                 + "# TYPE nolabels_total counter\n"
+                 + "nolabels_total 1.0\n", writer.toString());
   }
 
   @Test

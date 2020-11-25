@@ -19,11 +19,14 @@ public abstract class Collector {
    */
   public abstract List<MetricFamilySamples> collect();
   public enum Type {
+    UNTYPED, // XXX This is Unknown in OpenMetrics.
     COUNTER,
     GAUGE,
-    SUMMARY,
+    STATE_SET,
+    INFO,
     HISTOGRAM,
-    UNTYPED,
+    GAUGE_HISTOGRAM,
+    SUMMARY,
   }
 
   /**
@@ -31,15 +34,27 @@ public abstract class Collector {
    */
   static public class MetricFamilySamples {
     public final String name;
+    public final String unit;
     public final Type type;
     public final String help;
     public final List<Sample> samples;
 
-    public MetricFamilySamples(String name, Type type, String help, List<Sample> samples) {
+    public MetricFamilySamples(String name, String unit, Type type, String help, List<Sample> samples) {
+      if (!unit.isEmpty() && !name.endsWith("_" + unit)) {
+        throw new IllegalArgumentException("Metric's unit is not the suffix of the metric name: " + name);
+      }
+      if ((type == Type.INFO || type == Type.STATE_SET) && !unit.isEmpty()) {
+        throw new IllegalArgumentException("Metric is of a type that cannot have a unit: " + name);
+      }
       this.name = name;
+      this.unit = unit;
       this.type = type;
       this.help = help;
       this.samples = samples;
+    }
+
+    public MetricFamilySamples(String name, Type type, String help, List<Sample> samples) {
+      this(name, "", type, help, samples);
     }
 
     @Override
@@ -49,14 +64,18 @@ public abstract class Collector {
       }
       MetricFamilySamples other = (MetricFamilySamples) obj;
       
-      return other.name.equals(name) && other.type.equals(type)
-        && other.help.equals(help) && other.samples.equals(samples) ;
+      return other.name.equals(name)
+        && other.unit.equals(unit)
+        && other.type.equals(type)
+        && other.help.equals(help)
+        && other.samples.equals(samples);
     }
 
     @Override
     public int hashCode() {
       int hash = 1;
       hash = 37 * hash + name.hashCode();
+      hash = 37 * hash + unit.hashCode();
       hash = 37 * hash + type.hashCode();
       hash = 37 * hash + help.hashCode();
       hash = 37 * hash + samples.hashCode();
@@ -65,7 +84,7 @@ public abstract class Collector {
 
     @Override
     public String toString() {
-      return "Name: " + name + " Type: " + type + " Help: " + help + 
+      return "Name: " + name + " Unit:" + unit + " Type: " + type + " Help: " + help +
         " Samples: " + samples;
     }
 

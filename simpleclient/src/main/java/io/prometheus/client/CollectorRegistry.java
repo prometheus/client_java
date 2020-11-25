@@ -105,6 +105,11 @@ public class CollectorRegistry {
     List<String> names = new ArrayList<String>();
     for (Collector.MetricFamilySamples family : mfs) {
       switch (family.type) {
+        case COUNTER:
+          names.add(family.name + "_total");
+          names.add(family.name + "_created");
+          names.add(family.name);
+          break;
         case SUMMARY:
           names.add(family.name + "_count");
           names.add(family.name + "_sum");
