@@ -83,7 +83,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     /**
      * Export counter as Prometheus <a href="https://prometheus.io/docs/concepts/metric_types/#gauge">Gauge</a>.
      */
-    MetricFamilySamples fromCounter(String dropwizardName, Counter counter) {
+    protected MetricFamilySamples fromCounter(String dropwizardName, Counter counter) {
         MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "", new ArrayList<String>(), new ArrayList<String>(),
                 new Long(counter.getCount()).doubleValue());
         return new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName, counter), Arrays.asList(sample));
@@ -92,7 +92,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     /**
      * Export gauge as a prometheus gauge.
      */
-    MetricFamilySamples fromGauge(String dropwizardName, Gauge gauge) {
+    protected MetricFamilySamples fromGauge(String dropwizardName, Gauge gauge) {
         Object obj = gauge.getValue();
         double value;
         if (obj instanceof Number) {
@@ -117,7 +117,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * @param count          the total sample count for this snapshot.
      * @param factor         a factor to apply to histogram values.
      */
-    MetricFamilySamples fromSnapshotAndCount(String dropwizardName, Snapshot snapshot, long count, double factor, String helpMessage) {
+    protected MetricFamilySamples fromSnapshotAndCount(String dropwizardName, Snapshot snapshot, long count, double factor, String helpMessage) {
         List<MetricFamilySamples.Sample> samples = Arrays.asList(
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.5"), snapshot.getMedian() * factor),
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.75"), snapshot.get75thPercentile() * factor),
@@ -133,7 +133,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     /**
      * Convert histogram snapshot.
      */
-    MetricFamilySamples fromHistogram(String dropwizardName, Histogram histogram) {
+    protected MetricFamilySamples fromHistogram(String dropwizardName, Histogram histogram) {
         return fromSnapshotAndCount(dropwizardName, histogram.getSnapshot(), histogram.getCount(), 1.0,
                 getHelpMessage(dropwizardName, histogram));
     }
@@ -141,7 +141,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     /**
      * Export Dropwizard Timer as a histogram. Use TIME_UNIT as time unit.
      */
-    MetricFamilySamples fromTimer(String dropwizardName, Timer timer) {
+    protected MetricFamilySamples fromTimer(String dropwizardName, Timer timer) {
         return fromSnapshotAndCount(dropwizardName, timer.getSnapshot(), timer.getCount(),
                 1.0D / TimeUnit.SECONDS.toNanos(1L), getHelpMessage(dropwizardName, timer));
     }
@@ -149,7 +149,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     /**
      * Export a Meter as as prometheus COUNTER.
      */
-    MetricFamilySamples fromMeter(String dropwizardName, Meter meter) {
+    protected MetricFamilySamples fromMeter(String dropwizardName, Meter meter) {
         final MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "_total",
                 new ArrayList<String>(),
                 new ArrayList<String>(),
