@@ -23,7 +23,7 @@ public class SummaryTest {
   @Before
   public void setUp() {
     registry = new CollectorRegistry();
-    noLabels = Summary.build().name("nolabels").help("help").register(registry);
+    noLabels = Summary.build().name("no_labels").help("help").register(registry);
     labels = Summary.build().name("labels").help("help").labelNames("l").register(registry);
     noLabelsAndQuantiles = Summary.build()
             .quantile(0.5, 0.05)
@@ -44,10 +44,10 @@ public class SummaryTest {
   }
 
   private double getCount() {
-    return registry.getSampleValue("nolabels_count").doubleValue();
+    return registry.getSampleValue("no_labels_count").doubleValue();
   }
   private double getSum() {
-    return registry.getSampleValue("nolabels_sum").doubleValue();
+    return registry.getSampleValue("no_labels_sum").doubleValue();
   }
   private double getNoLabelQuantile(double q) {
     return registry.getSampleValue("no_labels_and_quantiles", new String[]{"quantile"}, new String[]{Collector.doubleToGoString(q)}).doubleValue();
@@ -61,32 +61,37 @@ public class SummaryTest {
     noLabels.observe(2);
     assertEquals(1.0, getCount(), .001);
     assertEquals(2.0, getSum(), .001);
-    assertEquals(1.0, noLabels.get().count, .001);
-    assertEquals(2.0, noLabels.get().sum, .001);
+
     noLabels.labels().observe(4);
     assertEquals(2.0, getCount(), .001);
     assertEquals(6.0, getSum(), .001);
-    assertEquals(2.0, noLabels.get().count, .001);
-    assertEquals(6.0, noLabels.get().sum, .001);
   }
 
   @Test
   public void testQuantiles() {
     int nSamples = 1000000; // simulate one million samples
+    double error = .01; // default `numberOfSignificantValueDigits` is `2`
+
+    double sum = 0.0;
 
     for (int i=1; i<=nSamples; i++) {
       // In this test, we observe the numbers from 1 to nSamples,
       // because that makes it easy to verify if the quantiles are correct.
       labelsAndQuantiles.labels("a").observe(i);
       noLabelsAndQuantiles.observe(i);
+      sum += i;
     }
     assertEquals(getNoLabelQuantile(0.5), 0.5 * nSamples, 0.05 * nSamples);
     assertEquals(getNoLabelQuantile(0.9), 0.9 * nSamples, 0.01 * nSamples);
     assertEquals(getNoLabelQuantile(0.99), 0.99 * nSamples, 0.001 * nSamples);
+    assertEquals(nSamples, registry.getSampleValue("no_labels_and_quantiles_count"), 0.001);
+    assertEquals(sum, registry.getSampleValue("no_labels_and_quantiles_sum"), 0.001);
 
     assertEquals(getLabeledQuantile("a", 0.5), 0.5 * nSamples, 0.05 * nSamples);
     assertEquals(getLabeledQuantile("a", 0.9), 0.9 * nSamples, 0.01 * nSamples);
     assertEquals(getLabeledQuantile("a", 0.99), 0.99 * nSamples, 0.001 * nSamples);
+    assertEquals(nSamples, registry.getSampleValue("labels_and_quantiles_count", new String[]{"l"}, new String[]{"a"}), 0.001);
+    assertEquals(sum, registry.getSampleValue("labels_and_quantiles_sum", new String[]{"l"}, new String[]{"a"}), 0.001);
   }
 
   @Test
@@ -144,6 +149,9 @@ public class SummaryTest {
   public void noLabelsDefaultZeroValue() {
     assertEquals(0.0, getCount(), .001);
     assertEquals(0.0, getSum(), .001);
+    noLabels.observe(2.0);
+    assertEquals(1.0, getCount(), .001);
+    assertEquals(2.0, getSum(), .001);
   }
 
   private Double getLabelsCount(String labelValue) {
@@ -159,30 +167,29 @@ public class SummaryTest {
     assertEquals(null, getLabelsSum("a"));
     assertEquals(null, getLabelsCount("b"));
     assertEquals(null, getLabelsSum("b"));
-    labels.labels("a").observe(2);
-    assertEquals(1.0, getLabelsCount("a").doubleValue(), .001);
-    assertEquals(2.0, getLabelsSum("a").doubleValue(), .001);
+
+    labels.labels("a").observe(2.0);
+    assertEquals(1.0, getLabelsCount("a"), .001);
+    assertEquals(2.0, getLabelsSum("a"), .001);
     assertEquals(null, getLabelsCount("b"));
     assertEquals(null, getLabelsSum("b"));
-    labels.labels("b").observe(3);
-    assertEquals(1.0, getLabelsCount("a").doubleValue(), .001);
-    assertEquals(2.0, getLabelsSum("a").doubleValue(), .001);
-    assertEquals(1.0, getLabelsCount("b").doubleValue(), .001);
-    assertEquals(3.0, getLabelsSum("b").doubleValue(), .001);
+
+
+    labels.labels("b").observe(3.0);
+    assertEquals(1.0, getLabelsCount("a"), .001);
+    assertEquals(2.0, getLabelsSum("a"), .001);
+    assertEquals(1.0, getLabelsCount("b"), .001);
+    assertEquals(3.0, getLabelsSum("b"), .001);
   }
 
   @Test
   public void testCollect() {
-    labels.labels("a").observe(2);
+    labels.labels("a").observe(2.0);
     List<Collector.MetricFamilySamples> mfs = labels.collect();
 
     ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
-    ArrayList<String> labelNames = new ArrayList<String>();
-    labelNames.add("l");
-    ArrayList<String> labelValues = new ArrayList<String>();
-    labelValues.add("a");
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_count", asList("l"), asList("a"), 1.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", asList("l"), asList("a"), 2.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.SUMMARY, "help", samples);
 
     assertEquals(1, mfs.size());
