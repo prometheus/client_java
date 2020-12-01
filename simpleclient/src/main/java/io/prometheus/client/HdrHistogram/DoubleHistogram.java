@@ -215,8 +215,13 @@ public class DoubleHistogram extends EncodableHistogram implements DoubleValueRe
             // Set our double tracking range and internal histogram:
             init(highestToLowestValueRatio, initialLowestValueInAutoRange, valuesHistogram);
 
-        } catch (NoSuchMethodException | IllegalAccessException |
-                InstantiationException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException ex) {
+            throw new IllegalArgumentException(ex);
+        } catch (IllegalAccessException ex) {
+            throw new IllegalArgumentException(ex);
+        } catch (InstantiationException ex) {
+            throw new IllegalArgumentException(ex);
+        } catch (InvocationTargetException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
@@ -1547,8 +1552,13 @@ public class DoubleHistogram extends EncodableHistogram implements DoubleValueRe
                     );
             histogram.setAutoResize(true);
             return histogram;
-        } catch (NoSuchMethodException | InstantiationException |
-                IllegalAccessException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException ex) {
+            throw new IllegalStateException("Unable to construct DoubleHistogram of type " + doubleHistogramClass);
+        } catch (InstantiationException ex) {
+            throw new IllegalStateException("Unable to construct DoubleHistogram of type " + doubleHistogramClass);
+        } catch (IllegalAccessException ex) {
+            throw new IllegalStateException("Unable to construct DoubleHistogram of type " + doubleHistogramClass);
+        } catch (InvocationTargetException ex) {
             throw new IllegalStateException("Unable to construct DoubleHistogram of type " + doubleHistogramClass);
         }
     }

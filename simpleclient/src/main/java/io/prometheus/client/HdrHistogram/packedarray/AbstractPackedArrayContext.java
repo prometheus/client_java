@@ -552,7 +552,9 @@ abstract class AbstractPackedArrayContext implements Serializable {
     private int getRootEntry(final int setNumber) {
         try {
             return getRootEntry(setNumber, false);
-        } catch (RetryException | ResizeException ex) {
+        } catch (RetryException ex) {
+            throw new IllegalStateException("Should not Resize or Retry exceptions on real-only read: ", ex);
+        } catch (ResizeException ex) {
             throw new IllegalStateException("Should not Resize or Retry exceptions on real-only read: ", ex);
         }
 

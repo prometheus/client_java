@@ -244,10 +244,10 @@ public class HistogramLogProcessor extends Thread {
         boolean timeIntervalLogLegendWritten = false;
         boolean movingWindowLogLegendWritten = false;
 
-        Queue<EncodableHistogram> movingWindowQueue = new LinkedList<>();
+        Queue<EncodableHistogram> movingWindowQueue = new LinkedList<EncodableHistogram>();
 
         if (config.listTags) {
-            Set<String> tags = new TreeSet<>();
+            Set<String> tags = new TreeSet<String>();
             EncodableHistogram histogram;
             boolean nullTagFound = false;
             while ((histogram = getIntervalHistogram()) != null) {

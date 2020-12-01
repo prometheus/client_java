@@ -2139,8 +2139,13 @@ public abstract class AbstractHistogram extends AbstractHistogramBase implements
             } catch (IllegalStateException ex) {
                 // Allow histogram to refuse auto-sizing setting
             }
-        } catch (IllegalAccessException | NoSuchMethodException |
-                InstantiationException | InvocationTargetException ex) {
+        } catch (IllegalAccessException ex) {
+            throw new IllegalArgumentException(ex);
+        } catch (NoSuchMethodException ex) {
+            throw new IllegalArgumentException(ex);
+        } catch (InstantiationException ex) {
+            throw new IllegalArgumentException(ex);
+        } catch (InvocationTargetException ex) {
             throw new IllegalArgumentException(ex);
         }
 
