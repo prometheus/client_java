@@ -119,12 +119,17 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      */
     MetricFamilySamples fromSnapshotAndCount(String dropwizardName, Snapshot snapshot, long count, double factor, String helpMessage) {
         List<MetricFamilySamples.Sample> samples = Arrays.asList(
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.25"), snapshot.getValue(0.25) * factor),
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.5"), snapshot.getMedian() * factor),
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.75"), snapshot.get75thPercentile() * factor),
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.95"), snapshot.get95thPercentile() * factor),
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.98"), snapshot.get98thPercentile() * factor),
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.99"), snapshot.get99thPercentile() * factor),
                 sampleBuilder.createSample(dropwizardName, "", Arrays.asList("quantile"), Arrays.asList("0.999"), snapshot.get999thPercentile() * factor),
+                sampleBuilder.createSample(dropwizardName, "_min", new ArrayList<String>(), new ArrayList<String>(), snapshot.getMin()),
+                sampleBuilder.createSample(dropwizardName, "_mean", new ArrayList<String>(), new ArrayList<String>(), snapshot.getMean()),
+                sampleBuilder.createSample(dropwizardName, "_max", new ArrayList<String>(), new ArrayList<String>(), snapshot.getMax()),
+                sampleBuilder.createSample(dropwizardName, "_stdDev", new ArrayList<String>(), new ArrayList<String>(), snapshot.getStdDev()),
                 sampleBuilder.createSample(dropwizardName, "_count", new ArrayList<String>(), new ArrayList<String>(), count)
         );
         return new MetricFamilySamples(samples.get(0).name, Type.SUMMARY, helpMessage, samples);
@@ -147,15 +152,17 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     }
 
     /**
-     * Export a Meter as as prometheus COUNTER.
+     * Export a Meter as as prometheus SUMMARY.
      */
     MetricFamilySamples fromMeter(String dropwizardName, Meter meter) {
-        final MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "_total",
-                new ArrayList<String>(),
-                new ArrayList<String>(),
-                meter.getCount());
-        return new MetricFamilySamples(sample.name, Type.COUNTER, getHelpMessage(dropwizardName, meter),
-                        Arrays.asList(sample));
+        List<MetricFamilySamples.Sample> samples = Arrays.asList(
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("rate"), Arrays.asList("1m"), meter.getOneMinuteRate()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("rate"), Arrays.asList("5m"), meter.getFiveMinuteRate()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("rate"), Arrays.asList("15m"), meter.getFiveMinuteRate()),
+                sampleBuilder.createSample(dropwizardName, "", Arrays.asList("rate"), Arrays.asList("mean"), meter.getMeanRate()),
+                sampleBuilder.createSample(dropwizardName, "_total", new ArrayList<String>(), new ArrayList<String>(), meter.getCount())
+        );
+        return new MetricFamilySamples(samples.get(0).name, Type.SUMMARY, getHelpMessage(dropwizardName, meter), samples);
     }
 
     @Override

@@ -155,7 +155,11 @@ public class DropwizardExportsTest {
             i += 1;
         }
         assertEquals(new Double(100), registry.getSampleValue("hist_count"));
-        for (Double d : Arrays.asList(0.75, 0.95, 0.98, 0.99)) {
+        assertEquals(new Double(0), registry.getSampleValue("hist_min"));
+        assertEquals(new Double(99), registry.getSampleValue("hist_max"));
+        assertEquals(new Double(49.5), registry.getSampleValue("hist_mean"));
+        assertEquals(new Double(28.86607004772212), registry.getSampleValue("hist_stdDev"));
+        for (Double d : Arrays.asList(0.25, 0.75, 0.95, 0.98, 0.99)) {
             assertEquals(new Double((d - 0.01) * 100), registry.getSampleValue("hist",
                     new String[]{"quantile"}, new String[]{d.toString()}));
         }
@@ -165,10 +169,16 @@ public class DropwizardExportsTest {
 
     @Test
     public void testMeter() throws IOException, InterruptedException {
-        Mockito.when(sampleBuilder.createSample("meter", "_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 2)).thenReturn(new Collector.MetricFamilySamples.Sample("meter_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 2));
+        final MetricRegistry metricRegistry = new MetricRegistry();
+        final CollectorRegistry registry = new CollectorRegistry();
+        new DropwizardExports(metricRegistry).register(registry);
         Meter meter = metricRegistry.meter("meter");
         meter.mark();
         meter.mark();
+        assertNotNull(registry.getSampleValue("meter", new String[]{"rate"}, new String[]{"1m"}));
+        assertNotNull(registry.getSampleValue("meter", new String[]{"rate"}, new String[]{"5m"}));
+        assertNotNull(registry.getSampleValue("meter", new String[]{"rate"}, new String[]{"15m"}));
+        assertNotNull(registry.getSampleValue("meter", new String[]{"rate"}, new String[]{"mean"}));
         assertEquals(new Double(2), registry.getSampleValue("meter_total"));
     }
 
@@ -312,7 +322,7 @@ public class DropwizardExportsTest {
         final Collector.MetricFamilySamples namedTimer = elements.get("my_application_namedTimer");
         assertNotNull(namedTimer);
         assertEquals(Collector.Type.SUMMARY, namedTimer.type);
-        assertEquals(14, namedTimer.samples.size());
+        assertEquals(24, namedTimer.samples.size());
 
         final Collector.MetricFamilySamples namedCounter = elements.get("my_application_namedCounter");
         assertNotNull(namedCounter);
@@ -323,8 +333,8 @@ public class DropwizardExportsTest {
 
         final Collector.MetricFamilySamples namedMeter = elements.get("my_application_namedMeter_total");
         assertNotNull(namedMeter);
-        assertEquals(Collector.Type.COUNTER, namedMeter.type);
-        assertEquals(2, namedMeter.samples.size());
+        assertEquals(Collector.Type.SUMMARY, namedMeter.type);
+        assertEquals(10, namedMeter.samples.size());
         assertTrue(namedMeter.samples.contains(namedMeter1));
         assertTrue(namedMeter.samples.contains(namedMeter2));
 
@@ -332,7 +342,7 @@ public class DropwizardExportsTest {
         assertNotNull(namedHistogram);
         assertEquals(Collector.Type.SUMMARY, namedHistogram.type);
         assertEquals(Collector.Type.SUMMARY, namedHistogram.type);
-        assertEquals(14, namedHistogram.samples.size());
+        assertEquals(24, namedHistogram.samples.size());
 
         final Collector.MetricFamilySamples namedGauge = elements.get("my_application_namedGauge");
         assertNotNull(namedGauge);
