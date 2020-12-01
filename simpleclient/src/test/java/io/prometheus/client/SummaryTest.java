@@ -61,16 +61,19 @@ public class SummaryTest {
     noLabels.observe(2);
     assertEquals(1.0, getCount(), .001);
     assertEquals(2.0, getSum(), .001);
+    assertEquals(1.0, noLabels.get().count, .001);
+    assertEquals(2.0, noLabels.get().sum, .001);
 
     noLabels.labels().observe(4);
     assertEquals(2.0, getCount(), .001);
     assertEquals(6.0, getSum(), .001);
+    assertEquals(2.0, noLabels.get().count, .001);
+    assertEquals(6.0, noLabels.get().sum, .001);
   }
 
   @Test
   public void testQuantiles() {
     int nSamples = 1000000; // simulate one million samples
-    double error = .01; // default `numberOfSignificantValueDigits` is `2`
 
     double sum = 0.0;
 
@@ -168,14 +171,13 @@ public class SummaryTest {
     assertEquals(null, getLabelsCount("b"));
     assertEquals(null, getLabelsSum("b"));
 
-    labels.labels("a").observe(2.0);
+    labels.labels("a").observe(2);
     assertEquals(1.0, getLabelsCount("a"), .001);
     assertEquals(2.0, getLabelsSum("a"), .001);
     assertEquals(null, getLabelsCount("b"));
     assertEquals(null, getLabelsSum("b"));
 
-
-    labels.labels("b").observe(3.0);
+    labels.labels("b").observe(3);
     assertEquals(1.0, getLabelsCount("a"), .001);
     assertEquals(2.0, getLabelsSum("a"), .001);
     assertEquals(1.0, getLabelsCount("b"), .001);
@@ -184,7 +186,7 @@ public class SummaryTest {
 
   @Test
   public void testCollect() {
-    labels.labels("a").observe(2.0);
+    labels.labels("a").observe(2);
     List<Collector.MetricFamilySamples> mfs = labels.collect();
 
     ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
