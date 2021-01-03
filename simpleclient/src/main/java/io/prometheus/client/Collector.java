@@ -88,7 +88,7 @@ public abstract class Collector {
       }
 
       public Sample(String name, List<String> labelNames, List<String> labelValues, double value) {
-    	  this(name, labelNames, labelValues, value, null);
+        this(name, labelNames, labelValues, value, null);
       }
 
       @Override
@@ -216,9 +216,6 @@ public abstract class Collector {
     } 
     if (d == Double.NEGATIVE_INFINITY) {
       return "-Inf";
-    }
-    if (Double.isNaN(d)) {
-      return "NaN";
     }
     return Double.toString(d);
   }
