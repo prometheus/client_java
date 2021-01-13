@@ -10,6 +10,7 @@ import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 public class ThreadExportsTest {
@@ -77,6 +78,55 @@ public class ThreadExportsTest {
             3L,
             registry.getSampleValue(
             "jvm_threads_deadlocked_monitor", EMPTY_LABEL, EMPTY_LABEL),
+            .0000001);
+
+    assertEquals(
+            1L,
+            registry.getSampleValue(
+                    "jvm_threads_state", STATE_LABEL, STATE_BLOCKED_LABEL),
+            .0000001);
+
+    assertEquals(
+            2L,
+            registry.getSampleValue(
+                    "jvm_threads_state", STATE_LABEL, STATE_RUNNABLE_LABEL),
+            .0000001);
+
+    assertEquals(
+            0L,
+            registry.getSampleValue(
+                    "jvm_threads_state", STATE_LABEL, STATE_TERMINATED_LABEL),
+            .0000001);
+  }
+
+  @Test
+	public void testThreadPoolsNoDeadlocked() {
+    collectorUnderTest.setIncludeDeadlockedThreads(false);
+
+    assertNull(registry.getSampleValue(
+                    "jvm_threads_deadlocked", EMPTY_LABEL, EMPTY_LABEL));
+    assertNull(registry.getSampleValue(
+                    "jvm_threads_deadlocked_monitor", EMPTY_LABEL, EMPTY_LABEL));
+
+    assertEquals(
+            300L,
+            registry.getSampleValue(
+                    "jvm_threads_current", EMPTY_LABEL, EMPTY_LABEL),
+            .0000001);
+    assertEquals(
+            200L,
+            registry.getSampleValue(
+                    "jvm_threads_daemon", EMPTY_LABEL, EMPTY_LABEL),
+            .0000001);
+    assertEquals(
+            301L,
+            registry.getSampleValue(
+                    "jvm_threads_peak", EMPTY_LABEL, EMPTY_LABEL),
+            .0000001);
+    assertEquals(
+            503L,
+            registry.getSampleValue(
+                    "jvm_threads_started_total", EMPTY_LABEL, EMPTY_LABEL),
             .0000001);
 
     assertEquals(
