@@ -8,9 +8,46 @@ import io.prometheus.client.Collector;
 
 public class TextFormat {
   /**
-   * Content-type for text version 0.0.4.
+   * Content-type for Prometheus text version 0.0.4.
    */
   public final static String CONTENT_TYPE_004 = "text/plain; version=0.0.4; charset=utf-8";
+  
+  /**
+   * Content-type for Openmetrics text version 1.0.0.
+   */
+  public final static String CONTENT_TYPE_OPENMETRICS_100 = "application/openmetrics-text; version=1.0.0; charset=utf-8";
+
+  /**
+   * Return the content type that should be used for a given Accept HTTP header.
+   */
+  public static String chooseContentType(String acceptHeader) {
+    if (acceptHeader == null) {
+      return CONTENT_TYPE_004;
+    }
+ 
+    for (String accepts : acceptHeader.split(",")) {
+      if ("application/openmetrics-text".equals(accepts.split(";")[0].trim())) {
+        return CONTENT_TYPE_OPENMETRICS_100;
+      }
+    }
+
+    return CONTENT_TYPE_004;
+  }
+
+  /**
+   * Write out the given MetricFamilySamples in a format per the contentType.
+   */
+  public static void writeFormat(String contentType, Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
+    if (CONTENT_TYPE_004.equals(contentType)) {
+        write004(writer, mfs);
+        return;
+    }
+    if (CONTENT_TYPE_OPENMETRICS_100.equals(contentType)) {
+        writeOpenMetrics100(writer, mfs);
+        return;
+    }
+    throw new IllegalArgumentException("Unknown contentType " + contentType);
+  }
 
   /**
    * Write out the text version 0.0.4 of the given MetricFamilySamples.
@@ -107,8 +144,100 @@ public class TextFormat {
         return "summary";
       case HISTOGRAM:
         return "histogram";
+      case GAUGE_HISTOGRAM:
+        return "histogram";
+      case STATE_SET:
+        return "gauge";
+      case INFO:
+        return "gauge";
       default:
         return "untyped";
+    }
+  }
+
+  /**
+   * Write out the OpenMetrics text version 1.0.0 of the given MetricFamilySamples.
+   */
+  public static void writeOpenMetrics100(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
+    while(mfs.hasMoreElements()) {
+      Collector.MetricFamilySamples metricFamilySamples = mfs.nextElement();
+      String name = metricFamilySamples.name;
+ 
+      writer.write("# TYPE ");
+      writer.write(name);
+      writer.write(' ');
+      writer.write(omTypeString(metricFamilySamples.type));
+      writer.write('\n');
+ 
+      if (!metricFamilySamples.unit.isEmpty()) {
+        writer.write("# UNIT ");
+        writer.write(name);
+        writer.write(' ');
+        writer.write(metricFamilySamples.unit);
+        writer.write('\n');
+      }
+
+      writer.write("# HELP ");
+      writer.write(name);
+      writer.write(' ');
+      writeEscapedLabelValue(writer, metricFamilySamples.help);
+      writer.write('\n');
+ 
+      for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
+        writer.write(sample.name);
+        if (sample.labelNames.size() > 0) {
+          writer.write('{');
+          for (int i = 0; i < sample.labelNames.size(); ++i) {
+            if (i > 0) {
+              writer.write(",");
+            }
+            writer.write(sample.labelNames.get(i));
+            writer.write("=\"");
+            writeEscapedLabelValue(writer, sample.labelValues.get(i));
+            writer.write("\"");
+          }
+          writer.write('}');
+        }
+        writer.write(' ');
+        writer.write(Collector.doubleToGoString(sample.value));
+        if (sample.timestampMs != null){
+          writer.write(' ');
+          long ts = sample.timestampMs.longValue();
+          writer.write(Long.toString(ts / 1000));
+          writer.write(".");
+          long ms = ts % 1000;
+          if (ms < 100) {
+            writer.write("0");
+          }
+          if (ms < 10) {
+            writer.write("0");
+          }
+          writer.write(Long.toString(ts % 1000));
+
+        }
+        writer.write('\n');
+      }
+    }
+  }
+
+  private static String omTypeString(Collector.Type t) {
+    switch (t) {
+      case GAUGE:
+        return "gauge";
+      case COUNTER:
+        return "counter";
+      case SUMMARY:
+        return "summary";
+      case HISTOGRAM:
+        return "histogram";
+      case GAUGE_HISTOGRAM:
+        return "gauge_histogram";
+      case STATE_SET:
+        return "stateset";
+      case INFO:
+        return "info";
+      default:
+        return "unknown";
     }
   }
 }

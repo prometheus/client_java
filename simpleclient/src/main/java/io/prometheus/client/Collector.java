@@ -1,6 +1,7 @@
 
 package io.prometheus.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -46,11 +47,27 @@ public abstract class Collector {
       if ((type == Type.INFO || type == Type.STATE_SET) && !unit.isEmpty()) {
         throw new IllegalArgumentException("Metric is of a type that cannot have a unit: " + name);
       }
+      List<Sample> mungedSamples = samples;
+      // Deal with _total from pre-OM automatically.
+      if (type == Type.COUNTER) {
+        if (name.endsWith("_total")) {
+          name = name.substring(0, name.length() - 6);
+        }
+        String withTotal = name + "_total";
+        mungedSamples = new ArrayList<Sample>(samples.size());
+        for (Sample s: samples) {
+          String n = s.name;
+          if (name.equals(n)) {
+            n = withTotal;
+          }
+          mungedSamples.add(new Sample(n, s.labelNames, s.labelValues, s.value, s.timestampMs));
+        }
+      }
       this.name = name;
       this.unit = unit;
       this.type = type;
       this.help = help;
-      this.samples = samples;
+      this.samples = mungedSamples;
     }
 
     public MetricFamilySamples(String name, Type type, String help, List<Sample> samples) {
