@@ -218,6 +218,7 @@ public class TextFormat {
         writer.write('\n');
       }
     }
+    writer.write("# EOF\n");
   }
 
   private static String omTypeString(Collector.Type t) {

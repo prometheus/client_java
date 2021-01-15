@@ -65,6 +65,17 @@ public class TestHTTPServer {
     return s.hasNext() ? s.next() : "";
   }
 
+  String requestWithAccept(String accept) throws IOException {
+    String url = "http://localhost:" + s.server.getAddress().getPort();
+    URLConnection connection = new URL(url).openConnection();
+    connection.setDoOutput(true);
+    connection.setDoInput(true);
+    connection.setRequestProperty("Accept", accept);
+    Scanner s = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
+    return s.hasNext() ? s.next() : "";
+  }
+
+  @Test
   @Test(expected = IllegalArgumentException.class)
   public void testRefuseUsingUnbound() throws IOException {
     CollectorRegistry registry = new CollectorRegistry();
@@ -118,6 +129,12 @@ public class TestHTTPServer {
     assertThat(response).contains("a 0.0");
     assertThat(response).contains("b 0.0");
     assertThat(response).contains("c 0.0");
+  }
+
+  @Test
+  public void testOpenMetrics() throws IOException {
+    String response = requestWithAccept("application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1");
+    assertThat(response).contains("# EOF");
   }
 
   @Test
