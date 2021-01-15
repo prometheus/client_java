@@ -2,7 +2,12 @@ package io.prometheus.client.exporter.common;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import io.prometheus.client.Collector;
 
@@ -53,31 +58,47 @@ public class TextFormat {
    * Write out the text version 0.0.4 of the given MetricFamilySamples.
    */
   public static void write004(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
+    Map<String, Collector.MetricFamilySamples> omFamilies = new TreeMap<String, Collector.MetricFamilySamples>();
     /* See http://prometheus.io/docs/instrumenting/exposition_formats/
      * for the output format specification. */
     while(mfs.hasMoreElements()) {
       Collector.MetricFamilySamples metricFamilySamples = mfs.nextElement();
       String name = metricFamilySamples.name;
-      if (metricFamilySamples.type == Collector.Type.COUNTER) {
-        name += "_total";
-      }
       writer.write("# HELP ");
       writer.write(name);
+      if (metricFamilySamples.type == Collector.Type.COUNTER) {
+        writer.write("_total");
+      }
       writer.write(' ');
       writeEscapedHelp(writer, metricFamilySamples.help);
       writer.write('\n');
 
       writer.write("# TYPE ");
       writer.write(name);
+      if (metricFamilySamples.type == Collector.Type.COUNTER) {
+        writer.write("_total");
+      }
       writer.write(' ');
       writer.write(typeString(metricFamilySamples.type));
       writer.write('\n');
 
+      String createdName = name + "_created";
+      String gcountName = name + "_gcount";
+      String gsumName = name + "_gsum";
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
-        writer.write(sample.name);
-        if (metricFamilySamples.type == Collector.Type.COUNTER && sample.name.equals(metricFamilySamples.name)) {
-          writer.write("_total");
+        /* OpenMetrics specific sample, put in a gauge at the end. */
+        if (sample.name.equals(createdName)
+            || sample.name.equals(gcountName)
+            || sample.name.equals(gsumName)) {
+          Collector.MetricFamilySamples omFamily = omFamilies.get(sample.name);
+          if (omFamily == null) {
+            omFamily = new Collector.MetricFamilySamples(sample.name, Collector.Type.GAUGE, metricFamilySamples.help, new ArrayList<Collector.MetricFamilySamples.Sample>());
+            omFamilies.put(sample.name, omFamily);
+          }
+          omFamily.samples.add(sample);
+          continue;
         }
+        writer.write(sample.name);
         if (sample.labelNames.size() > 0) {
           writer.write('{');
           for (int i = 0; i < sample.labelNames.size(); ++i) {
@@ -96,6 +117,10 @@ public class TextFormat {
         }
         writer.write('\n');
       }
+    }
+    // Write out any OM-specific samples.
+    if (!omFamilies.isEmpty()) {
+      write004(writer, Collections.enumeration(omFamilies.values()));
     }
   }
 

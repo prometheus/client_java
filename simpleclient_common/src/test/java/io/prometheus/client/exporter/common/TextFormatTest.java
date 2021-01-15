@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -56,6 +57,17 @@ public class TextFormatTest {
                  + "# TYPE nolabels_total counter\n"
                  + "nolabels_total 1.0\n", writer.toString());
   }
+
+  @Test
+  public void testCounterWithTotalOutput() throws IOException {
+    Counter noLabels = Counter.build().name("nolabels_total").help("help").register(registry);
+    noLabels.inc();
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP nolabels_total help\n"
+                 + "# TYPE nolabels_total counter\n"
+                 + "nolabels_total 1.0\n", writer.toString());
+  }
+
 
   @Test
   public void testCounterSamplesMissingTotal() throws IOException {
@@ -129,6 +141,39 @@ public class TextFormatTest {
             + "labelsAndQuantiles{l=\"a\",quantile=\"0.99\",} 2.0\n"
             + "labelsAndQuantiles_count{l=\"a\",} 1.0\n"
             + "labelsAndQuantiles_sum{l=\"a\",} 2.0\n", writer.toString());
+  }
+
+  @Test
+  public void testGaugeHistogramOutput() throws IOException {
+    class CustomCollector extends Collector {
+      public List<MetricFamilySamples> collect() {
+        List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
+        ArrayList<String> labelNames = new ArrayList<String>();
+        ArrayList<String> labelValues = new ArrayList<String>();
+        ArrayList<MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+        samples.add(new MetricFamilySamples.Sample("nolabels_bucket", Arrays.asList("le"), Arrays.asList("+Inf"), 2.0));
+        samples.add(new MetricFamilySamples.Sample("nolabels_gcount", labelNames, labelValues, 2.0));
+        samples.add(new MetricFamilySamples.Sample("nolabels_gsum", labelNames, labelValues, 7.0));
+        samples.add(new MetricFamilySamples.Sample("nolabels_created", labelNames, labelValues, 1234.0));
+        mfs.add(new MetricFamilySamples("nolabels", Collector.Type.GAUGE_HISTOGRAM, "help", samples));
+        return mfs;
+      }
+    }
+    new CustomCollector().register(registry);
+    writer = new StringWriter();
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP nolabels help\n"
+            + "# TYPE nolabels histogram\n"
+            + "nolabels_bucket{le=\"+Inf\",} 2.0\n"
+            + "# HELP nolabels_created help\n"
+            + "# TYPE nolabels_created gauge\n"
+            + "nolabels_created 1234.0\n"
+            + "# HELP nolabels_gcount help\n"
+            + "# TYPE nolabels_gcount gauge\n"
+            + "nolabels_gcount 2.0\n"
+            + "# HELP nolabels_gsum help\n"
+            + "# TYPE nolabels_gsum gauge\n"
+            + "nolabels_gsum 7.0\n", writer.toString());
   }
 
   @Test
