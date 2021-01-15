@@ -231,10 +231,12 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
     public static class Value {
       public final double sum;
       public final double[] buckets;
+      public final long created;
 
-      public Value(double sum, double[] buckets) {
+      public Value(double sum, double[] buckets, long created) {
         this.sum = sum;
         this.buckets = buckets;
+        this.created = created;
       }
     }
 
@@ -248,6 +250,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
     private final double[] upperBounds;
     private final DoubleAdder[] cumulativeCounts;
     private final DoubleAdder sum = new DoubleAdder();
+    private final long created = System.currentTimeMillis();
 
 
     /**
@@ -283,7 +286,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
         acc += cumulativeCounts[i].sum();
         buckets[i] = acc;
       }
-      return new Value(sum.sum(), buckets);
+      return new Value(sum.sum(), buckets, created);
     }
   }
 
@@ -337,6 +340,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       }
       samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.buckets[buckets.length-1]));
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
+      samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), v.created / 1000.0));
     }
 
     return familySamplesList(Type.HISTOGRAM, samples);

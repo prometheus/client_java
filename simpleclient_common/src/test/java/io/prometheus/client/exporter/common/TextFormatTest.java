@@ -55,7 +55,11 @@ public class TextFormatTest {
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP nolabels_total help\n"
                  + "# TYPE nolabels_total counter\n"
-                 + "nolabels_total 1.0\n", writer.toString());
+                 + "nolabels_total 1.0\n"
+                 + "# HELP nolabels_created help\n"
+                 + "# TYPE nolabels_created gauge\n"
+                 + "nolabels_created 1234.0\n",
+                 writer.toString().replaceAll("_created [0-9E.]+", "_created 1234.0"));
   }
 
   @Test
@@ -65,7 +69,11 @@ public class TextFormatTest {
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP nolabels_total help\n"
                  + "# TYPE nolabels_total counter\n"
-                 + "nolabels_total 1.0\n", writer.toString());
+                 + "nolabels_total 1.0\n"
+                 + "# HELP nolabels_created help\n"
+                 + "# TYPE nolabels_created gauge\n"
+                 + "nolabels_created 1234.0\n",
+                 writer.toString().replaceAll("_created [0-9E.]+", "_created 1234.0"));
   }
 
 
@@ -107,7 +115,7 @@ public class TextFormatTest {
         return mfs;
       }
     }
-    
+
     new CustomCollector().register(registry);
     TextFormat.write004(writer, registry.metricFamilySamples());
     assertEquals("# HELP nolabels help\n"
@@ -123,7 +131,11 @@ public class TextFormatTest {
     assertEquals("# HELP nolabels help\n"
                  + "# TYPE nolabels summary\n"
                  + "nolabels_count 1.0\n"
-                 + "nolabels_sum 2.0\n", writer.toString());
+                 + "nolabels_sum 2.0\n"
+                 + "# HELP nolabels_created help\n"
+                 + "# TYPE nolabels_created gauge\n"
+                 + "nolabels_created 1234.0\n",
+                 writer.toString().replaceAll("_created [0-9E.]+", "_created 1234.0"));
   }
 
   @Test
@@ -140,7 +152,11 @@ public class TextFormatTest {
             + "labelsAndQuantiles{l=\"a\",quantile=\"0.9\",} 2.0\n"
             + "labelsAndQuantiles{l=\"a\",quantile=\"0.99\",} 2.0\n"
             + "labelsAndQuantiles_count{l=\"a\",} 1.0\n"
-            + "labelsAndQuantiles_sum{l=\"a\",} 2.0\n", writer.toString());
+            + "labelsAndQuantiles_sum{l=\"a\",} 2.0\n"
+            + "# HELP labelsAndQuantiles_created help\n"
+            + "# TYPE labelsAndQuantiles_created gauge\n"
+            + "labelsAndQuantiles_created{l=\"a\",} 1234.0\n",
+            writer.toString().replaceAll("(_created\\{.*\\}) [0-9E.]+", "$1 1234.0"));
   }
 
   @Test

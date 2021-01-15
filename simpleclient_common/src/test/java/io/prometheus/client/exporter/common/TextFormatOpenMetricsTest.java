@@ -57,7 +57,8 @@ public class TextFormatOpenMetricsTest {
     assertEquals("# TYPE nolabels counter\n"
                  + "# HELP nolabels help\n"
                  + "nolabels_total 1.0\n"
-                 + "# EOF\n", writer.toString());
+                 + "nolabels_created 1234.0\n"
+                 + "# EOF\n", writer.toString().replaceAll("_created [0-9E.]+", "_created 1234.0"));
   }
 
   @Test
@@ -117,7 +118,8 @@ public class TextFormatOpenMetricsTest {
                  + "# HELP nolabels help\n"
                  + "nolabels_count 1.0\n"
                  + "nolabels_sum 2.0\n"
-                 + "# EOF\n", writer.toString());
+                 + "nolabels_created 1234.0\n"
+                 + "# EOF\n", writer.toString().replaceAll("_created [0-9E.]+", "_created 1234.0"));
   }
 
   @Test
@@ -135,7 +137,8 @@ public class TextFormatOpenMetricsTest {
             + "labelsAndQuantiles{l=\"a\",quantile=\"0.99\"} 2.0\n"
             + "labelsAndQuantiles_count{l=\"a\"} 1.0\n"
             + "labelsAndQuantiles_sum{l=\"a\"} 2.0\n"
-            + "# EOF\n", writer.toString());
+            + "labelsAndQuantiles_created{l=\"a\"} 1234.0\n"
+            + "# EOF\n", writer.toString().replaceAll("(_created\\{.*\\}) [0-9E.]+", "$1 1234.0"));
   }
 
   @Test

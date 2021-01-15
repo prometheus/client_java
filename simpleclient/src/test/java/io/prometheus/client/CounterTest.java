@@ -97,6 +97,7 @@ public class CounterTest {
     ArrayList<String> labelValues = new ArrayList<String>();
     labelValues.add("a");
     samples.add(new Collector.MetricFamilySamples.Sample("labels_seconds_total", labelNames, labelValues, 1.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_seconds_created", labelNames, labelValues, labels.labels("a").created() / 1000.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels_seconds", "seconds", Collector.Type.COUNTER, "help", samples);
 
     assertEquals(1, mfs.size());

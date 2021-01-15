@@ -239,11 +239,13 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       public final double count;
       public final double sum;
       public final SortedMap<Double, Double> quantiles;
+      public final long created;
 
-      private Value(double count, double sum, List<Quantile> quantiles, TimeWindowQuantiles quantileValues) {
+      private Value(double count, double sum, List<Quantile> quantiles, TimeWindowQuantiles quantileValues, long created) {
         this.count = count;
         this.sum = sum;
         this.quantiles = Collections.unmodifiableSortedMap(snapshot(quantiles, quantileValues));
+        this.created = created;
       }
 
       private SortedMap<Double, Double> snapshot(List<Quantile> quantiles, TimeWindowQuantiles quantileValues) {
@@ -263,6 +265,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private final DoubleAdder sum = new DoubleAdder();
     private final List<Quantile> quantiles;
     private final TimeWindowQuantiles quantileValues;
+    private final long created = System.currentTimeMillis();
 
     private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets) {
       this.quantiles = quantiles;
@@ -297,7 +300,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
      * <em>Warning:</em> The definition of {@link Value} is subject to change.
      */
     public Value get() {
-      return new Value(count.sum(), sum.sum(), quantiles, quantileValues);
+      return new Value(count.sum(), sum.sum(), quantiles, quantileValues, created);
     }
   }
 
@@ -360,6 +363,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       }
       samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
+      samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), v.created / 1000.0));
     }
 
     return familySamplesList(Type.SUMMARY, samples);

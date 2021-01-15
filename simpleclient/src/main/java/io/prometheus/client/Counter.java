@@ -112,6 +112,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
    */
   public static class Child {
     private final DoubleAdder value = new DoubleAdder();
+    private final long created = System.currentTimeMillis();
     /**
      * Increment the counter by 1.
      */
@@ -133,6 +134,12 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
      */
     public double get() {
       return value.sum();
+    }
+    /**
+     * Get the created time of the counter in milliseconds.
+     */
+    public long created() {
+      return created;
     }
   }
 
@@ -163,6 +170,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
       samples.add(new MetricFamilySamples.Sample(fullname + "_total", labelNames, c.getKey(), c.getValue().get()));
+      samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), c.getValue().created() / 1000.0));
     }
     return familySamplesList(Type.COUNTER, samples);
   }
