@@ -37,7 +37,7 @@ public class CounterMetricFamily extends Collector.MetricFamilySamples {
     labelNames = Collections.emptyList();
     samples.add(
         new Sample(
-          name,
+          this.name + "_total",
           labelNames, 
           Collections.<String>emptyList(),
           value));
@@ -52,7 +52,7 @@ public class CounterMetricFamily extends Collector.MetricFamilySamples {
     if (labelValues.size() != labelNames.size()) {
       throw new IllegalArgumentException("Incorrect number of labels.");
     }
-    samples.add(new Sample(name, labelNames, labelValues, value));
+    samples.add(new Sample(name + "_total", labelNames, labelValues, value));
     return this;
   }
 }

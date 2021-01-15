@@ -70,6 +70,7 @@ public class CacheMetricsCollectorTest {
         }
         cache.get("user3");
 
+
         assertMetric(registry, "caffeine_cache_hit_total", "loadingusers", 1.0);
         assertMetric(registry, "caffeine_cache_miss_total", "loadingusers", 3.0);
 

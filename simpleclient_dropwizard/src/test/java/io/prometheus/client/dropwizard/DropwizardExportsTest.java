@@ -224,7 +224,7 @@ public class DropwizardExportsTest {
 
         assertTrue(elements.keySet().contains("my_application_namedTimer1"));
         assertTrue(elements.keySet().contains("my_application_namedCounter1"));
-        assertTrue(elements.keySet().contains("my_application_namedMeter1_total"));
+        assertTrue(elements.keySet().contains("my_application_namedMeter1"));
         assertTrue(elements.keySet().contains("my_application_namedHistogram1"));
         assertTrue(elements.keySet().contains("my_application_namedGauge1"));
 
@@ -234,7 +234,7 @@ public class DropwizardExportsTest {
         assertThat(elements.get("my_application_namedCounter1").help,
                 is("Generated from Dropwizard metric import (metric=my.application.namedCounter1, type=com.codahale.metrics.Counter)"));
 
-        assertThat(elements.get("my_application_namedMeter1_total").help,
+        assertThat(elements.get("my_application_namedMeter1").help,
                 is("Generated from Dropwizard metric import (metric=my.application.namedMeter1, type=com.codahale.metrics.Meter)"));
 
         assertThat(elements.get("my_application_namedHistogram1").help,
@@ -321,7 +321,7 @@ public class DropwizardExportsTest {
         assertTrue(namedCounter.samples.contains(namedCounter1));
         assertTrue(namedCounter.samples.contains(namedCounter2));
 
-        final Collector.MetricFamilySamples namedMeter = elements.get("my_application_namedMeter_total");
+        final Collector.MetricFamilySamples namedMeter = elements.get("my_application_namedMeter");
         assertNotNull(namedMeter);
         assertEquals(Collector.Type.COUNTER, namedMeter.type);
         assertEquals(2, namedMeter.samples.size());
