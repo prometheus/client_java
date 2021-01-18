@@ -26,6 +26,16 @@ public class TestDaemonFlags {
         assertThat(usesDaemonExecutor(new HTTPServer(0, false))).isFalse();
     }
 
+    @Test
+    public void testDaemonWithMetricsContext() throws IOException, ExecutionException, InterruptedException {
+        assertThat(usesDaemonExecutor(new HTTPServer(0, true, "/metricz"))).isTrue();
+    }
+
+    @Test
+    public void testNonDaemonWithMetricsContext() throws IOException, ExecutionException, InterruptedException {
+        assertThat(usesDaemonExecutor(new HTTPServer(0, "/metricz"))).isFalse();
+    }
+
     private boolean usesDaemonExecutor(HTTPServer httpServer) throws IOException, InterruptedException, ExecutionException {
         try {
             FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
