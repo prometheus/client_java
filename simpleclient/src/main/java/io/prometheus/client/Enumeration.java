@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
  * </pre>
  */
 public class Enumeration extends SimpleCollector<Enumeration.Child> implements Counter.Describable {
-  
+
   private final Set<String> states;
 
   Enumeration(Builder b) {
@@ -166,7 +166,7 @@ public class Enumeration extends SimpleCollector<Enumeration.Child> implements C
     public void state(Enum e) {
       state(e.name());
     }
- 
+
     /**
      * Get the state.
      */

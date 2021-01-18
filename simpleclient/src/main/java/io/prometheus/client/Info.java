@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  * </pre>
  */
 public class Info extends SimpleCollector<Info.Child> implements Counter.Describable {
-  
+
   Info(Builder b) {
     super(b);
   }

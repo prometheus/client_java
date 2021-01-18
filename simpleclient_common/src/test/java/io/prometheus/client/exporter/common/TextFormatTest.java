@@ -121,7 +121,7 @@ public class TextFormatTest {
         ArrayList<MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
         MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample("nolabels", labelNames, labelValues, 1.0, 1518123456L);
         samples.add(sample);
-        mfs.add(new MetricFamilySamples("nolabels", Collector.Type.UNTYPED, "help", samples));
+        mfs.add(new MetricFamilySamples("nolabels", Collector.Type.UNKNOWN, "help", samples));
         return mfs;
       }
     }

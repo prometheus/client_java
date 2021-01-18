@@ -16,7 +16,7 @@ public class TextFormat {
    * Content-type for Prometheus text version 0.0.4.
    */
   public final static String CONTENT_TYPE_004 = "text/plain; version=0.0.4; charset=utf-8";
-  
+
   /**
    * Content-type for Openmetrics text version 1.0.0.
    */
@@ -29,7 +29,7 @@ public class TextFormat {
     if (acceptHeader == null) {
       return CONTENT_TYPE_004;
     }
- 
+
     for (String accepts : acceptHeader.split(",")) {
       if ("application/openmetrics-text".equals(accepts.split(";")[0].trim())) {
         return CONTENT_TYPE_OPENMETRICS_100;
@@ -193,13 +193,13 @@ public class TextFormat {
     while(mfs.hasMoreElements()) {
       Collector.MetricFamilySamples metricFamilySamples = mfs.nextElement();
       String name = metricFamilySamples.name;
- 
+
       writer.write("# TYPE ");
       writer.write(name);
       writer.write(' ');
       writer.write(omTypeString(metricFamilySamples.type));
       writer.write('\n');
- 
+
       if (!metricFamilySamples.unit.isEmpty()) {
         writer.write("# UNIT ");
         writer.write(name);

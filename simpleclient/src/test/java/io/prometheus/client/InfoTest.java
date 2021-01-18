@@ -59,7 +59,7 @@ public class InfoTest {
     labels.labels("b").info("baz", "meh");
     assertEquals(1.0, getInfo("labels", "l", "a", "foo", "bar"), .001);
     assertEquals(1.0, getInfo("labels", "l", "b", "baz", "meh"), .001);
-    
+
     assertEquals(null, getInfo("nolabels", "l", "a"));
     assertEquals(null, getInfo("nolabels", "l", "b"));
   }

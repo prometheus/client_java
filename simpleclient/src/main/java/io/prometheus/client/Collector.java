@@ -20,7 +20,7 @@ public abstract class Collector {
    */
   public abstract List<MetricFamilySamples> collect();
   public enum Type {
-    UNTYPED, // XXX This is Unknown in OpenMetrics.
+    UNKNOWN, // This is untyped in Prometheus text format.
     COUNTER,
     GAUGE,
     STATE_SET,

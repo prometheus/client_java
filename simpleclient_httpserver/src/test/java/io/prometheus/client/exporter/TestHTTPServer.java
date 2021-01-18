@@ -75,7 +75,6 @@ public class TestHTTPServer {
     return s.hasNext() ? s.next() : "";
   }
 
-  @Test
   @Test(expected = IllegalArgumentException.class)
   public void testRefuseUsingUnbound() throws IOException {
     CollectorRegistry registry = new CollectorRegistry();

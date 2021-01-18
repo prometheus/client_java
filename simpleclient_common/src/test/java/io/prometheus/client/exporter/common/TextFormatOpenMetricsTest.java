@@ -108,11 +108,11 @@ public class TextFormatOpenMetricsTest {
         ArrayList<MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
         MetricFamilySamples.Sample sample = new MetricFamilySamples.Sample("nolabels", labelNames, labelValues, 1.0, 1518123006L);
         samples.add(sample);
-        mfs.add(new MetricFamilySamples("nolabels", Collector.Type.UNTYPED, "help", samples));
+        mfs.add(new MetricFamilySamples("nolabels", Collector.Type.UNKNOWN, "help", samples));
         return mfs;
       }
     }
-    
+
     new CustomCollector().register(registry);
     TextFormat.writeOpenMetrics100(writer, registry.metricFamilySamples());
     assertEquals("# TYPE nolabels unknown\n"
