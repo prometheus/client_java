@@ -131,4 +131,24 @@ public class TestHTTPServer {
     String response = requestWithCompression("/-/healthy", "");
     assertThat(response).contains("Exporter is Healthy");
   }
+
+  @Test
+  public void testMetricsContext() throws IOException {
+    final String metricsContext = "/metricz";
+    s = new HTTPServer(new InetSocketAddress(0), registry, true, metricsContext);
+    String response = request(metricsContext, "");
+    assertThat(response).contains("a 0.0");
+    assertThat(response).contains("b 0.0");
+    assertThat(response).contains("c 0.0");
+  }
+
+  @Test
+  public void testMetricsContextGzipCompression() throws IOException {
+    final String metricsContext = "/metricz";
+    s = new HTTPServer(new InetSocketAddress(0), registry, metricsContext);
+    String response = requestWithCompression(metricsContext, "");
+    assertThat(response).contains("a 0.0");
+    assertThat(response).contains("b 0.0");
+    assertThat(response).contains("c 0.0");
+  }
 }
