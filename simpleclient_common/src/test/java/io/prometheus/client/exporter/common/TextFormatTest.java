@@ -15,6 +15,7 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
+import io.prometheus.client.Info;
 import io.prometheus.client.Summary;
 
 
@@ -76,6 +77,15 @@ public class TextFormatTest {
                  writer.toString().replaceAll("_created [0-9E.]+", "_created 1234.0"));
   }
 
+  @Test
+  public void testInfoOutput() throws IOException {
+    Info noLabels = Info.build().name("nolabels").help("help").register(registry);
+    noLabels.info("foo", "bar");
+    TextFormat.write004(writer, registry.metricFamilySamples());
+    assertEquals("# HELP nolabels_info help\n"
+                 + "# TYPE nolabels_info gauge\n"
+                 + "nolabels_info{foo=\"bar\",} 1.0\n", writer.toString());
+  }
 
   @Test
   public void testCounterSamplesMissingTotal() throws IOException {

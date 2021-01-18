@@ -129,6 +129,10 @@ public class CollectorRegistry {
           names.add(family.name + "_bucket");
           names.add(family.name);
           break;
+        case INFO:
+          names.add(family.name + "_info");
+          names.add(family.name);
+          break;
         default:
           names.add(family.name);
       }

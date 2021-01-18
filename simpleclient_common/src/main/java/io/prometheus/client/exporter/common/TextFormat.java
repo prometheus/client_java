@@ -69,6 +69,9 @@ public class TextFormat {
       if (metricFamilySamples.type == Collector.Type.COUNTER) {
         writer.write("_total");
       }
+      if (metricFamilySamples.type == Collector.Type.INFO) {
+        writer.write("_info");
+      }
       writer.write(' ');
       writeEscapedHelp(writer, metricFamilySamples.help);
       writer.write('\n');
@@ -77,6 +80,9 @@ public class TextFormat {
       writer.write(name);
       if (metricFamilySamples.type == Collector.Type.COUNTER) {
         writer.write("_total");
+      }
+      if (metricFamilySamples.type == Collector.Type.INFO) {
+        writer.write("_info");
       }
       writer.write(' ');
       writer.write(typeString(metricFamilySamples.type));

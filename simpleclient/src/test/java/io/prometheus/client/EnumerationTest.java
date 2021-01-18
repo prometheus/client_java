@@ -65,7 +65,7 @@ public class EnumerationTest {
     assertEquals(1.0, getLabeledState("b", "bar"), .001);
   }
 
-  public enum myEnum {
+  enum myEnum {
     FOO,
     BAR,
   }
