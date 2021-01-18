@@ -155,27 +155,43 @@ public class HTTPServer {
 
     /**
      * Start a HTTP server serving Prometheus metrics from the given registry using the given {@link HttpServer}.
-     * The {@code httpServer} is expected to already be bound to an address
+     * The {@code httpServer} is expected to already be bound to an address.
+     * A metrics context is registered if one is provided.
      */
-    public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
+    public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon, String metricsContext) throws IOException {
         if (httpServer.getAddress() == null)
             throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
 
         server = httpServer;
         HttpHandler mHandler = new HTTPMetricHandler(registry);
         server.createContext("/", mHandler);
-        server.createContext("/metrics", mHandler);
+        if (metricsContext != null) {
+            server.createContext(metricsContext, mHandler);
+        } else {
+            server.createContext("/metrics", mHandler);
+        }
         server.createContext("/-/healthy", mHandler);
         executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
         server.setExecutor(executorService);
         start(daemon);
     }
 
+    public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
+        this(httpServer, registry, daemon, null);
+    }
+
     /**
      * Start a HTTP server serving Prometheus metrics from the given registry.
      */
     public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean daemon) throws IOException {
-        this(HttpServer.create(addr, 3), registry, daemon);
+        this(HttpServer.create(addr, 3), registry, daemon, null);
+    }
+
+    /**
+     * Start a HTTP server serving Prometheus metrics from the given registry under a specified metrics context.
+     */
+    public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean daemon, String metricsContext) throws IOException {
+        this(HttpServer.create(addr, 3), registry, daemon, metricsContext);
     }
 
     /**
@@ -183,6 +199,20 @@ public class HTTPServer {
      */
     public HTTPServer(InetSocketAddress addr, CollectorRegistry registry) throws IOException {
         this(addr, registry, false);
+    }
+
+    /**
+     * Start a HTTP server serving Prometheus metrics from the given registry using non-daemon threads and a metrics context.
+     */
+    public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, String metricsContext) throws IOException {
+        this(addr, registry, false, metricsContext);
+    }
+
+    /**
+     * Start a HTTP server serving the default Prometheus registry using and non-daemon threads and a metrics context.
+     */
+    public HTTPServer(InetSocketAddress addr, String metricsContext) throws IOException {
+        this(addr, CollectorRegistry.defaultRegistry, false, metricsContext);
     }
 
     /**
@@ -200,6 +230,20 @@ public class HTTPServer {
     }
 
     /**
+     * Start a HTTP server serving the default Prometheus registry and a metrics context.
+     */
+    public HTTPServer(int port, boolean daemon, String metricsContext) throws IOException {
+        this(new InetSocketAddress(port), CollectorRegistry.defaultRegistry, daemon, metricsContext);
+    }
+
+    /**
+     * Start a HTTP server serving the default Prometheus registry using non-daemon threads and a metrics context.
+     */
+    public HTTPServer(int port, String metricsContext) throws IOException {
+        this(port, false, metricsContext);
+    }
+
+    /**
      * Start a HTTP server serving the default Prometheus registry.
      */
     public HTTPServer(String host, int port, boolean daemon) throws IOException {
@@ -211,6 +255,13 @@ public class HTTPServer {
      */
     public HTTPServer(String host, int port) throws IOException {
         this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false);
+    }
+
+    /**
+     * Start a HTTP server serving the default Prometheus registry using non-daemon threads and a metrics context.
+     */
+    public HTTPServer(String host, int port, String metricsContext) throws IOException {
+        this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false, metricsContext);
     }
 
     /**
