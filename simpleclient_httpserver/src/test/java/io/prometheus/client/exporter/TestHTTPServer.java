@@ -15,18 +15,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 public class TestHTTPServer {
 
   HTTPServer s;
+  private final CollectorRegistry registry = new CollectorRegistry();
 
   @Before
   public void init() throws IOException {
-    CollectorRegistry registry = new CollectorRegistry();
     Gauge.build("a", "a help").register(registry);
     Gauge.build("b", "a help").register(registry);
     Gauge.build("c", "a help").register(registry);
+
     s = new HTTPServer(new InetSocketAddress(0), registry);
   }
 
