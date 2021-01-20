@@ -9,12 +9,12 @@
     </parent>
 
     <groupId>io.prometheus</groupId>
-    <artifactId>simpleclient_graphite_bridge</artifactId>
+    <artifactId>simpleclient_discourse</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Java Simpleclient Graphite Bridge</name>
+    <name>Prometheus Java Simpleclient Discourse Bridge</name>
     <description>
-        Graphite bridge for the simpleclient.
+        Discourse bridge for the simpleclient.
     </description>
 
     <licenses>
@@ -27,12 +27,11 @@
 
     <developers>
         <developer>
-            <id>brian-brazil</id>
-            <name>Brian Brazil</name>
-            <email>brian.brazil@robustperception.io</email>
+            <id>joannepolsky</id>
+            <name>Joanne Polsky</name>
+            <email>joanne.polsky@highspot.com</email>
         </developer>
     </developers>
-
 
     <dependencies>
         <dependency>

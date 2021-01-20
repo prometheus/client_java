@@ -606,19 +606,7 @@ if you are not quite ready to fully transition to Prometheus yet.
 
 ### Graphite
 
-Metrics are pushed over TCP in the Graphite plaintext format.
-
-```java
-Graphite g = new Graphite("localhost", 2003);
-// Push the default registry once.
-g.push(CollectorRegistry.defaultRegistry);
-
-// Push the default registry every 60 seconds.
-Thread thread = g.start(CollectorRegistry.defaultRegistry, 60);
-// Stop pushing.
-thread.interrupt();
-thread.join();
-```
+See [Graphite Bridge for Prometheus](simpleclient_graphite_bridge/README.md)
 
 ## Custom Collectors
 
