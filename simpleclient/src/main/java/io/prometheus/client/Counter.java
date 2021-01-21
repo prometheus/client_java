@@ -64,6 +64,12 @@ import java.util.Map;
  * </pre>
  * These can be aggregated and processed together much more easily in the Prometheus
  * server than individual metrics for each labelset.
+ *
+ * If there is a suffix of <code>_total</code> on the metric name, it will be
+ * removed. When exposing the time series for counter value, a
+ * <code>_total</code> suffix will be added. This is for compatibility between
+ * OpenMetrics and the Prometheus text format, as OpenMetrics requires the
+ * <code>_total</code> suffix.
  */
 public class Counter extends SimpleCollector<Counter.Child> implements Collector.Describable {
 
