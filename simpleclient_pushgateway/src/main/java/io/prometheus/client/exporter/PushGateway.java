@@ -94,8 +94,6 @@ public class PushGateway {
    * Creates a URL instance from a String representation of a URL without throwing a checked exception.
    * Required because you can't wrap a call to another constructor in a try statement.
    *
-   * TODO: Remove this along with other deprecated methods before version 1.0 is released.
-   *
    * @param urlString the String representation of the URL.
    * @return The URL instance.
    */
@@ -214,66 +212,6 @@ public class PushGateway {
   */
   public void delete(String job, Map<String, String> groupingKey) throws IOException {
     doRequest(null, job, groupingKey, "DELETE");
-  }
-
-
-  /**
-   * Pushes all metrics in a registry, replacing all those with the same job and instance.
-   * <p>
-   * This uses the PUT HTTP method.
-   * @deprecated use {@link #push(CollectorRegistry, String, Map)}
-  */
-  @Deprecated
-  public void push(CollectorRegistry registry, String job, String instance) throws IOException {
-    push(registry, job, Collections.singletonMap("instance", instance));
-  }
-
-  /**
-   * Pushes all metrics in a Collector, replacing all those with the same job and instance.
-   * <p>
-   * This is useful for pushing a single Gauge.
-   * <p>
-   * This uses the PUT HTTP method.
-   * @deprecated use {@link #push(Collector, String, Map)}
-  */
-  @Deprecated
-  public void push(Collector collector, String job, String instance) throws IOException {
-    push(collector, job, Collections.singletonMap("instance", instance));
-  }
-
-  /**
-   * Pushes all metrics in a registry, replacing only previously pushed metrics of the same name.
-   * <p>
-   * This uses the POST HTTP method.
-   * @deprecated use {@link #pushAdd(CollectorRegistry, String, Map)}
-  */
-  @Deprecated
-  public void pushAdd(CollectorRegistry registry, String job, String instance) throws IOException {
-    pushAdd(registry, job, Collections.singletonMap("instance", instance));
-  }
-
-  /**
-   * Pushes all metrics in a Collector, replacing only previously pushed metrics of the same name.
-   * <p>
-   * This is useful for pushing a single Gauge.
-   * <p>
-   * This uses the POST HTTP method.
-   * @deprecated use {@link #pushAdd(Collector, String, Map)}
-  */
-  @Deprecated
-  public void pushAdd(Collector collector, String job, String instance) throws IOException {
-    pushAdd(collector, job, Collections.singletonMap("instance", instance));
-  }
-
-  /**
-   * Deletes metrics from the Pushgateway.
-   * <p>
-   * This uses the DELETE HTTP method.
-   * @deprecated use {@link #delete(String, Map)}
-  */
-  @Deprecated
-  public void delete(String job, String instance) throws IOException {
-    delete(job, Collections.singletonMap("instance", instance));
   }
 
   void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
