@@ -23,9 +23,14 @@ public class SummaryBenchmark {
 
   io.prometheus.client.metrics.Summary prometheusSummary;
   io.prometheus.client.metrics.Summary.Child prometheusSummaryChild;
+
   io.prometheus.client.Summary prometheusSimpleSummary;
   io.prometheus.client.Summary.Child prometheusSimpleSummaryChild;
   io.prometheus.client.Summary prometheusSimpleSummaryNoLabels;
+  io.prometheus.client.Summary prometheusSimpleSummaryQuantiles;
+  io.prometheus.client.Summary.Child prometheusSimpleSummaryQuantilesChild;
+  io.prometheus.client.Summary prometheusSimpleSummaryQuantilesNoLabels;
+
   io.prometheus.client.Histogram prometheusSimpleHistogram;
   io.prometheus.client.Histogram.Child prometheusSimpleHistogramChild;
   io.prometheus.client.Histogram prometheusSimpleHistogramNoLabels;
@@ -49,10 +54,25 @@ public class SummaryBenchmark {
       .help("some description..")
       .create();
 
+    prometheusSimpleSummaryQuantiles = io.prometheus.client.Summary.build()
+      .name("name")
+      .help("some description..")
+      .labelNames("some", "group")
+      .quantile(0.5).quantile(0.9).quantile(0.95).quantile(0.99)
+      .create();
+    prometheusSimpleSummaryQuantilesChild = prometheusSimpleSummaryQuantiles.labels("test", "group");
+
+    prometheusSimpleSummaryQuantilesNoLabels = io.prometheus.client.Summary.build()
+      .name("name")
+      .help("some description..")
+      .quantile(0.5).quantile(0.9).quantile(0.95).quantile(0.99)
+      .create();
+
     prometheusSimpleHistogram = io.prometheus.client.Histogram.build()
       .name("name")
       .help("some description..")
-      .labelNames("some", "group").create();
+      .labelNames("some", "group")
+      .create();
     prometheusSimpleHistogramChild = prometheusSimpleHistogram.labels("test", "group");
 
     prometheusSimpleHistogramNoLabels = io.prometheus.client.Histogram.build()
@@ -97,6 +117,27 @@ public class SummaryBenchmark {
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleSummaryNoLabelsBenchmark() {
     prometheusSimpleSummaryNoLabels.observe(1); 
+  }
+
+  @Benchmark
+  @BenchmarkMode({Mode.AverageTime})
+  @OutputTimeUnit(TimeUnit.NANOSECONDS)
+  public void prometheusSimpleSummaryQuantilesBenchmark() {
+    prometheusSimpleSummaryQuantiles.labels("test", "group").observe(1);
+  }
+
+  @Benchmark
+  @BenchmarkMode({Mode.AverageTime})
+  @OutputTimeUnit(TimeUnit.NANOSECONDS)
+  public void prometheusSimpleSummaryQuantilesChildBenchmark() {
+    prometheusSimpleSummaryQuantilesChild.observe(1);
+  }
+
+  @Benchmark
+  @BenchmarkMode({Mode.AverageTime})
+  @OutputTimeUnit(TimeUnit.NANOSECONDS)
+  public void prometheusSimpleSummaryQuantilesNoLabelsBenchmark() {
+    prometheusSimpleSummaryQuantilesNoLabels.observe(1);
   }
 
   @Benchmark
