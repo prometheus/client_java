@@ -1,7 +1,7 @@
 package io.prometheus.client.hotspot;
 
 import io.prometheus.client.Collector;
-import io.prometheus.client.GaugeMetricFamily;
+import io.prometheus.client.Info;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,20 +26,12 @@ public class VersionInfoExports extends Collector {
 
 
     public List<MetricFamilySamples> collect() {
-        List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-
-        GaugeMetricFamily jvmInfo = new GaugeMetricFamily(
-                "jvm_info",
-                "JVM version info",
-                Arrays.asList("version", "vendor", "runtime"));
-        jvmInfo.addMetric(
-                Arrays.asList(
-                    System.getProperty("java.runtime.version", "unknown"),
-                    System.getProperty("java.vm.vendor", "unknown"),
-                    System.getProperty("java.runtime.name", "unknown")),
-                    1L);
-        mfs.add(jvmInfo);
-
-        return mfs;
+        Info i = Info.build().name("jvm").help("VM version info").create();
+        i.info(
+            "version", System.getProperty("java.runtime.version", "unknown"),
+            "vendor", System.getProperty("java.vm.vendor", "unknown"),
+            "runtime", System.getProperty("java.runtime.name", "unknown")
+        );
+        return i.collect();
     }
 }

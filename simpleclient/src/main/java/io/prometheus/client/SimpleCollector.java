@@ -49,6 +49,7 @@ import java.util.List;
 public abstract class SimpleCollector<Child> extends Collector {
   protected final String fullname;
   protected final String help;
+  protected final String unit;
   protected final List<String> labelNames;
 
   protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
@@ -145,7 +146,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   protected abstract Child newChild();
 
   protected List<MetricFamilySamples> familySamplesList(Collector.Type type, List<MetricFamilySamples.Sample> samples) {
-    MetricFamilySamples mfs = new MetricFamilySamples(fullname, type, help, samples);
+    MetricFamilySamples mfs = new MetricFamilySamples(fullname, unit, type, help, samples);
     List<MetricFamilySamples> mfsList = new ArrayList<MetricFamilySamples>(1);
     mfsList.add(mfs);
     return mfsList;
@@ -159,6 +160,10 @@ public abstract class SimpleCollector<Child> extends Collector {
     }
     if (!b.namespace.isEmpty()) {
       name = b.namespace + '_' + name;
+    }
+    unit = b.unit;
+    if (!unit.isEmpty() && !name.endsWith("_" + unit)) {
+      name += "_" + unit;
     }
     fullname = name;
     checkMetricName(fullname);
@@ -183,6 +188,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     String subsystem = "";
     String name = "";
     String fullname = "";
+    String unit = "";
     String help = "";
     String[] labelNames = new String[]{};
     // Some metrics require additional setup before the initialization can be done.
@@ -207,6 +213,13 @@ public abstract class SimpleCollector<Child> extends Collector {
      */
     public B namespace(String namespace) {
       this.namespace = namespace;
+      return (B)this;
+    }
+    /**
+     * Set the unit of the metric. Required.
+     */
+    public B unit(String unit) {
+      this.unit = unit;
       return (B)this;
     }
     /**

@@ -67,13 +67,14 @@ public class HTTPServer {
             if ("/-/healthy".equals(contextPath)) {
                 osw.write(HEALTHY_RESPONSE);
             } else {
-                TextFormat.write004(osw,
+                String contentType = TextFormat.chooseContentType(t.getRequestHeaders().getFirst("Accept"));
+                t.getResponseHeaders().set("Content-Type", contentType);
+                TextFormat.writeFormat(contentType, osw,
                         registry.filteredMetricFamilySamples(parseQuery(query)));
             }
 
             osw.close();
-            t.getResponseHeaders().set("Content-Type",
-                    TextFormat.CONTENT_TYPE_004);
+
             if (shouldUseCompression(t)) {
                 t.getResponseHeaders().set("Content-Encoding", "gzip");
                 t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);

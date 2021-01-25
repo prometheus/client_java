@@ -64,6 +64,12 @@ import java.util.Map;
  * </pre>
  * These can be aggregated and processed together much more easily in the Prometheus
  * server than individual metrics for each labelset.
+ *
+ * If there is a suffix of <code>_total</code> on the metric name, it will be
+ * removed. When exposing the time series for counter value, a
+ * <code>_total</code> suffix will be added. This is for compatibility between
+ * OpenMetrics and the Prometheus text format, as OpenMetrics requires the
+ * <code>_total</code> suffix.
  */
 public class Counter extends SimpleCollector<Counter.Child> implements Collector.Describable {
 
@@ -74,6 +80,10 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   public static class Builder extends SimpleCollector.Builder<Builder, Counter> {
     @Override
     public Counter create() {
+      // Gracefully handle pre-OpenMetrics counters.
+      if (name.endsWith("_total")) {
+        name = name.substring(0, name.length() - 6);
+      }
       return new Counter(this);
     }
   }
@@ -108,6 +118,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
    */
   public static class Child {
     private final DoubleAdder value = new DoubleAdder();
+    private final long created = System.currentTimeMillis();
     /**
      * Increment the counter by 1.
      */
@@ -129,6 +140,12 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
      */
     public double get() {
       return value.sum();
+    }
+    /**
+     * Get the created time of the counter in milliseconds.
+     */
+    public long created() {
+      return created;
     }
   }
 
@@ -158,7 +175,8 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
+      samples.add(new MetricFamilySamples.Sample(fullname + "_total", labelNames, c.getKey(), c.getValue().get()));
+      samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), c.getValue().created() / 1000.0));
     }
     return familySamplesList(Type.COUNTER, samples);
   }

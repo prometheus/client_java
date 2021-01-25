@@ -42,11 +42,12 @@ public class MetricsServlet extends HttpServlet {
   protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
           throws ServletException, IOException {
     resp.setStatus(HttpServletResponse.SC_OK);
-    resp.setContentType(TextFormat.CONTENT_TYPE_004);
+    String contentType = TextFormat.chooseContentType(req.getHeader("Accept"));
+    resp.setContentType(contentType);
 
     Writer writer = new BufferedWriter(resp.getWriter());
     try {
-      TextFormat.write004(writer, registry.filteredMetricFamilySamples(parse(req)));
+      TextFormat.writeFormat(contentType, writer, registry.filteredMetricFamilySamples(parse(req)));
       writer.flush();
     } finally {
       writer.close();

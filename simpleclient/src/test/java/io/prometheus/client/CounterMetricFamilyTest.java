@@ -35,10 +35,10 @@ public class CounterMetricFamilyTest {
     }
     new YourCustomCollector().register(registry);
 
-    assertEquals(42.0, registry.getSampleValue("my_counter").doubleValue(), .001);
-    assertEquals(null, registry.getSampleValue("my_other_counter"));
-    assertEquals(4.0, registry.getSampleValue("my_other_counter", new String[]{"labelname"}, new String[]{"foo"}).doubleValue(), .001);
-    assertEquals(5.0, registry.getSampleValue("my_other_counter", new String[]{"labelname"}, new String[]{"bar"}).doubleValue(), .001);
+    assertEquals(42.0, registry.getSampleValue("my_counter_total").doubleValue(), .001);
+    assertEquals(null, registry.getSampleValue("my_other_counter_total"));
+    assertEquals(4.0, registry.getSampleValue("my_other_counter_total", new String[]{"labelname"}, new String[]{"foo"}).doubleValue(), .001);
+    assertEquals(5.0, registry.getSampleValue("my_other_counter_total", new String[]{"labelname"}, new String[]{"bar"}).doubleValue(), .001);
   }
 
   @Test
@@ -55,11 +55,37 @@ public class CounterMetricFamilyTest {
     new YourCustomCollector().register(registry);
 
     assertEquals(1.0,
-        registry.getSampleValue("my_metric", new String[]{"name"}, new String[]{"value1"})
+        registry.getSampleValue("my_metric_total", new String[]{"name"}, new String[]{"value1"})
             .doubleValue(), .001);
     assertEquals(2.0,
-        registry.getSampleValue("my_metric", new String[]{"name"}, new String[]{"value2"})
+        registry.getSampleValue("my_metric_total", new String[]{"name"}, new String[]{"value2"})
             .doubleValue(), .001);
+  }
+
+  @Test
+  public void testTotalHandling() {
+    class YourCustomCollector extends Collector {
+      public List<MetricFamilySamples> collect() {
+        return Arrays.<MetricFamilySamples>asList(
+            new CounterMetricFamily("a_total", "help", Arrays.asList("name"))
+                .addMetric(Arrays.asList("value"), 1.0),
+            new CounterMetricFamily("b", "help", Arrays.asList("name"))
+                .addMetric(Arrays.asList("value"), 2.0),
+            new CounterMetricFamily("c_total", "help", 3.0),
+            new CounterMetricFamily("d_total", "help", 4.0)
+        );
+      }
+    }
+    new YourCustomCollector().register(registry);
+
+    assertEquals(1.0,
+        registry.getSampleValue("a_total", new String[]{"name"}, new String[]{"value"})
+            .doubleValue(), .001);
+    assertEquals(2.0,
+        registry.getSampleValue("b_total", new String[]{"name"}, new String[]{"value"})
+            .doubleValue(), .001);
+    assertEquals(3.0, registry.getSampleValue("c_total").doubleValue(), .001);
+    assertEquals(4.0, registry.getSampleValue("d_total").doubleValue(), .001);
   }
 
 }

@@ -73,10 +73,12 @@ public class MetricsHandler implements Handler<RoutingContext> {
   public void handle(RoutingContext ctx) {
     try {
       final BufferWriter writer = new BufferWriter();
-      TextFormat.write004(writer, registry.filteredMetricFamilySamples(parse(ctx.request())));
+      String contentType = TextFormat.chooseContentType(ctx.request().headers().get("Accept"));
+
+      TextFormat.writeFormat(contentType, writer, registry.filteredMetricFamilySamples(parse(ctx.request())));
       ctx.response()
               .setStatusCode(200)
-              .putHeader("Content-Type", TextFormat.CONTENT_TYPE_004)
+              .putHeader("Content-Type", contentType)
               .end(writer.getBuffer());
     } catch (IOException e) {
       ctx.fail(e);

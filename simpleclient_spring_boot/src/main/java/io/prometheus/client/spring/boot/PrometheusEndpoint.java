@@ -23,13 +23,13 @@ class PrometheusEndpoint extends AbstractEndpoint<String> {
 
   @Override
   public String invoke() {
-    return writeRegistry(Collections.<String>emptySet());
+    return writeRegistry(Collections.<String>emptySet(), "");
   }
 
-  public String writeRegistry(Set<String> metricsToInclude) {
+  public String writeRegistry(Set<String> metricsToInclude, String contentType) {
     try {
       Writer writer = new StringWriter();
-      TextFormat.write004(writer, collectorRegistry.filteredMetricFamilySamples(metricsToInclude));
+      TextFormat.writeFormat(contentType, writer, collectorRegistry.filteredMetricFamilySamples(metricsToInclude));
       return writer.toString();
     } catch (IOException e) {
       // This actually never happens since StringWriter::write() doesn't throw any IOException

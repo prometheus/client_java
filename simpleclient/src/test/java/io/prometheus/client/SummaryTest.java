@@ -183,6 +183,7 @@ public class SummaryTest {
     labelValues.add("a");
     samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
     samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_created", labelNames, labelValues, labels.labels("a").get().created / 1000.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.SUMMARY, "help", samples);
 
     assertEquals(1, mfs.size());
@@ -200,6 +201,7 @@ public class SummaryTest {
     samples.add(new Collector.MetricFamilySamples.Sample("labels_and_quantiles", asList("l", "quantile"), asList("a", "0.99"), 2.0));
     samples.add(new Collector.MetricFamilySamples.Sample("labels_and_quantiles_count", asList("l"), asList("a"), 1.0));
     samples.add(new Collector.MetricFamilySamples.Sample("labels_and_quantiles_sum", asList("l"), asList("a"), 2.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_and_quantiles_created", asList("l"), asList("a"), labelsAndQuantiles.labels("a").get().created / 1000.0));
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels_and_quantiles", Collector.Type.SUMMARY, "help", samples);
 
     assertEquals(1, mfs.size());

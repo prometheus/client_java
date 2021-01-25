@@ -74,4 +74,23 @@ public class MetricsServletTest {
 
     verify(writer).close();
   }
+
+  @Test
+  public void testOpenMetricsNegotiated() throws IOException, ServletException {
+    CollectorRegistry registry = new CollectorRegistry();
+    Gauge.build("a", "a help").register(registry);
+
+    HttpServletRequest req = mock(HttpServletRequest.class);
+    when(req.getHeader("Accept")).thenReturn("application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1");
+    HttpServletResponse resp = mock(HttpServletResponse.class);
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringWriter);
+    when(resp.getWriter()).thenReturn(writer);
+
+    new MetricsServlet(registry).doGet(req, resp);
+
+    assertThat(stringWriter.toString()).contains("a 0.0");
+    assertThat(stringWriter.toString()).contains("# EOF");
+  }
+
 }

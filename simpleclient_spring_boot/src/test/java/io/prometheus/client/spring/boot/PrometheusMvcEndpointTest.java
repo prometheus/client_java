@@ -17,6 +17,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
@@ -48,6 +49,19 @@ public class PrometheusMvcEndpointTest {
         ResponseEntity<String> metricsResponse = template.exchange(getBaseUrl() + "/prometheus", HttpMethod.GET, new HttpEntity(headers), String.class);
 
         assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
+    }
+
+    @Test
+    public void testAcceptOpenMetrics() throws Exception {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1");
+
+        ResponseEntity<String> metricsResponse = template.exchange(getBaseUrl() + "/prometheus", HttpMethod.GET, new HttpEntity(headers), String.class);
+
+        assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
+        assertEquals(StringUtils.deleteWhitespace(TextFormat.CONTENT_TYPE_OPENMETRICS_100), metricsResponse.getHeaders().getContentType().toString().toLowerCase());
+        assertTrue(metricsResponse.getBody().contains("# EOF"));
     }
 
     @Test

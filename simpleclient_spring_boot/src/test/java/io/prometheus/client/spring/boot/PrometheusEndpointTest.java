@@ -55,7 +55,7 @@ public class PrometheusEndpointTest {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Accept", "text/plain");
 
-    ResponseEntity<String> metricsResponse = template.exchange(getBaseUrl() + "/prometheus?name[]=foo_bar", HttpMethod.GET, new HttpEntity(headers), String.class);
+    ResponseEntity<String> metricsResponse = template.exchange(getBaseUrl() + "/prometheus?name[]=foo_bar_total", HttpMethod.GET, new HttpEntity(headers), String.class);
 
     // then:
     assertEquals(HttpStatus.OK, metricsResponse.getStatusCode());
@@ -63,7 +63,7 @@ public class PrometheusEndpointTest {
 
     List<String> responseLines = Arrays.asList(metricsResponse.getBody().split("\n"));
     assertThat(responseLines, CustomMatchers.<String>exactlyNItems(1,
-            matchesPattern("foo_bar\\{label1=\"val1\",label2=\"val2\",?\\} 3.0")));
+            matchesPattern("foo_bar_total\\{label1=\"val1\",label2=\"val2\",?\\} 3.0")));
   }
 
   private String getBaseUrl() {

@@ -204,6 +204,8 @@ public class HistogramTest {
     }
     samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
     samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
+    samples.add(new Collector.MetricFamilySamples.Sample("labels_created", labelNames, labelValues, labels.labels("a").get().created / 1000.0));
+
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.HISTOGRAM, "help", samples);
 
     assertEquals(1, mfs.size());
