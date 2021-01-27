@@ -1,30 +1,24 @@
 package io.prometheus.client;
 
-import io.prometheus.client.CKMSQuantiles.Quantile;
-
-import java.io.Closeable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Info metric, key-value pairs.
  *
- * Examples of Info include, build information, version information, and potential target metadata,
- * The first provided state will be the default.
+ * Examples of Info include build information, version information, and potential target metadata.
+ * The first provided state will be the default. The string "_info" will be appended to the name.
  *
  * <p>
- * Example enumeration:
+ * Example Info:
  * <pre>
  * {@code
  *   class YourClass {
  *     static final Info buildInfo = Info.build()
- *         .name("your_build_info").help("Build information.")
+ *         .name("your_build").help("Build information.")
  *         .register();
  *
  *     void func() {
