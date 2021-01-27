@@ -217,6 +217,8 @@ public abstract class SimpleCollector<Child> extends Collector {
     }
     /**
      * Set the unit of the metric. Required.
+     *
+     * @since 0.10.0
      */
     public B unit(String unit) {
       this.unit = unit;

@@ -56,6 +56,8 @@ import java.util.concurrent.TimeUnit;
  *   }
  * }
  * </pre>
+ *
+ * @since 0.10.0
  */
 public class Enumeration extends SimpleCollector<Enumeration.Child> implements Counter.Describable {
 

@@ -19,11 +19,15 @@ public class TextFormat {
 
   /**
    * Content-type for Openmetrics text version 1.0.0.
+   *
+   * @since 0.10.0
    */
   public final static String CONTENT_TYPE_OPENMETRICS_100 = "application/openmetrics-text; version=1.0.0; charset=utf-8";
 
   /**
    * Return the content type that should be used for a given Accept HTTP header.
+   *
+   * @since 0.10.0
    */
   public static String chooseContentType(String acceptHeader) {
     if (acceptHeader == null) {
@@ -41,6 +45,8 @@ public class TextFormat {
 
   /**
    * Write out the given MetricFamilySamples in a format per the contentType.
+   *
+   * @since 0.10.0
    */
   public static void writeFormat(String contentType, Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
     if (CONTENT_TYPE_004.equals(contentType)) {
@@ -188,6 +194,8 @@ public class TextFormat {
 
   /**
    * Write out the OpenMetrics text version 1.0.0 of the given MetricFamilySamples.
+   *
+   * @since 0.10.0
    */
   public static void writeOpenMetrics100(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
     while(mfs.hasMoreElements()) {
