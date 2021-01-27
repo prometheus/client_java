@@ -34,6 +34,8 @@ import java.util.concurrent.TimeUnit;
  *   }
  * }
  * </pre>
+ *
+ * @since 0.10.0
  */
 public class Info extends SimpleCollector<Info.Child> implements Counter.Describable {
 
