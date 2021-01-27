@@ -1,8 +1,5 @@
 package io.prometheus.client;
 
-import io.prometheus.client.CKMSQuantiles.Quantile;
-
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.LinkedHashSet;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Enumeration metric, to track which of a set of states something is in.
@@ -19,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * The first provided state will be the default.
  *
  * <p>
- * Example enumeration:
+ * Example Enumeration:
  * <pre>
  * {@code
  *   class YourClass {
