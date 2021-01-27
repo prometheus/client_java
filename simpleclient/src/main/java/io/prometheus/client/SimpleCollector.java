@@ -216,7 +216,7 @@ public abstract class SimpleCollector<Child> extends Collector {
       return (B)this;
     }
     /**
-     * Set the unit of the metric. Required.
+     * Set the unit of the metric. Optional.
      *
      * @since 0.10.0
      */
