@@ -10,7 +10,7 @@ import java.util.TreeMap;
  * Info metric, key-value pairs.
  *
  * Examples of Info include build information, version information, and potential target metadata.
- * The first provided state will be the default. The string "_info" will be appended to the name.
+ * The string "_info" will be appended to the sample name.
  *
  * <p>
  * Example Info:
