@@ -241,4 +241,21 @@ public class TextFormatTest {
     assertEquals(TextFormat.CONTENT_TYPE_OPENMETRICS_100, TextFormat.chooseContentType("application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1"));
     assertEquals(TextFormat.CONTENT_TYPE_OPENMETRICS_100, TextFormat.chooseContentType("application/openmetrics-text; version=1.0.0"));
   }
+
+  @Test
+  public void testValueFilterMutating() throws IOException {
+    Gauge labels = Gauge.build().name("labels").help("help").labelNames("l").register(registry);
+    labels.labels("a").inc();
+
+    TextFormat.write004(writer, registry.metricFamilySamples(), new TextFormat.ValueFilter() {
+      @Override
+      public double getValue(Collector.MetricFamilySamples.Sample sample) {
+        return 2.0;
+      }
+    });
+
+    assertEquals("Value was not replace with mutated fixed value 2.0","# HELP labels help\n"
+            + "# TYPE labels gauge\n"
+            + "labels{l=\"a\",} 2.0\n", writer.toString());
+  }
 }

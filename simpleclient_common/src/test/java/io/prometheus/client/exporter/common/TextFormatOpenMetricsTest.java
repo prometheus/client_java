@@ -185,4 +185,22 @@ public class TextFormatOpenMetricsTest {
                  + "nolabels 1.0\n"
                  + "# EOF\n", writer.toString());
   }
+
+  @Test
+  public void testValueFilterMutating() throws IOException {
+    Gauge labels = Gauge.build().name("labels").help("help").labelNames("l").register(registry);
+    labels.labels("a").inc();
+
+    TextFormat.writeOpenMetrics100(writer, registry.metricFamilySamples(), new TextFormat.ValueFilter() {
+      @Override
+      public double getValue(Collector.MetricFamilySamples.Sample sample) {
+        return sample.value * 3.0;
+      }
+    });
+
+    assertEquals("Value was not replace with mutated value 1.0 x 3.0","# TYPE labels gauge\n"
+            + "# HELP labels help\n"
+            + "labels{l=\"a\"} 3.0\n"
+            + "# EOF\n", writer.toString());
+  }
 }

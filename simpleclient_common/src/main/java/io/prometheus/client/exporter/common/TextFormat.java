@@ -61,9 +61,34 @@ public class TextFormat {
   }
 
   /**
+   * Filter can be used to change the value of a sample, e.g. for simulating specific values for
+   * testing alerts.
+   */
+  public interface ValueFilter {
+    double getValue(Collector.MetricFamilySamples.Sample sample);
+  }
+
+  /**
+   * Noop filter that simple returns the original value
+   */
+  public static class NullValueFilter implements ValueFilter {
+    @Override
+    public double getValue(Collector.MetricFamilySamples.Sample sample) {
+      return sample.value;
+    }
+  }
+
+  /**
    * Write out the text version 0.0.4 of the given MetricFamilySamples.
    */
   public static void write004(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
+    write004(writer, mfs, new NullValueFilter());
+  }
+
+  /**
+   * Write out the text version 0.0.4 of the given MetricFamilySamples.
+   */
+  public static void write004(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs, ValueFilter valueFilter) throws IOException {
     Map<String, Collector.MetricFamilySamples> omFamilies = new TreeMap<String, Collector.MetricFamilySamples>();
     /* See http://prometheus.io/docs/instrumenting/exposition_formats/
      * for the output format specification. */
@@ -122,7 +147,7 @@ public class TextFormat {
           writer.write('}');
         }
         writer.write(' ');
-        writer.write(Collector.doubleToGoString(sample.value));
+        writer.write(Collector.doubleToGoString(valueFilter.getValue(sample)));
         if (sample.timestampMs != null){
           writer.write(' ');
           writer.write(sample.timestampMs.toString());
@@ -198,6 +223,15 @@ public class TextFormat {
    * @since 0.10.0
    */
   public static void writeOpenMetrics100(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
+    writeOpenMetrics100(writer, mfs, new NullValueFilter());
+  }
+
+  /**
+   * Write out the OpenMetrics text version 1.0.0 of the given MetricFamilySamples.
+   *
+   * @since 0.10.0
+   */
+  public static void writeOpenMetrics100(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs, ValueFilter valueFilter) throws IOException {
     while(mfs.hasMoreElements()) {
       Collector.MetricFamilySamples metricFamilySamples = mfs.nextElement();
       String name = metricFamilySamples.name;
@@ -238,7 +272,7 @@ public class TextFormat {
           writer.write('}');
         }
         writer.write(' ');
-        writer.write(Collector.doubleToGoString(sample.value));
+        writer.write(Collector.doubleToGoString(valueFilter.getValue(sample)));
         if (sample.timestampMs != null){
           writer.write(' ');
           long ts = sample.timestampMs.longValue();
