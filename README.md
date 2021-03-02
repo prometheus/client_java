@@ -405,7 +405,7 @@ SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class
 respectively 
 
 ```java
-SessionFactory sessionFactory = entityManager.unwrap(Session.class).getSessionFactory()
+SessionFactory sessionFactory = entityManager.unwrap(Session.class).getSessionFactory();
 ```
 ### Jetty
 
