@@ -401,6 +401,12 @@ or `EntityManagerFactory`, you can use this code to access the underlying `Sessi
 ```java
 SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
 ```
+
+respectively 
+
+```java
+SessionFactory sessionFactory = entityManager.unwrap(Session.class).getSessionFactory();
+```
 ### Jetty
 
 There is a collector for recording various Jetty server metrics. You can do it by  registering the collector like this:
