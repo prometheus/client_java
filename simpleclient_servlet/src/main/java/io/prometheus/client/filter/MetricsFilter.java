@@ -60,6 +60,7 @@ public class MetricsFilter implements Filter {
     static final String HELP_PARAM = "help";
     static final String METRIC_NAME_PARAM = "metric-name";
     static final String BUCKET_CONFIG_PARAM = "buckets";
+    static final String STRIP_CONTEXT_PATH_PARAM = "strip-context-path";
     static final String UNKNOWN_HTTP_STATUS_CODE = "";
 
     private Histogram histogram = null;
@@ -68,6 +69,7 @@ public class MetricsFilter implements Filter {
     // Package-level for testing purposes.
     int pathComponents = 1;
     private String metricName = null;
+    private boolean stripContextPath = false;
     private String help = "The time taken fulfilling servlet requests";
     private double[] buckets = null;
 
@@ -145,6 +147,10 @@ public class MetricsFilter implements Filter {
                     buckets[i] = Double.parseDouble(bucketParams[i]);
                 }
             }
+
+            if (!isEmpty(filterConfig.getInitParameter(STRIP_CONTEXT_PATH_PARAM))) {
+                stripContextPath = Boolean.parseBoolean(filterConfig.getInitParameter(STRIP_CONTEXT_PATH_PARAM));
+            }
         }
 
         if (buckets != null) {
@@ -171,6 +177,8 @@ public class MetricsFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         String path = request.getRequestURI();
+        if (stripContextPath)
+            path = path.substring(request.getContextPath().length());
 
         String components = getComponents(path);
         String method = request.getMethod();
