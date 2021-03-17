@@ -36,6 +36,17 @@ import com.sun.net.httpserver.HttpServer;
  * </pre>
  * */
 public class HTTPServer {
+
+    static {
+        if (!System.getProperties().containsKey("sun.net.httpserver.maxReqTime")) {
+            System.setProperty("sun.net.httpserver.maxReqTime", "60");
+        }
+
+        if (!System.getProperties().containsKey("sun.net.httpserver.maxRspTime")) {
+            System.setProperty("sun.net.httpserver.maxRspTime", "600");
+        }
+    }
+
     private static class LocalByteArray extends ThreadLocal<ByteArrayOutputStream> {
         @Override
         protected ByteArrayOutputStream initialValue()
@@ -256,4 +267,3 @@ public class HTTPServer {
         return server.getAddress().getPort();
     }
 }
-
