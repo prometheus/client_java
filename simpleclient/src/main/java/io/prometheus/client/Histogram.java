@@ -274,10 +274,10 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
      * @param amt the amount to observe
      * @param exemplarLabels a set of key value pairs used to create the exemplar
      *
-     * @throws IllegalArgumentException if exemplarLabels is null
-     * @throws IllegalArgumentException if exemplarLabels does not contain an even number of values
-     * @throws IllegalArgumentException if exemplarLabels contains any invalid labels
-     * @throws IllegalArgumentException if the combined length of the exemplarLabels is greater than 64
+     * @throws IllegalArgumentException if exemplarLabels is null.
+     * @throws IllegalArgumentException if exemplarLabels does not contain an even number of values.
+     * @throws IllegalArgumentException if exemplarLabels contains any invalid labels.
+     * @throws IllegalArgumentException if the combined length of the exemplarLabels is greater than 64.
      */
     public void observeWithExemplar(double amt, String... exemplarLabels) {
       //TODO exemplar label validation

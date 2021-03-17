@@ -143,10 +143,11 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
      * @param amt the amount to increment the counter by
      * @param exemplarLabels a set of key value pairs used to create the exemplar
      *
-     * @throws IllegalArgumentException if exemplarLabels is null
-     * @throws IllegalArgumentException if exemplarLabels does not contain an even number of values
-     * @throws IllegalArgumentException if exemplarLabels contains any invalid labels
-     * @throws IllegalArgumentException if the combined length of the exemplarLabels is greater than 64
+     * @throws IllegalArgumentException If amt is negative.
+     * @throws IllegalArgumentException if exemplarLabels is null.
+     * @throws IllegalArgumentException if exemplarLabels does not contain an even number of values.
+     * @throws IllegalArgumentException if exemplarLabels contains any invalid labels.
+     * @throws IllegalArgumentException if the combined length of the exemplarLabels is greater than 64.
      */
     public void incWithExemplar(double amt, String... exemplarLabels){
       //TODO exemplar label validation
