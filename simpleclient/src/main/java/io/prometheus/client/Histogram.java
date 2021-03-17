@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * Histogram metric, to track distributions of events.
  * <p>
@@ -267,6 +269,23 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       sum.add(amt);
     }
     /**
+     * Observe the given amount and update the exemplar for the bucket.
+     *
+     * @param amt the amount to observe
+     * @param exemplarLabels a set of key value pairs used to create the exemplar
+     *
+     * @throws IllegalArgumentException if exemplarLabels is null
+     * @throws IllegalArgumentException if exemplarLabels does not contain an even number of values
+     * @throws IllegalArgumentException if exemplarLabels contains any invalid labels
+     * @throws IllegalArgumentException if the combined length of the exemplarLabels is greater than 64
+     */
+    public void observeWithExemplar(double amt, String... exemplarLabels) {
+      //TODO exemplar label validation
+      observe(amt);
+      //TODO update exemplar
+      throw new NotImplementedException();
+    }
+    /**
      * Start a timer to track a duration.
      * <p>
      * Call {@link Timer#observeDuration} at the end of what you want to measure the duration of.
@@ -296,6 +315,12 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
    */
   public void observe(double amt) {
     noLabelsChild.observe(amt);
+  }
+  /**
+   *
+   */
+  public void observeWithExemplar(double amt, String... exemplarLabels) {
+    noLabelsChild.observeWithExemplar(amt, exemplarLabels);
   }
   /**
    * Start a timer to track a duration on the histogram with no labels.

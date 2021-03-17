@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * Counter metric, to track counts of events or running totals.
  * <p>
@@ -136,6 +138,23 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
       value.add(amt);
     }
     /**
+     * Increment the counter by given amount and update the exemplar for the series.
+     *
+     * @param amt the amount to increment the counter by
+     * @param exemplarLabels a set of key value pairs used to create the exemplar
+     *
+     * @throws IllegalArgumentException if exemplarLabels is null
+     * @throws IllegalArgumentException if exemplarLabels does not contain an even number of values
+     * @throws IllegalArgumentException if exemplarLabels contains any invalid labels
+     * @throws IllegalArgumentException if the combined length of the exemplarLabels is greater than 64
+     */
+    public void incWithExemplar(double amt, String... exemplarLabels){
+      //TODO exemplar label validation
+      inc(amt);
+      //TODO update exemplar
+      throw new NotImplementedException();
+    }
+    /**
      * Get the value of the counter.
      */
     public double get() {
@@ -162,6 +181,12 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
    */
   public void inc(double amt) {
     noLabelsChild.inc(amt);
+  }
+  /**
+   *
+   */
+  public void incWithExemplar(double amt, String... exemplarLabels){
+    noLabelsChild.incWithExemplar(amt, exemplarLabels);
   }
   
   /**
