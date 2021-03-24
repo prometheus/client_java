@@ -449,7 +449,10 @@ measuring is also configurable, via the `path-components` init parameter. By
 default, the servlet filter will record each path differently, but by setting an
 integer here, you can tell the filter to only record up to the Nth slashes. That
 is, all requests with greater than N "/" characters in the servlet URI path will
-be measured in the same bucket and you will lose that granularity.
+be measured in the same bucket and you will lose that granularity. The init
+parameter `strip-context-path` can be used to strip the leading part of the URL
+which is part of the deploy context (i.e. the folder the servlet is deployed to),
+so that the same servlet deployed to different paths can lead to similar metrics.
 
 The code below is an example of the XML configuration for the filter. You will
 need to place this (replace your own values) code in your
@@ -476,6 +479,11 @@ need to place this (replace your own values) code in your
   <init-param>
     <param-name>path-components</param-name>
     <param-value>1</param-value>
+  </init-param>
+  <!-- strip-context-path is optional, defaults to false -->
+  <init-param>
+    <param-name>strip-context-path</param-name>
+    <param-value>false</param-value>
   </init-param>
 </filter>
 

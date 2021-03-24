@@ -17,6 +17,7 @@ import java.util.Enumeration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -228,6 +229,28 @@ public class MetricsFilterTest {
         constructed.doFilter(req, res, c);
 
         final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue("foobar_filter_status_total", new String[]{"path", "method", "status"}, new String[]{"/foo/bar", HttpMethods.GET, MetricsFilter.UNKNOWN_HTTP_STATUS_CODE});
+        assertNotNull(sampleValue);
+        assertEquals(1, sampleValue, 0.0001);
+    }
+
+    @Test
+    public void testStripContextPath() throws Exception {
+        String metricName = "foo";
+        FilterConfig cfg = mock(FilterConfig.class);
+        when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn(metricName);
+        when(cfg.getInitParameter(MetricsFilter.PATH_COMPONENT_PARAM)).thenReturn("0");
+        when(cfg.getInitParameter(MetricsFilter.STRIP_CONTEXT_PATH_PARAM)).thenReturn("true");
+        f.init(cfg);
+        assertTrue(f.stripContextPath);
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
+        when(req.getContextPath()).thenReturn("/foo/bar");
+        when(req.getMethod()).thenReturn(HttpMethods.GET);
+        HttpServletResponse res = mock(HttpServletResponse.class);
+        FilterChain c = mock(FilterChain.class);
+        f.doFilter(req, res, c);
+        verify(c).doFilter(req, res);
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(metricName + "_count", new String[]{"path", "method"}, new String[]{"/baz/bang", HttpMethods.GET});
         assertNotNull(sampleValue);
         assertEquals(1, sampleValue, 0.0001);
     }
