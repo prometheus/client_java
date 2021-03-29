@@ -1,27 +1,31 @@
 package io.prometheus.client;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.rules.ExpectedException.none;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
+import io.prometheus.client.Collector.MetricFamilySamples.Sample;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.rules.ExpectedException.none;
 
 
 public class HistogramTest {
 
   CollectorRegistry registry;
   Histogram noLabels, labels;
-
 
   @Rule
   public final ExpectedException thrown = none();
@@ -219,11 +223,131 @@ public class HistogramTest {
   }
 
   @Test
+  public void testObserveWithExemplar() {
+    Map<String, String> labels = new HashMap<String, String>();
+    labels.put("mapKey1", "mapValue1");
+    labels.put("mapKey2", "mapValue2");
+
+    noLabels.observeWithExemplar(0.5, "key", "value");
+    assertExemplar(noLabels, 0.5, "key", "value");
+
+    noLabels.observeWithExemplar(0.5);
+    assertExemplar(noLabels, 0.5);
+
+    noLabels.observeWithExemplar(0.5, labels);
+    assertExemplar(noLabels, 0.5, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+
+    // default buckets are {.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10}
+    noLabels.observeWithExemplar(2.0, "key1", "value1", "key2", "value2");
+    assertExemplar(noLabels, 2.0, "key1", "value1", "key2", "value2");
+    assertExemplar(noLabels, 0.5, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+
+    noLabels.observeWithExemplar(0.4, new HashMap<String, String>()); // same bucket as 0.5
+    assertNoExemplar(noLabels, 0.5);
+    assertExemplar(noLabels, 0.4);
+    assertExemplar(noLabels, 2.0, "key1", "value1", "key2", "value2");
+
+    noLabels.observeWithExemplar(2.0, (String[]) null); // should not alter the exemplar
+    assertExemplar(noLabels, 2.0, "key1", "value1", "key2", "value2");
+
+    noLabels.observeWithExemplar(2.0, (Map<String, String>) null); // should not alter the exemplar
+    assertExemplar(noLabels, 2.0, "key1", "value1", "key2", "value2");
+  }
+
+  @Test
+  public void testTimeWithExemplar() {
+    Map<String, String> labels = new HashMap<String, String>();
+    labels.put("mapKey1", "mapValue1");
+    labels.put("mapKey2", "mapValue2");
+
+    noLabels.timeWithExemplar(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          Thread.sleep(15);
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+    assertExemplar(noLabels, 0.015);
+
+    noLabels.timeWithExemplar(new Callable<Object>() {
+      @Override
+      public Object call() throws Exception {
+        Thread.sleep(20);
+        return null;
+      }
+    }, labels);
+    assertNoExemplar(noLabels, 0.015);
+    assertExemplar(noLabels, 0.02,"mapKey1", "mapValue1", "mapKey2", "mapValue2");
+  }
+
+  private void assertExemplar(Histogram histogram, double value, String... labels) {
+    List<Collector.MetricFamilySamples> mfs = histogram.collect();
+    double lowerBound;
+    double upperBound = Double.NEGATIVE_INFINITY;
+    for (Sample bucket : mfs.get(0).samples) {
+      if (!bucket.name.endsWith("_bucket")) {
+        continue;
+      }
+      lowerBound = upperBound;
+      if ("+Inf".equals(findLabelValue(bucket, "le"))) {
+        upperBound = Double.POSITIVE_INFINITY;
+      } else {
+        upperBound = Double.parseDouble(findLabelValue(bucket, "le"));
+      }
+      if (lowerBound < value && value <= upperBound) {
+        Assert.assertNotNull("No exemplar found in bucket [" + lowerBound + ", " + upperBound + "]", bucket.exemplar);
+        Assert.assertEquals(value, bucket.exemplar.getValue(), 0.001);
+        Assert.assertEquals(labels.length/2, bucket.exemplar.getNumberOfLabels());
+        for (int i=0; i<labels.length; i+=2) {
+          Assert.assertEquals(labels[i], bucket.exemplar.getLabelName(i/2));
+          Assert.assertEquals(labels[i+1], bucket.exemplar.getLabelValue(i/2));
+        }
+        return;
+      }
+    }
+    throw new AssertionError("exemplar not found in histogram");
+  }
+
+  private void assertNoExemplar(Histogram histogram, double value) {
+    List<Collector.MetricFamilySamples> mfs = histogram.collect();
+    double lowerBound;
+    double upperBound = Double.NEGATIVE_INFINITY;
+    for (Sample bucket : mfs.get(0).samples) {
+      if (!bucket.name.endsWith("_bucket")) {
+        continue;
+      }
+      lowerBound = upperBound;
+      if ("+Inf".equals(findLabelValue(bucket, "le"))) {
+        upperBound = Double.POSITIVE_INFINITY;
+      } else {
+        upperBound = Double.parseDouble(findLabelValue(bucket, "le"));
+      }
+      if (lowerBound < value && value <= upperBound) {
+        if (bucket.exemplar != null) {
+          Assert.assertNotEquals("expecting no exemplar with value " + value, value, bucket.exemplar.getValue(), 0.001);
+        }
+      }
+    }
+  }
+
+  private String findLabelValue(Sample sample, String labelName) {
+    for (int i = 0; i < sample.labelNames.size(); i++) {
+      if (sample.labelNames.get(i).equals(labelName)) {
+        return sample.labelValues.get(i);
+      }
+    }
+    throw new AssertionError("label " + labelName + " not found in " + sample);
+  }
+
+  @Test
   public void testCollect() {
     labels.labels("a").observe(2);
     List<Collector.MetricFamilySamples> mfs = labels.collect();
 
-    ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
+    ArrayList<Sample> samples = new ArrayList<Sample>();
     ArrayList<String> labelNames = new ArrayList<String>();
     labelNames.add("l");
     ArrayList<String> labelValues = new ArrayList<String>();
@@ -233,16 +357,16 @@ public class HistogramTest {
     for (String bucket: new String[]{"0.005", "0.01", "0.025", "0.05", "0.075", "0.1", "0.25", "0.5", "0.75", "1.0"}) {
       ArrayList<String> labelValuesLe = new ArrayList<String>(labelValues);
       labelValuesLe.add(bucket);
-      samples.add(new Collector.MetricFamilySamples.Sample("labels_bucket", labelNamesLe, labelValuesLe, 0.0));
+      samples.add(new Sample("labels_bucket", labelNamesLe, labelValuesLe, 0.0));
     }
     for (String bucket: new String[]{"2.5", "5.0", "7.5", "10.0", "+Inf"}) {
       ArrayList<String> labelValuesLe = new ArrayList<String>(labelValues);
       labelValuesLe.add(bucket);
-      samples.add(new Collector.MetricFamilySamples.Sample("labels_bucket", labelNamesLe, labelValuesLe, 1.0));
+      samples.add(new Sample("labels_bucket", labelNamesLe, labelValuesLe, 1.0));
     }
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_count", labelNames, labelValues, 1.0));
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_sum", labelNames, labelValues, 2.0));
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_created", labelNames, labelValues, labels.labels("a").get().created / 1000.0));
+    samples.add(new Sample("labels_count", labelNames, labelValues, 1.0));
+    samples.add(new Sample("labels_sum", labelNames, labelValues, 2.0));
+    samples.add(new Sample("labels_created", labelNames, labelValues, labels.labels("a").get().created / 1000.0));
 
     Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.HISTOGRAM, "help", samples);
 
