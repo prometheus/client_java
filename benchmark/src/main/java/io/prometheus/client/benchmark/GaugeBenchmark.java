@@ -1,11 +1,9 @@
-package io.prometheus.benchmark;
+package io.prometheus.client.benchmark;
 
 import com.codahale.metrics.MetricRegistry;
-
-import java.util.concurrent.TimeUnit;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -15,26 +13,20 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.concurrent.TimeUnit;
+
 @State(Scope.Benchmark)
 public class GaugeBenchmark {
 
   MetricRegistry registry;
   com.codahale.metrics.Counter codahaleCounter;
 
-  io.prometheus.client.metrics.Gauge prometheusGauge;
-  io.prometheus.client.metrics.Gauge.Child prometheusGaugeChild;
   io.prometheus.client.Gauge prometheusSimpleGauge;
   io.prometheus.client.Gauge.Child prometheusSimpleGaugeChild;
   io.prometheus.client.Gauge prometheusSimpleGaugeNoLabels;
 
   @Setup
   public void setup() {
-    prometheusGauge = io.prometheus.client.metrics.Gauge.newBuilder()
-      .name("name")
-      .documentation("some description..")
-      .build();
-    prometheusGaugeChild = prometheusGauge.newPartial().apply();
-
     prometheusSimpleGauge = io.prometheus.client.Gauge.build()
       .name("name")
       .help("some description..")
@@ -51,20 +43,6 @@ public class GaugeBenchmark {
   }
 
   // Increment.
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusGaugeIncBenchmark() {
-    prometheusGauge.newPartial().apply().increment();
-  }
-
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusGaugeChildIncBenchmark() {
-    prometheusGaugeChild.increment();
-  }
-
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -98,20 +76,6 @@ public class GaugeBenchmark {
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusGaugeDecBenchmark() {
-    prometheusGauge.newPartial().apply().decrement();
-  }
-
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusGaugeChildDecBenchmark() {
-    prometheusGaugeChild.decrement();
-  }
-
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleGaugeDecBenchmark() {
     prometheusSimpleGauge.labels("test", "group").dec(); 
   }
@@ -138,20 +102,6 @@ public class GaugeBenchmark {
   }
 
   // Set.
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusGaugeSetBenchmark() {
-    prometheusGauge.newPartial().apply().set(42);
-  }
-
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusGaugeChildSetBenchmark() {
-    prometheusGaugeChild.set(42);
-  }
-
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)

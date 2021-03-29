@@ -1,11 +1,9 @@
-package io.prometheus.benchmark;
+package io.prometheus.client.benchmark;
 
 import com.codahale.metrics.MetricRegistry;
-
-import java.util.concurrent.TimeUnit;
+import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -15,14 +13,14 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.util.concurrent.TimeUnit;
+
 @State(Scope.Benchmark)
 public class SummaryBenchmark {
 
   MetricRegistry registry;
   com.codahale.metrics.Histogram codahaleHistogram;
 
-  io.prometheus.client.metrics.Summary prometheusSummary;
-  io.prometheus.client.metrics.Summary.Child prometheusSummaryChild;
   io.prometheus.client.Summary prometheusSimpleSummary;
   io.prometheus.client.Summary.Child prometheusSimpleSummaryChild;
   io.prometheus.client.Summary prometheusSimpleSummaryNoLabels;
@@ -32,12 +30,6 @@ public class SummaryBenchmark {
 
   @Setup
   public void setup() {
-    prometheusSummary = io.prometheus.client.metrics.Summary.newBuilder()
-      .name("name")
-      .documentation("some description..")
-      .build();
-    prometheusSummaryChild = prometheusSummary.newPartial().apply();
-
     prometheusSimpleSummary = io.prometheus.client.Summary.build()
       .name("name")
       .help("some description..")
@@ -62,20 +54,6 @@ public class SummaryBenchmark {
 
     registry = new MetricRegistry();
     codahaleHistogram = registry.histogram("name");
-  }
-
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusSummaryBenchmark() {
-    prometheusSummary.newPartial().apply().observe(1.0);
-  }
-
-  @Benchmark
-  @BenchmarkMode({Mode.AverageTime})
-  @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  public void prometheusSummaryChildBenchmark() {
-    prometheusSummaryChild.observe(1.0);
   }
 
   @Benchmark
