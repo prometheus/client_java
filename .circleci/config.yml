@@ -1,18 +1,19 @@
 version: 2
+machine: true
 jobs:
   build:
+    machine:
+      image: ubuntu-2004:202010-01
     working_directory: ~/circleci-java
-    docker:
-      - image: circleci/openjdk:8-jdk-stretch
     steps:
       - checkout
-      - restore_cache: # restore the saved cache after the first run or if `pom.xml` has changed
-          key: circleci-demo-java-spring-{{ checksum "pom.xml" }}
-      - run: mvn dependency:go-offline # gets the project dependencies
+      - restore_cache:
+          key: maven-dependencies-{{ checksum "pom.xml" }}
+      - run: mvn clean verify
       - save_cache:
           paths:
             - ~/.m2
-          key: circleci-demo-java-spring-{{ checksum "pom.xml" }}
-      - run: mvn package
+          key: maven-dependencies-{{ checksum "pom.xml" }}
+      - run: mvn verify
 orbs:
   prometheus: prometheus/prometheus@0.11.0

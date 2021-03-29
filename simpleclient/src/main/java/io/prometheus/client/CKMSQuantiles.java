@@ -258,6 +258,7 @@ class CKMSQuantiles {
         public final double value;
         public int g;
         public final int delta;
+        // TODO Exemplars here would be cool :)
 
         public Item(double value, int lower_delta, int delta) {
             this.value = value;

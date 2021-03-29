@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.rules.ExpectedException.none;
 
+import io.prometheus.client.exemplars.impl.NoopExemplarSampler;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;
@@ -156,7 +157,7 @@ public class SimpleCollectorTest {
 
   @Test
   public void testSetChild() {
-    metric.setChild(new Gauge.Child(){
+    metric.setChild(new Gauge.Child(new NoopExemplarSampler()){
       public double get() {
         return 42;
       }
@@ -166,7 +167,7 @@ public class SimpleCollectorTest {
 
   @Test
   public void testSetChildReturnsGauge() {
-    Gauge g = metric.setChild(new Gauge.Child(){
+    Gauge g = metric.setChild(new Gauge.Child(new NoopExemplarSampler()){
       public double get() {
         return 42;
       }

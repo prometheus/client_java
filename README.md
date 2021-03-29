@@ -17,6 +17,11 @@ Table of Contents
      * [Histogram](#histogram)
      * [Labels](#labels)
      * [Registering Metrics](#registering-metrics)
+  * [Exemplars](#exemplars)
+     * [Running an Exemplars Example](#running-an-exemplars-example)
+     * [Enabling and Disabling Exemplars](#enabling-and-disabling-exemplars)
+     * [Implement Your Own Exemplar Sampling Algorithm](#implement-your-own-exemplar-sampling-algorithm)
+     * [Implement Support for Other Tracing Vendors](#implement-support-for-other-tracing-vendors)
   * [Included Collectors](#included-collectors)
      * [Logging](#logging)
      * [Caches](#caches)
@@ -291,6 +296,99 @@ class YourClass {
 }
 ```
 
+## Exemplars
+
+Exemplars are a feature of the [OpenMetrics](http://openmetrics.io) format that allows applications to link metrics
+to example traces. Starting with version 0.11.0, `client_java` automatically adds Exemplars for applications that
+are instrumented with [OpenTelemetry](https://opentelemetry.io/) distributed tracing. No code change is required.
+
+### Running an Exemplars Example
+
+If you want to see this in action, you can run the example from the `ExemplarsClientJavaIT`:
+
+```
+mvn package
+cd integration_tests/exemplars_otel_agent/target/
+curl -LO https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.0.1/opentelemetry-javaagent-all.jar
+java -Dotel.traces.exporter=logging -Dotel.metrics.exporter=none -javaagent:./opentelemetry-javaagent-all.jar -jar ./sample-rest-application.jar
+```
+
+Now you have a Spring REST service running on [http://localhost:8080/hello](http://localhost:8080/hello) that is instrumented with the OpenTelemetry Java agent.
+
+In order to get metrics in [OpenMetrics](http://openmetrics.io) format, run
+
+```
+curl -H 'Accept: application/openmetrics-text; version=1.0.0; charset=utf-8' http://localhost:8080/metrics
+```
+
+You should see metrics with Exemplars, for example in the `request_duration_histogram` metric:
+
+```
+request_duration_histogram_bucket{path="/god-of-fire",le="0.004"} 4.0 # {trace_id="043cd631811e373e4180a678c06b128e",span_id="cd122e457d2ca5b0"} 0.0033 1618261159.027
+```
+
+Note that this is an example application for a unit test, so durations don't represent real durations, and some example metrics might not make sense in the real world.
+
+### Enabling And Disabling Exemplars
+
+By default, Exemplars are enabled if OpenTelemetry tracing is detected. You can disable this globally with:
+
+```java
+ExemplarConfig.disableByDefault();
+```
+
+If you want to enable Exemplars only for a single metric, use `withExemplarSampler()` in the metric builder.
+
+```java
+// This also works with Gauges, Histograms, and Summaries.
+Counter labelsCustomExemplar = Counter.build()
+    .name("number_of_events_total")
+    .help("help")
+    .withExemplarSampler(new MyExemplarSampler())
+    ...
+    .register();
+```
+
+Likewise, you can disable Exemplars for a single metric like this:
+
+```java
+// This also works with Gauges, Histograms, and Summaries.
+Counter labelsCustomExemplar = Counter.build()
+    .name("number_of_events_total")
+    .help("help")
+    .withoutExemplars()
+    ...
+    .register();
+```
+
+See `ExemplarTest` for more examples.
+
+### Implement Your Own Exemplar Sampling Algorithm
+
+The `DefaultExemplarSampler` is very simple: It samples a new Exemplar if the current one is older than 7 seconds.
+You might want to implement your own Exemplar sampler that provides more interesting Exemplars for your application.
+In order to do so, just implement the following interfaces:
+
+* `CounterExemplarSampler`
+* `GaugeExemplarSampler`
+* `HistogramExemplarSampler`
+* `SummaryExemplarSampler`
+
+You can set your implementations as default like this:
+
+```java
+ExemplarConfig.setDefaultCounterExemplarSampler(mySampler);
+ExemplarConfig.setDefaultGaugeExemplarSampler(mySampler);
+ExemplarConfig.setDefaultHistogramExemplarSampler(mySampler);
+ExemplarConfig.setDefaultSummaryExemplarSampler(mySampler);
+```
+
+### Implement Support for Other Tracing Vendors
+
+Version 0.11.0 implements support for OpenTelemetry. If you are a vendor for another distributed tracer,
+please create a pull request adding support for your system. The idea is that copy-and-paste the
+`tracer_otel` module and modify it for your needs. If this turns out to be too simplistic, please create
+a GitHub issue and let us know what you need.
 
 ## Included Collectors
 

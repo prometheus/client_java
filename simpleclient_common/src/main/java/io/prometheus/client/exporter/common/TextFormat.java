@@ -241,23 +241,35 @@ public class TextFormat {
         writer.write(Collector.doubleToGoString(sample.value));
         if (sample.timestampMs != null){
           writer.write(' ');
-          long ts = sample.timestampMs.longValue();
-          writer.write(Long.toString(ts / 1000));
-          writer.write(".");
-          long ms = ts % 1000;
-          if (ms < 100) {
-            writer.write("0");
-          }
-          if (ms < 10) {
-            writer.write("0");
-          }
-          writer.write(Long.toString(ts % 1000));
-
+          writeTimestamp(writer, sample.timestampMs);
+        }
+        if (sample.exemplar != null) {
+          writer.write(" # {trace_id=\"");
+          writeEscapedLabelValue(writer, sample.exemplar.getTraceId());
+          writer.write("\",span_id=\"");
+          writeEscapedLabelValue(writer, sample.exemplar.getSpanId());
+          writer.write("\"} ");
+          writer.write(Collector.doubleToGoString(sample.exemplar.getValue()));
+          writer.write(' ');
+          writeTimestamp(writer, sample.exemplar.getTimestampMs());
         }
         writer.write('\n');
       }
     }
     writer.write("# EOF\n");
+  }
+
+  private static void writeTimestamp(Writer writer, long timestampMs) throws IOException {
+    writer.write(Long.toString(timestampMs / 1000L));
+    writer.write(".");
+    long ms = timestampMs % 1000;
+    if (ms < 100) {
+      writer.write("0");
+    }
+    if (ms < 10) {
+      writer.write("0");
+    }
+    writer.write(Long.toString(timestampMs % 1000));
   }
 
   private static String omTypeString(Collector.Type t) {

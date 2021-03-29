@@ -1,11 +1,16 @@
 package io.prometheus.client;
 
+import io.prometheus.client.exemplars.api.Exemplar;
+import io.prometheus.client.exemplars.api.ExemplarConfig;
+import io.prometheus.client.exemplars.api.HistogramExemplarSampler;
+
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Histogram metric, to track distributions of events.
@@ -62,14 +67,18 @@ import java.util.concurrent.Callable;
  */
 public class Histogram extends SimpleCollector<Histogram.Child> implements Collector.Describable {
   private final double[] buckets;
+  private final HistogramExemplarSampler exemplarSampler;
 
   Histogram(Builder b) {
     super(b);
+    this.exemplarSampler = b.exemplarSampler;
     buckets = b.buckets;
     initializeNoLabelsChild();
   }
 
   public static class Builder extends SimpleCollector.Builder<Builder, Histogram> {
+
+    private HistogramExemplarSampler exemplarSampler = ExemplarConfig.getDefaultHistogramExemplarSampler();
     private double[] buckets = new double[]{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10};
 
     @Override
@@ -129,6 +138,17 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       return this;
     }
 
+    public Builder withExemplarSampler(HistogramExemplarSampler exemplarSampler) {
+      if (exemplarSampler == null) {
+        throw new NullPointerException();
+      }
+      this.exemplarSampler = exemplarSampler;
+      return this;
+    }
+
+    public Builder withoutExemplars() {
+      return withExemplarSampler(ExemplarConfig.getNoopExemplarSampler());
+    }
   }
 
   /**
@@ -150,7 +170,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
 
   @Override
   protected Child newChild() {
-    return new Child(buckets);
+    return new Child(buckets, exemplarSampler);
   }
 
   /**
@@ -231,22 +251,30 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
     public static class Value {
       public final double sum;
       public final double[] buckets;
+      public final Exemplar[] exemplars;
       public final long created;
 
-      public Value(double sum, double[] buckets, long created) {
+      public Value(double sum, double[] buckets, Exemplar[] exemplars, long created) {
         this.sum = sum;
         this.buckets = buckets;
+        this.exemplars = exemplars;
         this.created = created;
       }
     }
 
-    private Child(double[] buckets) {
+    private Child(double[] buckets, HistogramExemplarSampler exemplarSampler) {
       upperBounds = buckets;
+      this.exemplarSampler = exemplarSampler;
+      exemplars = new ArrayList<AtomicReference<Exemplar>>(buckets.length);
       cumulativeCounts = new DoubleAdder[buckets.length];
       for (int i = 0; i < buckets.length; ++i) {
         cumulativeCounts[i] = new DoubleAdder();
+        exemplars.add(new AtomicReference<Exemplar>());
       }
     }
+
+    private final ArrayList<AtomicReference<Exemplar>> exemplars;
+    private final HistogramExemplarSampler exemplarSampler;
     private final double[] upperBounds;
     private final DoubleAdder[] cumulativeCounts;
     private final DoubleAdder sum = new DoubleAdder();
@@ -265,10 +293,24 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
         // The last bucket is +Inf, so we always increment.
         if (amt <= upperBounds[i]) {
           cumulativeCounts[i].add(1);
+          updateExemplar(amt, i);
           break;
         }
       }
       sum.add(amt);
+    }
+    private void updateExemplar(double amt, int i) {
+      AtomicReference<Exemplar> exemplar = exemplars.get(i);
+      double bucketFrom = i == 0 ? Double.NEGATIVE_INFINITY : upperBounds[i-1];
+      double bucketTo = upperBounds[i];
+      Exemplar prev, next;
+      do {
+        prev = exemplar.get();
+        next = exemplarSampler.sample(amt, bucketFrom, bucketTo, prev);
+        if (next == null || next == prev) {
+          return;
+        }
+      } while (!exemplar.compareAndSet(prev, next));
     }
     /**
      * Start a timer to track a duration.
@@ -285,12 +327,14 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
      */
     public Value get() {
       double[] buckets = new double[cumulativeCounts.length];
+      Exemplar[] exemplars = new Exemplar[cumulativeCounts.length];
       double acc = 0;
       for (int i = 0; i < cumulativeCounts.length; ++i) {
         acc += cumulativeCounts[i].sum();
         buckets[i] = acc;
+        exemplars[i] = this.exemplars.get(i).get();
       }
-      return new Value(sum.sum(), buckets, created);
+      return new Value(sum.sum(), buckets, exemplars, created);
     }
   }
 
@@ -344,7 +388,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       for (int i = 0; i < v.buckets.length; ++i) {
         List<String> labelValuesWithLe = new ArrayList<String>(c.getKey());
         labelValuesWithLe.add(doubleToGoString(buckets[i]));
-        samples.add(new MetricFamilySamples.Sample(fullname + "_bucket", labelNamesWithLe, labelValuesWithLe, v.buckets[i]));
+        samples.add(new MetricFamilySamples.Sample(fullname + "_bucket", labelNamesWithLe, labelValuesWithLe, v.buckets[i], v.exemplars[i]));
       }
       samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.buckets[buckets.length-1]));
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));

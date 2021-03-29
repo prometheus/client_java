@@ -34,16 +34,21 @@
     </developers>
 
 
-    <dependencies>
-        <!-- The simpleclient has no dependencies by design, so that
-             it can be included into any other project without having
-             to worry about conflicts. -->
-        <!-- Test Dependencies Follow -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <!-- The simpleclient has no required 3rd party runtime dependencies by design, so that
+         it can be included into any other project without having to worry about conflicts.
+         All transitive dependencies of exemplars are scoped as provided and optional at runtime. -->
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>exemplars</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- Test Dependencies Follow -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>
