@@ -2,16 +2,18 @@ package io.prometheus.client.filter;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
+
+import org.eclipse.jetty.http.HttpMethod;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Enumeration;
 
 import static org.junit.Assert.assertEquals;
@@ -48,7 +50,7 @@ public class MetricsFilterTest {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 
 		when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang/zilch/zip/nada");
-		when(req.getMethod()).thenReturn(HttpMethods.GET);
+		when(req.getMethod()).thenReturn(HttpMethod.GET.asString());
 
 		HttpServletResponse res = mock(HttpServletResponse.class);
 		FilterChain c = mock(FilterChain.class);
@@ -60,7 +62,7 @@ public class MetricsFilterTest {
 		final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(
 				metricName + "_count",
 				new String[] { "path", "method" },
-				new String[] { "/foo/bar/baz/bang", HttpMethods.GET });
+				new String[] { "/foo/bar/baz/bang", HttpMethod.GET.asString() });
 		assertNotNull(sampleValue);
 		assertEquals(1, sampleValue, 0.0001);
 	}
@@ -71,7 +73,7 @@ public class MetricsFilterTest {
 		final String path = "/foo/bar/baz/bang/zilch/zip/nada";
 
 		when(req.getRequestURI()).thenReturn(path);
-		when(req.getMethod()).thenReturn(HttpMethods.GET);
+		when(req.getMethod()).thenReturn(HttpMethod.GET.asString());
 
 		HttpServletResponse res = mock(HttpServletResponse.class);
 		FilterChain c = mock(FilterChain.class);
@@ -88,7 +90,7 @@ public class MetricsFilterTest {
 
 		final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(name + "_count",
 				new String[] { "path", "method" },
-				new String[] { path, HttpMethods.GET });
+				new String[] { path, HttpMethod.GET.asString() });
 		assertNotNull(sampleValue);
 		assertEquals(1, sampleValue, 0.0001);
 	}
@@ -98,7 +100,7 @@ public class MetricsFilterTest {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		final String path = "/foo/bar/baz/bang";
 		when(req.getRequestURI()).thenReturn(path);
-		when(req.getMethod()).thenReturn(HttpMethods.POST);
+		when(req.getMethod()).thenReturn(HttpMethod.POST.asString());
 
 		FilterChain c = mock(FilterChain.class);
 		doAnswer(new Answer<Void>() {
@@ -119,7 +121,7 @@ public class MetricsFilterTest {
 		final Double sum = CollectorRegistry.defaultRegistry.getSampleValue(
 				"foobar_baz_filter_duration_seconds_sum",
 				new String[] { "path", "method" },
-				new String[] { path, HttpMethods.POST });
+				new String[] { path, HttpMethod.POST.asString() });
 		assertNotNull(sum);
 		assertEquals(0.1, sum, 0.01);
 	}
@@ -129,7 +131,7 @@ public class MetricsFilterTest {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		final String path = "/foo/bar/baz/bang";
 		when(req.getRequestURI()).thenReturn(path);
-		when(req.getMethod()).thenReturn(HttpMethods.POST);
+		when(req.getMethod()).thenReturn(HttpMethod.POST.asString());
 
 		FilterChain c = mock(FilterChain.class);
 		doAnswer(new Answer<Void>() {
@@ -153,17 +155,17 @@ public class MetricsFilterTest {
 
 		final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum",
 				new String[] { "path", "method" },
-				new String[] { "/foo", HttpMethods.POST });
+				new String[] { "/foo", HttpMethod.POST.asString() });
 		assertEquals(0.1, sum, 0.01);
 
 		final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket",
 				new String[] { "path", "method", "le" },
-				new String[] { "/foo", HttpMethods.POST, "0.05" });
+				new String[] { "/foo", HttpMethod.POST.asString(), "0.05" });
 		assertNotNull(le05);
 		assertEquals(0, le05, 0.01);
 		final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket",
 				new String[] { "path", "method", "le" },
-				new String[] { "/foo", HttpMethods.POST, "0.15" });
+				new String[] { "/foo", HttpMethod.POST.asString(), "0.15" });
 		assertNotNull(le15);
 		assertEquals(1, le15, 0.01);
 
@@ -193,7 +195,7 @@ public class MetricsFilterTest {
 	public void testStatusCode() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
-		when(req.getMethod()).thenReturn(HttpMethods.GET);
+		when(req.getMethod()).thenReturn(HttpMethod.GET.asString());
 
 		HttpServletResponse res = mock(HttpServletResponse.class);
 		when(res.getStatus()).thenReturn(200);
@@ -209,7 +211,7 @@ public class MetricsFilterTest {
 		final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(
 				"foobar_filter_status_total",
 				new String[] { "path", "method", "status" },
-				new String[] { "/foo/bar", HttpMethods.GET, "200" });
+				new String[] { "/foo/bar", HttpMethod.GET.asString(), "200" });
 		assertNotNull(sampleValue);
 		assertEquals(1, sampleValue, 0.0001);
 	}
@@ -218,7 +220,7 @@ public class MetricsFilterTest {
 	public void testStatusCodeWithNonHttpServletResponse() throws Exception {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
-		when(req.getMethod()).thenReturn(HttpMethods.GET);
+		when(req.getMethod()).thenReturn(HttpMethod.GET.asString());
 
 		ServletResponse res = mock(ServletResponse.class);
 
@@ -235,7 +237,7 @@ public class MetricsFilterTest {
 				new String[] { "path", "method", "status" },
 				new String[] {
 						"/foo/bar",
-						HttpMethods.GET,
+						HttpMethod.GET.asString(),
 						MetricsFilter.UNKNOWN_HTTP_STATUS_CODE });
 		assertNotNull(sampleValue);
 		assertEquals(1, sampleValue, 0.0001);
