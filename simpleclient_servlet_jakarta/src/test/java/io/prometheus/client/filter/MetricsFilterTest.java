@@ -2,8 +2,6 @@ package io.prometheus.client.filter;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
-
-import org.eclipse.jetty.http.HttpMethod;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -26,220 +24,214 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class MetricsFilterTest {
-	MetricsFilter f = new MetricsFilter();
+	
+	public static final String GET = "GET";
+	public static final String POST = "POST";
+	
+    MetricsFilter f = new MetricsFilter();
 
-	@After
-	public void clear() {
-		CollectorRegistry.defaultRegistry.clear();
-	}
+    @After
+    public void clear() {
+        CollectorRegistry.defaultRegistry.clear();
+    }
 
-	@Test
-	public void init() throws Exception {
-		FilterConfig cfg = mock(FilterConfig.class);
-		when(cfg.getInitParameter(anyString())).thenReturn(null);
+    @Test
+    public void init() throws Exception {
+        FilterConfig cfg = mock(FilterConfig.class);
+        when(cfg.getInitParameter(anyString())).thenReturn(null);
 
-		String metricName = "foo";
+        String metricName = "foo";
 
-		when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn(metricName);
-		when(cfg.getInitParameter(MetricsFilter.PATH_COMPONENT_PARAM)).thenReturn("4");
+        when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn(metricName);
+        when(cfg.getInitParameter(MetricsFilter.PATH_COMPONENT_PARAM)).thenReturn("4");
 
-		f.init(cfg);
+        f.init(cfg);
 
-		assertEquals(f.pathComponents, 4);
+        assertEquals(f.pathComponents, 4);
 
-		HttpServletRequest req = mock(HttpServletRequest.class);
+        HttpServletRequest req = mock(HttpServletRequest.class);
 
-		when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang/zilch/zip/nada");
-		when(req.getMethod()).thenReturn(HttpMethod.GET.asString());
+        when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang/zilch/zip/nada");
+        when(req.getMethod()).thenReturn(GET);
 
-		HttpServletResponse res = mock(HttpServletResponse.class);
-		FilterChain c = mock(FilterChain.class);
+        HttpServletResponse res = mock(HttpServletResponse.class);
+        FilterChain c = mock(FilterChain.class);
 
-		f.doFilter(req, res, c);
+        f.doFilter(req, res, c);
 
-		verify(c).doFilter(req, res);
+        verify(c).doFilter(req, res);
 
-		final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(
-				metricName + "_count",
-				new String[] { "path", "method" },
-				new String[] { "/foo/bar/baz/bang", HttpMethod.GET.asString() });
-		assertNotNull(sampleValue);
-		assertEquals(1, sampleValue, 0.0001);
-	}
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(metricName + "_count", new String[]{"path", "method"}, new String[]{"/foo/bar/baz/bang", GET});
+        assertNotNull(sampleValue);
+        assertEquals(1, sampleValue, 0.0001);
+    }
 
-	@Test
-	public void doFilter() throws Exception {
-		HttpServletRequest req = mock(HttpServletRequest.class);
-		final String path = "/foo/bar/baz/bang/zilch/zip/nada";
+    @Test
+    public void doFilter() throws Exception {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        final String path = "/foo/bar/baz/bang/zilch/zip/nada";
 
-		when(req.getRequestURI()).thenReturn(path);
-		when(req.getMethod()).thenReturn(HttpMethod.GET.asString());
+        when(req.getRequestURI()).thenReturn(path);
+        when(req.getMethod()).thenReturn(GET);
 
-		HttpServletResponse res = mock(HttpServletResponse.class);
-		FilterChain c = mock(FilterChain.class);
+        HttpServletResponse res = mock(HttpServletResponse.class);
+        FilterChain c = mock(FilterChain.class);
 
-		String name = "foo";
-		FilterConfig cfg = mock(FilterConfig.class);
-		when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn(name);
-		when(cfg.getInitParameter(MetricsFilter.PATH_COMPONENT_PARAM)).thenReturn("0");
+        String name = "foo";
+        FilterConfig cfg = mock(FilterConfig.class);
+        when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn(name);
+        when(cfg.getInitParameter(MetricsFilter.PATH_COMPONENT_PARAM)).thenReturn("0");
 
-		f.init(cfg);
-		f.doFilter(req, res, c);
+        f.init(cfg);
+        f.doFilter(req, res, c);
 
-		verify(c).doFilter(req, res);
+        verify(c).doFilter(req, res);
 
-		final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(name + "_count",
-				new String[] { "path", "method" },
-				new String[] { path, HttpMethod.GET.asString() });
-		assertNotNull(sampleValue);
-		assertEquals(1, sampleValue, 0.0001);
-	}
 
-	@Test
-	public void testConstructor() throws Exception {
-		HttpServletRequest req = mock(HttpServletRequest.class);
-		final String path = "/foo/bar/baz/bang";
-		when(req.getRequestURI()).thenReturn(path);
-		when(req.getMethod()).thenReturn(HttpMethod.POST.asString());
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(name + "_count", new String[]{"path", "method"}, new String[]{path, GET});
+        assertNotNull(sampleValue);
+        assertEquals(1, sampleValue, 0.0001);
+    }
 
-		FilterChain c = mock(FilterChain.class);
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-				Thread.sleep(100);
-				return null;
-			}
-		}).when(c).doFilter(any(HttpServletRequest.class), any(HttpServletResponse.class));
+    @Test
+    public void testConstructor() throws Exception {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        final String path = "/foo/bar/baz/bang";
+        when(req.getRequestURI()).thenReturn(path);
+        when(req.getMethod()).thenReturn(POST);
 
-		MetricsFilter constructed = new MetricsFilter("foobar_baz_filter_duration_seconds",
-				"Help for my filter", 0, null);
-		constructed.init(mock(FilterConfig.class));
+        FilterChain c = mock(FilterChain.class);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Thread.sleep(100);
+                return null;
+            }
+        }).when(c).doFilter(any(HttpServletRequest.class), any(HttpServletResponse.class));
 
-		HttpServletResponse res = mock(HttpServletResponse.class);
-		constructed.doFilter(req, res, c);
+        MetricsFilter constructed = new MetricsFilter(
+                "foobar_baz_filter_duration_seconds",
+                "Help for my filter",
+                0,
+                null
+        );
+        constructed.init(mock(FilterConfig.class));
 
-		final Double sum = CollectorRegistry.defaultRegistry.getSampleValue(
-				"foobar_baz_filter_duration_seconds_sum",
-				new String[] { "path", "method" },
-				new String[] { path, HttpMethod.POST.asString() });
-		assertNotNull(sum);
-		assertEquals(0.1, sum, 0.01);
-	}
+        HttpServletResponse res = mock(HttpServletResponse.class);
+        constructed.doFilter(req, res, c);
 
-	@Test
-	public void testBucketsAndName() throws Exception {
-		HttpServletRequest req = mock(HttpServletRequest.class);
-		final String path = "/foo/bar/baz/bang";
-		when(req.getRequestURI()).thenReturn(path);
-		when(req.getMethod()).thenReturn(HttpMethod.POST.asString());
+        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foobar_baz_filter_duration_seconds_sum", new String[]{"path", "method"}, new String[]{path, POST});
+        assertNotNull(sum);
+        assertEquals(0.1, sum, 0.01);
+    }
 
-		FilterChain c = mock(FilterChain.class);
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-				Thread.sleep(100);
-				return null;
-			}
-		}).when(c).doFilter(any(HttpServletRequest.class), any(HttpServletResponse.class));
+    @Test
+    public void testBucketsAndName() throws Exception {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        final String path = "/foo/bar/baz/bang";
+        when(req.getRequestURI()).thenReturn(path);
+        when(req.getMethod()).thenReturn(POST);
 
-		final String buckets = "0.01,0.05,0.1,0.15,0.25";
-		FilterConfig cfg = mock(FilterConfig.class);
-		when(cfg.getInitParameter(MetricsFilter.BUCKET_CONFIG_PARAM)).thenReturn(buckets);
-		when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn("foo");
+        FilterChain c = mock(FilterChain.class);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Thread.sleep(100);
+                return null;
+            }
+        }).when(c).doFilter(any(HttpServletRequest.class), any(HttpServletResponse.class));
 
-		HttpServletResponse res = mock(HttpServletResponse.class);
+        final String buckets = "0.01,0.05,0.1,0.15,0.25";
+        FilterConfig cfg = mock(FilterConfig.class);
+        when(cfg.getInitParameter(MetricsFilter.BUCKET_CONFIG_PARAM)).thenReturn(buckets);
+        when(cfg.getInitParameter(MetricsFilter.METRIC_NAME_PARAM)).thenReturn("foo");
 
-		f.init(cfg);
+        HttpServletResponse res = mock(HttpServletResponse.class);
 
-		f.doFilter(req, res, c);
+        f.init(cfg);
 
-		final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum",
-				new String[] { "path", "method" },
-				new String[] { "/foo", HttpMethod.POST.asString() });
-		assertEquals(0.1, sum, 0.01);
+        f.doFilter(req, res, c);
 
-		final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket",
-				new String[] { "path", "method", "le" },
-				new String[] { "/foo", HttpMethod.POST.asString(), "0.05" });
-		assertNotNull(le05);
-		assertEquals(0, le05, 0.01);
-		final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket",
-				new String[] { "path", "method", "le" },
-				new String[] { "/foo", HttpMethod.POST.asString(), "0.15" });
-		assertNotNull(le15);
-		assertEquals(1, le15, 0.01);
+        final Double sum = CollectorRegistry.defaultRegistry.getSampleValue("foo_sum", new String[]{"path", "method"}, new String[]{"/foo", POST});
+        assertEquals(0.1, sum, 0.01);
 
-		final Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry
-				.metricFamilySamples();
-		Collector.MetricFamilySamples sample = null;
-		while (samples.hasMoreElements()) {
-			sample = samples.nextElement();
-			if (sample.name.equals("foo")) {
-				break;
-			}
-		}
+        final Double le05 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo", POST, "0.05"});
+        assertNotNull(le05);
+        assertEquals(0, le05, 0.01);
+        final Double le15 = CollectorRegistry.defaultRegistry.getSampleValue("foo_bucket", new String[]{"path", "method", "le"}, new String[]{"/foo", POST, "0.15"});
+        assertNotNull(le15);
+        assertEquals(1, le15, 0.01);
 
-		assertNotNull(sample);
 
-		int count = 0;
-		for (Collector.MetricFamilySamples.Sample s : sample.samples) {
-			if (s.name.equals("foo_bucket")) {
-				count++;
-			}
-		}
-		// +1 because of the final le=+infinity bucket
-		assertEquals(buckets.split(",").length + 1, count);
-	}
+        final Enumeration<Collector.MetricFamilySamples> samples = CollectorRegistry.defaultRegistry.metricFamilySamples();
+        Collector.MetricFamilySamples sample = null;
+        while(samples.hasMoreElements()) {
+            sample = samples.nextElement();
+            if (sample.name.equals("foo")) {
+                break;
+            }
+        }
 
-	@Test
-	public void testStatusCode() throws Exception {
-		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
-		when(req.getMethod()).thenReturn(HttpMethod.GET.asString());
+        assertNotNull(sample);
 
-		HttpServletResponse res = mock(HttpServletResponse.class);
-		when(res.getStatus()).thenReturn(200);
+        int count = 0;
+        for (Collector.MetricFamilySamples.Sample s : sample.samples) {
+            if (s.name.equals("foo_bucket")) {
+                count++;
+            }
+        }
+        // +1 because of the final le=+infinity bucket
+        assertEquals(buckets.split(",").length+1, count);
+    }
 
-		FilterChain c = mock(FilterChain.class);
+    @Test
+    public void testStatusCode() throws Exception {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
+        when(req.getMethod()).thenReturn(GET);
 
-		MetricsFilter constructed = new MetricsFilter("foobar_filter", "Help for my filter", 2,
-				null);
-		constructed.init(mock(FilterConfig.class));
+        HttpServletResponse res = mock(HttpServletResponse.class);
+        when(res.getStatus()).thenReturn(200);
 
-		constructed.doFilter(req, res, c);
+        FilterChain c = mock(FilterChain.class);
 
-		final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(
-				"foobar_filter_status_total",
-				new String[] { "path", "method", "status" },
-				new String[] { "/foo/bar", HttpMethod.GET.asString(), "200" });
-		assertNotNull(sampleValue);
-		assertEquals(1, sampleValue, 0.0001);
-	}
+        MetricsFilter constructed = new MetricsFilter(
+                "foobar_filter",
+                "Help for my filter",
+                2,
+                null
+        );
+        constructed.init(mock(FilterConfig.class));
 
-	@Test
-	public void testStatusCodeWithNonHttpServletResponse() throws Exception {
-		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
-		when(req.getMethod()).thenReturn(HttpMethod.GET.asString());
+        constructed.doFilter(req, res, c);
 
-		ServletResponse res = mock(ServletResponse.class);
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue("foobar_filter_status_total", new String[]{"path", "method", "status"}, new String[]{"/foo/bar", GET, "200"});
+        assertNotNull(sampleValue);
+        assertEquals(1, sampleValue, 0.0001);
+    }
 
-		FilterChain c = mock(FilterChain.class);
+    @Test
+    public void testStatusCodeWithNonHttpServletResponse() throws Exception {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        when(req.getRequestURI()).thenReturn("/foo/bar/baz/bang");
+        when(req.getMethod()).thenReturn(GET);
 
-		MetricsFilter constructed = new MetricsFilter("foobar_filter", "Help for my filter", 2,
-				null);
-		constructed.init(mock(FilterConfig.class));
+        ServletResponse res = mock(ServletResponse.class);
 
-		constructed.doFilter(req, res, c);
+        FilterChain c = mock(FilterChain.class);
 
-		final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue(
-				"foobar_filter_status_total",
-				new String[] { "path", "method", "status" },
-				new String[] {
-						"/foo/bar",
-						HttpMethod.GET.asString(),
-						MetricsFilter.UNKNOWN_HTTP_STATUS_CODE });
-		assertNotNull(sampleValue);
-		assertEquals(1, sampleValue, 0.0001);
-	}
+        MetricsFilter constructed = new MetricsFilter(
+                "foobar_filter",
+                "Help for my filter",
+                2,
+                null
+        );
+        constructed.init(mock(FilterConfig.class));
+
+        constructed.doFilter(req, res, c);
+
+        final Double sampleValue = CollectorRegistry.defaultRegistry.getSampleValue("foobar_filter_status_total", new String[]{"path", "method", "status"}, new String[]{"/foo/bar", GET, MetricsFilter.UNKNOWN_HTTP_STATUS_CODE});
+        assertNotNull(sampleValue);
+        assertEquals(1, sampleValue, 0.0001);
+    }
 }

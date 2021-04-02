@@ -1,6 +1,8 @@
 package io.prometheus.client.exporter;
 
 import io.prometheus.client.Gauge;
+
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -28,8 +30,9 @@ public class ExampleBenchmark {
         server.start();
         Thread.sleep(1000);
 
+        Connector connector =  (Connector) server.getConnectors()[0];
         byte[] bytes = new byte[8192];
-        URL url = new URL("http", "localhost", server.getConnectors()[0].getLocalPort(), "/metrics");
+        URL url = new URL("http", "localhost", connector.getLocalPort(), "/metrics");
 
         long start = System.nanoTime();
         for (int i = 0; i < 100; i++) {
