@@ -255,6 +255,10 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
 
     /**
      * Observe the given amount.
+     * @param amt in most cases amt should be >= 0. Negative values are supported, but you should read
+     *            <a href="https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations">
+     *            https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations</a> for
+     *            implications and alternatives.
      */
     public void observe(double amt) {
       for (int i = 0; i < upperBounds.length; ++i) {
@@ -293,6 +297,10 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
   // Convenience methods.
   /**
    * Observe the given amount on the histogram with no labels.
+   * @param amt in most cases amt should be >= 0. Negative values are supported, but you should read
+   *            <a href="https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations">
+   *            https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations</a> for
+   *            implications and alternatives.
    */
   public void observe(double amt) {
     noLabelsChild.observe(amt);

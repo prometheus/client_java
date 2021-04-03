@@ -39,13 +39,27 @@ public class HistogramTest {
   }
 
   private double getCount() {
-    return registry.getSampleValue("nolabels_count").doubleValue();
+    return getCount("nolabels");
   }
+
+  private double getCount(String name) {
+    return registry.getSampleValue(name + "_count").doubleValue();
+  }
+
   private double getSum() {
-    return registry.getSampleValue("nolabels_sum").doubleValue();
+    return getSum("nolabels");
   }
+
+  private double getSum(String name) {
+    return registry.getSampleValue(name + "_sum").doubleValue();
+  }
+
   private double getBucket(double b) {
-    return registry.getSampleValue("nolabels_bucket",
+    return getBucket(b, "nolabels");
+  }
+
+  private double getBucket(double b, String name) {
+    return registry.getSampleValue(name + "_bucket",
         new String[]{"le"},
         new String[]{Collector.doubleToGoString(b)}).doubleValue();
   }
@@ -66,6 +80,30 @@ public class HistogramTest {
     assertEquals(2.0, getBucket(7.5), .001);
     assertEquals(2.0, getBucket(10), .001);
     assertEquals(2.0, getBucket(Double.POSITIVE_INFINITY), .001);
+  }
+
+  @Test
+  // See https://github.com/prometheus/client_java/issues/646
+  public void testNegativeAmount() {
+    Histogram histogram = Histogram.build()
+        .name("histogram")
+        .help("test histogram for negative values")
+        .buckets(-10, -5, 0, 5, 10)
+        .register(registry);
+    double expectedCount = 0;
+    double expectedSum = 0;
+    for (int i=10; i>=-11; i--) {
+      histogram.observe(i);
+      expectedCount++;
+      expectedSum += i;
+      assertEquals(expectedSum, getSum("histogram"), .001);
+      assertEquals(expectedCount, getCount("histogram"), .001);
+    }
+    double[] expectedBucketValues = new double[]{2.0, 7.0, 12.0, 17.0, 22.0, 22.0}; // buckets -10, -5, 0, 5, 10, +Inf
+    for (int i=0; i<expectedBucketValues.length; i++) {
+      double bucket = histogram.getBuckets()[i];
+      assertEquals(expectedBucketValues[i], getBucket(bucket, "histogram"), .001);
+    }
   }
 
   @Test

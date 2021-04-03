@@ -71,6 +71,15 @@ public class SummaryTest {
   }
 
   @Test
+  // See https://github.com/prometheus/client_java/issues/646
+  public void testNegativeAmount() {
+    noLabels.observe(-1);
+    noLabels.observe(-3);
+    assertEquals(2.0, getCount(), .001);
+    assertEquals(-4.0, getSum(), .001);
+  }
+
+  @Test
   public void testQuantiles() {
     int nSamples = 1000000; // simulate one million samples
 
