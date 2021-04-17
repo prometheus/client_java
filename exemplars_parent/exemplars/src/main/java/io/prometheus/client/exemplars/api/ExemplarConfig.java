@@ -2,7 +2,6 @@ package io.prometheus.client.exemplars.api;
 
 import io.prometheus.client.exemplars.impl.DefaultExemplarSampler;
 import io.prometheus.client.exemplars.impl.NoopExemplarSampler;
-import io.prometheus.client.exemplars.tracer.common.NoopSpanContext;
 import io.prometheus.client.exemplars.tracer.common.SpanContext;
 import io.prometheus.client.exemplars.tracer.otel.OpenTelemetrySpanContext;
 import io.prometheus.client.exemplars.tracer.otel_agent.OpenTelemetryAgentSpanContext;
@@ -14,88 +13,68 @@ public class ExemplarConfig {
 
   private static final ExemplarConfig instance = new ExemplarConfig();
 
-  private final NoopExemplarSampler noopExemplarSampler = new NoopExemplarSampler();
-  private volatile HistogramExemplarSampler defaultHistogramExemplarSampler;
-  private volatile SummaryExemplarSampler defaultSummaryExemplarSampler;
-  private volatile GaugeExemplarSampler defaultGaugeExemplarSampler;
-  private volatile CounterExemplarSampler defaultCounterExemplarSampler;
+  private final ExemplarSampler noopExemplarSampler;
+  private final ExemplarSampler defaultExemplarSampler;
+
+  private volatile HistogramExemplarSampler histogramExemplarSampler;
+  private volatile CounterExemplarSampler counterExemplarSampler;
 
   private ExemplarConfig() {
-    DefaultExemplarSampler defaultExemplars = new DefaultExemplarSampler(findTraceIdSupplier());
-    defaultCounterExemplarSampler = defaultExemplars;
-    defaultGaugeExemplarSampler = defaultExemplars;
-    defaultHistogramExemplarSampler = defaultExemplars;
-    defaultSummaryExemplarSampler = defaultExemplars;
+    noopExemplarSampler = new NoopExemplarSampler();
+    SpanContext spanContext = findSpanContextSupplier();
+    if (spanContext != null) {
+      defaultExemplarSampler = new DefaultExemplarSampler(spanContext);
+    } else {
+      defaultExemplarSampler = noopExemplarSampler;
+    }
+    counterExemplarSampler = defaultExemplarSampler;
+    histogramExemplarSampler = defaultExemplarSampler;
   }
 
   // Counter
 
-  public static void setDefaultCounterExemplarSampler(CounterExemplarSampler defaultCounterExemplarSampler) {
-    if (defaultCounterExemplarSampler == null) {
+  public static void setCounterExemplarSampler(CounterExemplarSampler counterExemplarSampler) {
+    if (counterExemplarSampler == null) {
       throw new NullPointerException();
     }
-    instance.defaultCounterExemplarSampler = defaultCounterExemplarSampler;
-  }
-
-  // Gauge
-
-  public static void setDefaultGaugeExemplarSampler(GaugeExemplarSampler defaultGaugeExemplarSampler) {
-    if (defaultGaugeExemplarSampler == null) {
-      throw new NullPointerException();
-    }
-    instance.defaultGaugeExemplarSampler = defaultGaugeExemplarSampler;
+    instance.counterExemplarSampler = counterExemplarSampler;
   }
 
   // Histogram
 
-  public static void setDefaultHistogramExemplarSampler(HistogramExemplarSampler defaultHistogramExemplarSampler) {
-    if (defaultHistogramExemplarSampler == null) {
+  public static void setHistogramExemplarSampler(HistogramExemplarSampler histogramExemplarSampler) {
+    if (histogramExemplarSampler == null) {
       throw new NullPointerException();
     }
-    instance.defaultHistogramExemplarSampler = defaultHistogramExemplarSampler;
-  }
-
-  // Summary
-
-  public static void setDefaultSummaryExemplarSampler(SummaryExemplarSampler defaultSummaryExemplarSampler) {
-    if (defaultSummaryExemplarSampler == null) {
-      throw new NullPointerException();
-    }
-    instance.defaultSummaryExemplarSampler = defaultSummaryExemplarSampler;
+    instance.histogramExemplarSampler = histogramExemplarSampler;
   }
 
   // Disable all of the above
 
-  public static void disableByDefault() {
-    instance.defaultCounterExemplarSampler = instance.noopExemplarSampler;
-    instance.defaultGaugeExemplarSampler = instance.noopExemplarSampler;
-    instance.defaultHistogramExemplarSampler = instance.noopExemplarSampler;
-    instance.defaultSummaryExemplarSampler = instance.noopExemplarSampler;
+  public static void disableExemplars() {
+    instance.counterExemplarSampler = instance.noopExemplarSampler;
+    instance.histogramExemplarSampler = instance.noopExemplarSampler;
   }
 
   // Methods for internal use
 
-  public static CounterExemplarSampler getDefaultCounterExemplarSampler() {
-    return instance.defaultCounterExemplarSampler;
+  public static CounterExemplarSampler getCounterExemplarSampler() {
+    return instance.counterExemplarSampler;
   }
 
-  public static GaugeExemplarSampler getDefaultGaugeExemplarSampler() {
-    return instance.defaultGaugeExemplarSampler;
+  public static HistogramExemplarSampler getHistogramExemplarSampler() {
+    return instance.histogramExemplarSampler;
   }
 
-  public static HistogramExemplarSampler getDefaultHistogramExemplarSampler() {
-    return instance.defaultHistogramExemplarSampler;
-  }
-
-  public static SummaryExemplarSampler getDefaultSummaryExemplarSampler() {
-    return instance.defaultSummaryExemplarSampler;
-  }
-
-  public static NoopExemplarSampler getNoopExemplarSampler() {
+  public static ExemplarSampler getNoopExemplarSampler() {
     return instance.noopExemplarSampler;
   }
 
-  private static SpanContext findTraceIdSupplier() {
+  public static ExemplarSampler getDefaultExemplarSampler() {
+    return instance.defaultExemplarSampler;
+  }
+
+  private static SpanContext findSpanContextSupplier() {
     try {
       if (OpenTelemetrySpanContext.isAvailable()) {
         return new OpenTelemetrySpanContext();
@@ -106,6 +85,6 @@ public class ExemplarConfig {
     } catch (UnsupportedClassVersionError ignored) {
       // OpenTelemetry requires Java 8, but client_java might run on Java 6.
     }
-    return new NoopSpanContext();
+    return null;
   }
 }

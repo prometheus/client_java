@@ -49,7 +49,7 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.10.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
           <groupId>com.codahale.metrics</groupId>

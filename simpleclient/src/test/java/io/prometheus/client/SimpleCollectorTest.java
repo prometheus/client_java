@@ -157,7 +157,7 @@ public class SimpleCollectorTest {
 
   @Test
   public void testSetChild() {
-    metric.setChild(new Gauge.Child(new NoopExemplarSampler()){
+    metric.setChild(new Gauge.Child(){
       public double get() {
         return 42;
       }
@@ -167,7 +167,7 @@ public class SimpleCollectorTest {
 
   @Test
   public void testSetChildReturnsGauge() {
-    Gauge g = metric.setChild(new Gauge.Child(new NoopExemplarSampler()){
+    Gauge g = metric.setChild(new Gauge.Child(){
       public double get() {
         return 42;
       }

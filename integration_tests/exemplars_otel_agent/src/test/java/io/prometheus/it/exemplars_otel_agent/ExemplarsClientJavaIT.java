@@ -59,9 +59,9 @@ public class ExemplarsClientJavaIT {
     assertExemplar(inner, metrics, "requests_total", "path", "/god-of-fire");
     assertNoExemplar(metrics, "requests_created", "path", "/god-of-fire");
 
-    // gauge
-    assertExemplar(outer, metrics, "last_request_timestamp", "path", "/hello");
-    assertExemplar(inner, metrics, "last_request_timestamp", "path", "/god-of-fire");
+    // gauge (Gauges don't have Exemplars according to the OpenMetrics Spec)
+    assertNoExemplar(metrics, "last_request_timestamp", "path", "/hello");
+    assertNoExemplar(metrics, "last_request_timestamp", "path", "/god-of-fire");
 
     // histogram: simulated duration is 0.5ms for the outer and 0.3ms for the inner request
     assertExemplar(outer, metrics, "request_duration_histogram_bucket", "path", "/hello", "le", "0.001");
@@ -73,13 +73,13 @@ public class ExemplarsClientJavaIT {
     assertNoExemplar(metrics, "request_duration_histogram_bucket", "path", "/hello", "le", "+Inf");
     assertNoExemplar(metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", "+Inf");
 
-    // summary: all values are identical because there is only one observation
-    assertExemplar(outer, metrics, "request_duration_summary", "path", "/hello", "quantile", "0.75");
-    assertExemplar(outer, metrics, "request_duration_summary", "path", "/hello", "quantile", "0.85");
+    // summary: all values are identical because there is only one observation. Summaries don't have exempalrs
+    assertNoExemplar(metrics, "request_duration_summary", "path", "/hello", "quantile", "0.75");
+    assertNoExemplar(metrics, "request_duration_summary", "path", "/hello", "quantile", "0.85");
     assertNoExemplar(metrics, "request_duration_summary_count", "path", "/hello");
     assertNoExemplar(metrics, "request_duration_summary_sum", "path", "/hello");
-    assertExemplar(inner, metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.75");
-    assertExemplar(inner, metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.85");
+    assertNoExemplar(metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.75");
+    assertNoExemplar(metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.85");
     assertNoExemplar(metrics, "request_duration_summary_count", "path", "/god-of-fire");
     assertNoExemplar(metrics, "request_duration_summary_sum", "path", "/god-of-fire");
 
@@ -107,20 +107,20 @@ public class ExemplarsClientJavaIT {
     assertExemplar(inner, metrics, "requests_total", "path", "/god-of-fire");
     assertNoExemplar(metrics, "requests_created", "path", "/god-of-fire");
 
-    // gauge: not updated, because the minimum retention interval is not over yet
-    assertExemplar(outer, metrics, "last_request_timestamp", "path", "/hello");
-    assertExemplar(inner, metrics, "last_request_timestamp", "path", "/god-of-fire");
+    // gauge (still no Exemplar)
+    assertNoExemplar(metrics, "last_request_timestamp", "path", "/hello");
+    assertNoExemplar(metrics, "last_request_timestamp", "path", "/god-of-fire");
 
     // histogram
     assertHistogramAfterMoreThenTenCalls(outers, inners);
 
     // summary: each call is 1ms slower than the previous one, up to 10ms, then we start again.
-    assertExemplar(outers.get("0.007"), metrics, "request_duration_summary", "path", "/hello", "quantile", "0.75");
-    assertExemplar(outers.get("0.008"), metrics, "request_duration_summary", "path", "/hello", "quantile", "0.85");
+    assertNoExemplar(metrics, "request_duration_summary", "path", "/hello", "quantile", "0.75");
+    assertNoExemplar(metrics, "request_duration_summary", "path", "/hello", "quantile", "0.85");
     assertNoExemplar(metrics, "request_duration_summary_count", "path", "/hello");
     assertNoExemplar(metrics, "request_duration_summary_sum", "path", "/hello");
-    assertExemplar(inners.get("0.007"), metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.75");
-    assertExemplar(inners.get("0.008"), metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.85");
+    assertNoExemplar(metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.75");
+    assertNoExemplar(metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.85");
     assertNoExemplar(metrics, "request_duration_summary_count", "path", "/god-of-fire");
     assertNoExemplar(metrics, "request_duration_summary_sum", "path", "/god-of-fire");
 

@@ -1,20 +1,19 @@
 package io.prometheus.client.exemplars.impl;
 
-import io.prometheus.client.exemplars.api.CounterExemplarSampler;
 import io.prometheus.client.exemplars.api.Exemplar;
-import io.prometheus.client.exemplars.api.GaugeExemplarSampler;
-import io.prometheus.client.exemplars.api.HistogramExemplarSampler;
-import io.prometheus.client.exemplars.api.SummaryExemplarSampler;
+import io.prometheus.client.exemplars.api.ExemplarSampler;
 import io.prometheus.client.exemplars.api.Value;
 import io.prometheus.client.exemplars.tracer.common.SpanContext;
+
+import static io.prometheus.client.exemplars.api.Exemplar.SPAN_ID;
+import static io.prometheus.client.exemplars.api.Exemplar.TRACE_ID;
 
 /**
  * Default Exemplar sampler.
  * <p/>
  * Keeps each Exemplar for a minimum of ~7 seconds, then samples a new one.
  */
-public class DefaultExemplarSampler
-    implements CounterExemplarSampler, GaugeExemplarSampler, HistogramExemplarSampler, SummaryExemplarSampler {
+public class DefaultExemplarSampler implements ExemplarSampler {
 
   private final SpanContext spanContext;
   // Choosing a prime number for the retention interval makes behavior more predictable,
@@ -34,39 +33,23 @@ public class DefaultExemplarSampler
   }
 
   @Override
-  public Exemplar sample(Value value, Exemplar previous) {
-    long timestampMs = clock.currentTimeMillis();
-    if (previous == null || timestampMs - previous.getTimestampMs() > minRetentionIntervalMs) {
-      String traceId = spanContext.getTraceId();
-      String spanId = spanContext.getSpanId();
-      if (traceId != null && spanId != null) {
-        return new Exemplar(traceId, spanId, value.get(), timestampMs);
-      }
-    }
-    return null;
+  public Exemplar sample(double increment, Value newTotalValue, Exemplar previous) {
+    return doSample(increment, previous);
   }
 
   @Override
   public Exemplar sample(double value, double bucketFrom, double bucketTo, Exemplar previous) {
-    // As this implementation ignores the buckets, it's almost identical to the Counter and Gauge version,
-    // except that the value is passed directly and not via the Value wrapper.
+    return doSample(value, previous);
+  }
+
+  private Exemplar doSample(double value, Exemplar previous) {
     long timestampMs = clock.currentTimeMillis();
     if (previous == null || timestampMs - previous.getTimestampMs() > minRetentionIntervalMs) {
       String traceId = spanContext.getTraceId();
       String spanId = spanContext.getSpanId();
       if (traceId != null && spanId != null) {
-        return new Exemplar(traceId, spanId, value, timestampMs);
+        return new Exemplar(value, timestampMs, TRACE_ID, traceId, SPAN_ID, spanId);
       }
-    }
-    return null;
-  }
-
-  @Override
-  public Exemplar sample(double value) {
-    String traceId = spanContext.getTraceId();
-    String spanId = spanContext.getSpanId();
-    if (traceId != null && spanId != null) {
-      return new Exemplar(traceId, spanId, value, clock.currentTimeMillis());
     }
     return null;
   }

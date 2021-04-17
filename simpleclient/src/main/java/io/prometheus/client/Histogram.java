@@ -78,7 +78,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
 
   public static class Builder extends SimpleCollector.Builder<Builder, Histogram> {
 
-    private HistogramExemplarSampler exemplarSampler = ExemplarConfig.getDefaultHistogramExemplarSampler();
+    private HistogramExemplarSampler exemplarSampler = ExemplarConfig.getHistogramExemplarSampler();
     private double[] buckets = new double[]{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10};
 
     @Override
@@ -138,7 +138,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       return this;
     }
 
-    public Builder withExemplarSampler(HistogramExemplarSampler exemplarSampler) {
+    public Builder withExemplars(HistogramExemplarSampler exemplarSampler) {
       if (exemplarSampler == null) {
         throw new NullPointerException();
       }
@@ -146,8 +146,12 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       return this;
     }
 
+    public Builder withExemplars() {
+      return withExemplars(ExemplarConfig.getDefaultExemplarSampler());
+    }
+
     public Builder withoutExemplars() {
-      return withExemplarSampler(ExemplarConfig.getNoopExemplarSampler());
+      return withExemplars(ExemplarConfig.getNoopExemplarSampler());
     }
   }
 

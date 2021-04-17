@@ -1,9 +1,6 @@
 package io.prometheus.client;
 
 import io.prometheus.client.CKMSQuantiles.Quantile;
-import io.prometheus.client.CKMSQuantilesWithExemplars.ValueWithExemplar;
-import io.prometheus.client.exemplars.api.ExemplarConfig;
-import io.prometheus.client.exemplars.api.SummaryExemplarSampler;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -86,11 +83,9 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   final List<Quantile> quantiles; // Can be empty, but can never be null.
   final long maxAgeSeconds;
   final int ageBuckets;
-  final SummaryExemplarSampler exemplarSampler;
 
   Summary(Builder b) {
     super(b);
-    this.exemplarSampler = b.exemplarSampler;
     quantiles = Collections.unmodifiableList(new ArrayList<Quantile>(b.quantiles));
     this.maxAgeSeconds = b.maxAgeSeconds;
     this.ageBuckets = b.ageBuckets;
@@ -102,7 +97,6 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private final List<Quantile> quantiles = new ArrayList<Quantile>();
     private long maxAgeSeconds = TimeUnit.MINUTES.toSeconds(10);
     private int ageBuckets = 5;
-    private SummaryExemplarSampler exemplarSampler = ExemplarConfig.getDefaultSummaryExemplarSampler();
 
     public Builder quantile(double quantile, double error) {
       if (quantile < 0.0 || quantile > 1.0) {
@@ -129,18 +123,6 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       }
       this.ageBuckets = ageBuckets;
       return this;
-    }
-
-    public Builder withExemplarSampler(SummaryExemplarSampler exemplarSampler) {
-      if (exemplarSampler == null) {
-        throw new NullPointerException();
-      }
-      this.exemplarSampler = exemplarSampler;
-      return this;
-    }
-
-    public Builder withoutExemplars() {
-      return withExemplarSampler(ExemplarConfig.getNoopExemplarSampler());
     }
 
     @Override
@@ -174,7 +156,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
   @Override
   protected Child newChild() {
-    return new Child(quantiles, maxAgeSeconds, ageBuckets, exemplarSampler);
+    return new Child(quantiles, maxAgeSeconds, ageBuckets);
   }
 
 
@@ -256,15 +238,8 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     public static class Value {
       public final double count;
       public final double sum;
-      public final SortedMap<Double, ValueWithExemplar> quantiles;
+      public final SortedMap<Double, Double> quantiles;
       public final long created;
-
-      private Value(double count, double sum, List<Quantile> quantiles, TimeWindowQuantilesWithExemplars quantileValues, long created) {
-        this.count = count;
-        this.sum = sum;
-        this.quantiles = Collections.unmodifiableSortedMap(snapshot(quantiles, quantileValues));
-        this.created = created;
-      }
 
       private Value(double count, double sum, List<Quantile> quantiles, TimeWindowQuantiles quantileValues, long created) {
         this.count = count;
@@ -273,16 +248,8 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
         this.created = created;
       }
 
-      private SortedMap<Double, ValueWithExemplar> snapshot(List<Quantile> quantiles, TimeWindowQuantiles quantileValues) {
-        SortedMap<Double, ValueWithExemplar> result = new TreeMap<Double, ValueWithExemplar>();
-        for (Quantile q : quantiles) {
-          result.put(q.quantile, new ValueWithExemplar(quantileValues.get(q.quantile), null));
-        }
-        return result;
-      }
-
-      private SortedMap<Double, ValueWithExemplar> snapshot(List<Quantile> quantiles, TimeWindowQuantilesWithExemplars quantileValues) {
-        SortedMap<Double, ValueWithExemplar> result = new TreeMap<Double, ValueWithExemplar>();
+      private SortedMap<Double, Double> snapshot(List<Quantile> quantiles, TimeWindowQuantiles quantileValues) {
+        SortedMap<Double, Double> result = new TreeMap<Double, Double>();
         for (Quantile q : quantiles) {
           result.put(q.quantile, quantileValues.get(q.quantile));
         }
@@ -298,24 +265,14 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private final DoubleAdder sum = new DoubleAdder();
     private final List<Quantile> quantiles;
     private final TimeWindowQuantiles quantileValues;
-    private final TimeWindowQuantilesWithExemplars quantileValuesWithExemplars;
     private final long created = System.currentTimeMillis();
-    private final SummaryExemplarSampler exemplarSampler;
 
-    private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets, SummaryExemplarSampler exemplarSampler) {
-      this.exemplarSampler = exemplarSampler;
+    private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets) {
       this.quantiles = quantiles;
       if (quantiles.size() > 0) {
-        if (exemplarSampler == ExemplarConfig.getNoopExemplarSampler()) {
-          quantileValues = new TimeWindowQuantiles(quantiles.toArray(new CKMSQuantiles.Quantile[]{}), maxAgeSeconds, ageBuckets);
-          quantileValuesWithExemplars = null;
-        } else {
-          quantileValues = null;
-          quantileValuesWithExemplars = new TimeWindowQuantilesWithExemplars(quantiles.toArray(new Quantile[]{}), maxAgeSeconds, ageBuckets);
-        }
+        quantileValues = new TimeWindowQuantiles(quantiles.toArray(new Quantile[]{}), maxAgeSeconds, ageBuckets);
       } else {
         quantileValues = null;
-        quantileValuesWithExemplars = null;
       }
     }
 
@@ -331,8 +288,6 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       sum.add(amt);
       if (quantileValues != null) {
         quantileValues.insert(amt);
-      } else if (quantileValuesWithExemplars != null) {
-        quantileValuesWithExemplars.insert(amt, exemplarSampler.sample(amt));
       }
     }
     /**
@@ -349,11 +304,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
      * <em>Warning:</em> The definition of {@link Value} is subject to change.
      */
     public Value get() {
-      if (quantileValuesWithExemplars != null) {
-        return new Value(count.sum(), sum.sum(), quantiles, quantileValuesWithExemplars, created);
-      } else {
-        return new Value(count.sum(), sum.sum(), quantiles, quantileValues, created);
-      }
+      return new Value(count.sum(), sum.sum(), quantiles, quantileValues, created);
     }
   }
 
@@ -413,11 +364,10 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       Child.Value v = c.getValue().get();
       List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
       labelNamesWithQuantile.add("quantile");
-      for(Map.Entry<Double, ValueWithExemplar> q : v.quantiles.entrySet()) {
+      for(Map.Entry<Double, Double> q : v.quantiles.entrySet()) {
         List<String> labelValuesWithQuantile = new ArrayList<String>(c.getKey());
         labelValuesWithQuantile.add(doubleToGoString(q.getKey()));
-        ValueWithExemplar valueWithExemplar = q.getValue();
-        samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, valueWithExemplar.getValue(), valueWithExemplar.getExemplar()));
+        samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, q.getValue()));
       }
       samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));

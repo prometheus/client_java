@@ -89,7 +89,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
 
   public static class Builder extends SimpleCollector.Builder<Builder, Counter> {
 
-    private CounterExemplarSampler exemplarSampler = ExemplarConfig.getDefaultCounterExemplarSampler();
+    private CounterExemplarSampler exemplarSampler = ExemplarConfig.getCounterExemplarSampler();
 
     @Override
     public Counter create() {
@@ -101,7 +101,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
       return new Counter(this);
     }
 
-    public Builder withExemplarSampler(CounterExemplarSampler exemplarSampler) {
+    public Builder withExemplars(CounterExemplarSampler exemplarSampler) {
       if (exemplarSampler == null) {
         throw new NullPointerException();
       }
@@ -109,8 +109,12 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
       return this;
     }
 
+    public Builder withExemplars() {
+      return withExemplars(ExemplarConfig.getDefaultExemplarSampler());
+    }
+
     public Builder withoutExemplars() {
-      return withExemplarSampler(ExemplarConfig.getNoopExemplarSampler());
+      return withExemplars(ExemplarConfig.getNoopExemplarSampler());
     }
   }
 
@@ -168,13 +172,13 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
         throw new IllegalArgumentException("Amount to increment must be non-negative.");
       }
       value.add(amt);
-      updateExemplar();
+      updateExemplar(amt);
     }
-    private void updateExemplar() {
+    private void updateExemplar(double amt) {
       Exemplar prev, next;
       do {
         prev = exemplar.get();
-        next = exemplarSampler.sample(this, prev);
+        next = exemplarSampler.sample(amt, this, prev);
         if (next == null || next == prev) {
           return;
         }

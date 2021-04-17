@@ -5,7 +5,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -241,17 +240,25 @@ public class TextFormat {
         writer.write(Collector.doubleToGoString(sample.value));
         if (sample.timestampMs != null){
           writer.write(' ');
-          writeTimestamp(writer, sample.timestampMs);
+          omWriteTimestamp(writer, sample.timestampMs);
         }
         if (sample.exemplar != null) {
-          writer.write(" # {trace_id=\"");
-          writeEscapedLabelValue(writer, sample.exemplar.getTraceId());
-          writer.write("\",span_id=\"");
-          writeEscapedLabelValue(writer, sample.exemplar.getSpanId());
-          writer.write("\"} ");
+          writer.write(" # {");
+          for (int i=0; i<sample.exemplar.getNumberOfLabels(); i++) {
+            if (i > 0) {
+              writer.write(",");
+            }
+            writer.write(sample.exemplar.getLabelName(i));
+            writer.write("=\"");
+            writeEscapedLabelValue(writer, sample.exemplar.getLabelValue(i));
+            writer.write("\"");
+          }
+          writer.write("} ");
           writer.write(Collector.doubleToGoString(sample.exemplar.getValue()));
-          writer.write(' ');
-          writeTimestamp(writer, sample.exemplar.getTimestampMs());
+          if (sample.exemplar.getTimestampMs() != 0) {
+            writer.write(' ');
+            omWriteTimestamp(writer, sample.exemplar.getTimestampMs());
+          }
         }
         writer.write('\n');
       }
@@ -259,7 +266,7 @@ public class TextFormat {
     writer.write("# EOF\n");
   }
 
-  private static void writeTimestamp(Writer writer, long timestampMs) throws IOException {
+  private static void omWriteTimestamp(Writer writer, long timestampMs) throws IOException {
     writer.write(Long.toString(timestampMs / 1000L));
     writer.write(".");
     long ms = timestampMs % 1000;

@@ -3,7 +3,6 @@ package io.prometheus.client.exemplars.impl;
 import io.prometheus.client.exemplars.api.CounterExemplarSampler;
 import io.prometheus.client.exemplars.api.Exemplar;
 import io.prometheus.client.exemplars.api.HistogramExemplarSampler;
-import io.prometheus.client.exemplars.api.SummaryExemplarSampler;
 import io.prometheus.client.exemplars.api.Value;
 import io.prometheus.client.exemplars.tracer.common.SpanContext;
 import org.junit.Assert;
@@ -13,6 +12,8 @@ import org.junit.Test;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.prometheus.client.exemplars.api.Exemplar.SPAN_ID;
+import static io.prometheus.client.exemplars.api.Exemplar.TRACE_ID;
 import static java.lang.Double.NEGATIVE_INFINITY;
 import static java.lang.Double.POSITIVE_INFINITY;
 
@@ -60,26 +61,26 @@ public class DefaultExemplarSamplerTest {
   }
 
   @Test
-  public void testCounterAndGauge() {
+  public void testCounter() {
     CounterExemplarSampler sampler = defaultSampler;
     value.set(2.0);
-    Exemplar first = new Exemplar(traceId.get(), spanId.get(), value.get(), timestamp.get());
-    Assert.assertEquals(first, sampler.sample(valueHolder, null));
+    Exemplar first = new Exemplar(2.0, timestamp.get(), TRACE_ID, traceId.get(), SPAN_ID, spanId.get());
+    Assert.assertEquals(first, sampler.sample(2.0, valueHolder, null));
     value.set(3.0);
     traceId.set("trace-2");
     spanId.set("span-2");
     timestamp.getAndAdd(100); // 100ms later
-    Exemplar second = new Exemplar(traceId.get(), spanId.get(), value.get(), timestamp.get());
-    Assert.assertNull(sampler.sample(valueHolder, first)); // no new exemplar yet
-    Assert.assertEquals(second, sampler.sample(valueHolder, null));
+    Exemplar second = new Exemplar(3.0, timestamp.get(), TRACE_ID, traceId.get(), SPAN_ID, spanId.get());
+    Assert.assertNull(sampler.sample(3.0, valueHolder, first)); // no new exemplar yet
+    Assert.assertEquals(second, sampler.sample(3.0, valueHolder, null));
     timestamp.getAndAdd(10 * 1000); // 10s later
     value.set(4.0);
     traceId.set("trace-3");
     spanId.set("span-3");
-    Exemplar third = new Exemplar(traceId.get(), spanId.get(), value.get(), timestamp.get());
-    Assert.assertEquals(third, sampler.sample(valueHolder, second));
+    Exemplar third = new Exemplar(4.0, timestamp.get(), TRACE_ID, traceId.get(), SPAN_ID, spanId.get());
+    Assert.assertEquals(third, sampler.sample(4.0, valueHolder, second));
     traceId.set(null);
-    Assert.assertNull(sampler.sample(valueHolder, null));
+    Assert.assertNull(sampler.sample(4.0, valueHolder, null));
   }
 
   @Test
@@ -87,32 +88,22 @@ public class DefaultExemplarSamplerTest {
     HistogramExemplarSampler sampler = defaultSampler;
     // Almost identical to Counter and Gauge, except that the value is passed directly and not via valueHolder.
     value.set(2.0);
-    Exemplar first = new Exemplar(traceId.get(), spanId.get(), value.get(), timestamp.get());
+    Exemplar first = new Exemplar(value.get(), timestamp.get(), TRACE_ID, traceId.get(), SPAN_ID, spanId.get());
     Assert.assertEquals(first, sampler.sample(valueHolder.get(), NEGATIVE_INFINITY, POSITIVE_INFINITY, null));
     value.set(3.0);
     traceId.set("trace-2");
     spanId.set("span-2");
     timestamp.getAndAdd(100); // 100ms later
-    Exemplar second = new Exemplar(traceId.get(), spanId.get(), value.get(), timestamp.get());
+    Exemplar second = new Exemplar(value.get(), timestamp.get(), TRACE_ID, traceId.get(), SPAN_ID, spanId.get());
     Assert.assertNull(sampler.sample(valueHolder.get(), NEGATIVE_INFINITY, POSITIVE_INFINITY, first)); // no new exemplar yet
     Assert.assertEquals(second, sampler.sample(valueHolder.get(), NEGATIVE_INFINITY, POSITIVE_INFINITY, null));
     timestamp.getAndAdd(10 * 1000); // 10s later
     value.set(4.0);
     traceId.set("trace-3");
     spanId.set("span-3");
-    Exemplar third = new Exemplar(traceId.get(), spanId.get(), value.get(), timestamp.get());
+    Exemplar third = new Exemplar(value.get(), timestamp.get(), TRACE_ID, traceId.get(), SPAN_ID, spanId.get());
     Assert.assertEquals(third, sampler.sample(valueHolder.get(), NEGATIVE_INFINITY, POSITIVE_INFINITY, second));
     traceId.set(null);
     Assert.assertNull(sampler.sample(valueHolder.get(), NEGATIVE_INFINITY, POSITIVE_INFINITY, null));
-  }
-
-  @Test
-  public void testSummary() {
-    SummaryExemplarSampler sampler = defaultSampler;
-    value.set(3.0);
-    Exemplar exemplar = sampler.sample(valueHolder.get());
-    Assert.assertEquals(new Exemplar(traceId.get(), spanId.get(), value.get(), timestamp.get()), exemplar);
-    traceId.set(null);
-    Assert.assertNull(sampler.sample(4.0));
   }
 }

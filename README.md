@@ -334,17 +334,17 @@ Note that this is an example application for a unit test, so durations don't rep
 By default, Exemplars are enabled if OpenTelemetry tracing is detected. You can disable this globally with:
 
 ```java
-ExemplarConfig.disableByDefault();
+ExemplarConfig.disableExemplars();
 ```
 
-If you want to enable Exemplars only for a single metric, use `withExemplarSampler()` in the metric builder.
+If you want to enable Exemplars only for a single metric, use `withExemplars()` in the metric builder.
 
 ```java
-// This also works with Gauges, Histograms, and Summaries.
+// The same API is also provided by Histograms
 Counter labelsCustomExemplar = Counter.build()
     .name("number_of_events_total")
     .help("help")
-    .withExemplarSampler(new MyExemplarSampler())
+    .withExemplars()
     ...
     .register();
 ```
@@ -352,7 +352,7 @@ Counter labelsCustomExemplar = Counter.build()
 Likewise, you can disable Exemplars for a single metric like this:
 
 ```java
-// This also works with Gauges, Histograms, and Summaries.
+// The same API is also provided by Histograms
 Counter labelsCustomExemplar = Counter.build()
     .name("number_of_events_total")
     .help("help")
@@ -370,23 +370,31 @@ You might want to implement your own Exemplar sampler that provides more interes
 In order to do so, just implement the following interfaces:
 
 * `CounterExemplarSampler`
-* `GaugeExemplarSampler`
 * `HistogramExemplarSampler`
-* `SummaryExemplarSampler`
 
 You can set your implementations as default like this:
 
 ```java
 ExemplarConfig.setDefaultCounterExemplarSampler(mySampler);
-ExemplarConfig.setDefaultGaugeExemplarSampler(mySampler);
 ExemplarConfig.setDefaultHistogramExemplarSampler(mySampler);
-ExemplarConfig.setDefaultSummaryExemplarSampler(mySampler);
+```
+
+If you don't want to use your implementation as a global default, you can also set it for a single metric like this:
+
+```java
+// The same API is also provided by Histograms
+Counter labelsCustomExemplar = Counter.build()
+    .name("number_of_events_total")
+    .help("help")
+    .withExemplars(new MyExemplarSampler())
+    ...
+    .register();
 ```
 
 ### Implement Support for Other Tracing Vendors
 
-Version 0.11.0 implements support for OpenTelemetry. If you are a vendor for another distributed tracer,
-please create a pull request adding support for your system. The idea is that copy-and-paste the
+Version 0.11.0 provides support for OpenTelemetry. If you are a vendor for another distributed tracer,
+please create a pull request adding support for your system. The idea is to copy-and-paste the
 `tracer_otel` module and modify it for your needs. If this turns out to be too simplistic, please create
 a GitHub issue and let us know what you need.
 

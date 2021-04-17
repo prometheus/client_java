@@ -1,17 +1,11 @@
 package io.prometheus.client;
 
-import io.prometheus.client.exemplars.api.Exemplar;
-import io.prometheus.client.exemplars.api.ExemplarConfig;
-import io.prometheus.client.exemplars.api.GaugeExemplarSampler;
-import io.prometheus.client.exemplars.api.Value;
-
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Gauge metric, to report instantaneous values.
@@ -71,33 +65,13 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Describable {
 
-  private final GaugeExemplarSampler exemplarSampler;
-
   Gauge(Builder b) {
     super(b);
-    this.exemplarSampler = b.exemplarSampler;
-    initializeNoLabelsChild();
   }
 
   public static class Builder extends SimpleCollector.Builder<Builder, Gauge> {
-
-    private GaugeExemplarSampler exemplarSampler = ExemplarConfig.getDefaultGaugeExemplarSampler();
-
-    public Builder withExemplarSampler(GaugeExemplarSampler exemplarSampler) {
-      if (exemplarSampler == null) {
-        throw new NullPointerException();
-      }
-      this.exemplarSampler = exemplarSampler;
-      return this;
-    }
-
-    public Builder withoutExemplars() {
-      return withExemplarSampler(ExemplarConfig.getNoopExemplarSampler());
-    }
-
     @Override
     public Gauge create() {
-      dontInitializeNoLabelsChild = true;
       return new Gauge(this);
     }
   }
@@ -121,7 +95,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
 
   @Override
   protected Child newChild() {
-    return new Child(exemplarSampler);
+    return new Child();
   }
 
    /**
@@ -159,16 +133,11 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
    * <em>Warning:</em> References to a Child become invalid after using
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
    */
-  public static class Child implements Value {
+  public static class Child {
 
     private final DoubleAdder value = new DoubleAdder();
-    private final GaugeExemplarSampler exemplarSampler;
-    private final AtomicReference<Exemplar> exemplar = new AtomicReference<Exemplar>();
-    static TimeProvider timeProvider = new TimeProvider();
 
-    public Child(GaugeExemplarSampler exemplarSampler) {
-      this.exemplarSampler = exemplarSampler;
-    }
+    static TimeProvider timeProvider = new TimeProvider();
 
     /**
      * Increment the gauge by 1.
@@ -181,7 +150,6 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
      */
     public void inc(double amt) {
       value.add(amt);
-      updateExemplar();
     }
     /**
      * Decrement the gauge by 1.
@@ -193,14 +161,13 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
      * Decrement the gauge by the given amount.
      */
     public void dec(double amt) {
-      inc(-amt);
+      value.add(-amt);
     }
     /**
      * Set the gauge to the given value.
      */
     public void set(double val) {
       value.set(val);
-      updateExemplar();
     }
     /**
      * Set the gauge to the current unixtime.
@@ -261,22 +228,8 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     /**
      * Get the value of the gauge.
      */
-    @Override
     public double get() {
       return value.sum();
-    }
-    private Exemplar getExemplar() {
-      return exemplar.get();
-    }
-    private void updateExemplar() {
-      Exemplar prev, next;
-      do {
-        prev = exemplar.get();
-        next = exemplarSampler.sample(this, prev);
-        if (next == null || next == prev) {
-          return;
-        }
-      } while (!exemplar.compareAndSet(prev, next));
     }
   }
 
@@ -361,7 +314,7 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get(), c.getValue().getExemplar()));
+      samples.add(new MetricFamilySamples.Sample(fullname, labelNames, c.getKey(), c.getValue().get()));
     }
     return familySamplesList(Type.GAUGE, samples);
   }
