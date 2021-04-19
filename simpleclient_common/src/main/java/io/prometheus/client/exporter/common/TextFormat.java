@@ -25,6 +25,14 @@ public class TextFormat {
   public final static String CONTENT_TYPE_OPENMETRICS_100 = "application/openmetrics-text; version=1.0.0; charset=utf-8";
 
   /**
+   * A property to be passed via the command line (-D...="true") to allow old-style pre OpenMetrics counter names,
+   * in other words invalid counter names (not ending with the suffix "_total")
+   *
+   * @since 0.10.1
+   */
+  private final static String ALLOW_INVALID_COUNTER_NAMES = "io.prometheus.allowInvalidCounterNames";
+
+  /**
    * Return the content type that should be used for a given Accept HTTP header.
    *
    * @since 0.10.0
@@ -64,6 +72,10 @@ public class TextFormat {
    * Write out the text version 0.0.4 of the given MetricFamilySamples.
    */
   public static void write004(Writer writer, Enumeration<Collector.MetricFamilySamples> mfs) throws IOException {
+    // true in case ALLOW_INVALID_COUNTER_NAMES property is present and is true (ignoring case),
+    // false in all other cases (including missing value)
+    boolean allowInvalidCounterNames
+            = Boolean.parseBoolean(System.getProperties().getProperty(ALLOW_INVALID_COUNTER_NAMES));
     Map<String, Collector.MetricFamilySamples> omFamilies = new TreeMap<String, Collector.MetricFamilySamples>();
     /* See http://prometheus.io/docs/instrumenting/exposition_formats/
      * for the output format specification. */
@@ -72,7 +84,7 @@ public class TextFormat {
       String name = metricFamilySamples.name;
       writer.write("# HELP ");
       writer.write(name);
-      if (metricFamilySamples.type == Collector.Type.COUNTER) {
+      if (metricFamilySamples.type == Collector.Type.COUNTER && !allowInvalidCounterNames) {
         writer.write("_total");
       }
       if (metricFamilySamples.type == Collector.Type.INFO) {
@@ -84,7 +96,7 @@ public class TextFormat {
 
       writer.write("# TYPE ");
       writer.write(name);
-      if (metricFamilySamples.type == Collector.Type.COUNTER) {
+      if (metricFamilySamples.type == Collector.Type.COUNTER && !allowInvalidCounterNames) {
         writer.write("_total");
       }
       if (metricFamilySamples.type == Collector.Type.INFO) {
