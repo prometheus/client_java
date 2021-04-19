@@ -5,11 +5,11 @@ import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.Summary;
-import io.prometheus.client.exemplars.api.CounterExemplarSampler;
-import io.prometheus.client.exemplars.api.Exemplar;
-import io.prometheus.client.exemplars.api.ExemplarConfig;
-import io.prometheus.client.exemplars.api.HistogramExemplarSampler;
-import io.prometheus.client.exemplars.api.Value;
+import io.prometheus.client.exemplars.CounterExemplarSampler;
+import io.prometheus.client.exemplars.Exemplar;
+import io.prometheus.client.exemplars.ExemplarConfig;
+import io.prometheus.client.exemplars.HistogramExemplarSampler;
+import io.prometheus.client.exemplars.Value;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,8 +18,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import static io.prometheus.client.exemplars.api.Exemplar.SPAN_ID;
-import static io.prometheus.client.exemplars.api.Exemplar.TRACE_ID;
+import static io.prometheus.client.exemplars.Exemplar.SPAN_ID;
+import static io.prometheus.client.exemplars.Exemplar.TRACE_ID;
 
 public class ExemplarTest {
 

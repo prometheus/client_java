@@ -12,6 +12,7 @@ The main outcomes of the benchmarks:
 * Simpleclient Histograms are 10-100X faster than Codahale and original client Summaries.
 * Simpleclient `Gauge.Child.set` is relatively slow, especially when done concurrently.
 * Label lookups in both Prometheus clients are relatively slow.
+* The `System.currentTimeMillis()` call in the `DefaultExemplarSampler` takes about 17ns on Linux.
 
 Accordingly, in terms of client instrumentation performance I suggest the following:
 * It's cheap to extensively instrument your code with Simpleclient Counters/Gauges/Summaries without labels, or Codahale Counters.
@@ -158,4 +159,12 @@ The closest to the original client's `Summary` is Codahale's
 Note the high error bars for the original client, it got slower with each iteration
 so I suspect a flaw in the test setup.
 
+### Exemplars
 
+The `ExemplarsBenchmark` was run on a Linux laptop with a 4 Core Intel i7-8550U CPU with OpenJDK 1.8.0_282-b08.
+
+    java -jar target/benchmarks.jar ExemplarsBenchmark
+    Benchmark                                               Mode  Samples   Score   Error  Units
+    i.p.b.ExemplarsBenchmark.testCounter                    avgt      200  28.252 ± 0.312  ns/op
+    i.p.b.ExemplarsBenchmark.testCounterWithExemplars       avgt      200  46.042 ± 0.781  ns/op
+    i.p.b.ExemplarsBenchmark.testCounterWithoutExemplars    avgt      200  29.322 ± 0.475  ns/op

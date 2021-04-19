@@ -1,8 +1,8 @@
 package io.prometheus.client;
 
-import io.prometheus.client.exemplars.api.Exemplar;
-import io.prometheus.client.exemplars.api.ExemplarConfig;
-import io.prometheus.client.exemplars.api.HistogramExemplarSampler;
+import io.prometheus.client.exemplars.Exemplar;
+import io.prometheus.client.exemplars.ExemplarConfig;
+import io.prometheus.client.exemplars.HistogramExemplarSampler;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -138,6 +138,9 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       return this;
     }
 
+    /**
+     * Enable exemplars and provide a custom {@link HistogramExemplarSampler}.
+     */
     public Builder withExemplars(HistogramExemplarSampler exemplarSampler) {
       if (exemplarSampler == null) {
         throw new NullPointerException();
@@ -146,10 +149,16 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       return this;
     }
 
+    /**
+     * Enable exemplars using the default {@link HistogramExemplarSampler} as configured in {@link ExemplarConfig}.
+     */
     public Builder withExemplars() {
       return withExemplars(ExemplarConfig.getDefaultExemplarSampler());
     }
 
+    /**
+     * Disable exemplars.
+     */
     public Builder withoutExemplars() {
       return withExemplars(ExemplarConfig.getNoopExemplarSampler());
     }

@@ -1,7 +1,7 @@
 
 package io.prometheus.client;
 
-import io.prometheus.client.exemplars.api.Exemplar;
+import io.prometheus.client.exemplars.Exemplar;
 
 import java.util.ArrayList;
 import java.util.List;

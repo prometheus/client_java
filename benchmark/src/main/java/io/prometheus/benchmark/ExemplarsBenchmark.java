@@ -1,8 +1,8 @@
 package io.prometheus.benchmark;
 
 import io.prometheus.client.Counter;
-import io.prometheus.client.exemplars.impl.DefaultExemplarSampler;
-import io.prometheus.client.exemplars.tracer.common.SpanContext;
+import io.prometheus.client.exemplars.DefaultExemplarSampler;
+import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
@@ -33,7 +33,7 @@ public class ExemplarsBenchmark {
         .name("counter_with_exemplars_total")
         .help("Total number of requests.")
         .labelNames("path")
-        .withExemplars(new DefaultExemplarSampler(new MockSpanContext()))
+        .withExemplars(new DefaultExemplarSampler(new MockSpanContextSupplier()))
         .create();
 
     counterWithoutExemplars = Counter.build()
@@ -65,7 +65,7 @@ public class ExemplarsBenchmark {
     counterWithoutExemplars.labels("test").inc();
   }
 
-  private static class MockSpanContext implements SpanContext {
+  private static class MockSpanContextSupplier implements SpanContextSupplier {
 
     @Override
     public String getTraceId() {

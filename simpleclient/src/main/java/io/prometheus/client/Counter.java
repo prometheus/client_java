@@ -1,9 +1,9 @@
 package io.prometheus.client;
 
-import io.prometheus.client.exemplars.api.CounterExemplarSampler;
-import io.prometheus.client.exemplars.api.Exemplar;
-import io.prometheus.client.exemplars.api.ExemplarConfig;
-import io.prometheus.client.exemplars.api.Value;
+import io.prometheus.client.exemplars.CounterExemplarSampler;
+import io.prometheus.client.exemplars.Exemplar;
+import io.prometheus.client.exemplars.ExemplarConfig;
+import io.prometheus.client.exemplars.Value;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -101,6 +101,9 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
       return new Counter(this);
     }
 
+    /**
+     * Enable exemplars and provide a custom {@link CounterExemplarSampler}.
+     */
     public Builder withExemplars(CounterExemplarSampler exemplarSampler) {
       if (exemplarSampler == null) {
         throw new NullPointerException();
@@ -109,10 +112,16 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
       return this;
     }
 
+    /**
+     * Enable exemplars using the default {@link CounterExemplarSampler} as configured in {@link ExemplarConfig}.
+     */
     public Builder withExemplars() {
       return withExemplars(ExemplarConfig.getDefaultExemplarSampler());
     }
 
+    /**
+     * Disable exemplars.
+     */
     public Builder withoutExemplars() {
       return withExemplars(ExemplarConfig.getNoopExemplarSampler());
     }

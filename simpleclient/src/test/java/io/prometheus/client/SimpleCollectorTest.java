@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.rules.ExpectedException.none;
 
-import io.prometheus.client.exemplars.impl.NoopExemplarSampler;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;

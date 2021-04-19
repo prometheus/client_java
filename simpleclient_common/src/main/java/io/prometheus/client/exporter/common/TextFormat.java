@@ -1,6 +1,7 @@
 package io.prometheus.client.exporter.common;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -255,7 +256,7 @@ public class TextFormat {
           }
           writer.write("} ");
           writer.write(Collector.doubleToGoString(sample.exemplar.getValue()));
-          if (sample.exemplar.getTimestampMs() != 0) {
+          if (sample.exemplar.getTimestampMs() != null) {
             writer.write(' ');
             omWriteTimestamp(writer, sample.exemplar.getTimestampMs());
           }
