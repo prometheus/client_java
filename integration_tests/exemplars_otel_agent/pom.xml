@@ -9,7 +9,6 @@
     <version>0.10.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>io.prometheus</groupId>
   <artifactId>exemplars_otel_agent</artifactId>
   <name>Integration Test - Exemplars with the OpenTelemetry Agent</name>
 

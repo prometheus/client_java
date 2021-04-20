@@ -1,8 +1,5 @@
 package io.prometheus.client.exemplars;
 
-import io.prometheus.client.exemplars.tracer.Tracer;
-import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
-
 /**
  * Static configuration class for Exemplar behavior.
  */
@@ -18,12 +15,7 @@ public class ExemplarConfig {
 
   private ExemplarConfig() {
     noopExemplarSampler = new NoopExemplarSampler();
-    SpanContextSupplier spanContextSupplier = Tracer.findSpanContextSupplier();
-    if (spanContextSupplier != null) {
-      defaultExemplarSampler = new DefaultExemplarSampler(spanContextSupplier);
-    } else {
-      defaultExemplarSampler = noopExemplarSampler;
-    }
+    defaultExemplarSampler = new Tracer().initExemplarSampler(noopExemplarSampler);
     counterExemplarSampler = defaultExemplarSampler;
     histogramExemplarSampler = defaultExemplarSampler;
   }

@@ -22,6 +22,7 @@
     </licenses>
 
     <modules>
+        <module>exemplars_otel</module>
         <module>exemplars_otel_agent</module>
         <module>example_application</module>
         <module>java_versions</module>

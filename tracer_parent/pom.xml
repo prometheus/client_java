@@ -33,7 +33,6 @@
   </licenses>
 
   <modules>
-    <module>tracer</module>
     <module>tracer_common</module>
     <module>tracer_otel</module>
     <module>tracer_otel_agent</module>
