@@ -6,7 +6,7 @@ package io.prometheus.client.exemplars;
 public class NoopExemplarSampler implements ExemplarSampler {
 
   @Override
-  public Exemplar sample(double increment, Value newTotalValue, Exemplar previous) {
+  public Exemplar sample(double increment, Exemplar previous) {
     return null;
   }
 

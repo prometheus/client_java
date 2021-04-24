@@ -18,14 +18,14 @@ public class ExemplarTest {
     long timestamp = System.currentTimeMillis();
     String traceId = "abc";
     String spanId = "def";
-    Exemplar exemplar = new Exemplar(value, timestamp, TRACE_ID, traceId, SPAN_ID, spanId);
+    Exemplar exemplar = new Exemplar(value, timestamp, SPAN_ID, spanId, TRACE_ID, traceId);
     Assert.assertEquals(42, exemplar.getValue(), 0.001);
     Assert.assertEquals(timestamp, exemplar.getTimestampMs().longValue());
     Assert.assertEquals(2, exemplar.getNumberOfLabels());
-    Assert.assertEquals(TRACE_ID, exemplar.getLabelName(0));
-    Assert.assertEquals(traceId, exemplar.getLabelValue(0));
-    Assert.assertEquals(SPAN_ID, exemplar.getLabelName(1));
-    Assert.assertEquals(spanId, exemplar.getLabelValue(1));
+    Assert.assertEquals(SPAN_ID, exemplar.getLabelName(0));
+    Assert.assertEquals(spanId, exemplar.getLabelValue(0));
+    Assert.assertEquals(TRACE_ID, exemplar.getLabelName(1));
+    Assert.assertEquals(traceId, exemplar.getLabelValue(1));
   }
 
   @Test
@@ -33,14 +33,14 @@ public class ExemplarTest {
     double value = 42;
     String traceId = "abc";
     String spanId = "def";
-    Exemplar exemplar = new Exemplar(value, TRACE_ID, traceId, SPAN_ID, spanId);
+    Exemplar exemplar = new Exemplar(value, SPAN_ID, spanId, TRACE_ID, traceId);
     Assert.assertEquals(42, exemplar.getValue(), 0.001);
     Assert.assertNull(exemplar.getTimestampMs());
     Assert.assertEquals(2, exemplar.getNumberOfLabels());
-    Assert.assertEquals(TRACE_ID, exemplar.getLabelName(0));
-    Assert.assertEquals(traceId, exemplar.getLabelValue(0));
-    Assert.assertEquals(SPAN_ID, exemplar.getLabelName(1));
-    Assert.assertEquals(spanId, exemplar.getLabelValue(1));
+    Assert.assertEquals(SPAN_ID, exemplar.getLabelName(0));
+    Assert.assertEquals(spanId, exemplar.getLabelValue(0));
+    Assert.assertEquals(TRACE_ID, exemplar.getLabelName(1));
+    Assert.assertEquals(traceId, exemplar.getLabelValue(1));
   }
 
   @Test
@@ -75,18 +75,38 @@ public class ExemplarTest {
 
   @Test
   public void testMaxLabelLength() {
-    String eight = "12345678";
-    String ten = "1234567890";
+    String eight = "_2345678";
+    String ten = "_234567890";
     String twenty = ten + ten;
     String thirty = twenty + ten;
-    String fourty = thirty + ten;
-    new Exemplar(42, ten, twenty, thirty, fourty, eight, twenty); // 128 chars total
+    String forty = thirty + ten;
+    new Exemplar(42, ten, twenty, thirty, forty, eight, twenty); // 128 chars total
     try {
-      new Exemplar(42, ten, twenty, thirty, fourty, eight, twenty + "1"); // 129 chars total
+      new Exemplar(42, ten, twenty, thirty, forty, eight, twenty + "1"); // 129 chars total
     } catch (IllegalArgumentException e) {
       return;
     }
     Assert.fail("expected IllegalArgumentException");
+  }
+
+  @Test
+  public void testSortedLabels() {
+    Exemplar exemplar = new Exemplar(42, "name4", "value4", "name3", "value3",
+        "name2", "value2", "name5", "value5", "name1", "value1");
+    Assert.assertEquals(5, exemplar.getNumberOfLabels());
+    for (int i=0; i<exemplar.getNumberOfLabels(); i++) {
+      Assert.assertEquals("name" + (i+1), exemplar.getLabelName(i));
+      Assert.assertEquals("value" + (i+1), exemplar.getLabelValue(i));
+    }
+  }
+
+  @Test
+  public void testInvalidLabelName() {
+    try {
+      new Exemplar(42, "label1", "value1", "1label", "1value");
+      Assert.fail("illegalArgumentException not thrown");
+    } catch (IllegalArgumentException ignored) {
+    }
   }
 
   @Test

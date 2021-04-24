@@ -9,7 +9,7 @@ jobs:
       - checkout
       - restore_cache:
           key: maven-dependencies-{{ checksum "pom.xml" }}
-      - run: mvn clean verify
+      - run: ./mvnw clean verify
       - save_cache:
           paths:
             - ~/.m2

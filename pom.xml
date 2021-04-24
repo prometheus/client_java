@@ -43,7 +43,6 @@
     </developers>
 
     <modules>
-        <module>tracer_parent</module>
         <module>simpleclient</module>
         <module>simpleclient_common</module>
         <module>simpleclient_caffeine</module>
@@ -62,6 +61,7 @@
         <module>simpleclient_spring_boot</module>
         <module>simpleclient_jetty</module>
         <module>simpleclient_jetty_jdk8</module>
+        <module>simpleclient_tracer</module>
         <module>simpleclient_vertx</module>
         <module>simpleclient_bom</module>
         <module>benchmark</module>

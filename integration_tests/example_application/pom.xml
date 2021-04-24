@@ -46,7 +46,7 @@
             <configuration>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>io.prometheus.smoketest.Server</mainClass>
+                  <mainClass>io.prometheus.client.smoketest.Server</mainClass>
                 </transformer>
               </transformers>
             </configuration>

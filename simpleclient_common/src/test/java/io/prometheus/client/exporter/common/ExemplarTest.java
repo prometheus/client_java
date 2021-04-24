@@ -9,7 +9,6 @@ import io.prometheus.client.exemplars.CounterExemplarSampler;
 import io.prometheus.client.exemplars.Exemplar;
 import io.prometheus.client.exemplars.ExemplarConfig;
 import io.prometheus.client.exemplars.HistogramExemplarSampler;
-import io.prometheus.client.exemplars.Value;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,8 +26,8 @@ public class ExemplarTest {
   private final String defaultSpanId = "default-span-id";
   private final String customTraceId = "custom-trace-id";
   private final String customSpanId = "custom-span-id";
-  private final String defaultExemplarLabels = "{trace_id=\"" + defaultTraceId + "\",span_id=\"" + defaultSpanId + "\"}";
-  private final String customExemplarLabels = "{trace_id=\"" + customTraceId + "\",span_id=\"" + customSpanId + "\"}";
+  private final String defaultExemplarLabels = "{span_id=\"" + defaultSpanId + "\",trace_id=\"" + defaultTraceId + "\"}";
+  private final String customExemplarLabels = "{span_id=\"" + customSpanId + "\",trace_id=\"" + customTraceId + "\"}";
   private final long timestamp = System.currentTimeMillis();
 
   private CollectorRegistry registry;
@@ -83,7 +82,7 @@ public class ExemplarTest {
     Counter noLabelsNoExemplar = Counter.build()
         .name("no_labels_no_exemplar")
         .help("help")
-        .withoutExemplars()
+        .withoutExemplarSampler()
         .register(registry);
     noLabelsNoExemplar.inc();
     assertNewFormat("no_labels_no_exemplar_total 1.0\n");
@@ -96,7 +95,7 @@ public class ExemplarTest {
         .name("labels_no_exemplar")
         .help("help")
         .labelNames("label")
-        .withoutExemplars()
+        .withoutExemplarSampler()
         .register(registry);
     labelsNoExemplar.labels("test").inc();
     assertNewFormat("labels_no_exemplar_total{label=\"test\"} 1.0\n");
@@ -108,7 +107,7 @@ public class ExemplarTest {
     Counter noLabelsCustomExemplar = Counter.build()
         .name("no_labels_custom_exemplar")
         .help("help")
-        .withExemplars(new TestExemplarSampler(customTraceId, customSpanId, timestamp))
+        .withExemplarSampler(new TestExemplarSampler(customTraceId, customSpanId, timestamp))
         .register(registry);
     noLabelsCustomExemplar.inc();
     assertNewFormat("no_labels_custom_exemplar_total 1.0 # " + customExemplarLabels + " 1.0 " + timestampString() + "\n");
@@ -120,7 +119,7 @@ public class ExemplarTest {
     Counter labelsCustomExemplar = Counter.build()
         .name("labels_custom_exemplar")
         .help("help")
-        .withExemplars(new TestExemplarSampler(customTraceId, customSpanId, timestamp))
+        .withExemplarSampler(new TestExemplarSampler(customTraceId, customSpanId, timestamp))
         .labelNames("label")
         .register(registry);
     labelsCustomExemplar.labels("test").inc();
@@ -223,7 +222,7 @@ public class ExemplarTest {
         .name("no_labels_no_exemplar")
         .help("help")
         .buckets(5.0)
-        .withoutExemplars()
+        .withoutExemplarSampler()
         .register(registry);
     noLabelsNoExemplar.observe(3.0);
     noLabelsNoExemplar.observe(6.0);
@@ -245,7 +244,7 @@ public class ExemplarTest {
         .help("help")
         .buckets(5.0)
         .labelNames("label")
-        .withoutExemplars()
+        .withoutExemplarSampler()
         .register(registry);
     labelsNoExemplar.labels("test").observe(3.0);
     labelsNoExemplar.labels("test").observe(6.0);
@@ -267,7 +266,7 @@ public class ExemplarTest {
         .name("no_labels_custom_exemplar")
         .help("help")
         .buckets(5.0)
-        .withExemplars(new TestExemplarSampler(customTraceId, customSpanId, timestamp))
+        .withExemplarSampler(new TestExemplarSampler(customTraceId, customSpanId, timestamp))
         .register(registry);
     noLabelsCustomExemplar.observe(3.0);
     noLabelsCustomExemplar.observe(6.0);
@@ -289,7 +288,7 @@ public class ExemplarTest {
         .name("labels_custom_exemplar")
         .help("help")
         .buckets(5.0)
-        .withExemplars(new TestExemplarSampler(customTraceId, customSpanId, timestamp))
+        .withExemplarSampler(new TestExemplarSampler(customTraceId, customSpanId, timestamp))
         .labelNames("label")
         .register(registry);
     labelsCustomExemplar.labels("test").observe(3.0);
@@ -361,7 +360,7 @@ public class ExemplarTest {
     }
 
     @Override
-    public Exemplar sample(double increment, Value newTotalValue, Exemplar previous) {
+    public Exemplar sample(double increment, Exemplar previous) {
       return new Exemplar(increment, timestamp, TRACE_ID, traceId, SPAN_ID, spanId);
     }
 

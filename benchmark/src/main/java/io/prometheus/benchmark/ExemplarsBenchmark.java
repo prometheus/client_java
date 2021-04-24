@@ -33,14 +33,14 @@ public class ExemplarsBenchmark {
         .name("counter_with_exemplars_total")
         .help("Total number of requests.")
         .labelNames("path")
-        .withExemplars(new DefaultExemplarSampler(new MockSpanContextSupplier()))
+        .withExemplarSampler(new DefaultExemplarSampler(new MockSpanContextSupplier()))
         .create();
 
     counterWithoutExemplars = Counter.build()
         .name("counter_without_exemplars_total")
         .help("Total number of requests.")
         .labelNames("path")
-        .withoutExemplars()
+        .withoutExemplarSampler()
         .create();
   }
 

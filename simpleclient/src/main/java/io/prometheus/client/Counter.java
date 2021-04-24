@@ -3,7 +3,6 @@ package io.prometheus.client;
 import io.prometheus.client.exemplars.CounterExemplarSampler;
 import io.prometheus.client.exemplars.Exemplar;
 import io.prometheus.client.exemplars.ExemplarConfig;
-import io.prometheus.client.exemplars.Value;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,7 +88,9 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
 
   public static class Builder extends SimpleCollector.Builder<Builder, Counter> {
 
-    private CounterExemplarSampler exemplarSampler = ExemplarConfig.getCounterExemplarSampler();
+    private CounterExemplarSampler exemplarSampler = ExemplarConfig.isExemplarSamplerEnabled() ?
+        ExemplarConfig.getCounterExemplarSampler() :
+        ExemplarConfig.getNoopExemplarSampler();
 
     @Override
     public Counter create() {
@@ -102,9 +103,9 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     }
 
     /**
-     * Enable exemplars and provide a custom {@link CounterExemplarSampler}.
+     * Use the provided {@link CounterExemplarSampler} by default.
      */
-    public Builder withExemplars(CounterExemplarSampler exemplarSampler) {
+    public Builder withExemplarSampler(CounterExemplarSampler exemplarSampler) {
       if (exemplarSampler == null) {
         throw new NullPointerException();
       }
@@ -115,31 +116,30 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     /**
      * Enable exemplars using the default {@link CounterExemplarSampler} as configured in {@link ExemplarConfig}.
      */
-    public Builder withExemplars() {
-      return withExemplars(ExemplarConfig.getDefaultExemplarSampler());
+    public Builder withExemplarSampler() {
+      return withExemplarSampler(ExemplarConfig.getCounterExemplarSampler());
     }
 
     /**
      * Disable exemplars.
      */
-    public Builder withoutExemplars() {
-      return withExemplars(ExemplarConfig.getNoopExemplarSampler());
+    public Builder withoutExemplarSampler() {
+      return withExemplarSampler(ExemplarConfig.getNoopExemplarSampler());
     }
   }
 
-
   /**
-   *  Return a Builder to allow configuration of a new Counter. Ensures required fields are provided.
+   * Return a Builder to allow configuration of a new Counter. Ensures required fields are provided.
    *
-   *  @param name The name of the metric
-   *  @param help The help string of the metric
+   * @param name The name of the metric
+   * @param help The help string of the metric
    */
   public static Builder build(String name, String help) {
     return new Builder().name(name).help(help);
   }
 
   /**
-   *  Return a Builder to allow configuration of a new Counter.
+   * Return a Builder to allow configuration of a new Counter.
    */
   public static Builder build() {
     return new Builder();
@@ -156,7 +156,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
    * <em>Warning:</em> References to a Child become invalid after using
    * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
    */
-  public static class Child implements Value {
+  public static class Child {
     private final DoubleAdder value = new DoubleAdder();
     private final long created = System.currentTimeMillis();
     private final CounterExemplarSampler exemplarSampler;
@@ -172,37 +172,88 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     public void inc() {
       inc(1);
     }
+
+    /**
+     * Same as {@link #incWithExemplar(double, String...) incWithExemplar(1, exemplarLabels)}.
+     */
+    public void incWithExemplar(String... exemplarLabels) {
+      incWithExemplar(1, exemplarLabels);
+    }
+
+    /**
+     * Same as {@link #incWithExemplar(double, Map) incWithExemplar(1, exemplarLabels)}.
+     */
+    public void incWithExemplar(Map<String, String> exemplarLabels) {
+      incWithExemplar(1, exemplarLabels);
+    }
+
     /**
      * Increment the counter by the given amount.
+     *
      * @throws IllegalArgumentException If amt is negative.
      */
     public void inc(double amt) {
+      incWithExemplar(amt, (String[]) null);
+    }
+
+    /**
+     * Like {@link #inc(double)}, but additionally creates an exemplar.
+     * <p>
+     * This exemplar takes precedence over any exemplar returned by the {@link CounterExemplarSampler} configured
+     * in {@link ExemplarConfig}.
+     * <p>
+     * The exemplar will have {@code amt} as the value, {@code System.currentTimeMillis()} as the timestamp,
+     * and the specified labels.
+     *
+     * @param amt            same as in {@link #inc(double)}
+     * @param exemplarLabels list of name/value pairs, as documented in {@link Exemplar#Exemplar(double, String...)}.
+     *                       A commonly used name is {@link Exemplar#TRACE_ID}.
+     *                       Calling {@code incWithExemplar(amt)} means that an exemplar without labels will be created.
+     *                       Calling {@code incWithExemplar(amt, (String[]) null)} is equivalent
+     *                       to calling {@code inc(amt)}.
+     */
+    public void incWithExemplar(double amt, String... exemplarLabels) {
+      Exemplar exemplar = exemplarLabels == null ? null : new Exemplar(amt, System.currentTimeMillis(), exemplarLabels);
       if (amt < 0) {
         throw new IllegalArgumentException("Amount to increment must be non-negative.");
       }
       value.add(amt);
-      updateExemplar(amt);
+      updateExemplar(amt, exemplar);
     }
-    private void updateExemplar(double amt) {
+
+    /**
+     * Same as {@link #incWithExemplar(double, String...)}, but the exemplar labels are passed as a {@link Map}.
+     */
+    public void incWithExemplar(double amt, Map<String, String> exemplarLabels) {
+      incWithExemplar(amt, Exemplar.mapToArray(exemplarLabels));
+    }
+
+    private void updateExemplar(double amt, Exemplar userProvidedExemplar) {
       Exemplar prev, next;
       do {
         prev = exemplar.get();
-        next = exemplarSampler.sample(amt, this, prev);
+        if (userProvidedExemplar == null) {
+          next = exemplarSampler.sample(amt, prev);
+        } else {
+          next = userProvidedExemplar;
+        }
         if (next == null || next == prev) {
           return;
         }
       } while (!exemplar.compareAndSet(prev, next));
     }
+
     /**
      * Get the value of the counter.
      */
-    @Override
     public double get() {
       return value.sum();
     }
+
     private Exemplar getExemplar() {
       return exemplar.get();
     }
+
     /**
      * Get the created time of the counter in milliseconds.
      */
@@ -212,20 +263,51 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   }
 
   // Convenience methods.
+
   /**
    * Increment the counter with no labels by 1.
    */
   public void inc() {
     inc(1);
   }
+
+  /**
+   * Like {@link Child#incWithExemplar(String...)}, but for the counter without labels.
+   */
+  public void incWithExemplar(String... exemplarLabels) {
+    incWithExemplar(1, exemplarLabels);
+  }
+
+  /**
+   * Like {@link Child#incWithExemplar(Map)}, but for the counter without labels.
+   */
+  public void incWithExemplar(Map<String, String> exemplarLabels) {
+    incWithExemplar(1, exemplarLabels);
+  }
+
   /**
    * Increment the counter with no labels by the given amount.
+   *
    * @throws IllegalArgumentException If amt is negative.
    */
   public void inc(double amt) {
     noLabelsChild.inc(amt);
   }
-  
+
+  /**
+   * Like {@link Child#incWithExemplar(double, String...)}, but for the counter without labels.
+   */
+  public void incWithExemplar(double amt, String... exemplarLabels) {
+    noLabelsChild.incWithExemplar(amt, exemplarLabels);
+  }
+
+  /**
+   * Like {@link Child#incWithExemplar(double, Map)}, but for the counter without labels.
+   */
+  public void incWithExemplar(double amt, Map<String, String> exemplarLabels) {
+    noLabelsChild.incWithExemplar(amt, exemplarLabels);
+  }
+
   /**
    * Get the value of the counter.
    */

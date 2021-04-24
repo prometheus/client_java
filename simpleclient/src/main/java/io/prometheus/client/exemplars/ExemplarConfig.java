@@ -5,75 +5,74 @@ package io.prometheus.client.exemplars;
  */
 public class ExemplarConfig {
 
-  private static final ExemplarConfig instance = new ExemplarConfig();
+  private static final ExemplarSampler noopExemplarSampler = new NoopExemplarSampler();
 
-  private final ExemplarSampler noopExemplarSampler;
-  private final ExemplarSampler defaultExemplarSampler;
+  private static volatile boolean enabled = true;
+  private static volatile HistogramExemplarSampler histogramExemplarSampler;
+  private static volatile CounterExemplarSampler counterExemplarSampler;
 
-  private volatile HistogramExemplarSampler histogramExemplarSampler;
-  private volatile CounterExemplarSampler counterExemplarSampler;
-
-  private ExemplarConfig() {
-    noopExemplarSampler = new NoopExemplarSampler();
-    defaultExemplarSampler = new Tracer().initExemplarSampler(noopExemplarSampler);
+  static {
+    ExemplarSampler defaultExemplarSampler = new Tracer().initExemplarSampler(noopExemplarSampler);
     counterExemplarSampler = defaultExemplarSampler;
     histogramExemplarSampler = defaultExemplarSampler;
   }
 
   /**
-   * @param counterExemplarSampler will be used by default when creating new {@code Counter} metrics.
+   * @param counterExemplarSampler will be used by default when creating new {@code Counter} metrics,
+   *                               unless {@link #disableExemplarSamplers()} was called.
    */
   public static void setCounterExemplarSampler(CounterExemplarSampler counterExemplarSampler) {
     if (counterExemplarSampler == null) {
       throw new NullPointerException();
     }
-    instance.counterExemplarSampler = counterExemplarSampler;
+    ExemplarConfig.counterExemplarSampler = counterExemplarSampler;
   }
 
   /**
-   * @param histogramExemplarSampler will be used by default when creating new {@code Histogram} metrics.
+   * @param histogramExemplarSampler will be used by default when creating new {@code Histogram} metrics,
+   *                                 unless {@link #disableExemplarSamplers()} was called.
    */
   public static void setHistogramExemplarSampler(HistogramExemplarSampler histogramExemplarSampler) {
     if (histogramExemplarSampler == null) {
       throw new NullPointerException();
     }
-    instance.histogramExemplarSampler = histogramExemplarSampler;
+    ExemplarConfig.histogramExemplarSampler = histogramExemplarSampler;
   }
 
   /**
-   * Disable exemplars by default. Exemplars can still be enabled for individual metrics in the metric's builder.
+   * Disable the implicit exemplar samplers by default.
+   * Exemplars can still be enabled for individual metrics in the metric builder,
+   * or they can be provided explicitly for individual observations with the {@code ...withExemplar()} methods.
    */
-  public static void disableExemplars() {
-    instance.counterExemplarSampler = instance.noopExemplarSampler;
-    instance.histogramExemplarSampler = instance.noopExemplarSampler;
+  public static void disableExemplarSamplers() {
+    enabled = false;
   }
 
   /**
    * @return the {@link CounterExemplarSampler} that is used by default when creating new {@code Counter} metrics.
    */
   public static CounterExemplarSampler getCounterExemplarSampler() {
-    return instance.counterExemplarSampler;
+    return counterExemplarSampler;
   }
 
   /**
    * @return the {@link HistogramExemplarSampler} that is used by default when creating new {@code Histogram} metrics.
    */
   public static HistogramExemplarSampler getHistogramExemplarSampler() {
-    return instance.histogramExemplarSampler;
+    return histogramExemplarSampler;
   }
 
   /**
-   * @return an {@link ExemplarSampler} that will never sample an exemplar.
+   * @return the {@link ExemplarSampler} used when the exemplar sampler is disabled.
    */
   public static ExemplarSampler getNoopExemplarSampler() {
-    return instance.noopExemplarSampler;
+    return noopExemplarSampler;
   }
 
   /**
-   * @return the default implementation of an {@link ExemplarSampler}. This implementation will sample a new Exemplar
-   * if no previous Exemplar is present or if the previous Exemplar is older than ca 7 seconds.
+   * @return true by default, false if {@link #disableExemplarSamplers()} was called.
    */
-  public static ExemplarSampler getDefaultExemplarSampler() {
-    return instance.defaultExemplarSampler;
+  public static boolean isExemplarSamplerEnabled() {
+    return enabled;
   }
 }

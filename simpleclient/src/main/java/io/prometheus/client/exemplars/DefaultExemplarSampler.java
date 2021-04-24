@@ -1,8 +1,5 @@
 package io.prometheus.client.exemplars;
 
-import io.prometheus.client.exemplars.Exemplar;
-import io.prometheus.client.exemplars.ExemplarSampler;
-import io.prometheus.client.exemplars.Value;
 import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 
 import static io.prometheus.client.exemplars.Exemplar.SPAN_ID;
@@ -33,7 +30,7 @@ public class DefaultExemplarSampler implements ExemplarSampler {
   }
 
   @Override
-  public Exemplar sample(double increment, Value newTotalValue, Exemplar previous) {
+  public Exemplar sample(double increment, Exemplar previous) {
     return doSample(increment, previous);
   }
 

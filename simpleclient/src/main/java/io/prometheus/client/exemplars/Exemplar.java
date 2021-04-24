@@ -2,6 +2,7 @@ package io.prometheus.client.exemplars;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Immutable data class holding an Exemplar.
@@ -14,6 +15,8 @@ public class Exemplar {
   private final String[] labels;
   private final double value;
   private final Long timestampMs;
+
+  private static final Pattern labelNameRegex = Pattern.compile("[a-zA-Z_]\\w*"); // \w is [a-zA-Z_0-9]
 
   /**
    * Create an Exemplar without a timestamp
@@ -36,8 +39,7 @@ public class Exemplar {
    *                    nor a label value may be null.
    */
   public Exemplar(double value, Long timestampMs, String... labels) {
-    validateLabels(labels);
-    this.labels = Arrays.copyOf(labels, labels.length);
+    this.labels = sortedCopy(labels);
     this.value = value;
     this.timestampMs = timestampMs;
   }
@@ -98,33 +100,56 @@ public class Exemplar {
     return timestampMs;
   }
 
-  private void validateLabels(String... labels) {
+  private String[] sortedCopy(String... labels) {
     if (labels.length % 2 != 0) {
       throw new IllegalArgumentException("labels are name/value pairs, expecting an even number");
     }
+    String[] result = new String[labels.length];
     int charsTotal = 0;
-    for (int i = 0; i < labels.length; i++) {
+    for (int i = 0; i < labels.length; i+=2) {
       if (labels[i] == null) {
         throw new IllegalArgumentException("labels[" + i + "] is null");
       }
-      if (i % 2 == 0) { // label names should be unique
-        int j=i+2;
-        while (j<labels.length) {
-          if (labels[i].equals(labels[j])) {
-            throw new IllegalArgumentException(labels[i] + ": label name is not unique");
-          }
-          j+=2;
+      if (labels[i+1] == null) {
+        throw new IllegalArgumentException("labels[" + (i+1) + "] is null");
+      }
+      if (!labelNameRegex.matcher(labels[i]).matches()) {
+        throw new IllegalArgumentException(labels[i] + " is not a valid label name");
+      }
+      result[i] = labels[i]; // name
+      result[i+1] = labels[i+1]; // value
+      charsTotal += labels[i].length() + labels[i+1].length();
+      // Move the current tuple down while the previous name is greater than current name.
+      for (int j=i-2; j>=0; j-=2) {
+        int compareResult = result[j+2].compareTo(result[j]);
+        if (compareResult == 0) {
+          throw new IllegalArgumentException(result[j] + ": label name is not unique");
+        } else if (compareResult < 0) {
+          String tmp = result[j];
+          result[j] = result[j+2];
+          result[j+2] = tmp;
+          tmp = result[j+1];
+          result[j+1] = result[j+3];
+          result[j+3] = tmp;
+        } else {
+          break;
         }
       }
-      charsTotal += labels[i].length();
     }
     if (charsTotal > 128) {
       throw new IllegalArgumentException(
           "the combined length of the label names and values must not exceed 128 UTF-8 characters");
     }
+    return result;
   }
 
-  private static String[] mapToArray(Map<String, String> labelMap) {
+  /**
+   * Convert the map to an array {@code [key1, value1, key2, value2, ...]}.
+   */
+  public static String[] mapToArray(Map<String, String> labelMap) {
+    if (labelMap == null) {
+      return null;
+    }
     String[] result = new String[2 * labelMap.size()];
     int i = 0;
     for (Map.Entry<String, String> entry : labelMap.entrySet()) {
