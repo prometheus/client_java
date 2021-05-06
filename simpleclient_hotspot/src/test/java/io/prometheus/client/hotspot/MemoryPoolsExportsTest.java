@@ -31,6 +31,7 @@ public class MemoryPoolsExportsTest {
     when(mockPoolsBean1.getUsage()).thenReturn(mockUsage1);
     when(mockPoolsBean2.getName()).thenReturn("PS Old Gen");
     when(mockPoolsBean2.getUsage()).thenReturn(mockUsage2);
+    when(mockMemoryBean.getObjectPendingFinalizationCount()).thenReturn(10);
     when(mockMemoryBean.getHeapMemoryUsage()).thenReturn(mockUsage1);
     when(mockMemoryBean.getNonHeapMemoryUsage()).thenReturn(mockUsage2);
     when(mockUsage1.getUsed()).thenReturn(500000L);
@@ -106,6 +107,11 @@ public class MemoryPoolsExportsTest {
 
   @Test
   public void testMemoryAreas() {
+    assertEquals(
+        10L,
+        registry.getSampleValue(
+            "jvm_objects_pending_finalization"),
+        .0000001);
     assertEquals(
         500000L,
         registry.getSampleValue(
