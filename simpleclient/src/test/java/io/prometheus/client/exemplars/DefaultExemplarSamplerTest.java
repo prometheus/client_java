@@ -8,12 +8,13 @@ import org.junit.Test;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.prometheus.client.exemplars.Exemplar.SPAN_ID;
-import static io.prometheus.client.exemplars.Exemplar.TRACE_ID;
 import static java.lang.Double.NEGATIVE_INFINITY;
 import static java.lang.Double.POSITIVE_INFINITY;
 
 public class DefaultExemplarSamplerTest {
+
+  private static final String SPAN_ID = "span_id";
+  private static final String TRACE_ID = "trace_id";
 
   final AtomicReference<String> traceId = new AtomicReference<String>();
   final AtomicReference<String> spanId = new AtomicReference<String>();

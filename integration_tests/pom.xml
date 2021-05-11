@@ -28,6 +28,17 @@
         <module>java_versions</module>
     </modules>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.22.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
     <dependencyManagement>
       <dependencies>
         <dependency>

@@ -1,4 +1,4 @@
-package io.prometheus.benchmark;
+package io.prometheus.client.benchmark;
 
 import com.codahale.metrics.MetricRegistry;
 

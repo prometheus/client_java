@@ -267,7 +267,7 @@ public class TextFormat {
     writer.write("# EOF\n");
   }
 
-  private static void omWriteTimestamp(Writer writer, long timestampMs) throws IOException {
+  static void omWriteTimestamp(Writer writer, long timestampMs) throws IOException {
     writer.write(Long.toString(timestampMs / 1000L));
     writer.write(".");
     long ms = timestampMs % 1000;

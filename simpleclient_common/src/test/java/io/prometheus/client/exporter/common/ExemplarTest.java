@@ -17,9 +17,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import static io.prometheus.client.exemplars.Exemplar.SPAN_ID;
-import static io.prometheus.client.exemplars.Exemplar.TRACE_ID;
-
 public class ExemplarTest {
 
   private final String defaultTraceId = "default-trace-id";
@@ -56,13 +53,13 @@ public class ExemplarTest {
         .help("help")
         .register(registry);
     noLabelsDefaultExemplar.inc(3);
-    assertNewFormat("no_labels_default_exemplar_total 3.0 # " + defaultExemplarLabels + " 3.0 " + timestampString() + "\n");
-    assertOldFormat("no_labels_default_exemplar_total 3.0\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_total 3.0 # " + defaultExemplarLabels + " 3.0 " + timestampString() + "\n");
+    assert004Format("no_labels_default_exemplar_total 3.0\n");
     noLabelsDefaultExemplar.inc(2);
     // The TestExemplarSampler always produces a new Exemplar.
     // The Exemplar with value 3.0 should be replaced with an Exemplar with value 5.0.
-    assertNewFormat("no_labels_default_exemplar_total 5.0 # " + defaultExemplarLabels + " 2.0 " + timestampString() + "\n");
-    assertOldFormat("no_labels_default_exemplar_total 5.0\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_total 5.0 # " + defaultExemplarLabels + " 2.0 " + timestampString() + "\n");
+    assert004Format("no_labels_default_exemplar_total 5.0\n");
   }
 
   @Test
@@ -73,8 +70,8 @@ public class ExemplarTest {
         .labelNames("label")
         .register(registry);
     labelsDefaultExemplar.labels("test").inc();
-    assertNewFormat("labels_default_exemplar_total{label=\"test\"} 1.0 # " + defaultExemplarLabels + " 1.0 " + timestampString() + "\n");
-    assertOldFormat("labels_default_exemplar_total{label=\"test\",} 1.0\n");
+    assertOpenMetrics100Format("labels_default_exemplar_total{label=\"test\"} 1.0 # " + defaultExemplarLabels + " 1.0 " + timestampString() + "\n");
+    assert004Format("labels_default_exemplar_total{label=\"test\",} 1.0\n");
   }
 
   @Test
@@ -85,8 +82,8 @@ public class ExemplarTest {
         .withoutExemplarSampler()
         .register(registry);
     noLabelsNoExemplar.inc();
-    assertNewFormat("no_labels_no_exemplar_total 1.0\n");
-    assertOldFormat("no_labels_no_exemplar_total 1.0\n");
+    assertOpenMetrics100Format("no_labels_no_exemplar_total 1.0\n");
+    assert004Format("no_labels_no_exemplar_total 1.0\n");
   }
 
   @Test
@@ -98,8 +95,8 @@ public class ExemplarTest {
         .withoutExemplarSampler()
         .register(registry);
     labelsNoExemplar.labels("test").inc();
-    assertNewFormat("labels_no_exemplar_total{label=\"test\"} 1.0\n");
-    assertOldFormat("labels_no_exemplar_total{label=\"test\",} 1.0\n");
+    assertOpenMetrics100Format("labels_no_exemplar_total{label=\"test\"} 1.0\n");
+    assert004Format("labels_no_exemplar_total{label=\"test\",} 1.0\n");
   }
 
   @Test
@@ -110,8 +107,8 @@ public class ExemplarTest {
         .withExemplarSampler(new TestExemplarSampler(customTraceId, customSpanId, timestamp))
         .register(registry);
     noLabelsCustomExemplar.inc();
-    assertNewFormat("no_labels_custom_exemplar_total 1.0 # " + customExemplarLabels + " 1.0 " + timestampString() + "\n");
-    assertOldFormat("no_labels_custom_exemplar_total 1.0\n");
+    assertOpenMetrics100Format("no_labels_custom_exemplar_total 1.0 # " + customExemplarLabels + " 1.0 " + timestampString() + "\n");
+    assert004Format("no_labels_custom_exemplar_total 1.0\n");
   }
 
   @Test
@@ -123,8 +120,8 @@ public class ExemplarTest {
         .labelNames("label")
         .register(registry);
     labelsCustomExemplar.labels("test").inc();
-    assertNewFormat("labels_custom_exemplar_total{label=\"test\"} 1.0 # " + customExemplarLabels + " 1.0 " + timestampString() + "\n");
-    assertOldFormat("labels_custom_exemplar_total{label=\"test\",} 1.0\n");
+    assertOpenMetrics100Format("labels_custom_exemplar_total{label=\"test\"} 1.0 # " + customExemplarLabels + " 1.0 " + timestampString() + "\n");
+    assert004Format("labels_custom_exemplar_total{label=\"test\",} 1.0\n");
   }
 
   @Test
@@ -136,8 +133,8 @@ public class ExemplarTest {
     noLabelsDefaultExemplar.set(37);
     // Gauges do not have Exemplars according to the OpenMetrics spec.
     // Make sure there are no Exemplars.
-    assertNewFormat("no_labels_default_exemplar 37.0\n");
-    assertOldFormat("no_labels_default_exemplar 37.0\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar 37.0\n");
+    assert004Format("no_labels_default_exemplar 37.0\n");
   }
 
   @Test
@@ -150,8 +147,8 @@ public class ExemplarTest {
     labelsDefaultExemplar.labels("test").inc();
     // Gauges do not have Exemplars according to the OpenMetrics spec.
     // Make sure there are no Exemplars.
-    assertNewFormat("labels_default_exemplar{label=\"test\"} 1.0\n");
-    assertOldFormat("labels_default_exemplar{label=\"test\",} 1.0\n");
+    assertOpenMetrics100Format("labels_default_exemplar{label=\"test\"} 1.0\n");
+    assert004Format("labels_default_exemplar{label=\"test\",} 1.0\n");
   }
 
   @Test
@@ -165,33 +162,33 @@ public class ExemplarTest {
     noLabelsDefaultExemplar.observe(6.0);
     noLabelsDefaultExemplar.observe(9.0);
 
-    assertNewFormat("no_labels_default_exemplar_bucket{le=\"5.0\"} 1.0 # " + defaultExemplarLabels + " 3.0 " + timestampString() + "\n");
-    assertNewFormat("no_labels_default_exemplar_bucket{le=\"8.0\"} 2.0 # " + defaultExemplarLabels + " 6.0 " + timestampString() + "\n");
-    assertNewFormat("no_labels_default_exemplar_bucket{le=\"+Inf\"} 3.0 # " + defaultExemplarLabels + " 9.0 " + timestampString() + "\n");
-    assertNewFormat("no_labels_default_exemplar_count 3.0\n");
-    assertNewFormat("no_labels_default_exemplar_sum 18.0\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_bucket{le=\"5.0\"} 1.0 # " + defaultExemplarLabels + " 3.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_bucket{le=\"8.0\"} 2.0 # " + defaultExemplarLabels + " 6.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_bucket{le=\"+Inf\"} 3.0 # " + defaultExemplarLabels + " 9.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_count 3.0\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_sum 18.0\n");
 
-    assertOldFormat("no_labels_default_exemplar_bucket{le=\"5.0\",} 1.0\n");
-    assertOldFormat("no_labels_default_exemplar_bucket{le=\"8.0\",} 2.0\n");
-    assertOldFormat("no_labels_default_exemplar_bucket{le=\"+Inf\",} 3.0\n");
-    assertOldFormat("no_labels_default_exemplar_count 3.0\n");
-    assertOldFormat("no_labels_default_exemplar_sum 18.0\n");
+    assert004Format("no_labels_default_exemplar_bucket{le=\"5.0\",} 1.0\n");
+    assert004Format("no_labels_default_exemplar_bucket{le=\"8.0\",} 2.0\n");
+    assert004Format("no_labels_default_exemplar_bucket{le=\"+Inf\",} 3.0\n");
+    assert004Format("no_labels_default_exemplar_count 3.0\n");
+    assert004Format("no_labels_default_exemplar_sum 18.0\n");
 
     noLabelsDefaultExemplar.observe(4.0);
     // The TestExemplarSampler always produces a new Exemplar.
     // The Exemplar with value 3.0 should be replaced with an Exemplar with value 4.0.
 
-    assertNewFormat("no_labels_default_exemplar_bucket{le=\"5.0\"} 2.0 # " + defaultExemplarLabels + " 4.0 " + timestampString() + "\n");
-    assertNewFormat("no_labels_default_exemplar_bucket{le=\"8.0\"} 3.0 # " + defaultExemplarLabels + " 6.0 " + timestampString() + "\n");
-    assertNewFormat("no_labels_default_exemplar_bucket{le=\"+Inf\"} 4.0 # " + defaultExemplarLabels + " 9.0 " + timestampString() + "\n");
-    assertNewFormat("no_labels_default_exemplar_count 4.0\n");
-    assertNewFormat("no_labels_default_exemplar_sum 22.0\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_bucket{le=\"5.0\"} 2.0 # " + defaultExemplarLabels + " 4.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_bucket{le=\"8.0\"} 3.0 # " + defaultExemplarLabels + " 6.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_bucket{le=\"+Inf\"} 4.0 # " + defaultExemplarLabels + " 9.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_count 4.0\n");
+    assertOpenMetrics100Format("no_labels_default_exemplar_sum 22.0\n");
 
-    assertOldFormat("no_labels_default_exemplar_bucket{le=\"5.0\",} 2.0\n");
-    assertOldFormat("no_labels_default_exemplar_bucket{le=\"8.0\",} 3.0\n");
-    assertOldFormat("no_labels_default_exemplar_bucket{le=\"+Inf\",} 4.0\n");
-    assertOldFormat("no_labels_default_exemplar_count 4.0\n");
-    assertOldFormat("no_labels_default_exemplar_sum 22.0\n");
+    assert004Format("no_labels_default_exemplar_bucket{le=\"5.0\",} 2.0\n");
+    assert004Format("no_labels_default_exemplar_bucket{le=\"8.0\",} 3.0\n");
+    assert004Format("no_labels_default_exemplar_bucket{le=\"+Inf\",} 4.0\n");
+    assert004Format("no_labels_default_exemplar_count 4.0\n");
+    assert004Format("no_labels_default_exemplar_sum 22.0\n");
   }
 
   @Test
@@ -205,15 +202,15 @@ public class ExemplarTest {
     noLabelsDefaultExemplar.labels("test").observe(3.0);
     noLabelsDefaultExemplar.labels("test").observe(6.0);
 
-    assertNewFormat("labels_default_exemplar_bucket{label=\"test\",le=\"5.0\"} 1.0 # " + defaultExemplarLabels + " 3.0 " + timestampString() + "\n");
-    assertNewFormat("labels_default_exemplar_bucket{label=\"test\",le=\"+Inf\"} 2.0 # " + defaultExemplarLabels + " 6.0 " + timestampString() + "\n");
-    assertNewFormat("labels_default_exemplar_count{label=\"test\"} 2.0\n");
-    assertNewFormat("labels_default_exemplar_sum{label=\"test\"} 9.0\n");
+    assertOpenMetrics100Format("labels_default_exemplar_bucket{label=\"test\",le=\"5.0\"} 1.0 # " + defaultExemplarLabels + " 3.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("labels_default_exemplar_bucket{label=\"test\",le=\"+Inf\"} 2.0 # " + defaultExemplarLabels + " 6.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("labels_default_exemplar_count{label=\"test\"} 2.0\n");
+    assertOpenMetrics100Format("labels_default_exemplar_sum{label=\"test\"} 9.0\n");
 
-    assertOldFormat("labels_default_exemplar_bucket{label=\"test\",le=\"5.0\",} 1.0\n");
-    assertOldFormat("labels_default_exemplar_bucket{label=\"test\",le=\"+Inf\",} 2.0\n");
-    assertOldFormat("labels_default_exemplar_count{label=\"test\",} 2.0\n");
-    assertOldFormat("labels_default_exemplar_sum{label=\"test\",} 9.0\n");
+    assert004Format("labels_default_exemplar_bucket{label=\"test\",le=\"5.0\",} 1.0\n");
+    assert004Format("labels_default_exemplar_bucket{label=\"test\",le=\"+Inf\",} 2.0\n");
+    assert004Format("labels_default_exemplar_count{label=\"test\",} 2.0\n");
+    assert004Format("labels_default_exemplar_sum{label=\"test\",} 9.0\n");
   }
 
   @Test
@@ -226,15 +223,15 @@ public class ExemplarTest {
         .register(registry);
     noLabelsNoExemplar.observe(3.0);
     noLabelsNoExemplar.observe(6.0);
-    assertNewFormat("no_labels_no_exemplar_bucket{le=\"5.0\"} 1.0\n");
-    assertNewFormat("no_labels_no_exemplar_bucket{le=\"+Inf\"} 2.0\n");
-    assertNewFormat("no_labels_no_exemplar_count 2.0\n");
-    assertNewFormat("no_labels_no_exemplar_sum 9.0\n");
+    assertOpenMetrics100Format("no_labels_no_exemplar_bucket{le=\"5.0\"} 1.0\n");
+    assertOpenMetrics100Format("no_labels_no_exemplar_bucket{le=\"+Inf\"} 2.0\n");
+    assertOpenMetrics100Format("no_labels_no_exemplar_count 2.0\n");
+    assertOpenMetrics100Format("no_labels_no_exemplar_sum 9.0\n");
 
-    assertOldFormat("no_labels_no_exemplar_bucket{le=\"5.0\",} 1.0\n");
-    assertOldFormat("no_labels_no_exemplar_bucket{le=\"+Inf\",} 2.0\n");
-    assertOldFormat("no_labels_no_exemplar_count 2.0\n");
-    assertOldFormat("no_labels_no_exemplar_sum 9.0\n");
+    assert004Format("no_labels_no_exemplar_bucket{le=\"5.0\",} 1.0\n");
+    assert004Format("no_labels_no_exemplar_bucket{le=\"+Inf\",} 2.0\n");
+    assert004Format("no_labels_no_exemplar_count 2.0\n");
+    assert004Format("no_labels_no_exemplar_sum 9.0\n");
   }
 
   @Test
@@ -249,15 +246,15 @@ public class ExemplarTest {
     labelsNoExemplar.labels("test").observe(3.0);
     labelsNoExemplar.labels("test").observe(6.0);
 
-    assertNewFormat("labels_no_exemplar_bucket{label=\"test\",le=\"5.0\"} 1.0\n");
-    assertNewFormat("labels_no_exemplar_bucket{label=\"test\",le=\"+Inf\"} 2.0\n");
-    assertNewFormat("labels_no_exemplar_count{label=\"test\"} 2.0\n");
-    assertNewFormat("labels_no_exemplar_sum{label=\"test\"} 9.0\n");
+    assertOpenMetrics100Format("labels_no_exemplar_bucket{label=\"test\",le=\"5.0\"} 1.0\n");
+    assertOpenMetrics100Format("labels_no_exemplar_bucket{label=\"test\",le=\"+Inf\"} 2.0\n");
+    assertOpenMetrics100Format("labels_no_exemplar_count{label=\"test\"} 2.0\n");
+    assertOpenMetrics100Format("labels_no_exemplar_sum{label=\"test\"} 9.0\n");
 
-    assertOldFormat("labels_no_exemplar_bucket{label=\"test\",le=\"5.0\",} 1.0\n");
-    assertOldFormat("labels_no_exemplar_bucket{label=\"test\",le=\"+Inf\",} 2.0\n");
-    assertOldFormat("labels_no_exemplar_count{label=\"test\",} 2.0\n");
-    assertOldFormat("labels_no_exemplar_sum{label=\"test\",} 9.0\n");
+    assert004Format("labels_no_exemplar_bucket{label=\"test\",le=\"5.0\",} 1.0\n");
+    assert004Format("labels_no_exemplar_bucket{label=\"test\",le=\"+Inf\",} 2.0\n");
+    assert004Format("labels_no_exemplar_count{label=\"test\",} 2.0\n");
+    assert004Format("labels_no_exemplar_sum{label=\"test\",} 9.0\n");
   }
 
   @Test
@@ -271,15 +268,15 @@ public class ExemplarTest {
     noLabelsCustomExemplar.observe(3.0);
     noLabelsCustomExemplar.observe(6.0);
 
-    assertNewFormat("no_labels_custom_exemplar_bucket{le=\"5.0\"} 1.0 # " + customExemplarLabels + " 3.0 " + timestampString() + "\n");
-    assertNewFormat("no_labels_custom_exemplar_bucket{le=\"+Inf\"} 2.0 # " + customExemplarLabels + " 6.0 " + timestampString() + "\n");
-    assertNewFormat("no_labels_custom_exemplar_count 2.0\n");
-    assertNewFormat("no_labels_custom_exemplar_sum 9.0\n");
+    assertOpenMetrics100Format("no_labels_custom_exemplar_bucket{le=\"5.0\"} 1.0 # " + customExemplarLabels + " 3.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("no_labels_custom_exemplar_bucket{le=\"+Inf\"} 2.0 # " + customExemplarLabels + " 6.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("no_labels_custom_exemplar_count 2.0\n");
+    assertOpenMetrics100Format("no_labels_custom_exemplar_sum 9.0\n");
 
-    assertOldFormat("no_labels_custom_exemplar_bucket{le=\"5.0\",} 1.0\n");
-    assertOldFormat("no_labels_custom_exemplar_bucket{le=\"+Inf\",} 2.0\n");
-    assertOldFormat("no_labels_custom_exemplar_count 2.0\n");
-    assertOldFormat("no_labels_custom_exemplar_sum 9.0\n");
+    assert004Format("no_labels_custom_exemplar_bucket{le=\"5.0\",} 1.0\n");
+    assert004Format("no_labels_custom_exemplar_bucket{le=\"+Inf\",} 2.0\n");
+    assert004Format("no_labels_custom_exemplar_count 2.0\n");
+    assert004Format("no_labels_custom_exemplar_sum 9.0\n");
   }
 
   @Test
@@ -294,15 +291,15 @@ public class ExemplarTest {
     labelsCustomExemplar.labels("test").observe(3.0);
     labelsCustomExemplar.labels("test").observe(6.0);
 
-    assertNewFormat("labels_custom_exemplar_bucket{label=\"test\",le=\"5.0\"} 1.0 # " + customExemplarLabels + " 3.0 " + timestampString() + "\n");
-    assertNewFormat("labels_custom_exemplar_bucket{label=\"test\",le=\"+Inf\"} 2.0 # " + customExemplarLabels + " 6.0 " + timestampString() + "\n");
-    assertNewFormat("labels_custom_exemplar_count{label=\"test\"} 2.0\n");
-    assertNewFormat("labels_custom_exemplar_sum{label=\"test\"} 9.0\n");
+    assertOpenMetrics100Format("labels_custom_exemplar_bucket{label=\"test\",le=\"5.0\"} 1.0 # " + customExemplarLabels + " 3.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("labels_custom_exemplar_bucket{label=\"test\",le=\"+Inf\"} 2.0 # " + customExemplarLabels + " 6.0 " + timestampString() + "\n");
+    assertOpenMetrics100Format("labels_custom_exemplar_count{label=\"test\"} 2.0\n");
+    assertOpenMetrics100Format("labels_custom_exemplar_sum{label=\"test\"} 9.0\n");
 
-    assertOldFormat("labels_custom_exemplar_bucket{label=\"test\",le=\"5.0\",} 1.0\n");
-    assertOldFormat("labels_custom_exemplar_bucket{label=\"test\",le=\"+Inf\",} 2.0\n");
-    assertOldFormat("labels_custom_exemplar_count{label=\"test\",} 2.0\n");
-    assertOldFormat("labels_custom_exemplar_sum{label=\"test\",} 9.0\n");
+    assert004Format("labels_custom_exemplar_bucket{label=\"test\",le=\"5.0\",} 1.0\n");
+    assert004Format("labels_custom_exemplar_bucket{label=\"test\",le=\"+Inf\",} 2.0\n");
+    assert004Format("labels_custom_exemplar_count{label=\"test\",} 2.0\n");
+    assert004Format("labels_custom_exemplar_sum{label=\"test\",} 9.0\n");
   }
 
 
@@ -317,13 +314,13 @@ public class ExemplarTest {
       noLabelsDefaultExemplar.observe(i);
     }
     // Summaries don't have Exemplars according to the OpenMetrics spec.
-    assertNewFormat("no_labels{quantile=\"0.5\"} 5.0\n");
-    assertNewFormat("no_labels_count 11.0\n");
-    assertNewFormat("no_labels_sum 66.0\n");
+    assertOpenMetrics100Format("no_labels{quantile=\"0.5\"} 5.0\n");
+    assertOpenMetrics100Format("no_labels_count 11.0\n");
+    assertOpenMetrics100Format("no_labels_sum 66.0\n");
 
-    assertOldFormat("no_labels{quantile=\"0.5\",} 5.0\n");
-    assertOldFormat("no_labels_count 11.0\n");
-    assertOldFormat("no_labels_sum 66.0\n");
+    assert004Format("no_labels{quantile=\"0.5\",} 5.0\n");
+    assert004Format("no_labels_count 11.0\n");
+    assert004Format("no_labels_sum 66.0\n");
   }
 
   @Test
@@ -338,13 +335,13 @@ public class ExemplarTest {
       labelsNoExemplar.labels("test").observe(i);
     }
     // Summaries don't have Exemplars according to the OpenMetrics spec.
-    assertNewFormat("labels{label=\"test\",quantile=\"0.5\"} 5.0\n");
-    assertNewFormat("labels_count{label=\"test\"} 11.0\n");
-    assertNewFormat("labels_sum{label=\"test\"} 66.0\n");
+    assertOpenMetrics100Format("labels{label=\"test\",quantile=\"0.5\"} 5.0\n");
+    assertOpenMetrics100Format("labels_count{label=\"test\"} 11.0\n");
+    assertOpenMetrics100Format("labels_sum{label=\"test\"} 66.0\n");
 
-    assertOldFormat("labels{label=\"test\",quantile=\"0.5\",} 5.0\n");
-    assertOldFormat("labels_count{label=\"test\",} 11.0\n");
-    assertOldFormat("labels_sum{label=\"test\",} 66.0\n");
+    assert004Format("labels{label=\"test\",quantile=\"0.5\",} 5.0\n");
+    assert004Format("labels_count{label=\"test\",} 11.0\n");
+    assert004Format("labels_sum{label=\"test\",} 66.0\n");
   }
 
   private static class TestExemplarSampler implements CounterExemplarSampler, HistogramExemplarSampler {
@@ -361,16 +358,16 @@ public class ExemplarTest {
 
     @Override
     public Exemplar sample(double increment, Exemplar previous) {
-      return new Exemplar(increment, timestamp, TRACE_ID, traceId, SPAN_ID, spanId);
+      return new Exemplar(increment, timestamp, "trace_id", traceId, "span_id", spanId);
     }
 
     @Override
     public Exemplar sample(double value, double bucketFrom, double bucketTo, Exemplar previous) {
-      return new Exemplar(value, timestamp, TRACE_ID, traceId, SPAN_ID, spanId);
+      return new Exemplar(value, timestamp, "trace_id", traceId, "span_id", spanId);
     }
   }
 
-  private void assertOldFormat(String line) throws IOException {
+  private void assert004Format(String line) throws IOException {
     StringWriter writer = new StringWriter();
     TextFormat.write004(writer, registry.metricFamilySamples());
     String metrics = writer.toString();
@@ -378,7 +375,7 @@ public class ExemplarTest {
         metrics.contains("\n" + line));
   }
 
-  private void assertNewFormat(String line) throws IOException {
+  private void assertOpenMetrics100Format(String line) throws IOException {
     StringWriter writer = new StringWriter();
     TextFormat.writeOpenMetrics100(writer, registry.metricFamilySamples());
     String metrics = writer.toString();
@@ -386,17 +383,9 @@ public class ExemplarTest {
         metrics.contains("\n" + line));
   }
 
-  private String timestampString() {
-    StringBuilder result = new StringBuilder();
-    result.append(timestamp / 1000L).append(".");
-    long ms = timestamp % 1000;
-    if (ms < 100) {
-      result.append("0");
-    }
-    if (ms < 10) {
-      result.append("0");
-    }
-    result.append(timestamp % 1000);
-    return result.toString();
+  private String timestampString() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    TextFormat.omWriteTimestamp(stringWriter, timestamp);
+    return stringWriter.toString();
   }
 }

@@ -18,6 +18,10 @@ public class ExemplarConfig {
   }
 
   /**
+   * Set the exemplar sampler used when building Counters.
+   * <p>
+   * This must be called before a Counter is created.
+   *
    * @param counterExemplarSampler will be used by default when creating new {@code Counter} metrics,
    *                               unless {@link #disableExemplarSamplers()} was called.
    */
@@ -29,6 +33,10 @@ public class ExemplarConfig {
   }
 
   /**
+   * Set the exemplar sampler used when building Histograms.
+   * <p>
+   * This must be called before a Histogram is created.
+   *
    * @param histogramExemplarSampler will be used by default when creating new {@code Histogram} metrics,
    *                                 unless {@link #disableExemplarSamplers()} was called.
    */
@@ -41,8 +49,11 @@ public class ExemplarConfig {
 
   /**
    * Disable the implicit exemplar samplers by default.
+   * <p>
    * Exemplars can still be enabled for individual metrics in the metric builder,
    * or they can be provided explicitly for individual observations with the {@code ...withExemplar()} methods.
+   * <p>
+   * This must be called before a Counter or a Histogram is created.
    */
   public static void disableExemplarSamplers() {
     enabled = false;

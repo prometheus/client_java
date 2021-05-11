@@ -9,14 +9,11 @@ import java.util.regex.Pattern;
  */
 public class Exemplar {
 
-  public static final String TRACE_ID = "trace_id";
-  public static final String SPAN_ID = "span_id";
-
   private final String[] labels;
   private final double value;
   private final Long timestampMs;
 
-  private static final Pattern labelNameRegex = Pattern.compile("[a-zA-Z_]\\w*"); // \w is [a-zA-Z_0-9]
+  private static final Pattern labelNameRegex = Pattern.compile("[a-zA-Z_][a-zA-Z_0-9]*");
 
   /**
    * Create an Exemplar without a timestamp

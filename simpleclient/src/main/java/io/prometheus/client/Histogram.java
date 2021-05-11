@@ -366,7 +366,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
      *
      * @param amt            same as in {@link #observe(double)} (double)}
      * @param exemplarLabels list of name/value pairs, as documented in {@link Exemplar#Exemplar(double, String...)}.
-     *                       A commonly used name is {@link Exemplar#TRACE_ID}.
+     *                       A commonly used name is {@code "trace_id"}.
      *                       Calling {@code observeWithExemplar(amt)} means that an exemplar without labels is created.
      *                       Calling {@code observeWithExemplar(amt, (String[]) null)} is equivalent
      *                       to calling {@code observe(amt)}.

@@ -207,7 +207,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
      *
      * @param amt            same as in {@link #inc(double)}
      * @param exemplarLabels list of name/value pairs, as documented in {@link Exemplar#Exemplar(double, String...)}.
-     *                       A commonly used name is {@link Exemplar#TRACE_ID}.
+     *                       A commonly used name is {@code "trace_id"}.
      *                       Calling {@code incWithExemplar(amt)} means that an exemplar without labels will be created.
      *                       Calling {@code incWithExemplar(amt, (String[]) null)} is equivalent
      *                       to calling {@code inc(amt)}.

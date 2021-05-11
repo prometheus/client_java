@@ -1,4 +1,4 @@
-package io.prometheus.benchmark;
+package io.prometheus.client.benchmark;
 
 import io.prometheus.client.Counter;
 import io.prometheus.client.exemplars.DefaultExemplarSampler;

@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static io.prometheus.client.exemplars.Exemplar.SPAN_ID;
-import static io.prometheus.client.exemplars.Exemplar.TRACE_ID;
-
 public class ExemplarTest {
+
+  private final String SPAN_ID = "span_id";
+  private final String TRACE_ID = "trace_id";
 
   @Test
   public void testCompleteExemplar() {
