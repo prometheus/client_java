@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.0.2.v20130417</version>
+            <version>9.3.27.v20190418</version>
         </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
