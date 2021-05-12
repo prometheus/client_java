@@ -396,13 +396,13 @@ You can explicitly create an exemplar for an individual observation. This takes 
 The following call will increment a counter, and create an exemplar with the specified `span_id` and `trace_id` labels:
 
 ```java
-myCounter.incWithExemplar(Exemplar.SPAN_ID, "abcdef", Exemplar.TRACE_ID, "123456");
+myCounter.incWithExemplar("span_id", "abcdef", "trace_id", "123456");
 ```
 
 The following call will observe a value of `0.12` in a histogram, and create an exemplar with the specified `span_id` and `trace_id` labels:
 
 ```java
-myHistogram.observeWithExemplar(0.12, Exemplar.SPAN_ID, "abcdef", Exemplar.TRACE_ID, "123456");
+myHistogram.observeWithExemplar(0.12, "span_id", "abcdef", "trace_id", "123456");
 ```
 
 All methods for observing and incrementing values have `...withExemplar` equivalents. There are versions taking the exemplar labels as a `String...` as shown in the example, as well as versions taking the exemplar labels as a `Map<String, String>`.
