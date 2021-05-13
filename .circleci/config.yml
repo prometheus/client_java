@@ -1,18 +1,39 @@
-version: 2
+---
+version: 2.1
 jobs:
   build:
     working_directory: ~/circleci-java
     docker:
-      - image: circleci/openjdk:8-jdk-stretch
+      - image: cimg/openjdk:<< parameters.jdk_version >>
+    parameters:
+      jdk_version:
+        type: string
     steps:
       - checkout
       - restore_cache: # restore the saved cache after the first run or if `pom.xml` has changed
-          key: circleci-demo-java-spring-{{ checksum "pom.xml" }}
+          key: circleci-demo-java-spring-{{ checksum "pom.xml" }}-<< parameters.jdk_version >>
       - run: mvn dependency:go-offline # gets the project dependencies
       - save_cache:
           paths:
             - ~/.m2
-          key: circleci-demo-java-spring-{{ checksum "pom.xml" }}
+          key: circleci-demo-java-spring-{{ checksum "pom.xml" }}-<< parameters.jdk_version >>
       - run: mvn package
-orbs:
-  prometheus: prometheus/prometheus@0.11.0
+workflows:
+  version: 2
+  client_java:
+    jobs:
+    - build:
+        matrix:
+          parameters:
+            jdk_version:
+            - '8.0'
+            - '11.0'
+            # TODO: Not working yet.
+            # - '12.0'
+            # - '13.0'
+            # - '14.0'
+            # - '15.0'
+            # - '16.0'
+        filters:
+          tags:
+            only: /.*/
