@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 /**
  * Histogram metric, to track distributions of events.
  * <p>
@@ -67,10 +70,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Histogram extends SimpleCollector<Histogram.Child> implements Collector.Describable {
   private final double[] buckets;
+  private final Boolean exemplarsEnabled; // null means default from ExemplarConfig applies
   private final HistogramExemplarSampler exemplarSampler;
 
   Histogram(Builder b) {
     super(b);
+    this.exemplarsEnabled = b.exemplarsEnabled;
     this.exemplarSampler = b.exemplarSampler;
     buckets = b.buckets;
     initializeNoLabelsChild();
@@ -78,9 +83,8 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
 
   public static class Builder extends SimpleCollector.Builder<Builder, Histogram> {
 
-    private HistogramExemplarSampler exemplarSampler = ExemplarConfig.isExemplarSamplerEnabled() ?
-        ExemplarConfig.getHistogramExemplarSampler() :
-        ExemplarConfig.getNoopExemplarSampler();
+    private Boolean exemplarsEnabled = null;
+    private HistogramExemplarSampler exemplarSampler = null;
     private double[] buckets = new double[] { .005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10 };
 
     @Override
@@ -149,21 +153,27 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
         throw new NullPointerException();
       }
       this.exemplarSampler = exemplarSampler;
+      return withExemplars();
+    }
+
+    /**
+     * Enable exemplars.
+     * <p>
+     * This will enable exemplars for this histogram even if exemplars are disabled by default in {@link ExemplarConfig}.
+     */
+    public Builder withExemplars() {
+      this.exemplarsEnabled = TRUE;
       return this;
     }
 
     /**
-     * Enable exemplars using the default {@link HistogramExemplarSampler} as configured in {@link ExemplarConfig}.
-     */
-    public Builder withExemplarSampler() {
-      return withExemplarSampler(ExemplarConfig.getHistogramExemplarSampler());
-    }
-
-    /**
      * Disable exemplars.
+     * <p>
+     * This will disable exemplars for this histogram even if exemplars are enabled by default in {@link ExemplarConfig}.
      */
-    public Builder withoutExemplarSampler() {
-      return withExemplarSampler(ExemplarConfig.getNoopExemplarSampler());
+    public Builder withoutExemplars() {
+      this.exemplarsEnabled = FALSE;
+      return this;
     }
   }
 
@@ -186,7 +196,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
 
   @Override
   protected Child newChild() {
-    return new Child(buckets, exemplarSampler);
+    return new Child(buckets, exemplarsEnabled, exemplarSampler);
   }
 
   /**
@@ -325,8 +335,9 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       }
     }
 
-    private Child(double[] buckets, HistogramExemplarSampler exemplarSampler) {
+    private Child(double[] buckets, Boolean exemplarsEnabled, HistogramExemplarSampler exemplarSampler) {
       upperBounds = buckets;
+      this.exemplarsEnabled = exemplarsEnabled;
       this.exemplarSampler = exemplarSampler;
       exemplars = new ArrayList<AtomicReference<Exemplar>>(buckets.length);
       cumulativeCounts = new DoubleAdder[buckets.length];
@@ -337,6 +348,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
     }
 
     private final ArrayList<AtomicReference<Exemplar>> exemplars;
+    private final Boolean exemplarsEnabled;
     private final HistogramExemplarSampler exemplarSampler;
     private final double[] upperBounds;
     private final DoubleAdder[] cumulativeCounts;
@@ -401,12 +413,28 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
         if (userProvidedExemplar != null) {
           next = userProvidedExemplar;
         } else {
-          next = exemplarSampler.sample(amt, bucketFrom, bucketTo, prev);
+          next = sampleNextExemplar(amt, bucketFrom, bucketTo, prev);
         }
         if (next == null || next == prev) {
           return;
         }
       } while (!exemplar.compareAndSet(prev, next));
+    }
+
+    private Exemplar sampleNextExemplar(double amt, double bucketFrom, double bucketTo, Exemplar prev) {
+      if (FALSE.equals(exemplarsEnabled)) {
+        return null;
+      }
+      if (exemplarSampler != null) {
+        return exemplarSampler.sample(amt, bucketFrom, bucketTo, prev);
+      }
+      if (TRUE.equals(exemplarsEnabled) || ExemplarConfig.isExemplarsEnabled()) {
+        HistogramExemplarSampler exemplarSampler = ExemplarConfig.getHistogramExemplarSampler();
+        if (exemplarSampler != null) {
+          return exemplarSampler.sample(amt, bucketFrom, bucketTo, prev);
+        }
+      }
+      return null;
     }
 
     /**

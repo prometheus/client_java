@@ -79,7 +79,7 @@ public class ExemplarTest {
     Counter noLabelsNoExemplar = Counter.build()
         .name("no_labels_no_exemplar")
         .help("help")
-        .withoutExemplarSampler()
+        .withoutExemplars()
         .register(registry);
     noLabelsNoExemplar.inc();
     assertOpenMetrics100Format("no_labels_no_exemplar_total 1.0\n");
@@ -92,7 +92,7 @@ public class ExemplarTest {
         .name("labels_no_exemplar")
         .help("help")
         .labelNames("label")
-        .withoutExemplarSampler()
+        .withoutExemplars()
         .register(registry);
     labelsNoExemplar.labels("test").inc();
     assertOpenMetrics100Format("labels_no_exemplar_total{label=\"test\"} 1.0\n");
@@ -219,7 +219,7 @@ public class ExemplarTest {
         .name("no_labels_no_exemplar")
         .help("help")
         .buckets(5.0)
-        .withoutExemplarSampler()
+        .withoutExemplars()
         .register(registry);
     noLabelsNoExemplar.observe(3.0);
     noLabelsNoExemplar.observe(6.0);
@@ -241,7 +241,7 @@ public class ExemplarTest {
         .help("help")
         .buckets(5.0)
         .labelNames("label")
-        .withoutExemplarSampler()
+        .withoutExemplars()
         .register(registry);
     labelsNoExemplar.labels("test").observe(3.0);
     labelsNoExemplar.labels("test").observe(6.0);

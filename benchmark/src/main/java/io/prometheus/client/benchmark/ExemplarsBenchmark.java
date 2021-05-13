@@ -40,7 +40,7 @@ public class ExemplarsBenchmark {
         .name("counter_without_exemplars_total")
         .help("Total number of requests.")
         .labelNames("path")
-        .withoutExemplarSampler()
+        .withoutExemplars()
         .create();
   }
 

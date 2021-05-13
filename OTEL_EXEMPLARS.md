@@ -1,6 +1,6 @@
 # OpenTelemetry Exemplars
 
-The `DefaultExemplarSampler` will provide OpenTelemetry exemplars if the [opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java) library version 0.16.0 or higher is found. When `client_java` 0.11.0 was released, the current [opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java) version was 1.1.0.
+The `DefaultExemplarSampler` will provide OpenTelemetry exemplars if the [opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java) library version 0.16.0 or higher is found. When `client_java` 0.11.0 was released, the current [opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java) version was 1.2.0.
 
 ## Running the Example
 

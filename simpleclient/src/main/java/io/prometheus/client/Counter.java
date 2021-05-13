@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 /**
  * Counter metric, to track counts of events or running totals.
  * <p>
@@ -78,19 +81,20 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Counter extends SimpleCollector<Counter.Child> implements Collector.Describable {
 
+  private final Boolean exemplarsEnabled; // null means default from ExemplarConfig applies
   private final CounterExemplarSampler exemplarSampler;
 
   Counter(Builder b) {
     super(b);
+    this.exemplarsEnabled = b.exemplarsEnabled;
     this.exemplarSampler = b.exemplarSampler;
     initializeNoLabelsChild();
   }
 
   public static class Builder extends SimpleCollector.Builder<Builder, Counter> {
 
-    private CounterExemplarSampler exemplarSampler = ExemplarConfig.isExemplarSamplerEnabled() ?
-        ExemplarConfig.getCounterExemplarSampler() :
-        ExemplarConfig.getNoopExemplarSampler();
+    private Boolean exemplarsEnabled = null;
+    private CounterExemplarSampler exemplarSampler = null;
 
     @Override
     public Counter create() {
@@ -103,28 +107,34 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     }
 
     /**
-     * Use the provided {@link CounterExemplarSampler} by default.
+     * Enable exemplars and provide a custom {@link CounterExemplarSampler}.
      */
     public Builder withExemplarSampler(CounterExemplarSampler exemplarSampler) {
       if (exemplarSampler == null) {
         throw new NullPointerException();
       }
       this.exemplarSampler = exemplarSampler;
+      return withExemplars();
+    }
+
+    /**
+     * Enable exemplars.
+     * <p>
+     * This will enable exemplars for this counter even if exemplars are disabled by default in {@link ExemplarConfig}.
+     */
+    public Builder withExemplars() {
+      this.exemplarsEnabled = TRUE;
       return this;
     }
 
     /**
-     * Enable exemplars using the default {@link CounterExemplarSampler} as configured in {@link ExemplarConfig}.
-     */
-    public Builder withExemplarSampler() {
-      return withExemplarSampler(ExemplarConfig.getCounterExemplarSampler());
-    }
-
-    /**
      * Disable exemplars.
+     * <p>
+     * This will disable exemplars for this counter even if exemplars are enabled by default in {@link ExemplarConfig}.
      */
-    public Builder withoutExemplarSampler() {
-      return withExemplarSampler(ExemplarConfig.getNoopExemplarSampler());
+    public Builder withoutExemplars() {
+      this.exemplarsEnabled = FALSE;
+      return this;
     }
   }
 
@@ -147,7 +157,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
 
   @Override
   protected Child newChild() {
-    return new Child(exemplarSampler);
+    return new Child(exemplarsEnabled, exemplarSampler);
   }
 
   /**
@@ -159,10 +169,12 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   public static class Child {
     private final DoubleAdder value = new DoubleAdder();
     private final long created = System.currentTimeMillis();
+    private final Boolean exemplarsEnabled;
     private final CounterExemplarSampler exemplarSampler;
     private final AtomicReference<Exemplar> exemplar = new AtomicReference<Exemplar>();
 
-    public Child(CounterExemplarSampler exemplarSampler) {
+    public Child(Boolean exemplarsEnabled, CounterExemplarSampler exemplarSampler) {
+      this.exemplarsEnabled = exemplarsEnabled;
       this.exemplarSampler = exemplarSampler;
     }
 
@@ -233,7 +245,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
       do {
         prev = exemplar.get();
         if (userProvidedExemplar == null) {
-          next = exemplarSampler.sample(amt, prev);
+          next = sampleNextExemplar(amt, prev);
         } else {
           next = userProvidedExemplar;
         }
@@ -241,6 +253,22 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
           return;
         }
       } while (!exemplar.compareAndSet(prev, next));
+    }
+
+    private Exemplar sampleNextExemplar(double amt, Exemplar prev) {
+      if (FALSE.equals(exemplarsEnabled)) {
+        return null;
+      }
+      if (exemplarSampler != null) {
+        return exemplarSampler.sample(amt, prev);
+      }
+      if (TRUE.equals(exemplarsEnabled) || ExemplarConfig.isExemplarsEnabled()) {
+        CounterExemplarSampler exemplarSampler = ExemplarConfig.getCounterExemplarSampler();
+        if (exemplarSampler != null) {
+          return exemplarSampler.sample(amt, prev);
+        }
+      }
+      return null;
     }
 
     /**

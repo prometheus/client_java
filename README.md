@@ -307,10 +307,10 @@ An `ExemplarSampler` is used implicitly under the hood to add exemplars to your 
 
 The `DefaultExemplarSampler` comes with built-in support for [OpenTelemetry tracing](https://github.com/open-telemetry/opentelemetry-java), see  [built-in support for tracing systems](#built-in-support-for-tracing-systems) below.
 
-You can disable the default exemplar sampler globally with:
+You can disable the default exemplar samplers globally with:
 
 ```java
-ExemplarConfig.disableExemplarSamplers();
+ExemplarConfig.disableExemplars();
 ```
 
 You can set your own custom implementation of `ExemplarSampler` as a global default like this:
@@ -321,19 +321,17 @@ ExemplarConfig.setCounterExemplarSampler(myExemplarSampler);
 ExemplarConfig.setHistogramExemplarSampler(myExemplarSampler);
 ```
 
-Note that `ExemplarConfig` is used when a metric is created, so changing the default has no effect on metrics that have already been created.
-
 ### Per Metric Exemplar Samplers
 
 The metric builders for `Counter` and `Histogram` have methods for setting the exemplar sampler for that individual metric. This takes precedence over the global setting in `ExemplarConfig`.
 
-The following calls enable the default exemplar sampler for individual metrics. This is useful if you disabled the exemplar sampler globally with `ExemplarConfig.disableExemplarSamplers()`.
+The following calls enable the default exemplar sampler for individual metrics. This is useful if you disabled the exemplar sampler globally with `ExemplarConfig.disableExemplars()`.
 
 ```java
 Counter myCounter = Counter.build()
     .name("number_of_events_total")
     .help("help")
-    .withExemplarSampler()
+    .withExemplars()
     ...
     .register();
 ```
@@ -342,18 +340,18 @@ Counter myCounter = Counter.build()
 Histogram myHistogram = Histogram.build()
     .name("my_latency")
     .help("help")
-    .withExemplarSampler()
+    .withExemplars()
     ...
     .register();
 ```
 
-The following calls disable the default exemplar sampler for individual metrics:
+The following calls disable exemplars for individual metrics:
 
 ```java
 Counter myCounter = Counter.build()
     .name("number_of_events_total")
     .help("help")
-    .withoutExemplarSampler()
+    .withoutExemplars()
     ...
     .register();
 ```
@@ -362,12 +360,12 @@ Counter myCounter = Counter.build()
 Histogram myHistogram = Histogram.build()
     .name("my_latency")
     .help("help")
-    .withoutExemplarSampler()
+    .withoutExemplars()
     ...
     .register();
 ```
 
-The following calls set a custom `MyExemplarSampler` for individual metrics:
+The following calls enable exemplars and set a custom `MyExemplarSampler` for individual metrics:
 
 ```java
 // CounterExemplarSampler

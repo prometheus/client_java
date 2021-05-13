@@ -6,7 +6,7 @@ import io.prometheus.client.exemplars.tracer.otel_agent.OpenTelemetryAgentSpanCo
 
 class Tracer {
 
-  ExemplarSampler initExemplarSampler(ExemplarSampler noopExemplarSampler) {
+  ExemplarSampler initExemplarSampler() {
     try {
       Object spanContextSupplier = findSpanContextSupplier();
       if (spanContextSupplier != null) {
@@ -15,7 +15,7 @@ class Tracer {
     } catch (NoClassDefFoundError ignored) {
       // tracer_common dependency not found
     }
-    return noopExemplarSampler;
+    return null;
   }
 
   // Avoid SpanContextSupplier in the method signature so that we can handle the NoClassDefFoundError
