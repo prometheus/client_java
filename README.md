@@ -389,7 +389,7 @@ Histogram myHistogram = Histogram.build()
 
 ### Per Observation Exemplars
 
-You can explicitly create an exemplar for an individual observation. This takes precedence over the exemplar sampler configured with the metric.
+You can explicitly provide an exemplar for an individual observation. This takes precedence over the exemplar sampler configured with the metric.
 
 The following call will increment a counter, and create an exemplar with the specified `span_id` and `trace_id` labels:
 

@@ -57,7 +57,7 @@ public class ExemplarTest {
     assert004Format("no_labels_default_exemplar_total 3.0\n");
     noLabelsDefaultExemplar.inc(2);
     // The TestExemplarSampler always produces a new Exemplar.
-    // The Exemplar with value 3.0 should be replaced with an Exemplar with value 5.0.
+    // The Exemplar with value 3.0 should be replaced with an Exemplar with value 2.0.
     assertOpenMetrics100Format("no_labels_default_exemplar_total 5.0 # " + defaultExemplarLabels + " 2.0 " + timestampString() + "\n");
     assert004Format("no_labels_default_exemplar_total 5.0\n");
   }

@@ -9,8 +9,8 @@
     <version>0.10.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>tracer_common</artifactId>
-  <name>Span Context Supplier - Common</name>
+  <artifactId>simpleclient_tracer_common</artifactId>
+  <name>Prometheus Java Span Context Supplier - Common</name>
 
   <dependencies>
   </dependencies>

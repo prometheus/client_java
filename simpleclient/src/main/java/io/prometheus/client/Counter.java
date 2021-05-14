@@ -118,9 +118,11 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     }
 
     /**
-     * Enable exemplars.
+     * Allow this counter to load exemplars from a {@link CounterExemplarSampler}.
      * <p>
-     * This will enable exemplars for this counter even if exemplars are disabled by default in {@link ExemplarConfig}.
+     * If a specific exemplar sampler is configured for this counter that exemplar sampler is used
+     * (see {@link #withExemplarSampler(CounterExemplarSampler)}).
+     * Otherwise the default from {@link ExemplarConfig} is used.
      */
     public Builder withExemplars() {
       this.exemplarsEnabled = TRUE;
@@ -128,9 +130,10 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     }
 
     /**
-     * Disable exemplars.
+     * Prevent this counter from loading exemplars from a {@link CounterExemplarSampler}.
      * <p>
-     * This will disable exemplars for this counter even if exemplars are enabled by default in {@link ExemplarConfig}.
+     * You can still provide exemplars for explicitly individual observations, e.g. using
+     * {@link #incWithExemplar(double, String...)}.
      */
     public Builder withoutExemplars() {
       this.exemplarsEnabled = FALSE;

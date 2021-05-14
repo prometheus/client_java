@@ -13,13 +13,13 @@ class Tracer {
         return new DefaultExemplarSampler((SpanContextSupplier) spanContextSupplier);
       }
     } catch (NoClassDefFoundError ignored) {
-      // tracer_common dependency not found
+      // simpleclient_tracer_common dependency not found
     }
     return null;
   }
 
   // Avoid SpanContextSupplier in the method signature so that we can handle the NoClassDefFoundError
-  // even if the user excluded tracer_common from the classpath.
+  // even if the user excluded simpleclient_tracer_common from the classpath.
   private Object findSpanContextSupplier() {
     try {
       if (OpenTelemetrySpanContextSupplier.isAvailable()) {

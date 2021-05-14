@@ -157,9 +157,11 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
     }
 
     /**
-     * Enable exemplars.
+     * Allow this histogram to load exemplars from a {@link HistogramExemplarSampler}.
      * <p>
-     * This will enable exemplars for this histogram even if exemplars are disabled by default in {@link ExemplarConfig}.
+     * If a specific exemplar sampler is configured for this histogram that exemplar sampler is used
+     * (see {@link #withExemplarSampler(HistogramExemplarSampler)}).
+     * Otherwise the default from {@link ExemplarConfig} is used.
      */
     public Builder withExemplars() {
       this.exemplarsEnabled = TRUE;
@@ -167,9 +169,10 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
     }
 
     /**
-     * Disable exemplars.
+     * Prevent this histogram from loading exemplars from a {@link HistogramExemplarSampler}.
      * <p>
-     * This will disable exemplars for this histogram even if exemplars are enabled by default in {@link ExemplarConfig}.
+     * You can still provide exemplars for explicitly individual observations, e.g. using
+     * {@link #observeWithExemplar(double, String...)}.
      */
     public Builder withoutExemplars() {
       this.exemplarsEnabled = FALSE;

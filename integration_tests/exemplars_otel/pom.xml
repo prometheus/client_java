@@ -21,25 +21,6 @@
       <groupId>io.prometheus</groupId>
       <artifactId>simpleclient</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <!-- uncomment the following to verify manually that simpleclient still works if the tracers are excluded -->
-        <!--
-        <exclusion>
-          <groupId>io.prometheus</groupId>
-          <artifactId>tracer_common</artifactId>
-        </exclusion>
-        -->
-        <exclusion>
-          <groupId>io.prometheus</groupId>
-          <artifactId>tracer_otel_agent</artifactId>
-        </exclusion>
-        <!--
-        <exclusion>
-          <groupId>io.prometheus</groupId>
-          <artifactId>tracer_otel</artifactId>
-        </exclusion>
-        -->
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.opentelemetry</groupId>
@@ -107,21 +88,15 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.2</version>
         <executions>
           <execution>
+            <id>copy-dependencies</id>
             <phase>package</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>copy-dependencies</goal>
             </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>io.prometheus.client.it.exemplars_otel.Server</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
           </execution>
         </executions>
       </plugin>

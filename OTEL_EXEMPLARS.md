@@ -52,12 +52,12 @@ you can exclude the corresponding dependencies in your `pom.xml`:
       <!-- The following will disable OpenTelemetry exemplars when your application uses OpenTelemetry directly -->
       <exclusion>
         <groupId>io.prometheus</groupId>
-        <artifactId>tracer_otel</artifactId>
+        <artifactId>simpleclient_tracer_otel</artifactId>
       </exclusion>
-      <!-- The following will disable OpenTelemetry exemplars when your application uses  OpenTelemetry is used via the OpenTelemetry Java agent -->
+      <!-- The following will disable OpenTelemetry exemplars when your application uses the OpenTelemetry Java agent -->
       <exclusion>
         <groupId>io.prometheus</groupId>
-        <artifactId>tracer_otel_agent</artifactId>
+        <artifactId>simpleclient_tracer_otel_agent</artifactId>
       </exclusion>
     </exclusions>
   </dependency>

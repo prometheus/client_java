@@ -30,20 +30,21 @@ public class ExemplarConfig {
   }
 
   /**
-   * Disable exemplars by default.
+   * Prevent metrics from loading exemplars from an {@link ExemplarSampler} by default.
    * <p>
-   * Exemplars can still be enabled for individual metrics with the metric builder's {@code withExemplars()} method,
-   * and single Exemplars can be provided explicitly for individual observations with
-   * the {@code ...withExemplar()} methods.
+   * You can still enable individual metrics to load exemplars from an {@link ExemplarSampler} by calling the
+   * metric builder's {@code withExemplars()} method, and you can still provide single exemplars explicitly
+   * for individual observations with the {@code ...withExemplar()} methods.
    */
   public static void disableExemplars() {
     enabled = false;
   }
 
   /**
-   * Enable exemplars by default.
+   * Allow metrics to load exemplars from an {@link ExemplarSampler} by default.
    * <p>
-   * Exemplars can still be disabled for individual metrics with the metric builder's {@code withoutExemplars()} method.
+   * You can still disallow individual metrics to load exemplars from an {@link ExemplarSampler} by calling
+   * the metric builder's {@code withoutExemplars()} method.
    * <p>
    * Exemplars are enabled by default. This method is here so that you can temporarily {@link #disableExemplars()}
    * and then {@link #enableExemplars()} again.
