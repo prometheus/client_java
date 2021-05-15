@@ -9,11 +9,17 @@ If you want to see this in action, you can run the example from the `ExemplarsCl
 ```
 ./mvnw package
 cd integration_tests/exemplars_otel_agent/target/
-curl -LO https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.0.1/opentelemetry-javaagent-all.jar
-java -Dotel.traces.exporter=logging -Dotel.metrics.exporter=none -javaagent:./opentelemetry-javaagent-all.jar -jar ./sample-rest-application.jar
+curl -LO https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.2.0/opentelemetry-javaagent-1.2.0-all.jar
+java -Dotel.traces.exporter=logging -Dotel.metrics.exporter=none -javaagent:./opentelemetry-javaagent-1.2.0-all.jar -jar ./sample-rest-application.jar
 ```
 
 Now you have a Spring REST service running on [http://localhost:8080/hello](http://localhost:8080/hello) that is instrumented with the OpenTelemetry Java agent.
+
+Run a request to generate an OpenTelemetry trace
+
+```
+curl http://localhost:8080/hello
+```
 
 In order to get metrics in [OpenMetrics](http://openmetrics.io) format, run
 
