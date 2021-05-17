@@ -9,12 +9,12 @@ public class OpenTelemetrySpanContextSupplier implements SpanContextSupplier {
 
   public static boolean isAvailable() {
     try {
-      if ("inactive".equalsIgnoreCase(System.getProperties().getProperty("otelExemplars", System.getenv("OTEL_EXEMPLARS")))) {
+      if ("inactive".equalsIgnoreCase(System.getProperties().getProperty("io.prometheus.otelExemplars"))) {
         return false;
       }
       OpenTelemetrySpanContextSupplier test = new OpenTelemetrySpanContextSupplier();
       test.getSpanId();
-      test.getSpanId();
+      test.getTraceId();
       return true;
     } catch (LinkageError ignored) {
       // NoClassDefFoundError:

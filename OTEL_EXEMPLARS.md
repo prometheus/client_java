@@ -33,11 +33,11 @@ You should see metrics with Exemplars, for example in the `request_duration_hist
 request_duration_histogram_bucket{path="/god-of-fire",le="0.004"} 4.0 # {trace_id="043cd631811e373e4180a678c06b128e",span_id="cd122e457d2ca5b0"} 0.0033 1618261159.027
 ```
 
-Note that this is an example application for a unit test, so durations don't represent real durations, and some example metrics might not make sense in the real world.
+Note that this is an example application for demonstration, so durations don't represent real durations, and some example metrics might not make sense in the real world.
 
 ## Disabling OpenTelemetry Exemplars
 
-If you use OpenTelemetry tracing but don't want Exemplars, you can disable OpenTelemetries in multiple ways.
+If you use OpenTelemetry tracing but do not want Exemplars, you can disable OpenTelemetries in multiple ways.
 
 ### Disabling OpenTelemetry Exemplars in Code
 
@@ -73,15 +73,8 @@ you can exclude the corresponding dependencies in your `pom.xml`:
 ### Disable OpenTelemetry Exemplars at Runtime
 
 If your application uses OpenTelemetry tracing, but you want to disable OpenTelemetry at runtime without changing code,
-start your application with the `otelExemplars` system property:
+start your application with the `io.prometheus.otelExemplars` system property:
 
 ```
-java -DotelExemplars=inactive -jar my-application.jar
-```
-
-Alternatively, you can set the environment variable `OTEL_EXEMPLARS=inactive`:
-
-```
-export OTEL_EXEMPLARS=inactive
-java -jar my-application.jar
+java -Dio.prometheus.otelExemplars=inactive -jar my-application.jar
 ```
