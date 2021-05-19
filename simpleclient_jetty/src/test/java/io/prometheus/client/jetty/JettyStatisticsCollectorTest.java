@@ -60,8 +60,11 @@ public class JettyStatisticsCollectorTest {
     } catch (FileNotFoundException ignored) {
     }
 
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_total"), is(1.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active"), is(0.0));
+    Double jettyRequestsTotal = CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_total");
+    Double jettyRequestsActive = CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_total");
+    System.out.println("jetty_requests_total=" + jettyRequestsTotal + ", jetty_requests_active" + jettyRequestsActive);
+    assertThat(jettyRequestsTotal, is(1.0));
+    assertThat(jettyRequestsActive, is(0.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active_max"),
         is(1.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_max_seconds"),
