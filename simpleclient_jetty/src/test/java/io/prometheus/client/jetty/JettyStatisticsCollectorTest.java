@@ -60,15 +60,15 @@ public class JettyStatisticsCollectorTest {
     } catch (FileNotFoundException ignored) {
     }
 
-    Double jettyRequestsTotal = null;
+    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_total"), is(1.0));
     Double jettyRequestsActive = null;
     for (int i=0; i<10; i++) {
-      jettyRequestsTotal = CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_total");
       jettyRequestsActive = CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active");
-      System.out.println("jetty_requests_total=" + jettyRequestsTotal + ", jetty_requests_active=" + jettyRequestsActive);
-      Thread.sleep(100);
+      if (Double.valueOf(0.0).equals(jettyRequestsActive)) {
+        break;
+      }
+      Thread.sleep(50);
     }
-    assertThat(jettyRequestsTotal, is(1.0));
     assertThat(jettyRequestsActive, is(0.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active_max"),
         is(1.0));
