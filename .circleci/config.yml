@@ -9,6 +9,7 @@ jobs:
       - checkout
       - restore_cache:
           key: maven-dependencies-{{ checksum "pom.xml" }}
+      - run: java -version
       - run: ./mvnw clean verify
       - save_cache:
           paths:
