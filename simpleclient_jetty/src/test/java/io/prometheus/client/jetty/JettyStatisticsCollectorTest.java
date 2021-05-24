@@ -61,7 +61,15 @@ public class JettyStatisticsCollectorTest {
     }
 
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_total"), is(1.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active"), is(0.0));
+    Double jettyRequestsActive = null;
+    for (int i=0; i<10; i++) {
+      jettyRequestsActive = CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active");
+      if (Double.valueOf(0.0).equals(jettyRequestsActive)) {
+        break;
+      }
+      Thread.sleep(50);
+    }
+    assertThat(jettyRequestsActive, is(0.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active_max"),
         is(1.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_max_seconds"),
