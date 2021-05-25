@@ -58,7 +58,7 @@ public class HTTPServer {
     /**
      * Handles Metrics collections from the given registry.
      */
-    static class HTTPMetricHandler implements HttpHandler {
+    public static class HTTPMetricHandler implements HttpHandler {
         private final CollectorRegistry registry;
         private final LocalByteArray response = new LocalByteArray();
         private final static String HEALTHY_RESPONSE = "Exporter is Healthy.";
