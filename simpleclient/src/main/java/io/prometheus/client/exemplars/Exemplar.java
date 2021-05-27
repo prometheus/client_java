@@ -70,7 +70,7 @@ public class Exemplar {
 
   /**
    * Get the label name at index {@code i}.
-   * @param i the index, must be >= 0 and < {@link #getNumberOfLabels()}.
+   * @param i the index, must be &gt;= 0 and &lt; {@link #getNumberOfLabels()}.
    * @return the label name at index {@code i}
    */
   public String getLabelName(int i) {
@@ -79,7 +79,7 @@ public class Exemplar {
 
   /**
    * Get the label value at index {@code i}.
-   * @param i the index, must be >= 0 and < {@link #getNumberOfLabels()}.
+   * @param i the index, must be &gt;= 0 and &lt; {@link #getNumberOfLabels()}.
    * @return the label value at index {@code i}
    */
   public String getLabelValue(int i) {

@@ -4,7 +4,7 @@ import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 
 /**
  * Default Exemplar sampler.
- * <p/>
+ * <p>
  * Keeps each Exemplar for a minimum of ~7 seconds, then samples a new one.
  */
 public class DefaultExemplarSampler implements ExemplarSampler {
