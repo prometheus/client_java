@@ -4,13 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.rules.ExpectedException.none;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import io.prometheus.client.exemplars.Exemplar;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.rules.ExpectedException;
-
 
 public class CounterTest {
   CollectorRegistry registry;
@@ -104,4 +107,50 @@ public class CounterTest {
     assertEquals(mfsFixture, mfs.get(0));
   }
 
+  @Test
+  public void testExemplars() {
+    Map<String, String> labels = new HashMap<String, String>();
+    labels.put("mapKey1", "mapValue1");
+    labels.put("mapKey2", "mapValue2");
+
+    noLabels.incWithExemplar("key", "value");
+    assertExemplar(noLabels, 1, "key", "value");
+
+    noLabels.incWithExemplar();
+    assertExemplar(noLabels, 1);
+
+    noLabels.incWithExemplar(labels);
+    assertExemplar(noLabels, 1, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+
+    noLabels.incWithExemplar(2, "key1", "value1", "key2", "value2");
+    assertExemplar(noLabels, 2, "key1", "value1", "key2", "value2");
+
+    noLabels.incWithExemplar(3);
+    assertExemplar(noLabels, 3);
+
+    noLabels.incWithExemplar(4, new HashMap<String, String>());
+    assertExemplar(noLabels, 4);
+
+    noLabels.incWithExemplar(5, labels);
+    assertExemplar(noLabels, 5, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+    noLabels.inc(); // should not alter the exemplar
+    assertExemplar(noLabels, 5, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+
+    noLabels.incWithExemplar(5, (String[]) null); // should not alter the exemplar
+    assertExemplar(noLabels, 5, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+
+    noLabels.incWithExemplar(5, (Map<String, String>) null); // should not alter the exemplar
+    assertExemplar(noLabels, 5, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+  }
+
+  private void assertExemplar(Counter counter, double value, String... labels) {
+    List<Collector.MetricFamilySamples> mfs = counter.collect();
+    Exemplar exemplar = mfs.get(0).samples.get(0).exemplar;
+    Assert.assertEquals(value, exemplar.getValue(), 0.001);
+    Assert.assertEquals(labels.length/2, exemplar.getNumberOfLabels());
+    for (int i=0; i<labels.length; i+=2) {
+      Assert.assertEquals(labels[i], exemplar.getLabelName(i/2));
+      Assert.assertEquals(labels[i+1], exemplar.getLabelValue(i/2));
+    }
+  }
 }

@@ -1,6 +1,8 @@
 
 package io.prometheus.client;
 
+import io.prometheus.client.exemplars.Exemplar;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -60,7 +62,7 @@ public abstract class Collector {
           if (name.equals(n)) {
             n = withTotal;
           }
-          mungedSamples.add(new Sample(n, s.labelNames, s.labelValues, s.value, s.timestampMs));
+          mungedSamples.add(new Sample(n, s.labelNames, s.labelValues, s.value, s.exemplar, s.timestampMs));
         }
       }
       this.name = name;
@@ -113,18 +115,28 @@ public abstract class Collector {
       public final List<String> labelNames;
       public final List<String> labelValues;  // Must have same length as labelNames.
       public final double value;
+      public final Exemplar exemplar;
       public final Long timestampMs;  // It's an epoch format with milliseconds value included (this field is subject to change).
 
-      public Sample(String name, List<String> labelNames, List<String> labelValues, double value, Long timestampMs) {
+      public Sample(String name, List<String> labelNames, List<String> labelValues, double value, Exemplar exemplar, Long timestampMs) {
         this.name = name;
         this.labelNames = labelNames;
         this.labelValues = labelValues;
         this.value = value;
+        this.exemplar = exemplar;
         this.timestampMs = timestampMs;
       }
 
+      public Sample(String name, List<String> labelNames, List<String> labelValues, double value, Long timestampMs) {
+        this(name, labelNames, labelValues, value, null, timestampMs);
+      }
+
+      public Sample(String name, List<String> labelNames, List<String> labelValues, double value, Exemplar exemplar) {
+        this(name, labelNames, labelValues, value, exemplar, null);
+      }
+
       public Sample(String name, List<String> labelNames, List<String> labelValues, double value) {
-        this(name, labelNames, labelValues, value, null);
+        this(name, labelNames, labelValues, value, null, null);
       }
 
       @Override
@@ -134,9 +146,12 @@ public abstract class Collector {
         }
         Sample other = (Sample) obj;
 
-        return other.name.equals(name) && other.labelNames.equals(labelNames)
-          && other.labelValues.equals(labelValues) && other.value == value
-          && ((timestampMs == null && other.timestampMs == null) || (other.timestampMs != null) && (other.timestampMs.equals(timestampMs)));
+        return other.name.equals(name) &&
+            other.labelNames.equals(labelNames) &&
+            other.labelValues.equals(labelValues) &&
+            other.value == value &&
+            (exemplar == null && other.exemplar == null || other.exemplar != null && other.exemplar.equals(exemplar)) &&
+            (timestampMs == null && other.timestampMs == null || other.timestampMs != null && other.timestampMs.equals(timestampMs));
       }
 
       @Override
@@ -149,6 +164,9 @@ public abstract class Collector {
         hash = 37 * hash + (int)(d ^ (d >>> 32));
         if (timestampMs != null) {
           hash = 37 * hash + timestampMs.hashCode();
+        }
+        if (exemplar != null) {
+          hash = 37 * exemplar.hashCode();
         }
         return hash;
       }

@@ -108,6 +108,26 @@ public class MemoryPoolsExports extends Collector {
         "Initial bytes of a given JVM memory pool.",
         Collections.singletonList("pool"));
     sampleFamilies.add(init);
+    GaugeMetricFamily collectionUsed = new GaugeMetricFamily(
+        "jvm_memory_pool_collection_bytes_used",
+        "Used bytes after last collection of a given JVM memory pool.",
+        Collections.singletonList("pool"));
+    sampleFamilies.add(collectionUsed);
+    GaugeMetricFamily collectionCommitted = new GaugeMetricFamily(
+        "jvm_memory_pool_collection_bytes_committed",
+        "Committed after last collection bytes of a given JVM memory pool.",
+        Collections.singletonList("pool"));
+    sampleFamilies.add(collectionCommitted);
+    GaugeMetricFamily collectionMax = new GaugeMetricFamily(
+        "jvm_memory_pool_collection_bytes_max",
+        "Max bytes after last collection of a given JVM memory pool.",
+        Collections.singletonList("pool"));
+    sampleFamilies.add(collectionMax);
+    GaugeMetricFamily collectionInit = new GaugeMetricFamily(
+        "jvm_memory_pool_collection_bytes_init",
+        "Initial after last collection bytes of a given JVM memory pool.",
+        Collections.singletonList("pool"));
+    sampleFamilies.add(collectionInit);
     for (final MemoryPoolMXBean pool : poolBeans) {
       MemoryUsage poolUsage = pool.getUsage();
       used.addMetric(
@@ -122,6 +142,21 @@ public class MemoryPoolsExports extends Collector {
       init.addMetric(
           Collections.singletonList(pool.getName()),
           poolUsage.getInit());
+      MemoryUsage collectionPoolUsage = pool.getCollectionUsage();
+      if (collectionPoolUsage != null) {
+          collectionUsed.addMetric(
+              Collections.singletonList(pool.getName()),
+              collectionPoolUsage.getUsed());
+          collectionCommitted.addMetric(
+              Collections.singletonList(pool.getName()),
+              collectionPoolUsage.getCommitted());
+          collectionMax.addMetric(
+              Collections.singletonList(pool.getName()),
+              collectionPoolUsage.getMax());
+          collectionInit.addMetric(
+              Collections.singletonList(pool.getName()),
+              collectionPoolUsage.getInit());
+      }
     }
   }
 

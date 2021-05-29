@@ -278,7 +278,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
     /**
      * Observe the given amount.
-     * @param amt in most cases amt should be >= 0. Negative values are supported, but you should read
+     * @param amt in most cases amt should be &gt;= 0. Negative values are supported, but you should read
      *            <a href="https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations">
      *            https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations</a> for
      *            implications and alternatives.
@@ -311,7 +311,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   // Convenience methods.
   /**
    * Observe the given amount on the summary with no labels.
-   * @param amt in most cases amt should be >= 0. Negative values are supported, but you should read
+   * @param amt in most cases amt should be &gt;= 0. Negative values are supported, but you should read
    *            <a href="https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations">
    *            https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations</a> for
    *            implications and alternatives.

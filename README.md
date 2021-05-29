@@ -17,6 +17,11 @@ Table of Contents
      * [Histogram](#histogram)
      * [Labels](#labels)
      * [Registering Metrics](#registering-metrics)
+  * [Exemplars](#exemplars)
+     * [Global Exemplar Samplers](#global-exemplar-samplers)
+     * [Per Metric Exemplar Samplers](#per-metric-exemplar-samplers)
+     * [Per Observation Exemplars](#per-observation-exemplars)
+     * [Built-in Support for Tracing Systems](#built-in-support-for-tracing-systems)
   * [Included Collectors](#included-collectors)
      * [Logging](#logging)
      * [Caches](#caches)
@@ -291,6 +296,123 @@ class YourClass {
 }
 ```
 
+## Exemplars
+
+Exemplars are a feature of the [OpenMetrics](http://openmetrics.io) format that allows applications to link metrics to example traces.
+Exemplars are supported since `client_java` version 0.11.0. Exemplars are supported for `Counter` and `Histogram` metrics.
+
+### Global Exemplar Samplers
+
+An `ExemplarSampler` is used implicitly under the hood to add exemplars to your metrics. The idea is that you get exemplars without changing your code.
+
+The `DefaultExemplarSampler` comes with built-in support for [OpenTelemetry tracing](https://github.com/open-telemetry/opentelemetry-java), see  [built-in support for tracing systems](#built-in-support-for-tracing-systems) below.
+
+You can disable the default exemplar samplers globally with:
+
+```java
+ExemplarConfig.disableExemplars();
+```
+
+You can set your own custom implementation of `ExemplarSampler` as a global default like this:
+
+```java
+ExemplarSampler myExemplarSampler = new MyExemplarSampler();
+ExemplarConfig.setCounterExemplarSampler(myExemplarSampler);
+ExemplarConfig.setHistogramExemplarSampler(myExemplarSampler);
+```
+
+### Per Metric Exemplar Samplers
+
+The metric builders for `Counter` and `Histogram` have methods for setting the exemplar sampler for that individual metric. This takes precedence over the global setting in `ExemplarConfig`.
+
+The following calls enable the default exemplar sampler for individual metrics. This is useful if you disabled the exemplar sampler globally with `ExemplarConfig.disableExemplars()`.
+
+```java
+Counter myCounter = Counter.build()
+    .name("number_of_events_total")
+    .help("help")
+    .withExemplars()
+    ...
+    .register();
+```
+
+```java
+Histogram myHistogram = Histogram.build()
+    .name("my_latency")
+    .help("help")
+    .withExemplars()
+    ...
+    .register();
+```
+
+The following calls disable exemplars for individual metrics:
+
+```java
+Counter myCounter = Counter.build()
+    .name("number_of_events_total")
+    .help("help")
+    .withoutExemplars()
+    ...
+    .register();
+```
+
+```java
+Histogram myHistogram = Histogram.build()
+    .name("my_latency")
+    .help("help")
+    .withoutExemplars()
+    ...
+    .register();
+```
+
+The following calls enable exemplars and set a custom `MyExemplarSampler` for individual metrics:
+
+```java
+// CounterExemplarSampler
+Counter myCounter = Counter.build()
+    .name("number_of_events_total")
+    .help("help")
+    .withExemplarSampler(new MyExemplarSampler())
+    ...
+    .register();
+```
+
+```java
+// HistogramExemplarSampler
+Histogram myHistogram = Histogram.build()
+    .name("my_latency")
+    .help("help")
+    .withExemplarSampler(new MyExemplarSampler())
+    ...
+    .register();
+```
+
+### Per Observation Exemplars
+
+You can explicitly provide an exemplar for an individual observation. This takes precedence over the exemplar sampler configured with the metric.
+
+The following call will increment a counter, and create an exemplar with the specified `span_id` and `trace_id` labels:
+
+```java
+myCounter.incWithExemplar("span_id", "abcdef", "trace_id", "123456");
+```
+
+The following call will observe a value of `0.12` in a histogram, and create an exemplar with the specified `span_id` and `trace_id` labels:
+
+```java
+myHistogram.observeWithExemplar(0.12, "span_id", "abcdef", "trace_id", "123456");
+```
+
+All methods for observing and incrementing values have `...withExemplar` equivalents. There are versions taking the exemplar labels as a `String...` as shown in the example, as well as versions taking the exemplar labels as a `Map<String, String>`.
+
+### Built-in Support for Tracing Systems
+
+The `DefaultExemplarSampler` detects if a tracing library is found on startup, and provides exemplars for that tracing library by default. Currently, only [OpenTelemetry tracing](https://github.com/open-telemetry/opentelemetry-java) is supported.
+If you are a tracing vendor, feel free to open a PR and add support for your tracing library.
+
+Documentation of the individual tracer integrations:
+
+* [OTEL_EXEMPLARS.md]: OpenTelemetry
 
 ## Included Collectors
 
