@@ -49,7 +49,7 @@ public class MemoryPoolsExports extends Collector {
     MemoryUsage nonHeapUsage = memoryBean.getNonHeapMemoryUsage();
 
     GaugeMetricFamily finalizer = new GaugeMetricFamily(
-        "jvm_objects_pending_finalization",
+        "jvm_memory_objects_pending_finalization",
         "The number of objects waiting in the finalizer queue.",
         memoryBean.getObjectPendingFinalizationCount());
     sampleFamilies.add(finalizer);

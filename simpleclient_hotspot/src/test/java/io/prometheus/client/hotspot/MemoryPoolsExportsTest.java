@@ -178,7 +178,7 @@ public class MemoryPoolsExportsTest {
     assertEquals(
         10L,
         registry.getSampleValue(
-            "jvm_objects_pending_finalization"),
+            "jvm_memory_objects_pending_finalization"),
         .0000001);
     assertEquals(
         500000L,
