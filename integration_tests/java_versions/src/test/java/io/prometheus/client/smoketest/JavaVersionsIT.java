@@ -35,22 +35,35 @@ public class JavaVersionsIT {
   @Parameterized.Parameters(name="{0}")
   public static String[] images() {
     return new String[] {
-        "openjdk:11-jre",
+
+        // HotSpot
         "openjdk:8-jre",
+        "openjdk:11-jre",
         "ticketfly/java:6",
+        "adoptopenjdk/openjdk16:ubi-minimal-jre",
+
+        // OpenJ9
         "ibmjava:8-jre",
+        "adoptopenjdk/openjdk11-openj9",
     };
   }
 
+  private final List<String> exampleMetrics = Arrays.asList(
+      "test_total{path=\"/hello-world\"}",
+      "jvm_memory_bytes_used{area=\"heap\"}"
+  );
+
   @Test
-  public void testExampleMetric() {
+  public void testExampleMetrics() {
     List<String> metrics = scrapeMetrics(TimeUnit.SECONDS.toMillis(10));
     System.out.println(javaContainer.getLogs());
-    Assert.assertTrue("jvm_memory_bytes_used{area=\"heap\"} not found", metrics.stream()
-        .filter(m -> m.startsWith("jvm_memory_bytes_used{area=\"heap\"} "))
-        .peek(System.out::println)
-        .findAny()
-        .isPresent());
+    for (String metric : exampleMetrics) {
+      Assert.assertTrue(metric + " not found", metrics.stream()
+          .filter(m -> m.startsWith(metric + " "))
+          .peek(System.out::println)
+          .findAny()
+          .isPresent());
+    }
   }
 
   private static class JavaContainer extends GenericContainer<JavaContainer> {
