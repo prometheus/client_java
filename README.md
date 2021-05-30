@@ -412,7 +412,7 @@ If you are a tracing vendor, feel free to open a PR and add support for your tra
 
 Documentation of the individual tracer integrations:
 
-* [OTEL_EXEMPLARS.md]: OpenTelemetry
+* [OTEL_EXEMPLARS.md](OTEL_EXEMPLARS.md): OpenTelemetry
 
 ## Included Collectors
 
