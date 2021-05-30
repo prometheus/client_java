@@ -90,28 +90,28 @@ public class MemoryPoolsExportsTest {
     assertEquals(
         400000L,
         registry.getSampleValue(
-            "jvm_memory_pool_collection_bytes_used",
+            "jvm_memory_pool_collection_used_bytes",
             new String[]{"pool"},
             new String[]{"PS Eden Space"}),
         .0000001);
     assertEquals(
         800000L,
         registry.getSampleValue(
-            "jvm_memory_pool_collection_bytes_committed",
+            "jvm_memory_pool_collection_committed_bytes",
             new String[]{"pool"},
             new String[]{"PS Eden Space"}),
         .0000001);
     assertEquals(
         1600000L,
         registry.getSampleValue(
-            "jvm_memory_pool_collection_bytes_max",
+            "jvm_memory_pool_collection_max_bytes",
             new String[]{"pool"},
             new String[]{"PS Eden Space"}),
         .0000001);
     assertEquals(
         2000L,
         registry.getSampleValue(
-            "jvm_memory_pool_collection_bytes_init",
+            "jvm_memory_pool_collection_init_bytes",
             new String[]{"pool"},
             new String[]{"PS Eden Space"}),
         .0000001);
@@ -146,28 +146,28 @@ public class MemoryPoolsExportsTest {
     assertEquals(
         20000L,
         registry.getSampleValue(
-            "jvm_memory_pool_collection_bytes_used",
+            "jvm_memory_pool_collection_used_bytes",
             new String[]{"pool"},
             new String[]{"PS Old Gen"}),
         .0000001);
     assertEquals(
         40000L,
         registry.getSampleValue(
-            "jvm_memory_pool_collection_bytes_committed",
+            "jvm_memory_pool_collection_committed_bytes",
             new String[]{"pool"},
             new String[]{"PS Old Gen"}),
         .0000001);
     assertEquals(
         6000000L,
         registry.getSampleValue(
-            "jvm_memory_pool_collection_bytes_max",
+            "jvm_memory_pool_collection_max_bytes",
             new String[]{"pool"},
             new String[]{"PS Old Gen"}),
         .0000001);
     assertEquals(
         4000L,
         registry.getSampleValue(
-            "jvm_memory_pool_collection_bytes_init",
+            "jvm_memory_pool_collection_init_bytes",
             new String[]{"pool"},
             new String[]{"PS Old Gen"}),
         .0000001);

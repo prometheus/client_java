@@ -88,6 +88,11 @@ public class MemoryPoolsExports extends Collector {
   }
 
   void addMemoryPoolMetrics(List<MetricFamilySamples> sampleFamilies) {
+
+    // Note: The Prometheus naming convention is that units belong at the end of the metric name.
+    // For new metrics like jvm_memory_pool_collection_used_bytes we follow that convention.
+    // For old metrics like jvm_memory_pool_bytes_used we keep the names as they are to avoid a breaking change.
+
     GaugeMetricFamily used = new GaugeMetricFamily(
         "jvm_memory_pool_bytes_used",
         "Used bytes of a given JVM memory pool.",
@@ -109,22 +114,22 @@ public class MemoryPoolsExports extends Collector {
         Collections.singletonList("pool"));
     sampleFamilies.add(init);
     GaugeMetricFamily collectionUsed = new GaugeMetricFamily(
-        "jvm_memory_pool_collection_bytes_used",
+        "jvm_memory_pool_collection_used_bytes",
         "Used bytes after last collection of a given JVM memory pool.",
         Collections.singletonList("pool"));
     sampleFamilies.add(collectionUsed);
     GaugeMetricFamily collectionCommitted = new GaugeMetricFamily(
-        "jvm_memory_pool_collection_bytes_committed",
+        "jvm_memory_pool_collection_committed_bytes",
         "Committed after last collection bytes of a given JVM memory pool.",
         Collections.singletonList("pool"));
     sampleFamilies.add(collectionCommitted);
     GaugeMetricFamily collectionMax = new GaugeMetricFamily(
-        "jvm_memory_pool_collection_bytes_max",
+        "jvm_memory_pool_collection_max_bytes",
         "Max bytes after last collection of a given JVM memory pool.",
         Collections.singletonList("pool"));
     sampleFamilies.add(collectionMax);
     GaugeMetricFamily collectionInit = new GaugeMetricFamily(
-        "jvm_memory_pool_collection_bytes_init",
+        "jvm_memory_pool_collection_init_bytes",
         "Initial after last collection bytes of a given JVM memory pool.",
         Collections.singletonList("pool"));
     sampleFamilies.add(collectionInit);
