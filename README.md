@@ -299,6 +299,12 @@ class YourClass {
 ## Exemplars
 
 Exemplars are a feature of the [OpenMetrics](http://openmetrics.io) format that allows applications to link metrics to example traces.
+In order to see exemplars, you need to set the `Accept` header for the [OpenMetrics](http://openmetrics.io) format like this:
+
+```
+curl -H 'Accept: application/openmetrics-text; version=1.0.0; charset=utf-8' http://localhost:8080/metrics
+```
+
 Exemplars are supported since `client_java` version 0.11.0. Exemplars are supported for `Counter` and `Histogram` metrics.
 
 ### Global Exemplar Samplers
