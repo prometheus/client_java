@@ -19,13 +19,9 @@ import java.util.regex.Pattern;
  * Dropwizard metrics that match the "match" pattern will be further processed to have a new name and new labels based on this config.
  */
 public class MapperConfig {
-    // each part of the metric name between dots
-    private static final String METRIC_PART_REGEX = "[a-zA-Z_0-9](-?[a-zA-Z0-9_])+";
-    // Simplified GLOB: we can have "*." at the beginning and "*" only at the end
-    static final String METRIC_GLOB_REGEX = "^(\\*\\.|" + METRIC_PART_REGEX + "\\.)+(\\*|" + METRIC_PART_REGEX + ")$";
+
     // Labels validation.
     private static final String LABEL_REGEX = "^[a-zA-Z_][a-zA-Z0-9_]+$";
-    private static final Pattern MATCH_EXPRESSION_PATTERN = Pattern.compile(METRIC_GLOB_REGEX);
     private static final Pattern LABEL_PATTERN = Pattern.compile(LABEL_REGEX);
 
     /**
@@ -74,13 +70,11 @@ public class MapperConfig {
 
     // for tests
     MapperConfig(final String match) {
-        validateMatch(match);
         this.match = match;
     }
 
     public MapperConfig(final String match, final String name, final Map<String, String> labels) {
         this.name = name;
-        validateMatch(match);
         this.match = match;
         validateLabels(labels);
         this.labels = labels;
@@ -96,7 +90,6 @@ public class MapperConfig {
     }
 
     public void setMatch(final String match) {
-        validateMatch(match);
         this.match = match;
     }
 
@@ -116,13 +109,6 @@ public class MapperConfig {
     public void setLabels(final Map<String, String> labels) {
         validateLabels(labels);
         this.labels = labels;
-    }
-
-    private void validateMatch(final String match)
-    {
-        if (!MATCH_EXPRESSION_PATTERN.matcher(match).matches()) {
-            throw new IllegalArgumentException(String.format("Match expression [%s] does not match required pattern %s", match, MATCH_EXPRESSION_PATTERN));
-        }
     }
 
     private void validateLabels(final Map<String, String> labels)

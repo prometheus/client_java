@@ -17,12 +17,6 @@ public class MapperConfigTest {
         assertEquals("com.company.meter.*", mapperConfig.getMatch());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void setMatch_WHEN_ExpressionDoesnNotMatchPattern_ThrowException() {
-        final MapperConfig mapperConfig = new MapperConfig();
-        mapperConfig.setMatch("com.company.meter.**.yay");
-    }
-
     @Test
     public void setLabels_WHEN_ExpressionMatchesPattern_AllGood() {
         final MapperConfig mapperConfig = new MapperConfig();
