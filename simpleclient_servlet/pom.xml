@@ -80,4 +80,59 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>updateSource</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${basedir}/../simpleclient_servlet_jakarta/src</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src</directory>
+                                        </resource>
+                                    </resources>
+                                    <overwrite>true</overwrite>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <tasks>
+                                        <replace dir="${basedir}/../simpleclient_servlet_jakarta/src" token="javax.servlet" value="jakarta.servlet"/>
+                                        <replace file="${basedir}/../simpleclient_servlet_jakarta/src/test/java/io/prometheus/client/exporter/ExampleBenchmark.java" 
+                                                    token="Connector connector =  (Connector)"
+                                                    value="ServerConnector connector =  (ServerConnector)"/>
+                                        <replace file="${basedir}/../simpleclient_servlet_jakarta/src/test/java/io/prometheus/client/exporter/ExampleBenchmark.java" 
+                                                    token="server.Connector"
+                                                    value="server.ServerConnector"/>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

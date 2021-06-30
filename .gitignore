@@ -8,6 +8,13 @@
 .idea
 *.iml
 
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+
 target/
 simpleclient_pushgateway/mockserver.log
 simpleclient_pushgateway/mockserver_request.log
