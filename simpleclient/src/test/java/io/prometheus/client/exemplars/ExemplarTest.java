@@ -183,4 +183,13 @@ public class ExemplarTest {
     Assert.assertEquals(timestamp, e.getTimestampMs().longValue());
     Assert.assertEquals(0, e.getNumberOfLabels());
   }
+
+  @Test
+  public void testToString() {
+    Assert.assertEquals("Exemplar{value=42.0, ts=100}", new Exemplar(42, 100L).toString());
+    Assert.assertEquals(
+        // Labels sorted
+        "Exemplar{value=42.0, ts=100, labels=<span_id=2 trace_id=1>}",
+        new Exemplar(42, 100L, "trace_id", "1", "span_id", "2").toString());
+  }
 }

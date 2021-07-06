@@ -182,4 +182,26 @@ public class Exemplar {
     }
     return hash;
   }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder("Exemplar{value=");
+    sb.append(value);
+    sb.append(", ts=");
+    sb.append(timestampMs);
+    if (labels.length > 0) {
+      sb.append(", labels=<");
+      for (int i = 0; i < labels.length; i += 2) {
+        sb.append(labels[i]);
+        sb.append('=');
+        sb.append(labels[i + 1]);
+        sb.append(' ');
+      }
+      // Trim trailing space
+      sb.setLength(sb.length() - 1);
+      sb.append('>');
+    }
+    sb.append('}');
+    return sb.toString();
+  }
 }
