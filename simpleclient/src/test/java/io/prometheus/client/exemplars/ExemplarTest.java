@@ -187,6 +187,7 @@ public class ExemplarTest {
   @Test
   public void testToString() {
     Assert.assertEquals("Exemplar{value=42.0, ts=100}", new Exemplar(42, 100L).toString());
+    Assert.assertEquals("Exemplar{value=42.0}", new Exemplar(42, null, new String[0]).toString());
     Assert.assertEquals(
         // Labels sorted
         "Exemplar{value=42.0, ts=100, labels=<span_id=2 trace_id=1>}",

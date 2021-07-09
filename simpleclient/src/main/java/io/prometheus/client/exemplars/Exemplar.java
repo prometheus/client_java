@@ -187,8 +187,10 @@ public class Exemplar {
   public String toString() {
     StringBuilder sb = new StringBuilder("Exemplar{value=");
     sb.append(value);
-    sb.append(", ts=");
-    sb.append(timestampMs);
+    if (timestampMs != null) {
+      sb.append(", ts=");
+      sb.append(timestampMs);
+    }
     if (labels.length > 0) {
       sb.append(", labels=<");
       for (int i = 0; i < labels.length; i += 2) {
