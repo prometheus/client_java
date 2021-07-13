@@ -32,6 +32,7 @@ import java.util.Map;
  */
 public class ThreadExports extends Collector {
   private final ThreadMXBean threadBean;
+  private boolean includeDeadlockedThreads = true;
 
   public ThreadExports() {
     this(ManagementFactory.getThreadMXBean());
@@ -41,6 +42,14 @@ public class ThreadExports extends Collector {
     this.threadBean = threadBean;
   }
 
+  public final boolean isIncludeDeadlockedThreads() {
+    return includeDeadlockedThreads;
+  }
+
+  public final void setIncludeDeadlockedThreads(boolean includeDeadlockedThreads) {
+    this.includeDeadlockedThreads = includeDeadlockedThreads;
+  }
+  
   void addThreadMetrics(List<MetricFamilySamples> sampleFamilies) {
     sampleFamilies.add(
         new GaugeMetricFamily(
@@ -66,18 +75,20 @@ public class ThreadExports extends Collector {
           "Started thread count of a JVM",
           threadBean.getTotalStartedThreadCount()));
 
-    sampleFamilies.add(
-        new GaugeMetricFamily(
-        "jvm_threads_deadlocked",
-        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers",
-        nullSafeArrayLength(threadBean.findDeadlockedThreads())));
-
-    sampleFamilies.add(
-        new GaugeMetricFamily(
-        "jvm_threads_deadlocked_monitor",
-        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors",
-        nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())));
-
+    if (includeDeadlockedThreads) {
+        sampleFamilies.add(
+            new GaugeMetricFamily(
+            "jvm_threads_deadlocked",
+            "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers",
+            nullSafeArrayLength(threadBean.findDeadlockedThreads())));
+	
+        sampleFamilies.add(
+            new GaugeMetricFamily(
+            "jvm_threads_deadlocked_monitor",
+            "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors",
+            nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())));
+    }
+    
     GaugeMetricFamily threadStateFamily = new GaugeMetricFamily(
       "jvm_threads_state",
       "Current count of threads by state",
