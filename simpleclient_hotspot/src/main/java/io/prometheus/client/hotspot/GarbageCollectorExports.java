@@ -24,7 +24,7 @@ import java.util.List;
  *   jvm_gc_collection_seconds_sum{gc="PS1"} 6.7
  * </pre>
  */
-public class GarbageCollectorExports extends Collector {
+public class GarbageCollectorExports extends Collector implements HotspotCollector {
   private final List<GarbageCollectorMXBean> garbageCollectors;
 
   public GarbageCollectorExports() {

@@ -28,7 +28,7 @@ import java.util.List;
  *   jvm_memory_pool_bytes_used{pool="PS Eden Space"} 2000
  * </pre>
  */
-public class MemoryPoolsExports extends Collector {
+public class MemoryPoolsExports extends Collector implements HotspotCollector {
   private final MemoryMXBean memoryBean;
   private final List<MemoryPoolMXBean> poolBeans;
 

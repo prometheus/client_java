@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MemoryAllocationExports extends Collector {
+public class MemoryAllocationExports extends Collector implements HotspotCollector {
   private final Counter allocatedCounter = Counter.build()
           .name("jvm_memory_pool_allocated_bytes_total")
           .help("Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.")

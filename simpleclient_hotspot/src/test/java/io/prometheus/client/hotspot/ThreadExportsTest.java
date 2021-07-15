@@ -7,9 +7,9 @@ import org.mockito.Mockito;
 
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 public class ThreadExportsTest {
@@ -34,8 +34,6 @@ public class ThreadExportsTest {
     when(mockThreadsBean.getDaemonThreadCount()).thenReturn(200);
     when(mockThreadsBean.getPeakThreadCount()).thenReturn(301);
     when(mockThreadsBean.getTotalStartedThreadCount()).thenReturn(503L);
-    when(mockThreadsBean.findDeadlockedThreads()).thenReturn(new long[]{1L,2L,3L});
-    when(mockThreadsBean.findMonitorDeadlockedThreads()).thenReturn(new long[]{2L,3L,4L});
     when(mockThreadsBean.getAllThreadIds()).thenReturn(new long[]{3L,4L,5L});
     when(mockThreadInfoBlocked.getThreadState()).thenReturn(Thread.State.BLOCKED);
     when(mockThreadInfoRunnable1.getThreadState()).thenReturn(Thread.State.RUNNABLE);
@@ -68,16 +66,12 @@ public class ThreadExportsTest {
             registry.getSampleValue(
                     "jvm_threads_started_total", EMPTY_LABEL, EMPTY_LABEL),
             .0000001);
-    assertEquals(
-        3L,
+    assertNull(
             registry.getSampleValue(
-            "jvm_threads_deadlocked", EMPTY_LABEL, EMPTY_LABEL),
-        .0000001);
-    assertEquals(
-            3L,
+                    "jvm_threads_deadlocked", EMPTY_LABEL, EMPTY_LABEL));
+    assertNull(
             registry.getSampleValue(
-            "jvm_threads_deadlocked_monitor", EMPTY_LABEL, EMPTY_LABEL),
-            .0000001);
+                    "jvm_threads_deadlocked_monitor", EMPTY_LABEL, EMPTY_LABEL));
 
     assertEquals(
             1L,

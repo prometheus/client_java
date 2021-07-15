@@ -30,7 +30,7 @@ import java.util.Map;
  *   jvm_threads_started_total{} 1200
  * </pre>
  */
-public class ThreadExports extends Collector {
+public class ThreadExports extends Collector implements HotspotCollector {
   private final ThreadMXBean threadBean;
 
   public ThreadExports() {
@@ -65,18 +65,6 @@ public class ThreadExports extends Collector {
           "jvm_threads_started_total",
           "Started thread count of a JVM",
           threadBean.getTotalStartedThreadCount()));
-
-    sampleFamilies.add(
-        new GaugeMetricFamily(
-        "jvm_threads_deadlocked",
-        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers",
-        nullSafeArrayLength(threadBean.findDeadlockedThreads())));
-
-    sampleFamilies.add(
-        new GaugeMetricFamily(
-        "jvm_threads_deadlocked_monitor",
-        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors",
-        nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())));
 
     GaugeMetricFamily threadStateFamily = new GaugeMetricFamily(
       "jvm_threads_state",
@@ -114,10 +102,7 @@ public class ThreadExports extends Collector {
     return threadCounts;
   }
 
-  private static double nullSafeArrayLength(long[] array) {
-    return null == array ? 0 : array.length;
-  }
-
+ @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
     addThreadMetrics(mfs);

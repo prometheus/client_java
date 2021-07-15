@@ -25,7 +25,7 @@ import java.util.List;
  *   jvm_classes_unloaded_total{} 500
  * </pre>
  */
-public class ClassLoadingExports extends Collector {
+public class ClassLoadingExports extends Collector implements HotspotCollector {
   private final ClassLoadingMXBean clBean;
 
   public ClassLoadingExports() {

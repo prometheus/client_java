@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  * }
  * </pre>
  */
-public class StandardExports extends Collector {
+public class StandardExports extends Collector implements HotspotCollector {
   private static final Logger LOGGER = Logger.getLogger(StandardExports.class.getName());
 
   private final StatusReader statusReader;

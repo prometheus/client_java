@@ -2,6 +2,12 @@ package io.prometheus.client.hotspot;
 
 import io.prometheus.client.CollectorRegistry;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Registers the default Hotspot collectors.
  * <p>
@@ -12,6 +18,14 @@ import io.prometheus.client.CollectorRegistry;
  * <pre>
  * {@code
  *   DefaultExports.initialize();
+ * }
+ * </pre>
+ * If some collector is undesirable for any reason
+ * (e.g. {@link DeadlockExports} for potential performance penalty)
+ * it may be explicitly excluded by using alternative registration approach:
+ * <pre>
+ * {@code
+ *   DefaultExports.build().exclude(DeadlockExports.class).register();
  * }
  * </pre>
  */
@@ -34,14 +48,63 @@ public class DefaultExports {
    * Register the default Hotspot collectors with the given registry.
    */
   public static void register(CollectorRegistry registry) {
-    new StandardExports().register(registry);
-    new MemoryPoolsExports().register(registry);
-    new MemoryAllocationExports().register(registry);
-    new BufferPoolsExports().register(registry);
-    new GarbageCollectorExports().register(registry);
-    new ThreadExports().register(registry);
-    new ClassLoadingExports().register(registry);
-    new VersionInfoExports().register(registry);
+    register(registry, Collections.<Class<? extends HotspotCollector>>emptySet());
+  }
+
+  private static void register(CollectorRegistry registry, Set<Class<? extends HotspotCollector>> exclusions) {
+    List<? extends HotspotCollector> collectors = Arrays.asList(
+            new StandardExports(),
+            new MemoryPoolsExports(),
+            new MemoryAllocationExports(),
+            new BufferPoolsExports(),
+            new GarbageCollectorExports(),
+            new ThreadExports(),
+            new DeadlockExports(),
+            new ClassLoadingExports(),
+            new VersionInfoExports());
+
+    for (HotspotCollector collector : collectors) {
+      if (!exclusions.contains(collector.getClass())) {
+        collector.register(registry);
+      }
+    }
+  }
+
+  /**
+   *  Return a Builder to allow configuration of a DefaultExports.
+   */
+  public static Builder build() {
+    return new Builder();
+  }
+
+  public static class Builder {
+
+    private final Set<Class<? extends HotspotCollector>> exclusions = new HashSet<Class<? extends HotspotCollector>>();
+
+    private Builder() {
+    }
+
+    /**
+     * Exclude provided Hotspot collector from registration.
+     */
+    public Builder exclude(Class<? extends HotspotCollector> exclusion) {
+      exclusions.add(exclusion);
+      return this;
+    }
+
+    /**
+     * Register the default Hotspot collectors (except provided exclusions) with the default registry.
+     */
+    public void register() {
+      register(CollectorRegistry.defaultRegistry);
+    }
+
+    /**
+     * Register the default Hotspot collectors (except provided exclusions) with the given registry.
+     */
+    public void register(CollectorRegistry registry) {
+      DefaultExports.register(registry, exclusions);
+    }
   }
 
 }

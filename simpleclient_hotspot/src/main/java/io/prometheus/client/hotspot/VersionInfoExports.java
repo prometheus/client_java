@@ -3,8 +3,6 @@ package io.prometheus.client.hotspot;
 import io.prometheus.client.Collector;
 import io.prometheus.client.Info;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,7 +20,7 @@ import java.util.List;
  * </pre>
  */
 
-public class VersionInfoExports extends Collector {
+public class VersionInfoExports extends Collector implements HotspotCollector {
 
 
     public List<MetricFamilySamples> collect() {

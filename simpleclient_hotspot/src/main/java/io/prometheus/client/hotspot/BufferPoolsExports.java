@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * Can be replaced with a simple access once JDK 1.7 compatibility is baseline.
  *
  */
-public class BufferPoolsExports extends Collector {
+public class BufferPoolsExports extends Collector implements HotspotCollector {
 
     private static final Logger LOGGER = Logger.getLogger(BufferPoolsExports.class.getName());
 
