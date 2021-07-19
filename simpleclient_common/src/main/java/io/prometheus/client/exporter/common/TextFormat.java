@@ -291,7 +291,7 @@ public class TextFormat {
       case HISTOGRAM:
         return "histogram";
       case GAUGE_HISTOGRAM:
-        return "gauge_histogram";
+        return "gaugehistogram";
       case STATE_SET:
         return "stateset";
       case INFO:
