@@ -25,6 +25,10 @@ import java.io.IOException;
  * (including servlet context path), but can be configured with the {@code path-components} init parameter. Any number
  * provided that is less than 1 will provide the full path granularity (warning, this may affect performance).
  *
+ * <p>The {@code strip-context-path} init parameter can be used to avoid including the leading path components which are
+ * part of the context (i.e. the folder where the servlet is deployed) so that the same project deployed under different
+ * paths can produce the same metrics.
+ *
  * <p>The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list
  * of valid {@code double} values.
  *
@@ -50,6 +54,11 @@ import java.io.IOException;
  *      <param-name>path-components</param-name>
  *      <param-value>0</param-value>
  *   </init-param>
+ *   <!-- strip-context-path is optional, defaults to false -->
+ *   <init-param>
+ *      <param-name>strip-context-path</param-name>
+ *      <param-value>false</param-value>
+ *   </init-param>
  * </filter>
  * }</pre>
  *
@@ -60,6 +69,7 @@ public class MetricsFilter implements Filter {
     static final String HELP_PARAM = "help";
     static final String METRIC_NAME_PARAM = "metric-name";
     static final String BUCKET_CONFIG_PARAM = "buckets";
+    static final String STRIP_CONTEXT_PATH_PARAM = "strip-context-path";
     static final String UNKNOWN_HTTP_STATUS_CODE = "";
 
     private Histogram histogram = null;
@@ -68,6 +78,7 @@ public class MetricsFilter implements Filter {
     // Package-level for testing purposes.
     int pathComponents = 1;
     private String metricName = null;
+    boolean stripContextPath = false;
     private String help = "The time taken fulfilling servlet requests";
     private double[] buckets = null;
 
@@ -145,6 +156,10 @@ public class MetricsFilter implements Filter {
                     buckets[i] = Double.parseDouble(bucketParams[i]);
                 }
             }
+
+            if (!isEmpty(filterConfig.getInitParameter(STRIP_CONTEXT_PATH_PARAM))) {
+                stripContextPath = Boolean.parseBoolean(filterConfig.getInitParameter(STRIP_CONTEXT_PATH_PARAM));
+            }
         }
 
         if (buckets != null) {
@@ -171,6 +186,9 @@ public class MetricsFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         String path = request.getRequestURI();
+        if (stripContextPath) {
+            path = path.substring(request.getContextPath().length());
+        }
 
         String components = getComponents(path);
         String method = request.getMethod();
