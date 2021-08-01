@@ -51,6 +51,8 @@
         <module>simpleclient_logback</module>
         <module>simpleclient_pushgateway</module>
         <module>simpleclient_servlet</module>
+        <module>simpleclient_servlet_common</module>
+        <module>simpleclient_servlet_jakarta</module>
         <module>simpleclient_spring_web</module>
         <module>simpleclient_spring_boot</module>
         <module>simpleclient_jetty</module>

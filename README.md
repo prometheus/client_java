@@ -567,8 +567,16 @@ new QueuedThreadPoolStatisticsCollector()
 
 #### Servlet Filter
 
-There is a servlet filter available for measuring the duration taken by servlet
-requests. The `metric-name` init parameter is required, and is the name of the
+There is a servlet filter available for measuring the duration taken by servlet requests:
+
+* `javax` version: `io.prometheus.client.filter.MetricsFilter` provided by `simpleclient_servlet`
+* `jakarta` version: `io.prometheus.client.servlet.jakarta.filter.MetricsFilter` provided by `simpleclient_servlet_jakarta`
+
+Both versions implement the same functionality.
+
+Configuration is as follows:
+
+The `metric-name` init parameter is required, and is the name of the
 metric prometheus will expose for the timing metrics. Help text via the `help`
 init parameter is not required, although it is highly recommended.  The number
 of buckets is overridable, and can be configured by passing a comma-separated
@@ -577,9 +585,9 @@ measuring is also configurable, via the `path-components` init parameter. By
 default, the servlet filter will record each path differently, but by setting an
 integer here, you can tell the filter to only record up to the Nth slashes. That
 is, all requests with greater than N "/" characters in the servlet URI path will
-be measured in the same bucket and you will lose that granularity. The init
+be measured in the same bucket, and you will lose that granularity. The init
 parameter `strip-context-path` can be used to strip the leading part of the URL
-which is part of the deploy context (i.e. the folder the servlet is deployed to),
+which is part of the deployment context (i.e. the folder the servlet is deployed to),
 so that the same servlet deployed to different paths can lead to similar metrics.
 
 The code below is an example of the XML configuration for the filter. You will
@@ -589,21 +597,24 @@ need to place this (replace your own values) code in your
 ```xml
 <filter>
   <filter-name>prometheusFilter</filter-name>
+  <!-- This example shows the javax version. For Jakarta you would use -->
+  <!-- <filter-class>io.prometheus.client.filter.servlet.jakarta.MetricsFilter</filter-class> -->
   <filter-class>io.prometheus.client.filter.MetricsFilter</filter-class>
   <init-param>
     <param-name>metric-name</param-name>
     <param-value>webapp_metrics_filter</param-value>
   </init-param>
+  <!-- help is optional, defaults to the message below -->
   <init-param>
     <param-name>help</param-name>
     <param-value>This is the help for your metrics filter</param-value>
   </init-param>
+  <!-- buckets is optional, unless specified the default buckets from io.prometheus.client.Histogram are used -->
   <init-param>
     <param-name>buckets</param-name>
     <param-value>0.005,0.01,0.025,0.05,0.075,0.1,0.25,0.5,0.75,1,2.5,5,7.5,10</param-value>
   </init-param>
-  <!-- Optionally override path components; anything less than 1 (1 is the default)
-       means full granularity -->
+  <!-- path-components is optional, anything less than 1 (1 is the default) means full granularity -->
   <init-param>
     <param-name>path-components</param-name>
     <param-value>1</param-value>
@@ -627,8 +638,7 @@ the most accurate measurement of latency. -->
 Additionally, you can instantiate your servlet filter directly in Java code. To
 do this, you just need to call the non-empty constructor. The first parameter,
 the metric name, is required. The second, help, is optional but highly
-recommended. The last two (path-components, and buckets) are optional and will
-default sensibly if omitted.
+recommended. The other parameters are optional and will default sensibly if omitted.
 
 #### Spring AOP
 

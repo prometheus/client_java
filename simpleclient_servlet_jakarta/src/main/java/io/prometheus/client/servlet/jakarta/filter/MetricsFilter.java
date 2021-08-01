@@ -1,20 +1,20 @@
-package io.prometheus.client.filter;
+package io.prometheus.client.servlet.jakarta.filter;
 
-import io.prometheus.client.Adapter;
+import io.prometheus.client.servlet.jakarta.Adapter;
 import io.prometheus.client.servlet.common.filter.Filter;
 import io.prometheus.client.servlet.common.filter.FilterConfigurationException;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
  * The MetricsFilter class provides a high-level filter that enables tunable collection of metrics for Servlet
  * performance.
  *
- * This is the Javax version of the MetricsFilter. If you are using Jakarta Servlet, there is a Jakarta version
- * available in {@code simpleclient-servlet-jakarta}.
+ * This is the Jakarta version of the MetricsFilter. If you are using Javax Servlet, there is a Javax version
+ * available in {@code simpleclient-servlet}.
  *
  * <p>The metric name itself is required, and configured with a {@code metric-name} init parameter.
  *
@@ -76,21 +76,12 @@ import java.io.IOException;
  * </filter-mapping>
  * }</pre>
  */
-public class MetricsFilter implements javax.servlet.Filter {
+public class MetricsFilter implements jakarta.servlet.Filter {
 
     private final Filter delegate;
 
     public MetricsFilter() {
         this.delegate = new Filter();
-    }
-
-    // compatibility with 0.11.1 and older
-    public MetricsFilter(
-            String metricName,
-            String help,
-            Integer pathComponents,
-            double[] buckets) {
-        this(metricName, help, pathComponents, buckets, false);
     }
 
     /**

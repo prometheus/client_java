@@ -1,29 +1,20 @@
-package io.prometheus.client.exporter;
+package io.prometheus.client.servlet.jakarta.exporter;
 
-import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.servlet.common.exporter.Exporter;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static io.prometheus.client.Adapter.wrap;
+import static io.prometheus.client.servlet.jakarta.Adapter.wrap;
 
 /**
  * The MetricsServlet class provides a simple way of exposing the metrics values.
  */
 public class MetricsServlet extends HttpServlet {
 
-  private final Exporter exporter;
-
-  public MetricsServlet() {
-    exporter = new Exporter();
-  }
-
-  public MetricsServlet(CollectorRegistry registry) {
-    exporter = new Exporter(registry);
-  }
+  private final Exporter exporter = new Exporter();
 
   @Override
   protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
