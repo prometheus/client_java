@@ -10,6 +10,7 @@
 
   <artifactId>simpleclient_tracer_otel_agent</artifactId>
   <name>Prometheus Java Span Context Supplier - OpenTelemetry Agent</name>
+  <packaging>bundle</packaging>
 
   <dependencies>
     <dependency>
