@@ -20,7 +20,7 @@ import java.util.List;
  * </pre>
  * Example metrics being exported:
  * <pre>
- *   jvm_classes_loaded{} 1000
+ *   jvm_classes_currently_loaded{} 1000
  *   jvm_classes_loaded_total{} 2000
  *   jvm_classes_unloaded_total{} 500
  * </pre>
@@ -38,7 +38,7 @@ public class ClassLoadingExports extends Collector {
 
   void addClassLoadingMetrics(List<MetricFamilySamples> sampleFamilies) {
     sampleFamilies.add(new GaugeMetricFamily(
-          "jvm_classes_loaded",
+          "jvm_classes_currently_loaded",
           "The number of classes that are currently loaded in the JVM",
           clBean.getLoadedClassCount()));
     sampleFamilies.add(new CounterMetricFamily(
