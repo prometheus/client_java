@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 public class ClassLoadingExportsTest {
 
   private ClassLoadingMXBean mockClassLoadingsBean = Mockito.mock(ClassLoadingMXBean.class);
-  private CollectorRegistry registry = new CollectorRegistry();
+  private CollectorRegistry registry = new CollectorRegistry(true);
   private ClassLoadingExports collectorUnderTest;
 
   private static final String[] EMPTY_LABEL = new String[0];
@@ -31,7 +31,7 @@ public class ClassLoadingExportsTest {
     assertEquals(
             1000,
             registry.getSampleValue(
-                    "jvm_classes_loaded", EMPTY_LABEL, EMPTY_LABEL),
+                    "jvm_classes_currently_loaded", EMPTY_LABEL, EMPTY_LABEL),
             .0000001);
     assertEquals(
             2000L,

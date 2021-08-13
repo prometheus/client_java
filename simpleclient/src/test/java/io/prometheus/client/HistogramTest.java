@@ -299,7 +299,7 @@ public class HistogramTest {
       }
       if (lowerBound < value && value <= upperBound) {
         Assert.assertNotNull("No exemplar found in bucket [" + lowerBound + ", " + upperBound + "]", bucket.exemplar);
-        Assert.assertEquals(value, bucket.exemplar.getValue(), 0.001);
+        Assert.assertEquals(value, bucket.exemplar.getValue(), 0.006);
         Assert.assertEquals(labels.length/2, bucket.exemplar.getNumberOfLabels());
         for (int i=0; i<labels.length; i+=2) {
           Assert.assertEquals(labels[i], bucket.exemplar.getLabelName(i/2));

@@ -1,5 +1,6 @@
 package io.prometheus.client.exporter;
 
+import com.sun.net.httpserver.*;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 
@@ -20,10 +21,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
-
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 
 /**
  * Expose Prometheus metrics using a plain Java HttpServer.
@@ -166,42 +163,75 @@ public class HTTPServer {
     protected final ExecutorService executorService;
 
     /**
-     * Start a HTTP server serving Prometheus metrics from the given registry using the given {@link HttpServer}.
+     * Start a HTTP server serving Prometheus metrics from the given registry using the given {@link Authenticator}
+     * and {@link HttpServer}.
      * The {@code httpServer} is expected to already be bound to an address
      */
-    public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
+    public HTTPServer(HttpServer httpServer, Authenticator authenticator, CollectorRegistry registry, boolean daemon) throws IOException {
         if (httpServer.getAddress() == null)
             throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
 
         server = httpServer;
         HttpHandler mHandler = new HTTPMetricHandler(registry);
-        server.createContext("/", mHandler);
-        server.createContext("/metrics", mHandler);
-        server.createContext("/-/healthy", mHandler);
+        HttpContext httpContext = server.createContext("/", mHandler);
+        if (authenticator != null) {
+            httpContext.setAuthenticator(authenticator);
+        }
+        httpContext = server.createContext("/metrics", mHandler);
+        if (authenticator != null) {
+            httpContext.setAuthenticator(authenticator);
+        }
+        httpContext = server.createContext("/-/healthy", mHandler);
+        if (authenticator != null) {
+            httpContext.setAuthenticator(authenticator);
+        }
         executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
         server.setExecutor(executorService);
         start(daemon);
     }
 
     /**
+     * Start a HTTP server serving Prometheus metrics from the given registry using the given {@link HttpServer}.
+     * The {@code httpServer} is expected to already be bound to an address
+     */
+    public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
+        this(httpServer, null, registry, daemon);
+    }
+
+    /**
+     * Start a HTTP server serving Prometheus metrics from the given registry using the given {@link HttpServer}.
+     * The {@code httpServer} is expected to already be bound to an address
+     */
+    public HTTPServer(HttpServer httpServer, CollectorRegistry registry) throws IOException {
+        this(httpServer, null, registry, false);
+    }
+
+    /**
+     * Start a HTTP server serving Prometheus metrics from the given registry.
+     */
+    public HTTPServer(InetSocketAddress addr, Authenticator authenticator, CollectorRegistry registry, boolean daemon) throws IOException {
+        this(HttpServer.create(addr, 3), authenticator, registry, daemon);
+    }
+
+    /**
      * Start a HTTP server serving Prometheus metrics from the given registry.
      */
     public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean daemon) throws IOException {
-        this(HttpServer.create(addr, 3), registry, daemon);
+        this(HttpServer.create(addr, 3), null, registry, daemon);
     }
 
     /**
      * Start a HTTP server serving Prometheus metrics from the given registry using non-daemon threads.
      */
     public HTTPServer(InetSocketAddress addr, CollectorRegistry registry) throws IOException {
-        this(addr, registry, false);
+        this(addr, null, registry, false);
     }
 
     /**
      * Start a HTTP server serving the default Prometheus registry.
      */
     public HTTPServer(int port, boolean daemon) throws IOException {
-        this(new InetSocketAddress(port), CollectorRegistry.defaultRegistry, daemon);
+        this(new InetSocketAddress(port), null, CollectorRegistry.defaultRegistry, daemon);
     }
 
     /**

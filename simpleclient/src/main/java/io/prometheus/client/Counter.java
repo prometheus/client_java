@@ -176,6 +176,10 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     private final CounterExemplarSampler exemplarSampler;
     private final AtomicReference<Exemplar> exemplar = new AtomicReference<Exemplar>();
 
+    public Child() {
+      this(null, null);
+    }
+
     public Child(Boolean exemplarsEnabled, CounterExemplarSampler exemplarSampler) {
       this.exemplarsEnabled = exemplarsEnabled;
       this.exemplarSampler = exemplarSampler;

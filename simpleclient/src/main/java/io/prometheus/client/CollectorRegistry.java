@@ -48,16 +48,29 @@ public class CollectorRegistry {
    */
   public void register(Collector m) {
     List<String> names = collectorNames(m);
+    assertNoDuplicateNames(m, names);
     synchronized (namesCollectorsLock) {
       for (String name : names) {
         if (namesToCollectors.containsKey(name)) {
-          throw new IllegalArgumentException("Collector already registered that provides name: " + name);
+          throw new IllegalArgumentException("Failed to register Collector of type " + m.getClass().getSimpleName()
+                  + ": " + name + " is already in use by another Collector of type "
+                  + namesToCollectors.get(name).getClass().getSimpleName());
         }
       }
       for (String name : names) {
         namesToCollectors.put(name, m);
       }
       collectorsToNames.put(m, names);
+    }
+  }
+
+  private void assertNoDuplicateNames(Collector m, List<String> names) {
+    Set<String> uniqueNames = new HashSet<String>();
+    for (String name : names) {
+      if (!uniqueNames.add(name)) {
+        throw new IllegalArgumentException("Failed to register Collector of type " + m.getClass().getSimpleName()
+                + ": The Collector exposes the same name multiple times: " + name);
+      }
     }
   }
 

@@ -1,197 +1,131 @@
 package io.prometheus.client.filter;
 
-import io.prometheus.client.Counter;
-import io.prometheus.client.Histogram;
+import io.prometheus.client.Adapter;
+import io.prometheus.client.servlet.common.filter.Filter;
+import io.prometheus.client.servlet.common.filter.FilterConfigurationException;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * The MetricsFilter class exists to provide a high-level filter that enables tunable collection of metrics for Servlet
+ * The MetricsFilter class provides a high-level filter that enables tunable collection of metrics for Servlet
  * performance.
+ *
+ * This is the Javax version of the MetricsFilter. If you are using Jakarta Servlet, there is a Jakarta version
+ * available in {@code simpleclient-servlet-jakarta}.
  *
  * <p>The metric name itself is required, and configured with a {@code metric-name} init parameter.
  *
  * <p>The help parameter, configured with the {@code help} init parameter, is not required but strongly recommended.
  *
+ * <p>The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated
+ * list * of valid {@code double} values. If omitted, the default buckets from {@link io.prometheus.client.Histogram}
+ * are used.
+ *
  * <p>By default, this filter will provide metrics that distinguish only 1 level deep for the request path
  * (including servlet context path), but can be configured with the {@code path-components} init parameter. Any number
  * provided that is less than 1 will provide the full path granularity (warning, this may affect performance).
  *
- * <p>The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated list
- * of valid {@code double} values.
+ * <p>The {@code strip-context-path} init parameter can be used to avoid including the leading path components which are
+ * part of the context (i.e. the folder where the servlet is deployed) so that the same project deployed under different
+ * paths can produce the same metrics.
  *
- * <p>HTTP statuses will be aggregated via Counter. The name for this counter will be derived from the {@code metric-name} init parameter.
+ * <p>HTTP statuses will be aggregated via Counter. The name for this counter will be derived from the
+ * {@code metric-name} init parameter.
  *
  * <pre>{@code
  * <filter>
  *   <filter-name>prometheusFilter</filter-name>
+ *   <!-- This example shows the javax version. For Jakarta you would use -->
+ *   <!-- <filter-class>io.prometheus.client.filter.servlet.jakarta.MetricsFilter</filter-class> -->
  *   <filter-class>io.prometheus.client.filter.MetricsFilter</filter-class>
  *   <init-param>
- *      <param-name>metric-name</param-name>
- *      <param-value>webapp_metrics_filter</param-value>
+ *     <param-name>metric-name</param-name>
+ *     <param-value>webapp_metrics_filter</param-value>
  *   </init-param>
+ *   <!-- help is optional, defaults to the message below -->
  *   <init-param>
- *      <param-name>help</param-name>
- *      <param-value>The time taken fulfilling servlet requests</param-value>
+ *     <param-name>help</param-name>
+ *     <param-value>This is the help for your metrics filter</param-value>
  *   </init-param>
+ *   <!-- buckets is optional, unless specified the default buckets from io.prometheus.client.Histogram are used -->
  *   <init-param>
- *      <param-name>buckets</param-name>
- *      <param-value>0.005,0.01,0.025,0.05,0.075,0.1,0.25,0.5,0.75,1,2.5,5,7.5,10</param-value>
+ *     <param-name>buckets</param-name>
+ *     <param-value>0.005,0.01,0.025,0.05,0.075,0.1,0.25,0.5,0.75,1,2.5,5,7.5,10</param-value>
  *   </init-param>
+ *   <!-- path-components is optional, anything less than 1 (1 is the default) means full granularity -->
  *   <init-param>
- *      <param-name>path-components</param-name>
- *      <param-value>0</param-value>
+ *     <param-name>path-components</param-name>
+ *     <param-value>1</param-value>
+ *   </init-param>
+ *   <!-- strip-context-path is optional, defaults to false -->
+ *   <init-param>
+ *     <param-name>strip-context-path</param-name>
+ *     <param-value>false</param-value>
  *   </init-param>
  * </filter>
- * }</pre>
  *
- * @author Andrew Stuart &lt;andrew.stuart2@gmail.com&gt;
+ * <!-- You will most likely want this to be the first filter in the chain
+ * (therefore the first <filter-mapping> in the web.xml file), so that you can get
+ * the most accurate measurement of latency. -->
+ * <filter-mapping>
+ *   <filter-name>prometheusFilter</filter-name>
+ *   <url-pattern>/*</url-pattern>
+ * </filter-mapping>
+ * }</pre>
  */
-public class MetricsFilter implements Filter {
-    static final String PATH_COMPONENT_PARAM = "path-components";
-    static final String HELP_PARAM = "help";
-    static final String METRIC_NAME_PARAM = "metric-name";
-    static final String BUCKET_CONFIG_PARAM = "buckets";
-    static final String UNKNOWN_HTTP_STATUS_CODE = "";
+public class MetricsFilter implements javax.servlet.Filter {
 
-    private Histogram histogram = null;
-    private Counter statusCounter = null;
+    private final Filter delegate;
 
-    // Package-level for testing purposes.
-    int pathComponents = 1;
-    private String metricName = null;
-    private String help = "The time taken fulfilling servlet requests";
-    private double[] buckets = null;
+    public MetricsFilter() {
+        this.delegate = new Filter();
+    }
 
-    public MetricsFilter() {}
-
+    // compatibility with 0.11.1 and older
     public MetricsFilter(
             String metricName,
             String help,
             Integer pathComponents,
             double[] buckets) {
-        this.metricName = metricName;
-        this.buckets = buckets;
-        if (help != null) {
-            this.help = help;
-        }
-        if (pathComponents != null) {
-            this.pathComponents = pathComponents;
-        }
+        this(metricName, help, pathComponents, buckets, false);
     }
 
-    private boolean isEmpty(String s) {
-        return s == null || s.length() == 0;
-    }
-
-    private String getComponents(String str) {
-        if (str == null || pathComponents < 1) {
-            return str;
-        }
-        int count = 0;
-        int i =  -1;
-        do {
-            i = str.indexOf("/", i + 1);
-            if (i < 0) {
-                // Path is longer than specified pathComponents.
-                return str;
-            }
-            count++;
-        } while (count <= pathComponents);
-
-        return str.substring(0, i);
+    /**
+     * See {@link Filter#Filter(String, String, Integer, double[], boolean)}.
+     */
+    public MetricsFilter(
+            String metricName,
+            String help,
+            Integer pathComponents,
+            double[] buckets,
+            boolean stripContextPath) {
+        this.delegate = new Filter(metricName, help, pathComponents, buckets, stripContextPath);
     }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        Histogram.Builder builder = Histogram.build()
-                .labelNames("path", "method");
-
-        if (filterConfig == null && isEmpty(metricName)) {
-            throw new ServletException("No configuration object provided, and no metricName passed via constructor");
+        try {
+            delegate.init(Adapter.wrap(filterConfig));
+        } catch (FilterConfigurationException e) {
+            throw new ServletException(e);
         }
-
-        if (filterConfig != null) {
-            if (isEmpty(metricName)) {
-                metricName = filterConfig.getInitParameter(METRIC_NAME_PARAM);
-                if (isEmpty(metricName)) {
-                    throw new ServletException("Init parameter \"" + METRIC_NAME_PARAM + "\" is required; please supply a value");
-                }
-            }
-
-            if (!isEmpty(filterConfig.getInitParameter(HELP_PARAM))) {
-                help = filterConfig.getInitParameter(HELP_PARAM);
-            }
-
-            // Allow overriding of the path "depth" to track
-            if (!isEmpty(filterConfig.getInitParameter(PATH_COMPONENT_PARAM))) {
-                pathComponents = Integer.valueOf(filterConfig.getInitParameter(PATH_COMPONENT_PARAM));
-            }
-
-            // Allow users to override the default bucket configuration
-            if (!isEmpty(filterConfig.getInitParameter(BUCKET_CONFIG_PARAM))) {
-                String[] bucketParams = filterConfig.getInitParameter(BUCKET_CONFIG_PARAM).split(",");
-                buckets = new double[bucketParams.length];
-
-                for (int i = 0; i < bucketParams.length; i++) {
-                    buckets[i] = Double.parseDouble(bucketParams[i]);
-                }
-            }
-        }
-
-        if (buckets != null) {
-            builder = builder.buckets(buckets);
-        }
-
-        histogram = builder
-                .help(help)
-                .name(metricName)
-                .register();
-
-        statusCounter = Counter.build(metricName + "_status_total", "HTTP status codes of " + help)
-                .labelNames("path", "method", "status")
-                .register();
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if (!(servletRequest instanceof HttpServletRequest)) {
+        if (!(servletRequest instanceof HttpServletRequest) || !(servletResponse instanceof HttpServletResponse)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
-
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-
-        String path = request.getRequestURI();
-
-        String components = getComponents(path);
-        String method = request.getMethod();
-        Histogram.Timer timer = histogram
-            .labels(components, method)
-            .startTimer();
-
+        Filter.MetricData data = delegate.startTimer(Adapter.wrap((HttpServletRequest) servletRequest));
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
-            timer.observeDuration();
-            statusCounter.labels(components, method, getStatusCode(servletResponse)).inc();
+            delegate.observeDuration(data, Adapter.wrap((HttpServletResponse) servletResponse));
         }
-    }
-
-    private String getStatusCode(ServletResponse servletResponse) {
-        if (!(servletResponse instanceof HttpServletResponse)) {
-            return UNKNOWN_HTTP_STATUS_CODE;
-        }
-
-        return Integer.toString(((HttpServletResponse) servletResponse).getStatus());
     }
 
     @Override
