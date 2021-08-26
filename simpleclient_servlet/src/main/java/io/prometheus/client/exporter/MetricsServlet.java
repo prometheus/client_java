@@ -1,8 +1,13 @@
 package io.prometheus.client.exporter;
 
+import io.prometheus.client.Adapter;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Predicate;
 import io.prometheus.client.servlet.common.exporter.Exporter;
+import io.prometheus.client.servlet.common.exporter.ServletConfigurationException;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,11 +23,28 @@ public class MetricsServlet extends HttpServlet {
   private final Exporter exporter;
 
   public MetricsServlet() {
-    exporter = new Exporter();
+    this(CollectorRegistry.defaultRegistry, null);
+  }
+
+  public MetricsServlet(Predicate<String> sampleNameFilter) {
+    this(CollectorRegistry.defaultRegistry, sampleNameFilter);
   }
 
   public MetricsServlet(CollectorRegistry registry) {
-    exporter = new Exporter(registry);
+    this(registry, null);
+  }
+
+  public MetricsServlet(CollectorRegistry registry, Predicate<String> sampleNameFilter) {
+    exporter = new Exporter(registry, sampleNameFilter);
+  }
+
+  @Override
+  public void init(ServletConfig servletConfig) throws ServletException {
+    try {
+      exporter.init(Adapter.wrap(servletConfig));
+    } catch (ServletConfigurationException e) {
+      throw new ServletException(e);
+    }
   }
 
   @Override

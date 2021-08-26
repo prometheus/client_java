@@ -672,8 +672,13 @@ There are HTTPServer, Servlet, SpringBoot, and Vert.x integrations included in t
 The simplest of these is the HTTPServer:
 
 ```java
-HTTPServer server = new HTTPServer(1234);
+HTTPServer server = new HTTPServer.Builder()
+    .withPort(1234)
+    .build();
 ```
+
+The `HTTPServer.Builder` supports configuration of a `SampleNameFilter` which can be used to
+restrict the time series being exported by name.
 
 To add Prometheus exposition to an existing HTTP server using servlets, see the `MetricsServlet`.
 It also serves as a simple example of how to write a custom endpoint.
@@ -689,10 +694,13 @@ server.setHandler(context);
 context.addServlet(new ServletHolder(new MetricsServlet()), "/metrics");
 ```
 
+Like the HTTPServer, the `MetricsServlet` can be configured with a `SampleNameFilter` which can
+be used to restrict the time series being exported by name. See `integration_tests/servlet_jakarta_exporter_webxml/`
+for an example how to configure this in `web.xml`.
+
 All HTTP exposition integrations support restricting which time series to return
 using `?name[]=` URL parameters. Due to implementation limitations, this may
 have false negatives.
-
 
 ## Exporting to a Pushgateway
 

@@ -53,7 +53,7 @@ public class CollectorRegistryTest {
     assertEquals(0, mfs.size());
   }
 
-  class EmptyCollector extends Collector {
+  static class EmptyCollector extends Collector {
     public List<MetricFamilySamples> collect() {
       return new ArrayList<MetricFamilySamples>();
     }
@@ -72,29 +72,6 @@ public class CollectorRegistryTest {
     assertEquals(new HashSet<String>(Arrays.asList("g", "c", "s")), names);
   }
 
-  @Test
-  public void testMetricFamilySamples_filterNames() {
-    Collector g = Gauge.build().name("g").help("h").register(registry);
-    Collector c = Counter.build().name("c").help("h").register(registry);
-    Collector s = Summary.build().name("s").help("h").register(registry);
-    Collector ec = new EmptyCollector().register(registry);
-    SkippedCollector sr = new SkippedCollector().register(registry);
-    PartiallyFilterCollector pfr = new PartiallyFilterCollector().register(registry);
-    HashSet<String> metrics = new HashSet<String>();
-    HashSet<String> series = new HashSet<String>();
-    for (Collector.MetricFamilySamples metricFamilySamples : Collections.list(registry.filteredMetricFamilySamples(
-            new HashSet<String>(Arrays.asList("", "s_sum", "c_total", "part_filter_a", "part_filter_c"))))) {
-      metrics.add(metricFamilySamples.name);
-      for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
-        series.add(sample.name);
-      }
-    }
-
-    assertEquals(1, sr.collectCallCount);
-    assertEquals(2, pfr.collectCallCount);
-    assertEquals(new HashSet<String>(Arrays.asList("s", "c", "part_filter_a", "part_filter_c")), metrics);
-    assertEquals(new HashSet<String>(Arrays.asList("s_sum", "c_total", "part_filter_a", "part_filter_c")), series);
-  }
 
   @Test
   public void testEmptyRegistryHasNoMoreElements() {
@@ -139,7 +116,7 @@ public class CollectorRegistryTest {
     registry.register(h);
   }
 
-  class MyCollector extends Collector {
+  static class MyCollector extends Collector {
     public List<MetricFamilySamples> collect() {
       List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
       mfs.add(new GaugeMetricFamily("g", "help", 42));
@@ -161,41 +138,4 @@ public class CollectorRegistryTest {
     new MyCollector().register(r);
     new MyCollector().register(r);
   }
-
-  private static class SkippedCollector extends Collector implements Collector.Describable {
-    public int collectCallCount = 0;
-
-    @Override
-    public List<MetricFamilySamples> collect() {
-      collectCallCount++;
-      List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-      mfs.add(new GaugeMetricFamily("slow_gauge", "help", 123));
-      return mfs;
-    }
-
-    @Override
-    public List<MetricFamilySamples> describe() {
-      return collect();
-    }
-  }
-
-  private static class PartiallyFilterCollector extends Collector implements Collector.Describable {
-    public int collectCallCount = 0;
-
-    @Override
-    public List<MetricFamilySamples> collect() {
-      collectCallCount++;
-      List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-      mfs.add(new GaugeMetricFamily("part_filter_a", "help", 123));
-      mfs.add(new GaugeMetricFamily("part_filter_b", "help", 123));
-      mfs.add(new GaugeMetricFamily("part_filter_c", "help", 123));
-      return mfs;
-    }
-
-    @Override
-    public List<MetricFamilySamples> describe() {
-      return collect();
-    }
-  }
-
 }
