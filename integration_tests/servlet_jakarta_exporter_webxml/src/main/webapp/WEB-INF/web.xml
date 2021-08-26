@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+             version="5.0">
+    <!-- Anyone still using web.xml in 2021? -->
+    <servlet>
+        <servlet-name>example</servlet-name>
+        <servlet-class>io.prometheus.client.it.servlet.jakarta.ExampleServlet</servlet-class>
+        <load-on-startup/>
+    </servlet>
+    <filter>
+        <filter-name>prometheus</filter-name>
+        <filter-class>io.prometheus.client.servlet.jakarta.filter.MetricsFilter</filter-class>
+        <init-param>
+            <param-name>metric-name</param-name>
+            <param-value>requests</param-value>
+        </init-param>
+    </filter>
+    <servlet>
+        <servlet-name>prometheus-exporter</servlet-name>
+        <servlet-class>io.prometheus.client.servlet.jakarta.exporter.MetricsServlet</servlet-class>
+        <init-param>
+            <param-name>name-must-not-start-with</param-name>
+            <param-value>
+                jvm_threads_deadlocked
+                jvm_memory_pool
+            </param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>example</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>prometheus-exporter</servlet-name>
+        <url-pattern>/metrics</url-pattern>
+    </servlet-mapping>
+    <filter-mapping>
+        <filter-name>prometheus</filter-name>
+        <servlet-name>example</servlet-name>
+    </filter-mapping>
+</web-app>

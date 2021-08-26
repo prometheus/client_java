@@ -3,8 +3,10 @@ package io.prometheus.client;
 import io.prometheus.client.servlet.common.adapter.FilterConfigAdapter;
 import io.prometheus.client.servlet.common.adapter.HttpServletRequestAdapter;
 import io.prometheus.client.servlet.common.adapter.HttpServletResponseAdapter;
+import io.prometheus.client.servlet.common.adapter.ServletConfigAdapter;
 
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -89,6 +91,20 @@ public class Adapter {
         }
     }
 
+    private static class ServletConfigAdapterImpl implements ServletConfigAdapter {
+
+        final ServletConfig delegate;
+
+        private ServletConfigAdapterImpl(ServletConfig delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public String getInitParameter(String name) {
+            return delegate.getInitParameter(name);
+        }
+    }
+
     public static HttpServletRequestAdapter wrap(HttpServletRequest req) {
         return new HttpServletRequestAdapterImpl(req);
     }
@@ -99,5 +115,9 @@ public class Adapter {
 
     public static FilterConfigAdapter wrap(FilterConfig filterConfig) {
         return new FilterConfigAdapterImpl(filterConfig);
+    }
+
+    public static ServletConfigAdapter wrap(ServletConfig servletConfig) {
+        return new ServletConfigAdapterImpl(servletConfig);
     }
 }

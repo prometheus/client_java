@@ -117,38 +117,7 @@ public class CollectorRegistry {
 
     List<String> names = new ArrayList<String>();
     for (Collector.MetricFamilySamples family : mfs) {
-      switch (family.type) {
-        case COUNTER:
-          names.add(family.name + "_total");
-          names.add(family.name + "_created");
-          names.add(family.name);
-          break;
-        case SUMMARY:
-          names.add(family.name + "_count");
-          names.add(family.name + "_sum");
-          names.add(family.name + "_created");
-          names.add(family.name);
-          break;
-        case HISTOGRAM:
-          names.add(family.name + "_count");
-          names.add(family.name + "_sum");
-          names.add(family.name + "_bucket");
-          names.add(family.name + "_created");
-          names.add(family.name);
-          break;
-        case GAUGE_HISTOGRAM:
-          names.add(family.name + "_gcount");
-          names.add(family.name + "_gsum");
-          names.add(family.name + "_bucket");
-          names.add(family.name);
-          break;
-        case INFO:
-          names.add(family.name + "_info");
-          names.add(family.name);
-          break;
-        default:
-          names.add(family.name);
-      }
+      names.addAll(Arrays.asList(family.getNames()));
     }
     return names;
   }
@@ -168,7 +137,16 @@ public class CollectorRegistry {
    * histogram, you must include the '_count', '_sum' and '_bucket' names.
    */
   public Enumeration<Collector.MetricFamilySamples> filteredMetricFamilySamples(Set<String> includedNames) {
-    return new MetricFamilySamplesEnumeration(includedNames);
+    return new MetricFamilySamplesEnumeration(new SampleNameFilter.Builder().nameMustBeEqualTo(includedNames).build());
+  }
+
+  /**
+   * Enumeration of metrics where {@code sampleNameFilter.test(name)} returns {@code true} for each {@code name} in
+   * {@link Collector.MetricFamilySamples#getNames()}.
+   * @param sampleNameFilter may be {@code null}, indicating that the enumeration should contain all metrics.
+   */
+  public Enumeration<Collector.MetricFamilySamples> filteredMetricFamilySamples(Predicate<String> sampleNameFilter) {
+    return new MetricFamilySamplesEnumeration(sampleNameFilter);
   }
 
   class MetricFamilySamplesEnumeration implements Enumeration<Collector.MetricFamilySamples> {
@@ -176,72 +154,53 @@ public class CollectorRegistry {
     private final Iterator<Collector> collectorIter;
     private Iterator<Collector.MetricFamilySamples> metricFamilySamples;
     private Collector.MetricFamilySamples next;
-    private Set<String> includedNames;
+    private final Predicate<String> sampleNameFilter;
 
-    MetricFamilySamplesEnumeration(Set<String> includedNames) {
-      this.includedNames = includedNames;
-      collectorIter = includedCollectorIterator(includedNames);
+    MetricFamilySamplesEnumeration(Predicate<String> sampleNameFilter) {
+      this.sampleNameFilter = sampleNameFilter;
+      this.collectorIter = filteredCollectorIterator();
       findNextElement();
     }
 
-    private Iterator<Collector> includedCollectorIterator(Set<String> includedNames) {
-      if (includedNames.isEmpty()) {
+    private Iterator<Collector> filteredCollectorIterator() {
+      if (sampleNameFilter == null) {
         return collectors().iterator();
       } else {
         HashSet<Collector> collectors = new HashSet<Collector>();
         synchronized (namesCollectorsLock) {
           for (Map.Entry<String, Collector> entry : namesToCollectors.entrySet()) {
-            if (includedNames.contains(entry.getKey())) {
+            // Note that namesToCollectors contains keys for all combinations of suffixes (_total, _info, etc.).
+            if (sampleNameFilter.test(entry.getKey())) {
               collectors.add(entry.getValue());
             }
           }
         }
-
         return collectors.iterator();
       }
     }
 
     MetricFamilySamplesEnumeration() {
-      this(Collections.<String>emptySet());
+      this(null);
     }
 
     private void findNextElement() {
       next = null;
 
       while (metricFamilySamples != null && metricFamilySamples.hasNext()) {
-        next = filter(metricFamilySamples.next());
+        next = metricFamilySamples.next().filter(sampleNameFilter);
         if (next != null) {
           return;
         }
       }
 
-      if (next == null) {
-        while (collectorIter.hasNext()) {
-          metricFamilySamples = collectorIter.next().collect().iterator();
-          while (metricFamilySamples.hasNext()) {
-            next = filter(metricFamilySamples.next());
-            if (next != null) {
-              return;
-            }
+      while (collectorIter.hasNext()) {
+        metricFamilySamples = collectorIter.next().collect(sampleNameFilter).iterator();
+        while (metricFamilySamples.hasNext()) {
+          next = metricFamilySamples.next().filter(sampleNameFilter);
+          if (next != null) {
+            return;
           }
         }
-      }
-    }
-
-    private Collector.MetricFamilySamples filter(Collector.MetricFamilySamples next) {
-      if (includedNames.isEmpty()) {
-        return next;
-      } else {
-        Iterator<Collector.MetricFamilySamples.Sample> it = next.samples.iterator();
-        while (it.hasNext()) {
-            if (!includedNames.contains(it.next().name)) {
-                it.remove();
-            }
-        }
-        if (next.samples.size() == 0) {
-          return null;
-        }
-        return next;
       }
     }
 

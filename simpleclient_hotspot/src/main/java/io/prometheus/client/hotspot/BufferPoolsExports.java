@@ -2,6 +2,7 @@ package io.prometheus.client.hotspot;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.GaugeMetricFamily;
+import io.prometheus.client.Predicate;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
@@ -11,6 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static io.prometheus.client.SampleNameFilter.ALLOW_ALL;
+
 /**
  * Exports metrics about JVM buffers.
  *
@@ -18,6 +21,10 @@ import java.util.logging.Logger;
  *
  */
 public class BufferPoolsExports extends Collector {
+
+    private static final String JVM_BUFFER_POOL_USED_BYTES = "jvm_buffer_pool_used_bytes";
+    private static final String JVM_BUFFER_POOL_CAPACITY_BYTES = "jvm_buffer_pool_capacity_bytes";
+    private static final String JVM_BUFFER_POOL_USED_BUFFERS = "jvm_buffer_pool_used_buffers";
 
     private static final Logger LOGGER = Logger.getLogger(BufferPoolsExports.class.getName());
 
@@ -65,37 +72,60 @@ public class BufferPoolsExports extends Collector {
 
     @Override
     public List<MetricFamilySamples> collect() {
+        return collect(null);
+    }
+
+    @Override
+    public List<MetricFamilySamples> collect(Predicate<String> nameFilter) {
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-        GaugeMetricFamily used = new GaugeMetricFamily(
-                "jvm_buffer_pool_used_bytes",
-                "Used bytes of a given JVM buffer pool.",
-                Collections.singletonList("pool"));
-        mfs.add(used);
-        GaugeMetricFamily capacity = new GaugeMetricFamily(
-                "jvm_buffer_pool_capacity_bytes",
-                "Bytes capacity of a given JVM buffer pool.",
-                Collections.singletonList("pool"));
-        mfs.add(capacity);
-        GaugeMetricFamily buffers = new GaugeMetricFamily(
-                "jvm_buffer_pool_used_buffers",
-                "Used buffers of a given JVM buffer pool.",
-                Collections.singletonList("pool"));
-        mfs.add(buffers);
+        if (nameFilter == null) {
+            nameFilter = ALLOW_ALL;
+        }
+        GaugeMetricFamily used = null;
+        if (nameFilter.test(JVM_BUFFER_POOL_USED_BYTES)) {
+            used = new GaugeMetricFamily(
+                    JVM_BUFFER_POOL_USED_BYTES,
+                    "Used bytes of a given JVM buffer pool.",
+                    Collections.singletonList("pool"));
+            mfs.add(used);
+        }
+        GaugeMetricFamily capacity = null;
+        if (nameFilter.test(JVM_BUFFER_POOL_CAPACITY_BYTES)) {
+            capacity = new GaugeMetricFamily(
+                    JVM_BUFFER_POOL_CAPACITY_BYTES,
+                    "Bytes capacity of a given JVM buffer pool.",
+                    Collections.singletonList("pool"));
+            mfs.add(capacity);
+        }
+        GaugeMetricFamily buffers = null;
+        if (nameFilter.test(JVM_BUFFER_POOL_USED_BUFFERS)) {
+            buffers = new GaugeMetricFamily(
+                    JVM_BUFFER_POOL_USED_BUFFERS,
+                    "Used buffers of a given JVM buffer pool.",
+                    Collections.singletonList("pool"));
+            mfs.add(buffers);
+        }
         for (final Object pool : bufferPoolMXBeans) {
-            used.addMetric(
-                    Collections.singletonList(getName(pool)),
-                    callLongMethond(getMemoryUsed,pool));
-            capacity.addMetric(
-                    Collections.singletonList(getName(pool)),
-                    callLongMethond(getTotalCapacity,pool));
-            buffers.addMetric(
-                    Collections.singletonList(getName(pool)),
-                    callLongMethond(getCount,pool));
+            if (used != null) {
+                used.addMetric(
+                        Collections.singletonList(getName(pool)),
+                        callLongMethod(getMemoryUsed, pool));
+            }
+            if (capacity != null) {
+                capacity.addMetric(
+                        Collections.singletonList(getName(pool)),
+                        callLongMethod(getTotalCapacity, pool));
+            }
+            if (buffers != null) {
+                buffers.addMetric(
+                        Collections.singletonList(getName(pool)),
+                        callLongMethod(getCount, pool));
+            }
         }
         return mfs;
     }
 
-    private long callLongMethond(final Method method, final Object pool) {
+    private long callLongMethod(final Method method, final Object pool) {
         try {
             return (Long)method.invoke(pool);
         } catch (IllegalAccessException e) {
@@ -116,7 +146,4 @@ public class BufferPoolsExports extends Collector {
         }
         return "<unknown>";
     }
-
-
-
 }

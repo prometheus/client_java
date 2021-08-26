@@ -17,10 +17,48 @@ import java.util.regex.Pattern;
  * @see <a href="http://prometheus.io/docs/instrumenting/exposition_formats/">Exposition formats</a>.
  */
 public abstract class Collector {
+
   /**
-   * Return all of the metrics of this Collector.
+   * Return all metrics of this Collector.
    */
   public abstract List<MetricFamilySamples> collect();
+
+  /**
+   * Like {@link #collect()}, but the result should only contain {@code MetricFamilySamples} where
+   * {@code sampleNameFilter.test(name)} is {@code true} for at least one Sample name.
+   * <p>
+   * The default implementation first collects all {@code MetricFamilySamples} and then discards the ones
+   * where {@code sampleNameFilter.test(name)} returns {@code false} for all names in
+   * {@link MetricFamilySamples#getNames()}.
+   * To improve performance, collector implementations should override this method to prevent
+   * {@code MetricFamilySamples} from being collected if they will be discarded anyways.
+   * See {@code ThreadExports} for an example.
+   * <p>
+   * Note that the resulting List may contain {@code MetricFamilySamples} where some Sample names return
+   * {@code true} for {@code sampleNameFilter.test(name)} but some Sample names return {@code false}.
+   * This is ok, because before we produce the output format we will call
+   * {@link MetricFamilySamples#filter(Predicate)} to strip all Samples where {@code sampleNameFilter.test(name)}
+   * returns {@code false}.
+   *
+   * @param sampleNameFilter may be {@code null}, indicating that all metrics should be collected.
+   */
+  public List<MetricFamilySamples> collect(Predicate<String> sampleNameFilter) {
+    List<MetricFamilySamples> all = collect();
+    if (sampleNameFilter == null) {
+      return all;
+    }
+    List<MetricFamilySamples> remaining = new ArrayList<MetricFamilySamples>(all.size());
+    for (MetricFamilySamples mfs : all) {
+      for (String name : mfs.getNames()) {
+        if (sampleNameFilter.test(name)) {
+          remaining.add(mfs);
+          break;
+        }
+      }
+    }
+    return remaining;
+  }
+
   public enum Type {
     UNKNOWN, // This is untyped in Prometheus text format.
     COUNTER,
@@ -40,7 +78,11 @@ public abstract class Collector {
     public final String unit;
     public final Type type;
     public final String help;
-    public final List<Sample> samples;
+    public final List<Sample> samples; // this list is modified when samples are added/removed.
+
+    public MetricFamilySamples(String name, Type type, String help, List<Sample> samples) {
+      this(name, "", type, help, samples);
+    }
 
     public MetricFamilySamples(String name, String unit, Type type, String help, List<Sample> samples) {
       if (!unit.isEmpty() && !name.endsWith("_" + unit)) {
@@ -72,9 +114,82 @@ public abstract class Collector {
       this.samples = mungedSamples;
     }
 
-    public MetricFamilySamples(String name, Type type, String help, List<Sample> samples) {
-      this(name, "", type, help, samples);
+    /**
+     * @param sampleNameFilter may be {@code null} indicating that the result contains the complete list of samples.
+     * @return A new MetricFamilySamples containing only the Samples matching the {@code sampleNameFilter},
+     *         or {@code null} if no Sample matches.
+     */
+    public MetricFamilySamples filter(Predicate<String> sampleNameFilter) {
+      if (sampleNameFilter == null) {
+        return this;
+      }
+      List<Sample> remainingSamples = new ArrayList<Sample>(samples.size());
+      for (Sample sample : samples) {
+        if (sampleNameFilter.test(sample.name)) {
+          remainingSamples.add(sample);
+        }
+      }
+      if (remainingSamples.isEmpty()) {
+        return null;
+      }
+      return new MetricFamilySamples(name, unit, type, help, remainingSamples);
     }
+
+    /**
+     * List of names that are reserved for Samples in these MetricsFamilySamples.
+     * <p>
+     * This is used in two places:
+     * <ol>
+     *     <li>To check potential name collisions in {@link CollectorRegistry#register(Collector)}.
+     *     <li>To check if a collector may contain metrics matching the metric name filter
+     *         in {@link Collector#collect(Predicate)}.
+     * </ol>
+     * Note that {@code getNames()} always includes the name without suffix, even though some
+     * metrics types (like Counter) will not have a Sample with that name.
+     * The reason is that the name without suffix is used in the metadata comments ({@code # TYPE}, {@code # UNIT},
+     * {@code # HELP}), and as this name <a href="https://github.com/prometheus/common/issues/319">must be unique</a>
+     * we include the name without suffix here as well.
+     */
+    public String[] getNames() {
+      switch (type) {
+        case COUNTER:
+          return new String[]{
+                  name + "_total",
+                  name + "_created",
+                  name
+          };
+        case SUMMARY:
+          return new String[]{
+                  name + "_count",
+                  name + "_sum",
+                  name + "_created",
+                  name
+          };
+        case HISTOGRAM:
+          return new String[]{
+                  name + "_count",
+                  name + "_sum",
+                  name + "_bucket",
+                  name + "_created",
+                  name
+          };
+        case GAUGE_HISTOGRAM:
+          return new String[]{
+                  name + "_gcount",
+                  name + "_gsum",
+                  name + "_bucket",
+                  name
+          };
+        case INFO:
+          return new String[]{
+                  name + "_info",
+                  name
+          };
+        default:
+          return new String[]{name};
+      }
+    }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -204,7 +319,7 @@ public abstract class Collector {
      *  Usually custom collectors do not have to implement Describable. If
      *  Describable is not implemented and the CollectorRegistry was created
      *  with auto describe enabled (which is the case for the default registry)
-     *  then {@link collect} will be called at registration time instead of
+     *  then {@link #collect} will be called at registration time instead of
      *  describe. If this could cause problems, either implement a proper
      *  describe, or if that's not practical have describe return an empty
      *  list.

@@ -89,7 +89,7 @@ public class ExporterTest {
     StringWriter responseBody = new StringWriter();
     HttpServletResponseAdapter resp = mockHttpServletResponse(new PrintWriter(responseBody));
 
-    new Exporter(registry).doGet(req, resp);
+    new Exporter(registry, null).doGet(req, resp);
 
     assertThat(responseBody.toString()).contains("a 0.0");
     assertThat(responseBody.toString()).contains("b 0.0");
@@ -110,7 +110,7 @@ public class ExporterTest {
     CollectorRegistry registry = new CollectorRegistry();
     Gauge a = Gauge.build("a", "a help").register(registry);
 
-    new Exporter(registry).doGet(req, resp);
+    new Exporter(registry, null).doGet(req, resp);
     Assert.assertTrue(closed.get());
   }
 
@@ -133,7 +133,7 @@ public class ExporterTest {
     Gauge a = Gauge.build("a", "a help").register(registry);
 
     try {
-      new Exporter(registry).doGet(req, resp);
+      new Exporter(registry, null).doGet(req, resp);
       fail("Exception expected");
     } catch (Exception e) {
     }
@@ -150,7 +150,7 @@ public class ExporterTest {
     StringWriter responseBody = new StringWriter();
     HttpServletResponseAdapter resp = mockHttpServletResponse(new PrintWriter(responseBody));
 
-    new Exporter(registry).doGet(req, resp);
+    new Exporter(registry, null).doGet(req, resp);
 
     assertThat(responseBody.toString()).contains("a 0.0");
     assertThat(responseBody.toString()).contains("# EOF");

@@ -26,6 +26,7 @@
         <module>exemplars_otel_agent</module>
         <module>example_application</module>
         <module>java_versions</module>
+        <module>servlet_jakarta_exporter_webxml</module>
     </modules>
 
     <build>
