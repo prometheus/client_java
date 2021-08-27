@@ -9,6 +9,7 @@
     </parent>
 
     <artifactId>simpleclient_jetty</artifactId>
+    <packaging>bundle</packaging>
 
     <name>Prometheus Java Simpleclient Jetty</name>
     <description>

@@ -60,7 +60,7 @@
         <module>simpleclient_tracer</module>
         <module>simpleclient_vertx</module>
         <module>simpleclient_bom</module>
-        <module>benchmark</module>
+        <module>benchmarks</module>
         <module>integration_tests</module>
     </modules>
 

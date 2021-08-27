@@ -8,7 +8,6 @@
         <version>0.11.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>io.prometheus</groupId>
     <artifactId>simpleclient_guava</artifactId>
     <packaging>bundle</packaging>
 

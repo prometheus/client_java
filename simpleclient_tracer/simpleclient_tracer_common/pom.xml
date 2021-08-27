@@ -9,6 +9,8 @@
   </parent>
 
   <artifactId>simpleclient_tracer_common</artifactId>
+  <packaging>bundle</packaging>
+
   <name>Prometheus Java Span Context Supplier - Common</name>
 
   <dependencies>

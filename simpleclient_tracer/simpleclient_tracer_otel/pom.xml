@@ -9,6 +9,8 @@
   </parent>
 
   <artifactId>simpleclient_tracer_otel</artifactId>
+  <packaging>bundle</packaging>
+
   <name>Prometheus Java Span Context Supplier - OpenTelemetry</name>
 
   <dependencies>
