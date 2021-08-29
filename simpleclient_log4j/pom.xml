@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>parent</artifactId>
-        <version>0.11.1-SNAPSHOT</version>
+        <version>0.12.0</version>
     </parent>
 
     <artifactId>simpleclient_log4j</artifactId>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.11.1-SNAPSHOT</version>
+            <version>0.12.0</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
