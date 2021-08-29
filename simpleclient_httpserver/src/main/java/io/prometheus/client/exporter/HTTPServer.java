@@ -26,6 +26,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -195,6 +197,7 @@ public class HTTPServer implements Closeable {
         private boolean daemon = false;
         private Predicate<String> sampleNameFilter;
         private Supplier<Predicate<String>> sampleNameFilterSupplier;
+        private Authenticator authenticator;
 
         /**
          * Port to bind to. Must not be called together with {@link #withInetSocketAddress(InetSocketAddress)}
@@ -286,6 +289,18 @@ public class HTTPServer implements Closeable {
             return this;
         }
 
+        /**
+         * Optional: {@link Authenticator} to use to support authentication.
+         */
+        public Builder withAuthenticator(Authenticator authenticator) {
+            this.authenticator = authenticator;
+            return this;
+        }
+
+        /**
+         * Build the HTTPServer
+         * @throws IOException
+         */
         public HTTPServer build() throws IOException {
             if (sampleNameFilter != null) {
                 assertNull(sampleNameFilterSupplier, "cannot configure 'sampleNameFilter' and 'sampleNameFilterSupplier' at the same time");
@@ -296,7 +311,7 @@ public class HTTPServer implements Closeable {
                 assertNull(hostname, "cannot configure 'httpServer' and 'hostname' at the same time");
                 assertNull(inetAddress, "cannot configure 'httpServer' and 'inetAddress' at the same time");
                 assertNull(inetSocketAddress, "cannot configure 'httpServer' and 'inetSocketAddress' at the same time");
-                return new HTTPServer(httpServer, registry, daemon, sampleNameFilterSupplier);
+                return new HTTPServer(httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
             } else if (inetSocketAddress != null) {
                 assertZero(port, "cannot configure 'inetSocketAddress' and 'port' at the same time");
                 assertNull(hostname, "cannot configure 'inetSocketAddress' and 'hostname' at the same time");
@@ -309,7 +324,7 @@ public class HTTPServer implements Closeable {
             } else {
                 inetSocketAddress = new InetSocketAddress(port);
             }
-            return new HTTPServer(HttpServer.create(inetSocketAddress, 3), registry, daemon, sampleNameFilterSupplier);
+            return new HTTPServer(HttpServer.create(inetSocketAddress, 3), registry, daemon, sampleNameFilterSupplier, authenticator);
         }
 
         private void assertNull(Object o, String msg) {
@@ -330,7 +345,7 @@ public class HTTPServer implements Closeable {
      * The {@code httpServer} is expected to already be bound to an address
      */
     public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
-        this(httpServer, registry, daemon, null);
+        this(httpServer, registry, daemon, null, null);
     }
 
     /**
@@ -375,15 +390,24 @@ public class HTTPServer implements Closeable {
         this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false);
     }
 
-    private HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon, Supplier<Predicate<String>> sampleNameFilterSupplier) {
+    private HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon, Supplier<Predicate<String>> sampleNameFilterSupplier, Authenticator authenticator) {
         if (httpServer.getAddress() == null)
             throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
 
         server = httpServer;
         HttpHandler mHandler = new HTTPMetricHandler(registry, sampleNameFilterSupplier);
-        server.createContext("/", mHandler);
-        server.createContext("/metrics", mHandler);
-        server.createContext("/-/healthy", mHandler);
+        HttpContext mContext = server.createContext("/", mHandler);
+        if (authenticator != null) {
+            mContext.setAuthenticator(authenticator);
+        }
+        mContext = server.createContext("/metrics", mHandler);
+        if (authenticator != null) {
+            mContext.setAuthenticator(authenticator);
+        }
+        mContext = server.createContext("/-/healthy", mHandler);
+        if (authenticator != null) {
+            mContext.setAuthenticator(authenticator);
+        }
         executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
         server.setExecutor(executorService);
         start(daemon);
