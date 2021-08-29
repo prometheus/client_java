@@ -1,9 +1,12 @@
 package io.prometheus.client.exporter;
 
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpServer;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.CollectorRegistry;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
@@ -11,8 +14,11 @@ import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 
 import io.prometheus.client.SampleNameFilter;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import javax.xml.bind.DatatypeConverter;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
@@ -65,6 +71,39 @@ public class TestHTTPServer {
     connection.setRequestProperty("Accept", accept);
     Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
     return scanner.hasNext() ? scanner.next() : "";
+  }
+
+  String requestWithCredentials(HTTPServer httpServer, String context, String suffix, String user, String password) throws IOException {
+    String url = "http://localhost:" + httpServer.server.getAddress().getPort() + context + suffix;
+    URLConnection connection = new URL(url).openConnection();
+    connection.setDoOutput(true);
+    if (user != null && password != null) {
+      connection.setRequestProperty("Authorization", encodeCredentials(user, password));
+    }
+    connection.connect();
+    Scanner s = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
+    return s.hasNext() ? s.next() : "";
+  }
+
+  String encodeCredentials(String user, String password) {
+    // Per RFC4648 table 2. We support Java 6, and java.util.Base64 was only added in Java 8,
+    try {
+      byte[] credentialsBytes = (user + ":" + password).getBytes("UTF-8");
+      String encoded = DatatypeConverter.printBase64Binary(credentialsBytes);
+      encoded = String.format("Basic %s", encoded);
+      return encoded;
+    } catch (UnsupportedEncodingException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+
+  Authenticator createAuthenticator(String realm, final String validUsername, final String validPassword) {
+    return new BasicAuthenticator(realm) {
+      @Override
+      public boolean checkCredentials(String username, String password) {
+        return validUsername.equals(username) && validPassword.equals(password);
+      }
+    };
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -198,6 +237,52 @@ public class TestHTTPServer {
     try {
       String response = requestWithCompression(s, "/-/healthy", "");
       assertThat(response).contains("Exporter is Healthy");
+    } finally {
+      s.close();
+    }
+  }
+
+  @Test
+  public void testBasicAuthSuccess() throws IOException {
+    HTTPServer s = new HTTPServer.Builder()
+            .withRegistry(registry)
+            .withAuthenticator(createAuthenticator("/", "user", "secret"))
+            .build();
+    try {
+      String response = requestWithCredentials(s, "/metrics","?name[]=a&name[]=b", "user", "secret");
+      assertThat(response).contains("a 0.0");
+    } finally {
+      s.close();
+    }
+  }
+
+  @Test
+  public void testBasicAuthCredentialsMissing() throws IOException {
+    HTTPServer s = new HTTPServer.Builder()
+            .withRegistry(registry)
+            .withAuthenticator(createAuthenticator("/", "user", "secret"))
+            .build();
+    try {
+      request(s, "/metrics", "?name[]=a&name[]=b");
+      Assert.fail("expected IOException with HTTP 401");
+    } catch (IOException e) {
+      Assert.assertTrue(e.getMessage().contains("401"));
+    } finally {
+      s.close();
+    }
+  }
+
+  @Test
+  public void testBasicAuthWrongCredentials() throws IOException {
+    HTTPServer s = new HTTPServer.Builder()
+            .withRegistry(registry)
+            .withAuthenticator(createAuthenticator("/", "user", "wrong"))
+            .build();
+    try {
+      request(s, "/metrics", "?name[]=a&name[]=b");
+      Assert.fail("expected IOException with HTTP 401");
+    } catch (IOException e) {
+      Assert.assertTrue(e.getMessage().contains("401"));
     } finally {
       s.close();
     }
