@@ -53,7 +53,7 @@ you can exclude the corresponding dependencies in your `pom.xml`:
   <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>simpleclient</artifactId>
-    <version>0.11.0</version>
+    <version>0.12.0</version>
     <exclusions>
       <!-- The following will disable OpenTelemetry exemplars when your application uses OpenTelemetry directly -->
       <exclusion>
