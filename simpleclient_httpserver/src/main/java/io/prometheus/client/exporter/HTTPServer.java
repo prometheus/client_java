@@ -84,6 +84,14 @@ public class HTTPServer implements Closeable {
         public void handle(HttpExchange t) throws IOException {
             String query = t.getRequestURI().getRawQuery();
 
+            // Correct HEAD behavior per Java bug #6886723
+            if (t.getRequestMethod().equals("HEAD")) {
+                t.getRequestBody().close();
+                t.getResponseHeaders().add("Transfer-encoding", "chunked");
+                t.sendResponseHeaders(200, -1);
+                return;
+            }
+
             String contextPath = t.getHttpContext().getPath();
             ByteArrayOutputStream response = this.response.get();
             response.reset();

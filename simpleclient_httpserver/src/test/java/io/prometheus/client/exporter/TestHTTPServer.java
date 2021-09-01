@@ -7,6 +7,7 @@ import io.prometheus.client.Gauge;
 import io.prometheus.client.CollectorRegistry;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
@@ -34,13 +35,18 @@ public class TestHTTPServer {
     Gauge.build("c", "a help").register(registry);
   }
 
-  String request(HTTPServer s, String context, String suffix) throws IOException {
+  String request(String requestMethod, HTTPServer s, String context, String suffix) throws IOException {
     String url = "http://localhost:" + s.server.getAddress().getPort() + context + suffix;
     URLConnection connection = new URL(url).openConnection();
+    ((HttpURLConnection)connection).setRequestMethod(requestMethod);
     connection.setDoOutput(true);
     connection.connect();
     Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
     return scanner.hasNext() ? scanner.next() : "";
+  }
+
+  String request(HTTPServer s, String context, String suffix) throws IOException {
+    return request("GET", s, context, suffix);
   }
 
   String request(HTTPServer s, String suffix) throws IOException {
@@ -283,6 +289,19 @@ public class TestHTTPServer {
       Assert.fail("expected IOException with HTTP 401");
     } catch (IOException e) {
       Assert.assertTrue(e.getMessage().contains("401"));
+    } finally {
+      s.close();
+    }
+  }
+
+  @Test
+  public void testHEADRequest() throws IOException {
+    HTTPServer s = new HTTPServer.Builder()
+            .withRegistry(registry)
+            .build();
+    try {
+      String content = request("HEAD", s, "/metrics", "?name[]=a&name[]=b");
+      Assert.assertTrue("".equals(content));
     } finally {
       s.close();
     }
