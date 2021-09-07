@@ -12,65 +12,88 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class InstrumentedAppenderTest {
+  public abstract static class Base {
+    CollectorRegistry registry;
+    InstrumentedAppender appender;
+    private ILoggingEvent event;
 
-  private InstrumentedAppender appender;
-  private ILoggingEvent event;
+    @Before
+    public void setUp() throws Exception {
+      this.appender.start();
 
-  @Before
-  public void setUp() throws Exception {
-    appender = new InstrumentedAppender();
-    appender.start();
-    
-    event = mock(ILoggingEvent.class);
+      this.event = mock(ILoggingEvent.class);
+    }
+
+    @Test
+    public void metersTraceEvents() throws Exception {
+      when(this.event.getLevel()).thenReturn(Level.TRACE);
+
+      this.appender.doAppend(event);
+
+      assertEquals(1, this.getLogLevelCount("trace"));
+    }
+
+    @Test
+    public void metersDebugEvents() throws Exception {
+      when(this.event.getLevel()).thenReturn(Level.DEBUG);
+
+      this.appender.doAppend(event);
+
+      assertEquals(1, this.getLogLevelCount("debug"));
+    }
+
+    @Test
+    public void metersInfoEvents() throws Exception {
+      when(this.event.getLevel()).thenReturn(Level.INFO);
+
+      this.appender.doAppend(event);
+
+      assertEquals(1, this.getLogLevelCount("info"));
+    }
+
+    @Test
+    public void metersWarnEvents() throws Exception {
+      when(this.event.getLevel()).thenReturn(Level.WARN);
+
+      this.appender.doAppend(event);
+
+      assertEquals(1, this.getLogLevelCount("warn"));
+    }
+
+    @Test
+    public void metersErrorEvents() throws Exception {
+      when(this.event.getLevel()).thenReturn(Level.ERROR);
+
+      this.appender.doAppend(event);
+
+      assertEquals(1, this.getLogLevelCount("error"));
+    }
+
+    private int getLogLevelCount(String level) {
+      return this.registry.getSampleValue(COUNTER_NAME,
+              new String[]{"level"}, new String[]{level}).intValue();
+    }
   }
 
-  @Test
-  public void metersTraceEvents() throws Exception {
-    when(event.getLevel()).thenReturn(Level.TRACE);
+  public static class DefaultTest extends Base {
+    @Before
+    public void setUp() throws Exception {
+      this.registry = CollectorRegistry.defaultRegistry;
 
-    appender.doAppend(event);
+      this.appender = new InstrumentedAppender();
 
-    assertEquals(1, getLogLevelCount("trace"));
+      super.setUp();
+    }
   }
 
-  @Test
-  public void metersDebugEvents() throws Exception {
-    when(event.getLevel()).thenReturn(Level.DEBUG);
+  public static class InstanceTest extends Base {
+    @Before
+    public void setUp() throws Exception {
+      this.registry = new CollectorRegistry();
 
-    appender.doAppend(event);
+      this.appender = new InstrumentedAppender(this.registry);
 
-    assertEquals(1, getLogLevelCount("debug"));
-  }
-
-  @Test
-  public void metersInfoEvents() throws Exception {
-    when(event.getLevel()).thenReturn(Level.INFO);
-
-    appender.doAppend(event);
-
-    assertEquals(1, getLogLevelCount("info"));
-  }
-
-  @Test
-  public void metersWarnEvents() throws Exception {
-    when(event.getLevel()).thenReturn(Level.WARN);
-
-    appender.doAppend(event);
-
-    assertEquals(1, getLogLevelCount("warn"));
-  }
-
-  @Test
-  public void metersErrorEvents() throws Exception {
-    when(event.getLevel()).thenReturn(Level.ERROR);
-
-    appender.doAppend(event);
-
-    assertEquals(1, getLogLevelCount("error"));
-  }
-
-  private int getLogLevelCount(String level) {
-    return CollectorRegistry.defaultRegistry.getSampleValue(COUNTER_NAME, 
-            new String[]{"level"}, new String[]{level}).intValue();
+      super.setUp();
+    }
   }
 }
