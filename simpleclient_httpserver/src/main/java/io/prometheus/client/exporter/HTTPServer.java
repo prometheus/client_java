@@ -83,15 +83,6 @@ public class HTTPServer implements Closeable {
         @Override
         public void handle(HttpExchange t) throws IOException {
             String query = t.getRequestURI().getRawQuery();
-
-            // Correct HEAD behavior per Java bug #6886723
-            if (t.getRequestMethod().equals("HEAD")) {
-                t.getRequestBody().close();
-                t.getResponseHeaders().add("Transfer-encoding", "chunked");
-                t.sendResponseHeaders(200, -1);
-                return;
-            }
-
             String contextPath = t.getHttpContext().getPath();
             ByteArrayOutputStream response = this.response.get();
             response.reset();
@@ -122,9 +113,12 @@ public class HTTPServer implements Closeable {
                     os.close();
                 }
             } else {
-                t.getResponseHeaders().set("Content-Length",
-                        String.valueOf(response.size()));
-                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.size());
+                long contentLength = response.size();
+                t.getResponseHeaders().set("Content-Length", String.valueOf(contentLength));
+                if (t.getRequestMethod().equals("HEAD")) {
+                    contentLength = -1;
+                }
+                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, contentLength);
                 response.writeTo(t.getResponseBody());
             }
             t.close();
