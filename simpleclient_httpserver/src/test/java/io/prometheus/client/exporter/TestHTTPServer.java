@@ -5,6 +5,7 @@ import io.prometheus.client.Gauge;
 import io.prometheus.client.CollectorRegistry;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
@@ -32,24 +33,29 @@ public class TestHTTPServer {
     Gauge.build("c", "a help").register(registry);
   }
 
-  String request(HTTPServer s, String context, String suffix) throws IOException {
+  Response request(String requestMethod, HTTPServer s, String context, String suffix) throws IOException {
     String url = "http://localhost:" + s.server.getAddress().getPort() + context + suffix;
     URLConnection connection = new URL(url).openConnection();
+    ((HttpURLConnection)connection).setRequestMethod(requestMethod);
     connection.setDoOutput(true);
     connection.connect();
     Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
-    return scanner.hasNext() ? scanner.next() : "";
+    return new Response(connection.getContentLength(), scanner.hasNext() ? scanner.next() : "");
   }
 
-  String request(HTTPServer s, String suffix) throws IOException {
+  Response request(HTTPServer s, String context, String suffix) throws IOException {
+    return request("GET", s, context, suffix);
+  }
+
+  Response request(HTTPServer s, String suffix) throws IOException {
     return request(s, "/metrics", suffix);
   }
 
-  String requestWithCompression(HTTPServer s, String suffix) throws IOException {
+  Response requestWithCompression(HTTPServer s, String suffix) throws IOException {
     return requestWithCompression(s, "/metrics", suffix);
   }
 
-  String requestWithCompression(HTTPServer s, String context, String suffix) throws IOException {
+  Response requestWithCompression(HTTPServer s, String context, String suffix) throws IOException {
     String url = "http://localhost:" + s.server.getAddress().getPort() + context + suffix;
     URLConnection connection = new URL(url).openConnection();
     connection.setDoOutput(true);
@@ -58,20 +64,20 @@ public class TestHTTPServer {
     connection.connect();
     GZIPInputStream gzs = new GZIPInputStream(connection.getInputStream());
     Scanner scanner = new Scanner(gzs).useDelimiter("\\A");
-    return scanner.hasNext() ? scanner.next() : "";
+    return new Response(connection.getContentLength(), scanner.hasNext() ? scanner.next() : "");
   }
 
-  String requestWithAccept(HTTPServer s, String accept) throws IOException {
+  Response requestWithAccept(HTTPServer s, String accept) throws IOException {
     String url = "http://localhost:" + s.server.getAddress().getPort();
     URLConnection connection = new URL(url).openConnection();
     connection.setDoOutput(true);
     connection.setDoInput(true);
     connection.setRequestProperty("Accept", accept);
     Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
-    return scanner.hasNext() ? scanner.next() : "";
+    return new Response(connection.getContentLength(), scanner.hasNext() ? scanner.next() : "");
   }
 
-  String requestWithCredentials(HTTPServer httpServer, String context, String suffix, String username, String password) throws IOException {
+  Response requestWithCredentials(HTTPServer httpServer, String context, String suffix, String username, String password) throws IOException {
     String url = "http://localhost:" + httpServer.server.getAddress().getPort() + context + suffix;
     URLConnection connection = new URL(url).openConnection();
     connection.setDoOutput(true);
@@ -80,7 +86,7 @@ public class TestHTTPServer {
     }
     connection.connect();
     Scanner s = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
-    return s.hasNext() ? s.next() : "";
+    return new Response(connection.getContentLength(), s.hasNext() ? s.next() : "");
   }
 
   String encodeCredentials(String user, String password) {
@@ -106,7 +112,7 @@ public class TestHTTPServer {
   public void testSimpleRequest() throws IOException {
     HTTPServer s = new HTTPServer(new InetSocketAddress(0), registry);
     try {
-      String response = request(s, "");
+      String response = request(s, "").body;
       assertThat(response).contains("a 0.0");
       assertThat(response).contains("b 0.0");
       assertThat(response).contains("c 0.0");
@@ -119,7 +125,7 @@ public class TestHTTPServer {
   public void testBadParams() throws IOException {
     HTTPServer s = new HTTPServer(new InetSocketAddress(0), registry);
     try {
-      String response = request(s, "?x");
+      String response = request(s, "?x").body;
       assertThat(response).contains("a 0.0");
       assertThat(response).contains("b 0.0");
       assertThat(response).contains("c 0.0");
@@ -132,7 +138,7 @@ public class TestHTTPServer {
   public void testSingleName() throws IOException {
     HTTPServer s = new HTTPServer(new InetSocketAddress(0), registry);
     try {
-      String response = request(s, "?name[]=a");
+      String response = request(s, "?name[]=a").body;
       assertThat(response).contains("a 0.0");
       assertThat(response).doesNotContain("b 0.0");
       assertThat(response).doesNotContain("c 0.0");
@@ -145,7 +151,7 @@ public class TestHTTPServer {
   public void testMultiName() throws IOException {
     HTTPServer s = new HTTPServer(new InetSocketAddress(0), registry);
     try {
-      String response = request(s, "?name[]=a&name[]=b");
+      String response = request(s, "?name[]=a&name[]=b").body;
       assertThat(response).contains("a 0.0");
       assertThat(response).contains("b 0.0");
       assertThat(response).doesNotContain("c 0.0");
@@ -163,7 +169,7 @@ public class TestHTTPServer {
                     .build())
             .build();
     try {
-      String response = request(s, "?name[]=a&name[]=b");
+      String response = request(s, "?name[]=a&name[]=b").body;
       assertThat(response).doesNotContain("a 0.0");
       assertThat(response).contains("b 0.0");
       assertThat(response).doesNotContain("c 0.0");
@@ -176,7 +182,7 @@ public class TestHTTPServer {
   public void testDecoding() throws IOException {
     HTTPServer s = new HTTPServer(new InetSocketAddress(0), registry);
     try {
-      String response = request(s, "?n%61me[]=%61");
+      String response = request(s, "?n%61me[]=%61").body;
       assertThat(response).contains("a 0.0");
       assertThat(response).doesNotContain("b 0.0");
       assertThat(response).doesNotContain("c 0.0");
@@ -189,7 +195,7 @@ public class TestHTTPServer {
   public void testGzipCompression() throws IOException {
     HTTPServer s = new HTTPServer(new InetSocketAddress(0), registry);
     try {
-      String response = requestWithCompression(s, "");
+      String response = requestWithCompression(s, "").body;
       assertThat(response).contains("a 0.0");
       assertThat(response).contains("b 0.0");
       assertThat(response).contains("c 0.0");
@@ -202,7 +208,7 @@ public class TestHTTPServer {
   public void testOpenMetrics() throws IOException {
     HTTPServer s = new HTTPServer(new InetSocketAddress(0), registry);
     try {
-      String response = requestWithAccept(s, "application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1");
+      String response = requestWithAccept(s, "application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1").body;
       assertThat(response).contains("# EOF");
     } finally {
       s.close();
@@ -213,7 +219,7 @@ public class TestHTTPServer {
   public void testHealth() throws IOException {
     HTTPServer s = new HTTPServer(new InetSocketAddress(0), registry);
     try {
-      String response = request(s, "/-/healthy", "");
+      String response = request(s, "/-/healthy", "").body;
       assertThat(response).contains("Exporter is Healthy");
     } finally {
       s.close();
@@ -224,7 +230,7 @@ public class TestHTTPServer {
   public void testHealthGzipCompression() throws IOException {
     HTTPServer s = new HTTPServer(new InetSocketAddress(0), registry);
     try {
-      String response = requestWithCompression(s, "/-/healthy", "");
+      String response = requestWithCompression(s, "/-/healthy", "").body;
       assertThat(response).contains("Exporter is Healthy");
     } finally {
       s.close();
@@ -241,7 +247,7 @@ public class TestHTTPServer {
             .withAuthenticator(authenticator)
             .build();
     try {
-      String response = requestWithCredentials(s, "/metrics","?name[]=a&name[]=b", "user", "secret");
+      String response = requestWithCredentials(s, "/metrics","?name[]=a&name[]=b", "user", "secret").body;
       assertThat(response).contains("a 0.0");
     } finally {
       s.close();
@@ -283,6 +289,31 @@ public class TestHTTPServer {
       Assert.assertTrue(e.getMessage().contains("401"));
     } finally {
       s.close();
+    }
+  }
+
+  @Test
+  public void testHEADRequest() throws IOException {
+    HTTPServer s = new HTTPServer.Builder()
+            .withRegistry(registry)
+            .build();
+    try {
+      Response response = request("HEAD", s, "/metrics", "?name[]=a&name[]=b");
+      Assert.assertTrue(response.contentLength == 74);
+      Assert.assertTrue("".equals(response.body));
+    } finally {
+      s.close();
+    }
+  }
+
+  class Response {
+
+    public long contentLength;
+    public String body;
+
+    public Response(long contentLength, String body) {
+      this.contentLength = contentLength;
+      this.body = body;
     }
   }
 }
