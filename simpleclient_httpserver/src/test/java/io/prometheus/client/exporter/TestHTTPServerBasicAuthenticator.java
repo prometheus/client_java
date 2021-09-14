@@ -16,7 +16,6 @@ public class TestHTTPServerBasicAuthenticator {
     @Test
     public void testWrongUsername() {
         HTTPServerBasicAuthenticator authenticator = new HTTPServerBasicAuthenticator("test", "secret");
-
         Assert.assertFalse(authenticator.checkCredentials("wrong", "secret"));
     }
 
