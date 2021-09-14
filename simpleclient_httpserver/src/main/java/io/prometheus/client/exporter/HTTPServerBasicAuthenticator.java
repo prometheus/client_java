@@ -13,11 +13,11 @@ public class HTTPServerBasicAuthenticator extends com.sun.net.httpserver.BasicAu
     public HTTPServerBasicAuthenticator(String username, String password) {
         super(REALM);
 
-        if ((username == null) || (username.trim().length() == 0)) {
+        if (username == null || username.trim().length() == 0) {
             throw new IllegalArgumentException("username is null or empty");
         }
 
-        if ((password == null) || (password.trim().length() == 0)) {
+        if (password == null || password.trim().length() == 0) {
             throw new IllegalArgumentException("password is null or empty");
         }
 
@@ -33,6 +33,6 @@ public class HTTPServerBasicAuthenticator extends com.sun.net.httpserver.BasicAu
      */
     @Override
     public boolean checkCredentials(String username, String password) {
-        return (this.username.equals(username) && this.password.equals(password));
+        return this.username.equals(username) && this.password.equals(password);
     }
 }
