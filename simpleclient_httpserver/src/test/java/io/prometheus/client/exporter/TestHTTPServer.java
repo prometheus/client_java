@@ -1,5 +1,7 @@
 package io.prometheus.client.exporter;
 
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpServer;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.CollectorRegistry;
