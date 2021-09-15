@@ -39,6 +39,7 @@ public class JavaVersionsIT {
         // HotSpot
         "openjdk:8-jre",
         "openjdk:11-jre",
+        "openjdk:17",
         "ticketfly/java:6",
         "adoptopenjdk/openjdk16:ubi-minimal-jre",
 
