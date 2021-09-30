@@ -18,11 +18,14 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
@@ -54,20 +57,11 @@ public class HTTPServer implements Closeable {
         }
     }
 
-    private static class LocalByteArray extends ThreadLocal<ByteArrayOutputStream> {
-        @Override
-        protected ByteArrayOutputStream initialValue()
-        {
-            return new ByteArrayOutputStream(1 << 20);
-        }
-    }
-
     /**
      * Handles Metrics collections from the given registry.
      */
     public static class HTTPMetricHandler implements HttpHandler {
         private final CollectorRegistry registry;
-        private final LocalByteArray response = new LocalByteArray();
         private final Supplier<Predicate<String>> sampleNameFilterSupplier;
         private final static String HEALTHY_RESPONSE = "Exporter is Healthy.";
 
@@ -84,8 +78,7 @@ public class HTTPServer implements Closeable {
         public void handle(HttpExchange t) throws IOException {
             String query = t.getRequestURI().getRawQuery();
             String contextPath = t.getHttpContext().getPath();
-            ByteArrayOutputStream response = this.response.get();
-            response.reset();
+            ByteArrayOutputStream response = new ByteArrayOutputStream(1 << 20);
             OutputStreamWriter osw = new OutputStreamWriter(response, Charset.forName("UTF-8"));
             if ("/-/healthy".equals(contextPath)) {
                 osw.write(HEALTHY_RESPONSE);
@@ -410,7 +403,15 @@ public class HTTPServer implements Closeable {
         if (authenticator != null) {
             mContext.setAuthenticator(authenticator);
         }
-        executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
+
+        executorService = new ThreadPoolExecutor(
+                1,
+                5,
+                30,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<Runnable>(5),
+                NamedDaemonThreadFactory.defaultThreadFactory(daemon));
+
         server.setExecutor(executorService);
         start(daemon);
     }
