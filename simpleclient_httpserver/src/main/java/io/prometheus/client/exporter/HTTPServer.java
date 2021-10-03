@@ -410,7 +410,8 @@ public class HTTPServer implements Closeable {
                 30,
                 TimeUnit.SECONDS,
                 new ArrayBlockingQueue<Runnable>(5),
-                NamedDaemonThreadFactory.defaultThreadFactory(daemon));
+                NamedDaemonThreadFactory.defaultThreadFactory(daemon),
+                new ThreadPoolExecutor.CallerRunsPolicy());
 
         server.setExecutor(executorService);
         start(daemon);
