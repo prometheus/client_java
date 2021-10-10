@@ -45,7 +45,7 @@ public class JavaVersionsIT {
 
         // OpenJ9
         "ibmjava:8-jre",
-        "adoptopenjdk/openjdk11-openj9",
+        "adoptopenjdk/openjdk11-openj9:alpine",
     };
   }
 
