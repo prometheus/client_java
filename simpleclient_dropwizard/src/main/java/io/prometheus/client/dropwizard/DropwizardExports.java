@@ -9,6 +9,7 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
+import io.prometheus.client.Predicate;
 import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
 import io.prometheus.client.dropwizard.samplebuilder.DefaultSampleBuilder;
 
@@ -181,6 +182,38 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
         }
         for (SortedMap.Entry<String, Meter> entry : registry.getMeters(metricFilter).entrySet()) {
             addToMap(mfSamplesMap, fromMeter(entry.getKey(), entry.getValue()));
+        }
+        return new ArrayList<MetricFamilySamples>(mfSamplesMap.values());
+    }
+
+    @Override
+    public List<MetricFamilySamples> collect(Predicate<String> sampleNameFilter) {
+        Map<String, MetricFamilySamples> mfSamplesMap = new HashMap<String, MetricFamilySamples>();
+
+        for (SortedMap.Entry<String, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
+            if(sampleNameFilter.test(entry.getKey())) {
+                addToMap(mfSamplesMap, fromGauge(entry.getKey(), entry.getValue()));
+            }
+        }
+        for (SortedMap.Entry<String, Counter> entry : registry.getCounters(metricFilter).entrySet()) {
+            if (sampleNameFilter.test(entry.getKey())) {
+                addToMap(mfSamplesMap, fromCounter(entry.getKey(), entry.getValue()));
+            }
+        }
+        for (SortedMap.Entry<String, Histogram> entry : registry.getHistograms(metricFilter).entrySet()) {
+            if (sampleNameFilter.test(entry.getKey())) {
+                addToMap(mfSamplesMap, fromHistogram(entry.getKey(), entry.getValue()));
+            }
+        }
+        for (SortedMap.Entry<String, Timer> entry : registry.getTimers(metricFilter).entrySet()) {
+            if (sampleNameFilter.test(entry.getKey())) {
+                addToMap(mfSamplesMap, fromTimer(entry.getKey(), entry.getValue()));
+            }
+        }
+        for (SortedMap.Entry<String, Meter> entry : registry.getMeters(metricFilter).entrySet()) {
+            if (sampleNameFilter.test(entry.getKey())) {
+                addToMap(mfSamplesMap, fromMeter(entry.getKey(), entry.getValue()));
+            }
         }
         return new ArrayList<MetricFamilySamples>(mfSamplesMap.values());
     }
