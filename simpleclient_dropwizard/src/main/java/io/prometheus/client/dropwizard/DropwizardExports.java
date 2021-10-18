@@ -93,20 +93,25 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
      * Export gauge as a prometheus gauge.
      */
     MetricFamilySamples fromGauge(String dropwizardName, Gauge gauge) {
-        Object obj = gauge.getValue();
-        double value;
-        if (obj instanceof Number) {
-            value = ((Number) obj).doubleValue();
-        } else if (obj instanceof Boolean) {
-            value = ((Boolean) obj) ? 1 : 0;
-        } else {
-            LOGGER.log(Level.FINE, String.format("Invalid type for Gauge %s: %s", sanitizeMetricName(dropwizardName),
-                    obj == null ? "null" : obj.getClass().getName()));
-            return null;
+        try {
+            Object obj = gauge.getValue();
+            double value;
+            if (obj instanceof Number) {
+                value = ((Number) obj).doubleValue();
+            } else if (obj instanceof Boolean) {
+                value = ((Boolean) obj) ? 1 : 0;
+            } else {
+                LOGGER.log(Level.FINE, String.format("Invalid type for Gauge %s: %s", sanitizeMetricName(dropwizardName),
+                        obj == null ? "null" : obj.getClass().getName()));
+                return null;
+            }
+            MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "",
+                    new ArrayList<String>(), new ArrayList<String>(), value);
+            return new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName, gauge), Arrays.asList(sample));
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
-        MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "",
-                new ArrayList<String>(), new ArrayList<String>(), value);
-        return new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName, gauge), Arrays.asList(sample));
+        return null;
     }
 
     /**
