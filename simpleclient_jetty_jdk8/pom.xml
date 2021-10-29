@@ -73,4 +73,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <!--This cannot have an automatic module name as its packages conflicts with the simpleclient_jetty module-->
 </project>
