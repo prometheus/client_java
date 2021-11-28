@@ -71,11 +71,11 @@ public class HTTPServer implements Closeable {
         private final Supplier<Predicate<String>> sampleNameFilterSupplier;
         private final static String HEALTHY_RESPONSE = "Exporter is Healthy.";
 
-        HTTPMetricHandler(CollectorRegistry registry) {
+        public HTTPMetricHandler(CollectorRegistry registry) {
             this(registry, null);
         }
 
-        HTTPMetricHandler(CollectorRegistry registry, Supplier<Predicate<String>> sampleNameFilterSupplier) {
+        public HTTPMetricHandler(CollectorRegistry registry, Supplier<Predicate<String>> sampleNameFilterSupplier) {
             this.registry = registry;
             this.sampleNameFilterSupplier = sampleNameFilterSupplier;
         }
