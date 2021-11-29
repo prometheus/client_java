@@ -91,6 +91,15 @@ public class TestHTTPServer {
     return new Response(connection.getContentLength(), s.hasNext() ? s.next() : "");
   }
 
+  Response request(HttpServer httpServer, String context, String suffix) throws IOException {
+    String url = "http://localhost:" + httpServer.getAddress().getPort() + context + suffix;
+    URLConnection connection = new URL(url).openConnection();
+    connection.setDoOutput(true);
+    connection.connect();
+    Scanner s = new Scanner(connection.getInputStream(), "UTF-8").useDelimiter("\\A");
+    return new Response(connection.getContentLength(), s.hasNext() ? s.next() : "");
+  }
+
   String encodeCredentials(String user, String password) {
     // Per RFC4648 table 2. We support Java 6, and java.util.Base64 was only added in Java 8,
     try {
@@ -305,6 +314,23 @@ public class TestHTTPServer {
       Assert.assertTrue("".equals(response.body));
     } finally {
       s.close();
+    }
+  }
+
+  @Test
+  public void testSimpleRequestHttpServerWithHTTPMetricHandler() throws IOException {
+    InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", 0);
+    HttpServer httpServer = HttpServer.create(inetSocketAddress, 0);
+    httpServer.createContext("/metrics", new HTTPServer.HTTPMetricHandler(registry));
+    httpServer.start();
+
+    try {
+      String response = request(httpServer, "/metrics", null).body;
+      assertThat(response).contains("a 0.0");
+      assertThat(response).contains("b 0.0");
+      assertThat(response).contains("c 0.0");
+    } finally {
+      httpServer.stop(0);
     }
   }
 
