@@ -13,10 +13,8 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.bind.DatatypeConverter;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
@@ -272,7 +270,7 @@ public class PushGateway {
   private static String base64url(String v) {
     // Per RFC4648 table 2. We support Java 6, and java.util.Base64 was only added in Java 8,
     try {
-      return DatatypeConverter.printBase64Binary(v.getBytes("UTF-8")).replace("+", "-").replace("/", "_");
+      return Base64.encodeToString(v.getBytes("UTF-8")).replace("+", "-").replace("/", "_");
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);  // Unreachable.
     }
