@@ -1,0 +1,5 @@
+# Usernames and passwords required to connect.
+# Passwords are hashed with bcrypt: https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md#about-bcrypt.
+basic_auth_users:
+  # testUser: testPwd
+  testUser: $2y$10$r/SV/hDe3E3ISKsrZIwVJe40vrCo5N8e22WbxDCThMIhaYdUgCBwe

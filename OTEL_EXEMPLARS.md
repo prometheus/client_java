@@ -8,9 +8,9 @@ If you want to see this in action, you can run the example from the `ExemplarsCl
 
 ```
 ./mvnw package
-cd integration_tests/exemplars_otel_agent/target/
+cd integration_tests/it_exemplars_otel_agent/target/
 curl -LO https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.2.0/opentelemetry-javaagent-all.jar
-java -Dotel.traces.exporter=logging -Dotel.metrics.exporter=none -javaagent:./opentelemetry-javaagent-all.jar -jar ./sample-rest-application.jar
+java -Dotel.traces.exporter=logging -Dotel.metrics.exporter=none -javaagent:./opentelemetry-javaagent-all.jar -jar ./example-spring-boot-app.jar
 ```
 
 Now you have a Spring REST service running on [http://localhost:8080/hello](http://localhost:8080/hello) that is instrumented with the OpenTelemetry Java agent.
@@ -55,7 +55,7 @@ you can exclude the corresponding dependencies in your `pom.xml`:
     <artifactId>simpleclient</artifactId>
     <version>0.12.0</version>
     <exclusions>
-      <!-- The following will disable OpenTelemetry exemplars when your application uses OpenTelemetry directly -->
+      <!-- The following will disable OpenTelemetry exemplars when your application uses the OpenTelemetry API directly -->
       <exclusion>
         <groupId>io.prometheus</groupId>
         <artifactId>simpleclient_tracer_otel</artifactId>
