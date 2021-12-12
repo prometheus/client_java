@@ -28,6 +28,7 @@
         <module>it_servlet_jakarta_exporter_webxml</module>
         <module>it_common</module>
         <module>it_pushgateway</module>
+        <module>it_log4j2</module>
     </modules>
 
     <build>

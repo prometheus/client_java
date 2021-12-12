@@ -479,6 +479,8 @@ To register the log4j2 collector at root level:
 </Configuration>
 ```
 
+See `./integration_tests/it_log4j2/` for a log4j2 example.
+
 ### Caches
 
 To register the Guava cache collector, be certain to add `recordStats()` when building
