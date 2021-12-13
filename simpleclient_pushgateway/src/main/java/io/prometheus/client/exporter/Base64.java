@@ -3,7 +3,7 @@ package io.prometheus.client.exporter;
 import javax.xml.bind.DatatypeConverter;
 
 /**
- * This class delegates to either javax.xml.bind.DatatypeConverter (for Java < 8) or java.util.Base64 (Java 8+)
+ * This class delegates to either javax.xml.bind.DatatypeConverter (for Java &lt; 8) or java.util.Base64 (Java 8+)
  * to perform Base64 encoding of a String.
  *
  * This code requires Java 8+ for compilation.
@@ -30,7 +30,7 @@ public class Base64 {
      *
      * Passing a null argument will cause a NullPointerException to be thrown.
      *
-     * @param src
+     * @param src string to be encoded
      * @return String in Base64 encoding
      */
     @SuppressWarnings("all")
