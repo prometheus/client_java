@@ -52,12 +52,12 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.4.v20170414</version>
+            <version>9.4.44.v20210927</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.4.4.v20170414</version>
+            <version>9.4.44.v20210927</version>
         </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
