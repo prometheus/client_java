@@ -1,5 +1,7 @@
 package io.prometheus.client.exporter;
 
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.SampleNameFilter;
 import io.prometheus.client.Predicate;
@@ -200,6 +202,7 @@ public class HTTPServer implements Closeable {
         private Predicate<String> sampleNameFilter;
         private Supplier<Predicate<String>> sampleNameFilterSupplier;
         private Authenticator authenticator;
+        private HttpsConfigurator httpsConfigurator;
 
         /**
          * Port to bind to. Must not be called together with {@link #withInetSocketAddress(InetSocketAddress)}
@@ -300,6 +303,14 @@ public class HTTPServer implements Closeable {
         }
 
         /**
+         * Optional: {@link HttpsConfigurator} to use to support TLS/SSL
+         */
+        public Builder withHttpsConfigurator(HttpsConfigurator configurator) {
+            this.httpsConfigurator = configurator;
+            return this;
+        }
+
+        /**
          * Build the HTTPServer
          * @throws IOException
          */
@@ -308,11 +319,13 @@ public class HTTPServer implements Closeable {
                 assertNull(sampleNameFilterSupplier, "cannot configure 'sampleNameFilter' and 'sampleNameFilterSupplier' at the same time");
                 sampleNameFilterSupplier = SampleNameFilterSupplier.of(sampleNameFilter);
             }
+
             if (httpServer != null) {
                 assertZero(port, "cannot configure 'httpServer' and 'port' at the same time");
                 assertNull(hostname, "cannot configure 'httpServer' and 'hostname' at the same time");
                 assertNull(inetAddress, "cannot configure 'httpServer' and 'inetAddress' at the same time");
                 assertNull(inetSocketAddress, "cannot configure 'httpServer' and 'inetSocketAddress' at the same time");
+                assertNull(httpsConfigurator, "cannot configure 'httpServer' and 'httpsConfigurator' at the same time");
                 return new HTTPServer(httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
             } else if (inetSocketAddress != null) {
                 assertZero(port, "cannot configure 'inetSocketAddress' and 'port' at the same time");
@@ -326,7 +339,16 @@ public class HTTPServer implements Closeable {
             } else {
                 inetSocketAddress = new InetSocketAddress(port);
             }
-            return new HTTPServer(HttpServer.create(inetSocketAddress, 3), registry, daemon, sampleNameFilterSupplier, authenticator);
+
+            HttpServer httpServer = null;
+            if (httpsConfigurator != null) {
+                httpServer = HttpsServer.create(inetSocketAddress, 3);
+                ((HttpsServer)httpServer).setHttpsConfigurator(httpsConfigurator);
+            } else {
+                httpServer = HttpServer.create(inetSocketAddress, 3);
+            }
+
+            return new HTTPServer(httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
         }
 
         private void assertNull(Object o, String msg) {
