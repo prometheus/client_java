@@ -428,6 +428,7 @@ public class TestHTTPServer {
     }
   }
 
+  @Test
   public void testSimpleRequestHttpServerWithHTTPMetricHandler() throws IOException {
     InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", 0);
     HttpServer httpServer = HttpServer.create(inetSocketAddress, 0);
