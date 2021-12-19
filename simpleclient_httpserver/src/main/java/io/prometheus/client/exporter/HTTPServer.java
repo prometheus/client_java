@@ -116,7 +116,9 @@ public class HTTPServer implements Closeable {
                 }
             } else {
                 long contentLength = response.size();
-                t.getResponseHeaders().set("Content-Length", String.valueOf(contentLength));
+                if (contentLength > 0) {
+                    t.getResponseHeaders().set("Content-Length", String.valueOf(contentLength));
+                }
                 if (t.getRequestMethod().equals("HEAD")) {
                     contentLength = -1;
                 }
