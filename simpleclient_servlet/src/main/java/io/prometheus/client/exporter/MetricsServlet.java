@@ -41,6 +41,7 @@ public class MetricsServlet extends HttpServlet {
   @Override
   public void init(ServletConfig servletConfig) throws ServletException {
     try {
+      super.init(servletConfig);
       exporter.init(Adapter.wrap(servletConfig));
     } catch (ServletConfigurationException e) {
       throw new ServletException(e);
