@@ -78,8 +78,6 @@
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
-          <!-- Intellij users: Intellij currently does not support different Java versions -->
-          <!-- for sources and test sources, see https://youtrack.jetbrains.com/issue/IDEA-85478 -->
           <testSource>1.8</testSource>
           <testTarget>1.8</testTarget>
         </configuration>
@@ -90,6 +88,36 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <!-- Intellij does not support different Java versions for source and testSource -->
+      <!-- As a workaround, use Java 8 in Intellij. -->
+      <!-- This will be fixed with https://youtrack.jetbrains.com/issue/IDEA-85478 -->
+      <id>intellij</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <!-- This property is only set when you open the project in Intellij. -->
+          <!-- When you compile in the command line, the property will not be set -->
+          <!-- and this profile will not be used. -->
+          <name>idea.maven.embedder.version</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <source>1.8</source>
+              <target>1.8</target>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <licenses>
     <license>
