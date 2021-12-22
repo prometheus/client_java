@@ -1,0 +1,39 @@
+name: "PR Build"
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java-version:
+          - 11
+          # - 17 Until Java 6 is not targeted this won't work
+        java-distribution:
+          #  - adopt-openj9 For now building was already exists
+          - temurin # OpenJDK
+    steps:
+      - uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '${{ matrix.java-version }}'
+          distribution: '${{ matrix.java-distribution }}'
+      - name: Caching
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: maven-${{ hashFiles('**/pom.xml') }}-${{ matrix.java-version }}-${{ matrix.java-distribution }}
+      - name: Build
+        run: |
+          java -version
+          ./mvnw clean install
+      - name: Build Java Doc
+        run: ./mvnw javadoc:jar
