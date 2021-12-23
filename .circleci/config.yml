@@ -8,13 +8,13 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: maven-dependencies-{{ checksum "pom.xml" }}
+          key: new-maven-dependencies-{{ checksum "pom.xml" }}
       - run: java -version
       - run: ./mvnw clean install
       - run: ./mvnw javadoc:jar
       - save_cache:
           paths:
             - ~/.m2
-          key: maven-dependencies-{{ checksum "pom.xml" }}
+          key: new-maven-dependencies-{{ checksum "pom.xml" }}
 orbs:
   prometheus: prometheus/prometheus@0.15.0
