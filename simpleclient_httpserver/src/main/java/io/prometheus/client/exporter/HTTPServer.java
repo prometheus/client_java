@@ -369,28 +369,40 @@ public class HTTPServer implements Closeable {
     /**
      * Start an HTTP server serving Prometheus metrics from the given registry using the given {@link HttpServer}.
      * The {@code httpServer} is expected to already be bound to an address
+     *
+     * @deprecated use {@link HTTPServer.Builder}
      */
+    @Deprecated
     public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
         this(httpServer, registry, daemon, null, null);
     }
 
     /**
      * Start an HTTP server serving Prometheus metrics from the given registry.
+     *
+     * @deprecated use {@link HTTPServer.Builder}
      */
+    @Deprecated
     public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean daemon) throws IOException {
         this(HttpServer.create(addr, 3), registry, daemon);
     }
 
     /**
      * Start an HTTP server serving Prometheus metrics from the given registry using non-daemon threads.
+     *
+     * @deprecated use {@link HTTPServer.Builder}
      */
+    @Deprecated
     public HTTPServer(InetSocketAddress addr, CollectorRegistry registry) throws IOException {
         this(addr, registry, false);
     }
 
     /**
      * Start an HTTP server serving the default Prometheus registry.
+     *
+     * @deprecated use {@link HTTPServer.Builder}
      */
+    @Deprecated
     public HTTPServer(int port, boolean daemon) throws IOException {
         this(new InetSocketAddress(port), CollectorRegistry.defaultRegistry, daemon);
     }
@@ -404,14 +416,20 @@ public class HTTPServer implements Closeable {
 
     /**
      * Start an HTTP server serving the default Prometheus registry.
+     *
+     * @deprecated use {@link HTTPServer.Builder}
      */
+    @Deprecated
     public HTTPServer(String host, int port, boolean daemon) throws IOException {
         this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, daemon);
     }
 
     /**
      * Start an HTTP server serving the default Prometheus registry using non-daemon threads.
+     *
+     * @deprecated use {@link HTTPServer.Builder}
      */
+    @Deprecated
     public HTTPServer(String host, int port) throws IOException {
         this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false);
     }

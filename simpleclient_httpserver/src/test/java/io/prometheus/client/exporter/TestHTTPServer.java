@@ -85,16 +85,47 @@ public class TestHTTPServer {
     }
   };
 
+  /**
+   * Creates an {@link HTTPServer.Builder} with default values
+   *
+   * @return {@link HTTPServer.Builder}
+   */
+  HTTPServer.Builder createHTTPServerBuilder() {
+    return new HTTPServer.Builder()
+            .withInetSocketAddress(new InetSocketAddress(0))
+            .withRegistry(registry);
+  }
+
+  /**
+   * Creates an {@link HttpRequest.Builder} with default values
+   *
+   * @param httpServer
+   * @param urlPath
+   * @return {@link HttpRequest.Builder}
+   */
   HttpRequest.Builder createHttpRequestBuilder(HTTPServer httpServer, String urlPath) {
     return new HttpRequest.Builder().withURL("http://localhost:" + httpServer.getPort() + urlPath);
   }
 
+  /**
+   * Creates an {@link HttpRequest.Builder} with default values for use with TLS/SSL
+   *
+   * @param httpServer
+   * @param urlPath
+   * @return {@link HttpRequest.Builder}
+   */
   HttpRequest.Builder createHttpRequestBuilderWithSSL(HTTPServer httpServer, String urlPath) {
     return new HttpRequest.Builder().withURL("https://localhost:" + httpServer.getPort() + urlPath)
             .withTrustManagers(TRUST_ALL_CERTS_TRUST_MANAGERS)
             .withHostnameVerifier(TRUST_ALL_HOSTS_HOSTNAME_VERIFIER);
   }
 
+  /**
+   * Creates an {@link HttpRequest.Builder} with default values for use an {@link HttpServer}
+   * @param httpServer
+   * @param urlPath
+   * @return
+   */
   HttpRequest.Builder createHttpRequestBuilder(HttpServer httpServer, String urlPath) {
     return new HttpRequest.Builder().withURL("http://localhost:" + httpServer.getAddress().getPort() + urlPath);
   }
@@ -109,14 +140,16 @@ public class TestHTTPServer {
 
   @Test(expected = IllegalArgumentException.class)
   public void testRefuseUsingUnbound() throws IOException {
-    CollectorRegistry registry = new CollectorRegistry();
-    HTTPServer httpServer = new HTTPServer(HttpServer.create(), registry, true);
+    HTTPServer httpServer = createHTTPServerBuilder()
+            .withInetSocketAddress(null) // remove the default InetSocketAddress
+            .withHttpServer(HttpServer.create()) // add an unbounded HttpServer
+            .build();
     httpServer.close();
   }
 
   @Test
   public void testSimpleRequest() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics").build().execute().getBody();
@@ -130,7 +163,7 @@ public class TestHTTPServer {
 
   @Test
   public void testBadParams() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics?x").build().execute().getBody();
@@ -144,7 +177,7 @@ public class TestHTTPServer {
 
   @Test
   public void testSingleName() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics?name[]=a").build().execute().getBody();
@@ -158,7 +191,7 @@ public class TestHTTPServer {
 
   @Test
   public void testMultiName() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics?name[]=a&name[]=b").build().execute().getBody();
@@ -172,8 +205,7 @@ public class TestHTTPServer {
 
   @Test
   public void testSampleNameFilter() throws IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
+    HTTPServer httpServer = createHTTPServerBuilder()
             .withSampleNameFilter(new SampleNameFilter.Builder()
                     .nameMustNotStartWith("a")
                     .build())
@@ -191,8 +223,7 @@ public class TestHTTPServer {
 
   @Test
   public void testSampleNameFilterEmptyBody() throws IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
+    HTTPServer httpServer = createHTTPServerBuilder()
             .withSampleNameFilter(new SampleNameFilter.Builder()
                     .nameMustNotStartWith("a")
                     .nameMustNotStartWith("b")
@@ -209,7 +240,7 @@ public class TestHTTPServer {
 
   @Test
   public void testDecoding() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics?n%61me[]=%61").build().execute().getBody();
@@ -223,7 +254,7 @@ public class TestHTTPServer {
 
   @Test
   public void testGzipCompression() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics")
@@ -240,7 +271,7 @@ public class TestHTTPServer {
 
   @Test
   public void testOpenMetrics() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/metrics")
@@ -254,7 +285,7 @@ public class TestHTTPServer {
 
   @Test
   public void testHealth() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/-/healthy").build().execute().getBody();
@@ -266,7 +297,7 @@ public class TestHTTPServer {
 
   @Test
   public void testHealthGzipCompression() throws IOException {
-    HTTPServer httpServer = new HTTPServer(new InetSocketAddress(0), registry);
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       String body = createHttpRequestBuilder(httpServer, "/-/healthy")
@@ -281,8 +312,7 @@ public class TestHTTPServer {
 
   @Test
   public void testBasicAuthSuccess() throws IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
+    HTTPServer httpServer = createHTTPServerBuilder()
             .withAuthenticator(createAuthenticator("/", "user", "secret"))
             .build();
 
@@ -298,8 +328,7 @@ public class TestHTTPServer {
 
   @Test
   public void testBasicAuthCredentialsMissing() throws IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
+    HTTPServer httpServer = createHTTPServerBuilder()
             .withAuthenticator(createAuthenticator("/", "user", "secret"))
             .build();
 
@@ -315,8 +344,7 @@ public class TestHTTPServer {
 
   @Test
   public void testBasicAuthWrongCredentials() throws IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
+    HTTPServer httpServer = createHTTPServerBuilder()
             .withAuthenticator(createAuthenticator("/", "user", "secret"))
             .build();
 
@@ -334,9 +362,7 @@ public class TestHTTPServer {
 
   @Test
   public void testHEADRequest() throws IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
-            .build();
+    HTTPServer httpServer = createHTTPServerBuilder().build();
 
     try {
       HttpResponse httpResponse = createHttpRequestBuilder(httpServer, "/metrics?name[]=a&name[]=b")
@@ -353,8 +379,7 @@ public class TestHTTPServer {
 
   @Test
   public void testHEADRequestWithSSL() throws GeneralSecurityException, IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
+    HTTPServer httpServer = createHTTPServerBuilder()
             .withHttpsConfigurator(HTTPS_CONFIGURATOR)
             .build();
 
@@ -390,8 +415,7 @@ public class TestHTTPServer {
 
   @Test
   public void testHEADRequestWithSSLAndBasicAuthSuccess() throws GeneralSecurityException, IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
+    HTTPServer httpServer = createHTTPServerBuilder()
             .withHttpsConfigurator(HTTPS_CONFIGURATOR)
             .withAuthenticator(createAuthenticator("/", "user", "secret"))
             .build();
@@ -412,8 +436,7 @@ public class TestHTTPServer {
 
   @Test
   public void testHEADRequestWithSSLAndBasicAuthCredentialsMissing() throws GeneralSecurityException, IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
+    HTTPServer httpServer = createHTTPServerBuilder()
             .withHttpsConfigurator(HTTPS_CONFIGURATOR)
             .withAuthenticator(createAuthenticator("/", "user", "secret"))
             .build();
@@ -432,8 +455,7 @@ public class TestHTTPServer {
 
   @Test
   public void testHEADRequestWithSSLAndBasicAuthWrongCredentials() throws GeneralSecurityException, IOException {
-    HTTPServer httpServer = new HTTPServer.Builder()
-            .withRegistry(registry)
+    HTTPServer httpServer = createHTTPServerBuilder()
             .withHttpsConfigurator(HTTPS_CONFIGURATOR)
             .withAuthenticator(createAuthenticator("/", "user", "secret"))
             .build();
