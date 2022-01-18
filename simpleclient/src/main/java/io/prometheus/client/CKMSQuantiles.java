@@ -2,6 +2,7 @@ package io.prometheus.client;
 
 // Copied from https://raw.githubusercontent.com/Netflix/ocelli/master/ocelli-core/src/main/java/netflix/ocelli/stats/CKMSQuantiles.java
 // Revision d0357b8bf5c17a173ce94d6b26823775b3f999f6 from Jan 21, 2015.
+// Which was copied from https://github.com/umbrant/QuantileEstimation/blob/34ea6889570827a79b3f8294812d9390af23b734/src/main/java/com/umbrant/quantile/QuantileEstimationCKMS.java
 //
 // This is the original code except for the following modifications:
 //
@@ -35,86 +36,158 @@ import java.util.ListIterator;
  * Implementation of the Cormode, Korn, Muthukrishnan, and Srivastava algorithm
  * for streaming calculation of targeted high-percentile epsilon-approximate
  * quantiles.
- * 
+ * <p>
  * This is a generalization of the earlier work by Greenwald and Khanna (GK),
  * which essentially allows different error bounds on the targeted quantiles,
  * which allows for far more efficient calculation of high-percentiles.
- * 
- * 
+ * <p>
+ * <p>
  * See: Cormode, Korn, Muthukrishnan, and Srivastava
  * "Effective Computation of Biased Quantiles over Data Streams" in ICDE 2005
- * 
+ * <p>
  * Greenwald and Khanna,
  * "Space-efficient online computation of quantile summaries" in SIGMOD 2001
- * 
+ * <p>
+ * <p>
+ * The Approximate Quantiles Algorithm looks like this (Figure 1)
+ * <pre>
+ * Main()
+ *    foreach item v do
+ *      Insert(v);
+ *      if (Compress Condition()) then
+ *          Compress();
+ *
+ * Insert(v):
+ *    r_0:=0;
+ *    for i:=1 to s do
+ *        ri := ri−1 + gi−1;
+ *        if (v < vi) break;
+ *        add (v,1,f(ri,n)−1) to S before vi;
+ *    n++;
+ *
+ * Compress():
+ *    for i := (s−1) downto 1 do
+ *        if (gi + gi+1 + ∆i+1 ≤ f(ri, n)) then
+ *            merge ti and ti+1;
+ *
+ * Output(φ):
+ *    r0:=0;
+ *    for i := 1 to s do
+ *        ri:=ri−1+gi−1;
+ *        if(ri +gi +∆i >φn+f(φn,n)/2)
+ *            print(vi−1); break;
+ * </pre>
  */
-class CKMSQuantiles {
+public final class CKMSQuantiles { /* public for benchmark-module */
     /**
      * Total number of items in stream.
+     * Increases on every insertBatch().
      */
     private int count = 0;
 
     /**
-     * Used for tracking incremental compression.
+     * Current list of sampled items, maintained in sorted order with error
+     * bounds.
+     * <p>
+     * Note: Any algorithm that guarantees to find biased
+     * quantiles φ with error at most φεn in rank must store
+     * Ω(1 min{klog1/φ,log(εn)}) items.
+     * </p>
+     */
+    protected final LinkedList<Item> sample;
+
+    /**
+     * Used for compress condition.
+     * This is a different index than the bufferCount,
+     * because flushing is also done on `quantile.get()`,
+     * but we need to compress, regardless of reaching the bufferCount, to limit space usage.
      */
     private int compressIdx = 0;
 
     /**
-     * Current list of sampled items, maintained in sorted order with error
-     * bounds.
+     * The amount of values observed when to compress, equal to 1/2ε
      */
-    protected LinkedList<Item> sample;
+    private final int insert_threshold;
 
     /**
      * Buffers incoming items to be inserted in batch.
+     * Incoming items are buffered into blocks of size 1/2ε
      */
-    private double[] buffer = new double[500];
+    private final double[] buffer;
 
-    private int bufferCount = 0;
+    /**
+     * Tracks the current index of the buffer. Increases on insert().
+     */
+    private int bufferIdx = 0;
 
     /**
      * Array of Quantiles that we care about, along with desired error.
      */
-    private final Quantile quantiles[];
+    private final Quantile[] quantiles;
 
+    /**
+     * Set up the CKMS Quantiles. Can have 0 or more targeted quantiles defined.
+     * @param quantiles The targeted quantiles, can be empty.
+     */
     public CKMSQuantiles(Quantile[] quantiles) {
-        this.quantiles = quantiles;
+        // hard-coded epsilon of 0.1% to determine the batch size, and default epsilon in case of empty quantiles
+        double pointOnePercent = 0.001;
+        if (quantiles.length == 0) { // we need at least one for this algorithm to work
+            this.quantiles = new Quantile[1];
+            this.quantiles[0] = new Quantile(0.5, pointOnePercent / 2);
+        } else {
+            this.quantiles = quantiles;
+        }
+
+        // 1/2ε as discussed in section 5.1 Methods - Batch.
+        this.insert_threshold = (int) (1.0 / (2.0 * pointOnePercent));
+        
+        // create a buffer with size equal to threshold
+        this.buffer = new double[insert_threshold];
+        
+        // Initialize empty items
         this.sample = new LinkedList<Item>();
     }
 
     /**
      * Add a new value from the stream.
-     * 
-     * @param value
+     *
+     * @param value the observed value
      */
     public void insert(double value) {
-        buffer[bufferCount] = value;
-        bufferCount++;
+        buffer[bufferIdx] = value;
+        bufferIdx++;
 
-        if (bufferCount == buffer.length) {
-            insertBatch();
+        if (bufferIdx == buffer.length) {
+            insertBatch(); // this is the batch insert variation
+        }
+        
+        // The Compress_Condition()
+        compressIdx = (compressIdx + 1) % insert_threshold;
+        if (compressIdx == 0) {
             compress();
         }
     }
 
     /**
      * Get the estimated value at the specified quantile.
-     * 
-     * @param q
-     *            Queried quantile, e.g. 0.50 or 0.99.
+     *
+     * @param q Queried quantile, e.g. 0.50 or 0.99.
      * @return Estimated value at that quantile.
      */
     public double get(double q) {
-        // clear the buffer
+        // clear the buffer. in case of low value insertions, the samples can become stale.
+        // On every get, make sure we get the latest values in. 
         insertBatch();
-        compress();
 
         if (sample.size() == 0) {
             return Double.NaN;
         }
 
-        int rankMin = 0;
-        int desired = (int) (q * count);
+        // Straightforward implementation of Output(q).
+        // Paper Section 3.1 on true rank: let r_i = Sum_{j=1}^{i−1} g_j
+        int currentRank = 0;
+        double desired = q * count;
 
         ListIterator<Item> it = sample.listIterator();
         Item prev, cur;
@@ -123,9 +196,9 @@ class CKMSQuantiles {
             prev = cur;
             cur = it.next();
 
-            rankMin += prev.g;
+            currentRank += prev.g;
 
-            if (rankMin + cur.g + cur.delta > desired
+            if (currentRank + cur.g + cur.delta > desired
                     + (allowableError(desired) / 2)) {
                 return prev.value;
             }
@@ -138,26 +211,27 @@ class CKMSQuantiles {
     /**
      * Specifies the allowable error for this rank, depending on which quantiles
      * are being targeted.
-     * 
+     * <p>
      * This is the f(r_i, n) function from the CKMS paper. It's basically how
      * wide the range of this rank can be.
-     * 
-     * @param rank
-     *            the index in the list of samples
+     * <p>
+     * Define invariant function f (ri , n) as
+     * (i) f_j(r_i,n) = 2ε_j r_i / φ_j for φ_j n ≤ r_i ≤ n;
+     * (ii) f_j(r_i,n) = 2ε_j(n−r_i) / (1−φ_j) for  0 ≤ r_i ≤ φ_j n
+     * <p>
+     * and take f(ri,n) = max{min_j ⌊f_j(r_i,n)⌋,1}.
+     * As before we ensure that for all i, g_i + ∆_i ≤ f(r_i, n).
+     *
+     * @param rank the index in the list of samples
      */
-    private double allowableError(int rank) {
-        // NOTE: according to CKMS, this should be count, not size, but this
-        // leads
-        // to error larger than the error bounds. Leaving it like this is
-        // essentially a HACK, and blows up memory, but does "work".
-        // int size = count;
-        int size = sample.size();
-        double minError = size + 1;
+    private double allowableError(double rank /* r_i */) {
+        int n = count;
+        double minError = count;
 
         for (Quantile q : quantiles) {
             double error;
-            if (rank <= q.quantile * size) {
-                error = q.u * (size - rank);
+            if (rank <= q.quantile * n) {
+                error = q.u * (n - rank);
             } else {
                 error = q.v * rank;
             }
@@ -165,18 +239,26 @@ class CKMSQuantiles {
                 minError = error;
             }
         }
-
-        return minError;
+        return Math.max(minError, 1);
     }
 
-    private boolean insertBatch() {
-        if (bufferCount == 0) {
-            return false;
+    /**
+     * To insert a new item, v, we find i such that vi < v ≤ vi+1,
+     * we compute ri and insert the tuple (v,g=1,∆=f(ri,n)−1).
+     *
+     * We also ensure that min and max are kept exactly, so when v < v1,
+     * we insert the tuple (v,g = 1,∆ = 0) before v1. Similarly, when v > vs,
+     * we insert (v,g = 1,∆ = 0) after vs.
+     */
+    private void insertBatch() {
+        if (bufferIdx == 0) {
+            return;
         }
+        // Has to be sorted: O(buffer)
+        // Since the buffer is treated as a circular buffer, we sort till the bufferIdx to prevent insertion of duplicate / already inserted values.
+        Arrays.sort(buffer, 0, bufferIdx);
 
-        Arrays.sort(buffer, 0, bufferCount);
-
-        // Base case: no samples
+        // Base case: no samples yet
         int start = 0;
         if (sample.size() == 0) {
             Item newItem = new Item(buffer[0], 1, 0);
@@ -185,30 +267,37 @@ class CKMSQuantiles {
             count++;
         }
 
+        // To insert a new item, v, we find i such that vi < v ≤ vi+1, 
         ListIterator<Item> it = sample.listIterator();
         Item item = it.next();
 
-        for (int i = start; i < bufferCount; i++) {
+        // Keep track of the current rank by adding the g of each item. See also discussion in https://issues.apache.org/jira/browse/HBASE-14324
+        // Paper Section 3.1 on true rank: let r_i = Sum_{j=1}^{i−1} g_j
+        int currentRank = item.g;
+
+        for (int i = start; i < bufferIdx; i++) {
+            // item to be inserted
             double v = buffer[i];
+            // find the item in the samples that is bigger than our v.
             while (it.nextIndex() < sample.size() && item.value < v) {
                 item = it.next();
+                currentRank += item.g;
             }
 
             // If we found that bigger item, back up so we insert ourselves
             // before it
             if (item.value > v) {
+                currentRank -= item.g;
                 it.previous();
             }
 
             // We use different indexes for the edge comparisons, because of the
-            // above
-            // if statement that adjusts the iterator
+            // above if statement that adjusts the iterator
             int delta;
             if (it.previousIndex() == 0 || it.nextIndex() == sample.size()) {
                 delta = 0;
-            } 
-            else {
-                delta = ((int) Math.floor(allowableError(it.nextIndex()))) - 1;
+            } else {
+                delta = ((int) Math.floor(allowableError(currentRank))) - 1;
             }
 
             Item newItem = new Item(v, 1, delta);
@@ -217,46 +306,83 @@ class CKMSQuantiles {
             item = newItem;
         }
 
-        bufferCount = 0;
-        return true;
+        // reset buffered items to 0.
+        bufferIdx = 0;
     }
 
     /**
      * Try to remove extraneous items from the set of sampled items. This checks
      * if an item is unnecessary based on the desired error bounds, and merges
      * it with the adjacent item if it is.
+     * <p>
+     * Compress. Periodically, the algorithm scans the data
+     * structure and merges adjacent nodes when this does not
+     * violate the invariant. That is, remove nodes (vi, gi, ∆i)
+     * and (vi+1 , gi+1 , ∆i+1 ), and replace with (vi+1 , (gi +
+     * gi+1 ), ∆i+1 ) provided that (gi + gi+1 + ∆i+1 ) ≤ f (ri , n).
+     * This also maintains the semantics of g and ∆ being the
+     * difference in rank between v_i and v_{i-1} , and the difference
+     * between the highest and lowest possible ranks of vi, respectively.
      */
     private void compress() {
-        if (sample.size() < 2) {
+        // If there are 0,1, or 2 samples then there's nothing to compress.
+        if (sample.size() < 3) {
             return;
         }
 
         ListIterator<Item> it = sample.listIterator();
-        int removed = 0;
 
-        Item prev = null;
+        Item prev;
         Item next = it.next();
+
+        // Counter for the rank in the stream of all observed values.
+        // Paper Section 3.1 on true rank: let r_i = Sum_{j=1}^{i−1} g_j
+        int currentRank = next.g;
 
         while (it.hasNext()) {
             prev = next;
             next = it.next();
-
-            if (prev.g + next.g + next.delta <= allowableError(it.previousIndex())) {
+            currentRank += next.g;
+            if (prev.g + next.g + next.delta <= allowableError(currentRank)) {
                 next.g += prev.g;
                 // Remove prev. it.remove() kills the last thing returned.
-                it.previous();
-                it.previous();
-                it.remove();
-                // it.next() is now equal to next, skip it back forward again
-                it.next();
-                removed++;
+                it.previous(); // brings pointer back to 'next'
+                it.previous(); // brings pointer back to 'prev'
+                it.remove(); // remove prev
+                // it.next() is now equal to next, 
+                it.next(); // set pointer to 'next'
             }
         }
     }
 
-    private class Item {
+    /**
+     * As in GK, the data structure at time n, S(n), consists
+     * of a sequence of s tuples ⟨ti = (vi, gi, ∆i)⟩, where each vi
+     * is a sampled item from the data stream and two additional
+     * values are kept: (1) g_i is the difference between the lowest
+     * possible rank of item i and the lowest possible rank of item
+     * i − 1; and (2) ∆_i is the difference between the greatest
+     * possible rank of item i and the lowest possible rank of item
+     * i.
+     */
+    private static class Item {
+        /**
+         * vi
+         * is a sampled item from the data stream and two additional
+         * values are kept
+         */
         public final double value;
+        /**
+         * g_i is the difference between the lowest
+         * possible rank of item i and the lowest possible rank of item
+         * i − 1
+         */
         public int g;
+        /**
+         * ∆i is the difference between the greatest
+         * possible rank of item i and the lowest possible rank of item
+         * i.
+         */
         public final int delta;
 
         public Item(double value, int lower_delta, int delta) {
@@ -271,22 +397,54 @@ class CKMSQuantiles {
         }
     }
 
+    /**
+     *
+     */
     public static class Quantile {
+        /**
+         * 0 < φ < 1
+         */
         public final double quantile;
-        public final double error;
+        /**
+         * Allowed error 0 < ε < 1
+         */
+        public final double epsilon;
+        /**
+         * Helper value to calculate the targeted quantiles invariant as per Definition 5 (ii)
+         */
         public final double u;
+        /**
+         * Helper value to calculate the targeted quantiles invariant as per Definition 5 (i)
+         */
         public final double v;
 
-        public Quantile(double quantile, double error) {
+        /**
+         * Targeted quantile: T = {(φ_j , ε_j )}
+         * Rather than requesting the same ε for all quantiles (the uniform case)
+         * or ε scaled by φ (the biased case), one might specify an arbitrary set
+         * of quantiles and the desired errors of ε for each in the form (φj , εj ).
+         * For example, input to the targeted quantiles problem might be {(0.5, 0.1), (0.2, 0.05), (0.9, 0.01)},
+         * meaning that the median should be returned with 10% error, the 20th percentile with 5% error,
+         * and the 90th percentile with 1%.
+         *
+         * @param quantile the quantile between 0 and 1
+         * @param epsilon  the desired error for this quantile, between 0 and 1.
+         */
+        public Quantile(double quantile, double epsilon) {
+            if (quantile < 0 || quantile > 1.0) throw new IllegalArgumentException("Quantile must be between 0 and 1");
+            if (epsilon < 0 || epsilon > 1.0) throw new IllegalArgumentException("Epsilon must be between 0 and 1");
+
             this.quantile = quantile;
-            this.error = error;
-            u = 2.0 * error / (1.0 - quantile);
-            v = 2.0 * error / quantile;
+            this.epsilon = epsilon;
+            //  f_j(r_i,n) = 2ε_j(n−r_i) / (1−φ_j) for  0 ≤ r_i ≤ φ_j n
+            u = 2.0 * epsilon / (1.0 - quantile);
+            // f_j(r_i,n) = 2ε_j r_i / φ_j for φ_j n ≤ r_i ≤ n;
+            v = 2.0 * epsilon / quantile;
         }
 
         @Override
         public String toString() {
-            return String.format("Q{q=%.3f, eps=%.3f}", quantile, error);
+            return String.format("Q{q=%.3f, eps=%.3f}", quantile, epsilon);
         }
     }
 
