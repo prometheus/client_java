@@ -310,15 +310,15 @@ public class ExemplarTest {
         .help("help")
         .quantile(0.5, 0.01)
         .register(registry);
-    for (int i=1; i<=11; i++) { // median is 5
+    for (int i=1; i<=11; i++) { // median is 6
       noLabelsDefaultExemplar.observe(i);
     }
     // Summaries don't have Exemplars according to the OpenMetrics spec.
-    assertOpenMetrics100Format("no_labels{quantile=\"0.5\"} 5.0\n");
+    assertOpenMetrics100Format("no_labels{quantile=\"0.5\"} 6.0\n");
     assertOpenMetrics100Format("no_labels_count 11.0\n");
     assertOpenMetrics100Format("no_labels_sum 66.0\n");
 
-    assert004Format("no_labels{quantile=\"0.5\",} 5.0\n");
+    assert004Format("no_labels{quantile=\"0.5\",} 6.0\n");
     assert004Format("no_labels_count 11.0\n");
     assert004Format("no_labels_sum 66.0\n");
   }
@@ -331,15 +331,15 @@ public class ExemplarTest {
         .labelNames("label")
         .quantile(0.5, 0.01)
         .register(registry);
-    for (int i=1; i<=11; i++) { // median is 5
+    for (int i=1; i<=11; i++) { // median is 6
       labelsNoExemplar.labels("test").observe(i);
     }
     // Summaries don't have Exemplars according to the OpenMetrics spec.
-    assertOpenMetrics100Format("labels{label=\"test\",quantile=\"0.5\"} 5.0\n");
+    assertOpenMetrics100Format("labels{label=\"test\",quantile=\"0.5\"} 6.0\n");
     assertOpenMetrics100Format("labels_count{label=\"test\"} 11.0\n");
     assertOpenMetrics100Format("labels_sum{label=\"test\"} 66.0\n");
 
-    assert004Format("labels{label=\"test\",quantile=\"0.5\",} 5.0\n");
+    assert004Format("labels{label=\"test\",quantile=\"0.5\",} 6.0\n");
     assert004Format("labels_count{label=\"test\",} 11.0\n");
     assert004Format("labels_sum{label=\"test\",} 66.0\n");
   }
