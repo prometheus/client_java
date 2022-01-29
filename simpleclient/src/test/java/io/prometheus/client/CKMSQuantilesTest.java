@@ -50,10 +50,10 @@ public class CKMSQuantilesTest {
         for (double v : input) {
             ckms.insert(v);
         }
-        assertEquals("No compress should be triggered", 0, ckms.sample.size());
+        assertEquals("No compress should be triggered", 0, ckms.samples.size());
         
         ckms.insert(500);
-        assertEquals(500, ckms.sample.size());
+        assertEquals(500, ckms.samples.size());
     }
 
     @Test
@@ -107,7 +107,7 @@ public class CKMSQuantilesTest {
         assertEquals(0.95 * elemCount, ckms.get(0.95), 0.02 * elemCount);
         assertEquals(0.99 * elemCount, ckms.get(0.99), 0.001 * elemCount);
 
-        assertTrue("sample size should be way below 1_000_000", ckms.sample.size() < 1000);
+        assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
     }
 
 
@@ -152,7 +152,7 @@ public class CKMSQuantilesTest {
         assertEquals(p95, ckms.get(0.95), errorBoundsNormalDistribution(0.95, 0.001, normalDistribution));
         assertEquals(p99, ckms.get(0.99), errorBoundsNormalDistribution(0.99, 0.001, normalDistribution));
 
-        assertTrue("sample size should be below 1000", ckms.sample.size() < 1000);
+        assertTrue("sample size should be below 1000", ckms.samples.size() < 1000);
     }
 
     @Test

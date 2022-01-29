@@ -78,7 +78,7 @@ import java.util.ListIterator;
  *            print(vi−1); break;
  * </pre>
  */
-public final class CKMSQuantiles { /* public for benchmark-module */
+final class CKMSQuantiles {
     /**
      * Total number of items in stream.
      * Increases on every insertBatch().
@@ -94,7 +94,7 @@ public final class CKMSQuantiles { /* public for benchmark-module */
      * Ω(1 min{klog1/φ,log(εn)}) items.
      * </p>
      */
-    protected final LinkedList<Item> sample;
+    final LinkedList<Item> samples;
 
     /**
      * Used for compress condition.
@@ -105,13 +105,12 @@ public final class CKMSQuantiles { /* public for benchmark-module */
     private int compressIdx = 0;
 
     /**
-     * The amount of values observed when to compress, equal to 1/2ε
+     * The amount of values observed when to compress.
      */
-    private final int insert_threshold;
+    private final int insertThreshold;
 
     /**
      * Buffers incoming items to be inserted in batch.
-     * Incoming items are buffered into blocks of size 1/2ε
      */
     private final double[] buffer;
 
@@ -129,7 +128,7 @@ public final class CKMSQuantiles { /* public for benchmark-module */
      * Set up the CKMS Quantiles. Can have 0 or more targeted quantiles defined.
      * @param quantiles The targeted quantiles, can be empty.
      */
-    public CKMSQuantiles(Quantile[] quantiles) {
+    CKMSQuantiles(Quantile[] quantiles) {
         // hard-coded epsilon of 0.1% to determine the batch size, and default epsilon in case of empty quantiles
         double pointOnePercent = 0.001;
         if (quantiles.length == 0) { // we need at least one for this algorithm to work
@@ -139,14 +138,15 @@ public final class CKMSQuantiles { /* public for benchmark-module */
             this.quantiles = quantiles;
         }
 
-        // 1/2ε as discussed in section 5.1 Methods - Batch.
-        this.insert_threshold = (int) (1.0 / (2.0 * pointOnePercent));
-        
+        // section 5.1 Methods - Batch.
+        // This is hardcoded to 500, which corresponds to an epsilon of 0.1%.
+        this.insertThreshold = 500;
+
         // create a buffer with size equal to threshold
-        this.buffer = new double[insert_threshold];
-        
+        this.buffer = new double[insertThreshold];
+
         // Initialize empty items
-        this.sample = new LinkedList<Item>();
+        this.samples = new LinkedList<Item>();
     }
 
     /**
@@ -161,9 +161,9 @@ public final class CKMSQuantiles { /* public for benchmark-module */
         if (bufferIdx == buffer.length) {
             insertBatch(); // this is the batch insert variation
         }
-        
+
         // The Compress_Condition()
-        compressIdx = (compressIdx + 1) % insert_threshold;
+        compressIdx = (compressIdx + 1) % insertThreshold;
         if (compressIdx == 0) {
             compress();
         }
@@ -177,10 +177,10 @@ public final class CKMSQuantiles { /* public for benchmark-module */
      */
     public double get(double q) {
         // clear the buffer. in case of low value insertions, the samples can become stale.
-        // On every get, make sure we get the latest values in. 
+        // On every get, make sure we get the latest values in.
         insertBatch();
 
-        if (sample.size() == 0) {
+        if (samples.size() == 0) {
             return Double.NaN;
         }
 
@@ -189,7 +189,7 @@ public final class CKMSQuantiles { /* public for benchmark-module */
         int currentRank = 0;
         double desired = q * count;
 
-        ListIterator<Item> it = sample.listIterator();
+        ListIterator<Item> it = samples.listIterator();
         Item prev, cur;
         cur = it.next();
         while (it.hasNext()) {
@@ -205,7 +205,7 @@ public final class CKMSQuantiles { /* public for benchmark-module */
         }
 
         // edge case of wanting max value
-        return sample.getLast().value;
+        return samples.getLast().value;
     }
 
     /**
@@ -260,15 +260,15 @@ public final class CKMSQuantiles { /* public for benchmark-module */
 
         // Base case: no samples yet
         int start = 0;
-        if (sample.size() == 0) {
-            Item newItem = new Item(buffer[0], 1, 0);
-            sample.add(newItem);
+        if (samples.size() == 0) {
+            Item newItem = new Item(buffer[0], 0);
+            samples.add(newItem);
             start++;
             count++;
         }
 
-        // To insert a new item, v, we find i such that vi < v ≤ vi+1, 
-        ListIterator<Item> it = sample.listIterator();
+        // To insert a new item, v, we find i such that vi < v ≤ vi+1,
+        ListIterator<Item> it = samples.listIterator();
         Item item = it.next();
 
         // Keep track of the current rank by adding the g of each item. See also discussion in https://issues.apache.org/jira/browse/HBASE-14324
@@ -279,7 +279,7 @@ public final class CKMSQuantiles { /* public for benchmark-module */
             // item to be inserted
             double v = buffer[i];
             // find the item in the samples that is bigger than our v.
-            while (it.nextIndex() < sample.size() && item.value < v) {
+            while (it.hasNext() && item.value < v) {
                 item = it.next();
                 currentRank += item.g;
             }
@@ -294,13 +294,13 @@ public final class CKMSQuantiles { /* public for benchmark-module */
             // We use different indexes for the edge comparisons, because of the
             // above if statement that adjusts the iterator
             int delta;
-            if (it.previousIndex() == 0 || it.nextIndex() == sample.size()) {
+            if (it.previousIndex() == 0 || it.nextIndex() == samples.size()) {
                 delta = 0;
             } else {
                 delta = ((int) Math.floor(allowableError(currentRank))) - 1;
             }
 
-            Item newItem = new Item(v, 1, delta);
+            Item newItem = new Item(v, delta);
             it.add(newItem);
             count++;
             item = newItem;
@@ -326,11 +326,11 @@ public final class CKMSQuantiles { /* public for benchmark-module */
      */
     private void compress() {
         // If there are 0,1, or 2 samples then there's nothing to compress.
-        if (sample.size() < 3) {
+        if (samples.size() < 3) {
             return;
         }
 
-        ListIterator<Item> it = sample.listIterator();
+        ListIterator<Item> it = samples.listIterator();
 
         Item prev;
         Item next = it.next();
@@ -349,7 +349,7 @@ public final class CKMSQuantiles { /* public for benchmark-module */
                 it.previous(); // brings pointer back to 'next'
                 it.previous(); // brings pointer back to 'prev'
                 it.remove(); // remove prev
-                // it.next() is now equal to next, 
+                // it.next() is now equal to next,
                 it.next(); // set pointer to 'next'
             }
         }
@@ -371,23 +371,23 @@ public final class CKMSQuantiles { /* public for benchmark-module */
          * is a sampled item from the data stream and two additional
          * values are kept
          */
-        public final double value;
+        final double value;
         /**
          * g_i is the difference between the lowest
          * possible rank of item i and the lowest possible rank of item
-         * i − 1
+         * i − 1.
+         * note: Always starts with 1, changes when merging Items.
          */
-        public int g;
+        int g = 1;
         /**
          * ∆i is the difference between the greatest
          * possible rank of item i and the lowest possible rank of item
          * i.
          */
-        public final int delta;
+        final int delta;
 
-        public Item(double value, int lower_delta, int delta) {
+        Item(double value, int delta) {
             this.value = value;
-            this.g = lower_delta;
             this.delta = delta;
         }
 
@@ -400,23 +400,23 @@ public final class CKMSQuantiles { /* public for benchmark-module */
     /**
      *
      */
-    public static class Quantile {
+    static class Quantile {
         /**
          * 0 < φ < 1
          */
-        public final double quantile;
+        final double quantile;
         /**
          * Allowed error 0 < ε < 1
          */
-        public final double epsilon;
+        final double epsilon;
         /**
          * Helper value to calculate the targeted quantiles invariant as per Definition 5 (ii)
          */
-        public final double u;
+        final double u;
         /**
          * Helper value to calculate the targeted quantiles invariant as per Definition 5 (i)
          */
-        public final double v;
+        final double v;
 
         /**
          * Targeted quantile: T = {(φ_j , ε_j )}
@@ -430,7 +430,7 @@ public final class CKMSQuantiles { /* public for benchmark-module */
          * @param quantile the quantile between 0 and 1
          * @param epsilon  the desired error for this quantile, between 0 and 1.
          */
-        public Quantile(double quantile, double epsilon) {
+        Quantile(double quantile, double epsilon) {
             if (quantile < 0 || quantile > 1.0) throw new IllegalArgumentException("Quantile must be between 0 and 1");
             if (epsilon < 0 || epsilon > 1.0) throw new IllegalArgumentException("Epsilon must be between 0 and 1");
 
