@@ -99,10 +99,10 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private int ageBuckets = 5;
 
     public Builder quantile(double quantile, double error) {
-      if (quantile < 0.0 || quantile > 1.0) {
+      if (quantile <= 0.0 || quantile >= 1.0) {
         throw new IllegalArgumentException("Quantile " + quantile + " invalid: Expected number between 0.0 and 1.0.");
       }
-      if (error < 0.0 || error > 1.0) {
+      if (error <= 0.0 || error >= 1.0) {
         throw new IllegalArgumentException("Error " + error + " invalid: Expected number between 0.0 and 1.0.");
       }
       quantiles.add(new Quantile(quantile, error));

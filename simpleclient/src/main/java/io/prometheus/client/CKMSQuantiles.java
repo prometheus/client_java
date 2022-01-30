@@ -129,14 +129,10 @@ final class CKMSQuantiles {
      * @param quantiles The targeted quantiles, can be empty.
      */
     CKMSQuantiles(Quantile[] quantiles) {
-        // hard-coded epsilon of 0.1% to determine the batch size, and default epsilon in case of empty quantiles
-        double pointOnePercent = 0.001;
         if (quantiles.length == 0) { // we need at least one for this algorithm to work
-            this.quantiles = new Quantile[1];
-            this.quantiles[0] = new Quantile(0.5, pointOnePercent / 2);
-        } else {
-            this.quantiles = quantiles;
+            throw new IllegalArgumentException("quantiles cannot be empty");
         }
+        this.quantiles = quantiles;
 
         // section 5.1 Methods - Batch.
         // This is hardcoded to 500, which corresponds to an epsilon of 0.1%.
@@ -431,8 +427,8 @@ final class CKMSQuantiles {
          * @param epsilon  the desired error for this quantile, between 0 and 1.
          */
         Quantile(double quantile, double epsilon) {
-            if (quantile < 0 || quantile > 1.0) throw new IllegalArgumentException("Quantile must be between 0 and 1");
-            if (epsilon < 0 || epsilon > 1.0) throw new IllegalArgumentException("Epsilon must be between 0 and 1");
+            if (quantile <= 0 || quantile >= 1.0) throw new IllegalArgumentException("Quantile must be between 0 and 1");
+            if (epsilon <= 0 || epsilon >= 1.0) throw new IllegalArgumentException("Epsilon must be between 0 and 1");
 
             this.quantile = quantile;
             this.epsilon = epsilon;

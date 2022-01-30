@@ -26,37 +26,6 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testGetWhenNoQuantilesAreDefined() {
-        CKMSQuantiles ckms = new CKMSQuantiles(new Quantile[]{});
-        assertEquals(Double.NaN, ckms.get(0), 0);
-    }
-
-    @Test
-    public void testInsertWhenNoQuantilesAreDefined() {
-        CKMSQuantiles ckms = new CKMSQuantiles(new Quantile[]{});
-        ckms.insert(1.0);
-        ckms.insert(2.0);
-        ckms.insert(3.0);
-        assertEquals(1.0, ckms.get(0), 0);
-        assertEquals(2.0, ckms.get(0.5), 0);
-        assertEquals(3.0, ckms.get(1), 0);
-    }
-
-    @Test
-    public void testCompressWhenBufferSize500Reached() {
-        CKMSQuantiles ckms = new CKMSQuantiles(new Quantile[]{});
-        List<Double> input = makeSequence(1, 499);
-
-        for (double v : input) {
-            ckms.insert(v);
-        }
-        assertEquals("No compress should be triggered", 0, ckms.samples.size());
-        
-        ckms.insert(500);
-        assertEquals(500, ckms.samples.size());
-    }
-
-    @Test
     public void testGet() {
         List<Quantile> quantiles = new ArrayList<Quantile>();
         quantiles.add(new Quantile(0.50, 0.01));
@@ -80,20 +49,19 @@ public class CKMSQuantilesTest {
     @Test
     public void testGetWithAMillionElements() {
         List<Quantile> quantiles = new ArrayList<Quantile>();
-        quantiles.add(new Quantile(0.0, 0.01));
+        quantiles.add(new Quantile(0.01, 0.001));
         quantiles.add(new Quantile(0.10, 0.01));
         quantiles.add(new Quantile(0.90, 0.001));
         quantiles.add(new Quantile(0.95, 0.02));
         quantiles.add(new Quantile(0.99, 0.001));
 
         final int elemCount = 1000000;
-        double[] shuffle = new double[elemCount];
-        for (int i = 0; i < shuffle.length; i++) {
-            shuffle[i] = i + 1;
+        List<Double> shuffle = new ArrayList<Double>(elemCount);
+        for (int i = 0; i < elemCount; i++) {
+            shuffle.add(i+1.0);
         }
         Random rand = new Random(0);
-
-        Collections.shuffle(Arrays.asList(shuffle), rand);
+        Collections.shuffle(shuffle, rand);
 
         CKMSQuantiles ckms = new CKMSQuantiles(
                 quantiles.toArray(new Quantile[]{}));
@@ -102,14 +70,21 @@ public class CKMSQuantilesTest {
             ckms.insert(v);
         }
         // given the linear distribution, we set the delta equal to the εn value for this quantile
-        assertEquals(0.1 * elemCount, ckms.get(0.1), 0.01 * elemCount);
-        assertEquals(0.9 * elemCount, ckms.get(0.9), 0.001 * elemCount);
-        assertEquals(0.95 * elemCount, ckms.get(0.95), 0.02 * elemCount);
-        assertEquals(0.99 * elemCount, ckms.get(0.99), 0.001 * elemCount);
+        assertRank(elemCount, ckms.get(0.01), 0.01, 0.001);
+        assertRank(elemCount, ckms.get(0.1), 0.1, 0.01);
+        assertRank(elemCount, ckms.get(0.9), 0.9, 0.001);
+        assertRank(elemCount, ckms.get(0.95), 0.95, 0.02);
+        assertRank(elemCount, ckms.get(0.99), 0.99, 0.001);
 
         assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
     }
 
+    private void assertRank(int elemCount, double actual, double quantile, double epsilon) {
+        double lowerBound = elemCount * (quantile - epsilon);
+        double upperBound = elemCount * (quantile + epsilon);
+        assertTrue("quantile=" + quantile + ", actual=" + actual + ", lowerBound=" + lowerBound, actual >= lowerBound);
+        assertTrue("quantile=" + quantile + ", actual=" + actual + ", upperBound=" + upperBound, actual <= upperBound);
+    }
 
     @Test
     public void testGetGaussian() {
