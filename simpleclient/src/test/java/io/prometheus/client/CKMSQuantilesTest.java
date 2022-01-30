@@ -12,104 +12,78 @@ import static org.junit.Assert.*;
 
 public class CKMSQuantilesTest {
 
+    private final Quantile q50 = new Quantile(0.5, 0.01);
+    private final Quantile q95 = new Quantile(0.95, 0.005);
+    private final Quantile q99 = new Quantile(0.99, 0.001);
+
     @Test
     public void testGetOnEmptyValues() {
-        List<Quantile> quantiles = new ArrayList<Quantile>();
-        quantiles.add(new Quantile(0.50, 0.01));
-        quantiles.add(new Quantile(0.90, 0.01));
-        quantiles.add(new Quantile(0.95, 0.01));
-        quantiles.add(new Quantile(0.99, 0.01));
-
-        CKMSQuantiles ckms = new CKMSQuantiles(
-                quantiles.toArray(new Quantile[]{}));
-        assertEquals(Double.NaN, ckms.get(0), 0);
-    }
-
-    @Test
-    public void testGetWhenNoQuantilesAreDefined() {
-        CKMSQuantiles ckms = new CKMSQuantiles(new Quantile[]{});
-        assertEquals(Double.NaN, ckms.get(0), 0);
-    }
-
-    @Test
-    public void testInsertWhenNoQuantilesAreDefined() {
-        CKMSQuantiles ckms = new CKMSQuantiles(new Quantile[]{});
-        ckms.insert(1.0);
-        ckms.insert(2.0);
-        ckms.insert(3.0);
-        assertEquals(1.0, ckms.get(0), 0);
-        assertEquals(2.0, ckms.get(0.5), 0);
-        assertEquals(3.0, ckms.get(1), 0);
-    }
-
-    @Test
-    public void testCompressWhenBufferSize500Reached() {
-        CKMSQuantiles ckms = new CKMSQuantiles(new Quantile[]{});
-        List<Double> input = makeSequence(1, 499);
-
-        for (double v : input) {
-            ckms.insert(v);
-        }
-        assertEquals("No compress should be triggered", 0, ckms.samples.size());
-        
-        ckms.insert(500);
-        assertEquals(500, ckms.samples.size());
+        CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
+        assertTrue(Double.isNaN(ckms.get(q95.quantile)));
     }
 
     @Test
     public void testGet() {
-        List<Quantile> quantiles = new ArrayList<Quantile>();
-        quantiles.add(new Quantile(0.50, 0.01));
-        quantiles.add(new Quantile(0.90, 0.01));
-        quantiles.add(new Quantile(0.95, 0.01));
-        quantiles.add(new Quantile(0.99, 0.01));
-
-        List<Double> input = makeSequence(1, 100);
-        CKMSQuantiles ckms = new CKMSQuantiles(
-                quantiles.toArray(new Quantile[]{}));
-        for (double v : input) {
-            ckms.insert(v);
+        Random random = new Random(0);
+        CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
+        List<Double> input = shuffledValues(100, random);
+        for (double value : input) {
+            ckms.insert(value);
         }
-        assertEquals(10.0, ckms.get(0.1), 1);
-        assertEquals(50.0, ckms.get(0.5), 1);
-        assertEquals(90.0, ckms.get(0.9), 1);
-        assertEquals(95.0, ckms.get(0.95), 1);
-        assertEquals(99.0, ckms.get(0.99), 1);
+        validateResults(ckms);
+    }
+
+    @Test
+    public void testBatchInsert() {
+        Random random = new Random(0);
+        testInsertBatch(1, 1, 100, random);
+        testInsertBatch(1, 10, 100, random);
+        testInsertBatch(2, 10, 100, random);
+        testInsertBatch(2, 110, 100, random); // compress never called, because compress interval > number of inserts
+        testInsertBatch(3, 10, 100, random);
+        testInsertBatch(10, 10, 100, random);
+        testInsertBatch(128, 128, 1, random);
+        testInsertBatch(128, 128, 1000, random);
+        testInsertBatch(128, 128, 10*1000, random);
+        testInsertBatch(128, 128, 100*1000, random);
+        testInsertBatch(128, 128, 1000*1000, random);
+    }
+
+    private void testInsertBatch(int batchSize, int compressInterval, int totalNumber, Random random) {
+        System.out.println("testInsertBatch(batchSize=" + batchSize + ", compressInterval=" + compressInterval + ", totalNumber=" + totalNumber + ")");
+        CKMSQuantiles ckms = new CKMSQuantiles(q50, q95);
+        int insertsSinceCompress = 0;
+        List<Double> input = shuffledValues(totalNumber, random);
+        for (int i=0; i<input.size(); i+=batchSize) {
+            double[] batch = new double[batchSize];
+            int j;
+            for (j=0; j<batchSize && i+j < input.size(); j++) {
+                batch[j] = input.get(i+j);
+            }
+            Arrays.sort(batch, 0, j);
+            ckms.insertBatch(batch, j);
+            validateSamples(ckms); // after each insert the samples should still be valid
+            insertsSinceCompress += j;
+            if (insertsSinceCompress >= compressInterval) {
+                ckms.compress();
+                validateSamples(ckms); // after each compress the samples should still be valid
+                insertsSinceCompress=0;
+            }
+        }
+        validateResults(ckms);
     }
 
     @Test
     public void testGetWithAMillionElements() {
-        List<Quantile> quantiles = new ArrayList<Quantile>();
-        quantiles.add(new Quantile(0.0, 0.01));
-        quantiles.add(new Quantile(0.10, 0.01));
-        quantiles.add(new Quantile(0.90, 0.001));
-        quantiles.add(new Quantile(0.95, 0.02));
-        quantiles.add(new Quantile(0.99, 0.001));
-
-        final int elemCount = 1000000;
-        double[] shuffle = new double[elemCount];
-        for (int i = 0; i < shuffle.length; i++) {
-            shuffle[i] = i + 1;
-        }
-        Random rand = new Random(0);
-
-        Collections.shuffle(Arrays.asList(shuffle), rand);
-
-        CKMSQuantiles ckms = new CKMSQuantiles(
-                quantiles.toArray(new Quantile[]{}));
-
-        for (double v : shuffle) {
+        Random random = new Random(0);
+        List<Double> input = shuffledValues(1000*1000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
+        for (double v : input) {
             ckms.insert(v);
         }
-        // given the linear distribution, we set the delta equal to the εn value for this quantile
-        assertEquals(0.1 * elemCount, ckms.get(0.1), 0.01 * elemCount);
-        assertEquals(0.9 * elemCount, ckms.get(0.9), 0.001 * elemCount);
-        assertEquals(0.95 * elemCount, ckms.get(0.95), 0.02 * elemCount);
-        assertEquals(0.99 * elemCount, ckms.get(0.99), 0.001 * elemCount);
-
+        validateResults(ckms);
         assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
     }
-
 
     @Test
     public void testGetGaussian() {
@@ -127,10 +101,9 @@ public class CKMSQuantilesTest {
         quantiles.add(new Quantile(0.95, 0.001));
         quantiles.add(new Quantile(0.99, 0.001));
 
-        CKMSQuantiles ckms = new CKMSQuantiles(
-                quantiles.toArray(new Quantile[]{}));
+        CKMSQuantiles ckms = new CKMSQuantiles(quantiles.toArray(new Quantile[]{}));
 
-        final int elemCount = 1000000;
+        final int elemCount = 1000*1000;
         double[] shuffle = normalDistribution.sample(elemCount);
 
         // insert a million samples
@@ -155,25 +128,6 @@ public class CKMSQuantilesTest {
         assertTrue("sample size should be below 1000", ckms.samples.size() < 1000);
     }
 
-    @Test
-    public void checkBounds() {
-        try {
-            new Quantile(-1, 0);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Quantile must be between 0 and 1", e.getMessage());
-        } catch (Exception e) {
-            fail("Wrong exception thrown" + e);
-        }
-
-        try {
-            new Quantile(0.95, 2);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Epsilon must be between 0 and 1", e.getMessage());
-        } catch (Exception e) {
-            fail("Wrong exception thrown" + e);
-        }
-    }
-
     double errorBoundsNormalDistribution(double p, double epsilon, NormalDistribution nd) {
         //(φ+ε)n
         double upperBound = nd.inverseCumulativeProbability(p + epsilon);
@@ -183,14 +137,69 @@ public class CKMSQuantilesTest {
         return Math.abs(upperBound - lowerBound) / 2;
     }
 
-    /**
-     * In Java 8 we could use IntStream
-     */
-    List<Double> makeSequence(int begin, int end) {
-        List<Double> ret = new ArrayList<Double>(end - begin + 1);
-        for (int i = begin; i <= end; i++) {
-            ret.add((double) i);
+    @Test
+    public void testIllegalArgumentException() {
+        try {
+            new Quantile(-1, 0);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Quantile must be between 0 and 1", e.getMessage());
+        } catch (Exception e) {
+            fail("Wrong exception thrown" + e);
         }
-        return ret;
+        try {
+            new Quantile(0.95, 2);
+        } catch (IllegalArgumentException e) {
+            assertEquals("Epsilon must be between 0 and 1", e.getMessage());
+        } catch (Exception e) {
+            fail("Wrong exception thrown" + e);
+        }
     }
+
+    private List<Double> shuffledValues(int n, Random random) {
+        List<Double> result = new ArrayList<Double>(n);
+        for (int i=0; i<n; i++) {
+            result.add(i+1.0);
+        }
+        Collections.shuffle(result, random);
+        return result;
+    }
+
+    /**
+     * The following invariant must be true for each sample: g + delta <= f(r)
+     */
+    private void validateSamples(CKMSQuantiles ckms) {
+        double prev = -1.0;
+        int r = 0; // sum of all g's left of the current sample
+        for (CKMSQuantiles.Sample sample : ckms.samples) {
+            String msg = "invalid sample " + sample + ": count=" + ckms.n + " r=" + r + " f(r)=" + ckms.f(r);
+            assertTrue(msg, sample.g + sample.delta <= ckms.f(r));
+            assertTrue("Samples not ordered. Keep in mind that insertBatch() takes a sorted array as parameter.", prev <= sample.value);
+            prev = sample.value;
+            r += sample.g;
+        }
+        assertEquals("the sum of all g's must be the total number of observations", r, ckms.n);
+    }
+
+    /**
+     * The values that we insert in these tests are always the numbers from 1 to n, in random order.
+     * So we can trivially calculate the range of acceptable results for each quantile.
+     * We check if the value returned by get() is within the range of acceptable results.
+     */
+    private void validateResults(CKMSQuantiles ckms) {
+        for (Quantile q : ckms.quantiles) {
+            double actual = ckms.get(q.quantile);
+            double lowerBound = Math.floor(ckms.n * (q.quantile - 2 * q.epsilon));
+            double upperBound = Math.ceil(ckms.n * (q.quantile + 2 * q.epsilon));
+            boolean ok = actual >= lowerBound && actual <= upperBound;
+            if (!ok) {
+                for (CKMSQuantiles.Sample sample : ckms.samples) {
+                    System.err.println(sample);
+                }
+            }
+            String errorMessage = q + ": " + actual + " not in [" + lowerBound + ", " + upperBound + "], n=" + ckms.n + ", " +  q.quantile + "*" + ckms.n + "=" + (q.quantile*ckms.n);
+            assertTrue(errorMessage, ok);
+        }
+    }
+
+
 }
