@@ -134,12 +134,22 @@ final class CKMSQuantiles {
         }
         this.quantiles = quantiles;
 
+
         // section 5.1 Methods - Batch.
+
         // This is hardcoded to 500, which corresponds to an epsilon of 0.1%.
-        this.insertThreshold = 500;
+        // Benchmarks showed that this size has a good performance on the Arrays.sort method used in insertBatch()
+        // Larger values grow too much in time to sort.
+        int threshold = 500;
+        for (Quantile q : quantiles) {
+            // Find a smaller threshold to cater for scenarios where this is required, e.g., large epsilon.
+            threshold = Math.min(threshold, (int) (1 / (2 * q.epsilon)));
+        }
+
+        this.insertThreshold = threshold;
 
         // create a buffer with size equal to threshold
-        this.buffer = new double[insertThreshold];
+        this.buffer = new double[threshold];
 
         // Initialize empty items
         this.samples = new LinkedList<Item>();

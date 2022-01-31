@@ -6,7 +6,10 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
@@ -33,7 +36,7 @@ public class CKMSQuantilesTest {
         quantiles.add(new Quantile(0.95, 0.01));
         quantiles.add(new Quantile(0.99, 0.01));
 
-        List<Double> input = makeSequence(1, 100);
+        List<Double> input = setupInput(100);
         CKMSQuantiles ckms = new CKMSQuantiles(
                 quantiles.toArray(new Quantile[]{}));
         for (double v : input) {
@@ -57,12 +60,7 @@ public class CKMSQuantilesTest {
         quantiles.add(new Quantile(1.0, 0.001));
 
         final int elemCount = 1000000;
-        List<Double> shuffle = new ArrayList<Double>(elemCount);
-        for (int i = 0; i < elemCount; i++) {
-            shuffle.add(i+1.0);
-        }
-        Random rand = new Random(0);
-        Collections.shuffle(shuffle, rand);
+        List<Double> shuffle = setupInput(elemCount);
 
         CKMSQuantiles ckms = new CKMSQuantiles(
                 quantiles.toArray(new Quantile[]{}));
@@ -79,6 +77,57 @@ public class CKMSQuantilesTest {
         assertRank(elemCount, ckms.get(1.0), 1.0, 0.001);
 
         assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
+    }
+
+    @Test
+    public void testGetWithASingleQuantile() {
+        List<Quantile> quantiles = new ArrayList<Quantile>();
+        quantiles.add(new Quantile(0.95, 0.02));
+
+        final int elemCount = 1000000;
+        List<Double> shuffle = setupInput(elemCount);
+
+        CKMSQuantiles ckms = new CKMSQuantiles(
+                quantiles.toArray(new Quantile[]{}));
+
+        for (double v : shuffle) {
+            ckms.insert(v);
+        }
+        // given the linear distribution, we set the delta equal to the εn value for this quantile
+        assertRank(elemCount, ckms.get(0.95), 0.95, 0.02);
+
+        assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
+    }
+
+    @Test
+    public void testReturnMinAndMaxWithoutPassingTheQuantile() {
+        List<Quantile> quantiles = new ArrayList<Quantile>();
+        quantiles.add(new Quantile(0.95, 0.02));
+
+        final int elemCount = 1000000;
+        List<Double> shuffle = setupInput(elemCount);
+
+        CKMSQuantiles ckms = new CKMSQuantiles(
+                quantiles.toArray(new Quantile[]{}));
+
+        for (double v : shuffle) {
+            ckms.insert(v);
+        }
+        // given the linear distribution, we set the delta equal to the εn value for this quantile
+        assertRank(elemCount, ckms.get(0), 0.0, 0.001);
+        assertRank(elemCount, ckms.get(1), 1.0, 0.001);
+
+        assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
+    }
+
+    private List<Double> setupInput(int elemCount) {
+        List<Double> shuffle = new ArrayList<Double>(elemCount);
+        for (int i = 0; i < elemCount; i++) {
+            shuffle.add(i + 1.0);
+        }
+        Random rand = new Random(0);
+        Collections.shuffle(shuffle, rand);
+        return shuffle;
     }
 
     private void assertRank(int elemCount, double actual, double quantile, double epsilon) {
@@ -158,16 +207,5 @@ public class CKMSQuantilesTest {
         double lowerBound = nd.inverseCumulativeProbability(p - epsilon);
         // subtract and divide by 2, assuming that the increase is linear in this small epsilon.
         return Math.abs(upperBound - lowerBound) / 2;
-    }
-
-    /**
-     * In Java 8 we could use IntStream
-     */
-    List<Double> makeSequence(int begin, int end) {
-        List<Double> ret = new ArrayList<Double>(end - begin + 1);
-        for (int i = begin; i <= end; i++) {
-            ret.add((double) i);
-        }
-        return ret;
     }
 }
