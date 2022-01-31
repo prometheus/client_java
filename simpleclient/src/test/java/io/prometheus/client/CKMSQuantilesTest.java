@@ -49,11 +49,12 @@ public class CKMSQuantilesTest {
     @Test
     public void testGetWithAMillionElements() {
         List<Quantile> quantiles = new ArrayList<Quantile>();
-        quantiles.add(new Quantile(0.01, 0.001));
+        quantiles.add(new Quantile(0.0, 0.001));
         quantiles.add(new Quantile(0.10, 0.01));
         quantiles.add(new Quantile(0.90, 0.001));
         quantiles.add(new Quantile(0.95, 0.02));
         quantiles.add(new Quantile(0.99, 0.001));
+        quantiles.add(new Quantile(1.0, 0.001));
 
         final int elemCount = 1000000;
         List<Double> shuffle = new ArrayList<Double>(elemCount);
@@ -70,11 +71,12 @@ public class CKMSQuantilesTest {
             ckms.insert(v);
         }
         // given the linear distribution, we set the delta equal to the εn value for this quantile
-        assertRank(elemCount, ckms.get(0.01), 0.01, 0.001);
+        assertRank(elemCount, ckms.get(0.0), 0.0, 0.001);
         assertRank(elemCount, ckms.get(0.1), 0.1, 0.01);
         assertRank(elemCount, ckms.get(0.9), 0.9, 0.001);
         assertRank(elemCount, ckms.get(0.95), 0.95, 0.02);
         assertRank(elemCount, ckms.get(0.99), 0.99, 0.001);
+        assertRank(elemCount, ckms.get(1.0), 1.0, 0.001);
 
         assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
     }

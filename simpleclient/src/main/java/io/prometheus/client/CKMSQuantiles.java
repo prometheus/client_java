@@ -180,6 +180,13 @@ final class CKMSQuantiles {
             return Double.NaN;
         }
 
+        // short-circuit min (p0) and max (p100) queries
+        if (q == 0.0) {
+            return samples.getFirst().value;
+        } else if (q == 1.0) {
+            return samples.getLast().value;
+        }
+
         // Straightforward implementation of Output(q).
         // Paper Section 3.1 on true rank: let r_i = Sum_{j=1}^{i−1} g_j
         int currentRank = 0;
@@ -200,8 +207,8 @@ final class CKMSQuantiles {
             }
         }
 
-        // edge case of wanting max value
-        return samples.getLast().value;
+        // The iterator is exhausted, return the last value.
+        return cur.value;
     }
 
     /**
@@ -328,6 +335,9 @@ final class CKMSQuantiles {
 
         ListIterator<Item> it = samples.listIterator();
 
+        // Preserve the first element (min) so that q=0.0 can be looked up
+        it.next();
+
         Item prev;
         Item next = it.next();
 
@@ -427,7 +437,7 @@ final class CKMSQuantiles {
          * @param epsilon  the desired error for this quantile, between 0 and 1.
          */
         Quantile(double quantile, double epsilon) {
-            if (quantile <= 0 || quantile >= 1.0) throw new IllegalArgumentException("Quantile must be between 0 and 1");
+            if (quantile < 0 || quantile > 1.0) throw new IllegalArgumentException("Quantile must be between 0 and 1");
             if (epsilon <= 0 || epsilon >= 1.0) throw new IllegalArgumentException("Epsilon must be between 0 and 1");
 
             this.quantile = quantile;
