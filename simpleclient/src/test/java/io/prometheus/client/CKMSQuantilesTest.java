@@ -79,12 +79,13 @@ public class CKMSQuantilesTest {
         assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
     }
 
+
     @Test
     public void testGetWithASingleQuantile() {
         List<Quantile> quantiles = new ArrayList<Quantile>();
         quantiles.add(new Quantile(0.95, 0.02));
 
-        final int elemCount = 1000000;
+        final int elemCount = 100;
         List<Double> shuffle = setupInput(elemCount);
 
         CKMSQuantiles ckms = new CKMSQuantiles(
@@ -95,8 +96,6 @@ public class CKMSQuantilesTest {
         }
         // given the linear distribution, we set the delta equal to the εn value for this quantile
         assertRank(elemCount, ckms.get(0.95), 0.95, 0.02);
-
-        assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
     }
 
     @Test
@@ -104,7 +103,7 @@ public class CKMSQuantilesTest {
         List<Quantile> quantiles = new ArrayList<Quantile>();
         quantiles.add(new Quantile(0.95, 0.02));
 
-        final int elemCount = 1000000;
+        final int elemCount = 1000;
         List<Double> shuffle = setupInput(elemCount);
 
         CKMSQuantiles ckms = new CKMSQuantiles(
@@ -116,8 +115,6 @@ public class CKMSQuantilesTest {
         // given the linear distribution, we set the delta equal to the εn value for this quantile
         assertRank(elemCount, ckms.get(0), 0.0, 0.001);
         assertRank(elemCount, ckms.get(1), 1.0, 0.001);
-
-        assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
     }
 
     private List<Double> setupInput(int elemCount) {

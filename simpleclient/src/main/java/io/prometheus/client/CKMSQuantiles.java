@@ -317,6 +317,8 @@ final class CKMSQuantiles {
             it.add(newItem);
             count++;
             item = newItem;
+            // Note that if the new value v is inserted before vi then ri increases by 1.
+            currentRank += item.g;
         }
 
         // reset buffered items to 0.
@@ -414,7 +416,14 @@ final class CKMSQuantiles {
     }
 
     /**
+     * Data class for Targeted quantile: T = {(φ_j , ε_j )}
      *
+     * Rather than requesting the same ε for all quantiles (the uniform case)
+     * or ε scaled by φ (the biased case), one might specify an arbitrary set
+     * of quantiles and the desired errors of ε for each in the form (φj , εj ).
+     * For example, input to the targeted quantiles problem might be {(0.5, 0.1), (0.2, 0.05), (0.9, 0.01)},
+     * meaning that the median should be returned with 10% error, the 20th percentile with 5% error,
+     * and the 90th percentile with 1%.
      */
     static class Quantile {
         /**
@@ -435,13 +444,6 @@ final class CKMSQuantiles {
         final double v;
 
         /**
-         * Targeted quantile: T = {(φ_j , ε_j )}
-         * Rather than requesting the same ε for all quantiles (the uniform case)
-         * or ε scaled by φ (the biased case), one might specify an arbitrary set
-         * of quantiles and the desired errors of ε for each in the form (φj , εj ).
-         * For example, input to the targeted quantiles problem might be {(0.5, 0.1), (0.2, 0.05), (0.9, 0.01)},
-         * meaning that the median should be returned with 10% error, the 20th percentile with 5% error,
-         * and the 90th percentile with 1%.
          *
          * @param quantile the quantile between 0 and 1
          * @param epsilon  the desired error for this quantile, between 0 and 1.
