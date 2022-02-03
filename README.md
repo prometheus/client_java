@@ -130,57 +130,86 @@ when using this approach ensure the value you are reporting accounts for concurr
 
 ### Summary
 
-Summaries track the size and number of events.
+Summaries and Histograms can both be used to monitor latencies (or other things like request sizes).
+
+An overview of when to use Summaries and when to use Histograms can be found on [https://prometheus.io/docs/practices/histograms](https://prometheus.io/docs/practices/histograms).
+
+The following example shows how to measure latencies and request sizes:
 
 ```java
 class YourClass {
-  static final Summary receivedBytes = Summary.build()
-     .name("requests_size_bytes").help("Request size in bytes.").register();
-  static final Summary requestLatency = Summary.build()
-     .name("requests_latency_seconds").help("Request latency in seconds.").register();
 
-  void processRequest(Request req) {
+  private static final Summary requestLatency = Summary.build()
+      .name("requests_latency_seconds")
+      .help("request latency in seconds")
+      .register();
+
+  private static final Summary receivedBytes = Summary.build()
+      .name("requests_size_bytes")
+      .help("request size in bytes")
+      .register();
+
+  public void processRequest(Request req) {
     Summary.Timer requestTimer = requestLatency.startTimer();
     try {
       // Your code here.
     } finally {
-      receivedBytes.observe(req.size());
       requestTimer.observeDuration();
+      receivedBytes.observe(req.size());
     }
   }
 }
 ```
 
-There are utilities for timing code and support for [quantiles](https://prometheus.io/docs/practices/histograms/#quantiles).
-Essentially quantiles aren't aggregatable and add some client overhead for the calculation.
+The `Summary` class provides different utility methods for observing values, like `observe(double)`, `startTimer(); timer.observeDuration()`, `time(Callable)`, etc.
+
+By default, `Summary` metrics provide the `count` and the `sum`. For example, if you measure latencies of a REST service, the `count` will tell you how often the REST service was called, and the `sum` will tell you the total aggregated response time. You can calculate the average response time using a Prometheus query dividing `sum / count`.
+
+In addition to `count` and `sum`, you can configure a Summary to provide quantiles:
 
 ```java
-class YourClass {
-  static final Summary requestLatency = Summary.build()
-    .quantile(0.5, 0.05)   // Add 50th percentile (= median) with 5% tolerated error
-    .quantile(0.9, 0.01)   // Add 90th percentile with 1% tolerated error
-    .name("requests_latency_seconds").help("Request latency in seconds.").register();
-
-  void processRequest(Request req) {
-    requestLatency.time(new Runnable() {
-      public abstract void run() {
-        // Your code here.
-      }
-    });
-
-
-    // Or the Java 8 lambda equivalent
-    requestLatency.time(() -> {
-      // Your code here.
-    });
-  }
-}
+Summary requestLatency = Summary.build()
+    .name("requests_latency_seconds")
+    .help("Request latency in seconds.")
+    .quantile(0.5, 0.01)    // 0.5 quantile (median) with 0.01 allowed error
+    .quantile(0.95, 0.005)  // 0.95 quantile with 0.005 allowed error
+    // ...
+    .register();
 ```
+
+As an example, a `0.95` quantile of `120ms` tells you that `95%` of the calls were faster than `120ms`, and `5%` of the calls were slower than `120ms`.
+
+Tracking exact quantiles require a large amount of memory, because all observations need to be stored in a sorted list. Therefore, we allow an error to significantly reduce memory usage.
+
+In the example, the allowed error of `0.005` means that you will not get the exact `0.95` quantile, but anything between the `0.945` quantile and the `0.955` quantile.
+
+Experiments show that the `Summary` typically needs to keep less than 100 samples to provide that precision, even if you have hundreds of millions of observations.
+
+There are a few special cases:
+
+* You can set an allowed error of `0`, but then the `Summary` will keep all observations in memory.
+* You can track the minimum value with `.quantile(0, 0)`. This special case will not use additional memory even though the allowed error is `0`.
+* You can track the maximum value with `.quantile(1, 0)`. This special case will not use additional memory even though the allowed error is `0`.
+
+Typically, you don't want to have a `Summary` representing the entire runtime of the application, but you want to look at a reasonable time interval. `Summary` metrics implement a configurable sliding time window:
+
+```java
+Summary requestLatency = Summary.build()
+    .name("requests_latency_seconds")
+    .help("Request latency in seconds.")
+    .maxAgeSeconds(10 * 60)
+    .ageBuckets(5)
+    // ...
+    .register();
+```
+
+The default is a time window of 10 minutes and 5 age buckets, i.e. the time window is 10 minutes wide, and * we slide it forward every 2 minutes.
 
 ### Histogram
 
-Histograms track the size and number of events in buckets.
-This allows for aggregatable calculation of quantiles.
+Like Summaries, Histograms can be used to monitor latencies (or other things like request sizes).
+
+An overview of when to use Summaries and when to use Histograms can be found on [https://prometheus.io/docs/practices/histograms](https://prometheus.io/docs/practices/histograms).
 
 ```java
 class YourClass {

@@ -142,6 +142,14 @@ final class CKMSQuantiles {
             return Double.NaN;
         }
 
+        if (q == 0.0) {
+            return samples.getFirst().value;
+        }
+
+        if (q == 1.0) {
+            return samples.getLast().value;
+        }
+
         int r = 0; // sum of g's left of the current sample
         int desiredRank = (int) Math.ceil(q * n);
 
@@ -168,6 +176,9 @@ final class CKMSQuantiles {
     int f(int r) {
         int minResult = Integer.MAX_VALUE;
         for (Quantile q : quantiles) {
+            if (q.quantile == 0 || q.quantile == 1) {
+                continue;
+            }
             int result;
             // We had a numerical error here with the following example:
             // quantile = 0.95, epsilon = 0.01, (n-r) = 30.
@@ -267,13 +278,13 @@ final class CKMSQuantiles {
         final double v;
 
         Quantile(double quantile, double epsilon) {
-            if (quantile <= 0 || quantile >= 1.0) throw new IllegalArgumentException("Quantile must be between 0 and 1");
-            if (epsilon <= 0 || epsilon >= 1.0) throw new IllegalArgumentException("Epsilon must be between 0 and 1");
+            if (quantile < 0.0 || quantile > 1.0) throw new IllegalArgumentException("Quantile must be between 0 and 1");
+            if (epsilon < 0.0 || epsilon > 1.0) throw new IllegalArgumentException("Epsilon must be between 0 and 1");
 
             this.quantile = quantile;
             this.epsilon = epsilon;
-            u = 2.0 * epsilon / (1.0 - quantile);
-            v = 2.0 * epsilon / quantile;
+            u = 2.0 * epsilon / (1.0 - quantile); // if quantile == 1 this will be Double.NaN
+            v = 2.0 * epsilon / quantile; // if quantile == 0 this will be Double.NaN
         }
 
         @Override

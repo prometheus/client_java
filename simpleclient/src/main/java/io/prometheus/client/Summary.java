@@ -13,70 +13,91 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Summary metric, to track the size of events.
+ * {@link Summary} metrics and {@link Histogram} metrics can both be used to monitor latencies (or other things like request sizes).
  * <p>
- * Example of uses for Summaries include:
- * <ul>
- *  <li>Response latency</li>
- *  <li>Request size</li>
- * </ul>
+ * An overview of when to use Summaries and when to use Histograms can be found on <a href="https://prometheus.io/docs/practices/histograms">https://prometheus.io/docs/practices/histograms</a>.
+ * <p>
+ * The following example shows how to measure latencies and request sizes:
  *
- * <p>
- * Example Summaries:
  * <pre>
- * {@code
- *   class YourClass {
- *     static final Summary receivedBytes = Summary.build()
- *         .name("requests_size_bytes").help("Request size in bytes.").register();
- *     static final Summary requestLatency = Summary.build()
- *         .name("requests_latency_seconds").help("Request latency in seconds.").register();
+ * class YourClass {
  *
- *     void processRequest(Request req) {
- *        Summary.Timer requestTimer = requestLatency.startTimer();
- *        try {
- *          // Your code here.
- *        } finally {
- *          receivedBytes.observe(req.size());
- *          requestTimer.observeDuration();
- *        }
- *     }
+ *   private static final Summary requestLatency = Summary.build()
+ *       .name("requests_latency_seconds")
+ *       .help("request latency in seconds")
+ *       .register();
  *
- *     // Or if using Java 8 and lambdas.
- *     void processRequestLambda(Request req) {
+ *   private static final Summary receivedBytes = Summary.build()
+ *       .name("requests_size_bytes")
+ *       .help("request size in bytes")
+ *       .register();
+ *
+ *   public void processRequest(Request req) {
+ *     Summary.Timer requestTimer = requestLatency.startTimer();
+ *     try {
+ *       // Your code here.
+ *     } finally {
+ *       requestTimer.observeDuration();
  *       receivedBytes.observe(req.size());
- *       requestLatency.time(() -> {
- *         // Your code here.
- *       });
  *     }
- * }
+ *   }
  * }
  * </pre>
- * This would allow you to track request rate, average latency and average request size.
  *
+ * The {@link Summary} class provides different utility methods for observing values, like {@link #observe(double)},
+ * {@link #startTimer()} and {@link Timer#observeDuration()}, {@link #time(Callable)}, etc.
  * <p>
- * How to add custom quantiles:
+ * By default, {@link Summary} metrics provide the <tt>count</tt> and the <tt>sum</tt>. For example, if you measure
+ * latencies of a REST service, the <tt>count</tt> will tell you how often the REST service was called,
+ * and the <tt>sum</tt> will tell you the total aggregated response time.
+ * You can calculate the average response time using a Prometheus query dividing <tt>sum / count</tt>.
+ * <p>
+ * In addition to <tt>count</tt> and <tt>sum</tt>, you can configure a Summary to provide quantiles:
+ *
  * <pre>
- * {@code
- *     static final Summary myMetric = Summary.build()
- *             .quantile(0.5, 0.05)   // Add 50th percentile (= median) with 5% tolerated error
- *             .quantile(0.9, 0.01)   // Add 90th percentile with 1% tolerated error
- *             .quantile(0.99, 0.001) // Add 99th percentile with 0.1% tolerated error
- *             .name("requests_size_bytes")
- *             .help("Request size in bytes.")
- *             .register();
- * }
+ * Summary requestLatency = Summary.build()
+ *     .name("requests_latency_seconds")
+ *     .help("Request latency in seconds.")
+ *     .quantile(0.5, 0.01)    // 0.5 quantile (median) with 0.01 allowed error
+ *     .quantile(0.95, 0.005)  // 0.95 quantile with 0.005 allowed error
+ *     // ...
+ *     .register();
  * </pre>
  *
- * The quantiles are calculated over a sliding window of time. There are two options to configure this time window:
+ * As an example, a 0.95 quantile of 120ms tells you that 95% of the calls were faster than 120ms, and 5% of the calls were slower than 120ms.
+ * <p>
+ * Tracking exact quantiles require a large amount of memory, because all observations need to be stored in a sorted list. Therefore, we allow an error to significantly reduce memory usage.
+ * <p>
+ * In the example, the allowed error of 0.005 means that you will not get the exact 0.95 quantile, but anything between the 0.945 quantile and the 0.955 quantile.
+ * <p>
+ * Experiments show that the {@link Summary} typically needs to keep less than 100 samples to provide that precision, even if you have hundreds of millions of observations.
+ * <p>
+ * There are a few special cases:
+ *
  * <ul>
- *   <li>maxAgeSeconds(long): Set the duration of the time window is, i.e. how long observations are kept before they are discarded.
- *       Default is 10 minutes.
- *   <li>ageBuckets(int): Set the number of buckets used to implement the sliding time window. If your time window is 10 minutes, and you have ageBuckets=5,
- *       buckets will be switched every 2 minutes. The value is a trade-off between resources (memory and cpu for maintaining the bucket)
- *       and how smooth the time window is moved. Default value is 5.
+ *   <li>You can set an allowed error of 0, but then the {@link Summary} will keep all observations in memory.</li>
+ *   <li>You can track the minimum value with <tt>.quantile(0.0, 0.0)</tt>.
+ *       This special case will not use additional memory even though the allowed error is 0.</li>
+ *   <li>You can track the maximum value with <tt>.quantile(1.0, 0.0)</tt>.
+ *       This special case will not use additional memory even though the allowed error is 0.</li>
  * </ul>
  *
- * See https://prometheus.io/docs/practices/histograms/ for more info on quantiles.
+ * Typically, you don't want to have a {@link Summary} representing the entire runtime of the application,
+ * but you want to look at a reasonable time interval. {@link Summary} metrics implement a configurable sliding
+ * time window:
+ *
+ * <pre>
+ * Summary requestLatency = Summary.build()
+ *     .name("requests_latency_seconds")
+ *     .help("Request latency in seconds.")
+ *     .maxAgeSeconds(10 * 60)
+ *     .ageBuckets(5)
+ *     // ...
+ *     .register();
+ * </pre>
+ *
+ * The default is a time window of 10 minutes and 5 age buckets, i.e. the time window is 10 minutes wide, and
+ * we slide it forward every 2 minutes.
  */
 public class Summary extends SimpleCollector<Summary.Child> implements Counter.Describable {
 
@@ -98,17 +119,25 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     private long maxAgeSeconds = TimeUnit.MINUTES.toSeconds(10);
     private int ageBuckets = 5;
 
+    /**
+     * The class JavaDoc for {@link Summary} has more information on {@link #quantile(double, double)}.
+     * @see Summary
+     */
     public Builder quantile(double quantile, double error) {
-      if (quantile <= 0.0 || quantile >= 1.0) {
+      if (quantile < 0.0 || quantile > 1.0) {
         throw new IllegalArgumentException("Quantile " + quantile + " invalid: Expected number between 0.0 and 1.0.");
       }
-      if (error <= 0.0 || error >= 1.0) {
+      if (error < 0.0 || error > 1.0) {
         throw new IllegalArgumentException("Error " + error + " invalid: Expected number between 0.0 and 1.0.");
       }
       quantiles.add(new Quantile(quantile, error));
       return this;
     }
 
+    /**
+     * The class JavaDoc for {@link Summary} has more information on {@link #maxAgeSeconds(long)} 
+     * @see Summary
+     */
     public Builder maxAgeSeconds(long maxAgeSeconds) {
       if (maxAgeSeconds <= 0) {
         throw new IllegalArgumentException("maxAgeSeconds cannot be " + maxAgeSeconds);
@@ -117,6 +146,10 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       return this;
     }
 
+    /**
+     * The class JavaDoc for {@link Summary} has more information on {@link #ageBuckets(int)} 
+     * @see Summary
+     */
     public Builder ageBuckets(int ageBuckets) {
       if (ageBuckets <= 0) {
         throw new IllegalArgumentException("ageBuckets cannot be " + ageBuckets);

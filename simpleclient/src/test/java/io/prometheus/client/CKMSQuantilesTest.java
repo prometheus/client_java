@@ -12,9 +12,11 @@ import static org.junit.Assert.*;
 
 public class CKMSQuantilesTest {
 
+    private final Quantile qMin = new Quantile(0.0, 0.00);
     private final Quantile q50 = new Quantile(0.5, 0.01);
     private final Quantile q95 = new Quantile(0.95, 0.005);
     private final Quantile q99 = new Quantile(0.99, 0.001);
+    private final Quantile qMax = new Quantile(1.0, 0.00);
 
     @Test
     public void testGetOnEmptyValues() {
@@ -35,7 +37,7 @@ public class CKMSQuantilesTest {
 
     @Test
     public void testBatchInsert() {
-        Random random = new Random(0);
+        Random random = new Random(1);
         testInsertBatch(1, 1, 100, random);
         testInsertBatch(1, 10, 100, random);
         testInsertBatch(2, 10, 100, random);
@@ -75,7 +77,7 @@ public class CKMSQuantilesTest {
 
     @Test
     public void testGetWithAMillionElements() {
-        Random random = new Random(0);
+        Random random = new Random(2);
         List<Double> input = shuffledValues(1000*1000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
         for (double v : input) {
@@ -83,6 +85,132 @@ public class CKMSQuantilesTest {
         }
         validateResults(ckms);
         assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
+    }
+
+    @Test
+    public void testMin() {
+        Random random = new Random(3);
+        List<Double> input = shuffledValues(1000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(qMin);
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
+        ckms.compress();
+        assertEquals(2, ckms.samples.size());
+    }
+
+    @Test
+    public void testMax() {
+        Random random = new Random(4);
+        List<Double> input = shuffledValues(1000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(qMax);
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
+        ckms.compress();
+        assertEquals(2, ckms.samples.size());
+    }
+
+    @Test
+    public void testMinMax() {
+        Random random = new Random(5);
+        List<Double> input = shuffledValues(1000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(qMin, qMax);
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
+        ckms.compress();
+        assertEquals(2, ckms.samples.size());
+    }
+
+    @Test
+    public void testMinAndOthers() {
+        Random random = new Random(6);
+        List<Double> input = shuffledValues(1000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(q95, qMin);
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
+        assertTrue(ckms.samples.size() < 200); // should be a lot less than input.size()
+    }
+
+    @Test
+    public void testMaxAndOthers() {
+        Random random = new Random(7);
+        List<Double> input = shuffledValues(10000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, qMax);
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
+        assertTrue(ckms.samples.size() < 200); // should be a lot less than input.size()
+    }
+
+    @Test
+    public void testMinMaxAndOthers() {
+        Random random = new Random(8);
+        List<Double> input = shuffledValues(10000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(qMin, q50, q95, q99, qMax);
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
+        assertTrue(ckms.samples.size() < 200); // should be a lot less than input.size()
+    }
+
+    @Test
+    public void testExactQuantile() {
+        Random random = new Random(9);
+        List<Double> input = shuffledValues(10000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.95, 0));
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
+        // With epsilon == 0 we need to keep all inputs in samples.
+        assertEquals(input.size(), ckms.samples.size());
+    }
+
+    @Test
+    public void testExactAndOthers() {
+        Random random = new Random(10);
+        List<Double> input = shuffledValues(10000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(q50, new Quantile(0.95, 0), q99);
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
+        // With epsilon == 0 we need to keep all inputs in samples.
+        assertEquals(input.size(), ckms.samples.size());
+    }
+
+    @Test
+    public void testExactAndMin() {
+        Random random = new Random(11);
+        List<Double> input = shuffledValues(10000, random);
+        CKMSQuantiles ckms = new CKMSQuantiles(qMin, q50, new Quantile(0.95, 0));
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
+        // With epsilon == 0 we need to keep all inputs in samples.
+        assertEquals(input.size(), ckms.samples.size());
+    }
+
+    @Test
+    public void testMaxEpsilon() {
+        Random random = new Random(12);
+        List<Double> input = shuffledValues(10000, random);
+        // epsilon == 1 basically gives you random results, but it should still not throw an exception.
+        CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.95, 1));
+        for (double v : input) {
+            ckms.insert(v);
+        }
+        validateResults(ckms);
     }
 
     @Test
@@ -188,8 +316,17 @@ public class CKMSQuantilesTest {
     private void validateResults(CKMSQuantiles ckms) {
         for (Quantile q : ckms.quantiles) {
             double actual = ckms.get(q.quantile);
-            double lowerBound = Math.floor(ckms.n * (q.quantile - 2 * q.epsilon));
-            double upperBound = Math.ceil(ckms.n * (q.quantile + 2 * q.epsilon));
+            double lowerBound, upperBound;
+            if (q.quantile == 0) {
+                lowerBound = 1;
+                upperBound = 1;
+            } else if (q.quantile == 1) {
+                lowerBound = ckms.n;
+                upperBound = ckms.n;
+            } else {
+                lowerBound = Math.floor(ckms.n * (q.quantile - 2 * q.epsilon));
+                upperBound = Math.ceil(ckms.n * (q.quantile + 2 * q.epsilon));
+            }
             boolean ok = actual >= lowerBound && actual <= upperBound;
             if (!ok) {
                 for (CKMSQuantiles.Sample sample : ckms.samples) {
@@ -200,6 +337,4 @@ public class CKMSQuantilesTest {
             assertTrue(errorMessage, ok);
         }
     }
-
-
 }
