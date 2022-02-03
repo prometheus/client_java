@@ -40,6 +40,7 @@
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
             <version>4.2.8</version>
+            <scope>provided</scope>
         </dependency>
         <!-- Test Dependencies Follow -->
         <dependency>
