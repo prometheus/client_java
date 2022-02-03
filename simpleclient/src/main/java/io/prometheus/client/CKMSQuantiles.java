@@ -185,9 +185,9 @@ final class CKMSQuantiles {
             // The expected result of (2*0.01*30)/(1-0.95) is 12. The actual result is 11.99999999999999.
             // To avoid running into these types of error we add 0.00000000001 before rounding down.
             if (r >= q.quantile * n) {
-                result = (int) Math.floor(q.v * r + 0.00000000001);
+                result = (int) (q.v * r + 0.00000000001);
             } else {
-                result = (int) Math.floor(q.u * (n - r) + 0.00000000001);
+                result = (int) (q.u * (n - r) + 0.00000000001);
             }
             if (result < minResult) {
                 minResult = result;
