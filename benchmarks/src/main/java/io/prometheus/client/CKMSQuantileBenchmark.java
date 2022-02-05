@@ -97,6 +97,10 @@ public class CKMSQuantileBenchmark {
             for (Double l : shuffle) {
                 ckmsQuantiles.insert(l);
             }
+            // make sure we inserted all 'hanging' samples (count % 128)
+            ckmsQuantiles.get(0);
+            // compress everything so we have a similar samples size regardless of n.
+            ckmsQuantiles.compress();
             System.out.println("Sample size is: " + ckmsQuantiles.samples.size());
         }
 

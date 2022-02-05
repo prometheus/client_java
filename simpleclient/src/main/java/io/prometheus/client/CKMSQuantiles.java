@@ -152,11 +152,12 @@ final class CKMSQuantiles {
 
         int r = 0; // sum of g's left of the current sample
         int desiredRank = (int) Math.ceil(q * n);
+        int upperBound = desiredRank + f(desiredRank) / 2;
 
         ListIterator<Sample> iterator = samples.listIterator();
         while (iterator.hasNext()) {
             Sample sample = iterator.next();
-            if (r + sample.g + sample.delta > desiredRank + f(desiredRank) / 2) {
+            if (r + sample.g + sample.delta > upperBound) {
                 iterator.previous(); // roll back the item.next() above
                 if (iterator.hasPrevious()) {
                     Sample result = iterator.previous();
