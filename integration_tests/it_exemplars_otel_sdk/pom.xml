@@ -12,7 +12,7 @@
   <name>Integration Tests - Exemplars with OpenTelemetry</name>
 
   <properties>
-    <otel.version>1.2.0</otel.version>
+    <otel.version>1.10.1</otel.version>
   </properties>
 
   <dependencies>

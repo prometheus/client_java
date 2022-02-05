@@ -25,13 +25,13 @@ import java.util.regex.Pattern;
 public class ExemplarsOpenTelemetryAgentIT {
 
   private final String image = "openjdk:11-jre";
-  private final String otelAgentVersion = "1.2.0";
+  private final String otelAgentVersion = "1.10.1";
   private final Volume volume;
   private final GenericContainer<?> javaContainer;
 
   public ExemplarsOpenTelemetryAgentIT() throws IOException, URISyntaxException {
     String appJar = "example-spring-boot-app.jar";
-    String agentJar = "opentelemetry-javaagent-all.jar";
+    String agentJar = "opentelemetry-javaagent.jar";
     String agentDownloadUrl = "https://github.com/open-telemetry/opentelemetry-java-instrumentation/" +
             "releases/download/v" + otelAgentVersion + "/" + agentJar;
     Downloader.downloadToTarget(agentDownloadUrl, agentJar);
