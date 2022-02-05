@@ -11,7 +11,7 @@ import java.util.List;
  * <p>
  * This class handles common initialization and label logic for the standard metrics.
  * You should never subclass this class.
- * <p>
+ *
  * <h2>Initialization</h2>
  * After calling build() on a subclass, {@link Builder#name(String) name},
  * {@link SimpleCollector.Builder#help(String) help},

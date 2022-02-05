@@ -9,8 +9,7 @@ import org.eclipse.jetty.server.handler.StatisticsHandler;
 
 /**
  * Collect metrics from jetty's org.eclipse.jetty.server.handler.StatisticsHandler.
- * <p>
- * <pre>{@code
+ * <pre>
  * Server server = new Server(8080);
  *
  * ServletContextHandler context = new ServletContextHandler();
@@ -29,7 +28,7 @@ import org.eclipse.jetty.server.handler.StatisticsHandler;
  * server.setHandler(handlers);
  *
  * server.start();
- * }</pre>
+ * </pre>
  */
 public class JettyStatisticsCollector extends Collector {
   private final StatisticsHandler statisticsHandler;

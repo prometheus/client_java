@@ -130,7 +130,7 @@ when using this approach ensure the value you are reporting accounts for concurr
 
 ### Summary
 
-Summaries and Histograms can both be used to monitor latencies (or other things like request sizes).
+Summaries and Histograms can both be used to monitor distributions, like latencies or request sizes.
 
 An overview of when to use Summaries and when to use Histograms can be found on [https://prometheus.io/docs/practices/histograms](https://prometheus.io/docs/practices/histograms).
 

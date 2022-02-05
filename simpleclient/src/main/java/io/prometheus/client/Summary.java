@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link Summary} metrics and {@link Histogram} metrics can both be used to monitor latencies (or other things like request sizes).
+ * {@link Summary} metrics and {@link Histogram} metrics can both be used to monitor distributions like latencies or request sizes.
  * <p>
  * An overview of when to use Summaries and when to use Histograms can be found on <a href="https://prometheus.io/docs/practices/histograms">https://prometheus.io/docs/practices/histograms</a>.
  * <p>
@@ -47,12 +47,12 @@ import java.util.concurrent.TimeUnit;
  * The {@link Summary} class provides different utility methods for observing values, like {@link #observe(double)},
  * {@link #startTimer()} and {@link Timer#observeDuration()}, {@link #time(Callable)}, etc.
  * <p>
- * By default, {@link Summary} metrics provide the <tt>count</tt> and the <tt>sum</tt>. For example, if you measure
- * latencies of a REST service, the <tt>count</tt> will tell you how often the REST service was called,
- * and the <tt>sum</tt> will tell you the total aggregated response time.
- * You can calculate the average response time using a Prometheus query dividing <tt>sum / count</tt>.
+ * By default, {@link Summary} metrics provide the {@code count} and the {@code sum}. For example, if you measure
+ * latencies of a REST service, the {@code count} will tell you how often the REST service was called,
+ * and the {@code sum} will tell you the total aggregated response time.
+ * You can calculate the average response time using a Prometheus query dividing {@code sum / count}.
  * <p>
- * In addition to <tt>count</tt> and <tt>sum</tt>, you can configure a Summary to provide quantiles:
+ * In addition to {@code count} and {@code sum}, you can configure a Summary to provide quantiles:
  *
  * <pre>
  * Summary requestLatency = Summary.build()
@@ -76,9 +76,9 @@ import java.util.concurrent.TimeUnit;
  *
  * <ul>
  *   <li>You can set an allowed error of 0, but then the {@link Summary} will keep all observations in memory.</li>
- *   <li>You can track the minimum value with <tt>.quantile(0.0, 0.0)</tt>.
+ *   <li>You can track the minimum value with {@code .quantile(0.0, 0.0)}.
  *       This special case will not use additional memory even though the allowed error is 0.</li>
- *   <li>You can track the maximum value with <tt>.quantile(1.0, 0.0)</tt>.
+ *   <li>You can track the maximum value with {@code .quantile(1.0, 0.0)}.
  *       This special case will not use additional memory even though the allowed error is 0.</li>
  * </ul>
  *
