@@ -42,6 +42,7 @@ public class ExemplarsOpenTelemetryAgentIT {
             "java",
             "-Dotel.traces.exporter=logging",
             "-Dotel.metrics.exporter=none",
+            "-Dotel.traces.sampler=always_on",
             "-javaagent:/app/" + agentJar,
             "-jar",
             "/app/" + appJar
