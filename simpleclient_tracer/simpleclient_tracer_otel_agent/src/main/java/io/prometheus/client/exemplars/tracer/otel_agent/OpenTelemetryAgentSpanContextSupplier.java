@@ -41,4 +41,9 @@ public class OpenTelemetryAgentSpanContextSupplier implements SpanContextSupplie
     String spanId = Span.current().getSpanContext().getSpanId();
     return SpanId.isValid(spanId) ? spanId : null;
   }
+
+  @Override
+  public boolean isSampled() {
+    return Span.current().getSpanContext().isSampled();
+  }
 }

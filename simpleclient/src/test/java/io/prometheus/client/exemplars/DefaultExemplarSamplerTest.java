@@ -1,15 +1,16 @@
 package io.prometheus.client.exemplars;
 
-import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import static java.lang.Double.NEGATIVE_INFINITY;
+import static java.lang.Double.POSITIVE_INFINITY;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static java.lang.Double.NEGATIVE_INFINITY;
-import static java.lang.Double.POSITIVE_INFINITY;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 
 public class DefaultExemplarSamplerTest {
 
@@ -20,6 +21,7 @@ public class DefaultExemplarSamplerTest {
   final AtomicReference<String> spanId = new AtomicReference<String>();
   final AtomicLong timestamp = new AtomicLong();
   DefaultExemplarSampler defaultSampler;
+  DefaultExemplarSampler defaultSamplerWithNoSample;
 
   final SpanContextSupplier testContext = new SpanContextSupplier() {
     @Override
@@ -31,7 +33,30 @@ public class DefaultExemplarSamplerTest {
     public String getSpanId() {
       return spanId.get();
     }
-  };
+
+        @Override
+        public boolean isSampled() {
+            return true;
+        }
+    };
+
+    final SpanContextSupplier testContextNoSample = new SpanContextSupplier() {
+
+        @Override
+        public String getTraceId() {
+            return traceId.get();
+        }
+
+        @Override
+        public String getSpanId() {
+            return spanId.get();
+        }
+
+        @Override
+        public boolean isSampled() {
+            return false;
+        }
+    };
 
   final DefaultExemplarSampler.Clock testClock = new DefaultExemplarSampler.Clock() {
     @Override
@@ -46,6 +71,7 @@ public class DefaultExemplarSamplerTest {
     spanId.set("span-1");
     timestamp.set(System.currentTimeMillis());
     defaultSampler = new DefaultExemplarSampler(testContext, testClock);
+    defaultSamplerWithNoSample = new DefaultExemplarSampler(testContextNoSample, testClock);
   }
 
   @Test
@@ -66,6 +92,18 @@ public class DefaultExemplarSamplerTest {
     Assert.assertEquals(third, sampler.sample(4.0, second));
     traceId.set(null);
     Assert.assertNull(sampler.sample(4.0, null));
+  }
+
+  @Test
+  public void testCounterWithNoSample() {
+    CounterExemplarSampler sampler = defaultSamplerWithNoSample;
+    Assert.assertEquals(null, sampler.sample(2.0, null));
+  }
+
+  @Test
+  public void testHistogramWithNoSample() {
+    HistogramExemplarSampler sampler = defaultSamplerWithNoSample;
+    Assert.assertEquals(null, sampler.sample(2.0, NEGATIVE_INFINITY, POSITIVE_INFINITY, null));
   }
 
   @Test
