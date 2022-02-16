@@ -76,5 +76,10 @@ public class ExemplarsBenchmark {
     public String getSpanId() {
       return "span-id";
     }
+
+    @Override
+    public boolean isSampled() {
+        return true;
+    }
   }
 }
