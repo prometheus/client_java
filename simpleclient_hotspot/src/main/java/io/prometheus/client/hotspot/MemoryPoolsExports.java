@@ -89,7 +89,7 @@ public class MemoryPoolsExports extends Collector {
       sampleFamilies.add(used);
     }
 
-    if (nameFilter.test(JVM_MEMORY_POOL_BYTES_COMMITTED)) {
+    if (nameFilter.test(JVM_MEMORY_BYTES_COMMITTED)) {
       GaugeMetricFamily committed = new GaugeMetricFamily(
               JVM_MEMORY_BYTES_COMMITTED,
               "Committed (bytes) of a given JVM memory area.",
