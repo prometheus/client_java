@@ -20,6 +20,7 @@ public class OpenTelemetryAgentSpanContextSupplier implements SpanContextSupplie
       OpenTelemetryAgentSpanContextSupplier test = new OpenTelemetryAgentSpanContextSupplier();
       test.getSpanId();
       test.getTraceId();
+      test.isSampled();
       return true;
     } catch (LinkageError ignored) {
       // NoClassDefFoundError:
