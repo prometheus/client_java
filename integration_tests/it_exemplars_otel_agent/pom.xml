@@ -20,6 +20,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>io.prometheus</groupId>
+        <artifactId>simpleclient_bom</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -32,26 +39,6 @@
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-     <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_tracer_common</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-     <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_tracer_otel</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-      <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_tracer_otel_agent</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>io.prometheus</groupId>
