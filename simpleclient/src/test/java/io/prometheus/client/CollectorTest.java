@@ -9,6 +9,32 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class CollectorTest {
+
+  @Test
+  public void sanitizeMetricPrefix() throws Exception {
+      assertEquals("afoo", Collector.sanitizeMetricName("afoo"));
+      assertEquals("zfoo", Collector.sanitizeMetricName("zfoo"));
+      assertEquals("Afoo", Collector.sanitizeMetricName("Afoo"));
+      assertEquals("Zfoo", Collector.sanitizeMetricName("Zfoo"));
+      assertEquals(":foo", Collector.sanitizeMetricName(":foo"));
+
+      assertEquals("_foo", Collector.sanitizeMetricName("0foo"));
+      assertEquals("_foo", Collector.sanitizeMetricName("5foo"));
+      assertEquals("_foo", Collector.sanitizeMetricName("9foo"));
+      assertEquals("_foo", Collector.sanitizeMetricName("/foo"));
+      assertEquals("_foo", Collector.sanitizeMetricName("*foo"));
+  }
+
+  @Test
+  public void sanitizeMetricBody() throws Exception {
+      assertEquals("aamzAMZ059", Collector.sanitizeMetricName("aamzAMZ059"));
+      assertEquals("aaMzAmZ009", Collector.sanitizeMetricName("aaMzAmZ009"));
+      assertEquals("aZmA950aMz", Collector.sanitizeMetricName("aZmA950aMz"));
+      assertEquals("aZ9mA0a5Mz", Collector.sanitizeMetricName("aZ9mA0a5Mz"));
+      assertEquals("aZ9mA_0a5Mz", Collector.sanitizeMetricName("aZ9mA*0a5Mz"));
+      assertEquals("aZ9mA_0a5Mz", Collector.sanitizeMetricName("aZ9mA&0a5Mz"));
+  }
+
   @Test
   public void sanitizeMetricName() throws Exception {
       assertEquals("_hoge", Collector.sanitizeMetricName("0hoge"));
