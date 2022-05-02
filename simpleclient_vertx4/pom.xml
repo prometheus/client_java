@@ -20,12 +20,12 @@
         <version>0.15.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>simpleclient_vertx</artifactId>
+    <artifactId>simpleclient_vertx4</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Java Simpleclient Vert.x 3</name>
+    <name>Prometheus Java Simpleclient Vert.x 4</name>
     <description>
-        Vert.x 3 Web Handler exporter for the simpleclient.
+        Vert.x 4 Web Handler exporter for the simpleclient.
     </description>
 
     <licenses>
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
-            <version>3.9.12</version>
+            <version>4.2.3</version>
             <scope>provided</scope>
         </dependency>
         <!-- Test Dependencies Follow -->
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.22.0</version>
+            <version>2.6.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
