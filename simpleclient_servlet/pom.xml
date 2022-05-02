@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>parent</artifactId>
-        <version>0.14.2-SNAPSHOT</version>
+        <version>0.15.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>simpleclient_servlet</artifactId>
@@ -40,22 +40,22 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.14.2-SNAPSHOT</version>
+            <version>0.15.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_common</artifactId>
-            <version>0.14.2-SNAPSHOT</version>
+            <version>0.15.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_servlet_common</artifactId>
-            <version>0.14.2-SNAPSHOT</version>
+            <version>0.15.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- Test Dependencies Follow -->
@@ -68,19 +68,19 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>2.6.0</version>
+            <version>3.22.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>8.1.7.v20120910</version>
+            <version>8.2.0.v20160908</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.28.2</version>
+            <version>4.3.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

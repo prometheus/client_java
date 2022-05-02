@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>integration_tests</artifactId>
-    <version>0.14.2-SNAPSHOT</version>
+    <version>0.15.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>it_pushgateway</artifactId>
@@ -30,13 +30,13 @@
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
-      <version>4.9.1</version>
+      <version>4.9.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.10</version>
       <scope>test</scope>
     </dependency>
     <dependency>

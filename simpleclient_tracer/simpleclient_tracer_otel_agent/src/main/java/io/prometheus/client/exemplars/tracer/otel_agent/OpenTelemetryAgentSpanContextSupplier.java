@@ -20,6 +20,7 @@ public class OpenTelemetryAgentSpanContextSupplier implements SpanContextSupplie
       OpenTelemetryAgentSpanContextSupplier test = new OpenTelemetryAgentSpanContextSupplier();
       test.getSpanId();
       test.getTraceId();
+      test.isSampled();
       return true;
     } catch (LinkageError ignored) {
       // NoClassDefFoundError:
@@ -40,5 +41,10 @@ public class OpenTelemetryAgentSpanContextSupplier implements SpanContextSupplie
   public String getSpanId() {
     String spanId = Span.current().getSpanContext().getSpanId();
     return SpanId.isValid(spanId) ? spanId : null;
+  }
+
+  @Override
+  public boolean isSampled() {
+    return Span.current().getSpanContext().isSampled();
   }
 }

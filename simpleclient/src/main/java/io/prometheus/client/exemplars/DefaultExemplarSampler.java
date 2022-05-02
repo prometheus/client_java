@@ -41,8 +41,9 @@ public class DefaultExemplarSampler implements ExemplarSampler {
 
   private Exemplar doSample(double value, Exemplar previous) {
     long timestampMs = clock.currentTimeMillis();
-    if (previous == null || previous.getTimestampMs() == null
-        || timestampMs - previous.getTimestampMs() > minRetentionIntervalMs) {
+    if ((previous == null || previous.getTimestampMs() == null
+        || timestampMs - previous.getTimestampMs() > minRetentionIntervalMs)
+        && spanContextSupplier.isSampled()) {
       String spanId = spanContextSupplier.getSpanId();
       String traceId = spanContextSupplier.getTraceId();
       if (traceId != null && spanId != null) {

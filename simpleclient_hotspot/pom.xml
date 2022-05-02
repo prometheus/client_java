@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>parent</artifactId>
-        <version>0.14.2-SNAPSHOT</version>
+        <version>0.15.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>simpleclient_hotspot</artifactId>
@@ -36,14 +36,14 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.14.2-SNAPSHOT</version>
+            <version>0.15.1-SNAPSHOT</version>
         </dependency>
         
         <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_servlet</artifactId>
-            <version>0.14.2-SNAPSHOT</version>
+            <version>0.15.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>8.1.7.v20120910</version>
+            <version>8.2.0.v20160908</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

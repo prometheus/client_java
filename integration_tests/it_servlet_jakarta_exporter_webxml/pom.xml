@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>integration_tests</artifactId>
-    <version>0.14.2-SNAPSHOT</version>
+    <version>0.15.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>it_servlet_jakarta_exporter_webxml</artifactId>
@@ -35,7 +35,7 @@
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
-      <version>4.9.1</version>
+      <version>4.9.3</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
@@ -45,7 +45,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.0</version>
+      <version>1.2.10</version>
     </dependency>
       <dependency>
           <groupId>jakarta.servlet</groupId>

@@ -9,8 +9,8 @@ If you want to see this in action, you can run the example from the `ExemplarsCl
 ```
 ./mvnw package
 cd integration_tests/it_exemplars_otel_agent/target/
-curl -LO https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.2.0/opentelemetry-javaagent-all.jar
-java -Dotel.traces.exporter=logging -Dotel.metrics.exporter=none -javaagent:./opentelemetry-javaagent-all.jar -jar ./example-spring-boot-app.jar
+curl -LO https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.10.1/opentelemetry-javaagent.jar
+java -Dotel.traces.exporter=logging -Dotel.metrics.exporter=none -javaagent:./opentelemetry-javaagent.jar -jar ./example-spring-boot-app.jar
 ```
 
 Now you have a Spring REST service running on [http://localhost:8080/hello](http://localhost:8080/hello) that is instrumented with the OpenTelemetry Java agent.

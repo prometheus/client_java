@@ -352,16 +352,24 @@ public abstract class Collector {
     }
   }
 
-  private static final Pattern SANITIZE_PREFIX_PATTERN = Pattern.compile("^[^a-zA-Z_:]");
-  private static final Pattern SANITIZE_BODY_PATTERN = Pattern.compile("[^a-zA-Z0-9_:]");
-
   /**
    * Sanitize metric name
    */
   public static String sanitizeMetricName(String metricName) {
-    return SANITIZE_BODY_PATTERN.matcher(
-            SANITIZE_PREFIX_PATTERN.matcher(metricName).replaceFirst("_")
-    ).replaceAll("_");
+    int length = metricName.length();
+    char[] sanitized = new char[length];
+    for(int i = 0; i < length; i++) {
+      char ch = metricName.charAt(i);
+      if(ch == ':' ||
+          (ch >= 'a' && ch <= 'z') ||
+          (ch >= 'A' && ch <= 'Z') ||
+          (i > 0 && ch >= '0' && ch <= '9')) {
+        sanitized[i] = ch;
+      } else {
+        sanitized[i] = '_';
+      }
+    }
+    return new String(sanitized);
   }
 
   /**

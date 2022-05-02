@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>parent</artifactId>
-        <version>0.14.2-SNAPSHOT</version>
+        <version>0.15.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>simpleclient_logback</artifactId>
@@ -36,12 +36,12 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.14.2-SNAPSHOT</version>
+            <version>0.15.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.10</version>
         </dependency>
         
 
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.28.2</version>
+            <version>4.3.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

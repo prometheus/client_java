@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>parent</artifactId>
-    <version>0.14.2-SNAPSHOT</version>
+    <version>0.15.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>simpleclient_tracer</artifactId>
@@ -18,7 +18,7 @@
       <dependency>
         <groupId>io.opentelemetry</groupId>
         <artifactId>opentelemetry-api</artifactId>
-        <version>1.0.1</version>
+        <version>1.10.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

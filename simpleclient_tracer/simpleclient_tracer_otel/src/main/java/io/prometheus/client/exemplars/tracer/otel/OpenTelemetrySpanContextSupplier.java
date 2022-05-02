@@ -7,7 +7,7 @@ import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 
 public class OpenTelemetrySpanContextSupplier implements SpanContextSupplier {
 
-  public static boolean isAvailable() {
+	public static boolean isAvailable() {
     try {
       if ("inactive".equalsIgnoreCase(System.getProperties().getProperty("io.prometheus.otelExemplars"))) {
         return false;
@@ -15,6 +15,7 @@ public class OpenTelemetrySpanContextSupplier implements SpanContextSupplier {
       OpenTelemetrySpanContextSupplier test = new OpenTelemetrySpanContextSupplier();
       test.getSpanId();
       test.getTraceId();
+      test.isSampled();
       return true;
     } catch (LinkageError ignored) {
       // NoClassDefFoundError:
@@ -25,15 +26,20 @@ public class OpenTelemetrySpanContextSupplier implements SpanContextSupplier {
     }
   }
 
-  @Override
-  public String getTraceId() {
-    String traceId = Span.current().getSpanContext().getTraceId();
-    return TraceId.isValid(traceId) ? traceId : null;
-  }
+	@Override
+	public String getTraceId() {
+		String traceId = Span.current().getSpanContext().getTraceId();
+		return TraceId.isValid(traceId) ? traceId : null;
+	}
 
-  @Override
-  public String getSpanId() {
-    String spanId = Span.current().getSpanContext().getSpanId();
-    return SpanId.isValid(spanId) ? spanId : null;
-  }
+	@Override
+	public String getSpanId() {
+		String spanId = Span.current().getSpanContext().getSpanId();
+		return SpanId.isValid(spanId) ? spanId : null;
+	}
+
+	@Override
+	public boolean isSampled() {
+		return Span.current().getSpanContext().isSampled();
+	}
 }

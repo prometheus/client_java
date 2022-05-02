@@ -5,7 +5,7 @@
 
     <groupId>io.prometheus</groupId>
     <artifactId>parent</artifactId>
-    <version>0.14.2-SNAPSHOT</version>
+    <version>0.15.1-SNAPSHOT</version>
 
     <name>Prometheus Java Suite</name>
     <url>http://github.com/prometheus/client_java</url>
