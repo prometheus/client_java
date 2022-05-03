@@ -199,6 +199,7 @@ public class HTTPServer implements Closeable {
         private InetAddress inetAddress = null;
         private InetSocketAddress inetSocketAddress = null;
         private HttpServer httpServer = null;
+        private ExecutorService executorService = null;
         private CollectorRegistry registry = CollectorRegistry.defaultRegistry;
         private boolean daemon = false;
         private Predicate<String> sampleNameFilter;
@@ -248,10 +249,23 @@ public class HTTPServer implements Closeable {
         /**
          * Use this httpServer. The {@code httpServer} is expected to already be bound to an address.
          * Must not be called together with {@link #withPort(int)}, or {@link #withHostname(String)},
-         * or {@link #withInetAddress(InetAddress)}, or {@link #withInetSocketAddress(InetSocketAddress)}.
+         * or {@link #withInetAddress(InetAddress)}, or {@link #withInetSocketAddress(InetSocketAddress)},
+         * or {@link #withExecutorService(ExecutorService)}.
          */
         public Builder withHttpServer(HttpServer httpServer) {
             this.httpServer = httpServer;
+            return this;
+        }
+
+        /**
+         * Optional: ExecutorService used by the {@code httpServer}.
+         * Must not be called together with the {@link #withHttpServer(HttpServer)}.
+         *
+         * @param executorService
+         * @return
+         */
+        public Builder withExecutorService(ExecutorService executorService) {
+            this.executorService = executorService;
             return this;
         }
 
@@ -323,12 +337,13 @@ public class HTTPServer implements Closeable {
             }
 
             if (httpServer != null) {
+                assertNull(executorService, "cannot configure 'httpServer' and `executorService'");
                 assertZero(port, "cannot configure 'httpServer' and 'port' at the same time");
                 assertNull(hostname, "cannot configure 'httpServer' and 'hostname' at the same time");
                 assertNull(inetAddress, "cannot configure 'httpServer' and 'inetAddress' at the same time");
                 assertNull(inetSocketAddress, "cannot configure 'httpServer' and 'inetSocketAddress' at the same time");
                 assertNull(httpsConfigurator, "cannot configure 'httpServer' and 'httpsConfigurator' at the same time");
-                return new HTTPServer(httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
+                return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
             } else if (inetSocketAddress != null) {
                 assertZero(port, "cannot configure 'inetSocketAddress' and 'port' at the same time");
                 assertNull(hostname, "cannot configure 'inetSocketAddress' and 'hostname' at the same time");
@@ -350,7 +365,7 @@ public class HTTPServer implements Closeable {
                 httpServer = HttpServer.create(inetSocketAddress, 3);
             }
 
-            return new HTTPServer(httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
+            return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
         }
 
         private void assertNull(Object o, String msg) {
@@ -371,7 +386,7 @@ public class HTTPServer implements Closeable {
      * The {@code httpServer} is expected to already be bound to an address
      */
     public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
-        this(httpServer, registry, daemon, null, null);
+        this(null, httpServer, registry, daemon, null, null);
     }
 
     /**
@@ -416,7 +431,7 @@ public class HTTPServer implements Closeable {
         this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false);
     }
 
-    private HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon, Supplier<Predicate<String>> sampleNameFilterSupplier, Authenticator authenticator) {
+    private HTTPServer(ExecutorService executorService, HttpServer httpServer, CollectorRegistry registry, boolean daemon, Supplier<Predicate<String>> sampleNameFilterSupplier, Authenticator authenticator) {
         if (httpServer.getAddress() == null)
             throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
 
@@ -434,8 +449,12 @@ public class HTTPServer implements Closeable {
         if (authenticator != null) {
             mContext.setAuthenticator(authenticator);
         }
-        executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
-        server.setExecutor(executorService);
+        if (executorService != null) {
+            this.executorService = executorService;
+        } else {
+            this.executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
+        }
+        server.setExecutor(this.executorService);
         start(daemon);
     }
 

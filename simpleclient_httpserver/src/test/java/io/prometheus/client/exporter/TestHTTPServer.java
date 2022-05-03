@@ -30,6 +30,8 @@ import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
@@ -446,6 +448,53 @@ public class TestHTTPServer {
       Assert.fail("expected IOException with HTTP 401");
     } catch (IOException e) {
       Assert.assertTrue(e.getMessage().contains("401"));
+    } finally {
+      httpServer.close();
+    }
+  }
+
+  @Test
+  public void testExecutorService() throws IOException {
+    ExecutorService executorService = Executors.newFixedThreadPool(20);
+
+    HTTPServer httpServer = new HTTPServer.Builder()
+            .withExecutorService(executorService)
+            .withRegistry(registry)
+            .build();
+
+    Assert.assertEquals(httpServer.executorService, executorService);
+
+    try {
+      String body = createHttpRequestBuilder(httpServer, "/metrics").build().execute().getBody();
+      assertThat(body).contains("a 0.0");
+      assertThat(body).contains("b 0.0");
+      assertThat(body).contains("c 0.0");
+    } finally {
+      httpServer.close();
+    }
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void testExecutorServiceWithHttpServer() throws IOException {
+    InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", 0);
+
+    HttpServer externalHttpServer = HttpServer.create(inetSocketAddress, 0);
+    externalHttpServer.createContext("/metrics", new HTTPServer.HTTPMetricHandler(registry));
+    externalHttpServer.start();
+
+    ExecutorService executorService = Executors.newFixedThreadPool(20);
+
+    HTTPServer httpServer = new HTTPServer.Builder()
+            .withExecutorService(executorService)
+            .withHttpServer(externalHttpServer)
+            .withRegistry(registry)
+            .build();
+
+    try {
+      String body = createHttpRequestBuilder(httpServer, "/metrics").build().execute().getBody();
+      assertThat(body).contains("a 0.0");
+      assertThat(body).contains("b 0.0");
+      assertThat(body).contains("c 0.0");
     } finally {
       httpServer.close();
     }
