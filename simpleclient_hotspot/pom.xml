@@ -55,14 +55,14 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.28.2</version>
+            <version>3.0.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>8.2.0.v20160908</version>
+            <version>9.4.44.v20210927</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

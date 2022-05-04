@@ -1,0 +1,41 @@
+<ruleset comparisonMethod="maven"
+         xmlns="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://mojo.codehaus.org/versions-maven-plugin/rule/2.0.0 https://www.mojohaus.org/versions-maven-plugin/xsd/rule-2.0.0.xsd">
+    <rules>
+        <rule groupId="*" comparisonMethod="maven">
+            <ignoreVersions>
+                <ignoreVersion type="regex">.*-RC\d</ignoreVersion>
+                <ignoreVersion type="regex">.*\.RC\d</ignoreVersion>
+                <ignoreVersion type="regex">.*alpha.*</ignoreVersion>
+                <ignoreVersion type="regex">.*\.M\d</ignoreVersion>
+            </ignoreVersions>
+        </rule>
+        <rule groupId="javax.servlet" comparisonMethod="maven">
+            <ignoreVersions>
+                <ignoreVersion type="regex">.*-b\d\d</ignoreVersion>
+            </ignoreVersions>
+        </rule>
+        <rule groupId="com.google.guava" comparisonMethod="maven">
+            <ignoreVersions>
+                <ignoreVersion type="regex">.*-android</ignoreVersion>
+            </ignoreVersions>
+        </rule>
+        <rule groupId="org.springframework.boot" comparisonMethod="maven">
+            <ignoreVersions>
+                <ignoreVersion type="regex">2\..*</ignoreVersion>
+            </ignoreVersions>
+        </rule>
+        <rule groupId="org.eclipse.jetty" comparisonMethod="maven">
+            <ignoreVersions>
+                <!-- pin to version 8 -->
+                <ignoreVersion type="regex">[^8].*</ignoreVersion>
+            </ignoreVersions>
+        </rule>
+        <rule groupId="org.springframework" comparisonMethod="maven">
+            <ignoreVersions>
+                <!-- pin to version 4 -->
+                <ignoreVersion type="regex">[^4].*</ignoreVersion>
+            </ignoreVersions>
+        </rule>
+    </rules>
+</ruleset>

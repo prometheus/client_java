@@ -12,7 +12,7 @@
     <name>Integration Tests - log4j2</name>
 
     <properties>
-        <log4j2.version>2.17.1</log4j2.version>
+        <log4j2.version>2.17.2</log4j2.version>
         <!-- I manually tested this with log4j2.version 2.3 and Java 6, and it worked fine. -->
         <!-- <log4j2.version>2.3</log4j2.version> -->
     </properties>
