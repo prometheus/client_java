@@ -61,7 +61,8 @@ public class TextFormatTest {
   public void testMetricOutputWithTimestamp() throws IOException {
 
     class CustomCollector extends Collector {
-      public List<MetricFamilySamples> collect() {
+      @Override
+    public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
         ArrayList<String> labelNames = new ArrayList<String>();
         ArrayList<String> labelValues = new ArrayList<String>();
@@ -133,7 +134,7 @@ public class TextFormatTest {
     Gauge noLabels = Gauge.build().name("nolabels").help("ąćčęntěd h\"e\\l\np").register(registry);
     noLabels.inc();
     TextFormat.write004(writer, registry.metricFamilySamples());
-    assertEquals("# HELP nolabels ąćčęntěd h\"e\\\\l\\np\n"
+    assertEquals("# HELP nolabels ąćčęntěd h\"e\\\\l\n# p\n"
                  + "# TYPE nolabels gauge\n"
                  + "nolabels 1.0\n", writer.toString());
   }

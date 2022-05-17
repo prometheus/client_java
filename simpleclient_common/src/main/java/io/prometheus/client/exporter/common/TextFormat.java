@@ -56,14 +56,13 @@ public class TextFormat {
   }
 
   private static void writeEscapedHelp(Writer writer, String s) throws IOException {
+    // In case of a multi-line help text, prefix new lines with #
+    s = s.replace("\n", "\n# ");
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
       switch (c) {
         case '\\':
           writer.append("\\\\");
-          break;
-        case '\n':
-          writer.append("\\n");
           break;
         default:
           writer.append(c);
