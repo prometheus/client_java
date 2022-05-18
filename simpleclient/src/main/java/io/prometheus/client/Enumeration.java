@@ -195,8 +195,10 @@ public class Enumeration extends SimpleCollector<Enumeration.Child> implements C
   }
 
   @Override
-  public void collect(SimpleTextOutputStream outputStream, Predicate<String> sampleNameFilter) {
-    //TODO
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
+    if (sampleNameFilter.test(this.fullname)) {
+      formatter.format(this);
+    }
   }
 
   @Override

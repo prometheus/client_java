@@ -351,8 +351,10 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   }
 
   @Override
-  public void collect(SimpleTextOutputStream outputStream, Predicate<String> sampleNameFilter) {
-    //TODO
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
+    if (sampleNameFilter.test(fullname)) {
+      formatter.format(this);
+    }
   }
 
   @Override

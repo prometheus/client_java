@@ -3,6 +3,7 @@ package io.prometheus.client;
 
 import io.prometheus.client.exemplars.Exemplar;
 
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -21,7 +22,7 @@ public abstract class Collector {
   /**
    * Write metrics to outputStream directly, without Samples objects allocation.
    */
-  public void collect(SimpleTextOutputStream outputStream, Predicate<String> sampleNameFilter) {
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
     List<MetricFamilySamples> samples = sampleNameFilter == null ? collect() : collect(sampleNameFilter);
     // TODO
   }

@@ -132,13 +132,13 @@ public class CollectorRegistry {
   /**
    * Collect all metrics to outputStream and filtered by sampleNameFilter.
    *
-   * @param outputStream
+   * @param formatter
    * @param sampleNameFilter
    */
-  public void collect(SimpleTextOutputStream outputStream, Predicate<String> sampleNameFilter) {
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
     Set<Collector> collectors = this.collectors();
     for (Collector collector : collectors) {
-      collector.collect(outputStream, sampleNameFilter);
+      collector.collect(formatter, sampleNameFilter);
     }
   }
 
