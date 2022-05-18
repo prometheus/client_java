@@ -1,5 +1,6 @@
 package io.prometheus.client.hotspot;
 
+import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.CollectorRegistry;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,7 +8,10 @@ import org.mockito.Mockito;
 
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -96,5 +100,99 @@ public class ThreadExportsTest {
             registry.getSampleValue(
                     "jvm_threads_state", STATE_LABEL, STATE_TERMINATED_LABEL),
             .0000001);
+  }
+
+  @Test
+  public void testInvalidThreadIds() {
+    ThreadExports threadExports = new ThreadExports();
+
+    // Number of threads to create with invalid thread ids
+    int numberOfInvalidThreadIds = 2;
+
+    // Get the current thread state counts
+    Map<String, Double> expectedThreadStateCountMap = new HashMap<String, Double>();
+    List<MetricFamilySamples> metricFamilySamplesList = threadExports.collect();
+    for (MetricFamilySamples metricFamilySamples : metricFamilySamplesList) {
+      if (ThreadExports.JVM_THREADS_STATE.equals(metricFamilySamples.name)) {
+        for (MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
+          expectedThreadStateCountMap.put(ThreadExports.JVM_THREADS_STATE + "-" + sample.labelValues.get(0), sample.value);
+        }
+      }
+    }
+
+    // Add numberOfInvalidThreadIds to the expected UNKNOWN thread state count
+    expectedThreadStateCountMap.put(
+      ThreadExports.JVM_THREADS_STATE + "-" + ThreadExports.UNKNOWN,
+      expectedThreadStateCountMap.get(
+        ThreadExports.JVM_THREADS_STATE + "-" + ThreadExports.UNKNOWN) + numberOfInvalidThreadIds);
+
+    final CountDownLatch countDownLatch = new CountDownLatch(numberOfInvalidThreadIds);
+
+    try {
+      // Create and start threads with invalid thread ids (id=0, id=-1, etc.)
+      for (int i = 0; i < numberOfInvalidThreadIds; i++) {
+        new TestThread(-i, new TestRunnable(countDownLatch)).start();
+      }
+
+      // Get the current thread state counts
+      Map<String, Double> actualThreadStateCountMap = new HashMap<String, Double>();
+      metricFamilySamplesList = threadExports.collect();
+      for (MetricFamilySamples metricFamilySamples : metricFamilySamplesList) {
+        if (ThreadExports.JVM_THREADS_STATE.equals(metricFamilySamples.name)) {
+          for (MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
+            actualThreadStateCountMap.put(ThreadExports.JVM_THREADS_STATE + "-" + sample.labelValues.get(0), sample.value);
+          }
+        }
+      }
+
+      // Assert that we have the same number of thread states
+      assertEquals(expectedThreadStateCountMap.size(), actualThreadStateCountMap.size());
+
+      // Check each thread state count
+      for (String threadState : expectedThreadStateCountMap.keySet()) {
+        double expectedThreadStateCount = expectedThreadStateCountMap.get(threadState);
+        double actualThreadStateCount = actualThreadStateCountMap.get(threadState);
+
+        // Assert the expected and actual thread count states are equal
+        assertEquals(expectedThreadStateCount, actualThreadStateCount, 0.0);
+      }
+    } finally {
+      for (int i = 0; i < numberOfInvalidThreadIds; i++) {
+        countDownLatch.countDown();
+      }
+    }
+  }
+
+  private class TestThread extends Thread {
+
+    private long id;
+
+    public TestThread(long id, Runnable runnable) {
+      super(runnable);
+      setDaemon(true);
+      this.id = id;
+    }
+
+    public long getId() {
+      return this.id;
+    }
+  }
+
+  private class TestRunnable implements Runnable {
+
+    private CountDownLatch countDownLatch;
+
+    public TestRunnable(CountDownLatch countDownLatch) {
+      this.countDownLatch = countDownLatch;
+    }
+
+    @Override
+    public void run() {
+      try {
+        countDownLatch.await();
+      } catch (InterruptedException e) {
+        // DO NOTHING
+      }
+    }
   }
 }
