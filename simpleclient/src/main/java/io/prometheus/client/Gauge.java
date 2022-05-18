@@ -65,7 +65,7 @@ import java.util.concurrent.Callable;
  */
 public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Describable {
 
-  Gauge(Builder b) {
+    public Gauge(Builder b) {
     super(b);
   }
 
