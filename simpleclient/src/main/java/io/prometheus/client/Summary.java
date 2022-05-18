@@ -390,6 +390,12 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     return noLabelsChild.get();
   }
 
+
+  @Override
+  public void collect(SimpleTextOutputStream outputStream, Predicate<String> sampleNameFilter) {
+    // TODO
+  }
+
   @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();

@@ -351,6 +351,11 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   }
 
   @Override
+  public void collect(SimpleTextOutputStream outputStream, Predicate<String> sampleNameFilter) {
+    //TODO
+  }
+
+  @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {

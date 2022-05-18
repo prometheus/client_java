@@ -19,6 +19,14 @@ import java.util.regex.Pattern;
 public abstract class Collector {
 
   /**
+   * Write metrics to outputStream directly, without Samples objects allocation.
+   */
+  public void collect(SimpleTextOutputStream outputStream, Predicate<String> sampleNameFilter) {
+    List<MetricFamilySamples> samples = sampleNameFilter == null ? collect() : collect(sampleNameFilter);
+    // TODO
+  }
+
+  /**
    * Return all metrics of this Collector.
    */
   public abstract List<MetricFamilySamples> collect();
@@ -197,7 +205,7 @@ public abstract class Collector {
         return false;
       }
       MetricFamilySamples other = (MetricFamilySamples) obj;
-      
+
       return other.name.equals(name)
         && other.unit.equals(unit)
         && other.type.equals(type)
@@ -390,7 +398,7 @@ public abstract class Collector {
   public static String doubleToGoString(double d) {
     if (d == Double.POSITIVE_INFINITY) {
       return "+Inf";
-    } 
+    }
     if (d == Double.NEGATIVE_INFINITY) {
       return "-Inf";
     }

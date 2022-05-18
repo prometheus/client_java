@@ -130,6 +130,19 @@ public class CollectorRegistry {
   }
 
   /**
+   * Collect all metrics to outputStream and filtered by sampleNameFilter.
+   *
+   * @param outputStream
+   * @param sampleNameFilter
+   */
+  public void collect(SimpleTextOutputStream outputStream, Predicate<String> sampleNameFilter) {
+    Set<Collector> collectors = this.collectors();
+    for (Collector collector : collectors) {
+      collector.collect(outputStream, sampleNameFilter);
+    }
+  }
+
+  /**
    * Enumeration of metrics matching the specified names.
    * <p>
    * Note that the provided set of names will be matched against the time series
