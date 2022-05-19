@@ -3,6 +3,7 @@ package io.prometheus.client;
 import io.prometheus.client.CKMSQuantiles.Quantile;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -135,7 +136,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     }
 
     /**
-     * The class JavaDoc for {@link Summary} has more information on {@link #maxAgeSeconds(long)} 
+     * The class JavaDoc for {@link Summary} has more information on {@link #maxAgeSeconds(long)}
      * @see Summary
      */
     public Builder maxAgeSeconds(long maxAgeSeconds) {
@@ -147,7 +148,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     }
 
     /**
-     * The class JavaDoc for {@link Summary} has more information on {@link #ageBuckets(int)} 
+     * The class JavaDoc for {@link Summary} has more information on {@link #ageBuckets(int)}
      * @see Summary
      */
     public Builder ageBuckets(int ageBuckets) {
@@ -392,9 +393,12 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
 
   @Override
-  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter)
+          throws IOException {
     if (sampleNameFilter.test(this.fullname)) {
-      formatter.format(this);
+      formatter.format(
+              new TextFormatter.SummaryMetricSnapshotSamples(
+                      fullname, unit, Type.SUMMARY, help, labelNames, children, quantiles));
     }
   }
 

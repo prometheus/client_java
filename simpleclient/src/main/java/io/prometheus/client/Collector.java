@@ -3,8 +3,9 @@ package io.prometheus.client;
 
 import io.prometheus.client.exemplars.Exemplar;
 
-import java.io.Writer;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -22,9 +23,23 @@ public abstract class Collector {
   /**
    * Write metrics to outputStream directly, without Samples objects allocation.
    */
-  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
-    List<MetricFamilySamples> samples = sampleNameFilter == null ? collect() : collect(sampleNameFilter);
-    // TODO
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) throws IOException {
+    final List<MetricFamilySamples> samples = sampleNameFilter == null ? collect() : collect(sampleNameFilter);
+    formatter.format(new Enumeration<MetricFamilySamples>() {
+      private int index = 1;
+
+      @Override
+      public boolean hasMoreElements() {
+        return index < samples.size();
+      }
+
+      @Override
+      public MetricFamilySamples nextElement() {
+        MetricFamilySamples familySamples = samples.get(index - 1);
+        index++;
+        return familySamples;
+      }
+    });
   }
 
   /**

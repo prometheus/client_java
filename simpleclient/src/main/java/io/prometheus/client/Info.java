@@ -148,13 +148,6 @@ public class Info extends SimpleCollector<Info.Child> implements Counter.Describ
   }
 
   @Override
-  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
-    if (sampleNameFilter.test(this.fullname)) {
-      formatter.format(this);
-    }
-  }
-
-  @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {

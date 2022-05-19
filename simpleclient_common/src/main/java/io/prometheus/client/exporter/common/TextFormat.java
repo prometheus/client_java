@@ -136,7 +136,7 @@ public class TextFormat {
     }
   }
 
-  private static void writeEscapedHelp(Writer writer, String s) throws IOException {
+  public static void writeEscapedHelp(Writer writer, String s) throws IOException {
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
       switch (c) {
@@ -152,7 +152,7 @@ public class TextFormat {
     }
   }
 
-  private static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
+  public static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
       switch (c) {
@@ -171,7 +171,7 @@ public class TextFormat {
     }
   }
 
-  private static String typeString(Collector.Type t) {
+  public static String typeString(Collector.Type t) {
     switch (t) {
       case GAUGE:
         return "gauge";

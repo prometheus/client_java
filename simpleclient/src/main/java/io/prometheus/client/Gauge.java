@@ -1,6 +1,7 @@
 package io.prometheus.client;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -312,9 +313,12 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
 
 
   @Override
-  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter)
+          throws IOException {
     if (sampleNameFilter.test(this.fullname)) {
-      formatter.format(this);
+      formatter.format(
+              new TextFormatter.MetricSnapshotSamples(
+                      fullname, unit, Type.GAUGE, help, labelNames, children));
     }
   }
 

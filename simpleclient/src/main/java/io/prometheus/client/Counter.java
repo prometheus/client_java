@@ -4,6 +4,7 @@ import io.prometheus.client.exemplars.CounterExemplarSampler;
 import io.prometheus.client.exemplars.Exemplar;
 import io.prometheus.client.exemplars.ExemplarConfig;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -351,9 +352,12 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
   }
 
   @Override
-  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter)
+          throws IOException {
     if (sampleNameFilter.test(fullname)) {
-      formatter.format(this);
+      formatter.format(
+              new TextFormatter.MetricSnapshotSamples(
+                      fullname, unit, Type.COUNTER, help, labelNames, children));
     }
   }
 

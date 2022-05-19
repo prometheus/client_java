@@ -1,5 +1,6 @@
 package io.prometheus.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -135,7 +136,7 @@ public class CollectorRegistry {
    * @param formatter
    * @param sampleNameFilter
    */
-  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) throws IOException {
     Set<Collector> collectors = this.collectors();
     for (Collector collector : collectors) {
       collector.collect(formatter, sampleNameFilter);

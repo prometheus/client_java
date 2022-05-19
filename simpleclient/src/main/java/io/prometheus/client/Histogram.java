@@ -5,6 +5,7 @@ import io.prometheus.client.exemplars.ExemplarConfig;
 import io.prometheus.client.exemplars.HistogramExemplarSampler;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -561,9 +562,12 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
   }
 
   @Override
-  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) {
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter)
+          throws IOException {
     if (sampleNameFilter.test(this.fullname)) {
-      formatter.format(this);
+      formatter.format(
+              new TextFormatter.HistogramMetricSnapshotSamples(
+                      fullname, unit, Type.HISTOGRAM, help, labelNames, children, buckets));
     }
   }
 
