@@ -29,6 +29,13 @@ class DoubleUtil {
     }
   }
 
+  /**
+   * To prevent generate string objects.
+   *
+   * @param writer
+   * @param v
+   * @throws IOException
+   */
   static void append(Writer writer, double v) throws IOException {
     if (initialized) {
       StringBuilder builder = stringBuilderCache.get();
