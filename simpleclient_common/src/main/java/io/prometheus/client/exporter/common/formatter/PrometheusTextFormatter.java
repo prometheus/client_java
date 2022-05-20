@@ -44,19 +44,20 @@ public class PrometheusTextFormatter extends TextFormatter {
     if (type.equals(Collector.Type.GAUGE)) {
       Map<List<String>, Gauge.Child> children = (Map<List<String>, Gauge.Child>) samples.children;
       for (Map.Entry<List<String>, Gauge.Child> entry : children.entrySet()) {
-        this.write(samples.labelNames, entry.getKey(), entry.getValue().get(), null, samples.name);
+        this.write(
+            samples.name, null, samples.labelNames, entry.getKey(), entry.getValue().get(), null);
       }
     } else if (type.equals(Collector.Type.COUNTER)) {
       Map<List<String>, Counter.Child> children =
           (Map<List<String>, Counter.Child>) samples.children;
       for (Map.Entry<List<String>, Counter.Child> entry : children.entrySet()) {
         this.write(
+            samples.name,
+            "_total",
             samples.labelNames,
             entry.getKey(),
             entry.getValue().get(),
-            null,
-            samples.name,
-            "_total");
+            null);
       }
       // TODO
     } else if (type.equals(Collector.Type.HISTOGRAM)) {
@@ -81,15 +82,19 @@ public class PrometheusTextFormatter extends TextFormatter {
     TextFormat.write004(this.writer, mfs);
   }
 
+  final String value = Double.toString(Double.MAX_VALUE);
+
   private void write(
+      String name,
+      String suffix,
       List<String> labelNames,
       List<String> labelValues,
       double value,
-      Long timestampMs,
-      String... names)
+      Long timestampMs)
       throws IOException {
-    for (String name : names) {
-      writer.write(name);
+    writer.write(name);
+    if (null != suffix) {
+      writer.write(suffix);
     }
     if (labelNames.size() > 0) {
       writer.write('{');
@@ -102,7 +107,16 @@ public class PrometheusTextFormatter extends TextFormatter {
       writer.write('}');
     }
     writer.write(' ');
-    writer.write(Collector.doubleToGoString(value));
+
+    if (value == Double.POSITIVE_INFINITY) {
+      writer.write("+Inf");
+    } else if (value == Double.NEGATIVE_INFINITY) {
+      writer.write("-Inf");
+    } else {
+      //TODO doubleToStr
+      writer.write(this.value);
+    }
+
     if (timestampMs != null) {
       writer.write(' ');
       writer.write(timestampMs.toString());
