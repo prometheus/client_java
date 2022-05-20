@@ -26,6 +26,8 @@ public class Exporter {
   public static final String NAME_MUST_NOT_BE_EQUAL_TO = "name-must-not-be-equal-to";
   public static final String NAME_MUST_START_WITH = "name-must-start-with";
   public static final String NAME_MUST_NOT_START_WITH = "name-must-not-start-with";
+  public static final String NAME_MUST_END_WITH = "name-must-end-with";
+  public static final String NAME_MUST_NOT_END_WITH = "name-must-not-end-with";
 
   private CollectorRegistry registry;
   private Predicate<String> sampleNameFilter;
@@ -48,12 +50,16 @@ public class Exporter {
     List<String> excludedNames = SampleNameFilter.stringToList(servletConfig.getInitParameter(NAME_MUST_NOT_BE_EQUAL_TO));
     List<String> allowedPrefixes = SampleNameFilter.stringToList(servletConfig.getInitParameter(NAME_MUST_START_WITH));
     List<String> excludedPrefixes = SampleNameFilter.stringToList(servletConfig.getInitParameter(NAME_MUST_NOT_START_WITH));
+    List<String> allowedSuffixes = SampleNameFilter.stringToList(servletConfig.getInitParameter(NAME_MUST_END_WITH));
+    List<String> excludedSuffixes = SampleNameFilter.stringToList(servletConfig.getInitParameter(NAME_MUST_NOT_END_WITH));
     if (!allowedPrefixes.isEmpty() || !excludedPrefixes.isEmpty() || !allowedNames.isEmpty() || !excludedNames.isEmpty()) {
       SampleNameFilter filter = new SampleNameFilter.Builder()
               .nameMustBeEqualTo(allowedNames)
               .nameMustNotBeEqualTo(excludedNames)
               .nameMustStartWith(allowedPrefixes)
               .nameMustNotStartWith(excludedPrefixes)
+              .nameMustEndWith(allowedSuffixes)
+              .nameMustNotEndWith(excludedSuffixes)
               .build();
       if (this.sampleNameFilter != null) {
         this.sampleNameFilter = filter.and(this.sampleNameFilter);
