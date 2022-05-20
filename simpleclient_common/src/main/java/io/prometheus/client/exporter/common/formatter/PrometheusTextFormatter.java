@@ -12,9 +12,7 @@ import java.util.Map;
 
 import static io.prometheus.client.exporter.common.TextFormat.*;
 
-/**
- * Implement TextFormat#write004.
- */
+/** Implement TextFormat#write004. */
 public class PrometheusTextFormatter extends TextFormatter {
 
   public static final List<Collector.Type> SUPPORTED_TYPES =
@@ -82,8 +80,6 @@ public class PrometheusTextFormatter extends TextFormatter {
     TextFormat.write004(this.writer, mfs);
   }
 
-  final String value = Double.toString(Double.MAX_VALUE);
-
   private void write(
       String name,
       String suffix,
@@ -113,8 +109,7 @@ public class PrometheusTextFormatter extends TextFormatter {
     } else if (value == Double.NEGATIVE_INFINITY) {
       writer.write("-Inf");
     } else {
-      //TODO doubleToStr
-      writer.write(this.value);
+      DoubleUtil.append(writer, value);
     }
 
     if (timestampMs != null) {
