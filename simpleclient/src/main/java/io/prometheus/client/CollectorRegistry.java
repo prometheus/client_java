@@ -136,11 +136,13 @@ public class CollectorRegistry {
    * @param formatter
    * @param sampleNameFilter
    */
-  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter) throws IOException {
+  public void collect(TextFormatter formatter, Predicate<String> sampleNameFilter)
+          throws IOException {
     Set<Collector> collectors = this.collectors();
     for (Collector collector : collectors) {
       collector.collect(formatter, sampleNameFilter);
     }
+    formatter.flush();
   }
 
   /**

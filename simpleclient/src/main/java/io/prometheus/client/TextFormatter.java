@@ -8,9 +8,9 @@ import java.util.Map;
 
 public abstract class TextFormatter {
 
-  protected final Writer writer;
+  protected final MetricsWriter writer;
 
-  public TextFormatter(Writer writer) {
+  public TextFormatter(MetricsWriter writer) {
     if (null == writer) {
       throw new IllegalArgumentException();
     }
@@ -21,6 +21,10 @@ public abstract class TextFormatter {
   public abstract void format(MetricSnapshotSamples samples) throws IOException;
 
   public abstract void format(Enumeration<Collector.MetricFamilySamples> mfs) throws IOException;
+
+  protected void flush() throws IOException {
+    // noop
+  }
 
   public static class MetricSnapshotSamples {
     public final String name;
@@ -75,6 +79,22 @@ public abstract class TextFormatter {
         double[] buckets) {
       super(name, unit, type, help, labelNames, children);
       this.buckets = buckets;
+    }
+  }
+
+  public abstract static class MetricsWriter extends Writer {
+    public void write(byte[] bytes) throws IOException {
+      this.write(bytes, 0, bytes.length);
+    }
+
+    public abstract void write(byte[] bytes, int offset, int length) throws IOException;
+
+    public <T> T getBuffer() {
+      throw new UnsupportedOperationException();
+    }
+
+    public MetricsWriter append(MetricsWriter other) throws IOException {
+      throw new UnsupportedOperationException();
     }
   }
 }

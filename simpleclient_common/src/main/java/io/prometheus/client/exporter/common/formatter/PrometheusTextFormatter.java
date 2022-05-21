@@ -4,7 +4,6 @@ import io.prometheus.client.*;
 import io.prometheus.client.exporter.common.TextFormat;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -22,8 +21,11 @@ public class PrometheusTextFormatter extends TextFormatter {
           Collector.Type.SUMMARY,
           Collector.Type.HISTOGRAM);
 
-  public PrometheusTextFormatter(Writer writer) {
+  private final MetricsWriter subWriter;
+
+  public PrometheusTextFormatter(MetricsWriter writer, MetricsWriter subWriter) {
     super(writer);
+    this.subWriter = subWriter;
   }
 
   @Override
@@ -34,7 +36,7 @@ public class PrometheusTextFormatter extends TextFormatter {
       return;
     }
 
-    this.write(samples.name, samples.help, type);
+    write(writer, samples.name, null, samples.help, type);
     final String createdName = samples.name + "_created";
     final String gcountName = samples.name + "_gcount";
     final String gsumName = samples.name + "_gsum";
@@ -42,29 +44,40 @@ public class PrometheusTextFormatter extends TextFormatter {
     if (type.equals(Collector.Type.GAUGE)) {
       Map<List<String>, Gauge.Child> children = (Map<List<String>, Gauge.Child>) samples.children;
       for (Map.Entry<List<String>, Gauge.Child> entry : children.entrySet()) {
-        this.write(
-            samples.name, null, samples.labelNames, entry.getKey(), entry.getValue().get(), null);
-      }
-    } else if (type.equals(Collector.Type.COUNTER)) {
-      Map<List<String>, Counter.Child> children =
-          (Map<List<String>, Counter.Child>) samples.children;
-      for (Map.Entry<List<String>, Counter.Child> entry : children.entrySet()) {
-        this.write(
+        write(
+            writer,
             samples.name,
-            "_total",
+            null,
             samples.labelNames,
             entry.getKey(),
             entry.getValue().get(),
             null);
       }
-      // TODO
+    } else if (type.equals(Collector.Type.COUNTER)) {
+      Map<List<String>, Counter.Child> children =
+          (Map<List<String>, Counter.Child>) samples.children;
+      write(subWriter, samples.name, "_created", samples.help, Collector.Type.GAUGE);
+      for (Map.Entry<List<String>, Counter.Child> entry : children.entrySet()) {
+        List<String> labelValues = entry.getKey();
+        Counter.Child child = entry.getValue();
+        write(writer, samples.name, "_total", samples.labelNames, labelValues, child.get(), null);
+        write(
+            subWriter,
+            samples.name,
+            "_created",
+            samples.labelNames,
+            labelValues,
+            child.created() / 1000.0,
+            null);
+      }
     } else if (type.equals(Collector.Type.HISTOGRAM)) {
       HistogramMetricSnapshotSamples samples1 = (HistogramMetricSnapshotSamples) samples;
       double[] buckets = samples1.buckets;
       Map<List<String>, Histogram.Child> children =
           (Map<List<String>, Histogram.Child>) samples1.children;
+      write(subWriter, samples.name, "_created", samples.help, Collector.Type.GAUGE);
       for (Map.Entry<List<String>, Histogram.Child> entry : children.entrySet()) {}
-      // TODO
+
     } else if (type.equals(Collector.Type.SUMMARY)) {
       SummaryMetricSnapshotSamples samples1 = (SummaryMetricSnapshotSamples) samples;
       List<CKMSQuantiles.Quantile> quantiles = samples1.quantiles;
@@ -80,7 +93,13 @@ public class PrometheusTextFormatter extends TextFormatter {
     TextFormat.write004(this.writer, mfs);
   }
 
-  private void write(
+  @Override
+  protected void flush() throws IOException {
+    this.writer.append(this.subWriter);
+  }
+
+  private static void write(
+      MetricsWriter writer,
       String name,
       String suffix,
       List<String> labelNames,
@@ -103,14 +122,7 @@ public class PrometheusTextFormatter extends TextFormatter {
       writer.write('}');
     }
     writer.write(' ');
-
-    if (value == Double.POSITIVE_INFINITY) {
-      writer.write("+Inf");
-    } else if (value == Double.NEGATIVE_INFINITY) {
-      writer.write("-Inf");
-    } else {
-      DoubleUtil.append(writer, value);
-    }
+    DoubleUtil.append(writer, value);
 
     if (timestampMs != null) {
       writer.write(' ');
@@ -119,9 +131,14 @@ public class PrometheusTextFormatter extends TextFormatter {
     writer.write('\n');
   }
 
-  private void write(String name, String help, Collector.Type type) throws IOException {
+  private static void write(
+      MetricsWriter writer, String name, String suffix, String help, Collector.Type type)
+      throws IOException {
     writer.write("# HELP ");
     writer.write(name);
+    if (suffix != null) {
+      writer.write(suffix);
+    }
     if (type == Collector.Type.COUNTER) {
       writer.write("_total");
     }
