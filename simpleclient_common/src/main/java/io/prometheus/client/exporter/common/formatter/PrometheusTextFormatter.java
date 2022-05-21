@@ -36,55 +36,96 @@ public class PrometheusTextFormatter extends TextFormatter {
       return;
     }
 
-    write(writer, samples.name, null, samples.help, type);
-    final String createdName = samples.name + "_created";
-    final String gcountName = samples.name + "_gcount";
-    final String gsumName = samples.name + "_gsum";
+    outputHeader(writer, samples.name, samples.help, type);
 
     if (type.equals(Collector.Type.GAUGE)) {
       Map<List<String>, Gauge.Child> children = (Map<List<String>, Gauge.Child>) samples.children;
       for (Map.Entry<List<String>, Gauge.Child> entry : children.entrySet()) {
-        write(
-            writer,
-            samples.name,
-            null,
-            samples.labelNames,
-            entry.getKey(),
-            entry.getValue().get(),
-            null);
+        outputValue(
+            writer, samples.name, null, samples.labelNames, entry.getKey(), entry.getValue().get());
       }
     } else if (type.equals(Collector.Type.COUNTER)) {
       Map<List<String>, Counter.Child> children =
           (Map<List<String>, Counter.Child>) samples.children;
-      write(subWriter, samples.name, "_created", samples.help, Collector.Type.GAUGE);
+      outputHeader(subWriter, samples.name + "_created", samples.help, Collector.Type.GAUGE);
       for (Map.Entry<List<String>, Counter.Child> entry : children.entrySet()) {
         List<String> labelValues = entry.getKey();
         Counter.Child child = entry.getValue();
-        write(writer, samples.name, "_total", samples.labelNames, labelValues, child.get(), null);
-        write(
+        outputValue(writer, samples.name, "_total", samples.labelNames, labelValues, child.get());
+        outputValue(
             subWriter,
             samples.name,
             "_created",
             samples.labelNames,
             labelValues,
-            child.created() / 1000.0,
-            null);
+            child.created() / 1000.0);
       }
     } else if (type.equals(Collector.Type.HISTOGRAM)) {
       HistogramMetricSnapshotSamples samples1 = (HistogramMetricSnapshotSamples) samples;
       double[] buckets = samples1.buckets;
       Map<List<String>, Histogram.Child> children =
           (Map<List<String>, Histogram.Child>) samples1.children;
-      write(subWriter, samples.name, "_created", samples.help, Collector.Type.GAUGE);
-      for (Map.Entry<List<String>, Histogram.Child> entry : children.entrySet()) {}
+      outputHeader(subWriter, samples.name + "_created", samples.help, Collector.Type.GAUGE);
+      for (Map.Entry<List<String>, Histogram.Child> entry : children.entrySet()) {
+        List<String> labelValues = entry.getKey();
+        Histogram.Child.Value value = entry.getValue().get();
+        for (int i = 0; i < value.buckets.length; ++i) {
+          outputValue(
+              writer,
+              samples.name,
+              "_bucket",
+              samples.labelNames,
+              "le",
+              labelValues,
+              buckets[i],
+              value.buckets[i]);
+        }
 
+        outputValue(
+            writer,
+            samples.name,
+            "_count",
+            samples.labelNames,
+            labelValues,
+            value.buckets[buckets.length - 1]);
+        outputValue(writer, samples.name, "_sum", samples.labelNames, labelValues, value.sum);
+        outputValue(
+            subWriter,
+            samples.name,
+            "_created",
+            samples.labelNames,
+            labelValues,
+            value.created / 1000.0);
+      }
     } else if (type.equals(Collector.Type.SUMMARY)) {
-      SummaryMetricSnapshotSamples samples1 = (SummaryMetricSnapshotSamples) samples;
-      List<CKMSQuantiles.Quantile> quantiles = samples1.quantiles;
       Map<List<String>, Summary.Child> children =
           (Map<List<String>, Summary.Child>) samples.children;
-      for (Map.Entry<List<String>, Summary.Child> entry : children.entrySet()) {}
-      // TODO
+      outputHeader(subWriter, samples.name + "_created", samples.help, Collector.Type.GAUGE);
+      for (Map.Entry<List<String>, Summary.Child> entry : children.entrySet()) {
+        List<String> labelValues = entry.getKey();
+        Summary.Child.Value value = entry.getValue().get();
+        for (Map.Entry<Double, Double> q : value.quantiles.entrySet()) {
+          outputValue(
+              writer,
+              samples.name,
+              null,
+              samples.labelNames,
+              "quantile",
+              labelValues,
+              q.getValue(),
+              q.getValue());
+        }
+
+        outputValue(writer, samples.name, "_count", samples.labelNames, labelValues, value.count);
+        outputValue(writer, samples.name, "_sum", samples.labelNames, labelValues, value.sum);
+        outputValue(
+            subWriter,
+            samples.name,
+            "_created",
+            samples.labelNames,
+            labelValues,
+            value.created / 1000.0);
+      }
     }
   }
 
@@ -98,14 +139,13 @@ public class PrometheusTextFormatter extends TextFormatter {
     this.writer.append(this.subWriter);
   }
 
-  private static void write(
+  private static void outputValue(
       MetricsWriter writer,
       String name,
       String suffix,
       List<String> labelNames,
       List<String> labelValues,
-      double value,
-      Long timestampMs)
+      double value)
       throws IOException {
     writer.write(name);
     if (null != suffix) {
@@ -123,22 +163,45 @@ public class PrometheusTextFormatter extends TextFormatter {
     }
     writer.write(' ');
     DoubleUtil.append(writer, value);
-
-    if (timestampMs != null) {
-      writer.write(' ');
-      writer.write(timestampMs.toString());
-    }
     writer.write('\n');
   }
 
-  private static void write(
-      MetricsWriter writer, String name, String suffix, String help, Collector.Type type)
+  private static void outputValue(
+      MetricsWriter writer,
+      String name,
+      String suffix,
+      List<String> labelNames,
+      String extraLabelName,
+      List<String> labelValues,
+      double extraLabelValue,
+      double value)
       throws IOException {
-    writer.write("# HELP ");
     writer.write(name);
-    if (suffix != null) {
+    if (null != suffix) {
       writer.write(suffix);
     }
+    if (labelNames.size() > 0) {
+      writer.write('{');
+      for (int i = 0; i < labelNames.size(); ++i) {
+        writer.write(labelNames.get(i));
+        writer.write("=\"");
+        writeEscapedLabelValue(writer, labelValues.get(i));
+        writer.write("\",");
+      }
+      writer.write(extraLabelName);
+      writer.write("=\"");
+      DoubleUtil.append(writer, extraLabelValue);
+      writer.write("\",}");
+    }
+    writer.write(' ');
+    DoubleUtil.append(writer, value);
+    writer.write('\n');
+  }
+
+  private static void outputHeader(
+      MetricsWriter writer, String name, String help, Collector.Type type) throws IOException {
+    writer.write("# HELP ");
+    writer.write(name);
     if (type == Collector.Type.COUNTER) {
       writer.write("_total");
     }
