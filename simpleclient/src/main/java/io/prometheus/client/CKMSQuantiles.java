@@ -32,7 +32,7 @@ import java.util.ListIterator;
  * by Cormode, Korn, Muthukrishnan, and Srivastava.
  *
  */
-public final class CKMSQuantiles {
+final class CKMSQuantiles {
 
     final Quantile[] quantiles;
 
@@ -256,27 +256,27 @@ public final class CKMSQuantiles {
         }
     }
 
-    public static class Quantile {
+    static class Quantile {
 
         /**
          * Quantile. Must be between 0 and 1.
          */
-        public final double quantile;
+        final double quantile;
 
         /**
          * Allowed error. Must be between 0 and 1.
          */
-        public final double epsilon;
+        final double epsilon;
 
         /**
          * Helper used in the error function f(), see definition 5 in the paper.
          */
-        public final double u;
+        final double u;
 
         /**
          * Helper used in the error function f(), see definition 5 in the paper.
          */
-        public final double v;
+        final double v;
 
         Quantile(double quantile, double epsilon) {
             if (quantile < 0.0 || quantile > 1.0) throw new IllegalArgumentException("Quantile must be between 0 and 1");

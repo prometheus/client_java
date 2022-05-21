@@ -50,22 +50,6 @@ public abstract class TextFormatter {
     }
   }
 
-  public static class SummaryMetricSnapshotSamples extends MetricSnapshotSamples {
-    public final List<CKMSQuantiles.Quantile> quantiles;
-
-    public SummaryMetricSnapshotSamples(
-        String name,
-        String unit,
-        Collector.Type type,
-        String help,
-        List<String> labelNames,
-        Map<List<String>, ?> children,
-        List<CKMSQuantiles.Quantile> quantiles) {
-      super(name, unit, type, help, labelNames, children);
-      this.quantiles = quantiles;
-    }
-  }
-
   public static class HistogramMetricSnapshotSamples extends MetricSnapshotSamples {
     public final double[] buckets;
 
