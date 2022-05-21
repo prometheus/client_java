@@ -3,13 +3,13 @@ package io.prometheus.client.hotspot;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.SampleNameFilter;
 import io.prometheus.client.Predicate;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,13 +36,16 @@ import static io.prometheus.client.SampleNameFilter.ALLOW_ALL;
  */
 public class ThreadExports extends Collector {
 
+  public static final String UNKNOWN = "UNKNOWN";
+
+  public static final String JVM_THREADS_STATE = "jvm_threads_state";
+
   private static final String JVM_THREADS_CURRENT = "jvm_threads_current";
   private static final String JVM_THREADS_DAEMON = "jvm_threads_daemon";
   private static final String JVM_THREADS_PEAK = "jvm_threads_peak";
   private static final String JVM_THREADS_STARTED_TOTAL = "jvm_threads_started_total";
   private static final String JVM_THREADS_DEADLOCKED = "jvm_threads_deadlocked";
   private static final String JVM_THREADS_DEADLOCKED_MONITOR = "jvm_threads_deadlocked_monitor";
-  private static final String JVM_THREADS_STATE = "jvm_threads_state";
 
   private final ThreadMXBean threadBean;
 
@@ -109,10 +112,10 @@ public class ThreadExports extends Collector {
               "Current count of threads by state",
               Collections.singletonList("state"));
 
-      Map<Thread.State, Integer> threadStateCounts = getThreadStateCountMap();
-      for (Map.Entry<Thread.State, Integer> entry : threadStateCounts.entrySet()) {
+      Map<String, Integer> threadStateCounts = getThreadStateCountMap();
+      for (Map.Entry<String, Integer> entry : threadStateCounts.entrySet()) {
         threadStateFamily.addMetric(
-                Collections.singletonList(entry.getKey().toString()),
+                Collections.singletonList(entry.getKey()),
                 entry.getValue()
         );
       }
@@ -120,23 +123,39 @@ public class ThreadExports extends Collector {
     }
   }
 
-  private Map<Thread.State, Integer> getThreadStateCountMap() {
+  private Map<String, Integer> getThreadStateCountMap() {
+    long[] threadIds = threadBean.getAllThreadIds();
+
+    // Code to remove any thread id values <= 0
+    int writePos = 0;
+    for (int i = 0; i < threadIds.length; i++) {
+      if (threadIds[i] > 0) {
+        threadIds[writePos++] = threadIds[i];
+      }
+    }
+
+    int numberOfInvalidThreadIds = threadIds.length - writePos;
+    threadIds = Arrays.copyOf(threadIds, writePos);
+
     // Get thread information without computing any stack traces
-    ThreadInfo[] allThreads = threadBean.getThreadInfo(threadBean.getAllThreadIds(), 0);
+    ThreadInfo[] allThreads = threadBean.getThreadInfo(threadIds, 0);
 
     // Initialize the map with all thread states
-    HashMap<Thread.State, Integer> threadCounts = new HashMap<Thread.State, Integer>();
+    HashMap<String, Integer> threadCounts = new HashMap<String, Integer>();
     for (Thread.State state : Thread.State.values()) {
-      threadCounts.put(state, 0);
+      threadCounts.put(state.name(), 0);
     }
 
     // Collect the actual thread counts
     for (ThreadInfo curThread : allThreads) {
       if (curThread != null) {
         Thread.State threadState = curThread.getThreadState();
-        threadCounts.put(threadState, threadCounts.get(threadState) + 1);
+        threadCounts.put(threadState.name(), threadCounts.get(threadState.name()) + 1);
       }
     }
+
+    // Add the thread count for invalid thread ids
+    threadCounts.put(UNKNOWN, numberOfInvalidThreadIds);
 
     return threadCounts;
   }
