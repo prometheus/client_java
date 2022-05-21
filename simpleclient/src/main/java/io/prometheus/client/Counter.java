@@ -350,6 +350,20 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     return noLabelsChild.get();
   }
 
+
+  @Override
+  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
+    if (null != sampleNameFilter && sampleNameFilter.test(fullname)) {
+      if (formatter.supported(Type.COUNTER)) {
+        formatter.format(
+                new MetricsFormatter.MetricSnapshotSamples(
+                        fullname, unit, help, labelNames, Type.COUNTER, children.entrySet()));
+      } else {
+        formatter.format(this.collect());
+      }
+    }
+  }
+
   @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());

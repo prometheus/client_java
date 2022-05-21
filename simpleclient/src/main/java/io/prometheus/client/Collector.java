@@ -23,6 +23,22 @@ public abstract class Collector {
    */
   public abstract List<MetricFamilySamples> collect();
 
+
+  /**
+   * Format metrics of this collector by given formatter.
+   */
+  public void collect(MetricsFormatter formatter) {
+    collect(formatter, null);
+  }
+
+  /**
+   * Format metrics of this collector by given formatter.
+   */
+  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
+    List<MetricFamilySamples> samples = collect(sampleNameFilter);
+    formatter.format(samples);
+  }
+
   /**
    * Like {@link #collect()}, but the result should only contain {@code MetricFamilySamples} where
    * {@code sampleNameFilter.test(name)} is {@code true} for at least one Sample name.
@@ -197,7 +213,7 @@ public abstract class Collector {
         return false;
       }
       MetricFamilySamples other = (MetricFamilySamples) obj;
-      
+
       return other.name.equals(name)
         && other.unit.equals(unit)
         && other.type.equals(type)
@@ -390,7 +406,7 @@ public abstract class Collector {
   public static String doubleToGoString(double d) {
     if (d == Double.POSITIVE_INFINITY) {
       return "+Inf";
-    } 
+    }
     if (d == Double.NEGATIVE_INFINITY) {
       return "-Inf";
     }

@@ -135,7 +135,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     }
 
     /**
-     * The class JavaDoc for {@link Summary} has more information on {@link #maxAgeSeconds(long)} 
+     * The class JavaDoc for {@link Summary} has more information on {@link #maxAgeSeconds(long)}
      * @see Summary
      */
     public Builder maxAgeSeconds(long maxAgeSeconds) {
@@ -147,7 +147,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
     }
 
     /**
-     * The class JavaDoc for {@link Summary} has more information on {@link #ageBuckets(int)} 
+     * The class JavaDoc for {@link Summary} has more information on {@link #ageBuckets(int)}
      * @see Summary
      */
     public Builder ageBuckets(int ageBuckets) {
@@ -388,6 +388,19 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
    */
   public Child.Value get() {
     return noLabelsChild.get();
+  }
+
+  @Override
+  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
+    if (null != sampleNameFilter && sampleNameFilter.test(fullname)) {
+      if (formatter.supported(Type.SUMMARY)) {
+        formatter.format(
+                new MetricsFormatter.MetricSnapshotSamples(
+                        fullname, unit, help, labelNames, Type.SUMMARY, children.entrySet()));
+      } else {
+        formatter.format(this.collect());
+      }
+    }
   }
 
   @Override

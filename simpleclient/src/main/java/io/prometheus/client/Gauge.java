@@ -310,6 +310,20 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
     return noLabelsChild.get();
   }
 
+
+  @Override
+  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
+    if (null != sampleNameFilter && sampleNameFilter.test(fullname)) {
+      if (formatter.supported(Type.GAUGE)) {
+        formatter.format(
+                new MetricsFormatter.MetricSnapshotSamples(
+                        fullname, unit, help, labelNames, Type.GAUGE, children.entrySet()));
+      } else {
+        formatter.format(this.collect());
+      }
+    }
+  }
+
   @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());

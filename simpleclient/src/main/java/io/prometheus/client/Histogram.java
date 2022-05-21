@@ -561,6 +561,19 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
   }
 
   @Override
+  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
+    if (null != sampleNameFilter && sampleNameFilter.test(fullname)) {
+      if (formatter.supported(Type.HISTOGRAM)) {
+        formatter.format(
+                new MetricsFormatter.HistogramSnapshotSamples(
+                        fullname, unit, help, labelNames, Type.HISTOGRAM, children.entrySet(), buckets));
+      } else {
+        formatter.format(this.collect());
+      }
+    }
+  }
+
+  @Override
   public List<MetricFamilySamples> collect() {
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
     for (Map.Entry<List<String>, Child> c : children.entrySet()) {

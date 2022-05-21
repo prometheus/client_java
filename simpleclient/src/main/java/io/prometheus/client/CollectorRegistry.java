@@ -123,6 +123,26 @@ public class CollectorRegistry {
   }
 
   /**
+   * Format all the collector's metrics of this register by given formatter.
+   */
+  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
+    Set<Collector> collectors = collectors();
+    for (Collector collector : collectors) {
+      collector.collect(formatter, sampleNameFilter);
+    }
+  }
+
+  /**
+   * Format all the collector's metrics of this register by given formatter.
+   */
+  public void collect(MetricsFormatter formatter) {
+    Set<Collector> collectors = collectors();
+    for (Collector collector : collectors) {
+      collector.collect(formatter);
+    }
+  }
+
+  /**
    * Enumeration of metrics of all registered collectors.
    */
   public Enumeration<Collector.MetricFamilySamples> metricFamilySamples() {
