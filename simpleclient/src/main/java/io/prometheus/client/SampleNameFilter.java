@@ -239,4 +239,26 @@ public class SampleNameFilter implements Predicate<String> {
         }
         return filter;
     }
+
+
+    /**
+     * Helper method to determine if names passed the filter.
+     *
+     * @param filter
+     * @param names
+     * @return
+     */
+    public static boolean filter(Predicate<String> filter, String[] names) {
+        if (filter == null || names == null) {
+            return true;
+        }
+
+        for (String name : names) {
+            if (filter.test(name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

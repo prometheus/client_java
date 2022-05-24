@@ -313,14 +313,19 @@ public class Gauge extends SimpleCollector<Gauge.Child> implements Collector.Des
 
   @Override
   public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
-    if (null != sampleNameFilter && sampleNameFilter.test(fullname)) {
-      if (formatter.supported(Type.GAUGE)) {
-        formatter.format(
-                new MetricsFormatter.MetricSnapshotSamples(
-                        fullname, unit, help, labelNames, Type.GAUGE, children.entrySet()));
-      } else {
-        formatter.format(this.collect());
+    if (null != sampleNameFilter) {
+      String[] names = Collector.getNames(Type.GAUGE, fullname);
+      if (!SampleNameFilter.filter(sampleNameFilter, names)) {
+        return;
       }
+    }
+
+    if (formatter.supported(Type.GAUGE)) {
+      formatter.format(
+              new MetricsFormatter.MetricSnapshotSamples(
+                      fullname, unit, help, labelNames, Type.GAUGE, children.entrySet()));
+    } else {
+      formatter.format(this.collect());
     }
   }
 

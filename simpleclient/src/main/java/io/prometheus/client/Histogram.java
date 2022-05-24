@@ -562,14 +562,19 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
 
   @Override
   public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
-    if (null != sampleNameFilter && sampleNameFilter.test(fullname)) {
-      if (formatter.supported(Type.HISTOGRAM)) {
-        formatter.format(
-                new MetricsFormatter.HistogramSnapshotSamples(
-                        fullname, unit, help, labelNames, Type.HISTOGRAM, children.entrySet(), buckets));
-      } else {
-        formatter.format(this.collect());
+    if (null != sampleNameFilter) {
+      String[] names = Collector.getNames(Type.HISTOGRAM, fullname);
+      if (!SampleNameFilter.filter(sampleNameFilter, names)) {
+        return;
       }
+    }
+
+    if (formatter.supported(Type.HISTOGRAM)) {
+      formatter.format(
+              new MetricsFormatter.HistogramSnapshotSamples(
+                      fullname, unit, help, labelNames, Type.HISTOGRAM, children.entrySet(), buckets));
+    } else {
+      formatter.format(this.collect());
     }
   }
 

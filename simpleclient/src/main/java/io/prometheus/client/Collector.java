@@ -167,43 +167,7 @@ public abstract class Collector {
      * we include the name without suffix here as well.
      */
     public String[] getNames() {
-      switch (type) {
-        case COUNTER:
-          return new String[]{
-                  name + "_total",
-                  name + "_created",
-                  name
-          };
-        case SUMMARY:
-          return new String[]{
-                  name + "_count",
-                  name + "_sum",
-                  name + "_created",
-                  name
-          };
-        case HISTOGRAM:
-          return new String[]{
-                  name + "_count",
-                  name + "_sum",
-                  name + "_bucket",
-                  name + "_created",
-                  name
-          };
-        case GAUGE_HISTOGRAM:
-          return new String[]{
-                  name + "_gcount",
-                  name + "_gsum",
-                  name + "_bucket",
-                  name
-          };
-        case INFO:
-          return new String[]{
-                  name + "_info",
-                  name
-          };
-        default:
-          return new String[]{name};
-      }
+      return Collector.getNames(type, name);
     }
 
 
@@ -386,6 +350,53 @@ public abstract class Collector {
       }
     }
     return new String(sanitized);
+  }
+
+  /**
+   * List of names that are reserved from collector type and collector name.
+   *
+   * @param type collector type
+   * @param name collect fullname
+   * @return
+   */
+  public static String[] getNames(Type type, String name) {
+    switch (type) {
+      case COUNTER:
+        return new String[]{
+                name + "_total",
+                name + "_created",
+                name
+        };
+      case SUMMARY:
+        return new String[]{
+                name + "_count",
+                name + "_sum",
+                name + "_created",
+                name
+        };
+      case HISTOGRAM:
+        return new String[]{
+                name + "_count",
+                name + "_sum",
+                name + "_bucket",
+                name + "_created",
+                name
+        };
+      case GAUGE_HISTOGRAM:
+        return new String[]{
+                name + "_gcount",
+                name + "_gsum",
+                name + "_bucket",
+                name
+        };
+      case INFO:
+        return new String[]{
+                name + "_info",
+                name
+        };
+      default:
+        return new String[]{name};
+    }
   }
 
   /**

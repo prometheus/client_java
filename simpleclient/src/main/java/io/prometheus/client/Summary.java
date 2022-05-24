@@ -392,14 +392,19 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
 
   @Override
   public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
-    if (null != sampleNameFilter && sampleNameFilter.test(fullname)) {
-      if (formatter.supported(Type.SUMMARY)) {
-        formatter.format(
-                new MetricsFormatter.MetricSnapshotSamples(
-                        fullname, unit, help, labelNames, Type.SUMMARY, children.entrySet()));
-      } else {
-        formatter.format(this.collect());
+    if (null != sampleNameFilter) {
+      String[] names = Collector.getNames(Type.SUMMARY, fullname);
+      if (!SampleNameFilter.filter(sampleNameFilter, names)) {
+        return;
       }
+    }
+
+    if (formatter.supported(Type.SUMMARY)) {
+      formatter.format(
+              new MetricsFormatter.MetricSnapshotSamples(
+                      fullname, unit, help, labelNames, Type.SUMMARY, children.entrySet()));
+    } else {
+      formatter.format(this.collect());
     }
   }
 

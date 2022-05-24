@@ -149,14 +149,19 @@ public class Info extends SimpleCollector<Info.Child> implements Counter.Describ
 
   @Override
   public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
-    if (null != sampleNameFilter && sampleNameFilter.test(fullname)) {
-      if (formatter.supported(Type.INFO)) {
-        formatter.format(
-                new MetricsFormatter.MetricSnapshotSamples(
-                        fullname, unit, help, labelNames, Type.INFO, children.entrySet()));
-      } else {
-        formatter.format(this.collect());
+    if (null != sampleNameFilter) {
+      String[] names = Collector.getNames(Type.INFO, fullname);
+      if (!SampleNameFilter.filter(sampleNameFilter, names)) {
+        return;
       }
+    }
+
+    if (formatter.supported(Type.INFO)) {
+      formatter.format(
+              new MetricsFormatter.MetricSnapshotSamples(
+                      fullname, unit, help, labelNames, Type.INFO, children.entrySet()));
+    } else {
+      formatter.format(this.collect());
     }
   }
 
