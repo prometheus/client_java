@@ -3,6 +3,7 @@ package io.prometheus.client;
 import io.prometheus.client.CKMSQuantiles.Quantile;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -391,7 +392,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
   }
 
   @Override
-  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
+  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) throws IOException {
     if (null != sampleNameFilter) {
       String[] names = Collector.getNames(Type.SUMMARY, fullname);
       if (!SampleNameFilter.filter(sampleNameFilter, names)) {

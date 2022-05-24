@@ -3,6 +3,7 @@ package io.prometheus.client;
 
 import io.prometheus.client.exemplars.Exemplar;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -27,14 +28,14 @@ public abstract class Collector {
   /**
    * Format metrics of this collector by given formatter.
    */
-  public void collect(MetricsFormatter formatter) {
+  public void collect(MetricsFormatter formatter) throws IOException {
     collect(formatter, null);
   }
 
   /**
    * Format metrics of this collector by given formatter.
    */
-  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
+  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) throws IOException {
     List<MetricFamilySamples> samples = collect(sampleNameFilter);
     formatter.format(samples);
   }

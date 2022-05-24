@@ -1,5 +1,6 @@
 package io.prometheus.client;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -148,7 +149,7 @@ public class Info extends SimpleCollector<Info.Child> implements Counter.Describ
   }
 
   @Override
-  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) {
+  public void collect(MetricsFormatter formatter, Predicate<String> sampleNameFilter) throws IOException {
     if (null != sampleNameFilter) {
       String[] names = Collector.getNames(Type.INFO, fullname);
       if (!SampleNameFilter.filter(sampleNameFilter, names)) {

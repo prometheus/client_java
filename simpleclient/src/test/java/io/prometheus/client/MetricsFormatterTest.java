@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,7 +24,7 @@ public class MetricsFormatterTest {
     }
 
     @Test
-    public void testGauge() {
+    public void testGauge() throws IOException {
         Gauge gauge = Gauge.build()
                 .name("test_gauge")
                 .help("-")
@@ -32,7 +33,7 @@ public class MetricsFormatterTest {
 
         gauge.labels("value1", "value2").inc();
 
-        MetricsFormatter formatter = new MetricsFormatter() {
+        MetricsFormatter formatter = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 Assert.assertNotNull(samples);
@@ -70,7 +71,7 @@ public class MetricsFormatterTest {
 
 
     @Test
-    public void testCounter() {
+    public void testCounter() throws IOException {
         Counter counter = Counter.build()
                 .name("test_counter")
                 .help("test_counter")
@@ -80,7 +81,7 @@ public class MetricsFormatterTest {
         counter.labels("value1", "value2").inc();
         counter.labels("value1", "value2").inc();
 
-        MetricsFormatter formatter = new MetricsFormatter() {
+        MetricsFormatter formatter = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 Assert.assertNotNull(samples);
@@ -117,7 +118,7 @@ public class MetricsFormatterTest {
     }
 
     @Test
-    public void testInfo() {
+    public void testInfo() throws IOException {
         Info info = Info.build()
                 .name("test_info")
                 .help("test_info")
@@ -126,7 +127,7 @@ public class MetricsFormatterTest {
 
         info.labels("value1", "value2").info("name", "prometheus", "version", "0.0.1");
 
-        MetricsFormatter formatter = new MetricsFormatter() {
+        MetricsFormatter formatter = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 Assert.assertNotNull(samples);
@@ -168,7 +169,7 @@ public class MetricsFormatterTest {
 
 
     @Test
-    public void testHistogram() {
+    public void testHistogram() throws IOException {
         final double[] buckets = new double[]{0.5, 0.9, 0.95, 0.99};
 
         Histogram histogram = Histogram
@@ -185,7 +186,7 @@ public class MetricsFormatterTest {
         histogram.labels("value1", "value2").observe(0.91);
 
 
-        MetricsFormatter formatter = new MetricsFormatter() {
+        MetricsFormatter formatter = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 Assert.assertNotNull(samples);
@@ -229,7 +230,7 @@ public class MetricsFormatterTest {
 
 
     @Test
-    public void testSummary() {
+    public void testSummary() throws IOException {
         Summary summary = Summary
                 .build("test_summary", "test_summary")
                 .quantile(0.5, 0.05)
@@ -242,7 +243,7 @@ public class MetricsFormatterTest {
         summary.labels("value1", "value2").observe(4);
 
 
-        MetricsFormatter formatter = new MetricsFormatter() {
+        MetricsFormatter formatter = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 Assert.assertNotNull(samples);
@@ -283,7 +284,7 @@ public class MetricsFormatterTest {
 
 
     @Test
-    public void testEnum() {
+    public void testEnum() throws IOException {
         Enumeration enumeration = Enumeration
                 .build("test_summary", "test_summary")
                 .labelNames("label1", "label2")
@@ -294,7 +295,7 @@ public class MetricsFormatterTest {
         enumeration.labels("value1", "value2").state("b");
 
 
-        MetricsFormatter formatter = new MetricsFormatter() {
+        MetricsFormatter formatter = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 throw new UnsupportedOperationException();
@@ -316,7 +317,7 @@ public class MetricsFormatterTest {
 
 
     @Test
-    public void testGaugeWithFilter() {
+    public void testGaugeWithFilter() throws IOException {
         Gauge gauge = Gauge.build()
                 .name("test_gauge")
                 .help("-")
@@ -325,7 +326,7 @@ public class MetricsFormatterTest {
 
         gauge.labels("value1", "value2").inc();
 
-        MetricsFormatter formatter = new MetricsFormatter() {
+        MetricsFormatter formatter = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 Assert.assertNotNull(samples);
@@ -350,7 +351,7 @@ public class MetricsFormatterTest {
         });
 
         final AtomicBoolean executed = new AtomicBoolean(false);
-        MetricsFormatter formatter1 = new MetricsFormatter() {
+        MetricsFormatter formatter1 = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 executed.set(true);
@@ -378,7 +379,7 @@ public class MetricsFormatterTest {
     }
 
     @Test
-    public void testCounterWithFilter() {
+    public void testCounterWithFilter() throws IOException {
         Counter counter = Counter.build()
                 .name("test_counter")
                 .help("-")
@@ -387,7 +388,7 @@ public class MetricsFormatterTest {
 
         counter.labels("value1", "value2").inc();
 
-        MetricsFormatter formatter = new MetricsFormatter() {
+        MetricsFormatter formatter = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 Assert.assertNotNull(samples);
@@ -412,7 +413,7 @@ public class MetricsFormatterTest {
         });
 
         final AtomicBoolean executed = new AtomicBoolean(false);
-        MetricsFormatter formatter1 = new MetricsFormatter() {
+        MetricsFormatter formatter1 = new MetricsFormatter(NOOP) {
             @Override
             public void format(MetricSnapshotSamples samples) {
                 executed.set(true);
@@ -437,5 +438,31 @@ public class MetricsFormatterTest {
         });
 
         Assert.assertFalse(executed.get());
+    }
+
+
+    private static final MetricsFormatter.MetricsWriter NOOP = new NoopMetricsWriter();
+
+    private static class NoopMetricsWriter extends MetricsFormatter.MetricsWriter {
+
+        @Override
+        public void write(byte[] bytes, int offset, int length) throws IOException {
+            //noop
+        }
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            //noop
+        }
+
+        @Override
+        public void flush() throws IOException {
+            //noop
+        }
+
+        @Override
+        public void close() throws IOException {
+            //noop
+        }
     }
 }
