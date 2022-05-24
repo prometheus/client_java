@@ -67,7 +67,7 @@ public class ClassLoadingExports extends Collector {
 
   @Override
   public List<MetricFamilySamples> collect() {
-    return collect(null);
+    return collect((Predicate<String>) null);
   }
 
   @Override
