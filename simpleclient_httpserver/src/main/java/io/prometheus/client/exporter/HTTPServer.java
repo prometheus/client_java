@@ -1,10 +1,15 @@
 package io.prometheus.client.exporter;
 
+import com.sun.net.httpserver.Authenticator;
+import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.SampleNameFilter;
 import io.prometheus.client.Predicate;
+import io.prometheus.client.SampleNameFilter;
 import io.prometheus.client.Supplier;
 import io.prometheus.client.exporter.common.TextFormat;
 
@@ -25,14 +30,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
-
-import com.sun.net.httpserver.Authenticator;
-import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 
 /**
  * Expose Prometheus metrics using a plain Java HttpServer.
@@ -452,7 +452,9 @@ public class HTTPServer implements Closeable {
         if (executorService != null) {
             this.executorService = executorService;
         } else {
-            this.executorService = Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
+            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
+            executor.setCorePoolSize(1);
+            this.executorService = executor;
         }
         server.setExecutor(this.executorService);
         start(daemon);
