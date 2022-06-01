@@ -1,6 +1,6 @@
 package io.prometheus.client.exporter;
 
-import io.prometheus.client.Adapter;
+import io.prometheus.client.internal.Adapter;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Predicate;
 import io.prometheus.client.servlet.common.exporter.Exporter;
@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static io.prometheus.client.Adapter.wrap;
+import static io.prometheus.client.internal.Adapter.wrap;
 
 /**
  * The MetricsServlet class provides a simple way of exposing the metrics values.

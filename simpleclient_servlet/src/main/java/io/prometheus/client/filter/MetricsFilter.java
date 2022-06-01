@@ -1,6 +1,6 @@
 package io.prometheus.client.filter;
 
-import io.prometheus.client.Adapter;
+import io.prometheus.client.internal.Adapter;
 import io.prometheus.client.servlet.common.filter.Filter;
 import io.prometheus.client.servlet.common.filter.FilterConfigurationException;
 

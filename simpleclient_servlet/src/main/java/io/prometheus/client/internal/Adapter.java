@@ -1,4 +1,4 @@
-package io.prometheus.client;
+package io.prometheus.client.internal;
 
 import io.prometheus.client.servlet.common.adapter.FilterConfigAdapter;
 import io.prometheus.client.servlet.common.adapter.HttpServletRequestAdapter;
