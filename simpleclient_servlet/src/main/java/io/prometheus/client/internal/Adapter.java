@@ -58,7 +58,7 @@ public class Adapter {
 
         @Override
         public void setStatus(int httpStatusCode) {
-            delegate.setBufferSize(httpStatusCode);
+            delegate.setStatus(httpStatusCode);
         }
 
         @Override
