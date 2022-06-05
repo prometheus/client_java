@@ -3,8 +3,7 @@ package io.prometheus.client;
 
 import io.prometheus.client.exemplars.Exemplar;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -151,43 +150,42 @@ public abstract class Collector {
      * we include the name without suffix here as well.
      */
     public String[] getNames() {
+      List<String> names = new ArrayList<String>();
       switch (type) {
         case COUNTER:
-          return new String[]{
-                  name + "_total",
-                  name + "_created",
-                  name
-          };
+          names.add(name + "_total");
+          if (getUseCreated()) {
+            names.add(name + "_created");
+          }
+          break;
         case SUMMARY:
-          return new String[]{
-                  name + "_count",
-                  name + "_sum",
-                  name + "_created",
-                  name
-          };
+          names.add(name + "_count");
+          names.add(name + "_sum");
+          if (getUseCreated()) {
+            names.add(name + "_created");
+          }
+          break;
         case HISTOGRAM:
-          return new String[]{
-                  name + "_count",
-                  name + "_sum",
-                  name + "_bucket",
-                  name + "_created",
-                  name
-          };
+          names.add(name + "_count");
+          names.add(name + "_sum");
+          names.add(name + "_bucket");
+          if (getUseCreated()) {
+            names.add(name + "_created");
+          }
+          break;
         case GAUGE_HISTOGRAM:
-          return new String[]{
-                  name + "_gcount",
-                  name + "_gsum",
-                  name + "_bucket",
-                  name
-          };
+          names.add(name + "_gcount");
+          names.add(name + "_gsum");
+          names.add(name + "_bucket");
+          break;
         case INFO:
-          return new String[]{
-                  name + "_info",
-                  name
-          };
+          names.add(name + "_info");
+          break;
         default:
-          return new String[]{name};
+          // NOP - `name` is added to all
       }
+      names.add(name);
+      return names.toArray(new String[0]);
     }
 
 
@@ -395,5 +393,16 @@ public abstract class Collector {
       return "-Inf";
     }
     return Double.toString(d);
+  }
+
+  protected static final String DISABLE_CREATED_SERIES = "PROMETHEUS_DISABLE_CREATED_SERIES";
+  private static final List<String> TRUTHS = Arrays.asList("true", "1", "t");
+
+  protected static boolean getUseCreated() {
+    String disable_series = System.getenv(DISABLE_CREATED_SERIES);
+    if (disable_series != null) {
+      return !TRUTHS.contains(disable_series.toLowerCase());
+    }
+    return true;
   }
 }
