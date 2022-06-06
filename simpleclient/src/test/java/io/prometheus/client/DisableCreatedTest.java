@@ -18,7 +18,7 @@ public class DisableCreatedTest {
     }
 
     @Test
-    public void testDisableCreatedAll() {
+    public void testDisableCreatedAll() throws Exception {
         EnvironmentVariables env = new EnvironmentVariables(Collector.DISABLE_CREATED_SERIES, "true");
         Counter counter1 = Counter.build()
                 .name("counter1")
@@ -47,12 +47,14 @@ public class DisableCreatedTest {
         List<Collector.MetricFamilySamples> mfsList;
         try {
             env.setup();
+            Collector.USE_CREATED = Collector.getUseCreated();
             mfsList = Collections.list(registry.metricFamilySamples());
             String extracted = System.getenv(Collector.DISABLE_CREATED_SERIES);
             Assert.assertEquals("Env isn't set", "true", extracted);
+        }
+        finally {
             env.teardown();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            Collector.USE_CREATED = Collector.getUseCreated();
         }
         assertSamplesInclude(mfsList, "counter1_total", 2);
         assertSamplesInclude(mfsList, "counter1_created", 0);

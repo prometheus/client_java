@@ -149,19 +149,19 @@ public abstract class Collector {
      * {@code # HELP}), and as this name <a href="https://github.com/prometheus/common/issues/319">must be unique</a>
      * we include the name without suffix here as well.
      */
-    public String[] getNames() {
+    public List<String> getNames() {
       List<String> names = new ArrayList<String>();
       switch (type) {
         case COUNTER:
           names.add(name + "_total");
-          if (getUseCreated()) {
+          if (USE_CREATED) {
             names.add(name + "_created");
           }
           break;
         case SUMMARY:
           names.add(name + "_count");
           names.add(name + "_sum");
-          if (getUseCreated()) {
+          if (USE_CREATED) {
             names.add(name + "_created");
           }
           break;
@@ -169,7 +169,7 @@ public abstract class Collector {
           names.add(name + "_count");
           names.add(name + "_sum");
           names.add(name + "_bucket");
-          if (getUseCreated()) {
+          if (USE_CREATED) {
             names.add(name + "_created");
           }
           break;
@@ -185,7 +185,7 @@ public abstract class Collector {
           // NOP - `name` is added to all
       }
       names.add(name);
-      return names.toArray(new String[0]);
+      return names;
     }
 
 
@@ -397,6 +397,8 @@ public abstract class Collector {
 
   protected static final String DISABLE_CREATED_SERIES = "PROMETHEUS_DISABLE_CREATED_SERIES";
   private static final List<String> TRUTHS = Arrays.asList("true", "1", "t");
+
+  protected static boolean USE_CREATED = getUseCreated();
 
   protected static boolean getUseCreated() {
     String disable_series = System.getenv(DISABLE_CREATED_SERIES);

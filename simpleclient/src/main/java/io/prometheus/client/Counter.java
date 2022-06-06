@@ -355,7 +355,7 @@ public class Counter extends SimpleCollector<Counter.Child> implements Collector
     List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
     for(Map.Entry<List<String>, Child> c: children.entrySet()) {
       samples.add(new MetricFamilySamples.Sample(fullname + "_total", labelNames, c.getKey(), c.getValue().get(), c.getValue().getExemplar()));
-      if (getUseCreated()) {
+      if (USE_CREATED) {
         samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), c.getValue().created() / 1000.0));
       }
     }

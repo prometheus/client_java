@@ -574,7 +574,7 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
       }
       samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.buckets[buckets.length-1]));
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
-      if (getUseCreated()) {
+      if (USE_CREATED) {
         samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), v.created / 1000.0));
       }
     }
