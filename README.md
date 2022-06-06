@@ -74,6 +74,13 @@ There are canonical examples defined in the class definition Javadoc of the clie
 Documentation can be found at the [Java Client
 Github Project Page](http://prometheus.github.io/client_java).
 
+### Disabling `_created` metrics
+
+By default, counters, histograms, and summaries export an additional series
+suffixed with `_created` and a value of the unix timestamp for when the metric
+was created. If this information is not helpful, it can be disabled by setting
+the environment variable `PROMETHEUS_DISABLE_CREATED_SERIES=True`.
+
 ## Instrumenting
 
 Four types of metrics are offered: Counter, Gauge, Summary and Histogram.
