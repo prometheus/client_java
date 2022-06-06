@@ -18,6 +18,31 @@ import java.util.regex.Pattern;
  */
 public abstract class Collector {
 
+  public static final String PROMETHEUS_DISABLE_CREATED_SERIES = "PROMETHEUS_DISABLE_CREATED_SERIES";
+
+  protected static boolean DISABLE_CREATED_SERIES;
+
+  static {
+    reset();
+  }
+
+  /*
+   * Method to reset configuration based on environment variables.
+   *
+   * Exposed for testing... typically, would never be used during normal code usage.
+   */
+  public static void reset() {
+    String disableCreatedSeries = System.getenv(PROMETHEUS_DISABLE_CREATED_SERIES);
+    if ((disableCreatedSeries != null) && (
+            (disableCreatedSeries.equalsIgnoreCase("true") ||
+                    disableCreatedSeries.equalsIgnoreCase("t") ||
+                    disableCreatedSeries.equals("1")))) {
+      DISABLE_CREATED_SERIES = true;
+    } else {
+      DISABLE_CREATED_SERIES = false;
+    }
+  }
+
   /**
    * Return all metrics of this Collector.
    */
@@ -151,45 +176,80 @@ public abstract class Collector {
      * we include the name without suffix here as well.
      */
     public String[] getNames() {
-      switch (type) {
-        case COUNTER:
-          return new String[]{
-                  name + "_total",
-                  name + "_created",
-                  name
-          };
-        case SUMMARY:
-          return new String[]{
-                  name + "_count",
-                  name + "_sum",
-                  name + "_created",
-                  name
-          };
-        case HISTOGRAM:
-          return new String[]{
-                  name + "_count",
-                  name + "_sum",
-                  name + "_bucket",
-                  name + "_created",
-                  name
-          };
-        case GAUGE_HISTOGRAM:
-          return new String[]{
-                  name + "_gcount",
-                  name + "_gsum",
-                  name + "_bucket",
-                  name
-          };
-        case INFO:
-          return new String[]{
-                  name + "_info",
-                  name
-          };
-        default:
-          return new String[]{name};
-      }
+      if (DISABLE_CREATED_SERIES) {
+        switch (type) {
+          case COUNTER:
+            return new String[]{
+                    name + "_total",
+                    name
+            };
+          case SUMMARY:
+            return new String[]{
+                    name + "_count",
+                    name + "_sum",
+                    name
+            };
+          case HISTOGRAM:
+            return new String[]{
+                    name + "_count",
+                    name + "_sum",
+                    name + "_bucket",
+                    name
+            };
+          case GAUGE_HISTOGRAM:
+            return new String[]{
+                    name + "_gcount",
+                    name + "_gsum",
+                    name + "_bucket",
+                    name
+            };
+          case INFO:
+            return new String[]{
+                    name + "_info",
+                    name
+            };
+          default:
+            return new String[]{name};
+        }
+      } else {
+        switch (type) {
+          case COUNTER:
+            return new String[]{
+                    name + "_total",
+                    name + "_created",
+                    name
+            };
+          case SUMMARY:
+            return new String[]{
+                    name + "_count",
+                    name + "_sum",
+                    name + "_created",
+                    name
+            };
+          case HISTOGRAM:
+            return new String[]{
+                    name + "_count",
+                    name + "_sum",
+                    name + "_bucket",
+                    name + "_created",
+                    name
+            };
+          case GAUGE_HISTOGRAM:
+            return new String[]{
+                    name + "_gcount",
+                    name + "_gsum",
+                    name + "_bucket",
+                    name
+            };
+          case INFO:
+            return new String[]{
+                    name + "_info",
+                    name
+            };
+          default:
+            return new String[]{name};
+        }      }
     }
-
 
     @Override
     public boolean equals(Object obj) {
