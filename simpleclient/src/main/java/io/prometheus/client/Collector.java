@@ -149,43 +149,44 @@ public abstract class Collector {
      * {@code # HELP}), and as this name <a href="https://github.com/prometheus/common/issues/319">must be unique</a>
      * we include the name without suffix here as well.
      */
-    public List<String> getNames() {
-      List<String> names = new ArrayList<String>();
+    public String[] getNames() {
       switch (type) {
         case COUNTER:
-          names.add(name + "_total");
-          if (USE_CREATED) {
-            names.add(name + "_created");
-          }
-          break;
+          return new String[]{
+                  name + "_total",
+                  name + "_created",
+                  name
+          };
         case SUMMARY:
-          names.add(name + "_count");
-          names.add(name + "_sum");
-          if (USE_CREATED) {
-            names.add(name + "_created");
-          }
-          break;
+          return new String[]{
+                  name + "_count",
+                  name + "_sum",
+                  name + "_created",
+                  name
+          };
         case HISTOGRAM:
-          names.add(name + "_count");
-          names.add(name + "_sum");
-          names.add(name + "_bucket");
-          if (USE_CREATED) {
-            names.add(name + "_created");
-          }
-          break;
+          return new String[]{
+                  name + "_count",
+                  name + "_sum",
+                  name + "_bucket",
+                  name + "_created",
+                  name
+          };
         case GAUGE_HISTOGRAM:
-          names.add(name + "_gcount");
-          names.add(name + "_gsum");
-          names.add(name + "_bucket");
-          break;
+          return new String[]{
+                  name + "_gcount",
+                  name + "_gsum",
+                  name + "_bucket",
+                  name
+          };
         case INFO:
-          names.add(name + "_info");
-          break;
+          return new String[]{
+                  name + "_info",
+                  name
+          };
         default:
-          // NOP - `name` is added to all
+          return new String[]{name};
       }
-      names.add(name);
-      return names;
     }
 
 

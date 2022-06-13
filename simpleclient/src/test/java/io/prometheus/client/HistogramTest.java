@@ -327,7 +327,7 @@ public class HistogramTest {
       }
       if (lowerBound < value && value <= upperBound) {
         if (bucket.exemplar != null) {
-          Assert.assertNotEquals("expecting no exemplar with value " + value, value, bucket.exemplar.getValue(), 0.001);
+          Assert.assertNotEquals("expecting no exemplar with value " + value, value, bucket.exemplar.getValue(), 0.0001);
         }
       }
     }
