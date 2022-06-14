@@ -1,4 +1,4 @@
-package io.prometheus.client;
+package io.prometheus.client.internal;
 
 import io.prometheus.client.servlet.common.adapter.FilterConfigAdapter;
 import io.prometheus.client.servlet.common.adapter.HttpServletRequestAdapter;
@@ -58,7 +58,7 @@ public class Adapter {
 
         @Override
         public void setStatus(int httpStatusCode) {
-            delegate.setBufferSize(httpStatusCode);
+            delegate.setStatus(httpStatusCode);
         }
 
         @Override
