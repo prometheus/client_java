@@ -168,10 +168,17 @@ public class CollectorRegistry {
       } else {
         HashSet<Collector> collectors = new HashSet<Collector>();
         synchronized (namesCollectorsLock) {
-          for (Map.Entry<String, Collector> entry : namesToCollectors.entrySet()) {
-            // Note that namesToCollectors contains keys for all combinations of suffixes (_total, _info, etc.).
-            if (sampleNameFilter.test(entry.getKey())) {
-              collectors.add(entry.getValue());
+          for (Map.Entry<Collector, List<String>> entry : collectorsToNames.entrySet()) {
+            List<String> names = entry.getValue();
+            if (names.isEmpty()) {
+              collectors.add(entry.getKey());
+            } else {
+              for (String name : names) {
+                if (sampleNameFilter.test(name)) {
+                  collectors.add(entry.getKey());
+                  break;
+                }
+              }
             }
           }
         }
