@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyListOf;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -119,7 +119,7 @@ public class DropwizardExportsTest {
 
         metricRegistry.register("invalid_gauge", invalidGauge);
         assertEquals(null, registry.getSampleValue("invalid_gauge"));
-        Mockito.verifyZeroInteractions(sampleBuilder);
+        Mockito.verifyNoInteractions(sampleBuilder);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class DropwizardExportsTest {
         };
         metricRegistry.register("invalid_gauge", invalidGauge);
         assertEquals(null, registry.getSampleValue("invalid_gauge"));
-        Mockito.verifyZeroInteractions(sampleBuilder);
+        Mockito.verifyNoInteractions(sampleBuilder);
     }
 
     void assertRegistryContainsMetrics(String... metrics) {
@@ -190,19 +190,19 @@ public class DropwizardExportsTest {
 
     @Test
     public void testThatMetricHelpUsesOriginalDropwizardName() {
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedTimer1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedTimer1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(new Collector.MetricFamilySamples.Sample("my_application_namedTimer1", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
 
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedCounter1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedCounter1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(new Collector.MetricFamilySamples.Sample("my_application_namedCounter1", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
 
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(new Collector.MetricFamilySamples.Sample("my_application_namedMeter1_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
 
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedHistogram1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedHistogram1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(new Collector.MetricFamilySamples.Sample("my_application_namedHistogram1", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
 
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedGauge1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedGauge1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(new Collector.MetricFamilySamples.Sample("my_application_namedGauge1", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234));
 
         metricRegistry.timer("my.application.namedTimer1");
@@ -248,43 +248,43 @@ public class DropwizardExportsTest {
     @Test
     public void testThatMetricsMappedToSameNameAreGroupedInSameFamily() {
         final Collector.MetricFamilySamples.Sample namedTimerSample1 = new Collector.MetricFamilySamples.Sample("my_application_namedTimer", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedTimer1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedTimer1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedTimerSample1);
 
         final Collector.MetricFamilySamples.Sample namedTimerSample2 = new Collector.MetricFamilySamples.Sample("my_application_namedTimer", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedTimer2"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedTimer2"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedTimerSample2);
 
         final Collector.MetricFamilySamples.Sample namedCounter1 = new Collector.MetricFamilySamples.Sample("my_application_namedCounter", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedCounter1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedCounter1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedCounter1);
 
         final Collector.MetricFamilySamples.Sample namedCounter2 = new Collector.MetricFamilySamples.Sample("my_application_namedCounter", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedCounter2"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedCounter2"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedCounter2);
 
         final Collector.MetricFamilySamples.Sample namedMeter1 = new Collector.MetricFamilySamples.Sample("my_application_namedMeter_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedMeter1);
 
         final Collector.MetricFamilySamples.Sample namedMeter2 = new Collector.MetricFamilySamples.Sample("my_application_namedMeter_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter2"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter2"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedMeter2);
 
         final Collector.MetricFamilySamples.Sample namedHistogram1 = new Collector.MetricFamilySamples.Sample("my_application_namedHistogram", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedHistogram1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedHistogram1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedHistogram1);
 
         final Collector.MetricFamilySamples.Sample namedHistogram2 = new Collector.MetricFamilySamples.Sample("my_application_namedHistogram", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedHistogram2"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedHistogram2"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedHistogram2);
 
         final Collector.MetricFamilySamples.Sample namedGauge1 = new Collector.MetricFamilySamples.Sample("my_application_namedGauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedGauge1"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedGauge1"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedGauge1);
 
         final Collector.MetricFamilySamples.Sample namedGauge2 = new Collector.MetricFamilySamples.Sample("my_application_namedGauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-        Mockito.when(sampleBuilder.createSample(eq("my.application.namedGauge2"), anyString(), anyListOf(String.class), anyListOf(String.class), anyDouble()))
+        Mockito.when(sampleBuilder.createSample(eq("my.application.namedGauge2"), anyString(), anyList(), anyList(), anyDouble()))
                 .thenReturn(namedGauge2);
 
         metricRegistry.timer("my.application.namedTimer1");

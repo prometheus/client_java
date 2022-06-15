@@ -62,7 +62,7 @@ public class MemoryAllocationExportsTest {
       }
     };
 
-    Mockito.verify((NotificationEmitter) notificationEmitterMXBean).addNotificationListener(Mockito.any(MemoryAllocationExports.AllocationCountingNotificationListener.class), Mockito.isNull(NotificationFilter.class), Mockito.isNull());
-    Mockito.verifyZeroInteractions(notNotificationEmitterMXBean);
+    Mockito.verify((NotificationEmitter) notificationEmitterMXBean).addNotificationListener(Mockito.any(MemoryAllocationExports.AllocationCountingNotificationListener.class), Mockito.isNull(), Mockito.isNull());
+    Mockito.verifyNoInteractions(notNotificationEmitterMXBean);
   }
 }

@@ -231,7 +231,7 @@
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>2.10.0</version>
                 <configuration>
-                    <rulesUri>file://${session.executionRootDirectory}/version-rules.xml</rulesUri>
+                    <rulesUri>file://${project.basedir}/version-rules.xml</rulesUri>
                 </configuration>
             </plugin>
         </plugins>

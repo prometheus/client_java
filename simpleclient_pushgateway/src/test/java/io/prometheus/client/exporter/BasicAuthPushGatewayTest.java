@@ -11,7 +11,7 @@ import io.prometheus.client.Gauge;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockserver.client.server.MockServerClient;
+import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 public class BasicAuthPushGatewayTest {
@@ -28,7 +28,7 @@ public class BasicAuthPushGatewayTest {
   public void setUp() {
     registry = new CollectorRegistry();
     gauge = Gauge.build().name("g").help("help").create();
-    pushGateway = new PushGateway("localhost:" + mockServerRule.getHttpPort());
+    pushGateway = new PushGateway("localhost:" + mockServerRule.getPort());
     pushGateway.setConnectionFactory(new BasicAuthHttpConnectionFactory("testUser", "testPwd"));
   }
 

@@ -16,7 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockserver.junit.MockServerRule;
-import org.mockserver.client.server.MockServerClient;
+import org.mockserver.client.MockServerClient;
 
 public class PushGatewayTest {
 
@@ -37,7 +37,7 @@ public class PushGatewayTest {
   public void setUp() {
     registry = new CollectorRegistry();
     gauge = (Gauge) Gauge.build().name("g").help("help").create();
-    pg = new PushGateway("localhost:" + mockServerRule.getHttpPort());
+    pg = new PushGateway("localhost:" + mockServerRule.getPort());
     groupingKey = new TreeMap<String, String>();
     groupingKey.put("l", "v");
   }
@@ -86,7 +86,7 @@ public class PushGatewayTest {
     thrown.expect(IOException.class);
     thrown.expectMessage(
             "Response code from http://localhost:"
-                    + mockServerRule.getHttpPort()
+                    + mockServerRule.getPort()
                     + "/metrics/job/j was 500");
     pg.push(registry, "j");
   }
