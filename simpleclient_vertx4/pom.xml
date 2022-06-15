@@ -17,7 +17,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>parent</artifactId>
-        <version>0.15.1-SNAPSHOT</version>
+        <version>0.16.0</version>
     </parent>
 
     <artifactId>simpleclient_vertx4</artifactId>
