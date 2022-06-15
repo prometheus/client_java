@@ -3,8 +3,7 @@ package io.prometheus.client;
 
 import io.prometheus.client.exemplars.Exemplar;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
