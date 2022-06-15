@@ -404,7 +404,7 @@ public class Summary extends SimpleCollector<Summary.Child> implements Counter.D
       }
       samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
       samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
-      if (USE_CREATED) {
+      if (Environment.includeCreatedSeries()) {
         samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), v.created / 1000.0));
       }
     }

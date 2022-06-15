@@ -395,16 +395,4 @@ public abstract class Collector {
     }
     return Double.toString(d);
   }
-
-  protected static final String DISABLE_CREATED_SERIES = "PROMETHEUS_DISABLE_CREATED_SERIES";
-  private static final List<String> TRUTHS = Arrays.asList("true", "1", "t");
-  protected static final boolean USE_CREATED = getUseCreated();
-
-  protected static boolean getUseCreated() {
-    String disable_series = System.getenv(DISABLE_CREATED_SERIES);
-    if (disable_series != null) {
-      return !TRUTHS.contains(disable_series.toLowerCase());
-    }
-    return true;
-  }
 }
