@@ -169,10 +169,15 @@ public class CollectorRegistry {
         HashSet<Collector> collectors = new HashSet<Collector>();
         synchronized (namesCollectorsLock) {
           for (Map.Entry<Collector, List<String>> entry : collectorsToNames.entrySet()) {
-            for (String name : entry.getValue()) {
-              if (sampleNameFilter.test(name)) {
-                collectors.add(entry.getKey());
-                break;
+            List<String> names = entry.getValue();
+            if (names.isEmpty()) {
+              collectors.add(entry.getKey());
+            } else {
+              for (String name : names) {
+                if (sampleNameFilter.test(name)) {
+                  collectors.add(entry.getKey());
+                  break;
+                }
               }
             }
           }
