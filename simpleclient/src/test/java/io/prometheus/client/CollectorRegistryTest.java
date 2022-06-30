@@ -43,6 +43,11 @@ public class CollectorRegistryTest {
   }
 
   @Test
+  public void testUnregisterNonRegistered() {
+    registry.unregister(new MyCollector());
+  }
+
+  @Test
   public void testClear() {
     Collector g = Gauge.build().name("g").help("h").register(registry);
     Collector c = Counter.build().name("c").help("h").register(registry);

@@ -80,8 +80,10 @@ public class CollectorRegistry {
   public void unregister(Collector m) {
     synchronized (namesCollectorsLock) {
       List<String> names = collectorsToNames.remove(m);
-      for (String name : names) {
-        namesToCollectors.remove(name);
+      if (names != null) {
+        for (String name : names) {
+          namesToCollectors.remove(name);
+        }
       }
     }
   }
