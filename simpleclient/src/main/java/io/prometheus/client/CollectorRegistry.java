@@ -254,4 +254,22 @@ public class CollectorRegistry {
     return null;
   }
 
+  /**
+   * Returns the given value, or null if it doesn't exist.
+   * <p>
+   * This is inefficient, and intended only for use in unittests.
+   */
+  public Double getSampleValue(String name, String[] labelNames, String[] labelValues, Predicate<String> sampleNameFilter) {
+    for (Collector.MetricFamilySamples metricFamilySamples : Collections.list(filteredMetricFamilySamples(sampleNameFilter))) {
+      for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
+        if (sample.name.equals(name)
+                && Arrays.equals(sample.labelNames.toArray(), labelNames)
+                && Arrays.equals(sample.labelValues.toArray(), labelValues)) {
+          return sample.value;
+        }
+      }
+    }
+    return null;
+  }
+
 }
