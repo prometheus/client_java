@@ -19,6 +19,7 @@ import java.util.concurrent.Callable;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.rules.ExpectedException.none;
 
 
@@ -68,6 +69,11 @@ public class HistogramTest {
         new String[]{Collector.doubleToGoString(b)}).doubleValue();
   }
 
+  @Test(expected=IllegalStateException.class)
+  public void testNullHelp() {
+    Histogram.build().name("nolabels2").help(null).register(registry);
+    fail("Expected IllegalStateException");
+  }
   @Test
   public void testObserve() {
     noLabels.observe(2);

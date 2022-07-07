@@ -1,6 +1,7 @@
 package io.prometheus.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.junit.rules.ExpectedException.none;
 
 import java.util.ArrayList;
@@ -32,7 +33,13 @@ public class CounterTest {
   private double getValue() {
     return registry.getSampleValue("nolabels_total").doubleValue();
   }
-  
+
+  @Test(expected=IllegalStateException.class)
+  public void testNullHelp() {
+    Counter.build().name("nolabels2").help(null).register(registry);
+    fail("Expected IllegalStateException");
+  }
+
   @Test
   public void testIncrement() {
     noLabels.inc();

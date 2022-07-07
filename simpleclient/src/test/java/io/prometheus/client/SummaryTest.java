@@ -13,6 +13,7 @@ import java.util.concurrent.Callable;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class SummaryTest {
@@ -54,6 +55,12 @@ public class SummaryTest {
   }
   private double getLabeledQuantile(String labelValue, double q) {
     return registry.getSampleValue("labels_and_quantiles", new String[]{"l", "quantile"}, new String[]{labelValue, Collector.doubleToGoString(q)}).doubleValue();
+  }
+
+  @Test(expected=IllegalStateException.class)
+  public void testNullHelp() {
+    Summary.build().name("nolabels2").help(null).register(registry);
+    fail("Expected IllegalStateException");
   }
 
   @Test

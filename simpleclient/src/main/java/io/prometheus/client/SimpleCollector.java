@@ -228,7 +228,11 @@ public abstract class SimpleCollector<Child> extends Collector {
      * Set the help string of the metric. Required.
      */
     public B help(String help) {
-      this.help = help;
+      if (help == null) {
+        this.help = "";
+      } else {
+        this.help = help;
+      }
       return (B)this;
     }
     /**

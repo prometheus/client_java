@@ -1,6 +1,7 @@
 package io.prometheus.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,12 @@ public class GaugeTest {
 
   private double getValue() {
     return registry.getSampleValue("nolabels").doubleValue();
+  }
+
+  @Test(expected=IllegalStateException.class)
+  public void testNullHelp() {
+    Gauge.build().name("nolabels2").help(null).register(registry);
+    fail("Expected IllegalStateException");
   }
 
   @Test

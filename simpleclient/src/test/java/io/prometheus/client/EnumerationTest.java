@@ -1,6 +1,5 @@
 package io.prometheus.client;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,7 +8,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class EnumerationTest {
@@ -29,6 +28,12 @@ public class EnumerationTest {
   }
   private Double getLabeledState(String labelValue, String s) {
     return registry.getSampleValue("labels", new String[]{"l", "labels"}, new String[]{labelValue, s});
+  }
+
+  @Test(expected=IllegalStateException.class)
+  public void testNullHelp() {
+    Enumeration.build().states("foo", "bar").name("nolabels2").help(null).register(registry);
+    fail("Expected IllegalStateException");
   }
 
   @Test
