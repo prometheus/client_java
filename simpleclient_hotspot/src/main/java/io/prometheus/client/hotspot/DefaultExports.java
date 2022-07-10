@@ -16,6 +16,7 @@ import io.prometheus.client.CollectorRegistry;
  * </pre>
  */
 public class DefaultExports {
+
   private static boolean initialized = false;
 
   /**
@@ -34,14 +35,14 @@ public class DefaultExports {
    * Register the default Hotspot collectors with the given registry.
    */
   public static void register(CollectorRegistry registry) {
-    new StandardExports().register(registry);
-    new MemoryPoolsExports().register(registry);
-    new MemoryAllocationExports().register(registry);
     new BufferPoolsExports().register(registry);
-    new GarbageCollectorExports().register(registry);
-    new ThreadExports().register(registry);
     new ClassLoadingExports().register(registry);
+    new CompilationExports().register(registry);
+    new GarbageCollectorExports().register(registry);
+    new MemoryAllocationExports().register(registry);
+    new MemoryPoolsExports().register(registry);
+    new StandardExports().register(registry);
+    new ThreadExports().register(registry);
     new VersionInfoExports().register(registry);
   }
-
 }
