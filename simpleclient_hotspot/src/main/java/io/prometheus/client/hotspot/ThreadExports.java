@@ -90,7 +90,7 @@ public class ThreadExports extends Collector {
                       threadBean.getTotalStartedThreadCount()));
     }
 
-    if (!threadBean.getClass().getSimpleName().equals("SubstrateThreadMXBean")) {
+    if (!NativeImageChecker.isGraalVmNativeImage) {
       if (nameFilter.test(JVM_THREADS_DEADLOCKED)) {
         sampleFamilies.add(
                 new GaugeMetricFamily(
