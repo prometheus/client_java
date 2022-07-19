@@ -90,36 +90,38 @@ public class ThreadExports extends Collector {
                       threadBean.getTotalStartedThreadCount()));
     }
 
-    if (nameFilter.test(JVM_THREADS_DEADLOCKED)) {
-      sampleFamilies.add(
-              new GaugeMetricFamily(
-                      JVM_THREADS_DEADLOCKED,
-                      "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers",
-                      nullSafeArrayLength(threadBean.findDeadlockedThreads())));
-    }
-
-    if (nameFilter.test(JVM_THREADS_DEADLOCKED_MONITOR)) {
-      sampleFamilies.add(
-              new GaugeMetricFamily(
-                      JVM_THREADS_DEADLOCKED_MONITOR,
-                      "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors",
-                      nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())));
-    }
-
-    if (nameFilter.test(JVM_THREADS_STATE)) {
-      GaugeMetricFamily threadStateFamily = new GaugeMetricFamily(
-              JVM_THREADS_STATE,
-              "Current count of threads by state",
-              Collections.singletonList("state"));
-
-      Map<String, Integer> threadStateCounts = getThreadStateCountMap();
-      for (Map.Entry<String, Integer> entry : threadStateCounts.entrySet()) {
-        threadStateFamily.addMetric(
-                Collections.singletonList(entry.getKey()),
-                entry.getValue()
-        );
+    if (!NativeImageChecker.isGraalVmNativeImage) {
+      if (nameFilter.test(JVM_THREADS_DEADLOCKED)) {
+        sampleFamilies.add(
+                new GaugeMetricFamily(
+                        JVM_THREADS_DEADLOCKED,
+                        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers",
+                        nullSafeArrayLength(threadBean.findDeadlockedThreads())));
       }
-      sampleFamilies.add(threadStateFamily);
+
+      if (nameFilter.test(JVM_THREADS_DEADLOCKED_MONITOR)) {
+        sampleFamilies.add(
+                new GaugeMetricFamily(
+                        JVM_THREADS_DEADLOCKED_MONITOR,
+                        "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors",
+                        nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())));
+      }
+
+      if (nameFilter.test(JVM_THREADS_STATE)) {
+        GaugeMetricFamily threadStateFamily = new GaugeMetricFamily(
+                JVM_THREADS_STATE,
+                "Current count of threads by state",
+                Collections.singletonList("state"));
+
+        Map<String, Integer> threadStateCounts = getThreadStateCountMap();
+        for (Map.Entry<String, Integer> entry : threadStateCounts.entrySet()) {
+          threadStateFamily.addMetric(
+                  Collections.singletonList(entry.getKey()),
+                  entry.getValue()
+          );
+        }
+        sampleFamilies.add(threadStateFamily);
+      }
     }
   }
 
