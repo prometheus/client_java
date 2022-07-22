@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
@@ -452,8 +453,8 @@ public class HTTPServer implements Closeable {
         if (executorService != null) {
             this.executorService = executorService;
         } else {
-            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5, NamedDaemonThreadFactory.defaultThreadFactory(daemon));
-            executor.setCorePoolSize(1);
+            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool(NamedDaemonThreadFactory.defaultThreadFactory(daemon));
+            executor.setKeepAliveTime(2, TimeUnit.MINUTES);
             this.executorService = executor;
         }
         server.setExecutor(this.executorService);
