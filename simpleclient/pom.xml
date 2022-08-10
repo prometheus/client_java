@@ -39,6 +39,11 @@
          All transitive dependencies of tracer libraries are scoped as provided and optional at runtime. -->
     <dependency>
       <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_tracer_micrometer_tracing</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
       <artifactId>simpleclient_tracer_otel</artifactId>
       <version>${project.version}</version>
     </dependency>
