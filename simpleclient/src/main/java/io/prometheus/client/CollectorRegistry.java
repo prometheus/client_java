@@ -101,7 +101,7 @@ public class CollectorRegistry {
   /**
    * A snapshot of the current collectors.
    */
-  private Set<Collector> collectors() {
+  public Set<Collector> collectors() {
     synchronized (namesCollectorsLock) {
       return new HashSet<Collector>(collectorsToNames.keySet());
     }
