@@ -1,6 +1,8 @@
 package io.prometheus.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Arrays;
@@ -47,9 +49,9 @@ import java.util.List;
  * by one of the dimensions altogether.
  */
 public abstract class SimpleCollector<Child> extends Collector {
-  protected final String fullname;
-  protected final String help;
-  protected final String unit;
+  public final String fullname;
+  public final String help;
+  public final String unit;
   protected final List<String> labelNames;
 
   protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
@@ -97,6 +99,20 @@ public abstract class SimpleCollector<Child> extends Collector {
   public void clear() {
     children.clear();
     initializeNoLabelsChild();
+  }
+
+  /**
+   * Return label names.
+   */
+  public List<String> labelNames() {
+    return Collections.unmodifiableList(labelNames);
+  }
+
+  /**
+   * Return all children.
+   */
+  public Map<List<String>, Child> children() {
+    return Collections.unmodifiableMap(children);
   }
   
   /**
