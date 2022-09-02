@@ -1,0 +1,56 @@
+package io.prometheus.client.it.java_versions;
+
+import io.prometheus.client.Counter;
+import io.prometheus.client.Histogram;
+import io.prometheus.client.Summary;
+import io.prometheus.client.exporter.HTTPServer;
+
+import java.io.IOException;
+import java.util.Random;
+
+/**
+ * Manual example to test histograms.
+ */
+public class HistogramDemo {
+    public static void main(String[] args) throws IOException, InterruptedException {
+        Histogram h = Histogram.build()
+                .name("response_time")
+                .help("example histogram")
+                .labelNames("http_status")
+                .buckets(0.1, 0.2, 0.3, 0.4)
+                .register();
+        Summary s = Summary.build()
+                .name("summary_example")
+                .help("example summary")
+                .labelNames("http_status")
+                .quantile(0.95, 0.01)
+                .quantile(0.99, 0.01)
+                .register();
+        Counter counter = Counter.build()
+                .name("test")
+                .help("test counter")
+                .labelNames("path")
+                .register();
+        counter.labels("/hello-world").inc();
+        populate(h);
+        populate(s);
+        new HTTPServer(9000);
+        Thread.currentThread().join(); // sleep forever
+    }
+
+    private static void populate(Histogram h) {
+        Random rand = new Random(0);
+        for (double d = 0.3; d > 0 && d <0.5; d += (rand.nextDouble() - 0.5)/ 10.0) {
+            String status = rand.nextBoolean() ? "200" : "500";
+            h.labels(status).observe(d);
+        }
+    }
+
+    private static void populate(Summary s) {
+        Random rand = new Random(1);
+        for (double d = 0.3; d > 0 && d <0.5; d += (rand.nextDouble() - 0.5)/ 10.0) {
+            String status = rand.nextBoolean() ? "200" : "500";
+            s.labels(status).observe(d);
+        }
+    }
+}

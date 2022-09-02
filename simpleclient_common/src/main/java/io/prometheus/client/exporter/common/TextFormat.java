@@ -1,7 +1,6 @@
 package io.prometheus.client.exporter.common;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +23,8 @@ public class TextFormat {
    */
   public final static String CONTENT_TYPE_OPENMETRICS_100 = "application/openmetrics-text; version=1.0.0; charset=utf-8";
 
+  public final static String CONTENT_TYPE_PROTOBUF = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
+
   /**
    * Return the content type that should be used for a given Accept HTTP header.
    *
@@ -35,6 +36,9 @@ public class TextFormat {
     }
 
     for (String accepts : acceptHeader.split(",")) {
+      if (accepts.startsWith(CONTENT_TYPE_PROTOBUF)) {
+        return CONTENT_TYPE_PROTOBUF;
+      }
       if ("application/openmetrics-text".equals(accepts.split(";")[0].trim())) {
         return CONTENT_TYPE_OPENMETRICS_100;
       }

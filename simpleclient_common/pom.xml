@@ -38,6 +38,14 @@
             <artifactId>prometheus-metrics</artifactId>
             <version>0.16.1-SNAPSHOT</version>
         </dependency>
+
+        <!-- the protobuf dependency is temporary and will be removed -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.21.5</version>
+        </dependency>
+
         <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>junit</groupId>
