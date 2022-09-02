@@ -11,6 +11,7 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Predicate;
 import io.prometheus.client.SampleNameFilter;
 import io.prometheus.client.Supplier;
+import io.prometheus.client.exporter.common.ProtoFormat;
 import io.prometheus.client.exporter.common.TextFormat;
 
 import java.io.ByteArrayOutputStream;
@@ -34,6 +35,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
+
+import static io.prometheus.client.exporter.common.TextFormat.CONTENT_TYPE_PROTOBUF;
 
 /**
  * Expose Prometheus metrics using a plain Java HttpServer.
@@ -98,7 +101,12 @@ public class HTTPServer implements Closeable {
                 Predicate<String> filter = sampleNameFilterSupplier == null ? null : sampleNameFilterSupplier.get();
                 filter = SampleNameFilter.restrictToNamesEqualTo(filter, parseQuery(query));
                 if (filter == null) {
-                    TextFormat.writeFormat(contentType, osw, registry.metricFamilySamples());
+                    if (CONTENT_TYPE_PROTOBUF.equals(contentType)) {
+                        // THIS IS A TEMPORARY HACK. IT WILL NOT GET MERGED.
+                        ProtoFormat.writeProtobuf(response, registry.metricFamilySamples());
+                    } else {
+                        TextFormat.writeFormat(contentType, osw, registry.metricFamilySamples());
+                    }
                 } else {
                     TextFormat.writeFormat(contentType, osw, registry.filteredMetricFamilySamples(filter));
                 }
