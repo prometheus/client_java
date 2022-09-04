@@ -42,6 +42,8 @@ public class HistogramDemo {
                 .register();
         counter.labels("/hello-world").inc();
         populate(h, sh, s);
+        sh.labels("200").observe(1024);
+        sh.labels("200").observe(Double.POSITIVE_INFINITY);
         new HTTPServer(9000);
         Thread.currentThread().join(); // sleep forever
     }
