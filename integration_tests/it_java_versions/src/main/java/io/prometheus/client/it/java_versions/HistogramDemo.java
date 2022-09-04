@@ -2,10 +2,13 @@ package io.prometheus.client.it.java_versions;
 
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
+import io.prometheus.client.SparseHistogram;
 import io.prometheus.client.Summary;
 import io.prometheus.client.exporter.HTTPServer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -13,6 +16,12 @@ import java.util.Random;
  */
 public class HistogramDemo {
     public static void main(String[] args) throws IOException, InterruptedException {
+        SparseHistogram sh = SparseHistogram.build()
+                .name("sparse_example")
+                .help("example sparse histogram")
+                .labelNames("http_status")
+                .withSchema(1)
+                .register();
         Histogram h = Histogram.build()
                 .name("response_time")
                 .help("example histogram")
@@ -32,25 +41,27 @@ public class HistogramDemo {
                 .labelNames("path")
                 .register();
         counter.labels("/hello-world").inc();
-        populate(h);
-        populate(s);
+        populate(h, sh, s);
         new HTTPServer(9000);
         Thread.currentThread().join(); // sleep forever
     }
 
-    private static void populate(Histogram h) {
+    private static void populate(Histogram h, SparseHistogram sh, Summary s) {
         Random rand = new Random(0);
+        ArrayList<Double> data = new ArrayList<>();
         for (double d = 0.3; d > 0 && d <0.5; d += (rand.nextDouble() - 0.5)/ 10.0) {
             String status = rand.nextBoolean() ? "200" : "500";
+            if (status.equals("500")) {
+                continue;
+            }
             h.labels(status).observe(d);
-        }
-    }
-
-    private static void populate(Summary s) {
-        Random rand = new Random(1);
-        for (double d = 0.3; d > 0 && d <0.5; d += (rand.nextDouble() - 0.5)/ 10.0) {
-            String status = rand.nextBoolean() ? "200" : "500";
+            sh.labels(status).observe(d);
             s.labels(status).observe(d);
+            data.add(d);
+        }
+        Collections.sort(data);
+        for (int i=0; i<data.size(); i++) {
+            System.out.println((i+1) + ": " + data.get(i));
         }
     }
 }
