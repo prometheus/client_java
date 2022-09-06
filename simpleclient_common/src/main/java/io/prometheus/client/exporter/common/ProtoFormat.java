@@ -5,9 +5,7 @@ import io.prometheus.client.Metrics;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 // THIS CODE WILL BE THROWN AWAY. IT WILL NEVER GET MERGED.
 // Prometheus has no intention to re-introduce the Protobuf format.
@@ -148,28 +146,8 @@ public class ProtoFormat {
                 prevValue = sample.value;
                 i++;
             }
-            if (positiveBuckets.size() > 1) { // more than just the +Inf bucket
-                Metrics.BucketSpan.Builder currentSpan = Metrics.BucketSpan.newBuilder();
-                currentSpan.setOffset(positiveBuckets.get(0).index);
-                currentSpan.setLength(0);
-                int previousIndex = currentSpan.getOffset();
-                long previousCount = 0;
-                for (Bucket bucket : positiveBuckets) {
-                    if (bucket.index == Integer.MAX_VALUE) {
-                        continue; // don't know how to represent the Inf bucket
-                    }
-                    if (bucket.index > previousIndex + 1) {
-                        histogramBuilder.addPositiveSpan(currentSpan.build());
-                        currentSpan = Metrics.BucketSpan.newBuilder();
-                        currentSpan.setOffset(bucket.index - previousIndex);
-                    }
-                    currentSpan.setLength(currentSpan.getLength() + 1);
-                    previousIndex = bucket.index;
-                    histogramBuilder.addPositiveDelta(Double.valueOf(bucket.count).longValue() - previousCount);
-                    previousCount = Double.valueOf(bucket.count).longValue();
-                }
-                histogramBuilder.addPositiveSpan(currentSpan.build());
-            }
+            addBuckets(histogramBuilder, positiveBuckets, +1);
+            addBuckets(histogramBuilder, negativeBuckets, -1);
             if ((sample = metricFamily.samples.get(i)).name.endsWith("_count")) {
                 metricBuilder.addAllLabel(makeLabels(sample));
                 histogramBuilder.setSampleCount((long) sample.value);
@@ -197,6 +175,49 @@ public class ProtoFormat {
             result.add(metricBuilder.setHistogram(histogramBuilder.build()).build());
         }
         return result;
+    }
+
+    private static void addBuckets(Metrics.Histogram.Builder histogramBuilder, List<Bucket> buckets, int sgn) {
+        if (buckets.size() > 1) { // more than just the Inf bucket
+            Collections.sort(buckets, new Comparator<Bucket>() {
+                @Override
+                public int compare(Bucket bucket1, Bucket bucket2) {
+                    return Integer.valueOf(bucket1.index).compareTo(bucket2.index);
+                }
+            });
+            Metrics.BucketSpan.Builder currentSpan = Metrics.BucketSpan.newBuilder();
+            currentSpan.setOffset(buckets.get(0).index);
+            currentSpan.setLength(0);
+            int previousIndex = currentSpan.getOffset();
+            long previousCount = 0;
+            for (Bucket bucket : buckets) {
+                if (bucket.index == Integer.MAX_VALUE) {
+                    continue; // don't know how to represent the Inf bucket
+                }
+                if (bucket.index > previousIndex + 1) {
+                    if (sgn > 0) {
+                        histogramBuilder.addPositiveSpan(currentSpan.build());
+                    }  else {
+                        histogramBuilder.addNegativeSpan(currentSpan.build());
+                    }
+                    currentSpan = Metrics.BucketSpan.newBuilder();
+                    currentSpan.setOffset(bucket.index - previousIndex);
+                }
+                currentSpan.setLength(currentSpan.getLength() + 1);
+                previousIndex = bucket.index;
+                if (sgn > 0) {
+                    histogramBuilder.addPositiveDelta(Double.valueOf(bucket.count).longValue() - previousCount);
+                } else {
+                    histogramBuilder.addNegativeDelta(Double.valueOf(bucket.count).longValue() - previousCount);
+                }
+                previousCount = Double.valueOf(bucket.count).longValue();
+            }
+            if (sgn > 0) {
+                histogramBuilder.addPositiveSpan(currentSpan.build());
+            } else {
+                histogramBuilder.addNegativeSpan(currentSpan.build());
+            }
+        }
     }
 
     private static class Bucket {

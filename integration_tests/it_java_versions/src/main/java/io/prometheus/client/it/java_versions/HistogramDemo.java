@@ -61,6 +61,7 @@ public class HistogramDemo {
             }
             //h.labels(status).observe(d);
             sh.labels(status).observe(d);
+            sh.labels(status).observe(-d);
             //sh.labels(status).observe(-d);
             //s.labels(status).observe(d);
             data.add(d);
