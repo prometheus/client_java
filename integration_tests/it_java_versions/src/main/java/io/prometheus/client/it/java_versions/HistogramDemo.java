@@ -22,6 +22,7 @@ public class HistogramDemo {
                 .labelNames("http_status")
                 .withSchema(1)
                 .register();
+        /*
         Histogram h = Histogram.build()
                 .name("response_time")
                 .help("example histogram")
@@ -35,15 +36,17 @@ public class HistogramDemo {
                 .quantile(0.95, 0.01)
                 .quantile(0.99, 0.01)
                 .register();
+         */
         Counter counter = Counter.build()
                 .name("test")
                 .help("test counter")
                 .labelNames("path")
                 .register();
         counter.labels("/hello-world").inc();
-        populate(h, sh, s);
-        sh.labels("200").observe(1024);
-        sh.labels("200").observe(Double.POSITIVE_INFINITY);
+        populate(null, sh, null);
+        //sh.labels("200").observe(-0.1);
+        //sh.labels("200").observe(1024);
+        //sh.labels("200").observe(Double.POSITIVE_INFINITY);
         new HTTPServer(9000);
         Thread.currentThread().join(); // sleep forever
     }
@@ -56,9 +59,10 @@ public class HistogramDemo {
             if (status.equals("500")) {
                 continue;
             }
-            h.labels(status).observe(d);
+            //h.labels(status).observe(d);
             sh.labels(status).observe(d);
-            s.labels(status).observe(d);
+            //sh.labels(status).observe(-d);
+            //s.labels(status).observe(d);
             data.add(d);
         }
         Collections.sort(data);
