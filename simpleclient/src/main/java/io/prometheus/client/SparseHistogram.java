@@ -3,6 +3,7 @@ package io.prometheus.client;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+// This should eventually be merged with Histogram so that there's only one single Histogram API.
 public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
 
     private final int schema; // integer in [-4, 8]
