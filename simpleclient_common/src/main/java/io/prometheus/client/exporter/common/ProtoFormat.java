@@ -116,6 +116,110 @@ public class ProtoFormat {
     }
 
     private static List<Metrics.Metric> makeHistograms(Collector.MetricFamilySamples metricFamily) {
+        // We might later merge sparse histograms and explicit histograms to provide a unified API,
+        // but for the initial evaluation we keep them separate.
+        Collector.MetricFamilySamples.Sample bucket = metricFamily.samples.get(0); // this is always a bucket
+        if (bucket.labelNames.size() >= 2 && bucket.labelNames.get(bucket.labelNames.size() - 2).equals("bucket_index")) {
+            return makeSparseHistograms(metricFamily);
+        } else {
+            return makeExplicitHistograms(metricFamily);
+        }
+    }
+
+    private static List<Metrics.Metric> makeSparseHistograms(Collector.MetricFamilySamples metricFamily) {
+        // We assume that the samples are in order _bucket..., _count, _sum, _schema, _zero_count, _zero_threshold
+        // because that's how we write them in Histogram.collect()
+        List<Metrics.Metric> result = new ArrayList<Metrics.Metric>();
+        for (int i = 0; i < metricFamily.samples.size();) {
+            Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
+            Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
+            Collector.MetricFamilySamples.Sample sample;
+            List<Bucket> positiveBuckets = new ArrayList<Bucket>();
+            List<Bucket> negativeBuckets = new ArrayList<Bucket>();
+            double prevValue = 0;
+            while ((sample = metricFamily.samples.get(i)).name.endsWith("_bucket")) {
+                Bucket bucket = new Bucket(sample, prevValue);
+                if (sample.labelValues.get(sample.labelValues.size() - 1).startsWith("-")) {
+                    // le label starts with "-", i.e. it's a negative upper bound
+                    negativeBuckets.add(bucket);
+                } else {
+                    positiveBuckets.add(bucket);
+                }
+                prevValue = sample.value;
+                i++;
+            }
+            if (positiveBuckets.size() > 1) { // more than just the +Inf bucket
+                Metrics.BucketSpan.Builder currentSpan = Metrics.BucketSpan.newBuilder();
+                currentSpan.setOffset(positiveBuckets.get(0).index);
+                currentSpan.setLength(0);
+                int previousIndex = currentSpan.getOffset();
+                long previousCount = 0;
+                for (Bucket bucket : positiveBuckets) {
+                    if (bucket.index == Integer.MAX_VALUE) {
+                        continue; // don't know how to represent the Inf bucket
+                    }
+                    if (bucket.index > previousIndex + 1) {
+                        histogramBuilder.addPositiveSpan(currentSpan.build());
+                        currentSpan = Metrics.BucketSpan.newBuilder();
+                        currentSpan.setOffset(bucket.index - previousIndex);
+                    }
+                    currentSpan.setLength(currentSpan.getLength() + 1);
+                    previousIndex = bucket.index;
+                    histogramBuilder.addPositiveDelta(Double.valueOf(bucket.count).longValue() - previousCount);
+                    previousCount = Double.valueOf(bucket.count).longValue();
+                }
+                histogramBuilder.addPositiveSpan(currentSpan.build());
+            }
+            if ((sample = metricFamily.samples.get(i)).name.endsWith("_count")) {
+                metricBuilder.addAllLabel(makeLabels(sample));
+                histogramBuilder.setSampleCount((long) sample.value);
+                i++;
+            }
+            if ((sample = metricFamily.samples.get(i)).name.endsWith("_sum")) {
+                histogramBuilder.setSampleSum(sample.value);
+                i++;
+            }
+            if ((sample = metricFamily.samples.get(i)).name.endsWith("_schema")) {
+                histogramBuilder.setSchema(Double.valueOf(sample.value).intValue());
+                i++;
+            }
+            if ((sample = metricFamily.samples.get(i)).name.endsWith("_zero_count")) {
+                histogramBuilder.setZeroCount(Double.valueOf(sample.value).longValue());
+                i++;
+            }
+            if ((sample = metricFamily.samples.get(i)).name.endsWith("_zero_threshold")) {
+                histogramBuilder.setZeroThreshold(sample.value);
+                i++;
+            }
+            if (i < metricFamily.samples.size() && metricFamily.samples.get(i).name.endsWith("_created")) {
+                i++;
+            }
+            result.add(metricBuilder.setHistogram(histogramBuilder.build()).build());
+        }
+        return result;
+    }
+
+    private static class Bucket {
+        final int index;
+        final double count;
+
+        private Bucket(Collector.MetricFamilySamples.Sample sample, double prevCount) {
+            this.index = findIndex(sample);
+            this.count = sample.value - prevCount;
+        }
+
+        private int findIndex(Collector.MetricFamilySamples.Sample sample) {
+            String indexString = sample.labelValues.get(sample.labelValues.size()-2);
+            String le = sample.labelValues.get(sample.labelValues.size()-1);
+            if (indexString.endsWith("Inf")) {
+                return Integer.MAX_VALUE;
+            }
+            int index = Integer.parseInt(indexString);
+            return le.startsWith("-") ? -index : index;
+        }
+    }
+
+    private static List<Metrics.Metric> makeExplicitHistograms(Collector.MetricFamilySamples metricFamily) {
         // We assume that the samples are in order _bucket..., _count, _sum,
         // because that's how we write them in Histogram.collect()
         List<Metrics.Metric> result = new ArrayList<Metrics.Metric>();

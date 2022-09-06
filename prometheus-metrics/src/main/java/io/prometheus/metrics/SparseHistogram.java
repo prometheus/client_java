@@ -1,6 +1,7 @@
 package io.prometheus.metrics;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
 
@@ -13,25 +14,47 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
         return new Builder();
     }
 
+    // There is no definition of a text format for sparse histograms yet.
+    // We produce a format emulating explicit histograms here.
+    // This will change once a format for sparse histograms is defined.
     @Override
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
-        for (Map.Entry<List<String>, SparseHistogram.Child> c : children.entrySet()) {
+        for (Map.Entry<List<String>, SparseHistogram.Child> entry : children.entrySet()) {
             List<String> labelNamesWithLe = new ArrayList<String>(labelNames);
             labelNamesWithLe.add("bucket_index"); // quick hack for manual verification, will be removed
             labelNamesWithLe.add("le");
-            int count = 0;
-            for (Map.Entry<Integer, Integer> bucket : c.getValue().bucketsForPositiveValues.entrySet()) {
-                List<String> labelValuesWithLe = new ArrayList<String>(c.getKey());
-                labelValuesWithLe.add(Integer.MAX_VALUE == bucket.getKey() ? "+Inf" : Integer.toString(bucket.getKey()));
-                labelValuesWithLe.add(doubleToGoString(bucketIndexToUpperBound(bucket.getKey())));
-                count = count + bucket.getValue();
+            SparseHistogram.Child child = entry.getValue();
+            long count = 0;
+            if (child.bucketsForNegativeValues.size() > 1 || child.bucketsForNegativeValues.get(Integer.MAX_VALUE).intValue() > 0) {
+                List<Integer> bucketIndexes = new ArrayList<Integer>(child.bucketsForNegativeValues.keySet());
+                Collections.sort(bucketIndexes, Collections.<Integer>reverseOrder());
+                for (Integer bucketIndex : bucketIndexes) {
+                    count = count + child.bucketsForNegativeValues.get(bucketIndex).intValue();
+                    List<String> labelValuesWithGe = new ArrayList<String>(labelNamesWithLe.size());
+                    labelValuesWithGe.addAll(entry.getKey());
+                    labelValuesWithGe.add(Integer.MAX_VALUE == bucketIndex ? "-Inf" : Integer.toString(bucketIndex));
+                    labelValuesWithGe.add(doubleToGoString(-bucketIndexToUpperBound(bucketIndex-1)));
+                    samples.add(new MetricFamilySamples.Sample(fullname + "_bucket", labelNamesWithLe, labelValuesWithGe, count));
+                }
+            }
+            List<Integer> bucketIndexes =  new ArrayList<Integer>(child.bucketsForPositiveValues.keySet());
+            Collections.sort(bucketIndexes);
+            for (Integer bucketIndex : bucketIndexes) {
+                count = count + child.bucketsForPositiveValues.get(bucketIndex).intValue();
+                List<String> labelValuesWithLe = new ArrayList<String>(labelNamesWithLe.size());
+                labelValuesWithLe.addAll(entry.getKey());
+                labelValuesWithLe.add(Integer.MAX_VALUE == bucketIndex ? "+Inf" : Integer.toString(bucketIndex));
+                labelValuesWithLe.add(doubleToGoString(bucketIndexToUpperBound(bucketIndex)));
                 samples.add(new MetricFamilySamples.Sample(fullname + "_bucket", labelNamesWithLe, labelValuesWithLe, count));
             }
-            samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), count));
-            samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), c.getValue().sum.doubleValue()));
+            samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, entry.getKey(), child.count.intValue()));
+            samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, entry.getKey(), child.sum.doubleValue()));
+            samples.add(new MetricFamilySamples.Sample(fullname + "_schema", labelNames, entry.getKey(), child.schema));
+            samples.add(new MetricFamilySamples.Sample(fullname + "_zero_count", labelNames, entry.getKey(), child.zeroCount.doubleValue()));
+            samples.add(new MetricFamilySamples.Sample(fullname + "_zero_threshold", labelNames, entry.getKey(), child.zeroThreshold));
             if (Environment.includeCreatedSeries()) {
-                samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), c.getValue().created / 1000.0));
+                samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, entry.getKey(), child.created / 1000.0));
             }
         }
 
@@ -95,8 +118,9 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
     public static class Child {
         private final int schema; // integer in [-4, 8]
         private final double zeroThreshold;
-        private final SortedMap<Integer, Integer> bucketsForPositiveValues = new TreeMap<Integer, Integer>();
-        private final SortedMap<Integer, Integer> bucketsForNegativeValues = new TreeMap<Integer, Integer>();
+        private final ConcurrentHashMap<Integer, DoubleAdder> bucketsForPositiveValues = new ConcurrentHashMap<Integer, DoubleAdder>();
+        private final ConcurrentHashMap<Integer, DoubleAdder> bucketsForNegativeValues = new ConcurrentHashMap<Integer, DoubleAdder>();
+        private final DoubleAdder count = new DoubleAdder();
         private final DoubleAdder sum = new DoubleAdder();
         private final DoubleAdder zeroCount = new DoubleAdder();
         private final long created = System.currentTimeMillis();
@@ -104,7 +128,8 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
         private Child(int schema, double zeroThreshold) {
             this.schema = schema;
             this.zeroThreshold = zeroThreshold;
-            bucketsForPositiveValues.put(Integer.MAX_VALUE, 0);
+            bucketsForPositiveValues.put(Integer.MAX_VALUE, new DoubleAdder());
+            bucketsForNegativeValues.put(Integer.MAX_VALUE, new DoubleAdder());
         }
 
         public void observe(double value) {
@@ -119,19 +144,22 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
             }
         }
 
-        private void observe(SortedMap<Integer, Integer> buckets, double value) {
+        private void observe(ConcurrentHashMap<Integer, DoubleAdder> buckets, double value) {
             int bucketIndex = Double.isInfinite(value) ? Integer.MAX_VALUE : findBucketIndex(value);
             // debug: the IllegalStateException should never happen
             double base = Math.pow(2, Math.pow(2, -schema));
             if (!Double.isInfinite(value) && !(Math.pow(base, bucketIndex-1) < value && value <= Math.pow(base, bucketIndex))) {
                 throw new IllegalStateException("Bucket index " + bucketIndex + ": Invariance violated: " + Math.pow(base, bucketIndex-1) + " < " + value + " <= " + Math.pow(base, bucketIndex));
             }
-            // not thread safe
-            if (!buckets.containsKey(bucketIndex)) {
-                buckets.put(bucketIndex, 0);
+            DoubleAdder bucketCount = buckets.get(bucketIndex);
+            if (bucketCount == null) {
+                DoubleAdder newBucketCount = new DoubleAdder();
+                DoubleAdder existingBucketCount = buckets.putIfAbsent(bucketIndex, newBucketCount);
+                bucketCount = existingBucketCount == null ? newBucketCount : existingBucketCount;
             }
-            buckets.put(bucketIndex, buckets.get(bucketIndex) + 1);
+            bucketCount.add(1);
             sum.add(value);
+            count.add(1);
         }
 
         // Assumptions:
