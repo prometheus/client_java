@@ -1,5 +1,6 @@
 package io.prometheus.client.hotspot;
 
+import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.Counter;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -11,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
 
 public class MemoryAllocationExportsTest {
 
@@ -62,7 +65,26 @@ public class MemoryAllocationExportsTest {
       }
     };
 
-    Mockito.verify((NotificationEmitter) notificationEmitterMXBean).addNotificationListener(Mockito.any(MemoryAllocationExports.AllocationCountingNotificationListener.class), Mockito.isNull(), Mockito.isNull());
+    Mockito.verify((NotificationEmitter) notificationEmitterMXBean).addNotificationListener(Mockito.any(MemoryAllocationExports.AllocationCountingNotificationListener.class), Mockito.nullable(NotificationFilter.class), Mockito.nullable(Object.class));
     Mockito.verifyNoInteractions(notNotificationEmitterMXBean);
+  }
+  
+  @Test
+  public void testEmptyMetricsWithRemovedNotificationEmitter() {
+    MemoryAllocationExports allocationExporter = new MemoryAllocationExports();
+    allocationExporter.removeGarbageCollectorListener();
+    
+    List<MetricFamilySamples> metrics = allocationExporter.collect();
+    
+    assertTrue("Metrics should be empty, if no notification emitter is registered", metrics.isEmpty());
+  }
+  
+  @Test
+  public void testAddNotificationEmitterNotCalledMultipleTimesDuringInstantiation() {
+    MemoryAllocationExports allocationExporter = Mockito.mock(MemoryAllocationExports.class);
+    
+    allocationExporter.addGarbageCollectorListener();
+    
+    Mockito.verify(allocationExporter, times(1)).addGarbageCollectorListener();
   }
 }

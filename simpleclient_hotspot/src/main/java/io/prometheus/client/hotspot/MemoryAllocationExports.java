@@ -5,6 +5,7 @@ import com.sun.management.GcInfo;
 import io.prometheus.client.Collector;
 import io.prometheus.client.Counter;
 
+import javax.management.ListenerNotFoundException;
 import javax.management.Notification;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
@@ -12,9 +13,11 @@ import javax.management.openmbean.CompositeData;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class MemoryAllocationExports extends Collector {
   private final Counter allocatedCounter = Counter.build()
@@ -23,18 +26,45 @@ public class MemoryAllocationExports extends Collector {
           .labelNames("pool")
           .create();
 
+  private static final Logger LOGGER = Logger.getLogger(MemoryAllocationExports.class.getName());
+
+  private NotificationListener listener = null;
+
   public MemoryAllocationExports() {
-    AllocationCountingNotificationListener listener = new AllocationCountingNotificationListener(allocatedCounter);
-    for (GarbageCollectorMXBean garbageCollectorMXBean : getGarbageCollectorMXBeans()) {
-      if (garbageCollectorMXBean instanceof NotificationEmitter) {
-        ((NotificationEmitter) garbageCollectorMXBean).addNotificationListener(listener, null, null);
-      }
-    }
+    addGarbageCollectorListener();
   }
 
   @Override
   public List<MetricFamilySamples> collect() {
-    return allocatedCounter.collect();
+    return null == listener ? new ArrayList<Collector.MetricFamilySamples>() : allocatedCounter.collect();
+  }
+
+  void removeGarbageCollectorListener() {
+    if (null != listener ) {
+      for (GarbageCollectorMXBean garbageCollectorMXBean : getGarbageCollectorMXBeans()) {
+        if (garbageCollectorMXBean instanceof NotificationEmitter) {
+          try {
+            ((NotificationEmitter) garbageCollectorMXBean).removeNotificationListener(listener);
+          } catch (ListenerNotFoundException e) {
+            LOGGER.warning("The default notification listener could not be removed from the garbage collector.");
+          }
+        }
+      }
+      
+      listener = null;
+    }
+  }
+  
+  void addGarbageCollectorListener() {
+    if (null == listener) {
+      listener = new AllocationCountingNotificationListener(allocatedCounter);
+      
+      for (GarbageCollectorMXBean garbageCollectorMXBean : getGarbageCollectorMXBeans()) {
+        if (garbageCollectorMXBean instanceof NotificationEmitter) {
+          ((NotificationEmitter) garbageCollectorMXBean).addNotificationListener(listener, null, null);
+        }
+      }
+    }
   }
 
   static class AllocationCountingNotificationListener implements NotificationListener {
