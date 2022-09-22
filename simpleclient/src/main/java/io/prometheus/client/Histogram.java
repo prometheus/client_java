@@ -5,6 +5,7 @@ import io.prometheus.client.exemplars.ExemplarConfig;
 import io.prometheus.client.exemplars.HistogramExemplarSampler;
 
 import java.io.Closeable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -128,8 +129,23 @@ public class Histogram extends SimpleCollector<Histogram.Child> implements Colle
      */
     public Builder linearBuckets(double start, double width, int count) {
       buckets = new double[count];
+      // Why BigDecimal?
+      // Because if you call linearBuckets(0.1, 0.1, 10) without BigDecimal you'll see annoying buckets like these:
+      // http_request_duration_seconds_bucket{le="0.1",} 10.0
+      // http_request_duration_seconds_bucket{le="0.2",} 35.0
+      // http_request_duration_seconds_bucket{le="0.30000000000000004",} 56.0
+      // http_request_duration_seconds_bucket{le="0.4",} 63.0
+      // http_request_duration_seconds_bucket{le="0.5",} 74.0
+      // http_request_duration_seconds_bucket{le="0.6",} 101.0
+      // http_request_duration_seconds_bucket{le="0.7000000000000001",} 134.0
+      // http_request_duration_seconds_bucket{le="0.8",} 149.0
+      // http_request_duration_seconds_bucket{le="0.9",} 156.0
+      // http_request_duration_seconds_bucket{le="1.0",} 159.0
+      // http_request_duration_seconds_bucket{le="+Inf",} 159.0
+      BigDecimal s = new BigDecimal(Double.toString(start));
+      BigDecimal w = new BigDecimal(Double.toString(width));
       for (int i = 0; i < count; i++) {
-        buckets[i] = start + i * width;
+        buckets[i] = s.add(w.multiply(new BigDecimal(i))).doubleValue();
       }
       return this;
     }
