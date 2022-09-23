@@ -1,8 +1,8 @@
 package io.prometheus.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -95,7 +95,8 @@ public class SampleNameFilter implements Predicate<String> {
          * @see #nameMustBeEqualTo(Collection)
          */
         public Builder nameMustBeEqualTo(String... names) {
-            return nameMustBeEqualTo(Arrays.asList(names));
+            Collections.addAll(nameEqualTo, names);
+            return this;
         }
 
         /**
@@ -118,7 +119,8 @@ public class SampleNameFilter implements Predicate<String> {
          * @see #nameMustNotBeEqualTo(Collection)
          */
         public Builder nameMustNotBeEqualTo(String... names) {
-            return nameMustNotBeEqualTo(Arrays.asList(names));
+            Collections.addAll(nameNotEqualTo, names);
+            return this;
         }
 
         /**
@@ -139,7 +141,8 @@ public class SampleNameFilter implements Predicate<String> {
          * @see #nameMustStartWith(Collection)
          */
         public Builder nameMustStartWith(String... prefixes) {
-            return nameMustStartWith(Arrays.asList(prefixes));
+            Collections.addAll(nameStartsWith, prefixes);
+            return this;
         }
 
         /**
@@ -155,7 +158,8 @@ public class SampleNameFilter implements Predicate<String> {
          * @see #nameMustNotStartWith(Collection)
          */
         public Builder nameMustNotStartWith(String... prefixes) {
-            return nameMustNotStartWith(Arrays.asList(prefixes));
+            Collections.addAll(nameDoesNotStartWith, prefixes);
+            return this;
         }
 
         /**

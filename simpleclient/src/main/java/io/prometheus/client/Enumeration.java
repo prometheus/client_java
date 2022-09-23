@@ -1,7 +1,6 @@
 package io.prometheus.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +78,7 @@ public class Enumeration extends SimpleCollector<Enumeration.Child> implements C
       }
       // LinkedHashSet so we can know which was the first state.
       states = new LinkedHashSet();
-      states.addAll(Arrays.asList(s));
+      Collections.addAll(states, s);
       return this;
     }
 

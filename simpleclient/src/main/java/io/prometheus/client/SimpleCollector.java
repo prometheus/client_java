@@ -1,6 +1,7 @@
 package io.prometheus.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Arrays;
@@ -69,7 +70,7 @@ public abstract class SimpleCollector<Child> extends Collector {
         throw new IllegalArgumentException("Label cannot be null.");
       }
     }
-    List<String> key = Arrays.asList(labelValues);
+    List<String> key = toList(labelValues);
     Child c = children.get(key);
     if (c != null) {
       return c;
@@ -79,13 +80,17 @@ public abstract class SimpleCollector<Child> extends Collector {
     return tmp == null ? c2 : tmp;
   }
 
+  private static List<String> toList(String[] values) {
+    return (values.length == 1) ? Collections.singletonList(values[0]) : Arrays.asList(values);
+  }
+
   /**
    * Remove the Child with the given labels.
    * <p>
    * Any references to the Child are invalidated.
    */
   public void remove(String... labelValues) {
-    children.remove(Arrays.asList(labelValues));
+    children.remove(toList(labelValues));
     initializeNoLabelsChild();
   }
   
@@ -136,7 +141,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     if (labelValues.length != labelNames.size()) {
       throw new IllegalArgumentException("Incorrect number of labels.");
     }
-    children.put(Arrays.asList(labelValues), child);
+    children.put(toList(labelValues), child);
     return (T)this;
   }
 
@@ -169,7 +174,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     checkMetricName(fullname);
     if (b.help != null && b.help.isEmpty()) throw new IllegalStateException("Help hasn't been set.");
     help = b.help;
-    labelNames = Arrays.asList(b.labelNames);
+    labelNames = toList(b.labelNames);
 
     for (String n: labelNames) {
       checkMetricLabelName(n);

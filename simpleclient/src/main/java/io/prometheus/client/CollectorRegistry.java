@@ -119,7 +119,7 @@ public class CollectorRegistry {
 
     List<String> names = new ArrayList<String>();
     for (Collector.MetricFamilySamples family : mfs) {
-      names.addAll(Arrays.asList(family.getNames()));
+      Collections.addAll(names, family.getNames());
     }
     return names;
   }
