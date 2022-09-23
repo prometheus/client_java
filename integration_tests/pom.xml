@@ -22,6 +22,7 @@
     </licenses>
 
     <modules>
+        <module>it_exemplars_micrometer_tracing</module>
         <module>it_exemplars_otel_sdk</module>
         <module>it_exemplars_otel_agent</module>
         <module>it_java_versions</module>

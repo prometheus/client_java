@@ -20,8 +20,22 @@
         <artifactId>opentelemetry-api</artifactId>
         <version>1.15.0</version>
       </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-tracing-bom</artifactId>
+        <version>1.0.0-M7</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <repositories>
+    <repository>
+      <id>spring-milestone</id>
+      <url>https://repo.spring.io/milestone</url>
+    </repository>
+  </repositories>
 
   <licenses>
     <license>
@@ -33,6 +47,7 @@
 
   <modules>
     <module>simpleclient_tracer_common</module>
+    <module>simpleclient_tracer_micrometer_tracing</module>
     <module>simpleclient_tracer_otel</module>
     <module>simpleclient_tracer_otel_agent</module>
   </modules>
