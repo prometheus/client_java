@@ -183,7 +183,18 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
                 frac /= 2.0;
                 exp++;
             }
-            return findIndex(bounds[schema - 1], frac) + (exp - 1) * bounds[schema - 1].length;
+            // end of frexp()
+
+            if (schema >= 1) {
+                return findIndex(bounds[schema - 1], frac) + (exp - 1) * bounds[schema - 1].length;
+            } else {
+                int result = exp;
+                if (frac == 0.5) {
+                    result--;
+                }
+                int div = 1 << -schema;
+                return (result + div - 1) / div;
+            }
         }
 
         private int findIndex(double[] bounds, double frac) {
