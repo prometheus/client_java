@@ -10,6 +10,7 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
     private final double base; // base == 2^(2^-schema)
     private final double zeroThreshold;
     private final static double[][] bounds;
+    private final int maxBuckets;
 
     public static Builder build() {
         return new Builder();
@@ -35,11 +36,11 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
                     List<String> labelValuesWithGe = new ArrayList<String>(labelNamesWithLe.size());
                     labelValuesWithGe.addAll(entry.getKey());
                     labelValuesWithGe.add(Integer.MAX_VALUE == bucketIndex ? "-Inf" : Integer.toString(bucketIndex));
-                    labelValuesWithGe.add(doubleToGoString(-bucketIndexToUpperBound(bucketIndex-1)));
+                    labelValuesWithGe.add(doubleToGoString(-bucketIndexToUpperBound(bucketIndex - 1)));
                     samples.add(new MetricFamilySamples.Sample(fullname + "_bucket", labelNamesWithLe, labelValuesWithGe, count));
                 }
             }
-            List<Integer> bucketIndexes =  new ArrayList<Integer>(child.bucketsForPositiveValues.keySet());
+            List<Integer> bucketIndexes = new ArrayList<Integer>(child.bucketsForPositiveValues.keySet());
             Collections.sort(bucketIndexes);
             for (Integer bucketIndex : bucketIndexes) {
                 count = count + child.bucketsForPositiveValues.get(bucketIndex).intValue();
@@ -69,19 +70,28 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
 
     @Override
     protected SparseHistogram.Child newChild() {
-        return new SparseHistogram.Child(schema, zeroThreshold);
+        return new SparseHistogram.Child(schema, zeroThreshold, Integer.MAX_VALUE);
     }
 
     public static class Builder extends SimpleCollector.Builder<SparseHistogram.Builder, SparseHistogram> {
 
         private int schema;
         private double zeroThreshold = Double.MIN_NORMAL;
+        private int maxBuckets = Integer.MAX_VALUE;
 
         public Builder withSchema(int schema) {
             if (schema < -4 || schema > 8) {
                 throw new IllegalStateException("unsupported schema " + schema);
             }
             this.schema = schema;
+            return this;
+        }
+
+        public Builder withMaxBuckets(int maxBuckets) {
+            if (maxBuckets <= 0) {
+                throw new IllegalArgumentException(maxBuckets + ": illegal value for maxBuckets");
+            }
+            this.maxBuckets = maxBuckets;
             return this;
         }
 
@@ -113,12 +123,14 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
         this.schema = builder.schema; // The Builder guarantees that schema is in [-4, 8].
         this.zeroThreshold = builder.zeroThreshold;
         this.base = Math.pow(2, Math.pow(2, -schema));
+        this.maxBuckets = builder.maxBuckets;
         initializeNoLabelsChild();
     }
 
     public static class Child {
         private final int schema; // integer in [-4, 8]
         private final double zeroThreshold;
+        private final int maxBuckets;
         private final ConcurrentHashMap<Integer, DoubleAdder> bucketsForPositiveValues = new ConcurrentHashMap<Integer, DoubleAdder>();
         private final ConcurrentHashMap<Integer, DoubleAdder> bucketsForNegativeValues = new ConcurrentHashMap<Integer, DoubleAdder>();
         private final DoubleAdder count = new DoubleAdder();
@@ -126,31 +138,35 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
         private final DoubleAdder zeroCount = new DoubleAdder();
         private final long created = System.currentTimeMillis();
 
-        private Child(int schema, double zeroThreshold) {
+        private Child(int schema, double zeroThreshold, int maxBuckets) {
             this.schema = schema;
             this.zeroThreshold = zeroThreshold;
-            bucketsForPositiveValues.put(Integer.MAX_VALUE, new DoubleAdder());
-            bucketsForNegativeValues.put(Integer.MAX_VALUE, new DoubleAdder());
+            this.maxBuckets = maxBuckets;
+            //bucketsForPositiveValues.put(Integer.MAX_VALUE, new DoubleAdder());
+            //bucketsForNegativeValues.put(Integer.MAX_VALUE, new DoubleAdder());
         }
 
         public void observe(double value) {
-            if (Double.isNaN(value)) {
-                return;
-            } else if (value > zeroThreshold) {
-                observe(bucketsForPositiveValues, value);
-            } else if (value < zeroThreshold) {
-                observe(bucketsForNegativeValues, -value);
-            } else {
-                zeroCount.add(1);
+            if (!Double.isNaN(value) && !Double.isInfinite(value)) {
+                if (value > zeroThreshold) {
+                    addToBucket(bucketsForPositiveValues, value);
+                } else if (value < -zeroThreshold) {
+                    addToBucket(bucketsForNegativeValues, -value);
+                } else {
+                    zeroCount.add(1);
+                }
             }
+            sum.add(value);
+            count.add(1);
         }
 
-        private void observe(ConcurrentHashMap<Integer, DoubleAdder> buckets, double value) {
-            int bucketIndex = Double.isInfinite(value) ? Integer.MAX_VALUE : findBucketIndex(value);
+        private void addToBucket(ConcurrentHashMap<Integer, DoubleAdder> buckets, double value) {
+            int bucketIndex = findBucketIndex(value);
             // debug: the IllegalStateException should never happen
+            // todo: remove and write a unit test for findBucketIndex() instead
             double base = Math.pow(2, Math.pow(2, -schema));
-            if (!Double.isInfinite(value) && !(Math.pow(base, bucketIndex-1) < value && value <= Math.pow(base, bucketIndex))) {
-                throw new IllegalStateException("Bucket index " + bucketIndex + ": Invariance violated: " + Math.pow(base, bucketIndex-1) + " < " + value + " <= " + Math.pow(base, bucketIndex));
+            if (!(Math.pow(base, bucketIndex - 1) < value && value <= (Math.pow(base, bucketIndex)) + 0.00000000001)) { // (2^(1/4))^4 should be 2, but is 1.9999999999999998
+                throw new IllegalStateException("Bucket index " + bucketIndex + ": Invariance violated: " + Math.pow(base, bucketIndex - 1) + " < " + value + " <= " + Math.pow(base, bucketIndex));
             }
             DoubleAdder bucketCount = buckets.get(bucketIndex);
             if (bucketCount == null) {
@@ -159,8 +175,14 @@ public class SparseHistogram extends SimpleCollector<SparseHistogram.Child> {
                 bucketCount = existingBucketCount == null ? newBucketCount : existingBucketCount;
             }
             bucketCount.add(1);
-            sum.add(value);
-            count.add(1);
+            int numberOfBuckets = buckets.size();
+            if (numberOfBuckets == Integer.MAX_VALUE || numberOfBuckets > maxBuckets) {
+                scaleDown();
+            }
+        }
+
+        private void scaleDown() {
+            // TODO
         }
 
         // Assumptions:

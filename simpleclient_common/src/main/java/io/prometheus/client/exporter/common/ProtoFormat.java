@@ -195,13 +195,28 @@ public class ProtoFormat {
                     continue; // don't know how to represent the Inf bucket
                 }
                 if (bucket.index > previousIndex + 1) {
-                    if (sgn > 0) {
-                        histogramBuilder.addPositiveSpan(currentSpan.build());
-                    }  else {
-                        histogramBuilder.addNegativeSpan(currentSpan.build());
+                    // If the gap between bucketIndex and previousIndex is just 1 or 2,
+                    // we don't start a new span but continue the existing span and add 1 or 2 empty buckets.
+                    if (bucket.index < previousIndex + 3) {
+                        while (bucket.index > previousIndex + 1) {
+                            currentSpan.setLength(currentSpan.getLength() + 1);
+                            previousIndex++;
+                            if (sgn > 0) {
+                                histogramBuilder.addPositiveDelta(-previousCount);
+                            } else {
+                                histogramBuilder.addNegativeDelta(-previousCount);
+                            }
+                            previousCount = 0;
+                        }
+                    } else {
+                        if (sgn > 0) {
+                            histogramBuilder.addPositiveSpan(currentSpan.build());
+                        } else {
+                            histogramBuilder.addNegativeSpan(currentSpan.build());
+                        }
+                        currentSpan = Metrics.BucketSpan.newBuilder();
+                        currentSpan.setOffset(bucket.index - (previousIndex + 1));
                     }
-                    currentSpan = Metrics.BucketSpan.newBuilder();
-                    currentSpan.setOffset(bucket.index - previousIndex);
                 }
                 currentSpan.setLength(currentSpan.getLength() + 1);
                 previousIndex = bucket.index;
