@@ -21,7 +21,7 @@ import java.io.IOException;
  * <p>The help parameter, configured with the {@code help} init parameter, is not required but strongly recommended.
  *
  * <p>The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated
- * list * of valid {@code double} values. If omitted, the default buckets from {@link io.prometheus.client.Histogram}
+ * list * of valid {@code double} values. If omitted, the default buckets from {@link io.prometheus.metrics.Histogram}
  * are used.
  *
  * <p>By default, this filter will provide metrics that distinguish only 1 level deep for the request path
@@ -50,7 +50,7 @@ import java.io.IOException;
  *     <param-name>help</param-name>
  *     <param-value>This is the help for your metrics filter</param-value>
  *   </init-param>
- *   <!-- buckets is optional, unless specified the default buckets from io.prometheus.client.Histogram are used -->
+ *   <!-- buckets is optional, unless specified the default buckets from io.prometheus.metrics.Histogram are used -->
  *   <init-param>
  *     <param-name>buckets</param-name>
  *     <param-value>0.005,0.01,0.025,0.05,0.075,0.1,0.25,0.5,0.75,1,2.5,5,7.5,10</param-value>

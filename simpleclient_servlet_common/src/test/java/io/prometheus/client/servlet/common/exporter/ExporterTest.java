@@ -1,7 +1,7 @@
 package io.prometheus.client.servlet.common.exporter;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Gauge;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Gauge;
 import io.prometheus.client.servlet.common.adapter.HttpServletRequestAdapter;
 import io.prometheus.client.servlet.common.adapter.HttpServletResponseAdapter;
 import org.junit.Assert;

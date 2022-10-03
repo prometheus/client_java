@@ -3,10 +3,10 @@ package io.prometheus.client.guava.cache;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
-import io.prometheus.client.Collector;
-import io.prometheus.client.CounterMetricFamily;
-import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.SummaryMetricFamily;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CounterMetricFamily;
+import io.prometheus.metrics.GaugeMetricFamily;
+import io.prometheus.metrics.SummaryMetricFamily;
 
 import java.util.ArrayList;
 import java.util.Arrays;

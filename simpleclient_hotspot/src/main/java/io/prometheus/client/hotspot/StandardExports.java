@@ -1,8 +1,8 @@
 package io.prometheus.client.hotspot;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CounterMetricFamily;
-import io.prometheus.client.GaugeMetricFamily;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CounterMetricFamily;
+import io.prometheus.metrics.GaugeMetricFamily;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

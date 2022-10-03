@@ -1,7 +1,7 @@
 package io.prometheus.client.servlet.jakarta.exporter;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Predicate;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Predicate;
 import io.prometheus.client.servlet.common.exporter.Exporter;
 
 import io.prometheus.client.servlet.common.exporter.ServletConfigurationException;

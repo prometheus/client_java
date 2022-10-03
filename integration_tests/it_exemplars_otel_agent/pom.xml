@@ -14,16 +14,16 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.6.3</version>
+        <groupId>io.prometheus</groupId>
+        <artifactId>simpleclient_bom</artifactId>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>io.prometheus</groupId>
-        <artifactId>simpleclient_bom</artifactId>
-        <version>${project.version}</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>2.6.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

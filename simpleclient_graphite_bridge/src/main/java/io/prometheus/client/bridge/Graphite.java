@@ -1,7 +1,7 @@
 package io.prometheus.client.bridge;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CollectorRegistry;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

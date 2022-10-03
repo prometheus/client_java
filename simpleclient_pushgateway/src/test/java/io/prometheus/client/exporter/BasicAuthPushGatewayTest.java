@@ -6,8 +6,8 @@ import static org.mockserver.model.HttpResponse.response;
 
 import java.io.IOException;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Gauge;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Gauge;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

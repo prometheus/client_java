@@ -7,10 +7,10 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Predicate;
-import io.prometheus.client.SampleNameFilter;
-import io.prometheus.client.Supplier;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Predicate;
+import io.prometheus.metrics.SampleNameFilter;
+import io.prometheus.metrics.Supplier;
 import io.prometheus.client.exporter.common.TextFormat;
 
 import java.io.ByteArrayOutputStream;

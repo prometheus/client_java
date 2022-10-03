@@ -11,7 +11,7 @@ import java.io.FileNotFoundException;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.CollectorRegistry;
 import org.junit.Before;
 import org.junit.Test;
 

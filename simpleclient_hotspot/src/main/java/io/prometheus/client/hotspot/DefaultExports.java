@@ -1,6 +1,6 @@
 package io.prometheus.client.hotspot;
 
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.CollectorRegistry;
 
 /**
  * Registers the default Hotspot collectors.

@@ -1,6 +1,6 @@
 package io.prometheus.client.dropwizard.samplebuilder;
 
-import io.prometheus.client.Collector;
+import io.prometheus.metrics.Collector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import java.util.List;
  * Default implementation of {@link SampleBuilder}.
  * Sanitises the metric name if necessary.
  *
- * @see io.prometheus.client.Collector#sanitizeMetricName(String)
+ * @see io.prometheus.metrics.Collector#sanitizeMetricName(String)
  */
 public class DefaultSampleBuilder implements SampleBuilder {
     @Override

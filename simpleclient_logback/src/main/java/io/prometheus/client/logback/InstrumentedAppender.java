@@ -3,8 +3,8 @@ package io.prometheus.client.logback;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Counter;
 
 public class InstrumentedAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
   public static final String COUNTER_NAME = "logback_appender_total";

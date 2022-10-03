@@ -16,8 +16,8 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 
 /**

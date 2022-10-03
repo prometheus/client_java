@@ -1,6 +1,6 @@
 package io.prometheus.client.spring.web;
 
-import io.prometheus.client.Summary;
+import io.prometheus.metrics.Summary;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

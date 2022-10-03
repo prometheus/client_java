@@ -1,9 +1,9 @@
 package io.prometheus.client.hibernate;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.CounterMetricFamily;
-import io.prometheus.client.GaugeMetricFamily;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.CounterMetricFamily;
+import io.prometheus.metrics.GaugeMetricFamily;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

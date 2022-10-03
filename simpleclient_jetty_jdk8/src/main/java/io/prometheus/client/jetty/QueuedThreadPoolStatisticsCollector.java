@@ -1,8 +1,8 @@
 package io.prometheus.client.jetty;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.GaugeMetricFamily;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.GaugeMetricFamily;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

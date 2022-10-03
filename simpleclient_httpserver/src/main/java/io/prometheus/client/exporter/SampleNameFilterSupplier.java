@@ -1,7 +1,7 @@
 package io.prometheus.client.exporter;
 
-import io.prometheus.client.Predicate;
-import io.prometheus.client.Supplier;
+import io.prometheus.metrics.Predicate;
+import io.prometheus.metrics.Supplier;
 
 /**
  * For convenience, an implementation of a {@code Supplier<Predicate<String>>} that

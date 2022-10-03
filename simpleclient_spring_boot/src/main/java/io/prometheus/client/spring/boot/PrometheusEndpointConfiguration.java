@@ -1,6 +1,6 @@
 package io.prometheus.client.spring.boot;
 
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.CollectorRegistry;
 import org.springframework.boot.actuate.condition.ConditionalOnEnabledEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;

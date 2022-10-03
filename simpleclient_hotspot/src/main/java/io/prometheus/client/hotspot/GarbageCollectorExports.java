@@ -1,8 +1,8 @@
 package io.prometheus.client.hotspot;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.Predicate;
-import io.prometheus.client.SummaryMetricFamily;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.Predicate;
+import io.prometheus.metrics.SummaryMetricFamily;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;

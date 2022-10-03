@@ -1,6 +1,6 @@
 package io.prometheus.client.log4j2;
 
-import io.prometheus.client.Counter;
+import io.prometheus.metrics.Counter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;

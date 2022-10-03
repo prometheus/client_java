@@ -1,7 +1,7 @@
 package io.prometheus.client.spring.web;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CollectorRegistry;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;

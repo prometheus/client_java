@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 /**
  * Collect Dropwizard metrics from a MetricRegistry.
  */
-public class DropwizardExports extends io.prometheus.client.Collector implements io.prometheus.client.Collector.Describable {
+public class DropwizardExports extends io.prometheus.metrics.Collector implements io.prometheus.metrics.Collector.Describable {
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
     private MetricRegistry registry;
     private MetricFilter metricFilter;

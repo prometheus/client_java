@@ -1,6 +1,6 @@
 package io.prometheus.client.spring.boot;
 
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
 import org.springframework.boot.context.properties.ConfigurationProperties;

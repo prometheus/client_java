@@ -2,8 +2,8 @@ package io.prometheus.client.dropwizard;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CollectorRegistry;
 import io.prometheus.client.dropwizard.samplebuilder.SampleBuilder;
 import org.junit.Before;
 import org.junit.Test;

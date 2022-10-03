@@ -3,7 +3,7 @@ package io.prometheus.client.jetty;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.CollectorRegistry;
 import java.util.concurrent.BlockingQueue;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.BlockingArrayQueue;

@@ -1,6 +1,6 @@
 package io.prometheus.client.vertx;
 
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;

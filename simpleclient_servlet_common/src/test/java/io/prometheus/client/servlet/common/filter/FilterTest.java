@@ -1,7 +1,7 @@
 package io.prometheus.client.servlet.common.filter;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import io.prometheus.client.servlet.common.adapter.FilterConfigAdapter;
 import io.prometheus.client.servlet.common.adapter.HttpServletRequestAdapter;

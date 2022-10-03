@@ -1,8 +1,8 @@
 package io.prometheus.client.hotspot;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.Predicate;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.GaugeMetricFamily;
+import io.prometheus.metrics.Predicate;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static io.prometheus.client.SampleNameFilter.ALLOW_ALL;
+import static io.prometheus.metrics.SampleNameFilter.ALLOW_ALL;
 
 /**
  * Exports metrics about JVM memory areas.

@@ -2,8 +2,8 @@ package io.prometheus.client.hotspot;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
-import io.prometheus.client.Collector;
-import io.prometheus.client.Counter;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.Counter;
 
 import javax.management.Notification;
 import javax.management.NotificationEmitter;

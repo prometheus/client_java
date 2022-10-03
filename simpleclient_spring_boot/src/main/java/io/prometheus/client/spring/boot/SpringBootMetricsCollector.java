@@ -1,6 +1,6 @@
 package io.prometheus.client.spring.boot;
 
-import io.prometheus.client.Collector;
+import io.prometheus.metrics.Collector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.PublicMetrics;
 import org.springframework.boot.actuate.metrics.Metric;

@@ -10,12 +10,12 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
-import io.prometheus.client.Gauge;
-import io.prometheus.client.Info;
-import io.prometheus.client.Summary;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Counter;
+import io.prometheus.metrics.Gauge;
+import io.prometheus.metrics.Info;
+import io.prometheus.metrics.Summary;
 
 
 public class TextFormatOpenMetricsTest {

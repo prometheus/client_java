@@ -1,6 +1,6 @@
 package io.prometheus.client.hotspot;
 
-import io.prometheus.client.Counter;
+import io.prometheus.metrics.Counter;
 import org.junit.Test;
 import org.mockito.Mockito;
 

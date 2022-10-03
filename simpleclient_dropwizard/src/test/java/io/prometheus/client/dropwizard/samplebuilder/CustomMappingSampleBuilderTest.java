@@ -1,6 +1,6 @@
 package io.prometheus.client.dropwizard.samplebuilder;
 
-import io.prometheus.client.Collector;
+import io.prometheus.metrics.Collector;
 import org.junit.Test;
 
 import java.util.Arrays;

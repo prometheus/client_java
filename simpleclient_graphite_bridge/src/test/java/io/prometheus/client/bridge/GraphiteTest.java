@@ -5,8 +5,8 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Gauge;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Gauge;
 
 import java.io.BufferedReader;
 import java.io.IOException;

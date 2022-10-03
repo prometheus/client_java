@@ -5,8 +5,8 @@ import static org.junit.rules.ExpectedException.none;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Gauge;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Gauge;
 import java.io.IOException;
 import java.util.TreeMap;
 import java.util.Map;

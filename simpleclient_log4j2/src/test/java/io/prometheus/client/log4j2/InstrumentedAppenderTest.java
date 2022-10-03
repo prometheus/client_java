@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.CollectorRegistry;
 import org.apache.logging.log4j.core.LogEvent;
 import org.junit.Before;
 import org.junit.Test;

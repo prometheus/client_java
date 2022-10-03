@@ -94,7 +94,7 @@ Counters go up, and reset when the process restarts.
 
 
 ```java
-import io.prometheus.client.Counter;
+import io.prometheus.metrics.Counter;
 class YourClass {
   static final Counter requests = Counter.build()
      .name("requests_total").help("Total requests.").register();
@@ -647,7 +647,7 @@ need to place this (replace your own values) code in your
     <param-name>help</param-name>
     <param-value>This is the help for your metrics filter</param-value>
   </init-param>
-  <!-- buckets is optional, unless specified the default buckets from io.prometheus.client.Histogram are used -->
+  <!-- buckets is optional, unless specified the default buckets from io.prometheus.metrics.Histogram are used -->
   <init-param>
     <param-name>buckets</param-name>
     <param-value>0.005,0.01,0.025,0.05,0.075,0.1,0.25,0.5,0.75,1,2.5,5,7.5,10</param-value>

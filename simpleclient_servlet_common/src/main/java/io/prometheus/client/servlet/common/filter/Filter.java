@@ -1,7 +1,8 @@
 package io.prometheus.client.servlet.common.filter;
 
-import io.prometheus.client.*;
 import io.prometheus.client.servlet.common.adapter.*;
+import io.prometheus.metrics.Counter;
+import io.prometheus.metrics.Histogram;
 
 /**
  * Filter implements the common functionality provided by the two MetricsFilter implementations:

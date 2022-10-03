@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>io.prometheus</groupId>
-        <artifactId>parent</artifactId>
+        <artifactId>client_java</artifactId>
         <version>0.16.1-SNAPSHOT</version>
     </parent>
 
@@ -35,7 +35,7 @@
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient</artifactId>
+            <artifactId>prometheus-metrics</artifactId>
             <version>0.16.1-SNAPSHOT</version>
         </dependency>
         <dependency>

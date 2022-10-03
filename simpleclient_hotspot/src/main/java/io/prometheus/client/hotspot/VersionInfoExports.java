@@ -1,7 +1,7 @@
 package io.prometheus.client.hotspot;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.Info;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.Info;
 
 import java.util.ArrayList;
 import java.util.Arrays;

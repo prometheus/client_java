@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Enable Spring-AOP-based automated method timing for the annotated method. The timings will be recorded in a
- * {@link io.prometheus.client.Summary} with a name specified by the required {@code name} parameter, and help
+ * {@link io.prometheus.metrics.Summary} with a name specified by the required {@code name} parameter, and help
  * specified by the {@code help} parameter.
  *
  * To properly work, {@link EnablePrometheusTiming} must be specified somewhere in your application configuration.

@@ -1,14 +1,14 @@
 package io.prometheus.client.exporter.common;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
-import io.prometheus.client.Gauge;
-import io.prometheus.client.Histogram;
-import io.prometheus.client.Summary;
-import io.prometheus.client.exemplars.CounterExemplarSampler;
-import io.prometheus.client.exemplars.Exemplar;
-import io.prometheus.client.exemplars.ExemplarConfig;
-import io.prometheus.client.exemplars.HistogramExemplarSampler;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Counter;
+import io.prometheus.metrics.Gauge;
+import io.prometheus.metrics.Histogram;
+import io.prometheus.metrics.Summary;
+import io.prometheus.metrics.exemplars.CounterExemplarSampler;
+import io.prometheus.metrics.exemplars.Exemplar;
+import io.prometheus.metrics.exemplars.ExemplarConfig;
+import io.prometheus.metrics.exemplars.HistogramExemplarSampler;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

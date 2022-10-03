@@ -1,6 +1,6 @@
 package io.prometheus.client.it.java_versions;
 
-import io.prometheus.client.Counter;
+import io.prometheus.metrics.Counter;
 import io.prometheus.client.exporter.HTTPServer;
 import io.prometheus.client.hotspot.DefaultExports;
 

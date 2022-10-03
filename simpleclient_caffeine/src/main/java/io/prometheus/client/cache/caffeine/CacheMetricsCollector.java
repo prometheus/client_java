@@ -4,10 +4,10 @@ import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
-import io.prometheus.client.Collector;
-import io.prometheus.client.CounterMetricFamily;
-import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.SummaryMetricFamily;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.CounterMetricFamily;
+import io.prometheus.metrics.GaugeMetricFamily;
+import io.prometheus.metrics.SummaryMetricFamily;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -9,7 +9,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
 
-import io.prometheus.client.Collector;
+import io.prometheus.metrics.Collector;
 
 public class TextFormat {
   /**

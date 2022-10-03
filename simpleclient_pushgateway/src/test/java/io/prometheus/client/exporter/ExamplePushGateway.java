@@ -1,7 +1,7 @@
 package io.prometheus.client.exporter;
 
-import io.prometheus.client.Gauge;
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.Gauge;
+import io.prometheus.metrics.CollectorRegistry;
 
 
 public class ExamplePushGateway {

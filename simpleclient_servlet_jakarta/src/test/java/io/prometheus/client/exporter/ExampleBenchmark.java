@@ -1,6 +1,6 @@
 package io.prometheus.client.exporter;
 
-import io.prometheus.client.Gauge;
+import io.prometheus.metrics.Gauge;
 
 import io.prometheus.client.servlet.jakarta.exporter.MetricsServlet;
 import org.eclipse.jetty.server.ServerConnector;

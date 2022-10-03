@@ -1,6 +1,6 @@
 package io.prometheus.client.jetty;
 
-import io.prometheus.client.Collector;
+import io.prometheus.metrics.Collector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

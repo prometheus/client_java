@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.CollectorRegistry;
 import java.io.FileNotFoundException;
 import java.net.HttpURLConnection;
 import java.net.URL;

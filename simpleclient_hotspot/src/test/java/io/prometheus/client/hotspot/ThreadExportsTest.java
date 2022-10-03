@@ -1,7 +1,7 @@
 package io.prometheus.client.hotspot;
 
-import io.prometheus.client.Collector.MetricFamilySamples;
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.Collector.MetricFamilySamples;
+import io.prometheus.metrics.CollectorRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;

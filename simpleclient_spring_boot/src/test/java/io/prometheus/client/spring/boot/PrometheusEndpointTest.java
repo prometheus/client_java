@@ -1,6 +1,6 @@
 package io.prometheus.client.spring.boot;
 
-import io.prometheus.client.Counter;
+import io.prometheus.metrics.Counter;
 import io.prometheus.client.exporter.common.TextFormat;
 import io.prometheus.client.matchers.CustomMatchers;
 import org.apache.commons.lang3.StringUtils;

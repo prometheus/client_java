@@ -1,7 +1,7 @@
 package io.prometheus.client.it.pushgateway;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Gauge;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Gauge;
 import io.prometheus.client.exporter.BasicAuthHttpConnectionFactory;
 import io.prometheus.client.exporter.PushGateway;
 

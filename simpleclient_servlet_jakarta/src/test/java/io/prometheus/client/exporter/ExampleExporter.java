@@ -1,9 +1,9 @@
 package io.prometheus.client.exporter;
 
-import io.prometheus.client.Counter;
-import io.prometheus.client.Gauge;
-import io.prometheus.client.Histogram;
-import io.prometheus.client.Summary;
+import io.prometheus.metrics.Counter;
+import io.prometheus.metrics.Gauge;
+import io.prometheus.metrics.Histogram;
+import io.prometheus.metrics.Summary;
 import io.prometheus.client.servlet.jakarta.exporter.MetricsServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;

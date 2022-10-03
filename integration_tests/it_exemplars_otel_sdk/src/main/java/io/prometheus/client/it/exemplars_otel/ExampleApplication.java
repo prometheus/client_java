@@ -3,7 +3,7 @@ package io.prometheus.client.it.exemplars_otel;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.prometheus.client.Counter;
+import io.prometheus.metrics.Counter;
 import io.prometheus.client.exporter.HTTPServer;
 
 import java.io.IOException;

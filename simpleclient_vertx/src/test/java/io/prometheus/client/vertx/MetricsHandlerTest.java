@@ -1,7 +1,7 @@
 package io.prometheus.client.vertx;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Gauge;
+import io.prometheus.metrics.CollectorRegistry;
+import io.prometheus.metrics.Gauge;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import org.junit.AfterClass;
