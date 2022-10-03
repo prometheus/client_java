@@ -1,7 +1,7 @@
 package io.prometheus.client.exporter.common;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.Metrics;
+import io.prometheus.metrics.Collector;
+import io.prometheus.metrics.Metrics;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

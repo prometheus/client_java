@@ -1,9 +1,9 @@
 package io.prometheus.client.it.java_versions;
 
-import io.prometheus.client.Counter;
-import io.prometheus.client.Histogram;
-import io.prometheus.client.SparseHistogram;
-import io.prometheus.client.Summary;
+import io.prometheus.metrics.Counter;
+import io.prometheus.metrics.Histogram;
+import io.prometheus.metrics.SparseHistogram;
+import io.prometheus.metrics.Summary;
 import io.prometheus.client.exporter.HTTPServer;
 
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class HistogramDemo {
 
     private static void populate(Histogram h, SparseHistogram sh, Summary s) {
         Random rand = new Random(0);
-        ArrayList<Double> data = new ArrayList<>();
+        ArrayList<Double> data = new ArrayList<Double>();
         for (double d = 0.3; d > 0 && d <0.5; d += (rand.nextDouble() - 0.5)/ 10.0) {
             String status = rand.nextBoolean() ? "200" : "500";
             if (status.equals("500")) {
