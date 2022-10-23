@@ -37,7 +37,8 @@
     </developers>
 
     <modules>
-        <module>prometheus-metrics</module>
+        <module>prometheus-metrics-model</module>
+        <module>prometheus-metrics-core</module>
         <module>simpleclient_common</module>
         <module>simpleclient_caffeine</module>
         <module>simpleclient_dropwizard</module>
