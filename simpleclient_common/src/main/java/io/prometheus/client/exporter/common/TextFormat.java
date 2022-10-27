@@ -1,15 +1,14 @@
 package io.prometheus.client.exporter.common;
 
+import io.prometheus.client.Collector;
+
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
-
-import io.prometheus.client.Collector;
 
 public class TextFormat {
   /**
@@ -117,7 +116,11 @@ public class TextFormat {
             writer.write(sample.labelNames.get(i));
             writer.write("=\"");
             writeEscapedLabelValue(writer, sample.labelValues.get(i));
-            writer.write("\",");
+            if (i < sample.labelNames.size() - 1){
+              writer.write("\",");
+            }else {
+              writer.write("\"");
+            }
           }
           writer.write('}');
         }
@@ -221,7 +224,7 @@ public class TextFormat {
       writer.write(' ');
       writeEscapedLabelValue(writer, metricFamilySamples.help);
       writer.write('\n');
- 
+
       for (Collector.MetricFamilySamples.Sample sample: metricFamilySamples.samples) {
         writer.write(sample.name);
         if (sample.labelNames.size() > 0) {
