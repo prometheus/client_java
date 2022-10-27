@@ -117,7 +117,11 @@ public class TextFormat {
             writer.write(sample.labelNames.get(i));
             writer.write("=\"");
             writeEscapedLabelValue(writer, sample.labelValues.get(i));
-            writer.write("\",");
+            if (i < sample.labelNames.size() - 1) {
+              writer.write("\",");
+            } else {
+              writer.write("\"");
+            }
           }
           writer.write('}');
         }
