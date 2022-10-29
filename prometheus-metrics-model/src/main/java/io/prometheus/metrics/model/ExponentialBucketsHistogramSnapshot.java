@@ -9,7 +9,8 @@ public final class ExponentialBucketsHistogramSnapshot extends Snapshot {
     private final List<ExponentialBucket> bucketsForPositiveValues;
     private final List<ExponentialBucket> bucketsForNegativeValues;
 
-    public ExponentialBucketsHistogramSnapshot(int schema, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels) {
+    public ExponentialBucketsHistogramSnapshot(int schema, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, long createdTimeMillis) {
+        super(labels);
         this.schema = schema;
         this.zeroThreshold = zeroThreshold;
         this.bucketsForPositiveValues = bucketsForPositiveValues;
@@ -18,10 +19,5 @@ public final class ExponentialBucketsHistogramSnapshot extends Snapshot {
 
     public double getZeroThreshold() {
         return zeroThreshold;
-    }
-
-    @Override
-    public Labels getLabels() {
-        return null;
     }
 }

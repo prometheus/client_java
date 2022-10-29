@@ -6,6 +6,7 @@ import io.prometheus.metrics.observer.GaugingObserver;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.DoubleSupplier;
 
@@ -47,33 +48,12 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
 
         @Override
         public GaugeSnapshot snapshot(Labels labels) {
-            return new Snapshot(this, labels);
+            return new GaugeSnapshot(value.sum(), labels);
         }
 
         @Override
         public GaugingObserver toObserver() {
             return this;
-        }
-    }
-
-    private static class Snapshot extends GaugeSnapshot {
-
-        private final double value;
-        private final Labels labels;
-
-        private Snapshot(GaugeData data, Labels labels) {
-            this.value = data.value.sum();
-            this.labels = labels;
-        }
-
-        @Override
-        public double getValue() {
-            return value;
-        }
-
-        @Override
-        public Labels getLabels() {
-            return labels;
         }
     }
 
@@ -104,17 +84,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
 
         @Override
         public Collection<GaugeSnapshot> snapshot() {
-            return Arrays.asList(new GaugeSnapshot[]{new GaugeSnapshot() {
-                @Override
-                public double getValue() {
-                    return callback.getAsDouble();
-                }
-
-                @Override
-                public Labels getLabels() {
-                    return constLabels;
-                }
-            }});
+            return Collections.singletonList(new GaugeSnapshot(callback.getAsDouble(), constLabels));
         }
 
         public static class Builder extends Metric.Builder<Gauge.FromCallback.Builder, Gauge.FromCallback> {

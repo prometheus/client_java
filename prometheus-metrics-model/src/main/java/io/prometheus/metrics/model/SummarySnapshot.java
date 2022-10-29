@@ -1,9 +1,30 @@
 package io.prometheus.metrics.model;
 
-public abstract class SummarySnapshot extends Snapshot {
+public final class SummarySnapshot extends Snapshot {
 
-    public abstract long getCount();
-    public abstract double getSum();
-    public abstract Quantiles getQuantiles();
-    public abstract long getCreatedTimeMillis();
+    private final long count;
+    private final double sum;
+    private final Quantiles quantiles;
+    private final long createdTimeMillis;
+
+    public SummarySnapshot(long count, double sum, Quantiles quantiles, Labels labels, long createdTimeMillis) {
+        super(labels);
+        this.count = count;
+        this.sum = sum;
+        this.quantiles = quantiles;
+        this.createdTimeMillis = createdTimeMillis;
+    }
+
+    public long getCount() {
+        return count;
+    }
+    public double getSum() {
+        return sum;
+    }
+    public Quantiles getQuantiles() {
+        return quantiles;
+    }
+    public long getCreatedTimeMillis() {
+        return createdTimeMillis;
+    }
 }

@@ -7,8 +7,8 @@ import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.observer.DiscreteEventObserver;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.DoubleSupplier;
@@ -106,51 +106,16 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
         @Override
         public CounterSnapshot snapshot(Labels labels) {
-            return new Snapshot(this, labels);
+            // Read the exemplar first. Otherwise, there is a race condition where you might
+            // see an Exemplar for a value that's not represented in getValue() yet.
+            Exemplar ex = exemplar.get();
+            return new CounterSnapshot(value.sum(), labels, ex, createdTimeMillis);
         }
 
         @Override
         public DiscreteEventObserver toObserver() {
             return this;
         }
-    }
-
-    private static class Snapshot extends CounterSnapshot {
-
-        private final double value;
-        private final long createdTimeMillis;
-        private final Labels labels;
-        private final io.prometheus.metrics.model.Exemplar exemplar;
-
-        private Snapshot(CounterData data, Labels labels) {
-            // Important: Read the exemplar first. Otherwise, there is a race condition where you might
-            // see an Exemplar for a value that's not represented in getValue() yet.
-            this.exemplar = data.exemplar.get();
-            this.value = data.value.sum();
-            this.createdTimeMillis = data.createdTimeMillis;
-            this.labels = labels;
-        }
-
-        @Override
-        public double getValue() {
-            return value;
-        }
-
-        @Override
-        public Labels getLabels() {
-            return labels;
-        }
-
-        @Override
-        public io.prometheus.metrics.model.Exemplar getExemplar() {
-            return exemplar;
-        }
-
-        @Override
-        public long getCreatedTimeMillis() {
-            return createdTimeMillis;
-        }
-
     }
 
     public static class Builder extends ObservingMetric.Builder<Builder, Counter> {
@@ -202,27 +167,12 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
         @Override
         public Collection<CounterSnapshot> snapshot() {
-            return Arrays.asList(new CounterSnapshot[]{new CounterSnapshot() {
-                @Override
-                public double getValue() {
-                    return callback.getAsDouble();
-                }
-
-                @Override
-                public Exemplar getExemplar() {
-                    return null;
-                }
-
-                @Override
-                public long getCreatedTimeMillis() {
-                    return createdTimeMillis;
-                }
-
-                @Override
-                public Labels getLabels() {
-                    return constLabels;
-                }
-            }});
+            return Collections.singletonList(new CounterSnapshot(
+                    callback.getAsDouble(),
+                    constLabels,
+                    null,
+                    createdTimeMillis
+            ));
         }
 
         public static class Builder extends Metric.Builder<io.prometheus.metrics.core.Counter.FromCallback.Builder, io.prometheus.metrics.core.Counter.FromCallback> {

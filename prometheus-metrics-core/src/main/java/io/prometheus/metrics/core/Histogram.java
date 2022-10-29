@@ -102,7 +102,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                                 cumulativeCount += buckets[i].sum();
                                 snapshotBuckets[i] = new ExplicitBucket(cumulativeCount, upperBounds[i], exemplars[i].get());
                             }
-                            return new ExplicitBucketsHistogramSnapshot(count.longValue(), sum.sum(), snapshotBuckets, createdTimeMillis, labels);
+                            return new ExplicitBucketsHistogramSnapshot(count.longValue(), sum.sum(), snapshotBuckets, labels, createdTimeMillis);
                         },
                         this::doObserve
                 );
@@ -274,7 +274,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             @Override
             public ExponentialBucketsHistogramSnapshot snapshot(Labels labels) {
                 // todo: activate bufffer
-                return new ExponentialBucketsHistogramSnapshot(schema, zeroThreshold, toBucketList(bucketsForPositiveValues), toBucketList(bucketsForNegativeValues), labels);
+                return new ExponentialBucketsHistogramSnapshot(schema, zeroThreshold, toBucketList(bucketsForPositiveValues), toBucketList(bucketsForNegativeValues), labels, createdTimeMillis);
             }
 
             @Override

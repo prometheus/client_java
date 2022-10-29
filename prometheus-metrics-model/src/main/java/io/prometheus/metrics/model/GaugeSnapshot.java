@@ -1,5 +1,15 @@
 package io.prometheus.metrics.model;
 
-public abstract class GaugeSnapshot extends Snapshot {
-    public abstract double getValue();
+public final class GaugeSnapshot extends Snapshot {
+
+    private final double value;
+
+    public GaugeSnapshot(double value, Labels labels) {
+        super(labels);
+        this.value = value;
+    }
+
+    public double getValue() {
+        return value;
+    }
 }

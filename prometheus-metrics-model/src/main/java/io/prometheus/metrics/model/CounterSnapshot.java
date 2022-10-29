@@ -1,10 +1,28 @@
 package io.prometheus.metrics.model;
 
-public abstract class CounterSnapshot extends Snapshot {
+public final class CounterSnapshot extends Snapshot {
 
-    public abstract double getValue();
+    private final double value;
+    private final Exemplar exemplar;
+    private final long createdTimeMillis;
 
-    public abstract Exemplar getExemplar();
+    public CounterSnapshot(double value, Labels labels, Exemplar exemplar, long createdTimeMillis) {
+        super(labels);
+        this.value = value;
+        this.exemplar = exemplar;
+        this.createdTimeMillis = createdTimeMillis;
+    }
 
-    public abstract long getCreatedTimeMillis();
+    public double getValue() {
+        return value;
+    }
+
+    public Exemplar getExemplar() {
+        return exemplar;
+    }
+
+    public long getCreatedTimeMillis() {
+        return createdTimeMillis;
+    }
+
 }

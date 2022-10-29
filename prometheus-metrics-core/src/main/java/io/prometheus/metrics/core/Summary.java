@@ -1,9 +1,6 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.Quantile;
-import io.prometheus.metrics.model.Quantiles;
-import io.prometheus.metrics.model.SummarySnapshot;
+import io.prometheus.metrics.model.*;
 import io.prometheus.metrics.observer.DistributionObserver;
 
 import java.util.ArrayList;
@@ -85,7 +82,7 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         public SummarySnapshot snapshot(Labels labels) {
             return buffer.run(
                     expectedCount -> count.sum() == expectedCount,
-                    () -> new Snapshot(this, labels),
+                    () -> new SummarySnapshot(count.sum(), sum.sum(), makeQuantiles(), labels, createdTimeMillis),
                     this::doObserve
             );
         }
@@ -98,55 +95,17 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         private List<CKMSQuantiles.Quantile> getQuantiles() {
             return quantiles;
         }
-    }
 
-    private static class Snapshot extends SummarySnapshot {
-
-        private final long count;
-        private final double sum;
-        private final Quantiles quantiles;
-        private final Labels labels;
-        private final long createdTimeMillis;
-
-        private Snapshot(SummaryData data, Labels labels) {
-            this.labels = labels;
-            this.createdTimeMillis = data.createdTimeMillis;
-            this.count = data.count.sum();
-            this.sum = data.sum.sum();
-            Quantile[] quantiles = new Quantile[data.getQuantiles().size()];
-            for (int i = 0; i < data.getQuantiles().size(); i++) {
-                CKMSQuantiles.Quantile quantile = data.getQuantiles().get(i);
-                quantiles[i] = new Quantile(quantile.quantile, data.quantileValues.get(quantile.quantile));
+        private Quantiles makeQuantiles() {
+            Quantile[] quantiles = new Quantile[getQuantiles().size()];
+            for (int i = 0; i < getQuantiles().size(); i++) {
+                CKMSQuantiles.Quantile quantile = getQuantiles().get(i);
+                quantiles[i] = new Quantile(quantile.quantile, quantileValues.get(quantile.quantile));
             }
-            this.quantiles = Quantiles.of(Arrays.asList(quantiles));
-        }
-
-
-        @Override
-        public long getCount() {
-            return count;
-        }
-
-        @Override
-        public double getSum() {
-            return sum;
-        }
-
-        @Override
-        public Quantiles getQuantiles() {
-            return quantiles;
-        }
-
-        @Override
-        public Labels getLabels() {
-            return labels;
-        }
-
-        @Override
-        public long getCreatedTimeMillis() {
-            return createdTimeMillis;
+            return Quantiles.of(Arrays.asList(quantiles));
         }
     }
+
 
     public static class Builder extends ObservingMetric.Builder<Summary.Builder, Summary> {
 

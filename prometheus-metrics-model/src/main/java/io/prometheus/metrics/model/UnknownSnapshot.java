@@ -1,4 +1,7 @@
 package io.prometheus.metrics.model;
 
-public abstract class UnknownSnapshot extends Snapshot {
+public final class UnknownSnapshot extends Snapshot {
+    public UnknownSnapshot(Labels labels) {
+        super(labels);
+    }
 }

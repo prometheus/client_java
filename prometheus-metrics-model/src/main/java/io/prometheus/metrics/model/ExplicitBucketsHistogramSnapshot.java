@@ -8,14 +8,13 @@ public final class ExplicitBucketsHistogramSnapshot extends Snapshot {
     private final double sum;
     private final List<ExplicitBucket> buckets;
     private final long createdTimeMillis;
-    private final Labels labels;
 
-    public ExplicitBucketsHistogramSnapshot(long count, double sum, ExplicitBucket[] buckets, long createdTimeMillis, Labels labels) {
+    public ExplicitBucketsHistogramSnapshot(long count, double sum, ExplicitBucket[] buckets, Labels labels, long createdTimeMillis) {
+        super(labels);
         this.count = count;
         this.sum = sum;
         this.buckets = Collections.unmodifiableList(Arrays.asList(Arrays.copyOf(buckets, buckets.length)));
         this.createdTimeMillis = createdTimeMillis;
-        this.labels = labels;
     }
 
     public long getCount() {
@@ -29,9 +28,5 @@ public final class ExplicitBucketsHistogramSnapshot extends Snapshot {
     }
     public long getCreatedTimeMillis() {
         return createdTimeMillis;
-    }
-    @Override
-    public Labels getLabels() {
-        return labels;
     }
 }

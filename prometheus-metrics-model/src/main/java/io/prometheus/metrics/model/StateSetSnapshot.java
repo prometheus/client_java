@@ -1,4 +1,7 @@
 package io.prometheus.metrics.model;
 
-public abstract class StateSetSnapshot extends Snapshot {
+public final class StateSetSnapshot extends Snapshot {
+    public StateSetSnapshot(Labels labels) {
+        super(labels);
+    }
 }

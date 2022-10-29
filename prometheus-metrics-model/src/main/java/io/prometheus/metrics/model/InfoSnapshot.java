@@ -1,4 +1,7 @@
 package io.prometheus.metrics.model;
 
-public abstract class InfoSnapshot extends Snapshot {
+public final class InfoSnapshot extends Snapshot {
+    public InfoSnapshot(Labels labels) {
+        super(labels);
+    }
 }
