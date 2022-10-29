@@ -1,4 +1,4 @@
-package io.prometheus.metrics.core;
+package io.prometheus.metrics.model;
 
 public enum MetricType {
     COUNTER,

@@ -39,6 +39,11 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         getNoLabels().observeWithExemplar(amount, labels);
     }
 
+    @Override
+    public MetricType getType() {
+        return MetricType.SUMMARY;
+    }
+
     public class SummaryData implements DistributionObserver, MetricData<DistributionObserver> {
 
         private final LongAdder count = new LongAdder();

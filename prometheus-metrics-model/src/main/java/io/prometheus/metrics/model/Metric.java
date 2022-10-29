@@ -11,5 +11,6 @@ public interface Metric {
     String getName();
     String getUnit();
     String getHelp();
+    MetricType getType();
     Collection<? extends Snapshot> snapshot();
 }

@@ -50,6 +50,11 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             return new ExplicitBucketsHistogramData();
         }
 
+        @Override
+        public MetricType getType() {
+            return MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
+        }
+
         class ExplicitBucketsHistogramData extends HistogramData {
             private final LongAdder[] buckets;
             private final AtomicReference<Exemplar>[] exemplars;
@@ -153,6 +158,11 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         @Override
         protected ExponentialBucketsHistogramData newMetricData() {
             return new ExponentialBucketsHistogramData();
+        }
+
+        @Override
+        public MetricType getType() {
+            return MetricType.EXPONENTIAL_BUCKETS_HISTOGRAM;
         }
 
         class ExponentialBucketsHistogramData extends HistogramData {

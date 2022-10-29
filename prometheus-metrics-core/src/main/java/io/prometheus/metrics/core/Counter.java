@@ -5,6 +5,7 @@ import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.observer.DiscreteEventObserver;
 
 import java.util.Collection;
@@ -29,8 +30,6 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         this.exemplarSampler = builder.exemplarSampler;
     }
 
-
-
     @Override
     public void inc(double amount) {
         getNoLabels().inc(amount);
@@ -48,6 +47,11 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    @Override
+    public MetricType getType() {
+        return MetricType.COUNTER;
     }
 
     class CounterData implements DiscreteEventObserver, MetricData<DiscreteEventObserver> {
@@ -163,6 +167,11 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         private FromCallback(io.prometheus.metrics.core.Counter.FromCallback.Builder builder) {
             super(builder);
             this.callback = builder.callback;
+        }
+
+        @Override
+        public MetricType getType() {
+            return MetricType.COUNTER;
         }
 
         @Override

@@ -2,6 +2,7 @@ package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.observer.GaugingObserver;
 
 import java.util.Arrays;
@@ -29,6 +30,11 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     @Override
     protected GaugeData newMetricData() {
         return new GaugeData();
+    }
+
+    @Override
+    public MetricType getType() {
+        return MetricType.GAUGE;
     }
 
     static class GaugeData implements GaugingObserver, MetricData<GaugingObserver> {
@@ -80,6 +86,11 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         private FromCallback(Gauge.FromCallback.Builder builder) {
             super(builder);
             this.callback = builder.callback;
+        }
+
+        @Override
+        public MetricType getType() {
+            return MetricType.GAUGE;
         }
 
         @Override
