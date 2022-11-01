@@ -1,9 +1,8 @@
 package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.Snapshot;
+import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.observer.Observer;
-import io.prometheus.metrics.registry.PrometheusRegistry;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,14 +25,17 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
     }
 
-    @Override
-    public Collection<Snapshot> snapshot() {
-        List<Snapshot> result = new ArrayList<>(data.size());
+    protected abstract MetricSnapshot collect(List<Labels> labels, List<V> metricData);
+
+    public io.prometheus.metrics.model.MetricSnapshot collect() {
+        List<Labels> labels = new ArrayList<>(data.size());
+        List<V> metricData = new ArrayList<>(data.size());
         for (Map.Entry<List<String>, V> entry : data.entrySet()) {
             String[] variableLabelValues = entry.getKey().toArray(new String[labelNames.length]);
-            result.add(entry.getValue().snapshot(constLabels.merge(labelNames, variableLabelValues)));
+            labels.add(constLabels.merge(labelNames, variableLabelValues));
+            metricData.add(entry.getValue());
         }
-        return result;
+        return collect(labels, metricData);
     }
 
     public O withLabels(String... labelValues) {

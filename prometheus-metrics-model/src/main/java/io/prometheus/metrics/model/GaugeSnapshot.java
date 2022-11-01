@@ -1,15 +1,27 @@
 package io.prometheus.metrics.model;
 
-public final class GaugeSnapshot extends Snapshot {
+import java.util.Collection;
 
-    private final double value;
+public final class GaugeSnapshot extends MetricSnapshot {
 
-    public GaugeSnapshot(double value, Labels labels) {
-        super(labels);
-        this.value = value;
+    private final Collection<GaugeData> data;
+
+    public GaugeSnapshot(MetricMetadata metadata, Collection<GaugeData> data) {
+        super(metadata);
+        this.data = data;
     }
 
-    public double getValue() {
-        return value;
+    public static final class GaugeData extends MetricData {
+
+        private final double value;
+
+        public GaugeData(double value, Labels labels) {
+            super(labels);
+            this.value = value;
+        }
+
+        public double getValue() {
+            return value;
+        }
     }
 }

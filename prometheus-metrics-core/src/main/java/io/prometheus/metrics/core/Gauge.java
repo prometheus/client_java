@@ -1,13 +1,9 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.model.GaugeSnapshot;
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricType;
+import io.prometheus.metrics.model.*;
 import io.prometheus.metrics.observer.GaugingObserver;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.DoubleSupplier;
 
@@ -28,13 +24,17 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     }
 
     @Override
-    protected GaugeData newMetricData() {
-        return new GaugeData();
-    }
+    protected GaugeSnapshot collect(List<Labels> labels, List<GaugeData> metricData) {
+            List<GaugeSnapshot.GaugeData> data = new ArrayList<>(labels.size());
+            for (int i=0; i<labels.size(); i++) {
+                data.add(metricData.get(i).snapshot(labels.get(i)));
+            }
+            return new GaugeSnapshot(getMetadata(), data);
+        }
 
     @Override
-    public MetricType getType() {
-        return MetricType.GAUGE;
+    protected GaugeData newMetricData() {
+        return new GaugeData();
     }
 
     static class GaugeData implements GaugingObserver, MetricData<GaugingObserver> {
@@ -52,9 +52,8 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
             this.value.add(value - this.value.sum());
         }
 
-        @Override
-        public GaugeSnapshot snapshot(Labels labels) {
-            return new GaugeSnapshot(value.sum(), labels);
+        private GaugeSnapshot.GaugeData snapshot(Labels labels) {
+            return new GaugeSnapshot.GaugeData(value.sum(), labels);
         }
 
         @Override
@@ -66,6 +65,11 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     public static class Builder extends ObservingMetric.Builder<Builder, Gauge> {
 
         private Builder() {
+        }
+
+        @Override
+        protected MetricType getType() {
+            return MetricType.GAUGE;
         }
 
         @Override
@@ -89,13 +93,10 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         }
 
         @Override
-        public MetricType getType() {
-            return MetricType.GAUGE;
-        }
-
-        @Override
-        public Collection<GaugeSnapshot> snapshot() {
-            return Collections.singletonList(new GaugeSnapshot(callback.getAsDouble(), constLabels));
+        public GaugeSnapshot collect() {
+            return new GaugeSnapshot(getMetadata(), Collections.singletonList(
+                    new GaugeSnapshot.GaugeData(callback.getAsDouble(), constLabels)
+            ));
         }
 
         public static class Builder extends Metric.Builder<Gauge.FromCallback.Builder, Gauge.FromCallback> {
@@ -103,6 +104,11 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
             private DoubleSupplier callback;
 
             private Builder() {
+            }
+
+            @Override
+            protected MetricType getType() {
+                return MetricType.GAUGE;
             }
 
             public Gauge.FromCallback.Builder withCallback(DoubleSupplier callback) {

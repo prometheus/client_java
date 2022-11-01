@@ -10,7 +10,7 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-class Buffer<T extends Snapshot> {
+class Buffer<T extends io.prometheus.metrics.model.MetricData> {
 
     private static final long signBit = 1L << 63;
     private final AtomicLong observationCount = new AtomicLong(0);

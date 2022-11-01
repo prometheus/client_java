@@ -1,23 +1,33 @@
 package io.prometheus.metrics.model;
 
+import java.util.Collection;
 import java.util.List;
 
-public final class ExponentialBucketsHistogramSnapshot extends Snapshot {
+public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
+        private final Collection<ExponentialBucketsHistogramData> data;
 
-    private final int schema;
-    private final double zeroThreshold;
-    private final List<ExponentialBucket> bucketsForPositiveValues;
-    private final List<ExponentialBucket> bucketsForNegativeValues;
+        public ExponentialBucketsHistogramSnapshot(MetricMetadata metadata, Collection<ExponentialBucketsHistogramData> data) {
+            super(metadata);
+            this.data = data;
+        }
 
-    public ExponentialBucketsHistogramSnapshot(int schema, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, long createdTimeMillis) {
-        super(labels);
-        this.schema = schema;
-        this.zeroThreshold = zeroThreshold;
-        this.bucketsForPositiveValues = bucketsForPositiveValues;
-        this.bucketsForNegativeValues = bucketsForNegativeValues;
-    }
+        public static final class ExponentialBucketsHistogramData extends MetricData {
 
-    public double getZeroThreshold() {
-        return zeroThreshold;
-    }
+            private final int schema;
+            private final double zeroThreshold;
+            private final List<ExponentialBucket> bucketsForPositiveValues;
+            private final List<ExponentialBucket> bucketsForNegativeValues;
+
+            public ExponentialBucketsHistogramData(int schema, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, long createdTimeMillis) {
+                super(labels);
+                this.schema = schema;
+                this.zeroThreshold = zeroThreshold;
+                this.bucketsForPositiveValues = bucketsForPositiveValues;
+                this.bucketsForNegativeValues = bucketsForNegativeValues;
+            }
+
+            public double getZeroThreshold() {
+                return zeroThreshold;
+            }
+        }
 }

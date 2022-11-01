@@ -1,9 +1,9 @@
 package io.prometheus.metrics.model;
 
-public abstract class Snapshot {
+public abstract class MetricData {
     private final Labels labels;
 
-    protected Snapshot(Labels labels) {
+    protected MetricData(Labels labels) {
         this.labels = labels;
     }
 

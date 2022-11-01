@@ -2,15 +2,21 @@ package io.prometheus.metrics.model;
 
 import java.util.Collection;
 
-public interface Metric {
+public final class Metric {
 
-    // See MetricMetadata in https://github.com/prometheus/prometheus/blob/main/prompb/types.proto
+    private final MetricMetadata metadata;
+    private final Collection<? extends Snapshot> snapshots;
 
-    // Note: The OpenMetrics exposition format would call this a MetricFamily. However, I think the name
-    // Metric works better as an API. See REFACTORING.md
-    String getName();
-    String getUnit();
-    String getHelp();
-    MetricType getType();
-    Collection<? extends Snapshot> snapshot();
+    public Metric(MetricMetadata metadata, Collection<? extends Snapshot> snapshots) {
+        this.metadata = metadata;
+        this.snapshots = snapshots;
+    }
+
+    public MetricMetadata getMetadata() {
+        return metadata;
+    }
+
+    public Collection<? extends Snapshot> getSnapshots() {
+        return snapshots;
+    }
 }

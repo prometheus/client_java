@@ -2,17 +2,18 @@ package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.exemplars.CounterExemplarSampler;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
-import io.prometheus.metrics.model.CounterSnapshot;
-import io.prometheus.metrics.model.Exemplar;
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricType;
+import io.prometheus.metrics.model.*;
 import io.prometheus.metrics.observer.DiscreteEventObserver;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.DoubleAdder;
+import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -40,6 +41,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         getNoLabels().incWithExemplar(amount, labels);
     }
 
+
     @Override
     protected CounterData newMetricData() {
         return new CounterData();
@@ -50,8 +52,12 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
     }
 
     @Override
-    public MetricType getType() {
-        return MetricType.COUNTER;
+    protected CounterSnapshot collect(List<Labels> labels, List<CounterData> metricData) {
+        List<CounterSnapshot.CounterData> data = new ArrayList<>(labels.size());
+        for (int i=0; i<labels.size(); i++) {
+            data.add(metricData.get(i).snapshot(labels.get(i)));
+        }
+        return new CounterSnapshot(getMetadata(), data);
     }
 
     class CounterData implements DiscreteEventObserver, MetricData<DiscreteEventObserver> {
@@ -108,12 +114,11 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
             }
         }
 
-        @Override
-        public CounterSnapshot snapshot(Labels labels) {
+        private CounterSnapshot.CounterData snapshot(Labels labels) {
             // Read the exemplar first. Otherwise, there is a race condition where you might
             // see an Exemplar for a value that's not represented in getValue() yet.
             Exemplar ex = exemplar.get();
-            return new CounterSnapshot(value.sum(), labels, ex, createdTimeMillis);
+            return new CounterSnapshot.CounterData(value.sum(), labels, ex, createdTimeMillis);
         }
 
         @Override
@@ -128,6 +133,11 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         private CounterExemplarSampler exemplarSampler;
 
         private Builder() {
+        }
+
+        @Override
+        protected MetricType getType() {
+            return MetricType.COUNTER;
         }
 
         @Override
@@ -170,18 +180,13 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         }
 
         @Override
-        public MetricType getType() {
-            return MetricType.COUNTER;
-        }
-
-        @Override
-        public Collection<CounterSnapshot> snapshot() {
-            return Collections.singletonList(new CounterSnapshot(
+        public CounterSnapshot collect() {
+            return new CounterSnapshot(getMetadata(), Collections.singletonList(new CounterSnapshot.CounterData(
                     callback.getAsDouble(),
                     constLabels,
                     null,
                     createdTimeMillis
-            ));
+            )));
         }
 
         public static class Builder extends Metric.Builder<io.prometheus.metrics.core.Counter.FromCallback.Builder, io.prometheus.metrics.core.Counter.FromCallback> {
@@ -189,6 +194,11 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
             private DoubleSupplier callback;
 
             private Builder() {
+            }
+
+            @Override
+            protected MetricType getType() {
+                return MetricType.COUNTER;
             }
 
             public io.prometheus.metrics.core.Counter.FromCallback.Builder withCallback(DoubleSupplier callback) {

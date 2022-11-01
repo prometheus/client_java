@@ -25,6 +25,15 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
     }
 
     @Override
+    protected MetricSnapshot collect(List<Labels> labels, List<SummaryData> metricData) {
+        List<SummarySnapshot.SummaryData> data = new ArrayList<>(labels.size());
+        for (int i=0; i<labels.size(); i++) {
+            data.add(metricData.get(i).snapshot(labels.get(i)));
+        }
+        return new SummarySnapshot(getMetadata(), data);
+    }
+
+    @Override
     protected SummaryData newMetricData() {
         return new SummaryData();
     }
@@ -39,17 +48,13 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         getNoLabels().observeWithExemplar(amount, labels);
     }
 
-    @Override
-    public MetricType getType() {
-        return MetricType.SUMMARY;
-    }
 
     public class SummaryData implements DistributionObserver, MetricData<DistributionObserver> {
 
         private final LongAdder count = new LongAdder();
         private final DoubleAdder sum = new DoubleAdder();
         private final TimeWindowQuantiles quantileValues;
-        private final Buffer<SummarySnapshot> buffer = new Buffer<>();
+        private final Buffer<SummarySnapshot.SummaryData> buffer = new Buffer<>();
 
         private final long createdTimeMillis = System.currentTimeMillis();
 
@@ -83,11 +88,10 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
             count.increment();
         }
 
-        @Override
-        public SummarySnapshot snapshot(Labels labels) {
+        public SummarySnapshot.SummaryData snapshot(Labels labels) {
             return buffer.run(
                     expectedCount -> count.sum() == expectedCount,
-                    () -> new SummarySnapshot(count.sum(), sum.sum(), makeQuantiles(), labels, createdTimeMillis),
+                    () -> new SummarySnapshot.SummaryData(count.sum(), sum.sum(), makeQuantiles(), labels, createdTimeMillis),
                     this::doObserve
             );
         }
@@ -119,6 +123,11 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         private int ageBuckets = 5;
 
         private Builder() {
+        }
+
+        @Override
+        protected MetricType getType() {
+            return MetricType.SUMMARY;
         }
 
         public Builder quantile(double quantile, double error) {

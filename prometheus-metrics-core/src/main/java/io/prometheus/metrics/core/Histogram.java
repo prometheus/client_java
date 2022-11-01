@@ -6,6 +6,7 @@ import io.prometheus.metrics.model.*;
 import io.prometheus.metrics.observer.DistributionObserver;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
     private final DoubleAdder sum = new DoubleAdder();
     private final LongAdder count = new LongAdder();
     private final long createdTimeMillis = System.currentTimeMillis();
-    private final Buffer<Snapshot> buffer = new Buffer<>();
+    private final Buffer<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> buffer = new Buffer<>();
 
     // Helper used in exponential histograms. Must be here because inner classes can't have static variables.
     private static final double[][] exponentialBounds;
@@ -51,8 +52,12 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
 
         @Override
-        public MetricType getType() {
-            return MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
+        protected ExplicitBucketsHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
+            List<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> data = new ArrayList<>(labels.size());
+            for (int i=0; i<labels.size(); i++) {
+                data.add(((ExplicitBucketsHistogram.ExplicitBucketsHistogramData) metricData.get(i)).snapshot(labels.get(i)));
+            }
+            return new ExplicitBucketsHistogramSnapshot(getMetadata(), data);
         }
 
         class ExplicitBucketsHistogramData extends HistogramData {
@@ -96,8 +101,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 count.increment(); // must be the last step, because count is used to signal that the operation is complete.
             }
 
-            @Override
-            public Snapshot snapshot(Labels labels) {
+            public ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData snapshot(Labels labels) {
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
                         () -> {
@@ -107,7 +111,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                                 cumulativeCount += buckets[i].sum();
                                 snapshotBuckets[i] = new ExplicitBucket(cumulativeCount, upperBounds[i], exemplars[i].get());
                             }
-                            return new ExplicitBucketsHistogramSnapshot(count.longValue(), sum.sum(), snapshotBuckets, labels, createdTimeMillis);
+                            return new ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData(count.longValue(), sum.sum(), snapshotBuckets, labels, createdTimeMillis);
                         },
                         this::doObserve
                 );
@@ -156,13 +160,17 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
 
         @Override
-        protected ExponentialBucketsHistogramData newMetricData() {
-            return new ExponentialBucketsHistogramData();
+        protected ExponentialBucketsHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
+            List<ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData> data = new ArrayList<>(labels.size());
+            for (int i=0; i<labels.size(); i++) {
+                data.add(((ExponentialBucketsHistogramData) metricData.get(i)).snapshot(labels.get(i)));
+            }
+            return new ExponentialBucketsHistogramSnapshot(getMetadata(), data);
         }
 
         @Override
-        public MetricType getType() {
-            return MetricType.EXPONENTIAL_BUCKETS_HISTOGRAM;
+        protected ExponentialBucketsHistogramData newMetricData() {
+            return new ExponentialBucketsHistogramData();
         }
 
         class ExponentialBucketsHistogramData extends HistogramData {
@@ -281,10 +289,9 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 // TODO
             }
 
-            @Override
-            public ExponentialBucketsHistogramSnapshot snapshot(Labels labels) {
+            public ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData snapshot(Labels labels) {
                 // todo: activate bufffer
-                return new ExponentialBucketsHistogramSnapshot(schema, zeroThreshold, toBucketList(bucketsForPositiveValues), toBucketList(bucketsForNegativeValues), labels, createdTimeMillis);
+                return new ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData(schema, zeroThreshold, toBucketList(bucketsForPositiveValues), toBucketList(bucketsForNegativeValues), labels, createdTimeMillis);
             }
 
             @Override
@@ -334,8 +341,14 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
         private Boolean exemplarsEnabled;
         private HistogramExemplarSampler exemplarSampler;
+        private MetricType metricType = MetricType.EXPONENTIAL_BUCKETS_HISTOGRAM;
 
         private Builder() {
+        }
+
+        @Override
+        protected MetricType getType() {
+            return metricType;
         }
 
         public Builder withExemplars() {
@@ -360,14 +373,17 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
 
         public ExplicitBucketsHistogramBuilder withBuckets(double... buckets) {
+            this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
             return new ExplicitBucketsHistogramBuilder().withBuckets(buckets);
         }
 
         public ExplicitBucketsHistogramBuilder withLinearBuckets(double start, double width, int count) {
+            this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
             return new ExplicitBucketsHistogramBuilder().withLinearBuckets(start, width, count);
         }
 
         public ExplicitBucketsHistogramBuilder withExponentialBuckets(double start, double factor, int count) {
+            this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
             return new ExplicitBucketsHistogramBuilder().withExponentialBuckets(start, factor, count);
         }
 

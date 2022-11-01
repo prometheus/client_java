@@ -1,36 +1,28 @@
 package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.MetricMetadata;
+import io.prometheus.metrics.model.MetricSnapshot;
+import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.model.Snapshot;
 import io.prometheus.metrics.registry.PrometheusRegistry;
 
-public abstract class Metric implements io.prometheus.metrics.model.Metric {
+import java.util.Collection;
 
-    private final String name;
-    private final String unit;
-    private final String help;
+public abstract class Metric {
+
+    private final MetricMetadata metadata;
     protected final Labels constLabels;
 
     protected Metric(Builder<?, ?> builder) {
-        this.name = builder.name;
-        this.unit = builder.unit;
-        this.help = builder.help;
+        this.metadata = new MetricMetadata(builder.name, builder.help, builder.getType(), builder.unit);
         this.constLabels = builder.constLabels;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
+    public abstract MetricSnapshot collect();
 
-    @Override
-    public String getUnit() {
-        return unit;
-    }
-
-    @Override
-    public String getHelp() {
-        return help;
+    protected MetricMetadata getMetadata() {
+        return metadata;
     }
 
     static abstract class Builder<B extends Builder<B, M>, M extends Metric> {
@@ -41,6 +33,7 @@ public abstract class Metric implements io.prometheus.metrics.model.Metric {
 
         protected Builder() {}
 
+        protected abstract MetricType getType();
         public B withName(String name) {
             this.name = name;
             return self();
