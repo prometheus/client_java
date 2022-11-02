@@ -1,7 +1,18 @@
 package io.prometheus.metrics.model;
 
-public final class InfoSnapshot extends Snapshot {
-    public InfoSnapshot(Labels labels) {
-        super(labels);
+import java.util.Collection;
+
+public final class InfoSnapshot extends MetricSnapshot {
+
+    private final Collection<InfoData> data;
+    public InfoSnapshot(MetricMetadata metadata, Collection<InfoData> data) {
+        super(metadata);
+        this.data = data;
+    }
+
+    public static class InfoData extends MetricData {
+        protected InfoData(Labels labels) {
+            super(labels);
+        }
     }
 }

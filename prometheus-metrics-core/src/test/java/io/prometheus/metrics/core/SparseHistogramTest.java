@@ -1,6 +1,8 @@
 package io.prometheus.metrics.core;
 
 import com.google.protobuf.TextFormat;
+import io.prometheus.expositionformat.protobuf.Protobuf;
+import io.prometheus.expositionformat.protobuf.generated.Metrics;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,10 +43,11 @@ public class SparseHistogramTest {
                                 "positive_span { offset: -1 length: 2 } " +
                                 "positive_delta: 1 " +
                                 "positive_delta: 0",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(0)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0.0, 0.5, 1.0),
                 new TestCase("'factor 1.1 results in schema 3' from client_golang",
                         "sample_count: 4 " +
@@ -58,10 +61,11 @@ public class SparseHistogramTest {
                                 "positive_delta: 1 " +
                                 "positive_delta: 0 " +
                                 "positive_delta: 0",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(3)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0.0, 1.0, 2.0, 3.0),
                 new TestCase("'factor 1.2 results in schema 2' from client_golang",
                         "sample_count: 6 " +
@@ -75,10 +79,11 @@ public class SparseHistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(2)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0, 1, 1.2, 1.4, 1.8, 2),
                 new TestCase("'factor 4 results in schema -1' from client_golang",
                         "sample_count: 10 " +
@@ -91,10 +96,11 @@ public class SparseHistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -1 " +
                                 "positive_delta: -2",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(-1)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0.5, 1, // Bucket 0: (0.25, 1]
                         1.5, 2, 3, 3.5, // Bucket 1: (1, 4]
                         5, 6, 7, // Bucket 2: (4, 16]
@@ -110,10 +116,11 @@ public class SparseHistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: 5 " +
                                 "positive_delta: -6",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(-2)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0.5, 1, // Bucket 0: (0.0625, 1]
                         1.5, 2, 3, 3.5, 5, 6, 7, // Bucket 1: (1, 16]
                         33.33 // Bucket 2: (16, 256]
@@ -130,10 +137,11 @@ public class SparseHistogramTest {
                                 "negative_delta: 2 " +
                                 "negative_delta: -2 " +
                                 "negative_delta: 2",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(2)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0, -1, -1.2, -1.4, -1.8, -2
                 ),
                 new TestCase("'negative and positive buckets' from client_golang",
@@ -154,10 +162,11 @@ public class SparseHistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(2)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
                 ),
                 new TestCase("'wide zero bucket' from client_golang",
@@ -170,10 +179,11 @@ public class SparseHistogramTest {
                                 "negative_delta: 2 " +
                                 "positive_span { offset: 4 length: 1 } " +
                                 "positive_delta: 2",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(2)
                                 .withZeroThreshold(1.4)
-                                .create(),
+                                .build(),
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
                 ),
                 new TestCase("'NaN observation' from client_golang",
@@ -188,10 +198,11 @@ public class SparseHistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(2)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NaN
                 ),
                 new TestCase("'+Inf observation' from client_golang",
@@ -206,10 +217,11 @@ public class SparseHistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(2)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.POSITIVE_INFINITY
                 ),
                 new TestCase("'-Inf observation' from client_golang",
@@ -224,92 +236,21 @@ public class SparseHistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        SparseHistogram.Builder.build("test", "test")
+                        Histogram.newBuilder()
+                                .withName("test")
                                 .withSchema(2)
                                 .withZeroThreshold(0)
-                                .create(),
+                                .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NEGATIVE_INFINITY
                 )
         };
         for (TestCase testCase : testCases) {
             for (double observation : testCase.observations) {
-                testCase.histogram.noLabelsChild.observe(observation);
+                testCase.histogram.observe(observation);
             }
-            Metrics.Histogram protobufData = convertToProtobuf(testCase.histogram.noLabelsChild);
-            Assert.assertEquals("test \"" + testCase.name + "\" failed", testCase.expected, TextFormat.printer().shortDebugString(protobufData));
-        }
-    }
-
-    private <T> T getField(SparseHistogram.Child child, String name, Class<T> type) throws NoSuchFieldException, IllegalAccessException {
-        Field field = SparseHistogram.Child.class.getDeclaredField(name);
-        field.setAccessible(true);
-        return (T) field.get(child);
-    }
-
-    private Metrics.Histogram convertToProtobuf(SparseHistogram.Child child) throws NoSuchFieldException, IllegalAccessException {
-        Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
-        histogramBuilder.setSchema(getField(child, "schema", Integer.class));
-        histogramBuilder.setZeroThreshold(getField(child, "zeroThreshold", Double.class));
-        histogramBuilder.setSampleCount(getField(child, "count", DoubleAdder.class).longValue());
-        histogramBuilder.setSampleSum(getField(child, "sum", DoubleAdder.class).doubleValue());
-        histogramBuilder.setZeroCount(getField(child, "zeroCount", DoubleAdder.class).longValue());
-        ConcurrentHashMap<Integer, DoubleAdder> positiveBuckets = getField(child, "bucketsForPositiveValues", ConcurrentHashMap.class);
-        addBuckets(histogramBuilder, positiveBuckets, +1);
-        ConcurrentHashMap<Integer, DoubleAdder> negativeBuckets = getField(child, "bucketsForNegativeValues", ConcurrentHashMap.class);
-        addBuckets(histogramBuilder, negativeBuckets, -1);
-        return histogramBuilder.build();
-    }
-
-    private void addBuckets(Metrics.Histogram.Builder histogramBuilder, ConcurrentHashMap<Integer, DoubleAdder> buckets, int sgn) {
-        if (!buckets.isEmpty()) {
-            List<Integer> bucketIndexes = new ArrayList<Integer>(buckets.keySet());
-            Collections.sort(bucketIndexes);
-            Metrics.BucketSpan.Builder currentSpan = Metrics.BucketSpan.newBuilder();
-            currentSpan.setOffset(bucketIndexes.get(0));
-            currentSpan.setLength(0);
-            int previousIndex = currentSpan.getOffset();
-            long previousCount = 0;
-            for (int bucketIndex : bucketIndexes) {
-                if (bucketIndex > previousIndex + 1) {
-                    // If the gap between bucketIndex and previousIndex is just 1 or 2,
-                    // we don't start a new span but continue the existing span and add 1 or 2 empty buckets.
-                    if (bucketIndex < previousIndex + 3) {
-                        while (bucketIndex > previousIndex + 1) {
-                            currentSpan.setLength(currentSpan.getLength() + 1);
-                            previousIndex++;
-                            if (sgn > 0) {
-                                histogramBuilder.addPositiveDelta(-previousCount);
-                            } else {
-                                histogramBuilder.addNegativeDelta(-previousCount);
-                            }
-                            previousCount = 0;
-                        }
-                    } else {
-                        if (sgn > 0) {
-                            histogramBuilder.addPositiveSpan(currentSpan.build());
-                        } else {
-                            histogramBuilder.addNegativeSpan(currentSpan.build());
-                        }
-                        currentSpan = Metrics.BucketSpan.newBuilder();
-                        currentSpan.setOffset(bucketIndex - (previousIndex + 1));
-                    }
-                }
-                currentSpan.setLength(currentSpan.getLength() + 1);
-                previousIndex = bucketIndex;
-                // TODO: Not relevant for the test, but buckets.get(bucketIndex) might return null
-                // if the histogram is currently scaling down in another thread.
-                if (sgn > 0) {
-                    histogramBuilder.addPositiveDelta(buckets.get(bucketIndex).longValue() - previousCount);
-                } else {
-                    histogramBuilder.addNegativeDelta(buckets.get(bucketIndex).longValue() - previousCount);
-                }
-                previousCount = buckets.get(bucketIndex).longValue();
-            }
-            if (sgn > 0) {
-                histogramBuilder.addPositiveSpan(currentSpan.build());
-            } else {
-                histogramBuilder.addNegativeSpan(currentSpan.build());
-            }
+            Metrics.MetricFamily protobufData = Protobuf.convert(testCase.histogram.collect());
+            String expected = "name: \"test\" type: HISTOGRAM metric { histogram { " + testCase.expected + " } }";
+            Assert.assertEquals("test \"" + testCase.name + "\" failed", expected, TextFormat.printer().shortDebugString(protobufData));
         }
     }
 }

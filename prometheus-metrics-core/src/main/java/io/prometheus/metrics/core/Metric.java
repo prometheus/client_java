@@ -4,10 +4,6 @@ import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricMetadata;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.model.MetricType;
-import io.prometheus.metrics.model.Snapshot;
-import io.prometheus.metrics.registry.PrometheusRegistry;
-
-import java.util.Collection;
 
 public abstract class Metric {
 
@@ -29,7 +25,7 @@ public abstract class Metric {
         private String name;
         private String unit;
         private String help;
-        private Labels constLabels;
+        private Labels constLabels = Labels.EMPTY;
 
         protected Builder() {}
 
@@ -62,6 +58,7 @@ public abstract class Metric {
 
         public abstract M build();
 
+        /*
         public M register() {
             return register(PrometheusRegistry.defaultRegistry);
         }
@@ -71,6 +68,7 @@ public abstract class Metric {
             registry.register(metric);
             return metric;
         }
+         */
 
         protected abstract B self();
     }

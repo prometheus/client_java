@@ -1,8 +1,6 @@
 package io.prometheus.metrics.observer;
 
 import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.Metric;
-import io.prometheus.metrics.model.Snapshot;
 
 public interface DiscreteEventObserver extends Observer {
 

@@ -22,10 +22,9 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
     private final Boolean exemplarsEnabled; // null means default from ExemplarConfig applies
     private final HistogramExemplarSampler exemplarSampler;
-    private final DoubleAdder sum = new DoubleAdder();
-    private final LongAdder count = new LongAdder();
-    private final long createdTimeMillis = System.currentTimeMillis();
-    private final Buffer<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> buffer = new Buffer<>();
+    protected final DoubleAdder sum = new DoubleAdder();
+    protected final LongAdder count = new LongAdder();
+    protected final long createdTimeMillis = System.currentTimeMillis();
 
     // Helper used in exponential histograms. Must be here because inner classes can't have static variables.
     private static final double[][] exponentialBounds;
@@ -38,8 +37,9 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
     abstract static class HistogramData implements DistributionObserver, MetricData<DistributionObserver> {}
 
-    class ExplicitBucketsHistogram extends Histogram {
+    static class ExplicitBucketsHistogram extends Histogram {
         private final double[] upperBounds;
+        private final Buffer<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> buffer = new Buffer<>();
 
         private ExplicitBucketsHistogram(Histogram.Builder.ExplicitBucketsHistogramBuilder builder) {
             super(builder.getHistogramBuilder());
@@ -135,11 +135,12 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
     }
 
-    class ExponentialBucketsHistogram extends Histogram {
+    static class ExponentialBucketsHistogram extends Histogram {
 
         private final int schema; // integer in [-4, 8]
         private final double zeroThreshold;
         private final int maxBuckets;
+        private final Buffer<ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData> buffer = new Buffer<>();
 
         private ExponentialBucketsHistogram(Histogram.Builder.ExponentialBucketsHistogramBuilder builder) {
             super(builder.getHistogramBuilder());
@@ -290,8 +291,18 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             }
 
             public ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData snapshot(Labels labels) {
-                // todo: activate bufffer
-                return new ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData(schema, zeroThreshold, toBucketList(bucketsForPositiveValues), toBucketList(bucketsForNegativeValues), labels, createdTimeMillis);
+                // todo: activate buffer
+                return new ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData(
+                        count.sum(),
+                        sum.sum(),
+                        schema,
+                        zeroCount.sum(),
+                        zeroThreshold,
+                        toBucketList(bucketsForPositiveValues),
+                        toBucketList(bucketsForNegativeValues),
+                        labels,
+                        createdTimeMillis
+                );
             }
 
             @Override
@@ -329,7 +340,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
     }
 
-    private boolean isExemplarsEnabled() {
+    protected boolean isExemplarsEnabled() {
         if (exemplarsEnabled != null) {
             return exemplarsEnabled;
         } else {
@@ -337,7 +348,10 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
     }
 
-    public class Builder extends ObservingMetric.Builder<Histogram.Builder, Histogram> {
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+    public static class Builder extends ObservingMetric.Builder<Histogram.Builder, Histogram> {
 
         private Boolean exemplarsEnabled;
         private HistogramExemplarSampler exemplarSampler;
@@ -508,6 +522,10 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             public ExponentialBucketsHistogramBuilder withLabelNames(String... labelNames) {
                 Builder.this.withLabelNames(labelNames);
                 return this;
+            }
+
+            public ExponentialBucketsHistogram build() {
+                return new ExponentialBucketsHistogram(this);
             }
 
             private Builder getHistogramBuilder() {

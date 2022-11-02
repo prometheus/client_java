@@ -1,7 +1,20 @@
 package io.prometheus.metrics.model;
 
-public final class StateSetSnapshot extends Snapshot {
-    public StateSetSnapshot(Labels labels) {
-        super(labels);
+import java.util.Collection;
+
+public final class StateSetSnapshot extends MetricSnapshot {
+
+    private final Collection<StateSetData> data;
+
+    public StateSetSnapshot(MetricMetadata metadata, Collection<StateSetData> data) {
+        super(metadata);
+        this.data = data;
+    }
+
+    public static class StateSetData extends MetricData {
+
+        protected StateSetData(Labels labels) {
+            super(labels);
+        }
     }
 }

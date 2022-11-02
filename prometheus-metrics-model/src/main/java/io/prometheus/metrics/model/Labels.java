@@ -1,7 +1,9 @@
 package io.prometheus.metrics.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 // See https://github.com/prometheus/prometheus/blob/main/prompb/types.proto
 public class Labels implements Comparable<Labels>, Iterable<Label> {
@@ -54,7 +56,12 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
 
     @Override
     public Iterator<Label> iterator() {
-        return null;
+        // TODO, this is just a quick hack
+        List<Label> result = new ArrayList<>(names.length);
+        for (int i=0; i<names.length; i++) {
+            result.add(new Label(names[i], values[i]));
+        }
+        return result.iterator();
     }
 
     // as labels are sorted by name, equals is insensitive to the order

@@ -10,6 +10,10 @@ public final class SummarySnapshot extends MetricSnapshot {
         this.data = data;
     }
 
+    public Collection<SummaryData> getData() {
+        return data;
+    }
+
     public static final class SummaryData extends MetricData {
 
         private final long count;

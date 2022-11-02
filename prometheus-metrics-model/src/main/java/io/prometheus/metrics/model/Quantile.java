@@ -9,6 +9,14 @@ public class Quantile implements Comparable<Quantile> {
         this.value = value;
     }
 
+    public double getQuantile() {
+        return quantile;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
     @Override
     public int compareTo(Quantile o) {
         return Double.compare(quantile, o.quantile);

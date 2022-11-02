@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.21.5</version>
+            <version>3.21.7</version> <!-- must be the same as the version of the protoc command that generated Metrics.java -->
         </dependency>
 
         <!-- Test Dependencies Follow -->

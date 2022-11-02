@@ -11,23 +11,59 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
             this.data = data;
         }
 
-        public static final class ExponentialBucketsHistogramData extends MetricData {
+    public Collection<ExponentialBucketsHistogramData> getData() {
+            return data;
+    }
 
+    public static final class ExponentialBucketsHistogramData extends MetricData {
+
+        private final long count;
+        private final double sum;
             private final int schema;
+            private final long zeroCount;
             private final double zeroThreshold;
             private final List<ExponentialBucket> bucketsForPositiveValues;
             private final List<ExponentialBucket> bucketsForNegativeValues;
 
-            public ExponentialBucketsHistogramData(int schema, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, long createdTimeMillis) {
+            public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, long createdTimeMillis) {
                 super(labels);
+                this.count = count;
+                this.sum = sum;
                 this.schema = schema;
+                this.zeroCount = zeroCount;
                 this.zeroThreshold = zeroThreshold;
                 this.bucketsForPositiveValues = bucketsForPositiveValues;
                 this.bucketsForNegativeValues = bucketsForNegativeValues;
             }
 
-            public double getZeroThreshold() {
+        public long getCount() {
+            return count;
+        }
+
+        public double getSum() {
+            return sum;
+        }
+
+        public int getSchema() {
+            return schema;
+        }
+
+        public long getZeroCount() {
+            return zeroCount;
+        }
+
+        public double getZeroThreshold() {
                 return zeroThreshold;
             }
+
+        public List<ExponentialBucket> getBucketsForPositiveValues() {
+            return bucketsForPositiveValues;
         }
+
+        public List<ExponentialBucket> getBucketsForNegativeValues() {
+            return bucketsForNegativeValues;
+        }
+    }
+
+
 }

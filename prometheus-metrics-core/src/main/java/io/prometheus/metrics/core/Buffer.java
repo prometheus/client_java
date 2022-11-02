@@ -1,7 +1,6 @@
 package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.Snapshot;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;

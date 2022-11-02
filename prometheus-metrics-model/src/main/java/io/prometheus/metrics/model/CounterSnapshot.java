@@ -12,6 +12,10 @@ public final class CounterSnapshot extends MetricSnapshot {
         this.data = data;
     }
 
+    public Collection<CounterData> getData() {
+        return data;
+    }
+
     public static final class CounterData extends MetricData {
 
         private final double value;

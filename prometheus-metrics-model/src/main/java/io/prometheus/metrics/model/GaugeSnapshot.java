@@ -11,6 +11,10 @@ public final class GaugeSnapshot extends MetricSnapshot {
         this.data = data;
     }
 
+    public Collection<GaugeData> getData() {
+        return data;
+    }
+
     public static final class GaugeData extends MetricData {
 
         private final double value;

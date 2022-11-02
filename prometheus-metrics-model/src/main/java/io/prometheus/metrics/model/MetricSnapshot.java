@@ -6,4 +6,8 @@ public abstract class MetricSnapshot {
     protected MetricSnapshot(MetricMetadata metadata) {
         this.metadata = metadata;
     }
+
+    public MetricMetadata getMetadata() {
+        return metadata;
+    }
 }

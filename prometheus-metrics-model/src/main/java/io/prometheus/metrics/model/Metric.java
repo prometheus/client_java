@@ -5,9 +5,9 @@ import java.util.Collection;
 public final class Metric {
 
     private final MetricMetadata metadata;
-    private final Collection<? extends Snapshot> snapshots;
+    private final Collection<? extends MetricSnapshot> snapshots;
 
-    public Metric(MetricMetadata metadata, Collection<? extends Snapshot> snapshots) {
+    public Metric(MetricMetadata metadata, Collection<? extends MetricSnapshot> snapshots) {
         this.metadata = metadata;
         this.snapshots = snapshots;
     }
@@ -16,7 +16,7 @@ public final class Metric {
         return metadata;
     }
 
-    public Collection<? extends Snapshot> getSnapshots() {
+    public Collection<? extends MetricSnapshot> getSnapshots() {
         return snapshots;
     }
 }

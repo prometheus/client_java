@@ -60,7 +60,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     }
 
     static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?,?>> extends Metric.Builder<B, M> {
-        private String[] labelNames;
+        private String[] labelNames = new String[0];
 
         protected Builder() {}
 

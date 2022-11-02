@@ -10,6 +10,10 @@ public final class ExplicitBucketsHistogramSnapshot extends MetricSnapshot {
         this.data = data;
     }
 
+    public Collection<ExplicitBucketsHistogramData> getData() {
+        return data;
+    }
+
     public static final class ExplicitBucketsHistogramData extends MetricData {
         private final long count;
         private final double sum;

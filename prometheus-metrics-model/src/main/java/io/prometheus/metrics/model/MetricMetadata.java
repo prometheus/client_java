@@ -15,19 +15,19 @@ public final class MetricMetadata {
         this.unit = unit;
     }
 
-    String getName() {
+    public String getName() {
         return name;
     }
 
-    String getHelp() {
+    public String getHelp() {
         return help;
     }
 
-    MetricType getType() {
+    public MetricType getType() {
         return type;
     }
 
-    String getUnit() {
+    public String getUnit() {
         return unit;
     }
 }
