@@ -19,8 +19,18 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
     }
 
     public static Labels of(String... keyValuePairs) {
-        return null;
+        if (keyValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Key/value pairs must have an even length");
+        }
+        String[] names = new String[keyValuePairs.length/2];
+        String[] values = new String[keyValuePairs.length/2];
+        for (int i=0; 2*i<keyValuePairs.length; i++) {
+            names[i] = keyValuePairs[2*i];
+            values[i] = keyValuePairs[2*i + 1];
+        }
+        return Labels.of(names, values);
     }
+
     public static Labels of(String[] names, String[] values) {
         String[] namesCopy = Arrays.copyOf(names, names.length);
         String[] valuesCopy = Arrays.copyOf(values, values.length);

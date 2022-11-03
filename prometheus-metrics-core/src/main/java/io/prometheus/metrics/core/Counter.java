@@ -60,6 +60,10 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         return new CounterSnapshot(getMetadata(), data);
     }
 
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
     class CounterData implements DiscreteEventObserver, MetricData<DiscreteEventObserver> {
 
         private final DoubleAdder value = new DoubleAdder();
@@ -88,7 +92,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
         private void validateAndAdd(double amount) {
             if (amount < 0) {
-                throw new IllegalArgumentException("Amount " + amount + " is negative.");
+                throw new IllegalArgumentException("Negative increment " + amount + " is illegal for Counter metrics.");
             }
             value.add(amount);
         }
