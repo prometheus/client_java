@@ -1,5 +1,8 @@
 package io.prometheus.metrics.core;
 
+import com.google.protobuf.TextFormat;
+import io.prometheus.expositionformat.protobuf.Protobuf;
+import io.prometheus.expositionformat.protobuf.generated.Metrics;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Labels;
 import org.junit.Before;
@@ -61,7 +64,7 @@ public class CounterTest {
   
   @Test
   public void testEmptyCountersHaveNoLabels() {
-    assertEquals(0, getNumberOfLabels(noLabels));
+    assertEquals(1, getNumberOfLabels(noLabels));
     assertEquals(0, getNumberOfLabels(labels));
   }
 
@@ -77,19 +80,21 @@ public class CounterTest {
     assertEquals(3.0, getValue(labels, "l", "b"), .001);
   }
 
-  /*
   @Test
   public void testTotalStrippedFromName() {
-    Counter c = Counter.build().name("foo_total").unit("seconds").help("h").create();
-    assertEquals("foo_seconds", c.fullname);
+    Counter counter = Counter.newBuilder()
+            .withName("my_counter_total")
+            .withUnit("seconds")
+            .build();
+    Metrics.MetricFamily protobufData = Protobuf.convert(counter.collect());
+    assertEquals("name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }", TextFormat.printer().shortDebugString(protobufData));
 
-    // This is not a good unit, but test it anyway.
-    c = Counter.build().name("foo_total").unit("total").help("h").create();
-    assertEquals("foo_total", c.fullname);
-    c = Counter.build().name("foo").unit("total").help("h").create();
-    assertEquals("foo_total", c.fullname);
+    counter = Counter.newBuilder()
+            .withName("my_counter")
+            .build();
+    protobufData = Protobuf.convert(counter.collect());
+    assertEquals("name: \"my_counter_total\" type: COUNTER metric { counter { value: 0.0 } }", TextFormat.printer().shortDebugString(protobufData));
   }
-   */
 
   /*
   @Test

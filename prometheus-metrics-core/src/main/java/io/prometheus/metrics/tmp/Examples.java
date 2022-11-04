@@ -8,10 +8,13 @@ import io.prometheus.metrics.registry.PrometheusRegistry;
 public class Examples {
 
     public static void main(String[] args) {
+        /*
         Counter counter = Counter.builder()
                 .withConstLabels(Labels.of("env", "prod"))
                 .withLabelNames("path")
                 .build();
+
+         */
         //
         /*
         PrometheusRegistry.counter(name).inc();

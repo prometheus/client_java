@@ -11,8 +11,18 @@ public abstract class Metric {
     protected final Labels constLabels;
 
     protected Metric(Builder<?, ?> builder) {
-        this.metadata = new MetricMetadata(builder.name, builder.help, builder.getType(), builder.unit);
+        this.metadata = new MetricMetadata(makeName(builder.name, builder.unit), builder.help, builder.getType(), builder.unit);
         this.constLabels = builder.constLabels;
+    }
+
+    private String makeName(String name, String unit) {
+        if (unit != null) {
+            String suffix = "_" + unit;
+            if (!name.endsWith(suffix)) {
+                name = name + suffix;
+            }
+        }
+        return name;
     }
 
     public abstract MetricSnapshot collect();
@@ -22,7 +32,7 @@ public abstract class Metric {
     }
 
     static abstract class Builder<B extends Builder<B, M>, M extends Metric> {
-        private String name;
+        protected String name;
         private String unit;
         private String help;
         private Labels constLabels = Labels.EMPTY;

@@ -27,6 +27,7 @@ public class Protobuf {
             builder.setHelp(metadata.getHelp());
         }
         if (snapshot instanceof CounterSnapshot) {
+            builder.setName(metadata.getName() + "_total");
             CounterSnapshot counter = (CounterSnapshot) snapshot;
             builder.setType(Metrics.MetricType.COUNTER);
             for (CounterSnapshot.CounterData data : counter.getData()) {

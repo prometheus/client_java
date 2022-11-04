@@ -47,10 +47,6 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         return new CounterData();
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     @Override
     protected CounterSnapshot collect(List<Labels> labels, List<CounterData> metricData) {
         List<CounterSnapshot.CounterData> data = new ArrayList<>(labels.size());
@@ -62,6 +58,13 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    private static String normalizeName(String name) {
+        if (name != null && name.endsWith("_total")) {
+            name = name.substring(0, name.length() - 6);
+        }
+        return name;
     }
 
     class CounterData implements DiscreteEventObserver, MetricData<DiscreteEventObserver> {
@@ -146,7 +149,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
         @Override
         public Counter build() {
-            return new Counter(this);
+            return new Counter(withName(normalizeName(name)));
         }
 
         public Builder withExemplars() {
@@ -193,7 +196,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
             )));
         }
 
-        public static class Builder extends Metric.Builder<io.prometheus.metrics.core.Counter.FromCallback.Builder, io.prometheus.metrics.core.Counter.FromCallback> {
+       public static class Builder extends Metric.Builder<io.prometheus.metrics.core.Counter.FromCallback.Builder, io.prometheus.metrics.core.Counter.FromCallback> {
 
             private DoubleSupplier callback;
 
@@ -212,7 +215,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
             @Override
             public io.prometheus.metrics.core.Counter.FromCallback build() {
-                return new io.prometheus.metrics.core.Counter.FromCallback(this);
+                return new io.prometheus.metrics.core.Counter.FromCallback(withName(normalizeName(name)));
             }
 
             @Override

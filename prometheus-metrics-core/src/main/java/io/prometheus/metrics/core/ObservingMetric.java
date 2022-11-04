@@ -28,6 +28,10 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     protected abstract MetricSnapshot collect(List<Labels> labels, List<V> metricData);
 
     public io.prometheus.metrics.model.MetricSnapshot collect() {
+        if (labelNames.length == 0 && data.size() == 0) {
+            // This is a metric without labels that has not been used yet. Initialize the data on the fly.
+            withLabels();
+        }
         List<Labels> labels = new ArrayList<>(data.size());
         List<V> metricData = new ArrayList<>(data.size());
         for (Map.Entry<List<String>, V> entry : data.entrySet()) {
