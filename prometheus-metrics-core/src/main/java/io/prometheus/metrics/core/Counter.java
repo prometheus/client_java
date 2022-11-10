@@ -71,7 +71,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
         private final DoubleAdder value = new DoubleAdder();
         private final long createdTimeMillis = System.currentTimeMillis();
-        private final AtomicReference<Exemplar> exemplar = new AtomicReference<Exemplar>();
+        private final AtomicReference<Exemplar> exemplar = new AtomicReference<>();
 
         @Override
         public void inc(double amount) {
