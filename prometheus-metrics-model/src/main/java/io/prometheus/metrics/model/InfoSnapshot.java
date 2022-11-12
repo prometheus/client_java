@@ -14,5 +14,8 @@ public final class InfoSnapshot extends MetricSnapshot {
         protected InfoData(Labels labels) {
             super(labels);
         }
+
+        @Override
+        void validate() {}
     }
 }

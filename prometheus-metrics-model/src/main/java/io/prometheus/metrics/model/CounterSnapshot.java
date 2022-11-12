@@ -41,5 +41,11 @@ public final class CounterSnapshot extends MetricSnapshot {
             return createdTimeMillis;
         }
 
+        @Override
+        void validate() {
+            if (value < 0) {
+                throw new IllegalArgumentException(value + ": counters cannot have negative values");
+            }
+        }
     }
 }

@@ -65,6 +65,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     public static class Builder extends ObservingMetric.Builder<Builder, Gauge> {
 
         private Builder() {
+            super(Collections.emptyList());
         }
 
         @Override
@@ -104,6 +105,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
             private DoubleSupplier callback;
 
             private Builder() {
+                super(Collections.emptyList());
             }
 
             @Override

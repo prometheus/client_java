@@ -8,6 +8,13 @@ public final class ExplicitBucketsHistogramSnapshot extends MetricSnapshot {
     public ExplicitBucketsHistogramSnapshot(MetricMetadata metadata, Collection<ExplicitBucketsHistogramData> data) {
         super(metadata);
         this.data = data;
+        for (ExplicitBucketsHistogramData d : data) {
+            for (Label label : d.getLabels()) {
+                if (label.getName().equals("le")) {
+                    throw new IllegalArgumentException("le is a reserved label name for histograms");
+                }
+            }
+        }
     }
 
     public Collection<ExplicitBucketsHistogramData> getData() {
@@ -26,6 +33,9 @@ public final class ExplicitBucketsHistogramSnapshot extends MetricSnapshot {
             this.sum = sum;
             this.buckets = Collections.unmodifiableList(Arrays.asList(Arrays.copyOf(buckets, buckets.length)));
             this.createdTimeMillis = createdTimeMillis;
+            // TODO: validation
+            // TODO: buckets must not have duplicates, must be sorted, counts must be cumulative, buckets must include a +Inf bucket.
+            // TODO: maybe implement a dedicated Buckets class similar to Labels?
         }
 
         public long getCount() {
@@ -42,6 +52,15 @@ public final class ExplicitBucketsHistogramSnapshot extends MetricSnapshot {
 
         public long getCreatedTimeMillis() {
             return createdTimeMillis;
+        }
+
+        @Override
+        protected void validate() {
+            for (Label label : getLabels()) {
+                if (label.getName().equals("le")) {
+                    throw new IllegalArgumentException("le is a reserved label name for histograms");
+                }
+            }
         }
     }
 }

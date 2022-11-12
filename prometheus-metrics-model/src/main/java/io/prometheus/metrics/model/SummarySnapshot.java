@@ -44,6 +44,14 @@ public final class SummarySnapshot extends MetricSnapshot {
         public long getCreatedTimeMillis() {
             return createdTimeMillis;
         }
-    }
 
+        @Override
+        protected void validate() {
+            for (Label label : getLabels()) {
+                if (label.getName().equals("quantile")) {
+                    throw new IllegalArgumentException("quantile is a reserved label name for summaries");
+                }
+            }
+        }
+    }
 }

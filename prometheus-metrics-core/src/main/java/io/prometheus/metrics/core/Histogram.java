@@ -6,10 +6,7 @@ import io.prometheus.metrics.model.*;
 import io.prometheus.metrics.observer.DistributionObserver;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -28,6 +25,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
     // Helper used in exponential histograms. Must be here because inner classes can't have static variables.
     private static final double[][] exponentialBounds;
+    public static final double[] DEFAULT_BUCKETS = new double[] { .005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10 };
 
     protected Histogram(Builder builder) {
         super(builder);
@@ -43,7 +41,16 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
         private ExplicitBucketsHistogram(Histogram.Builder.ExplicitBucketsHistogramBuilder builder) {
             super(builder.getHistogramBuilder());
-            this.upperBounds = Arrays.copyOf(builder.buckets, builder.buckets.length);
+            SortedSet<Double> upperBounds = new TreeSet<>();
+            for (double upperBound : builder.upperBounds) {
+                upperBounds.add(upperBound);
+            }
+            upperBounds.add(Double.POSITIVE_INFINITY);
+            this.upperBounds = new double[upperBounds.size()];
+            int i=0;
+            for (double upperBound : upperBounds) {
+                this.upperBounds[i++] = upperBound;
+            }
         }
 
         @Override
@@ -358,6 +365,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         private MetricType metricType = MetricType.EXPONENTIAL_BUCKETS_HISTOGRAM;
 
         private Builder() {
+            super(Collections.singletonList("le"));
         }
 
         @Override
@@ -391,6 +399,10 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             return new ExplicitBucketsHistogramBuilder().withBuckets(buckets);
         }
 
+        public ExplicitBucketsHistogramBuilder withDefaultBuckets() {
+            return withBuckets(DEFAULT_BUCKETS);
+        }
+
         public ExplicitBucketsHistogramBuilder withLinearBuckets(double start, double width, int count) {
             this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
             return new ExplicitBucketsHistogramBuilder().withLinearBuckets(start, width, count);
@@ -419,30 +431,36 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
         class ExplicitBucketsHistogramBuilder {
 
-            private double[] buckets;
+            private double[] upperBounds;
 
             private ExplicitBucketsHistogramBuilder() {
             }
 
-            public ExplicitBucketsHistogramBuilder withBuckets(double... buckets) {
+            public ExplicitBucketsHistogramBuilder withBuckets(double... upperBounds) {
+                this.upperBounds = upperBounds;
+                for (double bound : upperBounds) {
+                    if (Double.isNaN(bound)) {
+                        throw new IllegalArgumentException("Cannot use NaN as upper bound for a histogram");
+                    }
+                }
                 return this;
             }
 
             public ExplicitBucketsHistogramBuilder withLinearBuckets(double start, double width, int count) {
-                this.buckets = new double[count];
+                this.upperBounds = new double[count];
                 // Use BigDecimal to avoid weird bucket boundaries like 0.7000000000000001.
                 BigDecimal s = new BigDecimal(Double.toString(start));
                 BigDecimal w = new BigDecimal(Double.toString(width));
                 for (int i = 0; i < count; i++) {
-                    buckets[i] = s.add(w.multiply(new BigDecimal(i))).doubleValue();
+                    upperBounds[i] = s.add(w.multiply(new BigDecimal(i))).doubleValue();
                 }
                 return this;
             }
 
             public ExplicitBucketsHistogramBuilder withExponentialBuckets(double start, double factor, int count) {
-                buckets = new double[count];
+                upperBounds = new double[count];
                 for (int i = 0; i < count; i++) {
-                    buckets[i] = start * Math.pow(factor, i);
+                    upperBounds[i] = start * Math.pow(factor, i);
                 }
                 return this;
             }
@@ -466,6 +484,27 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 Builder.this.withLabelNames(labelNames);
                 return this;
             }
+
+            public ExplicitBucketsHistogramBuilder withName(String name) {
+                Builder.this.withName(name);
+                return this;
+            }
+
+            public ExplicitBucketsHistogramBuilder withUnit(String unit) {
+                Builder.this.withUnit(unit);
+                return this;
+            }
+
+            public ExplicitBucketsHistogramBuilder withHelp(String help) {
+                Builder.this.withHelp(help);
+                return this;
+            }
+
+            public ExplicitBucketsHistogramBuilder withConstLabels(Labels constLabels) {
+                Builder.this.withConstLabels(constLabels);
+                return this;
+            }
+
             private Builder getHistogramBuilder() {
                 return Builder.this;
             }
@@ -521,6 +560,26 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
             public ExponentialBucketsHistogramBuilder withLabelNames(String... labelNames) {
                 Builder.this.withLabelNames(labelNames);
+                return this;
+            }
+
+            public ExponentialBucketsHistogramBuilder withName(String name) {
+                Builder.this.withName(name);
+                return this;
+            }
+
+            public ExponentialBucketsHistogramBuilder withUnit(String unit) {
+                Builder.this.withUnit(unit);
+                return this;
+            }
+
+            public ExponentialBucketsHistogramBuilder withHelp(String help) {
+                Builder.this.withHelp(help);
+                return this;
+            }
+
+            public ExponentialBucketsHistogramBuilder withConstLabels(Labels constLabels) {
+                Builder.this.withConstLabels(constLabels);
                 return this;
             }
 

@@ -4,19 +4,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 // See https://github.com/prometheus/prometheus/blob/main/prompb/types.proto
 public class Labels implements Comparable<Labels>, Iterable<Label> {
 
     public static final Labels EMPTY = new Labels(new String[]{}, new String[]{});
+    private static final Pattern LABEL_NAME_RE = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]+$");
 
     private final String[] names; // sorted
     private final String[] values;
 
     private Labels(String[] names, String[] values) {
+        // names and values are already sorted and validated
         this.names = names;
         this.values = values;
     }
+
 
     public static Labels of(String... keyValuePairs) {
         if (keyValuePairs.length % 2 != 0) {
@@ -43,6 +47,19 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         // implement regex for names here?
         // make sure there are no duplicates in names
         // sort arrays by name
+        validateNames(names);
+    }
+
+    private static void validateNames(String[] names) {
+        for (String name : names) {
+            if (!isValidLabelName(name)) {
+                throw new IllegalArgumentException("'" + name + "' is an illegal label name");
+            }
+        }
+    }
+
+    public static boolean isValidLabelName(String name) {
+        return LABEL_NAME_RE.matcher(name).matches() && !name.startsWith("__");
     }
 
     public Labels merge(String[] names, String[] values) {

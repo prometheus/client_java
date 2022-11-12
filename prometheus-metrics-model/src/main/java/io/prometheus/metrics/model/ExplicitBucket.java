@@ -9,6 +9,12 @@ public class ExplicitBucket {
         this.cumulativeCount = cumulativeCount;
         this.upperBound = upperBound;
         this.exemplar = exemplar;
+        if (Double.isNaN(upperBound)) {
+            throw new IllegalArgumentException("Cannot use NaN as an upper bound for a histogram bucket");
+        }
+        if (cumulativeCount < 0) {
+            throw new IllegalArgumentException(cumulativeCount + ": Histogram buckets cannot have a negative count");
+        }
     }
 
     public long getCumulativeCount() {

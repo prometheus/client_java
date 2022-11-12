@@ -123,6 +123,7 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         private int ageBuckets = 5;
 
         private Builder() {
+            super(Collections.singletonList("quantile"));
         }
 
         @Override

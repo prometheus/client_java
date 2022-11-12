@@ -1,9 +1,9 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricMetadata;
-import io.prometheus.metrics.model.MetricSnapshot;
-import io.prometheus.metrics.model.MetricType;
+import io.prometheus.metrics.model.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Metric {
 
@@ -32,15 +32,21 @@ public abstract class Metric {
     }
 
     static abstract class Builder<B extends Builder<B, M>, M extends Metric> {
+        protected final List<String> illegalLabelNames;
         protected String name;
         private String unit;
         private String help;
         private Labels constLabels = Labels.EMPTY;
 
-        protected Builder() {}
+        protected Builder(List<String> illegalLabelNames) {
+            this.illegalLabelNames = new ArrayList<>(illegalLabelNames);
+        }
 
         protected abstract MetricType getType();
         public B withName(String name) {
+            if (!MetricMetadata.isValidMetricName(name)) {
+                throw new IllegalArgumentException("'" + name + "': Illegal metric name.");
+            }
             this.name = name;
             return self();
         }
@@ -62,6 +68,11 @@ public abstract class Metric {
         // machine_role metric). See also
         // https://prometheus.io/docs/instrumenting/writing_exporters/#target-labels-not-static-scraped-labels
         public B withConstLabels(Labels constLabels) {
+            for (Label label : constLabels) {
+                if (illegalLabelNames.contains(label.getName())) {
+                    throw new IllegalArgumentException(label.getName() + ": illegal label name for this metric type");
+                }
+            }
             this.constLabels = constLabels;
             return self();
         }

@@ -27,5 +27,8 @@ public final class GaugeSnapshot extends MetricSnapshot {
         public double getValue() {
             return value;
         }
+
+        @Override
+        void validate() {}
     }
 }

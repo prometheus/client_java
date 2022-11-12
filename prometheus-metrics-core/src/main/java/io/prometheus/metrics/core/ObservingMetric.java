@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.model.Label;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.observer.Observer;
@@ -66,9 +67,19 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?,?>> extends Metric.Builder<B, M> {
         private String[] labelNames = new String[0];
 
-        protected Builder() {}
+        protected Builder(List<String> illegalLabelNames) {
+            super(illegalLabelNames);
+        }
 
         public B withLabelNames(String... labelNames) {
+            for (String labelName : labelNames) {
+                if (!Labels.isValidLabelName(labelName)) {
+                    throw new IllegalArgumentException(labelName + ": illegal label name");
+                }
+                if (illegalLabelNames.contains(labelName)) {
+                    throw new IllegalArgumentException(labelName + ": illegal label name for this metric type");
+                }
+            }
             this.labelNames = labelNames;
             return self();
         }

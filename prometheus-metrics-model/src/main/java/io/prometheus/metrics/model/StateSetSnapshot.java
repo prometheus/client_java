@@ -16,5 +16,8 @@ public final class StateSetSnapshot extends MetricSnapshot {
         protected StateSetData(Labels labels) {
             super(labels);
         }
+
+        @Override
+        void validate() {}
     }
 }

@@ -5,9 +5,12 @@ public abstract class MetricData {
 
     protected MetricData(Labels labels) {
         this.labels = labels;
+        validate();
     }
 
     public Labels getLabels() {
         return labels;
     }
+
+    abstract void validate();
 }

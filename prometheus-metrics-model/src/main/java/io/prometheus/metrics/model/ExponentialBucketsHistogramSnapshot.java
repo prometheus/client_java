@@ -63,7 +63,14 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
         public List<ExponentialBucket> getBucketsForNegativeValues() {
             return bucketsForNegativeValues;
         }
+
+        @Override
+        protected void validate() {
+            for (Label label : getLabels()) {
+                if (label.getName().equals("le")) {
+                    throw new IllegalArgumentException("le is a reserved label name for histograms");
+                }
+            }
+        }
     }
-
-
 }

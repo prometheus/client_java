@@ -140,6 +140,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         private CounterExemplarSampler exemplarSampler;
 
         private Builder() {
+            super(Collections.emptyList());
         }
 
         @Override
@@ -201,6 +202,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
             private DoubleSupplier callback;
 
             private Builder() {
+                super(Collections.emptyList());
             }
 
             @Override

@@ -14,5 +14,14 @@ public final class GaugeHistogramSnapshot extends MetricSnapshot {
             super(labels);
         }
         // TODO: Define data model, or re-use histogram model.
+
+        @Override
+        protected void validate() {
+            for (Label label : getLabels()) {
+                if (label.getName().equals("le")) {
+                    throw new IllegalArgumentException("le is a reserved label name for histograms");
+                }
+            }
+        }
     }
 }

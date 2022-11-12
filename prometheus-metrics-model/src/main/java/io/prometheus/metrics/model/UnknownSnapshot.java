@@ -13,5 +13,8 @@ public final class UnknownSnapshot extends MetricSnapshot {
         protected UnknownData(Labels labels) {
             super(labels);
         }
+
+        @Override
+        void validate() {}
     }
 }
