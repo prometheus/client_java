@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.exemplars.CounterExemplarSampler;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.exemplars.HistogramExemplarSampler;
 import io.prometheus.metrics.model.*;
@@ -19,8 +20,6 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
     private final Boolean exemplarsEnabled; // null means default from ExemplarConfig applies
     private final HistogramExemplarSampler exemplarSampler;
-    protected final DoubleAdder sum = new DoubleAdder();
-    protected final LongAdder count = new LongAdder();
     protected final long createdTimeMillis = System.currentTimeMillis();
 
     // Helper used in exponential histograms. Must be here because inner classes can't have static variables.
@@ -33,11 +32,23 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         this.exemplarsEnabled = builder.exemplarsEnabled;
     }
 
+    protected Exemplar sampleNextExemplar(double amt, double bucketFrom, double bucketTo, Exemplar prev) {
+        if (exemplarSampler != null) {
+            return exemplarSampler.sample(amt, bucketFrom, bucketTo, prev);
+        } else {
+            HistogramExemplarSampler exemplarSampler = ExemplarConfig.getHistogramExemplarSampler();
+            if (exemplarSampler != null) {
+                return exemplarSampler.sample(amt, bucketFrom, bucketTo, prev);
+            } else {
+                return null;
+            }
+        }
+    }
+
     abstract static class HistogramData implements DistributionObserver, MetricData<DistributionObserver> {}
 
     static class ExplicitBucketsHistogram extends Histogram {
         private final double[] upperBounds;
-        private final Buffer<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> buffer = new Buffer<>();
 
         private ExplicitBucketsHistogram(Histogram.Builder.ExplicitBucketsHistogramBuilder builder) {
             super(builder.getHistogramBuilder());
@@ -70,6 +81,9 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         class ExplicitBucketsHistogramData extends HistogramData {
             private final LongAdder[] buckets;
             private final AtomicReference<Exemplar>[] exemplars;
+            protected final DoubleAdder sum = new DoubleAdder();
+            protected final LongAdder count = new LongAdder();
+            private final Buffer<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> buffer = new Buffer<>();
 
             @SuppressWarnings("unchecked")
             private ExplicitBucketsHistogramData() {
@@ -93,19 +107,36 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 }
             }
 
-            private void doObserve(double amount, Labels labels) {
+            private void doObserve(double amount, Labels exemplarLabels) {
                 for (int i = 0; i < upperBounds.length; ++i) {
                     // The last bucket is +Inf, so we always increment.
                     if (amount <= upperBounds[i]) {
                         buckets[i].add(1);
                         if (isExemplarsEnabled()) {
-                            exemplars[i].set(new Exemplar(amount, labels, System.currentTimeMillis()));
+                            updateExemplar(i, amount, exemplarLabels);
                         }
                         break;
                     }
                 }
                 sum.add(amount);
                 count.increment(); // must be the last step, because count is used to signal that the operation is complete.
+            }
+
+            private void updateExemplar(int i, double value, Labels labels) {
+                if (labels != null) {
+                    exemplars[i].set(new Exemplar(value, labels, System.currentTimeMillis()));
+                } else {
+                    double bucketFrom = i == 0 ? Double.NEGATIVE_INFINITY : upperBounds[i - 1];
+                    double bucketTo = upperBounds[i];
+                    Exemplar prev, next;
+                    do {
+                        prev = exemplars[i].get();
+                        next = sampleNextExemplar(value, bucketFrom, bucketTo, prev);
+                        if (next == null || next == prev) {
+                            return;
+                        }
+                    } while (!exemplars[i].compareAndSet(prev, next));
+                }
             }
 
             public ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData snapshot(Labels labels) {

@@ -17,6 +17,7 @@ import org.junit.rules.ExpectedException;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.rules.ExpectedException.none;
 
@@ -225,11 +226,5 @@ public class CounterTest {
     counter.incWithExemplar(3.0, Labels.of("a", "b"));
     Assert.assertNull(getData(counter).getExemplar());
     counter.inc(2.0);
-  }
-
-  private void assertExemplarEquals(Exemplar expected, Exemplar actual) {
-    // ignore timestamp
-    Assert.assertEquals(expected.getValue(), actual.getValue(), 0.001);
-    Assert.assertEquals(expected.getLabels(), actual.getLabels());
   }
 }

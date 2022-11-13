@@ -1,18 +1,25 @@
 package io.prometheus.metrics.core;
 
 
+import io.prometheus.metrics.exemplars.CounterExemplarSampler;
+import io.prometheus.metrics.exemplars.HistogramExemplarSampler;
+import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.ExplicitBucket;
 import io.prometheus.metrics.model.ExplicitBucketsHistogramSnapshot;
+import io.prometheus.metrics.model.ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData;
 import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.observer.DistributionObserver;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class HistogramTest {
 
@@ -63,7 +70,7 @@ public class HistogramTest {
 
    */
 
-  private ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData getData(Histogram histogram, String... labels) {
+  private ExplicitBucketsHistogramData getData(Histogram histogram, String... labels) {
     return ((ExplicitBucketsHistogramSnapshot) histogram.collect()).getData().stream()
             .filter(d -> d.getLabels().equals(Labels.of(labels)))
             .findAny()
@@ -160,9 +167,41 @@ public class HistogramTest {
     Assert.assertEquals(Arrays.asList(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY), upperBounds);
   }
 
+  @Test
+  public void testLinearBuckets() {
+    Histogram histogram = Histogram.newBuilder()
+            .withName("test")
+            .withLinearBuckets(0.1, 0.1, 10)
+            .build();
+    List<Double> upperBounds = getData(histogram).getBuckets().stream()
+            .map(ExplicitBucket::getUpperBound)
+            .collect(Collectors.toList());
+    Assert.assertEquals(Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, Double.POSITIVE_INFINITY), upperBounds);
+  }
+
+  @Test
+  public void testExponentialBuckets() {
+    Histogram histogram = Histogram.newBuilder()
+            .withExponentialBuckets(2, 2.5, 3)
+            .withName("test")
+            .build();
+    List<Double> upperBounds = getData(histogram).getBuckets().stream()
+            .map(ExplicitBucket::getUpperBound)
+            .collect(Collectors.toList());
+    assertEquals(Arrays.asList(2.0, 5.0, 12.5, Double.POSITIVE_INFINITY), upperBounds);
+  }
+
   @Test(expected = RuntimeException.class)
   public void testBucketsIncludeNaN() {
     Histogram.newBuilder().withBuckets(0.01, 0.1, 1.0, Double.NaN);
+  }
+
+  @Test
+  public void testNoLabelsDefaultZeroValue() {
+    Histogram noLabels = Histogram.newBuilder().withName("test").withDefaultBuckets().build();
+    assertEquals(0.0, getBucket(noLabels, 0.005).getCumulativeCount(), 0.000001);
+    assertEquals(0, getData(noLabels).getCount());
+    assertEquals(0.0, getData(noLabels).getSum(), 0.000001);
   }
 
   @Test
@@ -211,47 +250,208 @@ public class HistogramTest {
     assertEquals(expectedBucketCounts, actualBucketCounts);
   }
 
-  /*
   @Test
   public void testBoundaryConditions() {
-    // Equal to a bucket.
-    noLabels.observe(2.5);
-    assertEquals(0.0, getBucket(1), .001);
-    assertEquals(1.0, getBucket(2.5), .001);
-    noLabels.labels().observe(Double.POSITIVE_INFINITY);
+    Histogram histogram = Histogram.newBuilder()
+            .withName("test")
+            .withDefaultBuckets()
+            .build();
+    histogram.observe(2.5);
+    assertEquals(0, getBucket(histogram, 1).getCumulativeCount());
+    assertEquals(1, getBucket(histogram, 2.5).getCumulativeCount());
 
-    // Infinity.
-    assertEquals(0.0, getBucket(1), .001);
-    assertEquals(1.0, getBucket(2.5), .001);
-    assertEquals(1.0, getBucket(5), .001);
-    assertEquals(1.0, getBucket(7.5), .001);
-    assertEquals(1.0, getBucket(10), .001);
-    assertEquals(2.0, getBucket(Double.POSITIVE_INFINITY), .001);
+    histogram.observe(Double.POSITIVE_INFINITY);
+    assertEquals(0, getBucket(histogram, 1).getCumulativeCount());
+    assertEquals(1, getBucket(histogram, 2.5).getCumulativeCount());
+    assertEquals(1, getBucket(histogram, 5).getCumulativeCount());
+    assertEquals(1, getBucket(histogram, 7.5).getCumulativeCount());
+    assertEquals(1, getBucket(histogram, 10).getCumulativeCount());
+    assertEquals(2, getBucket(histogram, Double.POSITIVE_INFINITY).getCumulativeCount());
   }
 
   @Test
-  public void testManualBuckets() {
-    Histogram h = Histogram.build().name("h").help("help").buckets(1, 2).create();
-    assertArrayEquals(new double[]{1, 2, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+  public void testObserveWithLabels() {
+    Histogram histogram = Histogram.newBuilder()
+            .withDefaultBuckets()
+            .withName("test")
+            .withConstLabels(Labels.of("env", "prod"))
+            .withLabelNames("path", "status")
+            .build();
+    histogram.withLabels("/hello", "200").observe(0.11);
+    histogram.withLabels("/hello", "200").observe(0.2);
+    histogram.withLabels("/hello", "500").observe(0.19);
+    ExplicitBucketsHistogramData data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
+    ExplicitBucketsHistogramData data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
+    assertEquals(2, data200.getCount());
+    assertEquals(0.31, data200.getSum(), 0.0000001);
+    assertEquals(1, data500.getCount());
+    assertEquals(0.19, data500.getSum(), 0.0000001);
+    histogram.withLabels("/hello", "200").observe(0.13);
+    data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
+    data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
+    assertEquals(3, data200.getCount());
+    assertEquals(0.44, data200.getSum(), 0.0000001);
+    assertEquals(1, data500.getCount());
+    assertEquals(0.19, data500.getSum(), 0.0000001);
   }
 
   @Test
-  public void testManualBucketsInfinityAlreadyIncluded() {
-    Histogram h = Histogram.build().buckets(1, 2, Double.POSITIVE_INFINITY).name("h").help("help").create();
-    assertArrayEquals(new double[]{1, 2, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+  public void testObserveMultithreaded() throws InterruptedException, ExecutionException, TimeoutException {
+    // Hard to test concurrency, but let's run a couple of observations in parallel and assert none gets lost.
+    Histogram histogram = Histogram.newBuilder()
+            .withDefaultBuckets()
+            .withName("test")
+            .withLabelNames("status")
+            .build();
+    int nThreads = 8;
+    DistributionObserver obs = histogram.withLabels("200");
+    ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+    CompletionService<List<ExplicitBucketsHistogramSnapshot>> completionService = new ExecutorCompletionService<>(executor);
+    CountDownLatch startSignal = new CountDownLatch(nThreads);
+    for (int t=0; t<nThreads; t++) {
+      completionService.submit(() -> {
+        List<ExplicitBucketsHistogramSnapshot> snapshots = new ArrayList<>();
+        startSignal.countDown();
+        startSignal.await();
+        for (int i=0; i<10; i++) {
+          for (int j=0; j<1000; j++) {
+            obs.observe(1.1);
+          }
+          snapshots.add((ExplicitBucketsHistogramSnapshot) histogram.collect());
+        }
+        return snapshots;
+      });
+    }
+    long maxCount = 0;
+    for(int i=0; i<nThreads; i++) {
+      Future<List<ExplicitBucketsHistogramSnapshot>> future = completionService.take();
+      List<ExplicitBucketsHistogramSnapshot> snapshots = future.get(5, TimeUnit.SECONDS);
+      long count = 0;
+      for (ExplicitBucketsHistogramSnapshot snapshot : snapshots) {
+        Assert.assertEquals(1, snapshot.getData().size());
+        ExplicitBucketsHistogramData data = snapshot.getData().stream().findFirst().orElseThrow(RuntimeException::new);
+        Assert.assertTrue(data.getCount() >= (count + 1000)); // 1000 own observations plus the ones from other threads
+        count = data.getCount();
+      }
+      if (count > maxCount) {
+        maxCount = count;
+      }
+    }
+    Assert.assertEquals(nThreads * 10_000, maxCount); // the last collect() has seen all observations
+    Assert.assertEquals(getBucket(histogram, 2.5, "status", "200").getCumulativeCount(), nThreads * 10_000);
+    executor.shutdown();
+    Assert.assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
   }
 
   @Test
-  public void testLinearBuckets() {
-    Histogram h = Histogram.build().name("h").help("help").linearBuckets(1, 2, 3).create();
-    assertArrayEquals(new double[]{1, 3, 5, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+  public void testExemplarSampler() {
+    final Exemplar exemplar1 = new Exemplar(1.1, Labels.of("trace_id", "abc", "span_id", "123"), System.currentTimeMillis());
+    final Exemplar exemplar2 = new Exemplar(2.1, Labels.of("trace_id", "def", "span_id", "456"), System.currentTimeMillis());
+    final Exemplar exemplar3 = new Exemplar(2.2, Labels.of("trace_id", "123", "span_id", "abc"), System.currentTimeMillis());
+    final AtomicReference<Integer> callNumber = new AtomicReference<>(0);
+
+    // 1.1, 2.1, 1.3, 2.2
+
+    HistogramExemplarSampler exemplarSampler = (val, from, to, prev) -> {
+      switch (callNumber.get()) {
+        case 0:
+          Assert.assertEquals(1.1, val, 0.00001);
+          Assert.assertEquals(1.0, from, 0.00001);
+          Assert.assertEquals(2.0, to, 0.00001);
+          assertNull(prev);
+          return exemplar1;
+        case 1:
+          Assert.assertEquals(2.1, val,  0.00001);
+          Assert.assertEquals(2.0, from, 0.00001);
+          Assert.assertEquals(3.0, to, 0.00001);
+          assertNull(prev);
+          return exemplar2;
+        case 2:
+          Assert.assertEquals(1.3, val, 0.00001);
+          Assert.assertEquals(1.0, from, 0.00001);
+          Assert.assertEquals(2.0, to, 0.00001);
+          Assert.assertEquals(exemplar1, prev);
+          return null;
+        case 3:
+          Assert.assertEquals(2.2, val, 0.00001);
+          Assert.assertEquals(2.0, from, 0.00001);
+          Assert.assertEquals(3.0, to, 0.00001);
+          Assert.assertEquals(exemplar2, prev);
+          return exemplar3;
+        default:
+          throw new RuntimeException("Unexpected 5th call");
+      }
+    };
+    Histogram histogram = Histogram.newBuilder()
+            .withName("test")
+            .withBuckets(1.0, 2.0, 3.0)
+            .withExemplarSampler(exemplarSampler)
+            .build();
+
+    assertNull(getBucket(histogram, 2.0).getExemplar());
+    assertNull(getBucket(histogram, 3.0).getExemplar());
+    histogram.observe(1.1);
+    callNumber.set(callNumber.get() + 1);
+    assertExemplarEquals(exemplar1, getBucket(histogram, 2.0).getExemplar());
+    assertNull(getBucket(histogram, 3.0).getExemplar());
+    histogram.observe(2.1);
+    callNumber.set(callNumber.get() + 1);
+    assertExemplarEquals(exemplar1, getBucket(histogram, 2.0).getExemplar());
+    assertExemplarEquals(exemplar2, getBucket(histogram, 3.0).getExemplar());
+    histogram.observe(1.3);
+    callNumber.set(callNumber.get() + 1);
+    assertExemplarEquals(exemplar1, getBucket(histogram, 2.0).getExemplar());
+    assertExemplarEquals(exemplar2, getBucket(histogram, 3.0).getExemplar());
+    histogram.observe(2.2);
+    callNumber.set(callNumber.get() + 1);
+    assertExemplarEquals(exemplar1, getBucket(histogram, 2.0).getExemplar());
+    assertExemplarEquals(exemplar3, getBucket(histogram, 3.0).getExemplar());
+    histogram.observeWithExemplar(1.4, Labels.of("key1", "value1", "key2", "value2"));
+    assertExemplarEquals(new Exemplar(1.4, Labels.of("key1", "value1", "key2", "value2"), System.currentTimeMillis()), getBucket(histogram, 2.0).getExemplar());
+    assertExemplarEquals(exemplar3, getBucket(histogram, 3.0).getExemplar());
   }
 
+  /*
   @Test
-  public void testExponentialBuckets() {
-    Histogram h = Histogram.build().name("h").help("help").exponentialBuckets(2, 2.5, 3).create();
-    assertArrayEquals(new double[]{2, 5, 12.5, Double.POSITIVE_INFINITY}, h.getBuckets(), .001);
+  public void testObserveWithExemplar() {
+    Histogram histogram = Histogram.newBuilder()
+            .withName("test")
+            .withExemplars()
+            .withDefaultBuckets()
+            .build();
+    Map<String, String> labels = new HashMap<String, String>();
+    labels.put("mapKey1", "mapValue1");
+    labels.put("mapKey2", "mapValue2");
+
+    histogram.observeWithExemplar(0.5, Labels.of("key", "value"));
+    assertExemplar(noLabels, 0.5, "key", "value");
+
+    noLabels.observeWithExemplar(0.5);
+    assertExemplar(noLabels, 0.5);
+
+    noLabels.observeWithExemplar(0.5, labels);
+    assertExemplar(noLabels, 0.5, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+
+    // default buckets are {.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10}
+    noLabels.observeWithExemplar(2.0, "key1", "value1", "key2", "value2");
+    assertExemplar(noLabels, 2.0, "key1", "value1", "key2", "value2");
+    assertExemplar(noLabels, 0.5, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+
+    noLabels.observeWithExemplar(0.4, new HashMap<String, String>()); // same bucket as 0.5
+    assertNoExemplar(noLabels, 0.5);
+    assertExemplar(noLabels, 0.4);
+    assertExemplar(noLabels, 2.0, "key1", "value1", "key2", "value2");
+
+    noLabels.observeWithExemplar(2.0, (String[]) null); // should not alter the exemplar
+    assertExemplar(noLabels, 2.0, "key1", "value1", "key2", "value2");
+
+    noLabels.observeWithExemplar(2.0, (Map<String, String>) null); // should not alter the exemplar
+    assertExemplar(noLabels, 2.0, "key1", "value1", "key2", "value2");
   }
+   */
+
+  /*
+
 
   @Test
   public void testTimer() {
