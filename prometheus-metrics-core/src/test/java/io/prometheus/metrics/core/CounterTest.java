@@ -1,21 +1,22 @@
 package io.prometheus.metrics.core;
 
 import com.google.protobuf.TextFormat;
+import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 import io.prometheus.expositionformat.protobuf.Protobuf;
 import io.prometheus.expositionformat.protobuf.generated.Metrics;
-import io.prometheus.metrics.exemplars.CounterExemplarSampler;
+import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricType;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
@@ -25,9 +26,17 @@ public class CounterTest {
 
   Counter noLabels;
   Counter labels;
+  private static final long exemplarSampleIntervalMillis = 10;
+  private static final long exemplarMinAgeMillis = 100;
 
   @Rule
   public final ExpectedException thrown = none();
+
+  @BeforeClass
+  public static void beforeClass() {
+    ExemplarConfig.setDefaultSampleIntervalMillis(exemplarSampleIntervalMillis);
+    ExemplarConfig.setDefaultMinAgeMillis(exemplarMinAgeMillis);
+  }
 
   @Before
   public void setUp() {
@@ -142,12 +151,16 @@ public class CounterTest {
   }
 
   @Test
-  public void testIncWithExemplar() {
+  public void testIncWithExemplar() throws Exception {
     noLabels.incWithExemplar(Labels.of("key", "value"));
     assertExemplar(noLabels, 1.0, "key", "value");
 
+    Thread.sleep(exemplarMinAgeMillis + 2 * exemplarSampleIntervalMillis);
+
     noLabels.incWithExemplar(Labels.EMPTY);
     assertExemplar(noLabels, 1.0);
+
+    Thread.sleep(exemplarMinAgeMillis + 2 * exemplarSampleIntervalMillis);
 
     noLabels.incWithExemplar(3, Labels.of("key1", "value1", "key2", "value2"));
     assertExemplar(noLabels, 3, "key1", "value1", "key2", "value2");
@@ -156,70 +169,113 @@ public class CounterTest {
   private void assertExemplar(Counter counter, double value, String... labels) {
     Exemplar exemplar = getData(counter).getExemplar();
     Assert.assertEquals(value, exemplar.getValue(), 0.0001);
-    Assert.assertEquals(Labels.of(labels), exemplar.getLabels());
+    assertEquals(Labels.of(labels), exemplar.getLabels());
   }
 
   @Test
-  public void testExemplarSampler() {
-    final Exemplar exemplar1 = new Exemplar(2.0, Labels.of("trace_id", "abc", "span_id", "123"), System.currentTimeMillis());
-    final Exemplar exemplar2 = new Exemplar(1.0, Labels.of("trace_id", "def", "span_id", "456"), System.currentTimeMillis());
-    final Exemplar exemplar3 = new Exemplar(1.0, Labels.of("trace_id", "123", "span_id", "abc"), System.currentTimeMillis());
-    final AtomicReference<Exemplar> previous = new AtomicReference<>();
-    final AtomicReference<Integer> callNumber = new AtomicReference<>(0);
-    CounterExemplarSampler exemplarSampler = (increment, prev) -> {
-      assertEquals(previous.get(), prev);
-      switch (callNumber.get()) {
-        case 0:
-          return exemplar1;
-        case 1:
-          return null;
-        case 2:
-          return exemplar1;
-        case 3:
-          return exemplar2;
-        case 4:
-          return exemplar3;
-        default:
-          throw new RuntimeException("Unexpected 6th call");
+  public void testExemplarSampler() throws Exception {
+    final Exemplar exemplar1 = Exemplar.newBuilder()
+            .withValue(2.0)
+            .withTraceId("abc")
+            .withSpanId("123")
+            .build();
+    final Exemplar exemplar2 = Exemplar.newBuilder()
+            .withValue(1.0)
+            .withTraceId("def")
+            .withSpanId("456")
+            .build();
+    final Exemplar exemplar3 = Exemplar.newBuilder()
+            .withValue(1.0)
+            .withTraceId("123")
+            .withSpanId("abc")
+            .build();
+    final Exemplar customExemplar = Exemplar.newBuilder()
+            .withValue(1.0)
+            .withTraceId("bab")
+            .withSpanId("cdc")
+            .withLabels(Labels.of("test", "test"))
+            .build();
+    SpanContextSupplier scs = new SpanContextSupplier() {
+      private int callNumber = 0;
+      @Override
+      public String getTraceId() {
+        switch (callNumber) {
+          case 1:
+            return "abc";
+          case 3:
+            return "def";
+          case 4:
+            return "123";
+          case 5:
+            return "bab";
+          default:
+            throw new RuntimeException("unexpected call");
+        }
+      }
+
+      @Override
+      public String getSpanId() {
+        switch (callNumber) {
+          case 1:
+            return "123";
+          case 3:
+            return "456";
+          case 4:
+            return "abc";
+          case 5:
+            return "cdc";
+          default:
+            throw new RuntimeException("unexpected call");
+        }
+      }
+
+      @Override
+      public boolean isSampled() {
+        callNumber++;
+        if (callNumber == 2) {
+          return false;
+        }
+        return true;
       }
     };
     Counter counter = Counter.newBuilder()
-            .withExemplarSampler(exemplarSampler)
+            .withExemplarConfig(ExemplarConfig.newBuilder().withSpanContextSupplier(scs).build())
             .withName("count_total")
             .build();
 
     counter.inc(2.0);
     assertExemplarEquals(exemplar1, getData(counter).getExemplar());
-    previous.set(exemplar1);
-    callNumber.set(callNumber.get() + 1);
 
-    counter.inc(3.0); // exemplar sampler returns null -> keep the same exemplar
+    Thread.sleep(2 * exemplarSampleIntervalMillis);
+
+    counter.inc(3.0); // min age not reached -> keep the previous exemplar, exemplar sampler not called
     assertExemplarEquals(exemplar1, getData(counter).getExemplar());
-    callNumber.set(callNumber.get() + 1);
 
-    counter.inc(2.0); // exemplar sampler returns exemplar1 -> keep it
+    Thread.sleep(exemplarMinAgeMillis + 2 * exemplarSampleIntervalMillis);
+
+    counter.inc(2.0); // 2nd call: isSampled() returns false -> not sampled
     assertExemplarEquals(exemplar1, getData(counter).getExemplar());
-    callNumber.set(callNumber.get() + 1);
 
-    counter.inc(1.0);
+    Thread.sleep(2 * exemplarSampleIntervalMillis);
+
+    counter.inc(1.0); // sampled
     assertExemplarEquals(exemplar2, getData(counter).getExemplar());
-    previous.set(exemplar2);
-    callNumber.set(callNumber.get() + 1);
 
-    counter.inc(1.0);
+    Thread.sleep(exemplarMinAgeMillis + 2 * exemplarSampleIntervalMillis);
+
+    counter.inc(1.0); // sampled
     assertExemplarEquals(exemplar3, getData(counter).getExemplar());
-    previous.set(exemplar3);
-    callNumber.set(callNumber.get() + 1);
 
-    counter.incWithExemplar(Labels.of("test", "test"));
-    // exemplarSampler not called, otherwise it would throw an exception
-    assertExemplarEquals(new Exemplar(1.0, Labels.of("test", "test"), System.currentTimeMillis()), getData(counter).getExemplar());
+    Thread.sleep(2 * exemplarSampleIntervalMillis);
+
+    counter.incWithExemplar(Labels.of("test", "test")); // custom exemplar sampled even though the automatic exemplar hasn't reached min age yet
+    assertExemplarEquals(customExemplar, getData(counter).getExemplar());
   }
 
   @Test
   public void testExemplarSamplerDisabled() {
     Counter counter = Counter.newBuilder()
-            .withExemplarSampler((inc, prev) -> {throw new RuntimeException("unexpected call to exemplar sampler");})
+            //.withExemplarSampler((inc, prev) -> {throw new RuntimeException("unexpected call to exemplar sampler");})
             .withName("count_total")
             .withoutExemplars()
             .build();

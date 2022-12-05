@@ -1,8 +1,8 @@
 package io.prometheus.metrics.core;
 
 
-import io.prometheus.metrics.exemplars.CounterExemplarSampler;
-import io.prometheus.metrics.exemplars.HistogramExemplarSampler;
+import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
+import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.ExplicitBucket;
 import io.prometheus.metrics.model.ExplicitBucketsHistogramSnapshot;
@@ -12,16 +12,26 @@ import io.prometheus.metrics.observer.DistributionObserver;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class HistogramTest {
+public class ExplicitBucketsHistogramTest {
 
   /*
   CollectorRegistry registry;
@@ -344,71 +354,141 @@ public class HistogramTest {
   }
 
   @Test
-  public void testExemplarSampler() {
-    final Exemplar exemplar1 = new Exemplar(1.1, Labels.of("trace_id", "abc", "span_id", "123"), System.currentTimeMillis());
-    final Exemplar exemplar2 = new Exemplar(2.1, Labels.of("trace_id", "def", "span_id", "456"), System.currentTimeMillis());
-    final Exemplar exemplar3 = new Exemplar(2.2, Labels.of("trace_id", "123", "span_id", "abc"), System.currentTimeMillis());
-    final AtomicReference<Integer> callNumber = new AtomicReference<>(0);
+  public void testExemplarSampler() throws Exception {
+    SpanContextSupplier spanContextSupplier = new SpanContextSupplier() {
+      int callCount = 0;
+      @Override
+      public String getTraceId() {
+        return "traceId-" + callCount;
+      }
 
-    // 1.1, 2.1, 1.3, 2.2
+      @Override
+      public String getSpanId() {
+        return "spanId-" + callCount;
+      }
 
-    HistogramExemplarSampler exemplarSampler = (val, from, to, prev) -> {
-      switch (callNumber.get()) {
-        case 0:
-          Assert.assertEquals(1.1, val, 0.00001);
-          Assert.assertEquals(1.0, from, 0.00001);
-          Assert.assertEquals(2.0, to, 0.00001);
-          assertNull(prev);
-          return exemplar1;
-        case 1:
-          Assert.assertEquals(2.1, val,  0.00001);
-          Assert.assertEquals(2.0, from, 0.00001);
-          Assert.assertEquals(3.0, to, 0.00001);
-          assertNull(prev);
-          return exemplar2;
-        case 2:
-          Assert.assertEquals(1.3, val, 0.00001);
-          Assert.assertEquals(1.0, from, 0.00001);
-          Assert.assertEquals(2.0, to, 0.00001);
-          Assert.assertEquals(exemplar1, prev);
-          return null;
-        case 3:
-          Assert.assertEquals(2.2, val, 0.00001);
-          Assert.assertEquals(2.0, from, 0.00001);
-          Assert.assertEquals(3.0, to, 0.00001);
-          Assert.assertEquals(exemplar2, prev);
-          return exemplar3;
-        default:
-          throw new RuntimeException("Unexpected 5th call");
+      @Override
+      public boolean isSampled() {
+        callCount++;
+        return true;
       }
     };
+    long sampleIntervalMillis = 10;
     Histogram histogram = Histogram.newBuilder()
             .withName("test")
-            .withBuckets(1.0, 2.0, 3.0)
-            .withExemplarSampler(exemplarSampler)
+            // The default number of Exemplars for an exponential histogram is 4.
+            // Use 5 buckets to verify that the exemplar sample is configured with the buckets.
+            .withBuckets(1.0, 2.0, 3.0, 4.0, Double.POSITIVE_INFINITY)
+            .withExemplarConfig(ExemplarConfig.newBuilder()
+                    .withSpanContextSupplier(spanContextSupplier)
+                    .withSampleIntervalMillis(sampleIntervalMillis)
+                    .build())
+            .withLabelNames("path")
             .build();
 
-    assertNull(getBucket(histogram, 2.0).getExemplar());
-    assertNull(getBucket(histogram, 3.0).getExemplar());
-    histogram.observe(1.1);
-    callNumber.set(callNumber.get() + 1);
-    assertExemplarEquals(exemplar1, getBucket(histogram, 2.0).getExemplar());
-    assertNull(getBucket(histogram, 3.0).getExemplar());
-    histogram.observe(2.1);
-    callNumber.set(callNumber.get() + 1);
-    assertExemplarEquals(exemplar1, getBucket(histogram, 2.0).getExemplar());
-    assertExemplarEquals(exemplar2, getBucket(histogram, 3.0).getExemplar());
-    histogram.observe(1.3);
-    callNumber.set(callNumber.get() + 1);
-    assertExemplarEquals(exemplar1, getBucket(histogram, 2.0).getExemplar());
-    assertExemplarEquals(exemplar2, getBucket(histogram, 3.0).getExemplar());
-    histogram.observe(2.2);
-    callNumber.set(callNumber.get() + 1);
-    assertExemplarEquals(exemplar1, getBucket(histogram, 2.0).getExemplar());
-    assertExemplarEquals(exemplar3, getBucket(histogram, 3.0).getExemplar());
-    histogram.observeWithExemplar(1.4, Labels.of("key1", "value1", "key2", "value2"));
-    assertExemplarEquals(new Exemplar(1.4, Labels.of("key1", "value1", "key2", "value2"), System.currentTimeMillis()), getBucket(histogram, 2.0).getExemplar());
-    assertExemplarEquals(exemplar3, getBucket(histogram, 3.0).getExemplar());
+    Exemplar ex1a = Exemplar.newBuilder()
+                    .withValue(0.5)
+                            .withSpanId("spanId-1")
+            .withTraceId("traceId-1")
+                    .build();
+    Exemplar ex1b = Exemplar.newBuilder()
+            .withValue(0.5)
+            .withSpanId("spanId-2")
+            .withTraceId("traceId-2")
+            .build();
+    Exemplar ex2a = Exemplar.newBuilder()
+            .withValue(4.5)
+            .withSpanId("spanId-3")
+            .withTraceId("traceId-3")
+            .build();
+    Exemplar ex2b = Exemplar.newBuilder()
+            .withValue(4.5)
+            .withSpanId("spanId-4")
+            .withTraceId("traceId-4")
+            .build();
+    Exemplar ex3a = Exemplar.newBuilder()
+            .withValue(1.5)
+            .withSpanId("spanId-5")
+            .withTraceId("traceId-5")
+            .build();
+    Exemplar ex3b = Exemplar.newBuilder()
+            .withValue(1.5)
+            .withSpanId("spanId-6")
+            .withTraceId("traceId-6")
+            .build();
+    Exemplar ex4a = Exemplar.newBuilder()
+            .withValue(2.5)
+            .withSpanId("spanId-7")
+            .withTraceId("traceId-7")
+            .build();
+    Exemplar ex4b = Exemplar.newBuilder()
+            .withValue(2.5)
+            .withSpanId("spanId-8")
+            .withTraceId("traceId-8")
+            .build();
+    Exemplar ex5a = Exemplar.newBuilder()
+            .withValue(3.5)
+            .withSpanId("spanId-9")
+            .withTraceId("traceId-9")
+            .build();
+    Exemplar ex5b = Exemplar.newBuilder()
+            .withValue(3.5)
+            .withSpanId("spanId-10")
+            .withTraceId("traceId-10")
+            .build();
+    histogram.withLabels("/hello").observe(0.5);
+    histogram.withLabels("/world").observe(0.5); // different labels are tracked independently, i.e. we don't need to wait for sampleIntervalMillis
+    assertExemplarEquals(ex1a, getBucket(histogram, 1.0, "path", "/hello").getExemplar());
+    assertExemplarEquals(ex1b, getBucket(histogram, 1.0, "path", "/world").getExemplar());
+    assertNull(getBucket(histogram, 2.0, "path", "/hello").getExemplar());
+    assertNull(getBucket(histogram, 2.0, "path", "/world").getExemplar());
+    assertNull(getBucket(histogram, 3.0, "path", "/hello").getExemplar());
+    assertNull(getBucket(histogram, 3.0, "path", "/world").getExemplar());
+    assertNull(getBucket(histogram, 4.0, "path", "/hello").getExemplar());
+    assertNull(getBucket(histogram, 4.0, "path", "/world").getExemplar());
+    assertNull(getBucket(histogram, Double.POSITIVE_INFINITY, "path", "/hello").getExemplar());
+    assertNull(getBucket(histogram, Double.POSITIVE_INFINITY, "path", "/world").getExemplar());
+    Thread.sleep(sampleIntervalMillis + 1);
+    histogram.withLabels("/hello").observe(4.5);
+    histogram.withLabels("/world").observe(4.5);
+    assertExemplarEquals(ex1a, getBucket(histogram, 1.0, "path", "/hello").getExemplar());
+    assertExemplarEquals(ex1b, getBucket(histogram, 1.0, "path", "/world").getExemplar());
+    assertNull(getBucket(histogram, 2.0, "path", "/hello").getExemplar());
+    assertNull(getBucket(histogram, 2.0, "path", "/world").getExemplar());
+    assertNull(getBucket(histogram, 3.0, "path", "/hello").getExemplar());
+    assertNull(getBucket(histogram, 3.0, "path", "/world").getExemplar());
+    assertNull(getBucket(histogram, 4.0, "path", "/hello").getExemplar());
+    assertNull(getBucket(histogram, 4.0, "path", "/world").getExemplar());
+    assertExemplarEquals(ex2a, getBucket(histogram, Double.POSITIVE_INFINITY, "path", "/hello").getExemplar());
+    assertExemplarEquals(ex2b, getBucket(histogram, Double.POSITIVE_INFINITY, "path", "/world").getExemplar());
+    Thread.sleep(sampleIntervalMillis + 1);
+    histogram.withLabels("/hello").observe(1.5);
+    histogram.withLabels("/world").observe(1.5);
+    Thread.sleep(sampleIntervalMillis + 1);
+    histogram.withLabels("/hello").observe(2.5);
+    histogram.withLabels("/world").observe(2.5);
+    Thread.sleep(sampleIntervalMillis + 1);
+    histogram.withLabels("/hello").observe(3.5);
+    histogram.withLabels("/world").observe(3.5);
+    assertExemplarEquals(ex1a, getBucket(histogram, 1.0, "path", "/hello").getExemplar());
+    assertExemplarEquals(ex1b, getBucket(histogram, 1.0, "path", "/world").getExemplar());
+    assertExemplarEquals(ex3a, getBucket(histogram, 2.0, "path", "/hello").getExemplar());
+    assertExemplarEquals(ex3b, getBucket(histogram, 2.0, "path", "/world").getExemplar());
+    assertExemplarEquals(ex4a, getBucket(histogram, 3.0, "path", "/hello").getExemplar());
+    assertExemplarEquals(ex4b, getBucket(histogram, 3.0, "path", "/world").getExemplar());
+    assertExemplarEquals(ex5a, getBucket(histogram, 4.0, "path", "/hello").getExemplar());
+    assertExemplarEquals(ex5b, getBucket(histogram, 4.0, "path", "/world").getExemplar());
+    assertExemplarEquals(ex2a, getBucket(histogram, Double.POSITIVE_INFINITY, "path", "/hello").getExemplar());
+    assertExemplarEquals(ex2b, getBucket(histogram, Double.POSITIVE_INFINITY, "path", "/world").getExemplar());
+
+    Exemplar custom = Exemplar.newBuilder()
+            .withValue(3.4)
+            .withLabels(Labels.of("key2", "value2", "key1", "value1", "trace_id", "traceId-11", "span_id", "spanId-11"))
+            .build();
+    Thread.sleep(sampleIntervalMillis + 1);
+    histogram.withLabels("/hello").observeWithExemplar(3.4, Labels.of("key1", "value1", "key2", "value2"));
+    // custom exemplars have preference, so the automatic exemplar is replaced
+    assertExemplarEquals(custom, getBucket(histogram, 4.0, "path", "/hello").getExemplar());
   }
 
   /*

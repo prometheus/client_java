@@ -69,16 +69,17 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         @Override
         public void observe(double amount) {
             if (!buffer.append(amount)) {
-                doObserve(amount, null);
+                doObserve(amount);
             }
         }
 
         @Override
         public void observeWithExemplar(double amount, Labels labels) {
+            // TODO: Exemplars for summaries not implemented yet
             observe(amount);
         }
 
-        private void doObserve(double amount, Labels exemplarLabels) {
+        private void doObserve(double amount) {
             sum.add(amount);
             if (quantileValues != null) {
                 quantileValues.insert(amount);

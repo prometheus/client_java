@@ -1,15 +1,25 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.exemplars.CounterExemplarSampler;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
-import io.prometheus.metrics.exemplars.HistogramExemplarSampler;
-import io.prometheus.metrics.model.*;
+import io.prometheus.metrics.exemplars.ExemplarSampler;
+import io.prometheus.metrics.model.ExplicitBucket;
+import io.prometheus.metrics.model.ExplicitBucketsHistogramSnapshot;
+import io.prometheus.metrics.model.ExponentialBucket;
+import io.prometheus.metrics.model.ExponentialBucketsHistogramSnapshot;
+import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.observer.DistributionObserver;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -19,7 +29,7 @@ import static java.lang.Boolean.TRUE;
 public abstract class Histogram extends ObservingMetric<DistributionObserver, Histogram.HistogramData> implements DistributionObserver {
 
     private final Boolean exemplarsEnabled; // null means default from ExemplarConfig applies
-    private final HistogramExemplarSampler exemplarSampler;
+    protected final ExemplarConfig exemplarConfig; // null means default from ExemplarConfig applies
     protected final long createdTimeMillis = System.currentTimeMillis();
 
     // Helper used in exponential histograms. Must be here because inner classes can't have static variables.
@@ -28,21 +38,8 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
     protected Histogram(Builder builder) {
         super(builder);
-        this.exemplarSampler = builder.exemplarSampler;
         this.exemplarsEnabled = builder.exemplarsEnabled;
-    }
-
-    protected Exemplar sampleNextExemplar(double amt, double bucketFrom, double bucketTo, Exemplar prev) {
-        if (exemplarSampler != null) {
-            return exemplarSampler.sample(amt, bucketFrom, bucketTo, prev);
-        } else {
-            HistogramExemplarSampler exemplarSampler = ExemplarConfig.getHistogramExemplarSampler();
-            if (exemplarSampler != null) {
-                return exemplarSampler.sample(amt, bucketFrom, bucketTo, prev);
-            } else {
-                return null;
-            }
-        }
+        this.exemplarConfig = builder.exemplarConfig;
     }
 
     abstract static class HistogramData implements DistributionObserver, MetricData<DistributionObserver> {}
@@ -53,7 +50,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         private ExplicitBucketsHistogram(Histogram.Builder.ExplicitBucketsHistogramBuilder builder) {
             super(builder.getHistogramBuilder());
             SortedSet<Double> upperBounds = new TreeSet<>();
-            for (double upperBound : builder.upperBounds) {
+            for (double upperBound : builder.upperBounds) { // TODO: can upperBounds be null? Copy normalize code from ExemplarSampler?
                 upperBounds.add(upperBound);
             }
             upperBounds.add(Double.POSITIVE_INFINITY);
@@ -80,41 +77,76 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
         class ExplicitBucketsHistogramData extends HistogramData {
             private final LongAdder[] buckets;
-            private final AtomicReference<Exemplar>[] exemplars;
+            private volatile ExemplarSampler exemplarSampler;
             protected final DoubleAdder sum = new DoubleAdder();
             protected final LongAdder count = new LongAdder();
             private final Buffer<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> buffer = new Buffer<>();
 
-            @SuppressWarnings("unchecked")
             private ExplicitBucketsHistogramData() {
-                exemplars = new AtomicReference[upperBounds.length];
                 buckets = new LongAdder[upperBounds.length];
                 for (int i = 0; i < upperBounds.length; i++) {
-                    exemplars[i] = new AtomicReference<>();
                     buckets[i] = new LongAdder();
                 }
             }
 
             @Override
             public void observe(double amount) {
-                observeWithExemplar(amount, null);
+                if (!buffer.append(amount)) {
+                    doObserve(amount);
+                }
+                if (isExemplarsEnabled() && hasSpanContextSupplier()) {
+                    lazyInitExemplarSampler();
+                    exemplarSampler.observe(amount);
+                }
+            }
+
+            private boolean hasSpanContextSupplier() {
+                return exemplarConfig != null ? exemplarConfig.hasSpanContextSupplier() : ExemplarConfig.hasDefaultSpanContextSupplier();
+            }
+
+            // Some metrics might be statically initialized (static final Histogram myHistogram = ...).
+            // However, some tracers (like Micrometer) may not be available at static initialization time.
+            // Therefore, exemplarSampler must be lazily configured so that it will still be initialized if
+            // a tracer is added later at runtime.
+            // However, if no tracing is used or exemplars are disabled, this code should have almost zero overhead.
+            // TODO: This is partly copy-and-past
+            private void lazyInitExemplarSampler() {
+                    if (exemplarSampler == null) {
+                        synchronized (this) {
+                            if (exemplarSampler == null) {
+                                ExemplarConfig config = exemplarConfig;
+                                if (config == null) {
+                                    config = ExemplarConfig.newBuilder()
+                                            .withBuckets(upperBounds)
+                                            .build();
+                                } else {
+                                    ExemplarConfig.Builder builder = config.toBuilder();
+                                    if (!builder.hasBuckets() && !builder.hasNumberOfExemplars()) {
+                                        config = builder.withBuckets(upperBounds).build();
+                                    }
+                                }
+                                exemplarSampler = ExemplarSampler.newInstance(config);
+                            }
+                        }
+                    }
             }
 
             @Override
             public void observeWithExemplar(double amount, Labels labels) {
-                if (!buffer.append(amount, labels)) {
-                    doObserve(amount, labels);
+                if (!buffer.append(amount)) {
+                    doObserve(amount);
+                }
+                if (isExemplarsEnabled()) {
+                    lazyInitExemplarSampler();
+                    exemplarSampler.observeWithExemplar(amount, labels);
                 }
             }
 
-            private void doObserve(double amount, Labels exemplarLabels) {
+            private void doObserve(double amount) {
                 for (int i = 0; i < upperBounds.length; ++i) {
                     // The last bucket is +Inf, so we always increment.
                     if (amount <= upperBounds[i]) {
                         buckets[i].add(1);
-                        if (isExemplarsEnabled()) {
-                            updateExemplar(i, amount, exemplarLabels);
-                        }
                         break;
                     }
                 }
@@ -122,24 +154,9 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 count.increment(); // must be the last step, because count is used to signal that the operation is complete.
             }
 
-            private void updateExemplar(int i, double value, Labels labels) {
-                if (labels != null) {
-                    exemplars[i].set(new Exemplar(value, labels, System.currentTimeMillis()));
-                } else {
-                    double bucketFrom = i == 0 ? Double.NEGATIVE_INFINITY : upperBounds[i - 1];
-                    double bucketTo = upperBounds[i];
-                    Exemplar prev, next;
-                    do {
-                        prev = exemplars[i].get();
-                        next = sampleNextExemplar(value, bucketFrom, bucketTo, prev);
-                        if (next == null || next == prev) {
-                            return;
-                        }
-                    } while (!exemplars[i].compareAndSet(prev, next));
-                }
-            }
-
+            // TODO rename to collect()
             public ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData snapshot(Labels labels) {
+                Collection<io.prometheus.metrics.model.Exemplar> exemplars = exemplarSampler != null ? exemplarSampler.collect() : Collections.emptyList();
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
                         () -> {
@@ -147,7 +164,14 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                             long cumulativeCount = 0;
                             for (int i=0; i<upperBounds.length; i++) {
                                 cumulativeCount += buckets[i].sum();
-                                snapshotBuckets[i] = new ExplicitBucket(cumulativeCount, upperBounds[i], exemplars[i].get());
+                                io.prometheus.metrics.model.Exemplar exemplar = null;
+                                for (io.prometheus.metrics.model.Exemplar candidate : exemplars) {
+                                    if (candidate.getValue() <= upperBounds[i] && (i==0 || candidate.getValue() > upperBounds[i-1])) {
+                                        exemplar = candidate;
+                                        break;
+                                    }
+                                }
+                                snapshotBuckets[i] = new ExplicitBucket(cumulativeCount, upperBounds[i], exemplar);
                             }
                             return new ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData(count.longValue(), sum.sum(), snapshotBuckets, labels, createdTimeMillis);
                         },
@@ -222,6 +246,9 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             private final LongAdder zeroCount = new LongAdder();
             private final long createdTimeMillis = System.currentTimeMillis();
 
+            private ExponentialBucketsHistogramData() {
+            }
+
             @Override
             public void observe(double amount) {
                 observeWithExemplar(amount, null);
@@ -230,11 +257,11 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             @Override
             public void observeWithExemplar(double amount, Labels labels) {
                 if (!buffer.append(amount)) {
-                    doObserve(amount, null);
+                    doObserve(amount);
                 }
             }
 
-            private void doObserve(double value, Labels labels) {
+            private void doObserve(double value) {
                 // todo: examplars
                 if (!Double.isNaN(value) && !Double.isInfinite(value)) {
                     if (value > zeroThreshold) {
@@ -382,7 +409,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         if (exemplarsEnabled != null) {
             return exemplarsEnabled;
         } else {
-            return ExemplarConfig.isExemplarsEnabled();
+            return ExemplarConfig.isEnabled();
         }
     }
 
@@ -392,7 +419,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
     public static class Builder extends ObservingMetric.Builder<Histogram.Builder, Histogram> {
 
         private Boolean exemplarsEnabled;
-        private HistogramExemplarSampler exemplarSampler;
+        private ExemplarConfig exemplarConfig;
         private MetricType metricType = MetricType.EXPONENTIAL_BUCKETS_HISTOGRAM;
 
         private Builder() {
@@ -415,13 +442,13 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
 
         /**
-         * Enable exemplars and provide a custom {@link HistogramExemplarSampler}.
+         * Enable exemplars and overwrite defaults of the Exemplar sampler configuration.
          */
-        public Builder withExemplarSampler(HistogramExemplarSampler exemplarSampler) {
-            if (exemplarSampler == null) {
+        public Builder withExemplarConfig(ExemplarConfig exemplarConfig) {
+            if (exemplarConfig == null) {
                 throw new NullPointerException();
             }
-            this.exemplarSampler = exemplarSampler;
+            this.exemplarConfig = exemplarConfig;
             return withExemplars();
         }
 
@@ -506,8 +533,8 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withExemplarSampler(HistogramExemplarSampler exemplarSampler) {
-                Builder.this.withExemplarSampler(exemplarSampler);
+            public ExplicitBucketsHistogramBuilder withExemplarConfig(ExemplarConfig exemplarConfig) {
+                Builder.this.withExemplarConfig(exemplarConfig);
                 return this;
             }
 
@@ -543,7 +570,6 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             public ExplicitBucketsHistogram build() {
                 return new ExplicitBucketsHistogram(this);
             }
-
         }
 
         class ExponentialBucketsHistogramBuilder {
@@ -584,8 +610,8 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return this;
             }
 
-            public ExponentialBucketsHistogramBuilder withExemplarSampler(HistogramExemplarSampler exemplarSampler) {
-                Builder.this.withExemplarSampler(exemplarSampler);
+            public ExponentialBucketsHistogramBuilder withExemplarConfig(ExemplarConfig exemplarConfig) {
+                Builder.this.withExemplarConfig(exemplarConfig);
                 return this;
             }
 

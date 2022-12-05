@@ -1,11 +1,8 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.model.Labels;
-
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiConsumer;
-import java.util.function.DoubleConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -14,7 +11,6 @@ class Buffer<T extends io.prometheus.metrics.model.MetricData> {
     private static final long signBit = 1L << 63;
     private final AtomicLong observationCount = new AtomicLong(0);
     private double[] observationBuffer = new double[0];
-    private Labels[] exemplarLabelBuffer = new Labels[0];
     private int bufferPos = 0;
     private final Object writeLock = new Object();
 
@@ -23,34 +19,22 @@ class Buffer<T extends io.prometheus.metrics.model.MetricData> {
         if ((count & signBit) == 0) {
             return false; // sign bit not set -> buffer not active.
         } else {
-            doAppend(amount, null);
+            doAppend(amount);
             return true;
         }
     }
 
-    boolean append(double amount, Labels exemplarLabels) {
-        long count = observationCount.incrementAndGet();
-        if ((count & signBit) == 0) {
-            return false; // sign bit not set -> buffer not active.
-        } else {
-            doAppend(amount, exemplarLabels);
-            return true;
-        }
-    }
-
-    private void doAppend(double amount, Labels labels) {
+    private void doAppend(double amount) {
         synchronized (writeLock) {
             if (bufferPos >= observationBuffer.length) {
                 observationBuffer = Arrays.copyOf(observationBuffer, observationBuffer.length + 128);
-                exemplarLabelBuffer = Arrays.copyOf(exemplarLabelBuffer, exemplarLabelBuffer.length + 128);
             }
             observationBuffer[bufferPos] = amount;
-            exemplarLabelBuffer[bufferPos] = labels;
             bufferPos++;
         }
     }
 
-    synchronized T run(Function<Long, Boolean> complete, Supplier<T> runnable, BiConsumer<Double, Labels> observeFunction) {
+    synchronized T run(Function<Long, Boolean> complete, Supplier<T> runnable, Consumer<Double> observeFunction) {
         Long count = observationCount.getAndAdd(signBit);
         while (!complete.apply(count)) {
             Thread.yield();
@@ -61,10 +45,9 @@ class Buffer<T extends io.prometheus.metrics.model.MetricData> {
             Thread.yield();
         }
         for (int i=0; i<bufferPos; i++) {
-            observeFunction.accept(observationBuffer[i], exemplarLabelBuffer[i]);
+            observeFunction.accept(observationBuffer[i]);
         }
         observationBuffer = new double[0];
-        exemplarLabelBuffer = new Labels[0];
         bufferPos = 0;
         return result;
     }
