@@ -37,7 +37,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         return new GaugeData();
     }
 
-    static class GaugeData implements GaugingObserver, MetricData<GaugingObserver> {
+    static class GaugeData extends MetricData<GaugingObserver> implements GaugingObserver {
 
         private final DoubleAdder value = new DoubleAdder();
 

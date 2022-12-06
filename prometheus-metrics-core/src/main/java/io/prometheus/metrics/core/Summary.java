@@ -49,7 +49,7 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
     }
 
 
-    public class SummaryData implements DistributionObserver, MetricData<DistributionObserver> {
+    public class SummaryData extends MetricData<DistributionObserver> implements DistributionObserver {
 
         private final LongAdder count = new LongAdder();
         private final DoubleAdder sum = new DoubleAdder();

@@ -1,8 +1,5 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.exemplars.CounterExemplarSampler;
-import io.prometheus.metrics.exemplars.ExemplarSampler;
-import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Labels;
@@ -16,20 +13,10 @@ import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.DoubleSupplier;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-
 public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.CounterData> implements DiscreteEventObserver {
-    /**
-     * null means default from ExemplarConfig applies.
-     */
-    private final Boolean exemplarsEnabled;
-    private final ExemplarConfig exemplarConfig;
 
     private Counter(Builder builder) {
         super(builder);
-        this.exemplarsEnabled = builder.exemplarsEnabled;
-        this.exemplarConfig = builder.exemplarConfig;
     }
 
     @Override
@@ -68,57 +55,25 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         return name;
     }
 
-    class CounterData implements DiscreteEventObserver, MetricData<DiscreteEventObserver> {
+    class CounterData extends MetricData<DiscreteEventObserver> implements DiscreteEventObserver {
 
         private final DoubleAdder value = new DoubleAdder();
         private final long createdTimeMillis = System.currentTimeMillis();
-        private volatile ExemplarSampler exemplarSampler;
 
         @Override
         public void inc(double amount) {
             validateAndAdd(amount);
             if (isExemplarsEnabled() && hasSpanContextSupplier()) {
-                lazyInitExemplarSampler();
+                lazyInitExemplarSampler(exemplarConfig, 1, null);
                 exemplarSampler.observe(amount);
             }
-        }
-
-        private boolean hasSpanContextSupplier() {
-            return exemplarConfig != null ? exemplarConfig.hasSpanContextSupplier() : ExemplarConfig.hasDefaultSpanContextSupplier();
-        }
-
-        // Some metrics might be statically initialized (static final Counter myCounter = ...).
-        // However, some tracers (like Micrometer) may not be available at static initialization time.
-        // Therefore, exemplarSampler must be lazily configured so that it will still be initialized if
-        // a tracer is added later at runtime.
-        // However, if no tracing is used or exemplars are disabled, this code should have almost zero overhead.
-        // TODO: This is partly copy-and-past
-        private void lazyInitExemplarSampler() {
-                if (exemplarSampler == null) {
-                    synchronized (this) {
-                        if (exemplarSampler == null) {
-                            ExemplarConfig config = exemplarConfig;
-                            if (config == null) {
-                                config = ExemplarConfig.newBuilder()
-                                        .withNumberOfExemplars(1)
-                                        .build();
-                            } else {
-                                ExemplarConfig.Builder builder = config.toBuilder();
-                                if (!builder.hasBuckets() && !builder.hasNumberOfExemplars()) {
-                                    config = builder.withNumberOfExemplars(1).build();
-                                }
-                            }
-                            exemplarSampler = ExemplarSampler.newInstance(config);
-                        }
-                    }
-                }
         }
 
         @Override
         public void incWithExemplar(double amount, Labels labels) {
             validateAndAdd(amount);
             if (isExemplarsEnabled()) {
-                lazyInitExemplarSampler();
+                lazyInitExemplarSampler(exemplarConfig, 1, null);
                 exemplarSampler.observeWithExemplar(amount, labels);
             }
         }
@@ -128,14 +83,6 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
                 throw new IllegalArgumentException("Negative increment " + amount + " is illegal for Counter metrics.");
             }
             value.add(amount);
-        }
-
-        private boolean isExemplarsEnabled() {
-            if (exemplarsEnabled != null) {
-                return exemplarsEnabled;
-            } else {
-                return ExemplarConfig.isEnabled();
-            }
         }
 
         private CounterSnapshot.CounterData snapshot(Labels labels) {
@@ -159,9 +106,6 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
     public static class Builder extends ObservingMetric.Builder<Builder, Counter> {
 
-        private Boolean exemplarsEnabled;
-        private ExemplarConfig exemplarConfig;
-
         private Builder() {
             super(Collections.emptyList());
         }
@@ -174,24 +118,6 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         @Override
         public Counter build() {
             return new Counter(withName(normalizeName(name)));
-        }
-
-        public Builder withExemplars() {
-            this.exemplarsEnabled = TRUE;
-            return this;
-        }
-
-        public Builder withoutExemplars() {
-            this.exemplarsEnabled = FALSE;
-            return this;
-        }
-
-        /**
-         * Enable exemplars and provide a custom {@link CounterExemplarSampler}.
-         */
-        public Builder withExemplarConfig(ExemplarConfig exemplarConfig) {
-            this.exemplarConfig = exemplarConfig;
-            return withExemplars();
         }
 
         @Override

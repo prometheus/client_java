@@ -1,15 +1,23 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.model.Label;
+import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.observer.Observer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 public abstract class ObservingMetric<O extends Observer, V extends MetricData<O>> extends Metric {
     private final String[] labelNames;
+    private final Boolean exemplarsEnabled;
+    protected final ExemplarConfig exemplarConfig;
 
     /**
      * Map from variableLabelValues to MetricData.
@@ -24,6 +32,8 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     protected ObservingMetric(Builder<?, ?> builder) {
         super(builder);
         this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
+        this.exemplarsEnabled = builder.exemplarsEnabled;
+        this.exemplarConfig = builder.exemplarConfig;
     }
 
     protected abstract MetricSnapshot collect(List<Labels> labels, List<V> metricData);
@@ -64,8 +74,22 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         return noLabels;
     }
 
+    protected boolean isExemplarsEnabled() {
+        if (exemplarsEnabled != null) {
+            return exemplarsEnabled;
+        } else {
+            return ExemplarConfig.isEnabled();
+        }
+    }
+
+    protected boolean hasSpanContextSupplier() {
+        return exemplarConfig != null ? exemplarConfig.hasSpanContextSupplier() : ExemplarConfig.hasDefaultSpanContextSupplier();
+    }
+
     static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?,?>> extends Metric.Builder<B, M> {
         private String[] labelNames = new String[0];
+        private Boolean exemplarsEnabled;
+        private ExemplarConfig exemplarConfig;
 
         protected Builder(List<String> illegalLabelNames) {
             super(illegalLabelNames);
@@ -82,6 +106,24 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
             }
             this.labelNames = labelNames;
             return self();
+        }
+
+        public B withExemplars() {
+            this.exemplarsEnabled = TRUE;
+            return self();
+        }
+
+        public B withoutExemplars() {
+            this.exemplarsEnabled = FALSE;
+            return self();
+        }
+
+        /**
+         * Enable exemplars and provide an {@link ExemplarConfig}.
+         */
+        public B withExemplarConfig(ExemplarConfig exemplarConfig) {
+            this.exemplarConfig = exemplarConfig;
+            return withExemplars();
         }
     }
 }
