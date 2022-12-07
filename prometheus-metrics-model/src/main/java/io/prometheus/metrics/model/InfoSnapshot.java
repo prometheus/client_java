@@ -10,8 +10,12 @@ public final class InfoSnapshot extends MetricSnapshot {
         this.data = data;
     }
 
+    public Collection<InfoData> getData() {
+        return data;
+    }
+
     public static class InfoData extends MetricData {
-        protected InfoData(Labels labels) {
+        public InfoData(Labels labels) {
             super(labels);
         }
 
