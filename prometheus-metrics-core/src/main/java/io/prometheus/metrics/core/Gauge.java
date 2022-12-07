@@ -1,10 +1,15 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.model.*;
+import io.prometheus.metrics.model.Exemplar;
+import io.prometheus.metrics.model.GaugeSnapshot;
+import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.observer.GaugingObserver;
 
-import java.util.*;
-import java.util.concurrent.atomic.DoubleAdder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleSupplier;
 
 public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> implements GaugingObserver {
@@ -19,8 +24,18 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     }
 
     @Override
+    public void incWithExemplar(double amount, Labels labels) {
+        getNoLabels().incWithExemplar(amount, labels);
+    }
+
+    @Override
     public void set(double value) {
         getNoLabels().set(value);
+    }
+
+    @Override
+    public void setWithExemplar(double value, Labels labels) {
+        getNoLabels().setWithExemplar(value, labels);
     }
 
     @Override
@@ -37,23 +52,60 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         return new GaugeData();
     }
 
-    static class GaugeData extends MetricData<GaugingObserver> implements GaugingObserver {
+    class GaugeData extends MetricData<GaugingObserver> implements GaugingObserver {
 
-        private final DoubleAdder value = new DoubleAdder();
+        private final AtomicLong value = new AtomicLong(Double.doubleToRawLongBits(0));
 
         @Override
         public void inc(double amount) {
-            value.add(amount);
+            long next = value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
+            if (isExemplarsEnabled() && hasSpanContextSupplier()) {
+                lazyInitExemplarSampler(exemplarConfig, 1, null);
+                exemplarSampler.observe(Double.longBitsToDouble(next));
+            }
+        }
+
+        @Override
+        public void incWithExemplar(double amount, Labels labels) {
+            long next = value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
+            if (isExemplarsEnabled()) {
+                lazyInitExemplarSampler(exemplarConfig, 1, null);
+                exemplarSampler.observeWithExemplar(Double.longBitsToDouble(next), labels);
+            }
         }
 
         @Override
         public void set(double value) {
-            // todo: quick hack when switching to Java 8's built-in DoubleAdder. Needs investigation.
-            this.value.add(value - this.value.sum());
+            this.value.set(Double.doubleToRawLongBits(value));
+            if (isExemplarsEnabled() && hasSpanContextSupplier()) {
+                lazyInitExemplarSampler(exemplarConfig, 1, null);
+                exemplarSampler.observe(value);
+            }
+        }
+
+        @Override
+        public void setWithExemplar(double value, Labels labels) {
+            this.value.set(Double.doubleToRawLongBits(value));
+            if (isExemplarsEnabled()) {
+                lazyInitExemplarSampler(exemplarConfig, 1, null);
+                exemplarSampler.observeWithExemplar(value, labels);
+            }
         }
 
         private GaugeSnapshot.GaugeData snapshot(Labels labels) {
-            return new GaugeSnapshot.GaugeData(value.sum(), labels);
+            // Read the exemplar first. Otherwise, there is a race condition where you might
+            // see an Exemplar for a value that's not represented in getValue() yet.
+            // If there are multiple Exemplars (by default it's just one), use the oldest
+            // so that we don't violate min age.
+            Exemplar oldest = null;
+            if (exemplarSampler != null) {
+                for (Exemplar exemplar : exemplarSampler.collect()) {
+                    if (oldest == null || exemplar.getTimestampMillis() < oldest.getTimestampMillis()) {
+                        oldest = exemplar;
+                    }
+                }
+            }
+            return new GaugeSnapshot.GaugeData(Double.longBitsToDouble(value.get()), labels, oldest);
         }
 
         @Override
@@ -96,7 +148,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         @Override
         public GaugeSnapshot collect() {
             return new GaugeSnapshot(getMetadata(), Collections.singletonList(
-                    new GaugeSnapshot.GaugeData(callback.getAsDouble(), constLabels)
+                    new GaugeSnapshot.GaugeData(callback.getAsDouble(), constLabels, null)
             ));
         }
 
@@ -128,5 +180,9 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
                 return this;
             }
         }
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 }

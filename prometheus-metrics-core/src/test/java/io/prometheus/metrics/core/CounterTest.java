@@ -282,5 +282,6 @@ public class CounterTest {
     counter.incWithExemplar(3.0, Labels.of("a", "b"));
     Assert.assertNull(getData(counter).getExemplar());
     counter.inc(2.0);
+    Assert.assertNull(getData(counter).getExemplar());
   }
 }

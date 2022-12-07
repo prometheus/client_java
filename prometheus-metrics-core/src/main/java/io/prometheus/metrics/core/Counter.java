@@ -88,14 +88,17 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         private CounterSnapshot.CounterData snapshot(Labels labels) {
             // Read the exemplar first. Otherwise, there is a race condition where you might
             // see an Exemplar for a value that's not represented in getValue() yet.
-            Exemplar exemplar = null;
+            // If there are multiple Exemplars (by default it's just one), use the oldest
+            // so that we don't violate min age.
+            Exemplar oldest = null;
             if (exemplarSampler != null) {
-                Collection<Exemplar> exemplars = exemplarSampler.collect();
-                if (!exemplars.isEmpty()) {
-                    exemplar = exemplars.iterator().next();
+                for (Exemplar exemplar : exemplarSampler.collect()) {
+                    if (oldest == null || exemplar.getTimestampMillis() < oldest.getTimestampMillis()) {
+                        oldest = exemplar;
+                    }
                 }
             }
-            return new CounterSnapshot.CounterData(value.sum(), labels, exemplar, createdTimeMillis);
+            return new CounterSnapshot.CounterData(value.sum(), labels, oldest, createdTimeMillis);
         }
 
         @Override

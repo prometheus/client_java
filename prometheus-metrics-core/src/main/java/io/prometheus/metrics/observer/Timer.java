@@ -22,7 +22,7 @@ public class Timer implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         observeDuration();
     }
 }

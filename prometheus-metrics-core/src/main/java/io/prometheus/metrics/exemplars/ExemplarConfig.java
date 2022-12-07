@@ -11,18 +11,18 @@ import static java.util.stream.DoubleStream.concat;
 
 public class ExemplarConfig {
 
-    private static volatile boolean exemplarsEnabled = true;
+    private static volatile boolean defaultExemplarsEnabled = true;
     private static volatile Object defaultSpanContextSupplier = findSpanContextSupplier();
     private static volatile long defaultMinAgeMillis = SECONDS.toMillis(7);
     private static volatile long defaultMaxAgeMillis = SECONDS.toMillis(70);
     private static volatile long defaultSampleIntervalMillis = 20;
     private static final int defaultNumberOfExemplars = 4; // cannot be changed, because exemplar samplers cannot dynamically change the number of exemplars
     public static void disableExemplars() {
-        exemplarsEnabled = false;
+        defaultExemplarsEnabled = false;
     }
 
     public static void enableExemplars() {
-        exemplarsEnabled = true;
+        defaultExemplarsEnabled = true;
     }
 
     private final Object spanContextSupplier;
@@ -34,7 +34,7 @@ public class ExemplarConfig {
 
     public static boolean isEnabled() {
         // TODO: Allow disabling via system property or environment variable
-        return exemplarsEnabled;
+        return defaultExemplarsEnabled;
     }
 
     public boolean hasSpanContextSupplier() {
