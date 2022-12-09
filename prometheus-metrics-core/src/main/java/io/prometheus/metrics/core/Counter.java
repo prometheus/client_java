@@ -44,6 +44,11 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         return new CounterSnapshot(getMetadata(), data);
     }
 
+    @Override
+    public CounterSnapshot collect() {
+        return (CounterSnapshot) super.collect();
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }

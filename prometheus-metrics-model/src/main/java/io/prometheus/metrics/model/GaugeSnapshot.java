@@ -24,6 +24,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
             super(labels);
             this.value = value;
             this.exemplar = exemplar;
+            validate();
         }
 
         public double getValue() {

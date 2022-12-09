@@ -17,6 +17,7 @@ public final class InfoSnapshot extends MetricSnapshot {
     public static class InfoData extends MetricData {
         public InfoData(Labels labels) {
             super(labels);
+            validate();
         }
 
         @Override

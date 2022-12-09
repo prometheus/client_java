@@ -59,6 +59,11 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
 
         @Override
+        public ExplicitBucketsHistogramSnapshot collect() {
+            return (ExplicitBucketsHistogramSnapshot) super.collect();
+        }
+
+        @Override
         protected ExplicitBucketsHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
             List<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> data = new ArrayList<>(labels.size());
             for (int i=0; i<labels.size(); i++) {
@@ -180,6 +185,11 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         @Override
         public void observeWithExemplar(double amount, Labels labels) {
             getNoLabels().observeWithExemplar(amount, labels);
+        }
+
+        @Override
+        public ExponentialBucketsHistogramSnapshot collect() {
+            return (ExponentialBucketsHistogramSnapshot) super.collect();
         }
 
         @Override

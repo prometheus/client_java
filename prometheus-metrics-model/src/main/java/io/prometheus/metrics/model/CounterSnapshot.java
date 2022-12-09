@@ -27,6 +27,7 @@ public final class CounterSnapshot extends MetricSnapshot {
             this.value = value;
             this.exemplar = exemplar;
             this.createdTimeMillis = createdTimeMillis;
+            validate();
         }
 
         public double getValue() {

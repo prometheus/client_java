@@ -49,7 +49,7 @@ public class CounterTest {
   }
 
   private CounterSnapshot.CounterData getData(Counter counter, String... labels) {
-    return ((CounterSnapshot) counter.collect()).getData().stream()
+    return counter.collect().getData().stream()
             .filter(d -> d.getLabels().equals(Labels.of(labels)))
             .findAny()
             .orElseThrow(() -> new RuntimeException("counter with labels " + labels + " not found"));

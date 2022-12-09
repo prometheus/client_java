@@ -12,8 +12,9 @@ public final class GaugeHistogramSnapshot extends MetricSnapshot {
     public static class GaugeHistogramData extends MetricData {
         protected GaugeHistogramData(Labels labels) {
             super(labels);
+            validate();
+            // TODO: Define data model, or re-use histogram model.
         }
-        // TODO: Define data model, or re-use histogram model.
 
         @Override
         protected void validate() {

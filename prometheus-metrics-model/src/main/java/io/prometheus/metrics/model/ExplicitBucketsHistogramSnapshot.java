@@ -36,6 +36,7 @@ public final class ExplicitBucketsHistogramSnapshot extends MetricSnapshot {
             // TODO: validation
             // TODO: buckets must not have duplicates, must be sorted, counts must be cumulative, buckets must include a +Inf bucket.
             // TODO: maybe implement a dedicated Buckets class similar to Labels?
+            validate();
         }
 
         public long getCount() {

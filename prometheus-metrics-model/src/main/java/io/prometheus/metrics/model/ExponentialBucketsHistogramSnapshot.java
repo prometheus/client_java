@@ -34,6 +34,7 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
                 this.zeroThreshold = zeroThreshold;
                 this.bucketsForPositiveValues = bucketsForPositiveValues;
                 this.bucketsForNegativeValues = bucketsForNegativeValues;
+                validate();
             }
 
         public long getCount() {

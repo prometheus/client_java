@@ -36,6 +36,9 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         this.exemplarConfig = builder.exemplarConfig;
     }
 
+    /**
+     * labels and metricData have the same size. labels.get(i) are the labels for metricData.get(i).
+     */
     protected abstract MetricSnapshot collect(List<Labels> labels, List<V> metricData);
 
     public io.prometheus.metrics.model.MetricSnapshot collect() {

@@ -25,7 +25,12 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
     }
 
     @Override
-    protected MetricSnapshot collect(List<Labels> labels, List<SummaryData> metricData) {
+    public SummarySnapshot collect() {
+        return (SummarySnapshot) super.collect();
+    }
+
+    @Override
+    protected SummarySnapshot collect(List<Labels> labels, List<SummaryData> metricData) {
         List<SummarySnapshot.SummaryData> data = new ArrayList<>(labels.size());
         for (int i=0; i<labels.size(); i++) {
             data.add(metricData.get(i).snapshot(labels.get(i)));

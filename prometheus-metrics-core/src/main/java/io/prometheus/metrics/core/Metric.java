@@ -68,7 +68,7 @@ public abstract class Metric {
         // machine_role metric). See also
         // https://prometheus.io/docs/instrumenting/writing_exporters/#target-labels-not-static-scraped-labels
         public B withConstLabels(Labels constLabels) {
-            for (Label label : constLabels) {
+            for (Label label : constLabels) { // NPE if constLabels is null
                 if (illegalLabelNames.contains(label.getName())) {
                     throw new IllegalArgumentException(label.getName() + ": illegal label name for this metric type");
                 }

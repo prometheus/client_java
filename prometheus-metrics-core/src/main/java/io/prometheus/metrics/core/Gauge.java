@@ -39,6 +39,11 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     }
 
     @Override
+    public GaugeSnapshot collect() {
+        return (GaugeSnapshot) super.collect();
+    }
+
+    @Override
     protected GaugeSnapshot collect(List<Labels> labels, List<GaugeData> metricData) {
             List<GaugeSnapshot.GaugeData> data = new ArrayList<>(labels.size());
             for (int i=0; i<labels.size(); i++) {

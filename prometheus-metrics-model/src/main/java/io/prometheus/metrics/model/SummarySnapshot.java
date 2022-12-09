@@ -27,6 +27,7 @@ public final class SummarySnapshot extends MetricSnapshot {
             this.sum = sum;
             this.quantiles = quantiles;
             this.createdTimeMillis = createdTimeMillis;
+            validate();
         }
 
         public long getCount() {
