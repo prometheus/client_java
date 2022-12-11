@@ -119,7 +119,6 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 count.increment(); // must be the last step, because count is used to signal that the operation is complete.
             }
 
-            // TODO rename to collect()
             public ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData collect(Labels labels) {
                 Collection<io.prometheus.metrics.model.Exemplar> exemplars = exemplarSampler != null ? exemplarSampler.collect() : Collections.emptyList();
                 return buffer.run(
@@ -326,17 +325,20 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             }
 
             public ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData collect(Labels labels) {
-                // todo: activate buffer
-                return new ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData(
-                        count.sum(),
-                        sum.sum(),
-                        schema,
-                        zeroCount.sum(),
-                        zeroThreshold,
-                        toBucketList(bucketsForPositiveValues),
-                        toBucketList(bucketsForNegativeValues),
-                        labels,
-                        createdTimeMillis
+                return buffer.run(
+                        expectedCount -> count.sum() == expectedCount,
+                        () -> new ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData(
+                                count.sum(),
+                                sum.sum(),
+                                schema,
+                                zeroCount.sum(),
+                                zeroThreshold,
+                                toBucketList(bucketsForPositiveValues),
+                                toBucketList(bucketsForNegativeValues),
+                                labels,
+                                createdTimeMillis
+                        ),
+                        this::doObserve
                 );
             }
 
