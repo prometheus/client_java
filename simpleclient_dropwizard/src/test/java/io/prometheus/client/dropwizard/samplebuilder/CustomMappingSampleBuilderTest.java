@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +33,7 @@ public class CustomMappingSampleBuilderTest {
 
     @Test
     public void test_WHEN_OneMatch_THEN_ShouldReturnConverted() {
-        final Map<String, String> labels = new HashMap<String, String>();
+        final Map<String, String> labels = new LinkedHashMap<String, String>();
         labels.put("service", "${0}");
         final MapperConfig mapperConfig = new MapperConfig(
                 "app.okhttpclient.client.HttpClient.*.total",
@@ -57,7 +57,7 @@ public class CustomMappingSampleBuilderTest {
 
     @Test
     public void test_WHEN_MoreMatches_THEN_ShouldReturnFirstOne() {
-        final Map<String, String> labels = new HashMap<String, String>();
+        final Map<String, String> labels = new LinkedHashMap<String, String>();
         labels.put("service", "${0}");
         final MapperConfig mapperConfig = new MapperConfig(
                 "app.okhttpclient.client.HttpClient.*.total",
@@ -81,7 +81,7 @@ public class CustomMappingSampleBuilderTest {
 
     @Test
     public void test_WHEN_MoreMatchesReverseOrder_THEN_ShouldReturnFirstOne() {
-        final Map<String, String> labels = new HashMap<String, String>();
+        final Map<String, String> labels = new LinkedHashMap<String, String>();
         labels.put("service", "${0}");
         labels.put("status", "${1}");
         final MapperConfig mapperConfig = new MapperConfig(
@@ -106,7 +106,7 @@ public class CustomMappingSampleBuilderTest {
 
     @Test
     public void test_WHEN_MoreToFormatInLabelsAndName_THEN_ShouldReturnCorrectSample() {
-        final Map<String, String> labels = new HashMap<String, String>();
+        final Map<String, String> labels = new LinkedHashMap<String, String>();
         labels.put("service", "${0}_${1}");
         labels.put("status", "s_${1}");
         final MapperConfig mapperConfig = new MapperConfig(
@@ -131,7 +131,7 @@ public class CustomMappingSampleBuilderTest {
 
     @Test
     public void test_WHEN_MetricNameSuffixRequested_THEN_ShouldReturnCorrectSample() {
-        final Map<String, String> labels = new HashMap<String, String>();
+        final Map<String, String> labels = new LinkedHashMap<String, String>();
         labels.put("service", "${0}");
         labels.put("status", "s_${1}");
         final MapperConfig mapperConfig = new MapperConfig(
@@ -156,7 +156,7 @@ public class CustomMappingSampleBuilderTest {
 
     @Test
     public void test_WHEN_AdditionalLabels_THEN_ShouldReturnCorrectSample() {
-        final Map<String, String> labels = new HashMap<String, String>();
+        final Map<String, String> labels = new LinkedHashMap<String, String>();
         labels.put("service", "${0}");
         labels.put("status", "s_${1}");
         final MapperConfig mapperConfig = new MapperConfig(
