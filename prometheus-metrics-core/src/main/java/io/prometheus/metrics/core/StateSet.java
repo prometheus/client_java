@@ -113,6 +113,9 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
 
         @Override
         public StateSet build() {
+            if (names == null) {
+                throw new IllegalStateException("State names are required when building a StateSet.");
+            }
             return new StateSet(this);
         }
 

@@ -67,7 +67,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         protected ExplicitBucketsHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
             List<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> data = new ArrayList<>(labels.size());
             for (int i=0; i<labels.size(); i++) {
-                data.add(((ExplicitBucketsHistogram.ExplicitBucketsHistogramData) metricData.get(i)).snapshot(labels.get(i)));
+                data.add(((ExplicitBucketsHistogram.ExplicitBucketsHistogramData) metricData.get(i)).collect(labels.get(i)));
             }
             return new ExplicitBucketsHistogramSnapshot(getMetadata(), data);
         }
@@ -120,7 +120,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             }
 
             // TODO rename to collect()
-            public ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData snapshot(Labels labels) {
+            public ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData collect(Labels labels) {
                 Collection<io.prometheus.metrics.model.Exemplar> exemplars = exemplarSampler != null ? exemplarSampler.collect() : Collections.emptyList();
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
@@ -196,7 +196,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         protected ExponentialBucketsHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
             List<ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData> data = new ArrayList<>(labels.size());
             for (int i=0; i<labels.size(); i++) {
-                data.add(((ExponentialBucketsHistogramData) metricData.get(i)).snapshot(labels.get(i)));
+                data.add(((ExponentialBucketsHistogramData) metricData.get(i)).collect(labels.get(i)));
             }
             return new ExponentialBucketsHistogramSnapshot(getMetadata(), data);
         }
@@ -243,7 +243,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                     }
                 }
                 sum.add(value);
-                // count must be incremented last, because in snapshot() the count
+                // count must be incremented last, because in collect() the count
                 // indicates the number of completed observations.
                 count.increment();
             }
@@ -325,7 +325,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 // TODO
             }
 
-            public ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData snapshot(Labels labels) {
+            public ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData collect(Labels labels) {
                 // todo: activate buffer
                 return new ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData(
                         count.sum(),

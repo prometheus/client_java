@@ -39,7 +39,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
     protected CounterSnapshot collect(List<Labels> labels, List<CounterData> metricData) {
         List<CounterSnapshot.CounterData> data = new ArrayList<>(labels.size());
         for (int i=0; i<labels.size(); i++) {
-            data.add(metricData.get(i).snapshot(labels.get(i)));
+            data.add(metricData.get(i).collect(labels.get(i)));
         }
         return new CounterSnapshot(getMetadata(), data);
     }
@@ -90,7 +90,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
             value.add(amount);
         }
 
-        private CounterSnapshot.CounterData snapshot(Labels labels) {
+        private CounterSnapshot.CounterData collect(Labels labels) {
             // Read the exemplar first. Otherwise, there is a race condition where you might
             // see an Exemplar for a value that's not represented in getValue() yet.
             // If there are multiple Exemplars (by default it's just one), use the oldest

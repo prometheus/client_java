@@ -33,7 +33,7 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
     protected SummarySnapshot collect(List<Labels> labels, List<SummaryData> metricData) {
         List<SummarySnapshot.SummaryData> data = new ArrayList<>(labels.size());
         for (int i=0; i<labels.size(); i++) {
-            data.add(metricData.get(i).snapshot(labels.get(i)));
+            data.add(metricData.get(i).collect(labels.get(i)));
         }
         return new SummarySnapshot(getMetadata(), data);
     }
@@ -89,12 +89,12 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
             if (quantileValues != null) {
                 quantileValues.insert(amount);
             }
-            // count must be incremented last, because in snapshot() the count
+            // count must be incremented last, because in collect() the count
             // indicates the number of completed observations.
             count.increment();
         }
 
-        public SummarySnapshot.SummaryData snapshot(Labels labels) {
+        public SummarySnapshot.SummaryData collect(Labels labels) {
             return buffer.run(
                     expectedCount -> count.sum() == expectedCount,
                     () -> new SummarySnapshot.SummaryData(count.sum(), sum.sum(), makeQuantiles(), labels, createdTimeMillis),

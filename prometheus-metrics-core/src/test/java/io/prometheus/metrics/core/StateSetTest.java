@@ -62,7 +62,7 @@ public class StateSetTest {
                 .orElseThrow(() -> new RuntimeException("stateset with labels " + labels + " not found"));
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void testStatesCannotBeEmpty() {
         StateSet.newBuilder().withName("invalid").build();
     }

@@ -47,7 +47,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     protected GaugeSnapshot collect(List<Labels> labels, List<GaugeData> metricData) {
             List<GaugeSnapshot.GaugeData> data = new ArrayList<>(labels.size());
             for (int i=0; i<labels.size(); i++) {
-                data.add(metricData.get(i).snapshot(labels.get(i)));
+                data.add(metricData.get(i).collect(labels.get(i)));
             }
             return new GaugeSnapshot(getMetadata(), data);
         }
@@ -97,7 +97,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
             }
         }
 
-        private GaugeSnapshot.GaugeData snapshot(Labels labels) {
+        private GaugeSnapshot.GaugeData collect(Labels labels) {
             // Read the exemplar first. Otherwise, there is a race condition where you might
             // see an Exemplar for a value that's not represented in getValue() yet.
             // If there are multiple Exemplars (by default it's just one), use the oldest
