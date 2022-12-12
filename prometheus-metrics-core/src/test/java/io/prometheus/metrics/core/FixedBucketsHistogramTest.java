@@ -4,9 +4,9 @@ package io.prometheus.metrics.core;
 import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplar;
-import io.prometheus.metrics.model.ExplicitBucket;
-import io.prometheus.metrics.model.ExplicitBucketsHistogramSnapshot;
-import io.prometheus.metrics.model.ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData;
+import io.prometheus.metrics.model.FixedBucket;
+import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
+import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot.FixedBucketsHistogramData;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.observer.DistributionObserver;
 import org.junit.Assert;
@@ -31,7 +31,7 @@ import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class ExplicitBucketsHistogramTest {
+public class FixedBucketsHistogramTest {
 
   /*
   CollectorRegistry registry;
@@ -80,14 +80,14 @@ public class ExplicitBucketsHistogramTest {
 
    */
 
-  private ExplicitBucketsHistogramData getData(Histogram histogram, String... labels) {
-    return ((ExplicitBucketsHistogramSnapshot) histogram.collect()).getData().stream()
+  private FixedBucketsHistogramData getData(Histogram histogram, String... labels) {
+    return ((FixedBucketsHistogramSnapshot) histogram.collect()).getData().stream()
             .filter(d -> d.getLabels().equals(Labels.of(labels)))
             .findAny()
             .orElseThrow(() -> new RuntimeException("histogram with labels " + labels + " not found"));
   }
 
-  private ExplicitBucket getBucket(Histogram histogram, double le, String... labels) {
+  private FixedBucket getBucket(Histogram histogram, double le, String... labels) {
     return getData(histogram, labels).getBuckets().stream()
             .filter(b -> b.getUpperBound() == le)
             .findAny()
@@ -100,7 +100,7 @@ public class ExplicitBucketsHistogramTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testIllegalLabelNameExplicitBucketsHistogramBuilder() {
+  public void testIllegalLabelNameFixedBucketsHistogramBuilder() {
     Histogram.newBuilder().withDefaultBuckets().withLabelNames("label", "le");
   }
 
@@ -132,7 +132,7 @@ public class ExplicitBucketsHistogramTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testIllegalNameExplicitBucketsHistogramBuilder() {
+  public void testIllegalNameFixedBucketsHistogramBuilder() {
     Histogram.newBuilder().withBuckets(0, 1, 2).withName("server.durations");
   }
 
@@ -145,7 +145,7 @@ public class ExplicitBucketsHistogramTest {
   public void testDuplicateBuckets() {
     Histogram histogram = Histogram.newBuilder().withName("test").withBuckets(0, 3, 17, 3, 21).build();
     List<Double> upperBounds = getData(histogram).getBuckets().stream()
-            .map(ExplicitBucket::getUpperBound)
+            .map(FixedBucket::getUpperBound)
             .collect(Collectors.toList());
     Assert.assertEquals(Arrays.asList(0.0, 3.0, 17.0, 21.0, Double.POSITIVE_INFINITY), upperBounds);
   }
@@ -154,7 +154,7 @@ public class ExplicitBucketsHistogramTest {
   public void testUnsortedBuckets() {
     Histogram histogram = Histogram.newBuilder().withBuckets(0.2, 0.1).withName("test").build();
     List<Double> upperBounds = getData(histogram).getBuckets().stream()
-            .map(ExplicitBucket::getUpperBound)
+            .map(FixedBucket::getUpperBound)
             .collect(Collectors.toList());
     Assert.assertEquals(Arrays.asList(0.1, 0.2, Double.POSITIVE_INFINITY), upperBounds);
   }
@@ -163,7 +163,7 @@ public class ExplicitBucketsHistogramTest {
   public void testEmptyBuckets() {
     Histogram histogram = Histogram.newBuilder().withBuckets().withName("test").build();
     List<Double> upperBounds = getData(histogram).getBuckets().stream()
-            .map(ExplicitBucket::getUpperBound)
+            .map(FixedBucket::getUpperBound)
             .collect(Collectors.toList());
     Assert.assertEquals(Collections.singletonList(Double.POSITIVE_INFINITY), upperBounds);
   }
@@ -172,7 +172,7 @@ public class ExplicitBucketsHistogramTest {
   public void testBucketsIncludePositiveInfinity() {
     Histogram histogram = Histogram.newBuilder().withBuckets(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY).withName("test").build();
     List<Double> upperBounds = getData(histogram).getBuckets().stream()
-            .map(ExplicitBucket::getUpperBound)
+            .map(FixedBucket::getUpperBound)
             .collect(Collectors.toList());
     Assert.assertEquals(Arrays.asList(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY), upperBounds);
   }
@@ -184,7 +184,7 @@ public class ExplicitBucketsHistogramTest {
             .withLinearBuckets(0.1, 0.1, 10)
             .build();
     List<Double> upperBounds = getData(histogram).getBuckets().stream()
-            .map(ExplicitBucket::getUpperBound)
+            .map(FixedBucket::getUpperBound)
             .collect(Collectors.toList());
     Assert.assertEquals(Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, Double.POSITIVE_INFINITY), upperBounds);
   }
@@ -196,7 +196,7 @@ public class ExplicitBucketsHistogramTest {
             .withName("test")
             .build();
     List<Double> upperBounds = getData(histogram).getBuckets().stream()
-            .map(ExplicitBucket::getUpperBound)
+            .map(FixedBucket::getUpperBound)
             .collect(Collectors.toList());
     assertEquals(Arrays.asList(2.0, 5.0, 12.5, Double.POSITIVE_INFINITY), upperBounds);
   }
@@ -255,7 +255,7 @@ public class ExplicitBucketsHistogramTest {
     }
     List<Long> expectedBucketCounts = Arrays.asList(2L, 7L, 12L, 17L, 22L, 22L); // buckets -10, -5, 0, 5, 10, +Inf
     List<Long> actualBucketCounts = getData(histogram).getBuckets().stream()
-            .map(ExplicitBucket::getCumulativeCount)
+            .map(FixedBucket::getCumulativeCount)
             .collect(Collectors.toList());
     assertEquals(expectedBucketCounts, actualBucketCounts);
   }
@@ -290,8 +290,8 @@ public class ExplicitBucketsHistogramTest {
     histogram.withLabels("/hello", "200").observe(0.11);
     histogram.withLabels("/hello", "200").observe(0.2);
     histogram.withLabels("/hello", "500").observe(0.19);
-    ExplicitBucketsHistogramData data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
-    ExplicitBucketsHistogramData data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
+    FixedBucketsHistogramData data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
+    FixedBucketsHistogramData data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
     assertEquals(2, data200.getCount());
     assertEquals(0.31, data200.getSum(), 0.0000001);
     assertEquals(1, data500.getCount());
@@ -316,30 +316,30 @@ public class ExplicitBucketsHistogramTest {
     int nThreads = 8;
     DistributionObserver obs = histogram.withLabels("200");
     ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-    CompletionService<List<ExplicitBucketsHistogramSnapshot>> completionService = new ExecutorCompletionService<>(executor);
+    CompletionService<List<FixedBucketsHistogramSnapshot>> completionService = new ExecutorCompletionService<>(executor);
     CountDownLatch startSignal = new CountDownLatch(nThreads);
     for (int t=0; t<nThreads; t++) {
       completionService.submit(() -> {
-        List<ExplicitBucketsHistogramSnapshot> snapshots = new ArrayList<>();
+        List<FixedBucketsHistogramSnapshot> snapshots = new ArrayList<>();
         startSignal.countDown();
         startSignal.await();
         for (int i=0; i<10; i++) {
           for (int j=0; j<1000; j++) {
             obs.observe(1.1);
           }
-          snapshots.add((ExplicitBucketsHistogramSnapshot) histogram.collect());
+          snapshots.add((FixedBucketsHistogramSnapshot) histogram.collect());
         }
         return snapshots;
       });
     }
     long maxCount = 0;
     for(int i=0; i<nThreads; i++) {
-      Future<List<ExplicitBucketsHistogramSnapshot>> future = completionService.take();
-      List<ExplicitBucketsHistogramSnapshot> snapshots = future.get(5, TimeUnit.SECONDS);
+      Future<List<FixedBucketsHistogramSnapshot>> future = completionService.take();
+      List<FixedBucketsHistogramSnapshot> snapshots = future.get(5, TimeUnit.SECONDS);
       long count = 0;
-      for (ExplicitBucketsHistogramSnapshot snapshot : snapshots) {
+      for (FixedBucketsHistogramSnapshot snapshot : snapshots) {
         Assert.assertEquals(1, snapshot.getData().size());
-        ExplicitBucketsHistogramData data = snapshot.getData().stream().findFirst().orElseThrow(RuntimeException::new);
+        FixedBucketsHistogramData data = snapshot.getData().stream().findFirst().orElseThrow(RuntimeException::new);
         Assert.assertTrue(data.getCount() >= (count + 1000)); // 1000 own observations plus the ones from other threads
         count = data.getCount();
       }

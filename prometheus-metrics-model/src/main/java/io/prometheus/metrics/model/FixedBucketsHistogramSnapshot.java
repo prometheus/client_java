@@ -2,13 +2,13 @@ package io.prometheus.metrics.model;
 
 import java.util.*;
 
-public final class ExplicitBucketsHistogramSnapshot extends MetricSnapshot {
-    private final Collection<ExplicitBucketsHistogramData> data;
+public final class FixedBucketsHistogramSnapshot extends MetricSnapshot {
+    private final Collection<FixedBucketsHistogramData> data;
 
-    public ExplicitBucketsHistogramSnapshot(MetricMetadata metadata, Collection<ExplicitBucketsHistogramData> data) {
+    public FixedBucketsHistogramSnapshot(MetricMetadata metadata, Collection<FixedBucketsHistogramData> data) {
         super(metadata);
         this.data = data;
-        for (ExplicitBucketsHistogramData d : data) {
+        for (FixedBucketsHistogramData d : data) {
             for (Label label : d.getLabels()) {
                 if (label.getName().equals("le")) {
                     throw new IllegalArgumentException("le is a reserved label name for histograms");
@@ -17,17 +17,17 @@ public final class ExplicitBucketsHistogramSnapshot extends MetricSnapshot {
         }
     }
 
-    public Collection<ExplicitBucketsHistogramData> getData() {
+    public Collection<FixedBucketsHistogramData> getData() {
         return data;
     }
 
-    public static final class ExplicitBucketsHistogramData extends MetricData {
+    public static final class FixedBucketsHistogramData extends MetricData {
         private final long count;
         private final double sum;
-        private final List<ExplicitBucket> buckets;
+        private final List<FixedBucket> buckets;
         private final long createdTimeMillis;
 
-        public ExplicitBucketsHistogramData(long count, double sum, ExplicitBucket[] buckets, Labels labels, long createdTimeMillis) {
+        public FixedBucketsHistogramData(long count, double sum, FixedBucket[] buckets, Labels labels, long createdTimeMillis) {
             super(labels);
             this.count = count;
             this.sum = sum;
@@ -47,7 +47,7 @@ public final class ExplicitBucketsHistogramSnapshot extends MetricSnapshot {
             return sum;
         }
 
-        public Collection<ExplicitBucket> getBuckets() {
+        public Collection<FixedBucket> getBuckets() {
             return buckets;
         }
 

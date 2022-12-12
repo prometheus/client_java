@@ -1,8 +1,8 @@
 package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.exemplars.ExemplarConfig;
-import io.prometheus.metrics.model.ExplicitBucket;
-import io.prometheus.metrics.model.ExplicitBucketsHistogramSnapshot;
+import io.prometheus.metrics.model.FixedBucket;
+import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
 import io.prometheus.metrics.model.ExponentialBucket;
 import io.prometheus.metrics.model.ExponentialBucketsHistogramSnapshot;
 import io.prometheus.metrics.model.Labels;
@@ -36,10 +36,10 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
     abstract static class HistogramData extends MetricData<DistributionObserver> implements DistributionObserver {}
 
-    static class ExplicitBucketsHistogram extends Histogram {
+    static class FixedBucketsHistogram extends Histogram {
         private final double[] upperBounds;
 
-        private ExplicitBucketsHistogram(Histogram.Builder.ExplicitBucketsHistogramBuilder builder) {
+        private FixedBucketsHistogram(Histogram.Builder.FixedBucketsHistogramBuilder builder) {
             super(builder.getHistogramBuilder());
             SortedSet<Double> upperBounds = new TreeSet<>();
             for (double upperBound : builder.upperBounds) { // TODO: can upperBounds be null? Copy normalize code from ExemplarSampler?
@@ -54,31 +54,31 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
 
         @Override
-        protected ExplicitBucketsHistogramData newMetricData() {
-            return new ExplicitBucketsHistogramData();
+        protected FixedBucketsHistogramData newMetricData() {
+            return new FixedBucketsHistogramData();
         }
 
         @Override
-        public ExplicitBucketsHistogramSnapshot collect() {
-            return (ExplicitBucketsHistogramSnapshot) super.collect();
+        public FixedBucketsHistogramSnapshot collect() {
+            return (FixedBucketsHistogramSnapshot) super.collect();
         }
 
         @Override
-        protected ExplicitBucketsHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
-            List<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> data = new ArrayList<>(labels.size());
+        protected FixedBucketsHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
+            List<FixedBucketsHistogramSnapshot.FixedBucketsHistogramData> data = new ArrayList<>(labels.size());
             for (int i=0; i<labels.size(); i++) {
-                data.add(((ExplicitBucketsHistogram.ExplicitBucketsHistogramData) metricData.get(i)).collect(labels.get(i)));
+                data.add(((FixedBucketsHistogramData) metricData.get(i)).collect(labels.get(i)));
             }
-            return new ExplicitBucketsHistogramSnapshot(getMetadata(), data);
+            return new FixedBucketsHistogramSnapshot(getMetadata(), data);
         }
 
-        class ExplicitBucketsHistogramData extends HistogramData {
+        class FixedBucketsHistogramData extends HistogramData {
             private final LongAdder[] buckets;
             protected final DoubleAdder sum = new DoubleAdder();
             protected final LongAdder count = new LongAdder();
-            private final Buffer<ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData> buffer = new Buffer<>();
+            private final Buffer<FixedBucketsHistogramSnapshot.FixedBucketsHistogramData> buffer = new Buffer<>();
 
-            private ExplicitBucketsHistogramData() {
+            private FixedBucketsHistogramData() {
                 buckets = new LongAdder[upperBounds.length];
                 for (int i = 0; i < upperBounds.length; i++) {
                     buckets[i] = new LongAdder();
@@ -119,12 +119,12 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 count.increment(); // must be the last step, because count is used to signal that the operation is complete.
             }
 
-            public ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData collect(Labels labels) {
+            public FixedBucketsHistogramSnapshot.FixedBucketsHistogramData collect(Labels labels) {
                 Collection<io.prometheus.metrics.model.Exemplar> exemplars = exemplarSampler != null ? exemplarSampler.collect() : Collections.emptyList();
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
                         () -> {
-                            ExplicitBucket[] snapshotBuckets = new ExplicitBucket[buckets.length];
+                            FixedBucket[] snapshotBuckets = new FixedBucket[buckets.length];
                             long cumulativeCount = 0;
                             for (int i=0; i<upperBounds.length; i++) {
                                 cumulativeCount += buckets[i].sum();
@@ -135,9 +135,9 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                                         break;
                                     }
                                 }
-                                snapshotBuckets[i] = new ExplicitBucket(cumulativeCount, upperBounds[i], exemplar);
+                                snapshotBuckets[i] = new FixedBucket(cumulativeCount, upperBounds[i], exemplar);
                             }
-                            return new ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData(count.longValue(), sum.sum(), snapshotBuckets, labels, createdTimeMillis);
+                            return new FixedBucketsHistogramSnapshot.FixedBucketsHistogramData(count.longValue(), sum.sum(), snapshotBuckets, labels, createdTimeMillis);
                         },
                         this::doObserve
                 );
@@ -393,23 +393,23 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             return metricType;
         }
 
-        public ExplicitBucketsHistogramBuilder withBuckets(double... buckets) {
+        public FixedBucketsHistogramBuilder withBuckets(double... buckets) {
             this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
-            return new ExplicitBucketsHistogramBuilder().withBuckets(buckets);
+            return new FixedBucketsHistogramBuilder().withBuckets(buckets);
         }
 
-        public ExplicitBucketsHistogramBuilder withDefaultBuckets() {
+        public FixedBucketsHistogramBuilder withDefaultBuckets() {
             return withBuckets(DEFAULT_BUCKETS);
         }
 
-        public ExplicitBucketsHistogramBuilder withLinearBuckets(double start, double width, int count) {
+        public FixedBucketsHistogramBuilder withLinearBuckets(double start, double width, int count) {
             this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
-            return new ExplicitBucketsHistogramBuilder().withLinearBuckets(start, width, count);
+            return new FixedBucketsHistogramBuilder().withLinearBuckets(start, width, count);
         }
 
-        public ExplicitBucketsHistogramBuilder withExponentialBuckets(double start, double factor, int count) {
+        public FixedBucketsHistogramBuilder withExponentialBuckets(double start, double factor, int count) {
             this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
-            return new ExplicitBucketsHistogramBuilder().withExponentialBuckets(start, factor, count);
+            return new FixedBucketsHistogramBuilder().withExponentialBuckets(start, factor, count);
         }
 
         public ExponentialBucketsHistogramBuilder withSchema(int schema) {
@@ -428,14 +428,14 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         public Histogram build() {
             return new ExponentialBucketsHistogram(new ExponentialBucketsHistogramBuilder());
         }
-        class ExplicitBucketsHistogramBuilder {
+        class FixedBucketsHistogramBuilder {
 
             private double[] upperBounds;
 
-            private ExplicitBucketsHistogramBuilder() {
+            private FixedBucketsHistogramBuilder() {
             }
 
-            public ExplicitBucketsHistogramBuilder withBuckets(double... upperBounds) {
+            public FixedBucketsHistogramBuilder withBuckets(double... upperBounds) {
                 this.upperBounds = upperBounds;
                 for (double bound : upperBounds) {
                     if (Double.isNaN(bound)) {
@@ -445,7 +445,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withLinearBuckets(double start, double width, int count) {
+            public FixedBucketsHistogramBuilder withLinearBuckets(double start, double width, int count) {
                 this.upperBounds = new double[count];
                 // Use BigDecimal to avoid weird bucket boundaries like 0.7000000000000001.
                 BigDecimal s = new BigDecimal(Double.toString(start));
@@ -456,7 +456,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withExponentialBuckets(double start, double factor, int count) {
+            public FixedBucketsHistogramBuilder withExponentialBuckets(double start, double factor, int count) {
                 upperBounds = new double[count];
                 for (int i = 0; i < count; i++) {
                     upperBounds[i] = start * Math.pow(factor, i);
@@ -464,42 +464,42 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withExemplars() {
+            public FixedBucketsHistogramBuilder withExemplars() {
                 Builder.this.withExemplars();
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withoutExemplars() {
+            public FixedBucketsHistogramBuilder withoutExemplars() {
                 Builder.this.withoutExemplars();
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withExemplarConfig(ExemplarConfig exemplarConfig) {
+            public FixedBucketsHistogramBuilder withExemplarConfig(ExemplarConfig exemplarConfig) {
                 Builder.this.withExemplarConfig(exemplarConfig);
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withLabelNames(String... labelNames) {
+            public FixedBucketsHistogramBuilder withLabelNames(String... labelNames) {
                 Builder.this.withLabelNames(labelNames);
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withName(String name) {
+            public FixedBucketsHistogramBuilder withName(String name) {
                 Builder.this.withName(name);
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withUnit(String unit) {
+            public FixedBucketsHistogramBuilder withUnit(String unit) {
                 Builder.this.withUnit(unit);
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withHelp(String help) {
+            public FixedBucketsHistogramBuilder withHelp(String help) {
                 Builder.this.withHelp(help);
                 return this;
             }
 
-            public ExplicitBucketsHistogramBuilder withConstLabels(Labels constLabels) {
+            public FixedBucketsHistogramBuilder withConstLabels(Labels constLabels) {
                 Builder.this.withConstLabels(constLabels);
                 return this;
             }
@@ -508,8 +508,8 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return Builder.this;
             }
 
-            public ExplicitBucketsHistogram build() {
-                return new ExplicitBucketsHistogram(this);
+            public FixedBucketsHistogram build() {
+                return new FixedBucketsHistogram(this);
             }
         }
 

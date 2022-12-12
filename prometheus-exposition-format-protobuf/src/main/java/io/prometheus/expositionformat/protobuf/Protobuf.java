@@ -5,11 +5,8 @@ import io.prometheus.metrics.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Protobuf {
 
@@ -39,10 +36,10 @@ public class Protobuf {
             for (GaugeSnapshot.GaugeData data : gauge.getData()) {
                 builder.addMetric(convert(data));
             }
-        } else if (snapshot instanceof ExplicitBucketsHistogramSnapshot) {
-            ExplicitBucketsHistogramSnapshot histogram = (ExplicitBucketsHistogramSnapshot) snapshot;
+        } else if (snapshot instanceof FixedBucketsHistogramSnapshot) {
+            FixedBucketsHistogramSnapshot histogram = (FixedBucketsHistogramSnapshot) snapshot;
             builder.setType(Metrics.MetricType.HISTOGRAM);
-            for (ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData data : histogram.getData()) {
+            for (FixedBucketsHistogramSnapshot.FixedBucketsHistogramData data : histogram.getData()) {
                 builder.addMetric(convert(data));
             }
         } else if (snapshot instanceof ExponentialBucketsHistogramSnapshot) {
@@ -86,10 +83,10 @@ public class Protobuf {
         return metricBuilder.build();
     }
 
-    private static Metrics.Metric convert(ExplicitBucketsHistogramSnapshot.ExplicitBucketsHistogramData data) {
+    private static Metrics.Metric convert(FixedBucketsHistogramSnapshot.FixedBucketsHistogramData data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
-        for (ExplicitBucket bucket : data.getBuckets()) {
+        for (FixedBucket bucket : data.getBuckets()) {
             histogramBuilder.addBucket(convert(bucket));
         }
         histogramBuilder.setSampleCount(data.getCount());
@@ -199,7 +196,7 @@ public class Protobuf {
         return builder.build();
     }
 
-    private static Metrics.Bucket convert(ExplicitBucket bucket) {
+    private static Metrics.Bucket convert(FixedBucket bucket) {
         Metrics.Bucket.Builder builder = Metrics.Bucket.newBuilder();
         if (bucket.getExemplar() != null) {
             builder.setExemplar(convert(bucket.getExemplar()));
