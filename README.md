@@ -10,6 +10,7 @@ Table of Contents
   * [Using](#using)
      * [Assets](#assets)
      * [Javadocs](#javadocs)
+  * [Building](#building)
   * [Instrumenting](#instrumenting)
      * [Counter](#counter)
      * [Gauge](#gauge)
@@ -80,6 +81,10 @@ By default, counters, histograms, and summaries export an additional series
 suffixed with `_created` and a value of the unix timestamp for when the metric
 was created. If this information is not helpful, it can be disabled by setting
 the environment variable `PROMETHEUS_DISABLE_CREATED_SERIES=true`.
+
+## Building
+
+Building the repository needs Java <= 11 (The project the project still supports Java 6 and Java 11 dropped support for Java 6 output). We recommend to use an [up-to-data Java 8 installation](https://adoptium.net/en-GB/marketplace/?version=8). The project provides the maven wrapper and therefore no local maven installqation is needed. To build the repository just call `./mvnw verify`.
 
 ## Instrumenting
 
