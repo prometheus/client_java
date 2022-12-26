@@ -50,7 +50,7 @@ public class GraphiteTest {
     // Check result.
     String[] parts = result.toString().split(" ");
     assertEquals(3, parts.length);
-    assertEquals("labels.l.fo_o", parts[0]);
+    assertEquals("labels;l=fo_o", parts[0]);
     assertEquals("1.0", parts[1]);
     Integer.parseInt(parts[2]);  // This shouldn't throw an exception.
   }

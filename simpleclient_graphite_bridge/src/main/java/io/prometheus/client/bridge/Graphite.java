@@ -61,7 +61,7 @@ public class Graphite {
         writer.write(m.replaceAll("_"));
         for (int i = 0; i < sample.labelNames.size(); ++i) {
           m.reset(sample.labelValues.get(i));
-          writer.write("." + sample.labelNames.get(i) + "." + m.replaceAll("_"));
+          writer.write(";" + sample.labelNames.get(i) + "=" + m.replaceAll("_"));
         }
         writer.write(" " + sample.value + " " + now + "\n");
       }
