@@ -3,12 +3,10 @@ package io.prometheus.metrics.model;
 public class ExponentialBucket {
     private final long cumulativeCount;
     private final int bucketIndex;
-    private final Exemplar exemplar;
 
-    public ExponentialBucket(long cumulativeCount, int bucketIndex, Exemplar exemplar) {
+    public ExponentialBucket(long cumulativeCount, int bucketIndex) {
         this.cumulativeCount = cumulativeCount;
         this.bucketIndex = bucketIndex;
-        this.exemplar = exemplar;
     }
 
     public long getCumulativeCount() {
@@ -17,9 +15,5 @@ public class ExponentialBucket {
 
     public int getBucketIndex() {
         return bucketIndex;
-    }
-
-    public Exemplar getExemplar() {
-        return exemplar;
     }
 }

@@ -1,15 +1,24 @@
 package io.prometheus.metrics.core;
 
 import com.google.protobuf.TextFormat;
+import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 import io.prometheus.expositionformat.protobuf.Protobuf;
 import io.prometheus.expositionformat.protobuf.generated.Metrics;
+import io.prometheus.metrics.exemplars.ExemplarConfig;
+import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.ExponentialBucket;
 import io.prometheus.metrics.model.ExponentialBucketsHistogramSnapshot;
 import io.prometheus.metrics.model.Labels;
-import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+
+import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
+import static org.junit.Assert.assertEquals;
 
 public class ExponentialBucketsHistogramTest {
 
@@ -249,7 +258,7 @@ public class ExponentialBucketsHistogramTest {
             }
             Metrics.MetricFamily protobufData = Protobuf.convert(testCase.histogram.collect());
             String expected = "name: \"test\" type: HISTOGRAM metric { histogram { " + testCase.expected + " } }";
-            Assert.assertEquals("test \"" + testCase.name + "\" failed", expected, TextFormat.printer().shortDebugString(protobufData));
+            assertEquals("test \"" + testCase.name + "\" failed", expected, TextFormat.printer().shortDebugString(protobufData));
         }
     }
 
@@ -262,83 +271,70 @@ public class ExponentialBucketsHistogramTest {
         System.out.println(valueToIndex(3.13, 5));
     }
 
-    /*
     @Test
     public void testExemplarSampler() {
-        final Exemplar exemplar1 = new Exemplar(1.1, Labels.of("trace_id", "abc", "span_id", "123"), System.currentTimeMillis());
-        final Exemplar exemplar2 = new Exemplar(2.1, Labels.of("trace_id", "def", "span_id", "456"), System.currentTimeMillis());
-        final Exemplar exemplar3 = new Exemplar(2.2, Labels.of("trace_id", "123", "span_id", "abc"), System.currentTimeMillis());
-        final AtomicReference<Integer> callNumber = new AtomicReference<>(0);
 
-        // observed values:               3.11, 2.11, 2.12, 3.12
-        // corresponding buckets indexes: 53,   35,   35,   53
+        SpanContextSupplier spanContextSupplier = new SpanContextSupplier() {
+            int callCount = 0;
+            @Override
+            public String getTraceId() {
+                return "traceId-" + callCount;
+            }
 
-        HistogramExemplarSampler exemplarSampler = (val, from, to, prev) -> {
-            switch (callNumber.get()) {
-                case 0:
-                    Assert.assertEquals(3.11, val, 0.00001);
-                    Assert.assertEquals(lowerBound(3.11, 5), from, 0.000000001);
-                    Assert.assertEquals(upperBound(3.11, 5), to, 0.000000001);
-                    assertNull(prev);
-                    return exemplar1;
-                case 1:
-                    Assert.assertEquals(2.11, val,  0.00001);
-                    Assert.assertEquals(lowerBound(2.11, 5), from, 0.000000001);
-                    Assert.assertEquals(upperBound(2.11, 5), to, 0.000000001);
-                    assertNull(prev);
-                    return exemplar2;
-                case 2:
-                    Assert.assertEquals(2.12, val, 0.00001);
-                    Assert.assertEquals(lowerBound(2.12, 5), from, 0.000000001);
-                    Assert.assertEquals(upperBound(2.12, 5), to, 0.000000001);
-                    Assert.assertEquals(exemplar1, prev);
-                    return null;
-                case 3:
-                    Assert.assertEquals(3.12, val, 0.00001);
-                    Assert.assertEquals(lowerBound(3.12, 5), from, 0.000000001);
-                    Assert.assertEquals(upperBound(3.12, 5), to, 0.000000001);
-                    Assert.assertEquals(exemplar2, prev);
-                    return exemplar3;
-                default:
-                    throw new RuntimeException("Unexpected 5th call");
+            @Override
+            public String getSpanId() {
+                return "spanId-" + callCount;
+            }
+
+            @Override
+            public boolean isSampled() {
+                callCount++;
+                return true;
             }
         };
+        long sampleIntervalMillis = 10;
         Histogram histogram = Histogram.newBuilder()
                 .withName("test")
-                .withExemplarSampler(exemplarSampler)
+                .withExemplarConfig(ExemplarConfig.newBuilder()
+                        .withSpanContextSupplier(spanContextSupplier)
+                        .withSampleIntervalMillis(sampleIntervalMillis)
+                        .build())
+                .withLabelNames("path")
                 .build();
 
-        // the test assumes 3.11, 3.12, and 3.13 fall into the same bucket
-        Assert.assertEquals(valueToIndex(3.11, 5), valueToIndex(3.12, 5));
-        Assert.assertEquals(valueToIndex(3.12, 5), valueToIndex(3.13, 5));
-        // the test assumes 2.11 and 2.12 fall into the same bucket
-        Assert.assertEquals(valueToIndex(2.11, 5), valueToIndex(2.12, 5));
+        Exemplar ex1 = Exemplar.newBuilder()
+                .withValue(3.11)
+                .withSpanId("spanId-1")
+                .withTraceId("traceId-1")
+                .build();
+        Exemplar ex2 = Exemplar.newBuilder()
+                .withValue(3.12)
+                .withSpanId("spanId-2")
+                .withTraceId("traceId-2")
+                .build();
+        Exemplar ex3 = Exemplar.newBuilder()
+                .withValue(3.13)
+                .withSpanId("spanId-3")
+                .withTraceId("traceId-3")
+                .withLabels(Labels.of("key1", "value1", "key2", "value2"))
+                .build();
 
-        // observed values:               3.11, 2.11, 2.12, 3.12
-        assertFalse(getBucket(histogram, valueToIndex(3.11, 5)).isPresent());
-        assertFalse(getBucket(histogram, valueToIndex(2.11, 5)).isPresent());
-        histogram.observe(3.11);
-        callNumber.set(callNumber.get() + 1);
-        assertExemplarEquals(exemplar1, getBucket(histogram, valueToIndex(3.11, 5)).get().getExemplar());
-        assertFalse(getBucket(histogram, valueToIndex(2.11, 5)).isPresent());
-        histogram.observe(2.1);
-        callNumber.set(callNumber.get() + 1);
-        assertExemplarEquals(exemplar1, getBucket(histogram, valueToIndex(3.11, 5)).get().getExemplar());
-        assertExemplarEquals(exemplar2, getBucket(histogram, valueToIndex(2.11, 5)).get().getExemplar());
-        histogram.observe(1.3);
-        callNumber.set(callNumber.get() + 1);
-        assertExemplarEquals(exemplar1, getBucket(histogram, valueToIndex(3.11, 5)).get().getExemplar());
-        assertExemplarEquals(exemplar2, getBucket(histogram, valueToIndex(2.11, 5)).get().getExemplar());
-        histogram.observe(2.2);
-        callNumber.set(callNumber.get() + 1);
-        assertExemplarEquals(exemplar1, getBucket(histogram, valueToIndex(3.11, 5)).get().getExemplar());
-        assertExemplarEquals(exemplar3, getBucket(histogram, valueToIndex(2.11, 5)).get().getExemplar());
-        histogram.observeWithExemplar(3.13, Labels.of("key1", "value1", "key2", "value2"));
-        assertExemplarEquals(new Exemplar(3.13, Labels.of("key1", "value1", "key2", "value2"), System.currentTimeMillis()), getBucket(histogram, valueToIndex(3.13, 5)).get().getExemplar());
-        assertExemplarEquals(exemplar3, getBucket(histogram, valueToIndex(3.13, 5)).get().getExemplar());
+        histogram.withLabels("/hello").observe(3.11);
+        histogram.withLabels("/world").observe(3.12);
+        assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
+        assertExemplarEquals(ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
+        assertEquals(1, getData(histogram, "path", "/world").getExemplars().size());
+        assertExemplarEquals(ex2, getData(histogram, "path", "/world").getExemplars().iterator().next());
+        histogram.withLabels("/world").observeWithExemplar(3.13, Labels.of("key1", "value1", "key2", "value2"));
+        assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
+        assertExemplarEquals(ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
+        Collection<Exemplar> exemplars = getData(histogram, "path", "/world").getExemplars();
+        List<Exemplar> exemplarList = new ArrayList<>(exemplars);
+        exemplarList.sort(Comparator.comparingDouble(Exemplar::getValue));
+        assertEquals(2, exemplars.size());
+        assertExemplarEquals(ex2, exemplarList.get(0));
+        assertExemplarEquals(ex3, exemplarList.get(1));
     }
-
-     */
 
     private ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData getData(Histogram histogram, String... labels) {
         return ((ExponentialBucketsHistogramSnapshot) histogram.collect()).getData().stream()

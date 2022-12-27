@@ -63,6 +63,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         return data.computeIfAbsent(Arrays.asList(labelValues), l -> newMetricData()).toObserver();
     }
 
+    // TODO: Remove automatically if label values have not been used in a while?
     public void remove(String... labelValues) {
         data.remove(Arrays.asList(labelValues));
     }

@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
@@ -24,8 +25,9 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
             private final double zeroThreshold;
             private final List<ExponentialBucket> bucketsForPositiveValues;
             private final List<ExponentialBucket> bucketsForNegativeValues;
+            private final Collection<Exemplar> exemplars;
 
-            public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, long createdTimeMillis) {
+            public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, Collection<Exemplar> exemplars, long createdTimeMillis) {
                 super(labels);
                 this.count = count;
                 this.sum = sum;
@@ -34,6 +36,7 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
                 this.zeroThreshold = zeroThreshold;
                 this.bucketsForPositiveValues = bucketsForPositiveValues;
                 this.bucketsForNegativeValues = bucketsForNegativeValues;
+                this.exemplars = exemplars == null ? Collections.emptyList() : exemplars;
                 validate();
             }
 
@@ -63,6 +66,10 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
 
         public List<ExponentialBucket> getBucketsForNegativeValues() {
             return bucketsForNegativeValues;
+        }
+
+        public Collection<Exemplar> getExemplars() {
+                return exemplars;
         }
 
         @Override

@@ -27,7 +27,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
     protected final long createdTimeMillis = System.currentTimeMillis();
 
     // Helper used in exponential histograms. Must be here because inner classes can't have static variables.
-    private static final double[][] exponentialBounds;
+    private static final double[][] EXPONENTIAL_BOUNDS;
     public static final double[] DEFAULT_BUCKETS = new double[] { .005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10 };
 
     protected Histogram(Builder builder) {
@@ -166,7 +166,6 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         private final int schema; // integer in [-4, 8]
         private final double zeroThreshold;
         private final int maxBuckets;
-        private final Buffer<ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData> buffer = new Buffer<>();
 
         private ExponentialBucketsHistogram(Histogram.Builder.ExponentialBucketsHistogramBuilder builder) {
             super(builder.getHistogramBuilder());
@@ -214,13 +213,20 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             private final DoubleAdder sum = new DoubleAdder();
             private final LongAdder zeroCount = new LongAdder();
             private final long createdTimeMillis = System.currentTimeMillis();
+            private final Buffer<ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData> buffer = new Buffer<>();
 
             private ExponentialBucketsHistogramData() {
             }
 
             @Override
             public void observe(double amount) {
-                observeWithExemplar(amount, null);
+                if (!buffer.append(amount)) {
+                    doObserve(amount);
+                }
+                if (isExemplarsEnabled() && hasSpanContextSupplier()) {
+                    lazyInitExemplarSampler(exemplarConfig, 4, null);
+                    exemplarSampler.observe(amount);
+                }
             }
 
             @Override
@@ -228,10 +234,13 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 if (!buffer.append(amount)) {
                     doObserve(amount);
                 }
+                if (isExemplarsEnabled()) {
+                    lazyInitExemplarSampler(exemplarConfig, 4, null);
+                    exemplarSampler.observeWithExemplar(amount, labels);
+                }
             }
 
             private void doObserve(double value) {
-                // todo: examplars
                 if (!Double.isNaN(value) && !Double.isInfinite(value)) {
                     if (value > zeroThreshold) {
                         addToBucket(bucketsForPositiveValues, value);
@@ -291,7 +300,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 // end of frexp()
 
                 if (schema >= 1) {
-                    return findIndex(exponentialBounds[schema - 1], frac) + (exp - 1) * exponentialBounds[schema - 1].length;
+                    return findIndex(EXPONENTIAL_BOUNDS[schema - 1], frac) + (exp - 1) * EXPONENTIAL_BOUNDS[schema - 1].length;
                 } else {
                     int result = exp;
                     if (frac == 0.5) {
@@ -325,6 +334,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             }
 
             public ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData collect(Labels labels) {
+                final Collection<io.prometheus.metrics.model.Exemplar> exemplars = exemplarSampler != null ? exemplarSampler.collect() : Collections.emptyList();
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
                         () -> new ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData(
@@ -336,6 +346,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                                 toBucketList(bucketsForPositiveValues),
                                 toBucketList(bucketsForNegativeValues),
                                 labels,
+                                exemplars,
                                 createdTimeMillis
                         ),
                         this::doObserve
@@ -351,7 +362,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 ExponentialBucket[] result = new ExponentialBucket[map.size()];
                 int i=0;
                 for (Map.Entry<Integer, LongAdder> entry : map.entrySet()) {
-                    result[i++] = new ExponentialBucket(entry.getValue().sum(), entry.getKey(), null);
+                    result[i++] = new ExponentialBucket(entry.getValue().sum(), entry.getKey());
                 }
                 return Arrays.asList(result);
             }
@@ -360,18 +371,18 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
     static {
         // See bounds in client_golang's histogram implementation.
-        exponentialBounds = new double[8][];
+        EXPONENTIAL_BOUNDS = new double[8][];
         for (int schema = 1; schema <= 8; schema++) {
-            exponentialBounds[schema - 1] = new double[1 << schema];
-            exponentialBounds[schema - 1][0] = 0.5;
+            EXPONENTIAL_BOUNDS[schema - 1] = new double[1 << schema];
+            EXPONENTIAL_BOUNDS[schema - 1][0] = 0.5;
             // https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/metrics/v1/metrics.proto#L501
             double base = Math.pow(2, Math.pow(2, -schema));
-            for (int i = 1; i < exponentialBounds[schema - 1].length; i++) {
+            for (int i = 1; i < EXPONENTIAL_BOUNDS[schema - 1].length; i++) {
                 if (i % 2 == 0 && schema > 1) {
                     // Use previously calculated value for increased precision, see comment in client_golang's implementation.
-                    exponentialBounds[schema - 1][i] = exponentialBounds[schema - 2][i / 2];
+                    EXPONENTIAL_BOUNDS[schema - 1][i] = EXPONENTIAL_BOUNDS[schema - 2][i / 2];
                 } else {
-                    exponentialBounds[schema - 1][i] = exponentialBounds[schema - 1][i - 1] * base;
+                    EXPONENTIAL_BOUNDS[schema - 1][i] = EXPONENTIAL_BOUNDS[schema - 1][i - 1] * base;
                 }
             }
         }
