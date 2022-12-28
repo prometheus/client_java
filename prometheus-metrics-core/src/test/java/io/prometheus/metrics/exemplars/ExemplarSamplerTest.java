@@ -44,7 +44,7 @@ public class ExemplarSamplerTest {
     public void testIsSampled() throws Exception {
         SpanContextSupplier scs = new SpanContextSupplier();
         scs.isSampled = false;
-        ExemplarSampler sampler = ExemplarSampler.newInstance(ExemplarConfig.newBuilder()
+        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
                 .withMinAgeMillis(minAge)
                 .withMaxAgeMillis(maxAge)
@@ -58,7 +58,7 @@ public class ExemplarSamplerTest {
     @Test
     public void testDefaultConfigHasFourExemplars() throws Exception {
         SpanContextSupplier scs = new SpanContextSupplier();
-        ExemplarSampler sampler = ExemplarSampler.newInstance(ExemplarConfig.newBuilder()
+        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
                 .withMinAgeMillis(minAge)
                 .withMaxAgeMillis(maxAge)
@@ -81,7 +81,7 @@ public class ExemplarSamplerTest {
     @Test
     public void testEmptyBuckets() throws Exception {
         SpanContextSupplier scs = new SpanContextSupplier();
-        ExemplarSampler sampler = ExemplarSampler.newInstance(ExemplarConfig.newBuilder()
+        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
                 .withMinAgeMillis(minAge)
                 .withMaxAgeMillis(maxAge)
@@ -99,7 +99,7 @@ public class ExemplarSamplerTest {
     @Test
     public void testDefaultExemplarsBuckets() throws Exception {
         SpanContextSupplier scs = new SpanContextSupplier();
-        ExemplarSampler sampler = ExemplarSampler.newInstance(ExemplarConfig.newBuilder()
+        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
                 .withBuckets(0.2, 0.4, 0.6, 0.8, 1.0)
                 .withMinAgeMillis(minAge)
@@ -107,7 +107,7 @@ public class ExemplarSamplerTest {
                 .withSampleIntervalMillis(sampleInterval)
                 .build());
 
-        sampler.awaitInitialization();
+        ((DefaultExemplarSampler) sampler).awaitInitialization();
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.3);
         sampler.observe(0.5); // not observed, previous observation is less than sample interval ms ago
@@ -138,14 +138,14 @@ public class ExemplarSamplerTest {
     @Test
     public void testDefaultExemplarsNoBuckets() throws Exception {
         SpanContextSupplier scs = new SpanContextSupplier();
-        ExemplarSampler sampler = ExemplarSampler.newInstance(ExemplarConfig.newBuilder()
+        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
                 .withNumberOfExemplars(4)
                 .withMinAgeMillis(minAge)
                 .withMaxAgeMillis(maxAge)
                 .withSampleIntervalMillis(sampleInterval)
                 .build());
-        sampler.awaitInitialization();
+        ((DefaultExemplarSampler) sampler).awaitInitialization();
         Thread.sleep(tick);           // t = 1 tick
         sampler.observe(1);    // observed
         assertExemplars(sampler, 1);

@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.exemplars.DefaultExemplarSampler;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.exemplars.ExemplarSampler;
 import io.prometheus.metrics.model.Labels;
@@ -17,7 +18,7 @@ abstract class MetricData<T extends Observer> {
     // Therefore, exemplarSampler must be lazily configured so that it will still be initialized if
     // a tracer is added later at runtime.
     // However, if no tracing is used or exemplars are disabled, this code should have almost zero overhead.
-    // TODO: This is partly copy-and-past
+    // TODO: This is partly copy-and-paste
     protected void lazyInitExemplarSampler(ExemplarConfig config, Integer defaultNumberOfExemplars, double[] defaultBuckets) {
         if (exemplarSampler == null) {
             synchronized (this) {
@@ -34,7 +35,7 @@ abstract class MetricData<T extends Observer> {
                         } else if (defaultBuckets != null) {
                             configBuilder.withBuckets(defaultBuckets);
                         }
-                        exemplarSampler = ExemplarSampler.newInstance(configBuilder.build());
+                        exemplarSampler = DefaultExemplarSampler.newInstance(configBuilder.build());
                     }
                 }
             }
