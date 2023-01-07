@@ -1,19 +1,24 @@
 package io.prometheus.metrics.model;
 
-import java.util.Collection;
 import java.util.regex.Pattern;
 
 public final class MetricMetadata {
     private static final Pattern METRIC_NAME_RE = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]+$");
     private final String name;
     private final String help;
-    private final MetricType type;
-    private final String unit;
+    private final Unit unit;
 
-    public MetricMetadata(String name, String help, MetricType type, String unit) {
+    public MetricMetadata(String name) {
+        this(name, null, null);
+    }
+
+    public MetricMetadata(String name, String help) {
+        this(name, help, null);
+    }
+
+    public MetricMetadata(String name, String help, Unit unit) {
         this.name = name;
         this.help = help;
-        this.type = type;
         this.unit = unit;
         validate();
     }
@@ -26,11 +31,7 @@ public final class MetricMetadata {
         return help;
     }
 
-    public MetricType getType() {
-        return type;
-    }
-
-    public String getUnit() {
+    public Unit getUnit() {
         return unit;
     }
 

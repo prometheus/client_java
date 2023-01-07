@@ -5,12 +5,15 @@ import io.prometheus.metrics.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 
 public class Protobuf {
 
-    public static void writeProtobuf(ByteArrayOutputStream response, Collection<MetricSnapshot> metricSnapshots) throws IOException {
+    public final static String CONTENT_TYPE = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
+
+    public static void write(OutputStream response, Collection<MetricSnapshot> metricSnapshots) throws IOException {
         for (MetricSnapshot snapshot : metricSnapshots) {
             convert(snapshot).writeDelimitedTo(response);
         }

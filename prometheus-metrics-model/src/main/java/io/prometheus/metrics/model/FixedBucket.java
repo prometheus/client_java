@@ -1,9 +1,13 @@
 package io.prometheus.metrics.model;
 
-public class FixedBucket {
+public class FixedBucket implements Comparable<FixedBucket> {
     private final long cumulativeCount;
     private final double upperBound;
     private final Exemplar exemplar;
+
+    public FixedBucket(long cumulativeCount, double upperBound) {
+        this(cumulativeCount, upperBound, null);
+    }
 
     public FixedBucket(long cumulativeCount, double upperBound, Exemplar exemplar) {
         this.cumulativeCount = cumulativeCount;
@@ -27,5 +31,10 @@ public class FixedBucket {
 
     public Exemplar getExemplar() {
         return exemplar;
+    }
+
+    @Override
+    public int compareTo(FixedBucket other) {
+        return Double.compare(upperBound, other.upperBound);
     }
 }

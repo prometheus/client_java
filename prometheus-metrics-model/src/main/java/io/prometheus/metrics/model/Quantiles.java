@@ -4,6 +4,7 @@ import java.util.*;
 
 public class Quantiles implements Iterable<Quantile> {
     private final List<Quantile> quantiles;
+    public static final Quantiles EMPTY = new Quantiles(Collections.emptyList());
 
     private Quantiles(List<Quantile> quantiles) {
         quantiles = new ArrayList<>(quantiles);
@@ -13,6 +14,10 @@ public class Quantiles implements Iterable<Quantile> {
 
     public static Quantiles of(List<Quantile> quantiles) {
         return new Quantiles(quantiles);
+    }
+
+    public static Quantiles of(Quantile... quantiles) {
+        return of(Arrays.asList(quantiles));
     }
 
     @Override

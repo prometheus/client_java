@@ -144,8 +144,33 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return new Labels(mergedNames, mergedValues);
     }
 
+    public boolean hasSameNames(Labels other) {
+        return Arrays.equals(names, other.names);
+    }
+
+    public boolean hasSameValues(Labels other) {
+        return Arrays.equals(values, other.values);
+    }
+
     @Override
-    public int compareTo(Labels o) {
+    public int compareTo(Labels other) {
+        int result;
+        for (int i=0; i<names.length; i++) {
+            if (other.names.length <= i) {
+                return -1;
+            }
+            result = names[i].compareTo(other.names[i]);
+            if (result != 0) {
+                return result;
+            }
+            result = values[i].compareTo(other.values[i]);
+            if (result != 0) {
+                return result;
+            }
+        }
+        if (other.names.length > names.length) {
+            return 1;
+        }
         return 0;
     }
 

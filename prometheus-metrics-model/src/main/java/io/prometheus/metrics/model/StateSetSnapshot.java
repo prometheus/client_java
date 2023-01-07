@@ -4,28 +4,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class StateSetSnapshot extends MetricSnapshot {
 
-    private final Collection<StateSetData> data;
-
     public StateSetSnapshot(MetricMetadata metadata, Collection<StateSetData> data) {
-        super(metadata);
-        this.data = data;
+        super(metadata, data);
         validate();
     }
 
     private void validate() {
-        for (StateSetData entry : data) {
+        for (StateSetData entry : getData()) {
             if (entry.getLabels().contains(getMetadata().getName())) {
                 throw new IllegalArgumentException("Label name " + getMetadata().getName() + " is reserved.");
             }
         }
     }
 
-    public Collection<StateSetData> getData() {
-        return data;
+    @Override
+    public List<StateSetData> getData() {
+        return (List<StateSetData>) data;
     }
 
 
@@ -33,8 +32,8 @@ public final class StateSetSnapshot extends MetricSnapshot {
 
         private final Map<String, Boolean> states = new HashMap<>();
 
-        public StateSetData(Labels labels, String[] names, boolean[] values) {
-            super(labels);
+        public StateSetData(Labels labels, String[] names, boolean[] values, long timestampMillis) {
+            super(labels, 0L, timestampMillis);
             if (names.length == 0) {
                 throw new IllegalArgumentException("StateSet must have at least one state.");
             }

@@ -1,17 +1,22 @@
 package io.prometheus.metrics.model;
 
 import java.util.Collection;
+import java.util.List;
 
 public final class GaugeHistogramSnapshot extends MetricSnapshot {
-    private final Collection<GaugeHistogramData> data;
 
     public GaugeHistogramSnapshot(MetricMetadata metadata, Collection<GaugeHistogramData> data) {
-        super(metadata);
-        this.data = data;
+        super(metadata, data);
     }
+
+    @Override
+    public List<GaugeHistogramData> getData() {
+        return (List<GaugeHistogramData>) data;
+    }
+
     public static class GaugeHistogramData extends MetricData {
-        protected GaugeHistogramData(Labels labels) {
-            super(labels);
+        protected GaugeHistogramData(Labels labels, long timestampMillis) {
+            super(labels, 0L, timestampMillis);
             validate();
             // TODO: Define data model, or re-use histogram model.
         }

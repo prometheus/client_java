@@ -1,22 +1,22 @@
 package io.prometheus.metrics.model;
 
 import java.util.Collection;
+import java.util.List;
 
 public final class InfoSnapshot extends MetricSnapshot {
 
-    private final Collection<InfoData> data;
     public InfoSnapshot(MetricMetadata metadata, Collection<InfoData> data) {
-        super(metadata);
-        this.data = data;
+        super(metadata, data);
     }
 
-    public Collection<InfoData> getData() {
-        return data;
+    @Override
+    public List<InfoData> getData() {
+        return (List<InfoData>) data;
     }
 
     public static class InfoData extends MetricData {
-        public InfoData(Labels labels) {
-            super(labels);
+        public InfoData(Labels labels, long timestampMillis) {
+            super(labels, 0L, timestampMillis);
             validate();
         }
 
