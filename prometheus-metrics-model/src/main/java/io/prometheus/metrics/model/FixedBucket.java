@@ -3,16 +3,10 @@ package io.prometheus.metrics.model;
 public class FixedBucket implements Comparable<FixedBucket> {
     private final long cumulativeCount;
     private final double upperBound;
-    private final Exemplar exemplar;
 
-    public FixedBucket(long cumulativeCount, double upperBound) {
-        this(cumulativeCount, upperBound, null);
-    }
-
-    public FixedBucket(long cumulativeCount, double upperBound, Exemplar exemplar) {
+    public FixedBucket(double upperBound, long cumulativeCount) {
         this.cumulativeCount = cumulativeCount;
         this.upperBound = upperBound;
-        this.exemplar = exemplar;
         if (Double.isNaN(upperBound)) {
             throw new IllegalArgumentException("Cannot use NaN as an upper bound for a histogram bucket");
         }
@@ -27,10 +21,6 @@ public class FixedBucket implements Comparable<FixedBucket> {
 
     public double getUpperBound() {
         return upperBound;
-    }
-
-    public Exemplar getExemplar() {
-        return exemplar;
     }
 
     @Override

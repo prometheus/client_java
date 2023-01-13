@@ -2,6 +2,7 @@ package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.FixedBucket;
+import io.prometheus.metrics.model.FixedBuckets;
 import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
 import io.prometheus.metrics.model.ExponentialBucket;
 import io.prometheus.metrics.model.ExponentialBucketsHistogramSnapshot;
@@ -124,20 +125,14 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
                         () -> {
-                            FixedBucket[] snapshotBuckets = new FixedBucket[buckets.length];
+                            long[] cumulativeCounts = new long[buckets.length];
                             long cumulativeCount = 0;
                             for (int i=0; i<upperBounds.length; i++) {
                                 cumulativeCount += buckets[i].sum();
-                                io.prometheus.metrics.model.Exemplar exemplar = null;
-                                for (io.prometheus.metrics.model.Exemplar candidate : exemplars) {
-                                    if (candidate.getValue() <= upperBounds[i] && (i==0 || candidate.getValue() > upperBounds[i-1])) {
-                                        exemplar = candidate;
-                                        break;
-                                    }
-                                }
-                                snapshotBuckets[i] = new FixedBucket(cumulativeCount, upperBounds[i], exemplar);
+                                cumulativeCounts[i] = cumulativeCount;
                             }
-                            return new FixedBucketsHistogramSnapshot.FixedBucketsHistogramData(count.longValue(), sum.sum(), snapshotBuckets, labels, createdTimeMillis);
+                            FixedBuckets buckets = FixedBuckets.of(upperBounds, cumulativeCounts);
+                            return new FixedBucketsHistogramSnapshot.FixedBucketsHistogramData(count.longValue(), sum.sum(), buckets, labels, createdTimeMillis);
                         },
                         this::doObserve
                 );

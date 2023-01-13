@@ -4,6 +4,7 @@ import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.FixedBucket;
+import io.prometheus.metrics.model.FixedBuckets;
 import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.Label;
@@ -77,10 +78,18 @@ public class OpenMetricsTextFormatWriter {
         MetricMetadata metadata = snapshot.getMetadata();
         writeMetadata(writer, "histogram", metadata);
         for (FixedBucketsHistogramSnapshot.FixedBucketsHistogramData data : snapshot.getData()) {
-            for (FixedBucket bucket : data.getBuckets()) {
-                writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", bucket.getUpperBound());
-                writeLong(writer, bucket.getCumulativeCount());
-                writeTimestampAndExemplar(writer, data, bucket.getExemplar());
+            FixedBuckets buckets = data.getBuckets();
+            Exemplars exemplars = data.getExemplars();
+            for (int i=0; i<buckets.size(); i++) {
+                writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
+                writeLong(writer, buckets.getCumulativeCount(i));
+                Exemplar exemplar;
+                if (i == 0) {
+                    exemplar = exemplars.get(Double.NEGATIVE_INFINITY, buckets.getUpperBound(i));
+                } else {
+                    exemplar = exemplars.get(buckets.getUpperBound(i-1), buckets.getUpperBound(i));
+                }
+                writeTimestampAndExemplar(writer, data, exemplar);
             }
             writeCountSumCreated(writer, metadata, data, data.getCount(), data.getSum(), Exemplars.EMPTY);
         }
@@ -194,19 +203,17 @@ public class OpenMetricsTextFormatWriter {
 
     private void writeLabels(OutputStreamWriter writer, Labels labels, String additionalLabelName, double additionalLabelValue) throws IOException {
         writer.write('{');
-        boolean first = true;
-        for (Label label : labels) {
-            if (!first) {
+        for (int i=0; i<labels.size(); i++) {
+            if (i > 0) {
                 writer.write(",");
             }
-            first = false;
-            writer.write(label.getName());
+            writer.write(labels.getName(i));
             writer.write("=\"");
-            writeEscapedLabelValue(writer, label.getValue());
+            writeEscapedLabelValue(writer, labels.getValue(i));
             writer.write("\"");
         }
         if (additionalLabelName != null) {
-            if (!first) {
+            if (!labels.isEmpty()) {
                 writer.write(",");
             }
             writer.write(additionalLabelName);

@@ -35,28 +35,46 @@ public final class FixedBucketsHistogramSnapshot extends MetricSnapshot {
         private final long count;
         private final double sum;
         private final FixedBuckets buckets;
+        private final Exemplars exemplars;
 
         public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets) {
-            this(count, sum, buckets, Labels.EMPTY, 0, 0);
+            this(count, sum, buckets, Labels.EMPTY, Exemplars.EMPTY, 0, 0);
+        }
+
+        public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets, Exemplars exemplars) {
+            this(count, sum, buckets, Labels.EMPTY, exemplars, 0, 0);
         }
 
         public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets, long createdTimestampMillis) {
-            this(count, sum, buckets, Labels.EMPTY, createdTimestampMillis, 0);
+            this(count, sum, buckets, Labels.EMPTY, Exemplars.EMPTY, createdTimestampMillis, 0);
+        }
+
+        public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets, Exemplars exemplars, long createdTimestampMillis) {
+            this(count, sum, buckets, Labels.EMPTY, exemplars, createdTimestampMillis, 0);
         }
 
         public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets, Labels labels) {
-            this(count, sum, buckets, labels, 0, 0);
+            this(count, sum, buckets, labels, Exemplars.EMPTY, 0, 0);
+        }
+
+        public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets, Labels labels, Exemplars exemplars) {
+            this(count, sum, buckets, labels, exemplars, 0, 0);
         }
 
         public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets, Labels labels, long createdTimestampMillis) {
-            this(count, sum, buckets, labels, createdTimestampMillis, 0);
+            this(count, sum, buckets, labels, Exemplars.EMPTY, createdTimestampMillis, 0);
         }
 
-        public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets, Labels labels, long createdTimestampMillis, long timestampMillis) {
+        public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
+            this(count, sum, buckets, labels, exemplars, createdTimestampMillis, 0);
+        }
+
+        public FixedBucketsHistogramData(long count, double sum, FixedBuckets buckets, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
             super(labels, createdTimestampMillis, timestampMillis);
             this.count = count;
             this.sum = sum;
             this.buckets = buckets;
+            this.exemplars = exemplars;
             validate();
         }
 
@@ -72,6 +90,10 @@ public final class FixedBucketsHistogramSnapshot extends MetricSnapshot {
             return buckets;
         }
 
+        public Exemplars getExemplars() {
+            return exemplars;
+        }
+
         @Override
         protected void validate() {
             for (Label label : getLabels()) {
@@ -79,11 +101,7 @@ public final class FixedBucketsHistogramSnapshot extends MetricSnapshot {
                     throw new IllegalArgumentException("le is a reserved label name for histograms");
                 }
             }
-            FixedBucket infinity = buckets.stream()
-                    .filter(bucket -> bucket.getUpperBound() == Double.POSITIVE_INFINITY)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Buckets must contain a +Inf bucket"));
-            if (infinity.getCumulativeCount() != count) {
+            if (buckets.getCumulativeCount(buckets.size()-1) != count) {
                 throw new IllegalArgumentException("The +Inf bucket must have the same value as the count.");
             }
         }

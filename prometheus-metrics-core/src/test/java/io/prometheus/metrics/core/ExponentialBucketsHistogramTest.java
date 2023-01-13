@@ -6,6 +6,7 @@ import io.prometheus.expositionformat.protobuf.Protobuf;
 import io.prometheus.expositionformat.protobuf.generated.Metrics;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplar;
+import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.ExponentialBucket;
 import io.prometheus.metrics.model.ExponentialBucketsHistogramSnapshot;
 import io.prometheus.metrics.model.Labels;
@@ -328,8 +329,11 @@ public class ExponentialBucketsHistogramTest {
         histogram.withLabels("/world").observeWithExemplar(3.13, Labels.of("key1", "value1", "key2", "value2"));
         assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
         assertExemplarEquals(ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
-        Collection<Exemplar> exemplars = getData(histogram, "path", "/world").getExemplars();
-        List<Exemplar> exemplarList = new ArrayList<>(exemplars);
+        Exemplars exemplars = getData(histogram, "path", "/world").getExemplars();
+        List<Exemplar> exemplarList = new ArrayList<>(exemplars.size());
+        for (Exemplar exemplar : exemplars) {
+            exemplarList.add(exemplar);
+        }
         exemplarList.sort(Comparator.comparingDouble(Exemplar::getValue));
         assertEquals(2, exemplars.size());
         assertExemplarEquals(ex2, exemplarList.get(0));

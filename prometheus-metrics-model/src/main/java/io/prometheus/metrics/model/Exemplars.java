@@ -33,6 +33,17 @@ public class Exemplars implements Iterable<Exemplar> {
         return exemplars.size();
     }
 
+    public Exemplar get(double lowerBound, double upperBound) {
+        for (int i=0; i< exemplars.size(); i++) {
+            Exemplar exemplar = exemplars.get(i);
+            double value = exemplar.getValue();
+            if (value > lowerBound && value <= upperBound) {
+                return exemplar;
+            }
+        }
+        return null;
+    }
+
     public Exemplar get(int index) {
         return exemplars.get(index);
     }

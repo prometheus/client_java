@@ -9,41 +9,139 @@ import java.util.stream.Stream;
 
 public class FixedBuckets implements Iterable<FixedBucket> {
 
-    private final List<FixedBucket> buckets;
+    private final double[] upperBounds;
+    private final long[] cumulativeCounts;
 
-    private FixedBuckets(List<FixedBucket> buckets) {
-        buckets = new ArrayList<>(buckets);
-        Collections.sort(buckets);
-        this.buckets = Collections.unmodifiableList(buckets);
-        if (buckets.size() == 0 || buckets.get(buckets.size()-1).getUpperBound() != Double.POSITIVE_INFINITY) {
+    private FixedBuckets(double[] upperBounds, long[] cumulativeCounts) {
+        this.upperBounds = upperBounds;
+        this.cumulativeCounts = cumulativeCounts;
+    }
+
+    public static FixedBuckets of(List<Double> upperBounds, List<Long> cumulativeCounts) {
+        double[] upperBoundsCopy = new double[upperBounds.size()];
+        for (int i=0; i<upperBounds.size(); i++) {
+            upperBoundsCopy[i] = upperBounds.get(i);
+        }
+        long[] cumulativeCountsCopy = new long[cumulativeCounts.size()];
+        for (int i=0; i<cumulativeCounts.size(); i++) {
+            cumulativeCountsCopy[i] = cumulativeCounts.get(i);
+        }
+        sortAndValidate(upperBoundsCopy, cumulativeCountsCopy);
+        return new FixedBuckets(upperBoundsCopy, cumulativeCountsCopy);
+    }
+
+    public static FixedBuckets of(double[] upperBounds, long[] cumulativeCounts) {
+        double[] upperBoundsCopy = Arrays.copyOf(upperBounds, upperBounds.length);
+        long[] cumulativeCountsCopy = Arrays.copyOf(cumulativeCounts, cumulativeCounts.length);
+        sortAndValidate(upperBoundsCopy, cumulativeCountsCopy);
+        return new FixedBuckets(upperBoundsCopy, cumulativeCountsCopy);
+    }
+
+    private static void sortAndValidate(double[] upperBounds, long[] cumulativeCounts) {
+        if (upperBounds.length != cumulativeCounts.length) {
+            throw new IllegalArgumentException("upperBounds.length == " + upperBounds.length + " but cumulativeCounts.length == " + cumulativeCounts.length + ". Expected the same length.");
+        }
+        sort(upperBounds, cumulativeCounts);
+        validate(upperBounds, cumulativeCounts);
+    }
+
+    private static void sort(double[] upperBounds, long[] cumulativeCounts) {
+        // Bubblesort. Should be efficient here as in most cases upperBounds is already sorted.
+        int n = upperBounds.length;
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (upperBounds[j] > upperBounds[j + 1]) {
+                    swap(j, j+1, upperBounds, cumulativeCounts);
+                }
+            }
+        }
+    }
+
+    private static void swap(int i, int j, double[] upperBounds, long[] cumulativeCounts) {
+        double tmpDouble = upperBounds[j];
+        upperBounds[j] = upperBounds[i];
+        upperBounds[i] = tmpDouble;
+        long tmpLong = cumulativeCounts[j];
+        cumulativeCounts[j] = cumulativeCounts[i];
+        cumulativeCounts[i] = tmpLong;
+    }
+
+    private static void validate(double[] upperBounds, long[] cumulativeCounts) {
+        // Preconditions:
+        // * upperBounds sorted
+        // * upperBounds and cumulativeCounts have the same length
+        if (upperBounds.length == 0) {
+            throw new IllegalArgumentException("Buckets cannot be empty. They must contain at least the +Inf bucket.");
+        }
+        if (upperBounds[upperBounds.length-1] != Double.POSITIVE_INFINITY) {
             throw new IllegalArgumentException("Buckets must contain the +Inf bucket.");
         }
-        for (int i=1; i<buckets.size(); i++) {
-            FixedBucket prev = buckets.get(i-1);
-            FixedBucket next = buckets.get(i);
-            if (prev.getUpperBound() == next.getUpperBound()) {
-                throw new IllegalArgumentException("Duplicate upper bound " + buckets.get(i).getUpperBound());
+        for (int i=0; i<upperBounds.length; i++) {
+            if (Double.isNaN(upperBounds[i])) {
+                throw new IllegalArgumentException("Cannot use NaN as an upper bound.");
             }
-            if (prev.getCumulativeCount() > next.getCumulativeCount()) {
+            if (cumulativeCounts[i] < 0) {
+                throw new IllegalArgumentException("Bucket counts cannot be negative.");
+            }
+            if (i > 0) {
+            if (upperBounds[i-1] == upperBounds[i]) {
+                throw new IllegalArgumentException("Duplicate upper bound " + upperBounds[i]);
+            }
+            if (cumulativeCounts[i-1] > cumulativeCounts[i]) {
                 throw new IllegalArgumentException("Bucket counts must be cumulative.");
+            }
             }
         }
     }
 
-    public static FixedBuckets of(List<FixedBucket> buckets) {
-        return new FixedBuckets(buckets);
+    public int size() {
+        return upperBounds.length;
     }
 
-    public static FixedBuckets of(FixedBucket... buckets) {
-        return of(Arrays.asList(buckets));
+    public double getUpperBound(int i) {
+        return upperBounds[i];
+    }
+
+    public long getCumulativeCount(int i) {
+        return cumulativeCounts[i];
+    }
+
+    private List<FixedBucket> asList() {
+        List<FixedBucket> result = new ArrayList<>(size());
+        for (int i=0; i<upperBounds.length; i++) {
+            result.add(new FixedBucket(upperBounds[i], cumulativeCounts[i]));
+        }
+        return result;
     }
 
     @Override
     public Iterator<FixedBucket> iterator() {
-        return buckets.iterator();
+        return asList().iterator();
     }
 
     public Stream<FixedBucket> stream() {
-        return buckets.stream();
+        return asList().stream();
     }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private final List<Double> upperBounds = new ArrayList<>();
+        private final List<Long> cumulativeCounts = new ArrayList<>();
+
+        private Builder() {}
+
+        public Builder addBucket(double upperBound, long cumulativeCount) {
+            upperBounds.add(upperBound);
+            cumulativeCounts.add(cumulativeCount);
+            return this;
+        }
+
+        public FixedBuckets build() {
+            return FixedBuckets.of(upperBounds, cumulativeCounts);
+        }
+    }
+
 }

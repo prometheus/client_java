@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 // See https://github.com/prometheus/prometheus/blob/main/prompb/types.proto
 public class Labels implements Comparable<Labels>, Iterable<Label> {
@@ -36,6 +37,13 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
             values[i] = keyValuePairs[2 * i + 1];
         }
         return Labels.of(names, values);
+    }
+
+    public static Labels of(List<String> names, List<String> values) {
+        String[] namesCopy = names.toArray(new String[0]);
+        String[] valuesCopy = values.toArray(new String[0]);
+        sortAndValidate(namesCopy, valuesCopy);
+        return new Labels(namesCopy, valuesCopy);
     }
 
     public static Labels of(String[] names, String[] values) {
@@ -174,14 +182,33 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return 0;
     }
 
-    @Override
-    public Iterator<Label> iterator() {
-        // TODO, this is just a quick hack
+    private List<Label> asList() {
         List<Label> result = new ArrayList<>(names.length);
         for (int i = 0; i < names.length; i++) {
             result.add(new Label(names[i], values[i]));
         }
-        return result.iterator();
+        return result;
+    }
+
+    @Override
+    public Iterator<Label> iterator() {
+        return asList().iterator();
+    }
+
+    public Stream<Label> stream() {
+        return asList().stream();
+    }
+
+    public int size() {
+        return names.length;
+    }
+
+    public String getName(int i) {
+        return names[i];
+    }
+
+    public String getValue(int i) {
+        return values[i];
     }
 
     // as labels are sorted by name, equals is insensitive to the order
@@ -198,5 +225,26 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         int result = Arrays.hashCode(names);
         result = 31 * result + Arrays.hashCode(values);
         return result;
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private final List<String> names = new ArrayList<>();
+        private final List<String> values = new ArrayList<>();
+
+        private Builder() {}
+
+        public Builder addLabel(String name, String value) {
+            names.add(name);
+            values.add(value);
+            return this;
+        }
+
+        public Labels build() {
+            return Labels.of(names, values);
+        }
     }
 }
