@@ -16,9 +16,12 @@ import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.model.MetricSnapshots;
 import io.prometheus.metrics.model.Quantile;
 import io.prometheus.metrics.model.Quantiles;
+import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.model.SummarySnapshot;
 import io.prometheus.metrics.model.SummarySnapshot.SummaryData;
 import io.prometheus.metrics.model.Unit;
+import io.prometheus.metrics.model.UnknownSnapshot;
+import io.prometheus.metrics.model.UnknownSnapshot.UnknownData;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -190,6 +193,41 @@ public class OpenMetricsTextFormatWriterTest {
                         "# EOF\n",
                         new MetricSnapshot[]{
                                 new InfoSnapshot("version", "version information", new InfoSnapshot.InfoData(Labels.of("version", "1.2.3")))
+                        }},
+                new Object[]{"stateset", "" +
+                        "# TYPE more_complete stateset\n" +
+                        "# HELP more_complete complete state set example\n" +
+                        "more_complete{env=\"dev\",more_complete=\"state1\"} 1\n" +
+                        "more_complete{env=\"dev\",more_complete=\"state2\"} 0\n" +
+                        "more_complete{env=\"prod\",more_complete=\"state1\"} 0\n" +
+                        "more_complete{env=\"prod\",more_complete=\"state2\"} 1\n" +
+                        "# TYPE my_states stateset\n" +
+                        "my_states{my_states=\"a\"} 1\n" +
+                        "my_states{my_states=\"bb\"} 0\n" +
+                        "# EOF\n",
+                        new MetricSnapshot[]{
+                                new StateSetSnapshot("my_states", StateSetSnapshot.StateSetData.newBuilder().addState("a", true).addState("bb", false).build()),
+                                new StateSetSnapshot("more_complete", "complete state set example",
+                                        StateSetSnapshot.StateSetData.newBuilder().withLabels(Labels.of("env", "prod")).addState("state1", false).addState("state2", true).build(),
+                                        StateSetSnapshot.StateSetData.newBuilder().withLabels(Labels.of("env", "dev")).addState("state2", false).addState("state1", true).build()
+                                )
+                        }
+                },
+                new Object[]{"unknown", "" +
+                        "# TYPE my_special_thing unknown\n" +
+                        "# UNIT my_special_thing bytes\n" +
+                        "# HELP my_special_thing help message\n" +
+                        "my_special_thing{env=\"dev\"} 0.2 1672850685.829 # {env=\"prod\",span_id=\"12345\",trace_id=\"abcde\"} 1.7 1672850685.829\n" +
+                        "my_special_thing{env=\"prod\"} 0.7 1672850685.829 # {env=\"prod\",span_id=\"12345\",trace_id=\"abcde\"} 1.7 1672850685.829\n" +
+                        "# TYPE other unknown\n" +
+                        "other 22.3\n" +
+                        "# EOF\n",
+                        new MetricSnapshot[]{
+                                new UnknownSnapshot("my_special_thing", "help message", Unit.BYTES,
+                                        new UnknownData(0.7, Labels.of("env", "prod"), exemplar1, timestampLongs[1], timestampLongs[0]),
+                                        new UnknownData(0.2, Labels.of("env", "dev"), exemplar1, timestampLongs[1], timestampLongs[0])
+                                ),
+                                new UnknownSnapshot("other", new UnknownData(22.3))
                         }}
         );
     }

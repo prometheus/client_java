@@ -15,7 +15,9 @@ import io.prometheus.metrics.model.MetricMetadata;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.model.MetricSnapshots;
 import io.prometheus.metrics.model.Quantile;
+import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.model.SummarySnapshot;
+import io.prometheus.metrics.model.UnknownSnapshot;
 import sun.misc.FloatingDecimal;
 
 import java.io.IOException;
@@ -46,6 +48,10 @@ public class OpenMetricsTextFormatWriter {
                 writeSummary(writer, (SummarySnapshot) snapshot);
             } else if (snapshot instanceof InfoSnapshot) {
                 writeInfo(writer, (InfoSnapshot) snapshot);
+            } else if (snapshot instanceof StateSetSnapshot) {
+                writeStateSet(writer, (StateSetSnapshot) snapshot);
+            } else if (snapshot instanceof UnknownSnapshot) {
+                writeUnknown(writer, (UnknownSnapshot) snapshot);
             }
         }
         writer.write("# EOF\n");
@@ -83,14 +89,14 @@ public class OpenMetricsTextFormatWriter {
         for (FixedBucketsHistogramSnapshot.FixedBucketsHistogramData data : snapshot.getData()) {
             FixedBuckets buckets = data.getBuckets();
             Exemplars exemplars = data.getExemplars();
-            for (int i=0; i<buckets.size(); i++) {
+            for (int i = 0; i < buckets.size(); i++) {
                 writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
                 writeLong(writer, buckets.getCumulativeCount(i));
                 Exemplar exemplar;
                 if (i == 0) {
                     exemplar = exemplars.get(Double.NEGATIVE_INFINITY, buckets.getUpperBound(i));
                 } else {
-                    exemplar = exemplars.get(buckets.getUpperBound(i-1), buckets.getUpperBound(i));
+                    exemplar = exemplars.get(buckets.getUpperBound(i - 1), buckets.getUpperBound(i));
                 }
                 writeTimestampAndExemplar(writer, data, exemplar);
             }
@@ -124,13 +130,56 @@ public class OpenMetricsTextFormatWriter {
         }
     }
 
+    private void writeStateSet(OutputStreamWriter writer, StateSetSnapshot snapshot) throws IOException {
+        MetricMetadata metadata = snapshot.getMetadata();
+        writeMetadata(writer, "stateset", metadata);
+        for (StateSetSnapshot.StateSetData data : snapshot.getData()) {
+            for (int i = 0; i < data.size(); i++) {
+                writer.write(metadata.getName());
+                writer.write('{');
+                for (int j = 0; j < data.getLabels().size(); j++) {
+                    if (j > 0) {
+                        writer.write(",");
+                    }
+                    writer.write(data.getLabels().getName(j));
+                    writer.write("=\"");
+                    writeEscapedLabelValue(writer, data.getLabels().getValue(j));
+                    writer.write("\"");
+                }
+                if (!data.getLabels().isEmpty()) {
+                    writer.write(",");
+                }
+                writer.write(metadata.getName());
+                writer.write("=\"");
+                writeEscapedLabelValue(writer, data.getName(i));
+                writer.write("\"} ");
+                if (data.isTrue(i)) {
+                    writer.write("1");
+                } else {
+                    writer.write("0");
+                }
+                writeTimestampAndExemplar(writer, data, null);
+            }
+        }
+    }
+
+    private void writeUnknown(OutputStreamWriter writer, UnknownSnapshot snapshot) throws IOException {
+        MetricMetadata metadata = snapshot.getMetadata();
+        writeMetadata(writer, "unknown", metadata);
+        for (UnknownSnapshot.UnknownData data : snapshot.getData()) {
+            writeNameAndLabels(writer, metadata.getName(), null, data.getLabels());
+            writeDouble(writer, data.getValue());
+            writeTimestampAndExemplar(writer, data, data.getExemplar());
+        }
+    }
+
     private void writeCountSumCreated(OutputStreamWriter writer, MetricMetadata metadata, MetricData data, long count, double sum, Exemplars exemplars) throws IOException {
         writeNameAndLabels(writer, metadata.getName(), "_count", data.getLabels());
         writeLong(writer, count);
         writeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(0) : null);
         writeNameAndLabels(writer, metadata.getName(), "_sum", data.getLabels());
         writeDouble(writer, sum);
-        writeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(exemplars.size()-1) : null);
+        writeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(exemplars.size() - 1) : null);
         if (writeCreatedTimestamps && data.hasCreatedTimestamp()) {
             writeNameAndLabels(writer, metadata.getName(), "_created", data.getLabels());
             writeTimestamp(writer, data.getCreatedTimestampMillis());
@@ -143,7 +192,7 @@ public class OpenMetricsTextFormatWriter {
     }
 
     private void writeNameAndLabels(OutputStreamWriter writer, String name, String suffix, Labels labels,
-                String additionalLabelName, double additionalLabelValue) throws IOException {
+                                    String additionalLabelName, double additionalLabelValue) throws IOException {
         writer.write(name);
         if (suffix != null) {
             writer.write(suffix);
@@ -216,7 +265,7 @@ public class OpenMetricsTextFormatWriter {
 
     private void writeLabels(OutputStreamWriter writer, Labels labels, String additionalLabelName, double additionalLabelValue) throws IOException {
         writer.write('{');
-        for (int i=0; i<labels.size(); i++) {
+        for (int i = 0; i < labels.size(); i++) {
             if (i > 0) {
                 writer.write(",");
             }
