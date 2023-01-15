@@ -7,6 +7,7 @@ import io.prometheus.metrics.model.FixedBucket;
 import io.prometheus.metrics.model.FixedBuckets;
 import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot;
+import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Label;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricData;
@@ -43,6 +44,8 @@ public class OpenMetricsTextFormatWriter {
                 writeHistogram(writer, (FixedBucketsHistogramSnapshot) snapshot);
             } else if (snapshot instanceof SummarySnapshot) {
                 writeSummary(writer, (SummarySnapshot) snapshot);
+            } else if (snapshot instanceof InfoSnapshot) {
+                writeInfo(writer, (InfoSnapshot) snapshot);
             }
         }
         writer.write("# EOF\n");
@@ -108,6 +111,16 @@ public class OpenMetricsTextFormatWriter {
                 writeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(exemplarIndex) : null);
             }
             writeCountSumCreated(writer, metadata, data, data.getCount(), data.getSum(), exemplars);
+        }
+    }
+
+    private void writeInfo(OutputStreamWriter writer, InfoSnapshot snapshot) throws IOException {
+        MetricMetadata metadata = snapshot.getMetadata();
+        writeMetadata(writer, "info", metadata);
+        for (InfoSnapshot.InfoData data : snapshot.getData()) {
+            writeNameAndLabels(writer, metadata.getName(), "_info", data.getLabels());
+            writer.write("1.0");
+            writeTimestampAndExemplar(writer, data, null);
         }
     }
 
