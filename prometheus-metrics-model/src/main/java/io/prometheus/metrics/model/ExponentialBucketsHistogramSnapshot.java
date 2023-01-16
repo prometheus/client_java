@@ -1,13 +1,19 @@
 package io.prometheus.metrics.model;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
 
+    private final boolean gaugeHistogram;
+
     public ExponentialBucketsHistogramSnapshot(MetricMetadata metadata, Collection<ExponentialBucketsHistogramData> data) {
+        this(false, metadata, data);
+    }
+
+    public ExponentialBucketsHistogramSnapshot(boolean isGaugeHistogram, MetricMetadata metadata, Collection<ExponentialBucketsHistogramData> data) {
         super(metadata, data);
+        this.gaugeHistogram = isGaugeHistogram;
     }
 
     @Override
@@ -15,36 +21,26 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
         return (List<ExponentialBucketsHistogramData>) data;
     }
 
-    public static final class ExponentialBucketsHistogramData extends MetricData {
+    public static final class ExponentialBucketsHistogramData extends DistributionMetricData {
 
-        private final long count;
-        private final double sum;
         private final int schema;
         private final long zeroCount;
         private final double zeroThreshold;
         private final List<ExponentialBucket> bucketsForPositiveValues;
         private final List<ExponentialBucket> bucketsForNegativeValues;
-        private final Exemplars exemplars;
+
+        public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
+            this(count, sum, schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, labels, exemplars, createdTimestampMillis, 0L);
+        }
 
         public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
-            super(labels, createdTimestampMillis, timestampMillis);
-            this.count = count;
-            this.sum = sum;
+            super(count, sum, exemplars, labels, createdTimestampMillis, timestampMillis);
             this.schema = schema;
             this.zeroCount = zeroCount;
             this.zeroThreshold = zeroThreshold;
             this.bucketsForPositiveValues = bucketsForPositiveValues;
             this.bucketsForNegativeValues = bucketsForNegativeValues;
-            this.exemplars = exemplars;
             validate();
-        }
-
-        public long getCount() {
-            return count;
-        }
-
-        public double getSum() {
-            return sum;
         }
 
         public int getSchema() {
@@ -65,10 +61,6 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
 
         public List<ExponentialBucket> getBucketsForNegativeValues() {
             return bucketsForNegativeValues;
-        }
-
-        public Exemplars getExemplars() {
-            return exemplars;
         }
 
         @Override

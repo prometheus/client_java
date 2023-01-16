@@ -32,12 +32,9 @@ public final class SummarySnapshot extends MetricSnapshot {
         return (List<SummaryData>) data;
     }
 
-    public static final class SummaryData extends MetricData {
+    public static final class SummaryData extends DistributionMetricData {
 
-        private final long count;
-        private final double sum;
         private final Quantiles quantiles;
-        private final Exemplars exemplars;
 
         public SummaryData(long count, double sum) {
             this(count, sum, Quantiles.EMPTY, Labels.EMPTY, Exemplars.EMPTY, 0, 0);
@@ -104,28 +101,13 @@ public final class SummarySnapshot extends MetricSnapshot {
         }
 
         public SummaryData(long count, double sum, Quantiles quantiles, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
-            super(labels, createdTimestampMillis, timestampMillis);
-            this.count = count;
-            this.sum = sum;
+            super(count, sum, exemplars, labels, createdTimestampMillis, timestampMillis);
             this.quantiles = quantiles;
-            this.exemplars = exemplars;
             validate();
-        }
-
-        public long getCount() {
-            return count;
-        }
-
-        public double getSum() {
-            return sum;
         }
 
         public Quantiles getQuantiles() {
             return quantiles;
-        }
-
-        public Exemplars getExemplars() {
-            return exemplars;
         }
 
         @Override

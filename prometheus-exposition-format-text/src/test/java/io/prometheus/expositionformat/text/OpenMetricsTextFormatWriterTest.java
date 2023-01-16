@@ -11,7 +11,7 @@ import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot.GaugeData;
 import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricData;
+import io.prometheus.metrics.model.MetricMetadata;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.model.MetricSnapshots;
 import io.prometheus.metrics.model.Quantile;
@@ -30,6 +30,7 @@ import org.junit.runners.Parameterized;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(Parameterized.class)
@@ -167,7 +168,7 @@ public class OpenMetricsTextFormatWriterTest {
                         "response_size_bytes_created{status=\"500\"} " + timestampStrings[1] + "\n" +
                         "# EOF\n",
                         new MetricSnapshot[]{
-                                new FixedBucketsHistogramSnapshot("request_latency_seconds", new FixedBucketsHistogramData(2, 3.2, FixedBuckets.newBuilder().addBucket(Double.POSITIVE_INFINITY, 2).build())),
+                                new FixedBucketsHistogramSnapshot("request_latency_seconds", new FixedBucketsHistogramData(2, 3.2, FixedBuckets.newBuilder().addBucket(Double.POSITIVE_INFINITY, 2).build(), Labels.EMPTY, Exemplars.EMPTY, 0L)),
                                 new FixedBucketsHistogramSnapshot("response_size_bytes", "help", Unit.BYTES,
                                         new FixedBucketsHistogramData(2, 3.2, FixedBuckets.newBuilder()
                                                 .addBucket(2.2, 2)
@@ -185,6 +186,47 @@ public class OpenMetricsTextFormatWriterTest {
                                                 Exemplars.of(exemplar1, exemplar2),
                                                 timestampLongs[1],
                                                 timestampLongs[0])
+                                )}},
+                new Object[]{"gauge_histogram", "" +
+                        "# TYPE cache_size_bytes gaugehistogram\n" +
+                        "# UNIT cache_size_bytes bytes\n" +
+                        "# HELP cache_size_bytes number of bytes in the cache\n" +
+                        "cache_size_bytes_bucket{db=\"items\",le=\"2.0\"} 3 " + timestampStrings[0] + " # " + exemplar1String + "\n" +
+                        "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 7 " + timestampStrings[0] + " # " + exemplar2String + "\n" +
+                        "cache_size_bytes_gcount{db=\"items\"} 7 " + timestampStrings[0] + "\n" +
+                        "cache_size_bytes_gsum{db=\"items\"} 17.0 " + timestampStrings[0] + "\n" +
+                        "cache_size_bytes_created{db=\"items\"} " + timestampStrings[1] + "\n" +
+                        "cache_size_bytes_bucket{db=\"options\",le=\"2.0\"} 4 " + timestampStrings[0] + " # " + exemplar1String + "\n" +
+                        "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 8 " + timestampStrings[0] + " # " + exemplar2String + "\n" +
+                        "cache_size_bytes_gcount{db=\"options\"} 8 " + timestampStrings[0] + "\n" +
+                        "cache_size_bytes_gsum{db=\"options\"} 18.0 " + timestampStrings[0] + "\n" +
+                        "cache_size_bytes_created{db=\"options\"} " + timestampStrings[1] + "\n" +
+                        "# TYPE queue_size_bytes gaugehistogram\n" +
+                        "queue_size_bytes_bucket{le=\"+Inf\"} 130\n" +
+                        "queue_size_bytes_gcount 130\n" +
+                        "queue_size_bytes_gsum 27000.0\n" +
+                        "# EOF\n",
+                        new MetricSnapshot[]{
+                                new FixedBucketsHistogramSnapshot(true, new MetricMetadata("queue_size_bytes"), Collections.singletonList(new FixedBucketsHistogramData(130, 27000, FixedBuckets.newBuilder().addBucket(Double.POSITIVE_INFINITY, 130).build(), Labels.EMPTY, Exemplars.EMPTY, 0L))),
+                                new FixedBucketsHistogramSnapshot(true, new MetricMetadata("cache_size_bytes", "number of bytes in the cache", Unit.BYTES),
+                                        Arrays.asList(
+                                        new FixedBucketsHistogramData(7, 17, FixedBuckets.newBuilder()
+                                                .addBucket(2.0, 3)
+                                                .addBucket(Double.POSITIVE_INFINITY, 7)
+                                                .build(),
+                                                Labels.of("db", "items"),
+                                                Exemplars.of(exemplar1, exemplar2),
+                                                timestampLongs[1],
+                                                timestampLongs[0]),
+                                        new FixedBucketsHistogramData(8, 18, FixedBuckets.newBuilder()
+                                                .addBucket(2.0, 4)
+                                                .addBucket(Double.POSITIVE_INFINITY, 8)
+                                                .build(),
+                                                Labels.of("db", "options"),
+                                                Exemplars.of(exemplar1, exemplar2),
+                                                timestampLongs[1],
+                                                timestampLongs[0])
+                                        )
                                 )}},
                 new Object[]{"info", "" +
                         "# TYPE version info\n" +

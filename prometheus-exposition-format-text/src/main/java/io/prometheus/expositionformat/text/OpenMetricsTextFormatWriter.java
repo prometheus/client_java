@@ -3,12 +3,10 @@ package io.prometheus.expositionformat.text;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.FixedBucket;
 import io.prometheus.metrics.model.FixedBuckets;
 import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.InfoSnapshot;
-import io.prometheus.metrics.model.Label;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricData;
 import io.prometheus.metrics.model.MetricMetadata;
@@ -25,6 +23,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class OpenMetricsTextFormatWriter {
 
@@ -36,6 +35,7 @@ public class OpenMetricsTextFormatWriter {
     }
 
     public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
+        // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and "summary".
         OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
         for (MetricSnapshot snapshot : metricSnapshots) {
             if (snapshot instanceof CounterSnapshot) {
@@ -85,8 +85,17 @@ public class OpenMetricsTextFormatWriter {
 
     private void writeHistogram(OutputStreamWriter writer, FixedBucketsHistogramSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
-        writeMetadata(writer, "histogram", metadata);
-        for (FixedBucketsHistogramSnapshot.FixedBucketsHistogramData data : snapshot.getData()) {
+        if (snapshot.isGaugeHistogram()) {
+            writeMetadata(writer, "gaugehistogram", metadata);
+            writeHistogramBuckets(writer, metadata, "_gcount", "_gsum", snapshot.getData());
+        } else {
+            writeMetadata(writer, "histogram", metadata);
+            writeHistogramBuckets(writer, metadata, "_count", "_sum", snapshot.getData());
+        }
+    }
+
+    private void writeHistogramBuckets(OutputStreamWriter writer, MetricMetadata metadata, String countSuffix, String sumSuffix, List<FixedBucketsHistogramSnapshot.FixedBucketsHistogramData> dataList) throws IOException {
+        for (FixedBucketsHistogramSnapshot.FixedBucketsHistogramData data : dataList) {
             FixedBuckets buckets = data.getBuckets();
             Exemplars exemplars = data.getExemplars();
             for (int i = 0; i < buckets.size(); i++) {
@@ -100,7 +109,7 @@ public class OpenMetricsTextFormatWriter {
                 }
                 writeTimestampAndExemplar(writer, data, exemplar);
             }
-            writeCountSumCreated(writer, metadata, data, data.getCount(), data.getSum(), Exemplars.EMPTY);
+            writeCountSumCreated(writer, metadata, data, data.getCount(), countSuffix, data.getSum(), sumSuffix, Exemplars.EMPTY);
         }
     }
 
@@ -116,7 +125,7 @@ public class OpenMetricsTextFormatWriter {
                 exemplarIndex = exemplarIndex + 1 % exemplars.size();
                 writeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(exemplarIndex) : null);
             }
-            writeCountSumCreated(writer, metadata, data, data.getCount(), data.getSum(), exemplars);
+            writeCountSumCreated(writer, metadata, data, data.getCount(), "_count", data.getSum(), "_sum", exemplars);
         }
     }
 
@@ -173,11 +182,11 @@ public class OpenMetricsTextFormatWriter {
         }
     }
 
-    private void writeCountSumCreated(OutputStreamWriter writer, MetricMetadata metadata, MetricData data, long count, double sum, Exemplars exemplars) throws IOException {
-        writeNameAndLabels(writer, metadata.getName(), "_count", data.getLabels());
+    private void writeCountSumCreated(OutputStreamWriter writer, MetricMetadata metadata, MetricData data, long count, String countSuffix, double sum, String sumSuffix, Exemplars exemplars) throws IOException {
+        writeNameAndLabels(writer, metadata.getName(), countSuffix, data.getLabels());
         writeLong(writer, count);
         writeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(0) : null);
-        writeNameAndLabels(writer, metadata.getName(), "_sum", data.getLabels());
+        writeNameAndLabels(writer, metadata.getName(), sumSuffix, data.getLabels());
         writeDouble(writer, sum);
         writeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(exemplars.size() - 1) : null);
         if (writeCreatedTimestamps && data.hasCreatedTimestamp()) {

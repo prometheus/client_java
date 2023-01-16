@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.exemplars.ExemplarConfig;
+import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.FixedBucket;
 import io.prometheus.metrics.model.FixedBuckets;
 import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
@@ -121,7 +122,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             }
 
             public FixedBucketsHistogramSnapshot.FixedBucketsHistogramData collect(Labels labels) {
-                Collection<io.prometheus.metrics.model.Exemplar> exemplars = exemplarSampler != null ? exemplarSampler.collect() : Collections.emptyList();
+                Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
                         () -> {
@@ -132,7 +133,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                                 cumulativeCounts[i] = cumulativeCount;
                             }
                             FixedBuckets buckets = FixedBuckets.of(upperBounds, cumulativeCounts);
-                            return new FixedBucketsHistogramSnapshot.FixedBucketsHistogramData(count.longValue(), sum.sum(), buckets, labels, createdTimeMillis);
+                            return new FixedBucketsHistogramSnapshot.FixedBucketsHistogramData(count.longValue(), sum.sum(), buckets, labels, exemplars, createdTimeMillis);
                         },
                         this::doObserve
                 );
@@ -329,7 +330,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             }
 
             public ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData collect(Labels labels) {
-                final Collection<io.prometheus.metrics.model.Exemplar> exemplars = exemplarSampler != null ? exemplarSampler.collect() : Collections.emptyList();
+                final Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
                         () -> new ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData(

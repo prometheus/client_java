@@ -2,6 +2,7 @@ package io.prometheus.metrics.exemplars;
 
 import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 import io.prometheus.metrics.model.Exemplar;
+import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.Labels;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class DefaultExemplarSampler implements ExemplarSampler {
      * Collect up to nExemplars exemplars, preferably custom exemplars.
      */
     @Override
-    public Collection<Exemplar> collect() {
+    public Exemplars collect() {
         // this might run in parallel with observe()
         long now = System.currentTimeMillis();
         List<Exemplar> result = new ArrayList<>(exemplars.length);
@@ -73,7 +74,7 @@ public class DefaultExemplarSampler implements ExemplarSampler {
                 }
             }
         }
-        return result;
+        return Exemplars.of(result); // TODO
     }
 
     @Override
