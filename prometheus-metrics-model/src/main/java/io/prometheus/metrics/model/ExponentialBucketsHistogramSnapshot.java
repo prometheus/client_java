@@ -26,14 +26,14 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
         private final int schema;
         private final long zeroCount;
         private final double zeroThreshold;
-        private final List<ExponentialBucket> bucketsForPositiveValues;
-        private final List<ExponentialBucket> bucketsForNegativeValues;
+        private final ExponentialBuckets bucketsForPositiveValues;
+        private final ExponentialBuckets bucketsForNegativeValues;
 
-        public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
+        public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, ExponentialBuckets bucketsForPositiveValues, ExponentialBuckets bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
             this(count, sum, schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, labels, exemplars, createdTimestampMillis, 0L);
         }
 
-        public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, List<ExponentialBucket> bucketsForPositiveValues, List<ExponentialBucket> bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
+        public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, ExponentialBuckets bucketsForPositiveValues, ExponentialBuckets bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
             super(count, sum, exemplars, labels, createdTimestampMillis, timestampMillis);
             this.schema = schema;
             this.zeroCount = zeroCount;
@@ -55,11 +55,11 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
             return zeroThreshold;
         }
 
-        public List<ExponentialBucket> getBucketsForPositiveValues() {
+        public ExponentialBuckets getBucketsForPositiveValues() {
             return bucketsForPositiveValues;
         }
 
-        public List<ExponentialBucket> getBucketsForNegativeValues() {
+        public ExponentialBuckets getBucketsForNegativeValues() {
             return bucketsForNegativeValues;
         }
 

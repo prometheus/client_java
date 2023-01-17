@@ -4,5 +4,5 @@ import java.util.Collection;
 
 @FunctionalInterface
 public interface Collector {
-    Collection<Metric> collect();
+    MetricSnapshots collect();
 }

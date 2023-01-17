@@ -119,19 +119,19 @@ public class Protobuf {
         return metricBuilder.build();
     }
 
-    private static void addBuckets(Metrics.Histogram.Builder histogramBuilder, List<ExponentialBucket> buckets, int sgn) {
-        if (!buckets.isEmpty()) {
+    private static void addBuckets(Metrics.Histogram.Builder histogramBuilder, ExponentialBuckets buckets, int sgn) {
+        if (buckets.size() > 0) {
             Metrics.BucketSpan.Builder currentSpan = Metrics.BucketSpan.newBuilder();
-            currentSpan.setOffset(buckets.get(0).getBucketIndex());
+            currentSpan.setOffset(buckets.getBucketIndex(0));
             currentSpan.setLength(0);
             int previousIndex = currentSpan.getOffset();
             long previousCount = 0;
-            for (ExponentialBucket bucket : buckets) {
-                if (bucket.getBucketIndex() > previousIndex + 1) {
+            for (int i=0; i<buckets.size(); i++) {
+                if (buckets.getBucketIndex(i) > previousIndex + 1) {
                     // If the gap between bucketIndex and previousIndex is just 1 or 2,
                     // we don't start a new span but continue the existing span and add 1 or 2 empty buckets.
-                    if (bucket.getBucketIndex() < previousIndex + 3) {
-                        while (bucket.getBucketIndex() > previousIndex + 1) {
+                    if (buckets.getBucketIndex(i) < previousIndex + 3) {
+                        while (buckets.getBucketIndex(i) > previousIndex + 1) {
                             currentSpan.setLength(currentSpan.getLength() + 1);
                             previousIndex++;
                             if (sgn > 0) {
@@ -148,17 +148,17 @@ public class Protobuf {
                             histogramBuilder.addNegativeSpan(currentSpan.build());
                         }
                         currentSpan = Metrics.BucketSpan.newBuilder();
-                        currentSpan.setOffset(bucket.getBucketIndex() - (previousIndex + 1));
+                        currentSpan.setOffset(buckets.getBucketIndex(i) - (previousIndex + 1));
                     }
                 }
                 currentSpan.setLength(currentSpan.getLength() + 1);
-                previousIndex = bucket.getBucketIndex();
+                previousIndex = buckets.getBucketIndex(i);
                 if (sgn > 0) {
-                    histogramBuilder.addPositiveDelta(bucket.getCumulativeCount() - previousCount);
+                    histogramBuilder.addPositiveDelta(buckets.getCumulativeCount(i) - previousCount);
                 } else {
-                    histogramBuilder.addNegativeDelta(bucket.getCumulativeCount() - previousCount);
+                    histogramBuilder.addNegativeDelta(buckets.getCumulativeCount(i) - previousCount);
                 }
-                previousCount = bucket.getCumulativeCount();
+                previousCount = buckets.getCumulativeCount(i);
             }
             if (sgn > 0) {
                 histogramBuilder.addPositiveSpan(currentSpan.build());
@@ -201,9 +201,10 @@ public class Protobuf {
 
     private static Metrics.Bucket convert(FixedBucket bucket) {
         Metrics.Bucket.Builder builder = Metrics.Bucket.newBuilder();
-        if (bucket.getExemplar() != null) {
-            builder.setExemplar(convert(bucket.getExemplar()));
-        }
+        // TODO exemplars
+        //if (bucket.getExemplar() != null) {
+        //    builder.setExemplar(convert(bucket.getExemplar()));
+        //}
         builder.setCumulativeCount(bucket.getCumulativeCount());
         builder.setUpperBound(bucket.getUpperBound());
         return builder.build();

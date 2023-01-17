@@ -11,11 +11,11 @@ public abstract class Metric {
     protected final Labels constLabels;
 
     protected Metric(Builder<?, ?> builder) {
-        this.metadata = new MetricMetadata(makeName(builder.name, builder.unit), builder.help, builder.getType(), builder.unit);
+        this.metadata = new MetricMetadata(makeName(builder.name, builder.unit), builder.help, builder.unit);
         this.constLabels = builder.constLabels;
     }
 
-    private String makeName(String name, String unit) {
+    private String makeName(String name, Unit unit) {
         if (unit != null) {
             String suffix = "_" + unit;
             if (!name.endsWith(suffix)) {
@@ -34,7 +34,7 @@ public abstract class Metric {
     static abstract class Builder<B extends Builder<B, M>, M extends Metric> {
         protected final List<String> illegalLabelNames;
         protected String name;
-        private String unit;
+        private Unit unit;
         private String help;
         private Labels constLabels = Labels.EMPTY;
 
@@ -42,7 +42,6 @@ public abstract class Metric {
             this.illegalLabelNames = new ArrayList<>(illegalLabelNames);
         }
 
-        protected abstract MetricType getType();
         public B withName(String name) {
             if (!MetricMetadata.isValidMetricName(name)) {
                 throw new IllegalArgumentException("'" + name + "': Illegal metric name.");
@@ -51,7 +50,7 @@ public abstract class Metric {
             return self();
         }
 
-        public B withUnit(String unit) {
+        public B withUnit(Unit unit) {
             this.unit = unit;
             return self();
         }

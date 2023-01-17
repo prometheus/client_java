@@ -2,6 +2,7 @@ package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplars;
+import io.prometheus.metrics.model.ExponentialBuckets;
 import io.prometheus.metrics.model.FixedBucket;
 import io.prometheus.metrics.model.FixedBuckets;
 import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
@@ -354,13 +355,16 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return this;
             }
 
-            private List<ExponentialBucket> toBucketList(ConcurrentHashMap<Integer, LongAdder> map) {
-                ExponentialBucket[] result = new ExponentialBucket[map.size()];
+            private ExponentialBuckets toBucketList(ConcurrentHashMap<Integer, LongAdder> map) {
+                int[] bucketIndexes = new int[map.size()];
+                long[] cumulativeCounts = new long[map.size()];
                 int i=0;
                 for (Map.Entry<Integer, LongAdder> entry : map.entrySet()) {
-                    result[i++] = new ExponentialBucket(entry.getValue().sum(), entry.getKey());
+                    bucketIndexes[i] = entry.getKey();
+                    cumulativeCounts[i] = entry.getValue().sum();
+                    i++;
                 }
-                return Arrays.asList(result);
+                return ExponentialBuckets.of(bucketIndexes, cumulativeCounts);
             }
         }
     }

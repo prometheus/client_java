@@ -1,5 +1,8 @@
 package io.prometheus.metrics.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class MetricData {
     private final Labels labels;
     private final long createdTimestampMillis;
@@ -18,7 +21,7 @@ public abstract class MetricData {
         return labels;
     }
 
-    abstract void validate();
+    protected abstract void validate();
 
     public boolean hasTimestamp() {
         return timestampMillis != 0L;
@@ -37,5 +40,39 @@ public abstract class MetricData {
 
     public long getCreatedTimestampMillis() {
         return createdTimestampMillis;
+    }
+
+    public static abstract class Builder<T extends Builder<T>> {
+
+        private Labels labels = Labels.EMPTY;
+        private long createdTimestampMillis = 0L;
+        private long timestampMillis = 0L;
+
+        public T withLabels(Labels labels) {
+            this.labels = labels;
+            return self();
+        }
+
+        public T withCreatedTimestampMillis(long createdTimestampMillis) {
+            this.createdTimestampMillis = createdTimestampMillis;
+            return self();
+        }
+
+        public T withTimestampMillis(long timestampMillis) {
+            this.timestampMillis = timestampMillis;
+            return self();
+        }
+
+        protected long getCreatedTimestampMillis() {
+            return createdTimestampMillis;
+        }
+        protected long getTimestampMillis() {
+            return timestampMillis;
+        }
+        protected Labels getLabels() {
+            return labels;
+        }
+
+        protected abstract T self();
     }
 }

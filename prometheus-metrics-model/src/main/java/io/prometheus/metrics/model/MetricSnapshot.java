@@ -3,6 +3,7 @@ package io.prometheus.metrics.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,8 +17,9 @@ public abstract class MetricSnapshot {
 
     protected MetricSnapshot(MetricMetadata metadata, Collection<? extends MetricData> data) {
         this.metadata = metadata;
-        this.data = new ArrayList<>(data);
-        this.data.sort(Comparator.comparing(MetricData::getLabels));
+        List<? extends MetricData> dataCopy = new ArrayList<>(data);
+        dataCopy.sort(Comparator.comparing(MetricData::getLabels));
+        this.data = Collections.unmodifiableList(dataCopy);
         validateLabels(this.data);
     }
 
@@ -43,5 +45,39 @@ public abstract class MetricSnapshot {
                 }
             }
         }
+    }
+
+    public static abstract class Builder<T extends Builder<T>> {
+
+        private String name;
+        private String help;
+        private Unit unit;
+
+        /**
+         * The name is required. If a {@link #withUnit(Unit) unit} is present, the metric name should include the
+         * unit as a suffix (in <a href="https://openmetrics.io/">OpenMetrics</a> the unit suffix is required,
+         * but this library does not enforce this). The name must not include the {@code _total} suffix for counters or
+         * the {@code _info} suffix for info metrics.
+         */
+        public T withName(String name) {
+            this.name = name;
+            return self();
+        }
+
+        public T withHelp(String help) {
+            this.help = help;
+            return self();
+        }
+
+        public T withUnit(Unit unit) {
+            this.unit = unit;
+            return self();
+        }
+
+        protected MetricMetadata buildMetadata() {
+            return new MetricMetadata(name, help, unit);
+        }
+
+        protected abstract T self();
     }
 }
