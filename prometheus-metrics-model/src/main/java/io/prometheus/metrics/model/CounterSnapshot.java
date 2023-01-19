@@ -80,13 +80,9 @@ public class CounterSnapshot extends MetricSnapshot {
 
             private Exemplar exemplar = null;
             private Double value = null;
+            private long createdTimestampMillis = 0L;
 
             private Builder() {}
-
-            public Builder withExemplar(Exemplar exemplar) {
-                this.exemplar = exemplar;
-                return this;
-            }
 
             /**
              * Counter value. This is required. The value must not be negative.
@@ -96,11 +92,21 @@ public class CounterSnapshot extends MetricSnapshot {
                 return this;
             }
 
+            public Builder withExemplar(Exemplar exemplar) {
+                this.exemplar = exemplar;
+                return this;
+            }
+
+            public Builder withCreatedTimestampMillis(long createdTimestampMillis) {
+                this.createdTimestampMillis = createdTimestampMillis;
+                return this;
+            }
+
             public CounterData build() {
                 if (value == null) {
                     throw new IllegalArgumentException("Missing required field: value is null.");
                 }
-                return new CounterData(value, getLabels(), exemplar, getCreatedTimestampMillis(), getTimestampMillis());
+                return new CounterData(value, getLabels(), exemplar, createdTimestampMillis, getTimestampMillis());
             }
 
             @Override

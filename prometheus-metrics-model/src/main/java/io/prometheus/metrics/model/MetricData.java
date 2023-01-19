@@ -1,8 +1,5 @@
 package io.prometheus.metrics.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class MetricData {
     private final Labels labels;
     private final long createdTimestampMillis;
@@ -45,7 +42,6 @@ public abstract class MetricData {
     public static abstract class Builder<T extends Builder<T>> {
 
         private Labels labels = Labels.EMPTY;
-        private long createdTimestampMillis = 0L;
         private long timestampMillis = 0L;
 
         public T withLabels(Labels labels) {
@@ -53,19 +49,17 @@ public abstract class MetricData {
             return self();
         }
 
-        public T withCreatedTimestampMillis(long createdTimestampMillis) {
-            this.createdTimestampMillis = createdTimestampMillis;
-            return self();
-        }
-
+        /**
+         * In most cases you should not need to set a timestamp, because the timestamp of a Prometheus metric should
+         * usually be set by the Prometheus server during scraping.
+         * Exceptions include mirroring metrics with given timestamps from other metric sources.
+         */
         public T withTimestampMillis(long timestampMillis) {
             this.timestampMillis = timestampMillis;
             return self();
         }
 
-        protected long getCreatedTimestampMillis() {
-            return createdTimestampMillis;
-        }
+
         protected long getTimestampMillis() {
             return timestampMillis;
         }
