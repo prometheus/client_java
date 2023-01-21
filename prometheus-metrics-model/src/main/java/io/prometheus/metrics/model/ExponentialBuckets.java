@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class ExponentialBuckets implements Iterable<ExponentialBucket> {
+
+    public static final ExponentialBuckets EMPTY = new ExponentialBuckets(new int[]{}, new long[]{});
     private final int[] bucketIndexes;
     private final long[] cumulativeCounts;
 

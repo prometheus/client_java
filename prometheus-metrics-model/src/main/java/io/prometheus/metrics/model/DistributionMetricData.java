@@ -1,5 +1,8 @@
 package io.prometheus.metrics.model;
 
+/**
+ * Common base class for static histogram data, native histogram data, and summary data.
+ */
 public abstract class DistributionMetricData extends MetricData {
     private final long count;
     private final double sum;
@@ -33,5 +36,33 @@ public abstract class DistributionMetricData extends MetricData {
 
     public Exemplars getExemplars() {
         return exemplars;
+    }
+
+    public static abstract class Builder<T extends Builder<T>> extends MetricData.Builder<T> {
+
+        protected long count = -1;
+        protected double sum = Double.NaN;
+        protected long createdTimestampMillis = 0L;
+        protected Exemplars exemplars = Exemplars.EMPTY;
+
+        public T withCount(long count) {
+            this.count = count;
+            return self();
+        }
+
+        public T withSum(double sum) {
+            this.sum = sum;
+            return self();
+        }
+
+        public T withExemplars(Exemplars exemplars) {
+            this.exemplars = exemplars;
+            return self();
+        }
+
+        public T withCreatedTimestampMillis(long createdTimestampMillis) {
+            this.createdTimestampMillis = createdTimestampMillis;
+            return self();
+        }
     }
 }

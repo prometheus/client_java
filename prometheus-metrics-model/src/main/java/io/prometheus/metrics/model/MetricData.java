@@ -41,8 +41,8 @@ public abstract class MetricData {
 
     public static abstract class Builder<T extends Builder<T>> {
 
-        private Labels labels = Labels.EMPTY;
-        private long timestampMillis = 0L;
+        protected Labels labels = Labels.EMPTY;
+        protected long timestampMillis = 0L;
 
         public T withLabels(Labels labels) {
             this.labels = labels;
@@ -57,14 +57,6 @@ public abstract class MetricData {
         public T withTimestampMillis(long timestampMillis) {
             this.timestampMillis = timestampMillis;
             return self();
-        }
-
-
-        protected long getTimestampMillis() {
-            return timestampMillis;
-        }
-        protected Labels getLabels() {
-            return labels;
         }
 
         protected abstract T self();

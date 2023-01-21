@@ -106,7 +106,7 @@ public class CounterSnapshot extends MetricSnapshot {
                 if (value == null) {
                     throw new IllegalArgumentException("Missing required field: value is null.");
                 }
-                return new CounterData(value, getLabels(), exemplar, createdTimestampMillis, getTimestampMillis());
+                return new CounterData(value, labels, exemplar, createdTimestampMillis, timestampMillis);
             }
 
             @Override

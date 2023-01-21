@@ -95,7 +95,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
                 if (value == null) {
                     throw new IllegalArgumentException("Missing required field: value is null.");
                 }
-                return new GaugeData(value, getLabels(), exemplar, getTimestampMillis());
+                return new GaugeData(value, labels, exemplar, timestampMillis);
             }
 
             @Override
