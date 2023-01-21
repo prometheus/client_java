@@ -10,6 +10,7 @@ import io.prometheus.metrics.model.ExponentialBucket;
 import io.prometheus.metrics.model.ExponentialBucketsHistogramSnapshot;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricType;
+import io.prometheus.metrics.model.Unit;
 import io.prometheus.metrics.observer.DistributionObserver;
 
 import java.math.BigDecimal;
@@ -393,19 +394,11 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
     }
     public static class Builder extends ObservingMetric.Builder<Histogram.Builder, Histogram> {
 
-        private MetricType metricType = MetricType.EXPONENTIAL_BUCKETS_HISTOGRAM;
-
         private Builder() {
             super(Collections.singletonList("le"));
         }
 
-        @Override
-        protected MetricType getType() {
-            return metricType;
-        }
-
         public FixedBucketsHistogramBuilder withBuckets(double... buckets) {
-            this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
             return new FixedBucketsHistogramBuilder().withBuckets(buckets);
         }
 
@@ -414,12 +407,10 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
 
         public FixedBucketsHistogramBuilder withLinearBuckets(double start, double width, int count) {
-            this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
             return new FixedBucketsHistogramBuilder().withLinearBuckets(start, width, count);
         }
 
         public FixedBucketsHistogramBuilder withExponentialBuckets(double start, double factor, int count) {
-            this.metricType = MetricType.EXPLICIT_BUCKETS_HISTOGRAM;
             return new FixedBucketsHistogramBuilder().withExponentialBuckets(start, factor, count);
         }
 
@@ -500,7 +491,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return this;
             }
 
-            public FixedBucketsHistogramBuilder withUnit(String unit) {
+            public FixedBucketsHistogramBuilder withUnit(Unit unit) {
                 Builder.this.withUnit(unit);
                 return this;
             }
@@ -577,7 +568,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return this;
             }
 
-            public ExponentialBucketsHistogramBuilder withUnit(String unit) {
+            public ExponentialBucketsHistogramBuilder withUnit(Unit unit) {
                 Builder.this.withUnit(unit);
                 return this;
             }

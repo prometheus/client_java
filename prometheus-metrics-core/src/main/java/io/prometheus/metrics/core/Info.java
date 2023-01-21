@@ -4,6 +4,7 @@ import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Label;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricType;
+import io.prometheus.metrics.model.Unit;
 
 import java.util.Collections;
 
@@ -44,11 +45,8 @@ public class Info extends Metric {
         }
 
         @Override
-        public Builder withUnit(String unit) {
-            if (!unit.isEmpty()) {
-                throw new UnsupportedOperationException("Info metrics cannot have a unit.");
-            }
-            return super.withUnit(unit);
+        public Builder withUnit(Unit unit) {
+            throw new UnsupportedOperationException("Info metrics cannot have a unit.");
         }
 
         private static String normalizeName(String name) {

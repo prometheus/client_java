@@ -9,6 +9,7 @@ import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricType;
+import io.prometheus.metrics.model.Unit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -43,7 +44,7 @@ public class CounterTest {
     noLabels = Counter.newBuilder().withName("nolabels").build();
     labels = Counter.newBuilder().withName("labels")
             .withHelp("help")
-            .withUnit("seconds")
+            .withUnit(Unit.SECONDS)
             .withLabelNames("l")
             .build();
   }
@@ -105,7 +106,7 @@ public class CounterTest {
   public void testTotalStrippedFromName() {
     Counter counter = Counter.newBuilder()
             .withName("my_counter_total")
-            .withUnit("seconds")
+            .withUnit(Unit.SECONDS)
             .build();
     Metrics.MetricFamily protobufData = Protobuf.convert(counter.collect());
     assertEquals("name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }", TextFormat.printer().shortDebugString(protobufData));
@@ -122,7 +123,7 @@ public class CounterTest {
     long before = System.currentTimeMillis();
     Counter counter = Counter.newBuilder()
             .withName("test_seconds_total")
-            .withUnit("seconds")
+            .withUnit(Unit.SECONDS)
             .withHelp("help message")
             .withConstLabels(Labels.of("const1name", "const1value", "const2name", "const2value"))
             .withLabelNames("path", "status")
