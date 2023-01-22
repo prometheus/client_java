@@ -212,25 +212,46 @@ public class OpenMetricsTextFormatWriterTest {
                         "response_size_bytes_created{status=\"500\"} " + timestampStrings[1] + "\n" +
                         "# EOF\n",
                         new MetricSnapshot[]{
-                                new FixedBucketsHistogramSnapshot("request_latency_seconds", new FixedBucketsHistogramData(2, 3.2, FixedBuckets.newBuilder().addBucket(Double.POSITIVE_INFINITY, 2).build(), Labels.EMPTY, Exemplars.EMPTY, 0L)),
-                                new FixedBucketsHistogramSnapshot("response_size_bytes", "help", Unit.BYTES,
-                                        new FixedBucketsHistogramData(2, 3.2, FixedBuckets.newBuilder()
-                                                .addBucket(2.2, 2)
-                                                .addBucket(Double.POSITIVE_INFINITY, 2)
-                                                .build(),
-                                                Labels.of("status", "500"),
-                                                Exemplars.of(exemplar1, exemplar2),
-                                                timestampLongs[1],
-                                                timestampLongs[0]),
-                                        new FixedBucketsHistogramData(4, 4.1, FixedBuckets.newBuilder()
-                                                .addBucket(2.2, 2)
-                                                .addBucket(Double.POSITIVE_INFINITY, 4)
-                                                .build(),
-                                                Labels.of("status", "200"),
-                                                Exemplars.of(exemplar1, exemplar2),
-                                                timestampLongs[1],
-                                                timestampLongs[0])
-                                )}},
+                                FixedBucketsHistogramSnapshot.newBuilder()
+                                        .withName("request_latency_seconds")
+                                        .addData(FixedBucketsHistogramData.newBuilder()
+                                                .withCount(2)
+                                                .withSum(3.2)
+                                                .withBuckets(FixedBuckets.newBuilder()
+                                                        .addBucket(Double.POSITIVE_INFINITY, 2)
+                                                        .build())
+                                                .build())
+                                        .build(),
+                                FixedBucketsHistogramSnapshot.newBuilder()
+                                        .withName("response_size_bytes")
+                                        .withHelp("help")
+                                        .withUnit(Unit.BYTES)
+                                        .addData(FixedBucketsHistogramData.newBuilder()
+                                                .withCount(2)
+                                                .withSum(3.2)
+                                                .withBuckets(FixedBuckets.newBuilder()
+                                                        .addBucket(2.2, 2)
+                                                        .addBucket(Double.POSITIVE_INFINITY, 2)
+                                                        .build())
+                                                .withLabels(Labels.of("status", "500"))
+                                                .withExemplars(Exemplars.of(exemplar1, exemplar2))
+                                                .withCreatedTimestampMillis(timestampLongs[1])
+                                                .withTimestampMillis(timestampLongs[0])
+                                                .build())
+                                        .addData(FixedBucketsHistogramData.newBuilder()
+                                                .withCount(4)
+                                                .withSum(4.1)
+                                                .withBuckets(FixedBuckets.newBuilder()
+                                                        .addBucket(2.2, 2)
+                                                        .addBucket(Double.POSITIVE_INFINITY, 4)
+                                                        .build())
+                                                .withLabels(Labels.of("status", "200"))
+                                                .withExemplars(Exemplars.of(exemplar1, exemplar2))
+                                                .withCreatedTimestampMillis(timestampLongs[1])
+                                                .withTimestampMillis(timestampLongs[0])
+                                                .build())
+                                        .build()
+                        }},
                 new Object[]{"gauge_histogram", "" +
                         "# TYPE cache_size_bytes gaugehistogram\n" +
                         "# UNIT cache_size_bytes bytes\n" +
