@@ -186,11 +186,50 @@ public class OpenMetricsTextFormatWriterTest {
                         "latency_seconds_sum 1.2\n" +
                         "# EOF\n",
                         new MetricSnapshot[]{
-                                new SummarySnapshot("http_request_duration_seconds", "request duration", Unit.SECONDS,
-                                        new SummaryData(7, 2.2, Quantiles.of(quantiles), Labels.of("status", "500"), Exemplars.of(exemplar1), timestampLongs[1], timestampLongs[0]),
-                                        new SummaryData(3, 1.2, Quantiles.of(quantiles), Labels.of("status", "200"), Exemplars.of(exemplar1), timestampLongs[1], timestampLongs[0])
-                                ),
-                                new SummarySnapshot("latency_seconds", "latency", Unit.SECONDS, new SummaryData(3, 1.2))
+                                SummarySnapshot.newBuilder()
+                                        .withName("http_request_duration_seconds")
+                                        .withHelp("request duration")
+                                        .withUnit(Unit.SECONDS)
+                                        .addData(SummaryData.newBuilder()
+                                                .withCount(7)
+                                                .withSum(2.2)
+                                                .withQuantiles(Quantiles.newBuilder()
+                                                        .addQuantile(0.5, 225.3)
+                                                        .addQuantile(0.9, 240.7)
+                                                        .addQuantile(0.95, 245.1)
+                                                        .build())
+                                                .withLabels(Labels.newBuilder()
+                                                        .addLabel("status", "500")
+                                                        .build())
+                                                .withExemplars(Exemplars.of(exemplar1))
+                                                .withCreatedTimestampMillis(timestampLongs[1])
+                                                .withTimestampMillis(timestampLongs[0])
+                                                .build())
+                                        .addData(SummaryData.newBuilder()
+                                                .withCount(3)
+                                                .withSum(1.2)
+                                                .withQuantiles(Quantiles.newBuilder()
+                                                        .addQuantile(0.5, 225.3)
+                                                        .addQuantile(0.9, 240.7)
+                                                        .addQuantile(0.95, 245.1)
+                                                        .build())
+                                                .withLabels(Labels.newBuilder()
+                                                        .addLabel("status", "200")
+                                                        .build())
+                                                .withExemplars(Exemplars.of(exemplar1))
+                                                .withCreatedTimestampMillis(timestampLongs[1])
+                                                .withTimestampMillis(timestampLongs[0])
+                                                .build())
+                                        .build(),
+                                SummarySnapshot.newBuilder()
+                                        .withName("latency_seconds")
+                                        .withHelp("latency")
+                                        .withUnit(Unit.SECONDS)
+                                        .addData(SummaryData.newBuilder()
+                                                .withCount(3)
+                                                .withSum(1.2)
+                                                .build())
+                                        .build()
                         }},
                 new Object[]{"static_histogram", "" +
                         "# TYPE request_latency_seconds histogram\n" +

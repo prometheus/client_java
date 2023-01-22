@@ -24,4 +24,28 @@ public class Quantiles implements Iterable<Quantile> {
     public Iterator<Quantile> iterator() {
         return quantiles.iterator();
     }
+
+    public static class Builder {
+
+        private List<Quantile> quantiles = new ArrayList<>();
+        private Builder() {}
+
+        public Builder addQuantile(Quantile quantile) {
+            quantiles.add(quantile);
+            return this;
+        }
+
+        public Builder addQuantile(double quantile, double value) {
+            quantiles.add(new Quantile(quantile, value));
+            return this;
+        }
+
+        public Quantiles build() {
+            return new Quantiles(quantiles);
+        }
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
 }

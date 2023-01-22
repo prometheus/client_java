@@ -97,7 +97,8 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         public SummarySnapshot.SummaryData collect(Labels labels) {
             return buffer.run(
                     expectedCount -> count.sum() == expectedCount,
-                    () -> new SummarySnapshot.SummaryData(count.sum(), sum.sum(), makeQuantiles(), labels, createdTimeMillis),
+                    // TODO Exemplars (are hard-coded as empty in the line below)
+                    () -> new SummarySnapshot.SummaryData(count.sum(), sum.sum(), makeQuantiles(), labels, Exemplars.EMPTY, createdTimeMillis),
                     this::doObserve
             );
         }
@@ -130,11 +131,6 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
 
         private Builder() {
             super(Collections.singletonList("quantile"));
-        }
-
-        @Override
-        protected MetricType getType() {
-            return MetricType.SUMMARY;
         }
 
         public Builder quantile(double quantile, double error) {
