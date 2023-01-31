@@ -118,11 +118,6 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         }
 
         @Override
-        protected MetricType getType() {
-            return MetricType.COUNTER;
-        }
-
-        @Override
         public Counter build() {
             return new Counter(withName(normalizeName(name)));
         }
@@ -159,11 +154,6 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
             private Builder() {
                 super(Collections.emptyList());
-            }
-
-            @Override
-            protected MetricType getType() {
-                return MetricType.COUNTER;
             }
 
             public io.prometheus.metrics.core.Counter.FromCallback.Builder withCallback(DoubleSupplier callback) {

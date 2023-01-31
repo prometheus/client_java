@@ -34,7 +34,7 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
     protected StateSetSnapshot collect(List<Labels> labels, List<StateSetData> metricDataList) {
         List<StateSetSnapshot.StateSetData> data = new ArrayList<>(labels.size());
         for (int i = 0; i < labels.size(); i++) {
-            data.add(new StateSetSnapshot.StateSetData(labels.get(i), names, metricDataList.get(i).values));
+            data.add(new StateSetSnapshot.StateSetData(names, metricDataList.get(i).values, labels.get(i)));
         }
         return new StateSetSnapshot(getMetadata(), data);
     }
@@ -117,11 +117,6 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
                 throw new IllegalStateException("State names are required when building a StateSet.");
             }
             return new StateSet(this);
-        }
-
-        @Override
-        protected MetricType getType() {
-            return MetricType.STATE_SET;
         }
 
         @Override

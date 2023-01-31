@@ -126,11 +126,6 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         }
 
         @Override
-        protected MetricType getType() {
-            return MetricType.GAUGE;
-        }
-
-        @Override
         public Gauge build() {
             return new Gauge(this);
         }
@@ -163,11 +158,6 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
 
             private Builder() {
                 super(Collections.emptyList());
-            }
-
-            @Override
-            protected MetricType getType() {
-                return MetricType.GAUGE;
             }
 
             public Gauge.FromCallback.Builder withCallback(DoubleSupplier callback) {

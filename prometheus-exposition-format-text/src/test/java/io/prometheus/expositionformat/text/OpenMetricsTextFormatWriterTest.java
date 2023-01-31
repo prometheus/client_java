@@ -338,7 +338,13 @@ public class OpenMetricsTextFormatWriterTest {
                         "version_info{version=\"1.2.3\"} 1.0\n" +
                         "# EOF\n",
                         new MetricSnapshot[]{
-                                new InfoSnapshot("version", "version information", new InfoSnapshot.InfoData(Labels.of("version", "1.2.3")))
+                                InfoSnapshot.newBuilder()
+                                        .withName("version")
+                                        .withHelp("version information")
+                                        .addInfoData(InfoSnapshot.InfoData.newBuilder()
+                                                .withLabels(Labels.of("version", "1.2.3"))
+                                                .build())
+                                        .build()
                         }},
                 new Object[]{"stateset", "" +
                         "# TYPE more_complete stateset\n" +
@@ -352,13 +358,28 @@ public class OpenMetricsTextFormatWriterTest {
                         "my_states{my_states=\"bb\"} 0\n" +
                         "# EOF\n",
                         new MetricSnapshot[]{
-                                new StateSetSnapshot("my_states", StateSetSnapshot.StateSetData.newBuilder().addState("a", true).addState("bb", false).build()),
-                                new StateSetSnapshot("more_complete", "complete state set example",
-                                        StateSetSnapshot.StateSetData.newBuilder().withLabels(Labels.of("env", "prod")).addState("state1", false).addState("state2", true).build(),
-                                        StateSetSnapshot.StateSetData.newBuilder().withLabels(Labels.of("env", "dev")).addState("state2", false).addState("state1", true).build()
-                                )
-                        }
-                },
+                                StateSetSnapshot.newBuilder()
+                                        .withName("my_states")
+                                        .addStateSetData(StateSetSnapshot.StateSetData.newBuilder()
+                                                .addState("a", true)
+                                                .addState("bb", false)
+                                                .build())
+                                        .build(),
+                                StateSetSnapshot.newBuilder()
+                                        .withName("more_complete")
+                                        .withHelp("complete state set example")
+                                        .addStateSetData(StateSetSnapshot.StateSetData.newBuilder()
+                                                .withLabels(Labels.of("env", "prod"))
+                                                .addState("state1", false)
+                                                .addState("state2", true)
+                                                .build())
+                                        .addStateSetData(StateSetSnapshot.StateSetData.newBuilder()
+                                                .withLabels(Labels.of("env", "dev"))
+                                                .addState("state2", false)
+                                                .addState("state1", true)
+                                                .build())
+                                        .build()
+                        }},
                 new Object[]{"unknown", "" +
                         "# TYPE my_special_thing unknown\n" +
                         "# UNIT my_special_thing bytes\n" +

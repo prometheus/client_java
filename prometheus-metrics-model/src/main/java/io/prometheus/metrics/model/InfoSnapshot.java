@@ -1,23 +1,19 @@
 package io.prometheus.metrics.model;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public final class InfoSnapshot extends MetricSnapshot {
 
-    public InfoSnapshot(String name, InfoData... data) {
-        this(new MetricMetadata(name), data);
-    }
-
-    public InfoSnapshot(String name, String help, InfoData... data) {
-        this(new MetricMetadata(name, help), data);
-    }
-
-    public InfoSnapshot(MetricMetadata metadata, InfoData... data) {
-        this(metadata, Arrays.asList(data));
-    }
-
+    /**
+     * To create a new {@link InfoSnapshot}, you can either call the constructor directly or use
+     * the builder with {@link InfoSnapshot#newBuilder()}.
+     *
+     * @param metadata the metric name in metadata must not include the {@code _info} suffix.
+     *                 See {@link MetricMetadata} for more naming conventions.
+     * @param data     the constructor will create a sorted copy of the collection.
+     */
     public InfoSnapshot(MetricMetadata metadata, Collection<InfoData> data) {
         super(metadata, data);
         if (metadata.getName().endsWith("_info")) {
@@ -31,16 +27,70 @@ public final class InfoSnapshot extends MetricSnapshot {
     }
 
     public static class InfoData extends MetricData {
+
+        /**
+         * To create a new {@link InfoData}, you can either call the constructor directly or use the
+         * Builder with {@link InfoData#newBuilder()}.
+         *
+         * @param labels                 must not be null. Use {@link Labels#EMPTY} if there are no labels.
+         */
         public InfoData(Labels labels) {
             this(labels, 0L);
         }
 
+        /**
+         * Constructor with an additional metric timestamp parameter. In most cases you should not need this.
+         * This is only useful in rare cases as the timestamp of a Prometheus metric should usually be set by the
+         * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
+         * metric sources.
+         */
         public InfoData(Labels labels, long timestampMillis) {
             super(labels, 0L, timestampMillis);
             validate();
         }
 
         @Override
-        void validate() {}
+        protected void validate() {}
+
+        public static class Builder extends MetricData.Builder<Builder> {
+
+            public InfoData build() {
+                return new InfoData(labels, timestampMillis);
+            }
+
+            @Override
+            protected Builder self() {
+                return this;
+            }
+        }
+
+        public static Builder newBuilder() {
+            return new Builder();
+        }
+    }
+
+    public static class Builder extends MetricSnapshot.Builder<Builder> {
+
+        private final List<InfoData> infoData = new ArrayList<>();
+
+        private Builder() {}
+
+        public Builder addInfoData(InfoData data) {
+            infoData.add(data);
+            return this;
+        }
+
+        public InfoSnapshot build() {
+            return new InfoSnapshot(buildMetadata(), infoData);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 }

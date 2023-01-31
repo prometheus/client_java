@@ -40,11 +40,6 @@ public class Info extends Metric {
         }
 
         @Override
-        protected MetricType getType() {
-            return MetricType.INFO;
-        }
-
-        @Override
         public Builder withUnit(Unit unit) {
             throw new UnsupportedOperationException("Info metrics cannot have a unit.");
         }
