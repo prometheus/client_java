@@ -162,22 +162,27 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
 
     @Override
     public int compareTo(Labels other) {
+        int result = compare(names, other.names);
+        if (result != 0) {
+            return result;
+        }
+        return compare(values, other.values);
+    }
+
+    // Looks like Java doesn't have a compareTo() method for arrays.
+    private int compare(String[] array1, String[] array2) {
         int result;
-        for (int i=0; i<names.length; i++) {
-            if (other.names.length <= i) {
-                return -1;
+        for (int i=0; i<array1.length; i++) {
+            if (array2.length <= i) {
+                return 1;
             }
-            result = names[i].compareTo(other.names[i]);
-            if (result != 0) {
-                return result;
-            }
-            result = values[i].compareTo(other.values[i]);
+            result = array1[i].compareTo(array2[i]);
             if (result != 0) {
                 return result;
             }
         }
-        if (other.names.length > names.length) {
-            return 1;
+        if (array2.length > array1.length) {
+            return -1;
         }
         return 0;
     }
@@ -209,6 +214,42 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
 
     public String getValue(int i) {
         return values[i];
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append("{");
+        for (int i = 0; i < names.length; i++) {
+            if (i > 0) {
+                b.append(",");
+            }
+            b.append(names[i]);
+            b.append("=\"");
+            appendEscapedLabelValue(b, values[i]);
+            b.append("\"");
+        }
+        b.append("}");
+        return b.toString();
+    }
+
+    private void appendEscapedLabelValue(StringBuilder b, String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            switch (c) {
+                case '\\':
+                    b.append("\\\\");
+                    break;
+                case '\"':
+                    b.append("\\\"");
+                    break;
+                case '\n':
+                    b.append("\\n");
+                    break;
+                default:
+                    b.append(c);
+            }
+        }
     }
 
     // as labels are sorted by name, equals is insensitive to the order

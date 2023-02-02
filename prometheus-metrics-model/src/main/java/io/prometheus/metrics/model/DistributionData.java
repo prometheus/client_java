@@ -3,12 +3,12 @@ package io.prometheus.metrics.model;
 /**
  * Common base class for static histogram data, native histogram data, and summary data.
  */
-public abstract class DistributionMetricData extends MetricData {
+public abstract class DistributionData extends MetricData {
     private final long count;
     private final double sum;
     private final Exemplars exemplars;
 
-    protected DistributionMetricData(long count, double sum, Exemplars exemplars, Labels labels, long createdTimestampMillis, long timestampMillis) {
+    protected DistributionData(long count, double sum, Exemplars exemplars, Labels labels, long createdTimestampMillis, long timestampMillis) {
         super(labels, createdTimestampMillis, timestampMillis);
         this.count = count;
         this.sum = sum;

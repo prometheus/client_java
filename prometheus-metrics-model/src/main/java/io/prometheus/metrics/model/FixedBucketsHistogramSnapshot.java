@@ -39,7 +39,7 @@ public final class FixedBucketsHistogramSnapshot extends MetricSnapshot {
         return (List<FixedBucketsHistogramData>) data;
     }
 
-    public static final class FixedBucketsHistogramData extends DistributionMetricData {
+    public static final class FixedBucketsHistogramData extends DistributionData {
 
         private final FixedBuckets buckets;
 
@@ -93,7 +93,7 @@ public final class FixedBucketsHistogramSnapshot extends MetricSnapshot {
             }
         }
 
-        public static class Builder extends DistributionMetricData.Builder<FixedBucketsHistogramData.Builder> {
+        public static class Builder extends DistributionData.Builder<FixedBucketsHistogramData.Builder> {
 
             private FixedBuckets buckets;
 

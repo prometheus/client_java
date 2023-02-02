@@ -35,7 +35,7 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
         return (List<ExponentialBucketsHistogramData>) data;
     }
 
-    public static final class ExponentialBucketsHistogramData extends DistributionMetricData {
+    public static final class ExponentialBucketsHistogramData extends DistributionData {
 
         private final int schema;
         private final long zeroCount;
@@ -119,7 +119,7 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
             }
         }
 
-        public static class Builder extends DistributionMetricData.Builder<Builder> {
+        public static class Builder extends DistributionData.Builder<Builder> {
             private Integer schema;
             private long zeroCount = 0;
             private double zeroThreshold = 0;

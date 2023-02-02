@@ -22,7 +22,7 @@ public final class SummarySnapshot extends MetricSnapshot {
         return (List<SummaryData>) data;
     }
 
-    public static final class SummaryData extends DistributionMetricData {
+    public static final class SummaryData extends DistributionData {
 
         private final Quantiles quantiles;
 
@@ -70,7 +70,7 @@ public final class SummarySnapshot extends MetricSnapshot {
             }
         }
 
-        public static class Builder extends DistributionMetricData.Builder<Builder> {
+        public static class Builder extends DistributionData.Builder<Builder> {
 
             private Quantiles quantiles = Quantiles.EMPTY;
 
