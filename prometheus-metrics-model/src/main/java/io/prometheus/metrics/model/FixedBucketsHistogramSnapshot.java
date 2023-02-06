@@ -113,7 +113,7 @@ public final class FixedBucketsHistogramSnapshot extends MetricSnapshot {
                 if (buckets == null) {
                     throw new IllegalArgumentException("buckets are required");
                 }
-                return new FixedBucketsHistogramData(count, sum, buckets, labels, exemplars, createdTimestampMillis, timestampMillis);
+                return new FixedBucketsHistogramData(count, sum, buckets, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
 

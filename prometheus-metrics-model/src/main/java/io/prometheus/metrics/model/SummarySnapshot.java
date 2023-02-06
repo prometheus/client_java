@@ -88,7 +88,7 @@ public final class SummarySnapshot extends MetricSnapshot {
             }
 
             public SummaryData build() {
-                return new SummaryData(count, sum, quantiles, labels, exemplars, createdTimestampMillis, timestampMillis);
+                return new SummaryData(count, sum, quantiles, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
 

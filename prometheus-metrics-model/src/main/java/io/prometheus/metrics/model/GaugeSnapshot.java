@@ -1,7 +1,6 @@
 package io.prometheus.metrics.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -50,8 +49,8 @@ public final class GaugeSnapshot extends MetricSnapshot {
          * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
          * metric sources.
          */
-        public GaugeData(double value, Labels labels, Exemplar exemplar, long timestampMillis) {
-            super(labels, 0L, timestampMillis);
+        public GaugeData(double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
+            super(labels, 0L, scrapeTimestampMillis);
             this.value = value;
             this.exemplar = exemplar;
             validate();
@@ -95,7 +94,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
                 if (value == null) {
                     throw new IllegalArgumentException("Missing required field: value is null.");
                 }
-                return new GaugeData(value, labels, exemplar, timestampMillis);
+                return new GaugeData(value, labels, exemplar, scrapeTimestampMillis);
             }
 
             @Override

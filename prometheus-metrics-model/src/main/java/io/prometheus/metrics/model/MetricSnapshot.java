@@ -17,10 +17,13 @@ public abstract class MetricSnapshot {
 
     protected MetricSnapshot(MetricMetadata metadata, Collection<? extends MetricData> data) {
         this.metadata = metadata;
+        if (data == null) {
+            throw new NullPointerException();
+        }
         List<? extends MetricData> dataCopy = new ArrayList<>(data);
         dataCopy.sort(Comparator.comparing(MetricData::getLabels));
         this.data = Collections.unmodifiableList(dataCopy);
-        validateLabels(this.data);
+        validateLabels();
     }
 
     public MetricMetadata getMetadata() {
@@ -29,20 +32,14 @@ public abstract class MetricSnapshot {
 
     public abstract List<? extends MetricData> getData();
 
-    protected void validateLabels(List<? extends MetricData> data) {
-        if (data == null || data.isEmpty()) {
-            throw new IllegalStateException(this.getClass().getSimpleName() + " cannot have empty data.");
-        }
-        for (int i=0; i<data.size(); i++) {
-            for (int j=0; j<data.size(); j++) {
-                if (i != j) {
-                    if (!data.get(i).getLabels().hasSameNames(data.get(j).getLabels())) {
-                        throw new IllegalArgumentException("All labels for a snapshot must have the same names.");
-                    }
-                    if (data.get(i).getLabels().hasSameValues(data.get(j).getLabels())) {
-                        throw new IllegalArgumentException("Can't have different metric data with the same label values.");
-                    }
-                }
+    protected void validateLabels() {
+        // According to the OpenMetrics standard the metric data SHOULD have the same label names.
+        // However, this is a SHOULD and not a MUST, so this is not enforced.
+        // So let's just make sure that labels (including name and value) are unique.
+        // Data is already sorted by labels, so if there are duplicates they will be next to each other.
+        for (int i=0; i<data.size()-1; i++) {
+            if (data.get(i).getLabels().equals(data.get(i+1).getLabels())) {
+                throw new IllegalArgumentException("Duplicate labels in metric data.");
             }
         }
     }

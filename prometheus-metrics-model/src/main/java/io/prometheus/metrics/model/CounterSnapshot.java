@@ -54,8 +54,8 @@ public class CounterSnapshot extends MetricSnapshot {
          * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
          * metric sources.
          */
-        public CounterData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis, long timestampMillis) {
-            super(labels, createdTimestampMillis, timestampMillis);
+        public CounterData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis, long scrapeTimestampMillis) {
+            super(labels, createdTimestampMillis, scrapeTimestampMillis);
             this.value = value;
             this.exemplar = exemplar;
             validate();
@@ -106,7 +106,7 @@ public class CounterSnapshot extends MetricSnapshot {
                 if (value == null) {
                     throw new IllegalArgumentException("Missing required field: value is null.");
                 }
-                return new CounterData(value, labels, exemplar, createdTimestampMillis, timestampMillis);
+                return new CounterData(value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis);
             }
 
             @Override

@@ -162,7 +162,7 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
                 if (schema == null) {
                     throw new IllegalArgumentException("schema is required");
                 }
-                return new ExponentialBucketsHistogramData(count, sum, schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, labels, exemplars, createdTimestampMillis, timestampMillis);
+                return new ExponentialBucketsHistogramData(count, sum, schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
 

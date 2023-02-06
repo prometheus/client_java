@@ -213,9 +213,9 @@ public class OpenMetricsTextFormatWriter {
     }
 
     private void writeTimestampAndExemplar(OutputStreamWriter writer, MetricData data, Exemplar exemplar) throws IOException {
-        if (data.hasTimestamp()) {
+        if (data.hasScrapeTimestamp()) {
             writer.write(' ');
-            writeTimestamp(writer, data.getTimestampMillis());
+            writeTimestamp(writer, data.getScrapeTimestampMillis());
         }
         if (exemplar != null) {
             writer.write(" # ");

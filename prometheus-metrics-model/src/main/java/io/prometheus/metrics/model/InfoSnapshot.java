@@ -44,8 +44,8 @@ public final class InfoSnapshot extends MetricSnapshot {
          * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
          * metric sources.
          */
-        public InfoData(Labels labels, long timestampMillis) {
-            super(labels, 0L, timestampMillis);
+        public InfoData(Labels labels, long scrapeTimestampMillis) {
+            super(labels, 0L, scrapeTimestampMillis);
             validate();
         }
 
@@ -55,7 +55,7 @@ public final class InfoSnapshot extends MetricSnapshot {
         public static class Builder extends MetricData.Builder<Builder> {
 
             public InfoData build() {
-                return new InfoData(labels, timestampMillis);
+                return new InfoData(labels, scrapeTimestampMillis);
             }
 
             @Override

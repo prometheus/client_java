@@ -3,14 +3,14 @@ package io.prometheus.metrics.model;
 public abstract class MetricData {
     private final Labels labels;
     private final long createdTimestampMillis;
-    private final long timestampMillis;
+    private final long scrapeTimestampMillis;
 
-    protected MetricData(Labels labels, long createdTimestampMillis, long timestampMillis) {
+    protected MetricData(Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
         this.labels = labels;
         this.createdTimestampMillis = createdTimestampMillis;
-        this.timestampMillis = timestampMillis;
-        if (timestampMillis != 0L && timestampMillis < createdTimestampMillis) {
-            throw new IllegalArgumentException("The current timestamp cannot be before the created timestamp");
+        this.scrapeTimestampMillis = scrapeTimestampMillis;
+        if (scrapeTimestampMillis != 0L && scrapeTimestampMillis < createdTimestampMillis) {
+            throw new IllegalArgumentException("The scrape timestamp cannot be before the created timestamp");
         }
     }
 
@@ -20,12 +20,12 @@ public abstract class MetricData {
 
     protected abstract void validate();
 
-    public boolean hasTimestamp() {
-        return timestampMillis != 0L;
+    public boolean hasScrapeTimestamp() {
+        return scrapeTimestampMillis != 0L;
     }
 
-    public long getTimestampMillis() {
-        return timestampMillis;
+    public long getScrapeTimestampMillis() {
+        return scrapeTimestampMillis;
     }
 
     /**
@@ -42,7 +42,7 @@ public abstract class MetricData {
     public static abstract class Builder<T extends Builder<T>> {
 
         protected Labels labels = Labels.EMPTY;
-        protected long timestampMillis = 0L;
+        protected long scrapeTimestampMillis = 0L;
 
         public T withLabels(Labels labels) {
             this.labels = labels;
@@ -54,8 +54,8 @@ public abstract class MetricData {
          * usually be set by the Prometheus server during scraping.
          * Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public T withTimestampMillis(long timestampMillis) {
-            this.timestampMillis = timestampMillis;
+        public T withScrapeTimestampMillis(long scrapeTimestampMillis) {
+            this.scrapeTimestampMillis = scrapeTimestampMillis;
             return self();
         }
 

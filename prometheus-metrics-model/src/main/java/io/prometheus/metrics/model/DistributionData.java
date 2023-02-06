@@ -8,8 +8,8 @@ public abstract class DistributionData extends MetricData {
     private final double sum;
     private final Exemplars exemplars;
 
-    protected DistributionData(long count, double sum, Exemplars exemplars, Labels labels, long createdTimestampMillis, long timestampMillis) {
-        super(labels, createdTimestampMillis, timestampMillis);
+    protected DistributionData(long count, double sum, Exemplars exemplars, Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
+        super(labels, createdTimestampMillis, scrapeTimestampMillis);
         this.count = count;
         this.sum = sum;
         this.exemplars = exemplars;

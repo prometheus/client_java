@@ -68,8 +68,8 @@ public final class UnknownSnapshot extends MetricSnapshot {
             this(value, labels, exemplar, createdTimestampMillis, 0);
         }
 
-        public UnknownData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis, long timestampMillis) {
-            super(labels, createdTimestampMillis, timestampMillis);
+        public UnknownData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis, long scrapeTimestampMillis) {
+            super(labels, createdTimestampMillis, scrapeTimestampMillis);
             this.value = value;
             this.exemplar = exemplar;
             validate();
@@ -84,6 +84,6 @@ public final class UnknownSnapshot extends MetricSnapshot {
         }
 
         @Override
-        void validate() {}
+        protected void validate() {}
     }
 }

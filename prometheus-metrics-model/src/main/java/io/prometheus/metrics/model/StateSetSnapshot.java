@@ -59,8 +59,8 @@ public final class StateSetSnapshot extends MetricSnapshot {
          * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
          * metric sources.
          */
-        public StateSetData(String[] names, boolean[] values, Labels labels, long timestampMillis) {
-            super(labels, 0L, timestampMillis);
+        public StateSetData(String[] names, boolean[] values, Labels labels, long scrapeTimestampMillis) {
+            super(labels, 0L, scrapeTimestampMillis);
             if (names.length == 0) {
                 throw new IllegalArgumentException("StateSet must have at least one state.");
             }
@@ -160,7 +160,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
                 for (int i = 0; i < values.size(); i++) {
                     valuesArray[i] = values.get(i);
                 }
-                return new StateSetData(names.toArray(new String[]{}), valuesArray, labels, timestampMillis);
+                return new StateSetData(names.toArray(new String[]{}), valuesArray, labels, scrapeTimestampMillis);
             }
         }
 
