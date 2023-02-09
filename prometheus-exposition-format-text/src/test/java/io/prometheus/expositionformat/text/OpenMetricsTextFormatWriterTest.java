@@ -4,9 +4,9 @@ import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.CounterSnapshot.CounterData;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.FixedBuckets;
-import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
-import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot.FixedBucketsHistogramData;
+import io.prometheus.metrics.model.FixedHistogramBuckets;
+import io.prometheus.metrics.model.FixedHistogramSnapshot;
+import io.prometheus.metrics.model.FixedHistogramSnapshot.FixedHistogramData;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot.GaugeData;
 import io.prometheus.metrics.model.InfoSnapshot;
@@ -251,24 +251,24 @@ public class OpenMetricsTextFormatWriterTest {
                         "response_size_bytes_created{status=\"500\"} " + timestampStrings[1] + "\n" +
                         "# EOF\n",
                         new MetricSnapshot[]{
-                                FixedBucketsHistogramSnapshot.newBuilder()
+                                FixedHistogramSnapshot.newBuilder()
                                         .withName("request_latency_seconds")
-                                        .addData(FixedBucketsHistogramData.newBuilder()
+                                        .addData(FixedHistogramData.newBuilder()
                                                 .withCount(2)
                                                 .withSum(3.2)
-                                                .withBuckets(FixedBuckets.newBuilder()
+                                                .withBuckets(FixedHistogramBuckets.newBuilder()
                                                         .addBucket(Double.POSITIVE_INFINITY, 2)
                                                         .build())
                                                 .build())
                                         .build(),
-                                FixedBucketsHistogramSnapshot.newBuilder()
+                                FixedHistogramSnapshot.newBuilder()
                                         .withName("response_size_bytes")
                                         .withHelp("help")
                                         .withUnit(Unit.BYTES)
-                                        .addData(FixedBucketsHistogramData.newBuilder()
+                                        .addData(FixedHistogramData.newBuilder()
                                                 .withCount(2)
                                                 .withSum(3.2)
-                                                .withBuckets(FixedBuckets.newBuilder()
+                                                .withBuckets(FixedHistogramBuckets.newBuilder()
                                                         .addBucket(2.2, 2)
                                                         .addBucket(Double.POSITIVE_INFINITY, 2)
                                                         .build())
@@ -277,10 +277,10 @@ public class OpenMetricsTextFormatWriterTest {
                                                 .withCreatedTimestampMillis(timestampLongs[1])
                                                 .withScrapeTimestampMillis(timestampLongs[0])
                                                 .build())
-                                        .addData(FixedBucketsHistogramData.newBuilder()
+                                        .addData(FixedHistogramData.newBuilder()
                                                 .withCount(4)
                                                 .withSum(4.1)
-                                                .withBuckets(FixedBuckets.newBuilder()
+                                                .withBuckets(FixedHistogramBuckets.newBuilder()
                                                         .addBucket(2.2, 2)
                                                         .addBucket(Double.POSITIVE_INFINITY, 4)
                                                         .build())
@@ -311,10 +311,10 @@ public class OpenMetricsTextFormatWriterTest {
                         "queue_size_bytes_gsum 27000.0\n" +
                         "# EOF\n",
                         new MetricSnapshot[]{
-                                new FixedBucketsHistogramSnapshot(true, new MetricMetadata("queue_size_bytes"), Collections.singletonList(new FixedBucketsHistogramData(130, 27000, FixedBuckets.newBuilder().addBucket(Double.POSITIVE_INFINITY, 130).build(), Labels.EMPTY, Exemplars.EMPTY, 0L))),
-                                new FixedBucketsHistogramSnapshot(true, new MetricMetadata("cache_size_bytes", "number of bytes in the cache", Unit.BYTES),
+                                new FixedHistogramSnapshot(true, new MetricMetadata("queue_size_bytes"), Collections.singletonList(new FixedHistogramData(130, 27000, FixedHistogramBuckets.newBuilder().addBucket(Double.POSITIVE_INFINITY, 130).build(), Labels.EMPTY, Exemplars.EMPTY, 0L))),
+                                new FixedHistogramSnapshot(true, new MetricMetadata("cache_size_bytes", "number of bytes in the cache", Unit.BYTES),
                                         Arrays.asList(
-                                                new FixedBucketsHistogramData(7, 17, FixedBuckets.newBuilder()
+                                                new FixedHistogramData(7, 17, FixedHistogramBuckets.newBuilder()
                                                         .addBucket(2.0, 3)
                                                         .addBucket(Double.POSITIVE_INFINITY, 7)
                                                         .build(),
@@ -322,7 +322,7 @@ public class OpenMetricsTextFormatWriterTest {
                                                         Exemplars.of(exemplar1, exemplar2),
                                                         timestampLongs[1],
                                                         timestampLongs[0]),
-                                                new FixedBucketsHistogramData(8, 18, FixedBuckets.newBuilder()
+                                                new FixedHistogramData(8, 18, FixedHistogramBuckets.newBuilder()
                                                         .addBucket(2.0, 4)
                                                         .addBucket(Double.POSITIVE_INFINITY, 8)
                                                         .build(),

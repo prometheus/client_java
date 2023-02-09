@@ -7,13 +7,12 @@ import io.prometheus.expositionformat.protobuf.generated.Metrics;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.ExponentialBucket;
-import io.prometheus.metrics.model.ExponentialBucketsHistogramSnapshot;
+import io.prometheus.metrics.model.NativeHistogramBucket;
+import io.prometheus.metrics.model.NativeHistogramSnapshot;
 import io.prometheus.metrics.model.Labels;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +20,7 @@ import java.util.Optional;
 import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
 
-public class ExponentialBucketsHistogramTest {
+public class NativeHistogramBucketsHistogramTest {
 
     private static class TestCase {
         final String name;
@@ -340,14 +339,14 @@ public class ExponentialBucketsHistogramTest {
         assertExemplarEquals(ex3, exemplarList.get(1));
     }
 
-    private ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData getData(Histogram histogram, String... labels) {
-        return ((ExponentialBucketsHistogramSnapshot) histogram.collect()).getData().stream()
+    private NativeHistogramSnapshot.NativeHistogramData getData(Histogram histogram, String... labels) {
+        return ((NativeHistogramSnapshot) histogram.collect()).getData().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("histogram with labels " + labels + " not found"));
     }
 
-    private Optional<ExponentialBucket> getBucket(Histogram histogram, int bucketIndex, String... labels) {
+    private Optional<NativeHistogramBucket> getBucket(Histogram histogram, int bucketIndex, String... labels) {
         return getData(histogram, labels).getBucketsForPositiveValues().stream()
                 .filter(b -> b.getBucketIndex() == bucketIndex)
                 .findAny();

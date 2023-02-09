@@ -3,7 +3,6 @@ package io.prometheus.metrics.core;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.observer.GaugingObserver;
 
 import java.util.ArrayList;

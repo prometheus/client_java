@@ -2,21 +2,16 @@ package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.ExponentialBuckets;
-import io.prometheus.metrics.model.FixedBucket;
-import io.prometheus.metrics.model.FixedBuckets;
-import io.prometheus.metrics.model.FixedBucketsHistogramSnapshot;
-import io.prometheus.metrics.model.ExponentialBucket;
-import io.prometheus.metrics.model.ExponentialBucketsHistogramSnapshot;
+import io.prometheus.metrics.model.NativeHistogramBuckets;
+import io.prometheus.metrics.model.FixedHistogramBuckets;
+import io.prometheus.metrics.model.FixedHistogramSnapshot;
+import io.prometheus.metrics.model.NativeHistogramSnapshot;
 import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.model.Unit;
 import io.prometheus.metrics.observer.DistributionObserver;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -63,24 +58,24 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
 
         @Override
-        public FixedBucketsHistogramSnapshot collect() {
-            return (FixedBucketsHistogramSnapshot) super.collect();
+        public FixedHistogramSnapshot collect() {
+            return (FixedHistogramSnapshot) super.collect();
         }
 
         @Override
-        protected FixedBucketsHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
-            List<FixedBucketsHistogramSnapshot.FixedBucketsHistogramData> data = new ArrayList<>(labels.size());
+        protected FixedHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
+            List<FixedHistogramSnapshot.FixedHistogramData> data = new ArrayList<>(labels.size());
             for (int i=0; i<labels.size(); i++) {
                 data.add(((FixedBucketsHistogramData) metricData.get(i)).collect(labels.get(i)));
             }
-            return new FixedBucketsHistogramSnapshot(getMetadata(), data);
+            return new FixedHistogramSnapshot(getMetadata(), data);
         }
 
         class FixedBucketsHistogramData extends HistogramData {
             private final LongAdder[] buckets;
             protected final DoubleAdder sum = new DoubleAdder();
             protected final LongAdder count = new LongAdder();
-            private final Buffer<FixedBucketsHistogramSnapshot.FixedBucketsHistogramData> buffer = new Buffer<>();
+            private final Buffer<FixedHistogramSnapshot.FixedHistogramData> buffer = new Buffer<>();
 
             private FixedBucketsHistogramData() {
                 buckets = new LongAdder[upperBounds.length];
@@ -123,7 +118,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 count.increment(); // must be the last step, because count is used to signal that the operation is complete.
             }
 
-            public FixedBucketsHistogramSnapshot.FixedBucketsHistogramData collect(Labels labels) {
+            public FixedHistogramSnapshot.FixedHistogramData collect(Labels labels) {
                 Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
@@ -134,8 +129,8 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                                 cumulativeCount += buckets[i].sum();
                                 cumulativeCounts[i] = cumulativeCount;
                             }
-                            FixedBuckets buckets = FixedBuckets.of(upperBounds, cumulativeCounts);
-                            return new FixedBucketsHistogramSnapshot.FixedBucketsHistogramData(count.longValue(), sum.sum(), buckets, labels, exemplars, createdTimeMillis);
+                            FixedHistogramBuckets buckets = FixedHistogramBuckets.of(upperBounds, cumulativeCounts);
+                            return new FixedHistogramSnapshot.FixedHistogramData(count.longValue(), sum.sum(), buckets, labels, exemplars, createdTimeMillis);
                         },
                         this::doObserve
                 );
@@ -184,17 +179,17 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
         }
 
         @Override
-        public ExponentialBucketsHistogramSnapshot collect() {
-            return (ExponentialBucketsHistogramSnapshot) super.collect();
+        public NativeHistogramSnapshot collect() {
+            return (NativeHistogramSnapshot) super.collect();
         }
 
         @Override
-        protected ExponentialBucketsHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
-            List<ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData> data = new ArrayList<>(labels.size());
+        protected NativeHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
+            List<NativeHistogramSnapshot.NativeHistogramData> data = new ArrayList<>(labels.size());
             for (int i=0; i<labels.size(); i++) {
                 data.add(((ExponentialBucketsHistogramData) metricData.get(i)).collect(labels.get(i)));
             }
-            return new ExponentialBucketsHistogramSnapshot(getMetadata(), data);
+            return new NativeHistogramSnapshot(getMetadata(), data);
         }
 
         @Override
@@ -211,7 +206,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             private final DoubleAdder sum = new DoubleAdder();
             private final LongAdder zeroCount = new LongAdder();
             private final long createdTimeMillis = System.currentTimeMillis();
-            private final Buffer<ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData> buffer = new Buffer<>();
+            private final Buffer<NativeHistogramSnapshot.NativeHistogramData> buffer = new Buffer<>();
 
             private ExponentialBucketsHistogramData() {
             }
@@ -331,11 +326,11 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 // TODO
             }
 
-            public ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData collect(Labels labels) {
+            public NativeHistogramSnapshot.NativeHistogramData collect(Labels labels) {
                 final Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
-                        () -> new ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData(
+                        () -> new NativeHistogramSnapshot.NativeHistogramData(
                                 count.sum(),
                                 sum.sum(),
                                 schema,
@@ -356,7 +351,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return this;
             }
 
-            private ExponentialBuckets toBucketList(ConcurrentHashMap<Integer, LongAdder> map) {
+            private NativeHistogramBuckets toBucketList(ConcurrentHashMap<Integer, LongAdder> map) {
                 int[] bucketIndexes = new int[map.size()];
                 long[] cumulativeCounts = new long[map.size()];
                 int i=0;
@@ -365,7 +360,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                     cumulativeCounts[i] = entry.getValue().sum();
                     i++;
                 }
-                return ExponentialBuckets.of(bucketIndexes, cumulativeCounts);
+                return NativeHistogramBuckets.of(bucketIndexes, cumulativeCounts);
             }
         }
     }

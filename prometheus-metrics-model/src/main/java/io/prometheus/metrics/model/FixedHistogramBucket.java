@@ -1,10 +1,11 @@
 package io.prometheus.metrics.model;
 
-public class FixedBucket implements Comparable<FixedBucket> {
+public class FixedHistogramBucket implements Comparable<FixedHistogramBucket> {
+
     private final long cumulativeCount;
     private final double upperBound;
 
-    public FixedBucket(double upperBound, long cumulativeCount) {
+    public FixedHistogramBucket(double upperBound, long cumulativeCount) {
         this.cumulativeCount = cumulativeCount;
         this.upperBound = upperBound;
         if (Double.isNaN(upperBound)) {
@@ -24,7 +25,7 @@ public class FixedBucket implements Comparable<FixedBucket> {
     }
 
     @Override
-    public int compareTo(FixedBucket other) {
+    public int compareTo(FixedHistogramBucket other) {
         return Double.compare(upperBound, other.upperBound);
     }
 }

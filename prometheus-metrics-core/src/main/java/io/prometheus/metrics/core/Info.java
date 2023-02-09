@@ -3,7 +3,6 @@ package io.prometheus.metrics.core;
 import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Label;
 import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.model.Unit;
 
 import java.util.Collections;

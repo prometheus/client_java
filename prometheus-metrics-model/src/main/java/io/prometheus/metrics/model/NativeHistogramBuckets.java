@@ -6,25 +6,25 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ExponentialBuckets implements Iterable<ExponentialBucket> {
+public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
 
-    public static final ExponentialBuckets EMPTY = new ExponentialBuckets(new int[]{}, new long[]{});
+    public static final NativeHistogramBuckets EMPTY = new NativeHistogramBuckets(new int[]{}, new long[]{});
     private final int[] bucketIndexes;
     private final long[] cumulativeCounts;
 
-    private ExponentialBuckets(int[] bucketIndexes, long[] cumulativeCounts) {
+    private NativeHistogramBuckets(int[] bucketIndexes, long[] cumulativeCounts) {
         this.bucketIndexes = bucketIndexes;
         this.cumulativeCounts = cumulativeCounts;
     }
 
-    public static ExponentialBuckets of(int[] bucketIndexes, long[] cumulativeCounts) {
+    public static NativeHistogramBuckets of(int[] bucketIndexes, long[] cumulativeCounts) {
         int[] bucketIndexesCopy = Arrays.copyOf(bucketIndexes, bucketIndexes.length);
         long[] cumulativeCountsCopy = Arrays.copyOf(cumulativeCounts, cumulativeCounts.length);
         sortAndValidate(bucketIndexesCopy, cumulativeCountsCopy);
-        return new ExponentialBuckets(bucketIndexesCopy, cumulativeCountsCopy);
+        return new NativeHistogramBuckets(bucketIndexesCopy, cumulativeCountsCopy);
     }
 
-    public static ExponentialBuckets of(List<Integer> bucketIndexes, List<Long> cumulativeCounts) {
+    public static NativeHistogramBuckets of(List<Integer> bucketIndexes, List<Long> cumulativeCounts) {
         int[] bucketIndexesCopy = new int[bucketIndexes.size()];
         for (int i=0; i<bucketIndexes.size(); i++) {
             bucketIndexesCopy[i] = bucketIndexes.get(i);
@@ -34,27 +34,27 @@ public class ExponentialBuckets implements Iterable<ExponentialBucket> {
             cumulativeCountsCopy[i] = cumulativeCounts.get(i);
         }
         sortAndValidate(bucketIndexesCopy, cumulativeCountsCopy);
-        return new ExponentialBuckets(bucketIndexesCopy, cumulativeCountsCopy);
+        return new NativeHistogramBuckets(bucketIndexesCopy, cumulativeCountsCopy);
     }
 
     public int size() {
         return bucketIndexes.length;
     }
 
-    private List<ExponentialBucket> asList() {
-        List<ExponentialBucket> result = new ArrayList<>(size());
+    private List<NativeHistogramBucket> asList() {
+        List<NativeHistogramBucket> result = new ArrayList<>(size());
         for (int i=0; i<bucketIndexes.length; i++) {
-            result.add(new ExponentialBucket(bucketIndexes[i], cumulativeCounts[i]));
+            result.add(new NativeHistogramBucket(bucketIndexes[i], cumulativeCounts[i]));
         }
         return result;
     }
 
     @Override
-    public Iterator<ExponentialBucket> iterator() {
+    public Iterator<NativeHistogramBucket> iterator() {
         return asList().iterator();
     }
 
-    public Stream<ExponentialBucket> stream() {
+    public Stream<NativeHistogramBucket> stream() {
         return asList().stream();
     }
 

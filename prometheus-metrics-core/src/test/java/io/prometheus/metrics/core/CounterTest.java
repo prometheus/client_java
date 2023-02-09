@@ -8,7 +8,6 @@ import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.model.Unit;
 import org.junit.Assert;
 import org.junit.Before;
@@ -132,23 +131,22 @@ public class CounterTest {
     counter.withLabels("/", "500").inc();
     CounterSnapshot snapshot = (CounterSnapshot) counter.collect();
     Assert.assertEquals("test_seconds", snapshot.getMetadata().getName());
-    Assert.assertEquals("seconds", snapshot.getMetadata().getUnit());
+    Assert.assertEquals("seconds", snapshot.getMetadata().getUnit().toString());
     Assert.assertEquals("help message", snapshot.getMetadata().getHelp());
-    Assert.assertEquals(MetricType.COUNTER, snapshot.getMetadata().getType());
     Assert.assertEquals(2, snapshot.getData().size());
     Iterator<CounterSnapshot.CounterData> iter = snapshot.getData().iterator();
     // data is ordered by labels, so 200 comes before 500
     CounterSnapshot.CounterData data = iter.next();
     Assert.assertEquals(Labels.of("const1name", "const1value", "const2name", "const2value", "path", "/", "status", "200"), data.getLabels());
     Assert.assertEquals(2, data.getValue(), 0.0001);
-    Assert.assertTrue(data.getCreatedTimeMillis() >= before);
-    Assert.assertTrue(data.getCreatedTimeMillis() <= System.currentTimeMillis());
+    Assert.assertTrue(data.getCreatedTimestampMillis() >= before);
+    Assert.assertTrue(data.getCreatedTimestampMillis() <= System.currentTimeMillis());
     // 500
     data = iter.next();
     Assert.assertEquals(Labels.of("const1name", "const1value", "const2name", "const2value", "path", "/", "status", "500"), data.getLabels());
     Assert.assertEquals(1, data.getValue(), 0.0001);
-    Assert.assertTrue(data.getCreatedTimeMillis() >= before);
-    Assert.assertTrue(data.getCreatedTimeMillis() <= System.currentTimeMillis());
+    Assert.assertTrue(data.getCreatedTimestampMillis() >= before);
+    Assert.assertTrue(data.getCreatedTimestampMillis() <= System.currentTimeMillis());
   }
 
   @Test

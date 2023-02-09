@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
+public final class NativeHistogramSnapshot extends MetricSnapshot {
 
     private final boolean gaugeHistogram;
 
     /**
-     * To create a new {@link ExponentialBucketsHistogramSnapshot}, you can either call the constructor directly or use
-     * the builder with {@link ExponentialBucketsHistogramSnapshot#newBuilder()}.
+     * To create a new {@link NativeHistogramSnapshot}, you can either call the constructor directly or use
+     * the builder with {@link NativeHistogramSnapshot#newBuilder()}.
      *
      * @param metadata see {@link MetricMetadata} for more naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
      */
-    public ExponentialBucketsHistogramSnapshot(MetricMetadata metadata, Collection<ExponentialBucketsHistogramData> data) {
+    public NativeHistogramSnapshot(MetricMetadata metadata, Collection<NativeHistogramData> data) {
         this(false, metadata, data);
     }
 
@@ -25,27 +25,27 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
      * are semantically gauges and not counters. See <a href="https://openmetrics.io">openmetrics.io</a> for more
      * info on Gauge Histograms.
      */
-    public ExponentialBucketsHistogramSnapshot(boolean isGaugeHistogram, MetricMetadata metadata, Collection<ExponentialBucketsHistogramData> data) {
+    public NativeHistogramSnapshot(boolean isGaugeHistogram, MetricMetadata metadata, Collection<NativeHistogramData> data) {
         super(metadata, data);
         this.gaugeHistogram = isGaugeHistogram;
     }
 
     @Override
-    public List<ExponentialBucketsHistogramData> getData() {
-        return (List<ExponentialBucketsHistogramData>) data;
+    public List<NativeHistogramData> getData() {
+        return (List<NativeHistogramData>) data;
     }
 
-    public static final class ExponentialBucketsHistogramData extends DistributionData {
+    public static final class NativeHistogramData extends DistributionData {
 
         private final int schema;
         private final long zeroCount;
         private final double zeroThreshold;
-        private final ExponentialBuckets bucketsForPositiveValues;
-        private final ExponentialBuckets bucketsForNegativeValues;
+        private final NativeHistogramBuckets bucketsForPositiveValues;
+        private final NativeHistogramBuckets bucketsForNegativeValues;
 
         /**
-         * To create a new {@link ExponentialBucketsHistogramData}, you can either call the constructor directly
-         * or use the Builder with {@link ExponentialBucketsHistogramData#newBuilder()}.
+         * To create a new {@link NativeHistogramData}, you can either call the constructor directly
+         * or use the Builder with {@link NativeHistogramData#newBuilder()}.
          *
          * @param count                    total number of observations.
          *                                 If present, the count must be the same as the value of the highest bucket.
@@ -60,9 +60,9 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
          * @param zeroThreshold            Observations smaller than this threshold are considered equal to zero.
          *                                 Required. Can be 0.
          * @param bucketsForPositiveValues buckets representing positive values. Can be
-         *                                 {@link ExponentialBuckets#EMPTY}, but must not be {@code null}.
+         *                                 {@link NativeHistogramBuckets#EMPTY}, but must not be {@code null}.
          * @param bucketsForNegativeValues buckets representing positive values. Can be empty,
-         *                                 {@link ExponentialBuckets#EMPTY}, but must not be {@code null}.
+         *                                 {@link NativeHistogramBuckets#EMPTY}, but must not be {@code null}.
          * @param labels                   must not be null. Use {@link Labels#EMPTY} if there are no labels.
          * @param exemplars                must not be null. Use {@link Exemplars#EMPTY} if there are no exemplars.
          * @param createdTimestampMillis   timestamp (as in {@link System#currentTimeMillis()}) when this histogram
@@ -71,7 +71,7 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
          *                                 not the creation of the snapshot.
          *                                 It's optional. Use {@code 0L} if there is no created timestamp.
          */
-        public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, ExponentialBuckets bucketsForPositiveValues, ExponentialBuckets bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
+        public NativeHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
             this(count, sum, schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, labels, exemplars, createdTimestampMillis, 0L);
         }
 
@@ -80,7 +80,7 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
          * as the timestamp of a Prometheus metric is set by the Prometheus server during scraping.
          * Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public ExponentialBucketsHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, ExponentialBuckets bucketsForPositiveValues, ExponentialBuckets bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
+        public NativeHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
             super(count, sum, exemplars, labels, createdTimestampMillis, timestampMillis);
             this.schema = schema;
             this.zeroCount = zeroCount;
@@ -102,11 +102,11 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
             return zeroThreshold;
         }
 
-        public ExponentialBuckets getBucketsForPositiveValues() {
+        public NativeHistogramBuckets getBucketsForPositiveValues() {
             return bucketsForPositiveValues;
         }
 
-        public ExponentialBuckets getBucketsForNegativeValues() {
+        public NativeHistogramBuckets getBucketsForNegativeValues() {
             return bucketsForNegativeValues;
         }
 
@@ -123,8 +123,8 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
             private Integer schema;
             private long zeroCount = 0;
             private double zeroThreshold = 0;
-            private ExponentialBuckets bucketsForPositiveValues = ExponentialBuckets.EMPTY;
-            private ExponentialBuckets bucketsForNegativeValues = ExponentialBuckets.EMPTY;
+            private NativeHistogramBuckets bucketsForPositiveValues = NativeHistogramBuckets.EMPTY;
+            private NativeHistogramBuckets bucketsForNegativeValues = NativeHistogramBuckets.EMPTY;
 
             private Builder() {}
 
@@ -148,21 +148,21 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
                 return this;
             }
 
-            public Builder withBucketsForPositiveValues(ExponentialBuckets bucketsForPositiveValues) {
+            public Builder withBucketsForPositiveValues(NativeHistogramBuckets bucketsForPositiveValues) {
                 this.bucketsForPositiveValues = bucketsForPositiveValues;
                 return this;
             }
 
-            public Builder withBucketsForNegativeValues(ExponentialBuckets bucketsForNegativeValues) {
+            public Builder withBucketsForNegativeValues(NativeHistogramBuckets bucketsForNegativeValues) {
                 this.bucketsForNegativeValues = bucketsForNegativeValues;
                 return this;
             }
 
-            public ExponentialBucketsHistogramData build() {
+            public NativeHistogramData build() {
                 if (schema == null) {
                     throw new IllegalArgumentException("schema is required");
                 }
-                return new ExponentialBucketsHistogramData(count, sum, schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
+                return new NativeHistogramData(count, sum, schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
 
@@ -174,13 +174,13 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
 
-        private final List<ExponentialBucketsHistogramData> histogramData = new ArrayList<>();
+        private final List<NativeHistogramData> histogramData = new ArrayList<>();
         private boolean isGaugeHistogram = false;
 
         private Builder() {
         }
 
-        public Builder addData(ExponentialBucketsHistogramData data) {
+        public Builder addData(NativeHistogramData data) {
             histogramData.add(data);
             return this;
         }
@@ -195,8 +195,8 @@ public final class ExponentialBucketsHistogramSnapshot extends MetricSnapshot {
             return this;
         }
 
-        public ExponentialBucketsHistogramSnapshot build() {
-            return new ExponentialBucketsHistogramSnapshot(isGaugeHistogram, buildMetadata(), histogramData);
+        public NativeHistogramSnapshot build() {
+            return new NativeHistogramSnapshot(isGaugeHistogram, buildMetadata(), histogramData);
         }
 
         @Override

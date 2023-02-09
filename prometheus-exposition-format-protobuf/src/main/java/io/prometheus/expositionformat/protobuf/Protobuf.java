@@ -3,11 +3,9 @@ package io.prometheus.expositionformat.protobuf;
 import io.prometheus.expositionformat.protobuf.generated.Metrics;
 import io.prometheus.metrics.model.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
-import java.util.List;
 
 public class Protobuf {
 
@@ -39,16 +37,16 @@ public class Protobuf {
             for (GaugeSnapshot.GaugeData data : gauge.getData()) {
                 builder.addMetric(convert(data));
             }
-        } else if (snapshot instanceof FixedBucketsHistogramSnapshot) {
-            FixedBucketsHistogramSnapshot histogram = (FixedBucketsHistogramSnapshot) snapshot;
+        } else if (snapshot instanceof FixedHistogramSnapshot) {
+            FixedHistogramSnapshot histogram = (FixedHistogramSnapshot) snapshot;
             builder.setType(Metrics.MetricType.HISTOGRAM);
-            for (FixedBucketsHistogramSnapshot.FixedBucketsHistogramData data : histogram.getData()) {
+            for (FixedHistogramSnapshot.FixedHistogramData data : histogram.getData()) {
                 builder.addMetric(convert(data));
             }
-        } else if (snapshot instanceof ExponentialBucketsHistogramSnapshot) {
-            ExponentialBucketsHistogramSnapshot histogram = (ExponentialBucketsHistogramSnapshot) snapshot;
+        } else if (snapshot instanceof NativeHistogramSnapshot) {
+            NativeHistogramSnapshot histogram = (NativeHistogramSnapshot) snapshot;
             builder.setType(Metrics.MetricType.HISTOGRAM);
-            for (ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData data : histogram.getData()) {
+            for (NativeHistogramSnapshot.NativeHistogramData data : histogram.getData()) {
                 builder.addMetric(convert(data));
             }
         } else if (snapshot instanceof SummarySnapshot) {
@@ -86,10 +84,10 @@ public class Protobuf {
         return metricBuilder.build();
     }
 
-    private static Metrics.Metric convert(FixedBucketsHistogramSnapshot.FixedBucketsHistogramData data) {
+    private static Metrics.Metric convert(FixedHistogramSnapshot.FixedHistogramData data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
-        for (FixedBucket bucket : data.getBuckets()) {
+        for (FixedHistogramBucket bucket : data.getBuckets()) {
             histogramBuilder.addBucket(convert(bucket));
         }
         histogramBuilder.setSampleCount(data.getCount());
@@ -101,7 +99,7 @@ public class Protobuf {
         return metricBuilder.build();
     }
 
-    private static Metrics.Metric convert(ExponentialBucketsHistogramSnapshot.ExponentialBucketsHistogramData data) {
+    private static Metrics.Metric convert(NativeHistogramSnapshot.NativeHistogramData data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder()
             .setSchema(data.getSchema())
@@ -119,7 +117,7 @@ public class Protobuf {
         return metricBuilder.build();
     }
 
-    private static void addBuckets(Metrics.Histogram.Builder histogramBuilder, ExponentialBuckets buckets, int sgn) {
+    private static void addBuckets(Metrics.Histogram.Builder histogramBuilder, NativeHistogramBuckets buckets, int sgn) {
         if (buckets.size() > 0) {
             Metrics.BucketSpan.Builder currentSpan = Metrics.BucketSpan.newBuilder();
             currentSpan.setOffset(buckets.getBucketIndex(0));
@@ -199,7 +197,7 @@ public class Protobuf {
         return builder.build();
     }
 
-    private static Metrics.Bucket convert(FixedBucket bucket) {
+    private static Metrics.Bucket convert(FixedHistogramBucket bucket) {
         Metrics.Bucket.Builder builder = Metrics.Bucket.newBuilder();
         // TODO exemplars
         //if (bucket.getExemplar() != null) {

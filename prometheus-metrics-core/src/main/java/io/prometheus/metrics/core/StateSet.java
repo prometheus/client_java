@@ -1,7 +1,6 @@
 package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricType;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.observer.StateObserver;
 
