@@ -11,7 +11,7 @@ public class CounterSnapshotTest {
     @Test
     public void testCompleteGoodCase() {
         long createdTimestamp1 = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
-        long createdTimestamp2 = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2);
+        long createdTimestamp2 = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2);
         long exemplarTimestamp = System.currentTimeMillis();
         CounterSnapshot snapshot = CounterSnapshot.newBuilder()
                 .withName("http_server_requests_seconds")

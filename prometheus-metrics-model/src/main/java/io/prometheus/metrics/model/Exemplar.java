@@ -39,6 +39,8 @@ public class Exemplar {
 
         private Double value = null;
         private Labels labels = Labels.EMPTY;
+        private String traceId = null;
+        private String spanId = null;
         private Long timestampMillis;
 
         private Builder() {}
@@ -49,18 +51,12 @@ public class Exemplar {
         }
 
         public Builder withTraceId(String traceId) {
-            if (traceId == null) {
-                throw new NullPointerException();
-            }
-            labels = labels.add(TRACE_ID, traceId);
+            this.traceId = traceId;
             return this;
         }
 
         public Builder withSpanId(String spanId) {
-            if (spanId == null) {
-                throw new NullPointerException();
-            }
-            labels = labels.add(SPAN_ID, spanId);
+            this.spanId = spanId;
             return this;
         }
 
@@ -68,7 +64,7 @@ public class Exemplar {
             if (labels == null) {
                 throw new NullPointerException();
             }
-            this.labels = this.labels.merge(labels);
+            this.labels = labels;
             return this;
         }
 
@@ -84,7 +80,20 @@ public class Exemplar {
             if (value == null) {
                 throw new IllegalStateException("cannot build an Exemplar without a value");
             }
-            return new Exemplar(value, labels, timestampMillis);
+            Labels allLabels;
+            if (traceId != null && spanId != null) {
+                allLabels = Labels.of(TRACE_ID, traceId, SPAN_ID, spanId);
+            } else if (traceId != null) {
+                allLabels = Labels.of(TRACE_ID, traceId);
+            } else if (spanId != null) {
+                allLabels = Labels.of(SPAN_ID, spanId);
+            } else {
+                allLabels = Labels.EMPTY;
+            }
+            if (!labels.isEmpty()) {
+                allLabels = allLabels.merge(labels);
+            }
+            return new Exemplar(value, allLabels, timestampMillis);
         }
     }
 }

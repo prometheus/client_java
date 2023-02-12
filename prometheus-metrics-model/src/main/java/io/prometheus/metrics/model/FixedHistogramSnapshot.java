@@ -88,8 +88,9 @@ public final class FixedHistogramSnapshot extends MetricSnapshot {
                     throw new IllegalArgumentException("le is a reserved label name for histograms");
                 }
             }
-            if (buckets.getCumulativeCount(buckets.size()-1) != getCount()) {
-                throw new IllegalArgumentException("The +Inf bucket must have the same value as the count.");
+            if (hasCount() && buckets.getCumulativeCount(buckets.size()-1) > getCount()) {
+                // Can count be greater than +Inf bucket? Yes, if NaN values were observed.
+                throw new IllegalArgumentException("Count is " + getCount() + ", but the +Inf bucket is " + buckets.getCumulativeCount(buckets.size()-1) + ".");
             }
         }
 
