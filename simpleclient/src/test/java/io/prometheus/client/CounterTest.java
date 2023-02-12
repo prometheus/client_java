@@ -5,8 +5,10 @@ import static org.junit.rules.ExpectedException.none;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.prometheus.client.exemplars.Exemplar;
 import org.junit.Assert;
@@ -141,6 +143,58 @@ public class CounterTest {
 
     noLabels.incWithExemplar(5, (Map<String, String>) null); // should not alter the exemplar
     assertExemplar(noLabels, 5, "mapKey1", "mapValue1", "mapKey2", "mapValue2");
+  }
+
+  @Test
+  public void testEnvironmentDisableCreatedSeries() {
+    Counter c = Counter.build().name("foo").unit("seconds").help("h").create();
+
+    // Include created series (default)
+
+    Set<String> metricNameSet = new HashSet<String>();
+
+    List<Collector.MetricFamilySamples> mfs = c.collect();
+    for (Collector.MetricFamilySamples metricFamilySamples : mfs) {
+      for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
+        metricNameSet.add(sample.name);
+      }
+    }
+
+    assertEquals(metricNameSet.size(), 2);
+    assertEquals(metricNameSet.contains("foo_seconds_total"), true);
+    assertEquals(metricNameSet.contains("foo_seconds_created"), true);
+
+    // Exclude include created series
+
+    Environment.disableCreatedSeries();
+    metricNameSet.clear();
+
+    mfs = c.collect();
+    for (Collector.MetricFamilySamples metricFamilySamples : mfs) {
+      for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
+        metricNameSet.add(sample.name);
+      }
+    }
+
+    assertEquals(metricNameSet.size(), 1);
+    assertEquals(metricNameSet.contains("foo_seconds_total"), true);
+    assertEquals(metricNameSet.contains("foo_seconds_created"), false);
+
+    // Include created series
+
+    Environment.enabledCreatedSeries();
+    metricNameSet.clear();
+
+    mfs = c.collect();
+    for (Collector.MetricFamilySamples metricFamilySamples : mfs) {
+      for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
+        metricNameSet.add(sample.name);
+      }
+    }
+
+    assertEquals(metricNameSet.size(), 2);
+    assertEquals(metricNameSet.contains("foo_seconds_total"), true);
+    assertEquals(metricNameSet.contains("foo_seconds_created"), true);
   }
 
   private void assertExemplar(Counter counter, double value, String... labels) {
