@@ -84,6 +84,9 @@ public final class MetricMetadata {
      * Convert arbitrary metric names to valid Prometheus metric names.
      */
     public static String sanitizeMetricName(String metricName) {
+        if (metricName.isEmpty()) {
+            throw new IllegalArgumentException("Cannot convert an empty string into a valid metric name.");
+        }
         int length = metricName.length();
         char[] sanitized = new char[length];
         for (int i = 0; i < length; i++) {

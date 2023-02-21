@@ -98,24 +98,24 @@ public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
         // * upperBounds sorted
         // * upperBounds and cumulativeCounts have the same length
         if (upperBounds.length == 0) {
-            throw new IllegalArgumentException("Buckets cannot be empty. They must contain at least the +Inf bucket.");
+            throw new IllegalArgumentException(FixedHistogramBuckets.class.getSimpleName() + " cannot be empty. They must contain at least the +Inf bucket.");
         }
         if (upperBounds[upperBounds.length - 1] != Double.POSITIVE_INFINITY) {
-            throw new IllegalArgumentException("Buckets must contain the +Inf bucket.");
+            throw new IllegalArgumentException(FixedHistogramBuckets.class.getSimpleName() + " must contain the +Inf bucket.");
         }
         for (int i = 0; i < upperBounds.length; i++) {
             if (Double.isNaN(upperBounds[i])) {
-                throw new IllegalArgumentException("Cannot use NaN as an upper bound.");
+                throw new IllegalArgumentException("Cannot use NaN as an upper bound in " + FixedHistogramBuckets.class.getSimpleName());
             }
             if (cumulativeCounts[i] < 0) {
-                throw new IllegalArgumentException("Bucket counts cannot be negative.");
+                throw new IllegalArgumentException("The cumulative counts in " + FixedHistogramBuckets.class.getSimpleName() + " cannot be negative.");
             }
             if (i > 0) {
                 if (upperBounds[i - 1] == upperBounds[i]) {
                     throw new IllegalArgumentException("Duplicate upper bound " + upperBounds[i]);
                 }
                 if (cumulativeCounts[i - 1] > cumulativeCounts[i]) {
-                    throw new IllegalArgumentException("Bucket counts must be cumulative.");
+                    throw new IllegalArgumentException(FixedHistogramBucket.class.getSimpleName() + " counts must be cumulative (count for le=\"" + upperBounds[i-1] + "\" is "  + cumulativeCounts[i-1] + " but count for le=\"" + upperBounds[i] + "\" is " + cumulativeCounts[i] + ").");
                 }
             }
         }

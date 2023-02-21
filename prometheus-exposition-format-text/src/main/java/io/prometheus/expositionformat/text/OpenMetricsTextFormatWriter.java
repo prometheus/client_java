@@ -222,7 +222,7 @@ public class OpenMetricsTextFormatWriter {
             writeLabels(writer, exemplar.getLabels(), null, 0);
             writer.write(' ');
             writeDouble(writer, exemplar.getValue());
-            if (exemplar.getTimestampMillis() != null) {
+            if (exemplar.hasTimestamp()) {
                 writer.write(' ');
                 writeTimestamp(writer, exemplar.getTimestampMillis());
             }

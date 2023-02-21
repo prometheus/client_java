@@ -8,9 +8,20 @@ public class Exemplar {
 
     private final double value;
     private final Labels labels;
-    private final Long timestampMillis;
+    private final long timestampMillis;
 
-    private Exemplar(double value, Labels labels, Long timestampMillis) {
+    /**
+     * To create a new {@link Exemplar}, you can either call the constructor directly
+     * or use the Builder with {@link Exemplar#newBuilder()}.
+     * @param value the observed value
+     * @param labels in most cases the labels will contain the {@link #TRACE_ID} and {@link #SPAN_ID}.
+     *               Must not be {@code null}. Use {@link Labels#EMPTY} if no labels are present.
+     * @param timestampMillis timestamp when the value was observed. Optional. Use 0L if not available.
+     */
+    public Exemplar(double value, Labels labels, long timestampMillis) {
+        if (labels == null) {
+            throw new NullPointerException("Labels cannot be null. Use Labels.EMPTY.");
+        }
         this.value = value;
         this.labels = labels;
         this.timestampMillis = timestampMillis;
@@ -24,10 +35,11 @@ public class Exemplar {
         return labels;
     }
 
-    /**
-     * may be null
-     */
-    public Long getTimestampMillis() {
+    public boolean hasTimestamp() {
+        return timestampMillis != 0L;
+    }
+
+    public long getTimestampMillis() {
         return timestampMillis;
     }
 
@@ -41,7 +53,7 @@ public class Exemplar {
         private Labels labels = Labels.EMPTY;
         private String traceId = null;
         private String spanId = null;
-        private Long timestampMillis;
+        private long timestampMillis = 0L;
 
         private Builder() {}
 
@@ -73,10 +85,10 @@ public class Exemplar {
             return this;
         }
 
+        /**
+         * @throws IllegalStateException if {@link #withValue(double)} wasn't called.
+         */
         public Exemplar build() {
-            if (timestampMillis == null) {
-                timestampMillis = System.currentTimeMillis();
-            }
             if (value == null) {
                 throw new IllegalStateException("cannot build an Exemplar without a value");
             }

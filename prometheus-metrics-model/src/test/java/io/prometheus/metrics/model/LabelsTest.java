@@ -16,7 +16,18 @@ public class LabelsTest {
     }
 
     @Test
-    public void testCompareByLabelValue() {
+    public void testCompareDifferentLabelNames() {
+        Labels labels1 = Labels.of("env", "prod", "status2", "200");
+        Labels labels2 = Labels.of("env", "prod", "status1", "200");
+        assertGreaterThan(labels1, labels2);
+        assertLessThan(labels2, labels1);
+        assertNotEquals(labels1, labels2);
+        assertNotEquals(labels2, labels1);
+    }
+
+    @Test
+    public void testCompareSameLabelNames() {
+        // If all label names are the same, labels should be sorted by label value.
         Labels labels1 = Labels.of("env", "prod", "status", "200");
         Labels labels2 = Labels.of("env", "prod", "status", "500");
         assertLessThan(labels1, labels2);
@@ -35,15 +46,6 @@ public class LabelsTest {
         assertNotEquals(labels2, labels1);
     }
 
-    @Test
-    public void testCompareByLabelName() {
-        Labels labels1 = Labels.of("env", "prod", "status2", "200");
-        Labels labels2 = Labels.of("env", "prod", "status1", "200");
-        assertGreaterThan(labels1, labels2);
-        assertLessThan(labels2, labels1);
-        assertNotEquals(labels1, labels2);
-        assertNotEquals(labels2, labels1);
-    }
 
     @Test
     public void testCompareEquals() {
@@ -53,5 +55,20 @@ public class LabelsTest {
         Assert.assertEquals(0, labels2.compareTo(labels1));
         Assert.assertEquals(labels1, labels2);
         Assert.assertEquals(labels2, labels1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testIllegalLabelName() {
+        Labels.of("http.status_code", "200");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testReservedLabelName() {
+        Labels.of("__name__", "requests_total");
+    }
+
+    @Test
+    public void testSanitizeLabelName() {
+        Assert.assertEquals("_my_label", Labels.sanitizeMetricName("...my/label"));
     }
 }

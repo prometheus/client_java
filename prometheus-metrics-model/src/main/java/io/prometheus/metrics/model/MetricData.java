@@ -9,8 +9,10 @@ public abstract class MetricData {
         this.labels = labels;
         this.createdTimestampMillis = createdTimestampMillis;
         this.scrapeTimestampMillis = scrapeTimestampMillis;
-        if (scrapeTimestampMillis != 0L && scrapeTimestampMillis < createdTimestampMillis) {
-            throw new IllegalArgumentException("The scrape timestamp cannot be before the created timestamp");
+        if (hasCreatedTimestamp() && hasScrapeTimestamp()) {
+            if (scrapeTimestampMillis < createdTimestampMillis) {
+                throw new IllegalArgumentException("The scrape timestamp cannot be before the created timestamp");
+            }
         }
     }
 

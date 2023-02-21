@@ -105,6 +105,17 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return LABEL_NAME_RE.matcher(name).matches() && !name.startsWith("__");
     }
 
+    /**
+     * Convert arbitrary label names to valid Prometheus label names.
+     */
+    public static String sanitizeMetricName(String labelName) {
+        String result = MetricMetadata.sanitizeMetricName(labelName);
+        while (result.startsWith("__")) {
+            result = result.substring(1);
+        }
+        return result;
+    }
+
     public Labels merge(Labels other) {
         String[] names = new String[this.names.length + other.names.length];
         String[] values = new String[names.length];
