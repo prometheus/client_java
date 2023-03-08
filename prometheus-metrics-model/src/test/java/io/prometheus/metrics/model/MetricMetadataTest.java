@@ -21,10 +21,27 @@ public class MetricMetadataTest {
     }
 
     @Test
-    public void testSanitization() {
+    public void testSanitizationIllegalCharacters() {
         MetricMetadata metadata = new MetricMetadata(MetricMetadata.sanitizeMetricName("http.server.duration"), "help string", Unit.SECONDS);
         Assert.assertEquals("http_server_duration", metadata.getName());
         Assert.assertEquals("help string", metadata.getHelp());
         Assert.assertEquals("seconds", metadata.getUnit().toString());
+    }
+
+    @Test
+    public void testSanitizationReservedSuffix() {
+        MetricMetadata metadata = new MetricMetadata(MetricMetadata.sanitizeMetricName("my_events_total"));
+        Assert.assertEquals("my_events", metadata.getName());
+    }
+
+    @Test
+    public void testSanitizationSuffixOnly() {
+        MetricMetadata metadata = new MetricMetadata(MetricMetadata.sanitizeMetricName("_total_created"));
+        Assert.assertEquals("total", metadata.getName());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSanitizeEmptyString() {
+        MetricMetadata.sanitizeMetricName("");
     }
 }

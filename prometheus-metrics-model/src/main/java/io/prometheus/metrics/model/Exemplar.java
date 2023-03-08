@@ -1,10 +1,16 @@
 package io.prometheus.metrics.model;
 
-// See https://github.com/prometheus/prometheus/blob/main/prompb/types.proto
 public class Exemplar {
 
-    public static final String TRACE_ID = "trace_id"; // label name for trace id
-    public static final String SPAN_ID = "span_id"; // label name for span id
+    /**
+     * Label name for trace id.
+     */
+    public static final String TRACE_ID = "trace_id";
+
+    /**
+     * Label name for span id.
+     */
+    public static final String SPAN_ID = "span_id";
 
     private final double value;
     private final Labels labels;

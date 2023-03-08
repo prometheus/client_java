@@ -37,8 +37,8 @@ public abstract class MetricSnapshot {
         // However, this is a SHOULD and not a MUST, so this is not enforced.
         // So let's just make sure that labels (including name and value) are unique.
         // Data is already sorted by labels, so if there are duplicates they will be next to each other.
-        for (int i=0; i<data.size()-1; i++) {
-            if (data.get(i).getLabels().equals(data.get(i+1).getLabels())) {
+        for (int i = 0; i < data.size() - 1; i++) {
+            if (data.get(i).getLabels().equals(data.get(i + 1).getLabels())) {
                 throw new IllegalArgumentException("Duplicate labels in metric data.");
             }
         }
@@ -51,10 +51,9 @@ public abstract class MetricSnapshot {
         private Unit unit;
 
         /**
-         * The name is required. If a {@link #withUnit(Unit) unit} is present, the metric name should include the
-         * unit as a suffix (in <a href="https://openmetrics.io/">OpenMetrics</a> the unit suffix is required,
-         * but this library does not enforce this). The name must not include the {@code _total} suffix for counters or
-         * the {@code _info} suffix for info metrics.
+         * The name is required.
+         * If the name is missing or invalid, {@code build()} will throw an {@link IllegalArgumentException}.
+         * See {@link MetricMetadata#isValidMetricName(String)} for info on valid metric names.
          */
         public T withName(String name) {
             this.name = name;

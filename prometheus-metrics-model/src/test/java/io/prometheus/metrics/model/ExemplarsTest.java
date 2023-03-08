@@ -22,6 +22,15 @@ public class ExemplarsTest {
         Assert.assertEquals(3.0, exemplars.get(2.0, 3.0).getValue(), 0.0);
         Assert.assertEquals(2.0, exemplars.get(1.0, 2.1).getValue(), 0.0);
         Assert.assertNull(exemplars.get(2.0, 2.1));
+    }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void testImmutable() {
+        Exemplars exemplars = Exemplars.of(
+                Exemplar.newBuilder().withValue(1.0).build(),
+                Exemplar.newBuilder().withValue(3.0).build(),
+                Exemplar.newBuilder().withValue(2.0).build()
+        );
+        exemplars.iterator().remove();
     }
 }

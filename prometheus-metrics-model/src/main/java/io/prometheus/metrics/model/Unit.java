@@ -8,6 +8,8 @@ public class Unit {
     public static final Unit SECONDS = new Unit("seconds");
     public static final Unit BYTES = new Unit("bytes");
 
+    public static final Unit CELSIUS = new Unit("celsius");
+
     public Unit(String name) {
         this.name = name;
     }

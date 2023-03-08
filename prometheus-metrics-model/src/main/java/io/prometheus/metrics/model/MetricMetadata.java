@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 public final class MetricMetadata {
     private static final Pattern METRIC_NAME_RE = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]+$");
+    private static final String[] RESERVED_SUFFIXES = {"_total", "_created", "_count", "_sum", "_bucket", "_gcount", "gsum", "_info"};
     private final String name;
     private final String help;
     private final Unit unit;
@@ -74,9 +75,28 @@ public final class MetricMetadata {
     }
 
     /**
-     * If this is false, the name cannot be used as a metric name.
+     * Test if a metric name is valid. Rules:
+     * <ul>
+     * <li>The name must match {@link #METRIC_NAME_RE}.</li>
+     * <li>The name MUST NOT end with one of the {@link #RESERVED_SUFFIXES}.</li>
+     * </ul>
+     * If a metric has a {@link Unit}, the metric name SHOULD end with the unit as a suffix (note that in
+     * <a href="https://openmetrics.io/">OpenMetrics</a> this is a MUST, but this library does not enforce Unit
+     * suffixes).
+     * <p>
+     * Example: If you create a Counter for a processing time with {@link Unit#SECONDS}, the name should be
+     * {@code processing_time_seconds}. When exposed in OpenMetrics Text format, this will be represented as two
+     * values: {@code processing_time_seconds_total} for the counter value, and the optional
+     * {@code processing_time_seconds_created} timestamp.
+     * <p>
+     * Use {@link #sanitizeMetricName(String)} to convert arbitrary Strings to valid metric names.
      */
     public static boolean isValidMetricName(String name) {
+        for (String reservedSuffix : RESERVED_SUFFIXES) {
+            if (name.endsWith(reservedSuffix)) {
+                return false;
+            }
+        }
         return METRIC_NAME_RE.matcher(name).matches();
     }
 
@@ -100,6 +120,22 @@ public final class MetricMetadata {
                 sanitized[i] = '_';
             }
         }
-        return new String(sanitized);
+        String sanitizedString = new String(sanitized);
+        boolean modified = true;
+        while (modified) {
+            modified = false;
+            for (String reservedSuffix : RESERVED_SUFFIXES) {
+                if (sanitizedString.equals(reservedSuffix)) {
+                    // This is for the corner case when you call sanitizeMetricName("_total").
+                    // In that case the result will be "total".
+                    return reservedSuffix.substring(1);
+                }
+                if (sanitizedString.endsWith(reservedSuffix)) {
+                    sanitizedString = sanitizedString.substring(0, sanitizedString.length() - reservedSuffix.length());
+                    modified = true;
+                }
+            }
+        }
+        return sanitizedString;
     }
 }

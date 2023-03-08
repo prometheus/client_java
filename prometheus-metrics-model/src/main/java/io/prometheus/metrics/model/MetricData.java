@@ -26,17 +26,22 @@ public abstract class MetricData {
         return scrapeTimestampMillis != 0L;
     }
 
+    /**
+     * This will only return a reasonable value if {@link #hasScrapeTimestamp()} is true.
+     */
     public long getScrapeTimestampMillis() {
         return scrapeTimestampMillis;
     }
 
-    /**
-     * Some metrics like Gauge don't have created timestamps, so for these metrics this will always return true.
-     */
     public boolean hasCreatedTimestamp() {
         return createdTimestampMillis != 0L;
     }
 
+    /**
+     * This will only return a reasonable value if {@link #hasCreatedTimestamp()} is true.
+     * Some metrics like Gauge don't have created timestamps. For these metrics {@link #hasCreatedTimestamp()}
+     * is always false.
+     */
     public long getCreatedTimestampMillis() {
         return createdTimestampMillis;
     }

@@ -13,25 +13,35 @@ public class Exemplars implements Iterable<Exemplar> {
     private final List<Exemplar> exemplars;
 
     private Exemplars(Collection<Exemplar> exemplars) {
-        this.exemplars = new ArrayList<>(exemplars);
+        this.exemplars = Collections.unmodifiableList(new ArrayList<>(exemplars));
     }
 
     /**
+     * Create a new Exemplars instance.
      * You can either create Exemplars with one of the static {@code Exemplars.of(...)} methods,
      * or you can use the {@link Exemplars#newBuilder()}.
+     *
+     * @param exemplars a copy of the exemplars collection will be created.
      */
     public static Exemplars of(Collection<Exemplar> exemplars) {
         return new Exemplars(exemplars);
     }
 
     /**
+     * Create a new Exemplars instance.
      * You can either create Exemplars with one of the static {@code Exemplars.of(...)} methods,
      * or you can use the {@link Exemplars#newBuilder()}.
+     *
+     * @param exemplars a copy of the exemplars array will be created.
      */
     public static Exemplars of(Exemplar... exemplars) {
         return new Exemplars(Arrays.asList(exemplars));
     }
 
+    /**
+     * Exemplars is immutable, so the iterator throws an {@link UnsupportedOperationException}
+     * if {@link Iterator#remove()} is called.
+     */
     @Override
     public Iterator<Exemplar> iterator() {
         return exemplars.iterator();
@@ -49,7 +59,7 @@ public class Exemplars implements Iterable<Exemplar> {
      * This is used by fixed histograms to find an exemplar with a value between lowerBound and upperBound.
      */
     public Exemplar get(double lowerBound, double upperBound) {
-        for (int i=0; i< exemplars.size(); i++) {
+        for (int i = 0; i < exemplars.size(); i++) {
             Exemplar exemplar = exemplars.get(i);
             double value = exemplar.getValue();
             if (value > lowerBound && value <= upperBound) {
@@ -62,14 +72,16 @@ public class Exemplars implements Iterable<Exemplar> {
     public static class Builder {
 
         private final ArrayList<Exemplar> exemplars = new ArrayList<>();
-        private Builder() {}
+
+        private Builder() {
+        }
 
         public Builder addExemplar(Exemplar exemplar) {
             exemplars.add(exemplar);
             return this;
         }
 
-       public Builder addExemplars(List<Exemplar> exemplars) {
+        public Builder addExemplars(List<Exemplar> exemplars) {
             this.exemplars.addAll(exemplars);
             return this;
         }
