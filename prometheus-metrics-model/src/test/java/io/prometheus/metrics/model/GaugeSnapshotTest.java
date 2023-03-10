@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.xml.crypto.Data;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 public class GaugeSnapshotTest {
@@ -61,18 +62,27 @@ public class GaugeSnapshotTest {
 
     @Test
     public void testMinimalGoodCase() {
-        CounterSnapshot snapshot = CounterSnapshot.newBuilder()
-                .withName("events")
-                .addCounterData(CounterData.newBuilder().withValue(1.0).build())
+        GaugeSnapshot snapshot = GaugeSnapshot.newBuilder()
+                .withName("temperature")
+                .withUnit(Unit.CELSIUS)
+                .addGaugeData(GaugeData.newBuilder().withValue(23.0).build())
                 .build();
-        SnapshotTestUtil.assertMetadata(snapshot, "events", null, null);
+        SnapshotTestUtil.assertMetadata(snapshot, "temperature", null, null);
         Assert.assertEquals(1, snapshot.getData().size());
-        CounterData data = snapshot.getData().get(0);
+        GaugeData data = snapshot.getData().get(0);
         Assert.assertEquals(Labels.EMPTY, data.getLabels());
-        Assert.assertEquals(1.0, data.getValue(), 0.0);
+        Assert.assertEquals(23.0, data.getValue(), 0.0);
         Assert.assertNull(data.getExemplar());
         Assert.assertFalse(data.hasCreatedTimestamp());
         Assert.assertFalse(data.hasScrapeTimestamp());
+    }
+
+    @Test
+    public void testEmptyGauge() {
+        GaugeSnapshot snapshot = GaugeSnapshot.newBuilder()
+                .withName("temperature")
+                .build();
+        Assert.assertEquals(0, snapshot.getData().size());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -83,5 +93,17 @@ public class GaugeSnapshotTest {
     @Test(expected = IllegalArgumentException.class)
     public void testValueMissing() {
         CounterData.newBuilder().build();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testDataImmutable() {
+        GaugeSnapshot snapshot = GaugeSnapshot.newBuilder()
+                .withName("gauge")
+                .addGaugeData(GaugeData.newBuilder().withLabels(Labels.of("a", "a")).withValue(23.0).build())
+                .addGaugeData(GaugeData.newBuilder().withLabels(Labels.of("a", "b")).withValue(23.0).build())
+                .build();
+        Iterator<GaugeSnapshot.GaugeData> iterator = snapshot.getData().iterator();
+        iterator.next();
+        iterator.remove();
     }
 }

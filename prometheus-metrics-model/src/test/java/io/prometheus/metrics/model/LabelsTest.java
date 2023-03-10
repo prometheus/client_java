@@ -69,6 +69,6 @@ public class LabelsTest {
 
     @Test
     public void testSanitizeLabelName() {
-        Assert.assertEquals("_my_label", Labels.sanitizeMetricName("...my/label"));
+        Assert.assertEquals("_my_label", Labels.sanitizeLabelName("...my/label"));
     }
 }

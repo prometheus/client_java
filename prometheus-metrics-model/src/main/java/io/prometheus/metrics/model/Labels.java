@@ -108,7 +108,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
     /**
      * Convert arbitrary label names to valid Prometheus label names.
      */
-    public static String sanitizeMetricName(String labelName) {
+    public static String sanitizeLabelName(String labelName) {
         String result = MetricMetadata.sanitizeMetricName(labelName);
         while (result.startsWith("__")) {
             result = result.substring(1);

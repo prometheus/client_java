@@ -12,12 +12,16 @@ public final class InfoSnapshot extends MetricSnapshot {
      *
      * @param metadata the metric name in metadata must not include the {@code _info} suffix.
      *                 See {@link MetricMetadata} for more naming conventions.
+     *                 The metadata must not have a unit.
      * @param data     the constructor will create a sorted copy of the collection.
      */
     public InfoSnapshot(MetricMetadata metadata, Collection<InfoData> data) {
         super(metadata, data);
         if (metadata.getName().endsWith("_info")) {
             throw new IllegalArgumentException("The name of an info snapshot must not include the _info suffix");
+        }
+        if (metadata.hasUnit()) {
+            throw new IllegalArgumentException("An Info metric cannot have a unit.");
         }
     }
 
@@ -78,6 +82,11 @@ public final class InfoSnapshot extends MetricSnapshot {
         public Builder addInfoData(InfoData data) {
             infoData.add(data);
             return this;
+        }
+
+        @Override
+        public Builder withUnit(Unit unit) {
+            throw new IllegalArgumentException("Info metric cannot have a unit.");
         }
 
         public InfoSnapshot build() {

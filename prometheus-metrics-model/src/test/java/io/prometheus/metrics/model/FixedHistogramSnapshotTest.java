@@ -4,6 +4,7 @@ import io.prometheus.metrics.model.FixedHistogramSnapshot.FixedHistogramData;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 public class FixedHistogramSnapshotTest {
@@ -106,5 +107,23 @@ public class FixedHistogramSnapshotTest {
                         .build())
                 .build();
         Assert.assertEquals(0, snapshot.getData().get(0).getBuckets().getCumulativeCount(0));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testDataImmutable() {
+        FixedHistogramSnapshot snapshot = FixedHistogramSnapshot.newBuilder()
+                .withName("test_histogram")
+                .addData(FixedHistogramData.newBuilder()
+                        .withLabels(Labels.of("a", "a"))
+                        .withBuckets(FixedHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
+                        .build())
+                .addData(FixedHistogramData.newBuilder()
+                        .withLabels(Labels.of("a", "b"))
+                        .withBuckets(FixedHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{2}))
+                        .build())
+                .build();
+        Iterator<FixedHistogramSnapshot.FixedHistogramData> iterator = snapshot.getData().iterator();
+        iterator.next();
+        iterator.remove();
     }
 }

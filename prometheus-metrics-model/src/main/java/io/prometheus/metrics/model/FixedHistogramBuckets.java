@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Immutable container for buckets of a fixed histogram.
+ */
 public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
 
     private final double[] upperBounds;

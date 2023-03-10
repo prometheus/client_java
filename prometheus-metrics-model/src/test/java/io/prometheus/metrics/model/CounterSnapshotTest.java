@@ -4,6 +4,7 @@ import io.prometheus.metrics.model.CounterSnapshot.CounterData;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 public class CounterSnapshotTest {
@@ -77,6 +78,12 @@ public class CounterSnapshotTest {
         Assert.assertFalse(data.hasScrapeTimestamp());
     }
 
+    @Test
+    public void testEmptyCounter() {
+        CounterSnapshot snapshot = CounterSnapshot.newBuilder().withName("events").build();
+        Assert.assertEquals(0, snapshot.getData().size());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testTotalSuffixPresent() {
         CounterSnapshot.newBuilder().withName("test_total").build();
@@ -85,5 +92,17 @@ public class CounterSnapshotTest {
     @Test(expected = IllegalArgumentException.class)
     public void testValueMissing() {
         CounterData.newBuilder().build();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testDataImmutable() {
+        CounterSnapshot snapshot = CounterSnapshot.newBuilder()
+                .withName("events")
+                .addCounterData(CounterData.newBuilder().withLabels(Labels.of("a", "a")).withValue(1.0).build())
+                .addCounterData(CounterData.newBuilder().withLabels(Labels.of("a", "b")).withValue(2.0).build())
+                .build();
+        Iterator<CounterSnapshot.CounterData> iterator = snapshot.getData().iterator();
+        iterator.next();
+        iterator.remove();
     }
 }

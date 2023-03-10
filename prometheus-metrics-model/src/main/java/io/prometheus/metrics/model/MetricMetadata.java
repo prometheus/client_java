@@ -5,6 +5,11 @@ import java.util.regex.Pattern;
 public final class MetricMetadata {
     private static final Pattern METRIC_NAME_RE = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]+$");
     private static final String[] RESERVED_SUFFIXES = {"_total", "_created", "_count", "_sum", "_bucket", "_gcount", "gsum", "_info"};
+
+    /**
+     * Name is the name without suffix. For example, the name for a counter "http_requests_total" would be "http_requests".
+     * The name of a info called "target_info" is "target".
+     */
     private final String name;
     private final String help;
     private final Unit unit;
@@ -26,6 +31,9 @@ public final class MetricMetadata {
     /**
      * Naming conventions:
      * <ul>
+     *     <li>The name MUST NOT include the {@code _total} suffix for counter metrics or the
+     *         {@code _info} suffix for info metrics.
+     *         If in doubt, use {@link #sanitizeMetricName(String)} to remove these prefixes.</li>
      *     <li>If name is {@code null}, a {@link NullPointerException} is thrown.</li>
      *     <li>If {@link #isValidMetricName(String) isValidMetricName(name)} is false,
      *         an {@link IllegalArgumentException} is thrown.
@@ -53,12 +61,20 @@ public final class MetricMetadata {
         validate();
     }
 
+    /**
+     * The name does not include the {@code _total} suffix for counter metrics
+     * or the {@code _info} suffix for Info metrics.
+     */
     public String getName() {
         return name;
     }
 
     public String getHelp() {
         return help;
+    }
+
+    public boolean hasUnit() {
+        return unit != null;
     }
 
     public Unit getUnit() {

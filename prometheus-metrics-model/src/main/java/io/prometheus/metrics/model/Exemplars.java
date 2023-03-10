@@ -7,8 +7,17 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Immutable container for Exemplars.
+ * <p>
+ * This is currently backed by a {@code List<Exemplar>}, but can be refactored later to use a more
+ * efficient data structure.
+ */
 public class Exemplars implements Iterable<Exemplar> {
 
+    /**
+     * For convenience, this means "no Exemplars".
+     */
     public static final Exemplars EMPTY = new Exemplars(Collections.emptyList());
     private final List<Exemplar> exemplars;
 

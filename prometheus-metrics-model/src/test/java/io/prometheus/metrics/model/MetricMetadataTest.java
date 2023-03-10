@@ -29,13 +29,19 @@ public class MetricMetadataTest {
     }
 
     @Test
-    public void testSanitizationReservedSuffix() {
+    public void testSanitizationCounter() {
         MetricMetadata metadata = new MetricMetadata(MetricMetadata.sanitizeMetricName("my_events_total"));
         Assert.assertEquals("my_events", metadata.getName());
     }
 
     @Test
-    public void testSanitizationSuffixOnly() {
+    public void testSanitizationInfo() {
+        MetricMetadata metadata = new MetricMetadata(MetricMetadata.sanitizeMetricName("target_info"));
+        Assert.assertEquals("target", metadata.getName());
+    }
+
+    @Test
+    public void testSanitizationWeirdCornerCase() {
         MetricMetadata metadata = new MetricMetadata(MetricMetadata.sanitizeMetricName("_total_created"));
         Assert.assertEquals("total", metadata.getName());
     }
