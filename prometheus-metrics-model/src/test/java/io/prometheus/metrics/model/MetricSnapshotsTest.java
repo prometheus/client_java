@@ -47,4 +47,16 @@ public class MetricSnapshotsTest {
                 .build();
         new MetricSnapshots(c, g);
     }
+
+    @Test
+    public void testBuilder() {
+        CounterSnapshot counter = CounterSnapshot.newBuilder()
+                .withName("my_metric")
+                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .build();
+        MetricSnapshots.Builder builder = MetricSnapshots.newBuilder();
+        Assert.assertFalse(builder.containsMetricName("my_metric"));
+        builder.addMetricSnapshot(counter);
+        Assert.assertTrue(builder.containsMetricName("my_metric"));
+    }
 }
