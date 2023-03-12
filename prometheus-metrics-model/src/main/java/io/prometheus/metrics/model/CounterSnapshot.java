@@ -16,9 +16,6 @@ public class CounterSnapshot extends MetricSnapshot {
      */
     public CounterSnapshot(MetricMetadata metadata, Collection<CounterData> data) {
         super(metadata, data);
-        if (metadata.getName().endsWith("_total")) {
-            throw new IllegalArgumentException("The name of a counter snapshot must not include the _total suffix");
-        }
     }
 
     @Override

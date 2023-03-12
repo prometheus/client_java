@@ -59,4 +59,11 @@ public class FixedHistogramBucketsTest {
     public void testEmptyBuckets() {
         FixedHistogramBuckets.newBuilder().build();
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDifferentLength() {
+        double[] upperBounds = new double[] {0.7, 1.3, Double.POSITIVE_INFINITY};
+        long[] cumulativeCounts = new long[] {13, 178, 1024, 3000};
+        FixedHistogramBuckets.of(upperBounds, cumulativeCounts);
+    }
 }

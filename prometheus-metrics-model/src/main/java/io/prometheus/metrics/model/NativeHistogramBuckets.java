@@ -113,4 +113,26 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
             }
         }
     }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private final List<Integer> bucketIndexes = new ArrayList<>();
+        private final List<Long> cumulativeCounts = new ArrayList<>();
+
+        private Builder() {}
+
+        public Builder addBucket(int bucketIndex, long cumulativeCount) {
+            bucketIndexes.add(bucketIndex);
+            cumulativeCounts.add(cumulativeCount);
+            return this;
+        }
+
+        public NativeHistogramBuckets build() {
+            return NativeHistogramBuckets.of(bucketIndexes, cumulativeCounts);
+        }
+    }
 }

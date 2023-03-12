@@ -34,9 +34,11 @@ public class MetricSnapshotsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testDuplicateName() {
-        // You might think this is a valid scenario, because the counter will produce
-        // my_metric_total and my_metric_created, both not conflicting with the gauge.
-        // However, the name for HELP, TYPE, UNIT is the same, and that is invalid.
+        // Q: What if you have a counter named "foo" and a gauge named "foo"?
+        // A: Great question. You might think this is a valid scenario, because the counter will produce
+        //    the values "foo_total" and "foo_created" while the gauge will produce the value "foo".
+        //    So from that perspective there is no conflict. However, the name for HELP, TYPE, UNIT is the same,
+        //    and that is the conflict. Therefore, you cannot have a counter named "foo" and a gauge named "foo".
         CounterSnapshot c = CounterSnapshot.newBuilder()
                 .withName("my_metric")
                 .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())

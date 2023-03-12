@@ -39,7 +39,7 @@ public abstract class MetricSnapshot {
         // Data is already sorted by labels, so if there are duplicates they will be next to each other.
         for (int i = 0; i < data.size() - 1; i++) {
             if (data.get(i).getLabels().equals(data.get(i + 1).getLabels())) {
-                throw new IllegalArgumentException("Duplicate labels in metric data.");
+                throw new IllegalArgumentException("Duplicate labels in metric data: " + data.get(i).getLabels());
             }
         }
     }
