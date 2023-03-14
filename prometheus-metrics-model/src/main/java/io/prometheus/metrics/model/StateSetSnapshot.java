@@ -3,6 +3,7 @@ package io.prometheus.metrics.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -22,6 +23,9 @@ public final class StateSetSnapshot extends MetricSnapshot {
     }
 
     private void validate() {
+        if (getMetadata().hasUnit()) {
+            throw new IllegalArgumentException("An Info metric cannot have a unit.");
+        }
         for (StateSetData entry : getData()) {
             if (entry.getLabels().contains(getMetadata().getName())) {
                 throw new IllegalArgumentException("Label name " + getMetadata().getName() + " is reserved.");
@@ -104,7 +108,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
             for (int i = 0; i < names.length; i++) {
                 result.add(new State(names[i], values[i]));
             }
-            return result;
+            return Collections.unmodifiableList(result);
         }
 
         @Override
@@ -197,6 +201,11 @@ public final class StateSetSnapshot extends MetricSnapshot {
         public Builder addStateSetData(StateSetData data) {
             stateSetData.add(data);
             return this;
+        }
+
+        @Override
+        public Builder withUnit(Unit unit) {
+            throw new IllegalArgumentException("StateSet metric cannot have a unit.");
         }
 
         public StateSetSnapshot build() {

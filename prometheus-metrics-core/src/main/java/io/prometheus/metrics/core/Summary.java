@@ -118,7 +118,7 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
                 CKMSQuantiles.Quantile quantile = getQuantiles().get(i);
                 quantiles[i] = new Quantile(quantile.quantile, quantileValues.get(quantile.quantile));
             }
-            return Quantiles.of(Arrays.asList(quantiles));
+            return Quantiles.of(quantiles);
         }
     }
 

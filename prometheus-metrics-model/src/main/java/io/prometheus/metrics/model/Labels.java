@@ -2,6 +2,7 @@ package io.prometheus.metrics.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -203,7 +204,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         for (int i = 0; i < names.length; i++) {
             result.add(new Label(names[i], values[i]));
         }
-        return result;
+        return Collections.unmodifiableList(result);
     }
 
     @Override

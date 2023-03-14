@@ -56,7 +56,6 @@ public class FixedHistogramSnapshotTest {
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "request_size_bytes", "request sizes in bytes", "bytes");
 
-        // FixedHistogramData 2
         Assert.assertEquals(2, snapshot.getData().size());
         FixedHistogramData data = snapshot.getData().get(0); // data is sorted by labels, so the first one should be path="/"
         Assert.assertEquals(12, data.getCount());

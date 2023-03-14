@@ -11,14 +11,11 @@ public final class GaugeSnapshot extends MetricSnapshot {
      * the builder with {@link GaugeSnapshot#newBuilder()}.
      *
      * @param metadata required name and optional help and unit.
-     *                 See {@link MetricMetadata} for more naming conventions.
+     *                 See {@link MetricMetadata} for naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
      */
     public GaugeSnapshot(MetricMetadata metadata, Collection<GaugeData> data) {
         super(metadata, data);
-        if (metadata.getName().endsWith("_total")) {
-            throw new IllegalArgumentException("The name of a counter snapshot must not include the _total suffix");
-        }
     }
 
     @Override

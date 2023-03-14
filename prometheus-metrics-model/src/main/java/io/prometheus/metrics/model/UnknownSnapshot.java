@@ -1,27 +1,20 @@
 package io.prometheus.metrics.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 public final class UnknownSnapshot extends MetricSnapshot {
 
-    public UnknownSnapshot(String name, UnknownData... data) {
-        this(new MetricMetadata(name), data);
-    }
-
-    public UnknownSnapshot(String name, String help, UnknownData... data) {
-        this(new MetricMetadata(name, help), data);
-    }
-
-    public UnknownSnapshot(String name, String help, Unit unit, UnknownData... data) {
-        this(new MetricMetadata(name, help, unit), data);
-    }
-
-    public UnknownSnapshot(MetricMetadata metadata, UnknownData... data) {
-        this(metadata, Arrays.asList(data));
-    }
-
+    /**
+     * To create a new {@link UnknownSnapshot}, you can either call the constructor directly or use
+     * the builder with {@link UnknownSnapshot#newBuilder()}.
+     *
+     * @param metadata required name and optional help and unit.
+     *                 See {@link MetricMetadata} for naming conventions.
+     * @param data     the constructor will create a sorted copy of the collection.
+     */
     public UnknownSnapshot(MetricMetadata metadata, Collection<UnknownData> data) {
         super(metadata, data);
     }
@@ -36,40 +29,26 @@ public final class UnknownSnapshot extends MetricSnapshot {
         private final double value;
         private final Exemplar exemplar;
 
-        public UnknownData(double value) {
-            this(value, Labels.EMPTY, null, 0, 0);
-        }
-
-        public UnknownData(double value, long createdTimestampMillis) {
-            this(value, Labels.EMPTY, null, createdTimestampMillis, 0);
-        }
-
-        public UnknownData(double value, Labels labels) {
-            this(value, labels, null, 0, 0);
-        }
-
-        public UnknownData(double value, Labels labels, long createdTimestampMillis) {
-            this(value, labels, null, createdTimestampMillis, 0);
-        }
-
-        public UnknownData(double value, Exemplar exemplar) {
-            this(value, Labels.EMPTY, exemplar, 0, 0);
-        }
-
-        public UnknownData(double value, Exemplar exemplar, long createdTimestampMillis) {
-            this(value, Labels.EMPTY, exemplar, createdTimestampMillis, 0);
-        }
-
+        /**
+         * To create a new {@link UnknownData}, you can either call the constructor directly or use the
+         * Builder with {@link UnknownData#newBuilder()}.
+         *
+         * @param value                  the value.
+         * @param labels                 must not be null. Use {@link Labels#EMPTY} if there are no labels.
+         * @param exemplar               may be null.
+         */
         public UnknownData(double value, Labels labels, Exemplar exemplar) {
-            this(value, labels, exemplar, 0, 0);
+            this(value, Labels.EMPTY, exemplar, 0);
         }
 
-        public UnknownData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis) {
-            this(value, labels, exemplar, createdTimestampMillis, 0);
-        }
-
-        public UnknownData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis, long scrapeTimestampMillis) {
-            super(labels, createdTimestampMillis, scrapeTimestampMillis);
+        /**
+         * Constructor with an additional scrape timestamp parameter. In most cases you should not need this.
+         * This is only useful in rare cases as the timestamp of a Prometheus metric should usually be set by the
+         * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
+         * metric sources.
+         */
+        public UnknownData(double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
+            super(labels, 0L, scrapeTimestampMillis);
             this.value = value;
             this.exemplar = exemplar;
             validate();
@@ -85,5 +64,70 @@ public final class UnknownSnapshot extends MetricSnapshot {
 
         @Override
         protected void validate() {}
+
+        public static class Builder extends MetricData.Builder<Builder> {
+
+            private Exemplar exemplar = null;
+            private Double value = null;
+
+            private Builder() {}
+
+            /**
+             * required.
+             */
+            public Builder withValue(double value) {
+                this.value = value;
+                return this;
+            }
+
+            /**
+             * Optional
+             */
+            public Builder withExemplar(Exemplar exemplar) {
+                this.exemplar = exemplar;
+                return this;
+            }
+
+            public UnknownData build() {
+                if (value == null) {
+                    throw new IllegalArgumentException("Missing required field: value is null.");
+                }
+                return new UnknownData(value, labels, exemplar, scrapeTimestampMillis);
+            }
+
+            @Override
+            protected Builder self() {
+                return this;
+            }
+        }
+
+        public static Builder newBuilder() {
+            return new Builder();
+        }
+    }
+
+    public static class Builder extends MetricSnapshot.Builder<Builder> {
+
+        private final List<UnknownData> unknownData = new ArrayList<>();
+
+        private Builder() {}
+
+        public Builder addUnknownData(UnknownData data) {
+            unknownData.add(data);
+            return this;
+        }
+
+        public UnknownSnapshot build() {
+            return new UnknownSnapshot(buildMetadata(), unknownData);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 }

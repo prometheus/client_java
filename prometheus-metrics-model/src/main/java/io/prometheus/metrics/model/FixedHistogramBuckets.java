@@ -2,6 +2,7 @@ package io.prometheus.metrics.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -141,7 +142,7 @@ public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
         for (int i = 0; i < upperBounds.length; i++) {
             result.add(new FixedHistogramBucket(upperBounds[i], cumulativeCounts[i]));
         }
-        return result;
+        return Collections.unmodifiableList(result);
     }
 
     @Override

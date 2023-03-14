@@ -8,8 +8,17 @@ public class Quantiles implements Iterable<Quantile> {
 
     private Quantiles(List<Quantile> quantiles) {
         quantiles = new ArrayList<>(quantiles);
-        Collections.sort(quantiles);
+        quantiles.sort(Comparator.comparing(Quantile::getQuantile));
         this.quantiles = Collections.unmodifiableList(quantiles);
+        validate();
+    }
+
+    private void validate() {
+        for (int i=0; i< quantiles.size() - 1; i++) {
+            if (quantiles.get(i).getQuantile() == quantiles.get(i+1).getQuantile()) {
+                throw new IllegalArgumentException("Duplicate " + quantiles.get(i).getQuantile() + " quantile.");
+            }
+        }
     }
 
     public static Quantiles of(List<Quantile> quantiles) {
@@ -18,6 +27,14 @@ public class Quantiles implements Iterable<Quantile> {
 
     public static Quantiles of(Quantile... quantiles) {
         return of(Arrays.asList(quantiles));
+    }
+
+    public int size() {
+        return quantiles.size();
+    }
+
+    public Quantile get(int i) {
+        return quantiles.get(i);
     }
 
     @Override

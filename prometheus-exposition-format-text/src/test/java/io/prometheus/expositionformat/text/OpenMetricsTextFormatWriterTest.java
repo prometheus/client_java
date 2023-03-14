@@ -190,7 +190,7 @@ public class OpenMetricsTextFormatWriterTest {
                                         .withName("http_request_duration_seconds")
                                         .withHelp("request duration")
                                         .withUnit(Unit.SECONDS)
-                                        .addData(SummaryData.newBuilder()
+                                        .addSummaryData(SummaryData.newBuilder()
                                                 .withCount(7)
                                                 .withSum(2.2)
                                                 .withQuantiles(Quantiles.newBuilder()
@@ -205,7 +205,7 @@ public class OpenMetricsTextFormatWriterTest {
                                                 .withCreatedTimestampMillis(timestampLongs[1])
                                                 .withScrapeTimestampMillis(timestampLongs[0])
                                                 .build())
-                                        .addData(SummaryData.newBuilder()
+                                        .addSummaryData(SummaryData.newBuilder()
                                                 .withCount(3)
                                                 .withSum(1.2)
                                                 .withQuantiles(Quantiles.newBuilder()
@@ -225,7 +225,7 @@ public class OpenMetricsTextFormatWriterTest {
                                         .withName("latency_seconds")
                                         .withHelp("latency")
                                         .withUnit(Unit.SECONDS)
-                                        .addData(SummaryData.newBuilder()
+                                        .addSummaryData(SummaryData.newBuilder()
                                                 .withCount(3)
                                                 .withSum(1.2)
                                                 .build())
@@ -381,20 +381,38 @@ public class OpenMetricsTextFormatWriterTest {
                                         .build()
                         }},
                 new Object[]{"unknown", "" +
-                        "# TYPE my_special_thing unknown\n" +
-                        "# UNIT my_special_thing bytes\n" +
-                        "# HELP my_special_thing help message\n" +
-                        "my_special_thing{env=\"dev\"} 0.2 1672850685.829 # {env=\"prod\",span_id=\"12345\",trace_id=\"abcde\"} 1.7 1672850685.829\n" +
-                        "my_special_thing{env=\"prod\"} 0.7 1672850685.829 # {env=\"prod\",span_id=\"12345\",trace_id=\"abcde\"} 1.7 1672850685.829\n" +
+                        "# TYPE my_special_thing_bytes unknown\n" +
+                        "# UNIT my_special_thing_bytes bytes\n" +
+                        "# HELP my_special_thing_bytes help message\n" +
+                        "my_special_thing_bytes{env=\"dev\"} 0.2 1672850685.829 # {env=\"prod\",span_id=\"12345\",trace_id=\"abcde\"} 1.7 1672850685.829\n" +
+                        "my_special_thing_bytes{env=\"prod\"} 0.7 1672850685.829 # {env=\"prod\",span_id=\"12345\",trace_id=\"abcde\"} 1.7 1672850685.829\n" +
                         "# TYPE other unknown\n" +
                         "other 22.3\n" +
                         "# EOF\n",
                         new MetricSnapshot[]{
-                                new UnknownSnapshot("my_special_thing", "help message", Unit.BYTES,
-                                        new UnknownData(0.7, Labels.of("env", "prod"), exemplar1, timestampLongs[1], timestampLongs[0]),
-                                        new UnknownData(0.2, Labels.of("env", "dev"), exemplar1, timestampLongs[1], timestampLongs[0])
-                                ),
-                                new UnknownSnapshot("other", new UnknownData(22.3))
+                                UnknownSnapshot.newBuilder()
+                                        .withName("my_special_thing_bytes")
+                                        .withHelp("help message")
+                                        .withUnit(Unit.BYTES)
+                                        .addUnknownData(UnknownData.newBuilder()
+                                                .withValue(0.7)
+                                                .withLabels(Labels.of("env", "prod"))
+                                                .withExemplar(exemplar1)
+                                                .withScrapeTimestampMillis(timestampLongs[1])
+                                                .build())
+                                        .addUnknownData(UnknownData.newBuilder()
+                                                .withValue(0.2)
+                                                .withLabels(Labels.of("env", "dev"))
+                                                .withExemplar(exemplar1)
+                                                .withScrapeTimestampMillis(timestampLongs[1])
+                                                .build())
+                                        .build(),
+                                UnknownSnapshot.newBuilder()
+                                        .withName("other")
+                                        .addUnknownData(UnknownData.newBuilder()
+                                                .withValue(22.3)
+                                                .build())
+                                        .build()
                         }}
         );
     }

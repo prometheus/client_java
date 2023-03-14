@@ -1,6 +1,6 @@
 package io.prometheus.metrics.model;
 
-public class Quantile implements Comparable<Quantile> {
+public class Quantile {
     private final double quantile;
     private final double value;
 
@@ -15,10 +15,5 @@ public class Quantile implements Comparable<Quantile> {
 
     public double getValue() {
         return value;
-    }
-
-    @Override
-    public int compareTo(Quantile o) {
-        return Double.compare(quantile, o.quantile);
     }
 }

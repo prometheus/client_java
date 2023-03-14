@@ -104,7 +104,7 @@ public final class SummarySnapshot extends MetricSnapshot {
         private Builder() {
         }
 
-        public Builder addData(SummaryData data) {
+        public Builder addSummaryData(SummaryData data) {
             summaryData.add(data);
             return this;
         }

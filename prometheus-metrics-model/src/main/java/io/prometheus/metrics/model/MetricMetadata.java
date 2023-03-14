@@ -83,7 +83,7 @@ public final class MetricMetadata {
 
     private void validate() {
         if (name == null) {
-            throw new NullPointerException("name is required");
+            throw new IllegalArgumentException("Missing required field: name is null");
         }
         if (!isValidMetricName(name)) {
             throw new IllegalArgumentException("'" + name + "': illegal metric name");

@@ -2,6 +2,7 @@ package io.prometheus.metrics.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -46,7 +47,7 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
         for (int i=0; i<bucketIndexes.length; i++) {
             result.add(new NativeHistogramBucket(bucketIndexes[i], cumulativeCounts[i]));
         }
-        return result;
+        return Collections.unmodifiableList(result);
     }
 
     @Override
