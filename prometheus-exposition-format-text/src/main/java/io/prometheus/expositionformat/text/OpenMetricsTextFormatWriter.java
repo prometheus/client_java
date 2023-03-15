@@ -65,11 +65,7 @@ public class OpenMetricsTextFormatWriter {
             writeNameAndLabels(writer, metadata.getName(), "_total", data.getLabels());
             writeDouble(writer, data.getValue());
             writeTimestampAndExemplar(writer, data, data.getExemplar());
-            if (writeCreatedTimestamps && data.hasCreatedTimestamp()) {
-                writeNameAndLabels(writer, metadata.getName(), "_created", data.getLabels());
-                writeTimestamp(writer, data.getCreatedTimestampMillis());
-                writer.write('\n');
-            }
+            writeCreated(writer, metadata, data);
         }
     }
 
@@ -122,8 +118,10 @@ public class OpenMetricsTextFormatWriter {
             for (Quantile quantile : data.getQuantiles()) {
                 writeNameAndLabels(writer, metadata.getName(), null, data.getLabels(), "quantile", quantile.getQuantile());
                 writeDouble(writer, quantile.getValue());
-                exemplarIndex = exemplarIndex + 1 % exemplars.size();
+                // Exemplars for summaries are not officially supported in OpenMetrics. However, the Prometheus server will accept them anyway.
+                // We'll need to get back to this and see if there is a better way to choose the Exemplars for quantiles.
                 writeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(exemplarIndex) : null);
+                exemplarIndex = exemplarIndex + 1 % exemplars.size();
             }
             writeCountSumCreated(writer, metadata, data, data.getCount(), "_count", data.getSum(), "_sum", exemplars);
         }
@@ -189,9 +187,17 @@ public class OpenMetricsTextFormatWriter {
         writeNameAndLabels(writer, metadata.getName(), sumSuffix, data.getLabels());
         writeDouble(writer, sum);
         writeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(exemplars.size() - 1) : null);
+        writeCreated(writer, metadata, data);
+    }
+
+    private void writeCreated(OutputStreamWriter writer, MetricMetadata metadata, MetricData data) throws IOException {
         if (writeCreatedTimestamps && data.hasCreatedTimestamp()) {
             writeNameAndLabels(writer, metadata.getName(), "_created", data.getLabels());
             writeTimestamp(writer, data.getCreatedTimestampMillis());
+            if (data.hasScrapeTimestamp()) {
+                writer.write(' ');
+                writeTimestamp(writer, data.getScrapeTimestampMillis());
+            }
             writer.write('\n');
         }
     }
