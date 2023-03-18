@@ -84,7 +84,7 @@ the environment variable `PROMETHEUS_DISABLE_CREATED_SERIES=true`.
 
 ## Building
 
-Building the repository needs Java 11 (The project the project still supports Java 6 and Java versions > 11 dropped support for Java 6 output). We recommend to use an [up-to-data Java 8 installation](https://adoptium.net/en-GB/marketplace/?version=8). The project provides the maven wrapper and therefore no local maven installqation is needed. To build the repository just call `./mvnw verify`.
+Building the repository needs Java 11 (The project the project still supports Java 6 and Java versions > 11 dropped support for Java 6 output). We recommend to use an up to date [Java 8 installation](https://adoptium.net/en-GB/marketplace/?version=8). The project provides the maven wrapper and therefore no local maven installqation is needed. To build the repository just call `./mvnw verify`.
 
 ## Instrumenting
 
