@@ -72,8 +72,7 @@ version can be found on in the maven repository for
 ### Javadocs
 There are canonical examples defined in the class definition Javadoc of the client packages.
 
-Documentation can be found at the [Java Client
-Github Project Page](http://prometheus.github.io/client_java).
+Documentation can be found at the [Java Client GitHub Project Page](http://prometheus.github.io/client_java).
 
 ### Disabling `_created` metrics
 
@@ -84,7 +83,7 @@ the environment variable `PROMETHEUS_DISABLE_CREATED_SERIES=true`.
 
 ## Building
 
-Building the repository needs Java 11 (The project the project still supports Java 6 and Java versions > 11 dropped support for Java 6 output). We recommend to use an up to date [Java 8 installation](https://adoptium.net/en-GB/marketplace/?version=8). The project provides the maven wrapper and therefore no local maven installqation is needed. To build the repository just call `./mvnw verify`.
+Building the repository needs Java 11 (The project still supports Java 6 and Java versions > 11 dropped support for Java 6 output). We recommend to use an up-to-date [Java 8 installation](https://adoptium.net/en-GB/marketplace/?version=8). The project provides the maven wrapper and therefore no local maven installation is needed. To build the repository just call `./mvnw verify`.
 
 ## Instrumenting
 
@@ -873,7 +872,7 @@ MetricRegistry metricRegistry = new MetricRegistry();
 new DropwizardExports(metricRegistry).register();
 ```
 
-By default Dropwizard metrics are translated to Prometheus sample sanitizing their names, i.e. replacing unsupported chars with `_`, for example:
+By default, Dropwizard metrics are translated to Prometheus sample sanitizing their names, i.e. replacing unsupported chars with `_`, for example:
 ```
 Dropwizard metric name:
 org.company.controller.save.status.400
