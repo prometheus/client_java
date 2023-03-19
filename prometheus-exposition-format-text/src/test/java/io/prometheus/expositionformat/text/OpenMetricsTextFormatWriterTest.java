@@ -214,7 +214,7 @@ public class OpenMetricsTextFormatWriterTest {
     }
 
     @Test
-    public void testSummaryMinimal() throws IOException {
+    public void testSummaryWithoutQuantiles() throws IOException {
         String expected = "" +
                 "# TYPE latency_seconds summary\n" +
                 "# UNIT latency_seconds seconds\n" +
@@ -229,6 +229,57 @@ public class OpenMetricsTextFormatWriterTest {
                 .addSummaryData(SummaryData.newBuilder()
                         .withCount(3)
                         .withSum(1.2)
+                        .build())
+                .build();
+        assertOutput(expected, summary);
+    }
+
+    @Test
+    public void testSummaryNoCountAndSum() throws IOException {
+        String expected = "" +
+                "# TYPE latency_seconds summary\n" +
+                "latency_seconds{quantile=\"0.95\"} 200.0\n" +
+                "# EOF\n";
+        SummarySnapshot summary = SummarySnapshot.newBuilder()
+                .withName("latency_seconds")
+                .addSummaryData(SummaryData.newBuilder()
+                        .withQuantiles(Quantiles.newBuilder().addQuantile(0.95, 200.0).build())
+                        .build())
+                .build();
+        assertOutput(expected, summary);
+    }
+
+    @Test
+    public void testSummaryEmptyData() throws IOException {
+        // SummaryData can be present but empty. This should be treated like no data is present.
+        SummarySnapshot summary = SummarySnapshot.newBuilder()
+                .withName("latency_seconds")
+                .withHelp("latency")
+                .withUnit(Unit.SECONDS)
+                .addSummaryData(SummaryData.newBuilder().build())
+                .build();
+        assertOutput("# EOF\n", summary);
+    }
+
+    @Test
+    public void testSummaryEmptyAndNonEmpty() throws IOException {
+        String expected = "" +
+                "# TYPE latency_seconds summary\n" +
+                "latency_seconds_count{path=\"/v2\"} 2\n" +
+                "latency_seconds_sum{path=\"/v2\"} 10.7\n" +
+                "# EOF\n";
+        SummarySnapshot summary = SummarySnapshot.newBuilder()
+                .withName("latency_seconds")
+                .addSummaryData(SummaryData.newBuilder()
+                        .withLabels(Labels.of("path", "/v1"))
+                        .build())
+                .addSummaryData(SummaryData.newBuilder()
+                        .withLabels(Labels.of("path", "/v2"))
+                        .withCount(2)
+                        .withSum(10.7)
+                        .build())
+                .addSummaryData(SummaryData.newBuilder()
+                        .withLabels(Labels.of("path", "/v3"))
                         .build())
                 .build();
         assertOutput(expected, summary);
@@ -285,6 +336,23 @@ public class OpenMetricsTextFormatWriterTest {
 
     @Test
     public void testFixedHistogramMinimal() throws Exception {
+        String expected = "" +
+                "# TYPE request_latency_seconds histogram\n" +
+                "request_latency_seconds_bucket{le=\"+Inf\"} 2\n" +
+                "# EOF\n";
+        FixedHistogramSnapshot histogram = FixedHistogramSnapshot.newBuilder()
+                .withName("request_latency_seconds")
+                .addData(FixedHistogramData.newBuilder()
+                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                                .addBucket(Double.POSITIVE_INFINITY, 2)
+                                .build())
+                        .build())
+                .build();
+        assertOutput(expected, histogram);
+    }
+
+    @Test
+    public void testFixedHistogramCountAndSum() throws Exception {
         String expected = "" +
                 "# TYPE request_latency_seconds histogram\n" +
                 "request_latency_seconds_bucket{le=\"+Inf\"} 2\n" +
@@ -357,6 +425,24 @@ public class OpenMetricsTextFormatWriterTest {
 
     @Test
     public void testFixedGaugeHistogramMinimal() throws IOException {
+        String expected = "" +
+                "# TYPE queue_size_bytes gaugehistogram\n" +
+                "queue_size_bytes_bucket{le=\"+Inf\"} 130\n" +
+                "# EOF\n";
+        FixedHistogramSnapshot gaugeHistogram = FixedHistogramSnapshot.newBuilder()
+                .asGaugeHistogram()
+                .withName("queue_size_bytes")
+                .addData(FixedHistogramData.newBuilder()
+                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                                .addBucket(Double.POSITIVE_INFINITY, 130)
+                                .build())
+                        .build())
+                .build();
+        assertOutput(expected, gaugeHistogram);
+    }
+
+    @Test
+    public void testFixedGaugeHistogramCountAndSum() throws IOException {
         String expected = "" +
                 "# TYPE queue_size_bytes gaugehistogram\n" +
                 "queue_size_bytes_bucket{le=\"+Inf\"} 130\n" +
@@ -482,6 +568,38 @@ public class OpenMetricsTextFormatWriterTest {
                         .build())
                 .build();
         assertOutput(expected, unknown);
+    }
+
+    @Test
+    public void testHelpEscape() throws IOException {
+        String expected = "" +
+                "# TYPE test counter\n" +
+                "# HELP test Some text and \\n some \\\" escaping\n" +
+                "test_total 1.0\n" +
+                "# EOF\n";
+        CounterSnapshot counter = CounterSnapshot.newBuilder()
+                .withName("test")
+                .withHelp("Some text and \n some \" escaping") // example from https://openmetrics.io
+                .addCounterData(CounterData.newBuilder().withValue(1.0).build())
+                .build();
+        assertOutput(expected, counter);
+    }
+
+    @Test
+    public void testLabelValueEscape() throws IOException {
+        String expected = "" +
+                "# TYPE test counter\n" +
+                "test_total{a=\"x\",b=\"escaping\\\" example \\n \"} 1.0\n" +
+                "# EOF\n";
+        CounterSnapshot counter = CounterSnapshot.newBuilder()
+                .withName("test")
+                .addCounterData(CounterData.newBuilder()
+                        // example from https://openmetrics.io
+                        .withLabels(Labels.of("a", "x", "b", "escaping\" example \n "))
+                        .withValue(1.0)
+                        .build())
+                .build();
+        assertOutput(expected, counter);
     }
 
     private void assertOutput(String expected, MetricSnapshot snapshot) throws IOException {

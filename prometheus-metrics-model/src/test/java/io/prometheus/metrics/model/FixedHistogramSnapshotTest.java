@@ -105,7 +105,15 @@ public class FixedHistogramSnapshotTest {
                         .withBuckets(FixedHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
                         .build())
                 .build();
-        Assert.assertEquals(0, snapshot.getData().get(0).getBuckets().getCumulativeCount(0));
+        FixedHistogramData data = snapshot.getData().get(0);
+        Assert.assertFalse(data.hasCount());
+        Assert.assertFalse(data.hasSum());
+        Assert.assertEquals(1, snapshot.getData().get(0).getBuckets().size());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEmptyData() {
+        FixedHistogramData.newBuilder().build();
     }
 
     @Test(expected = UnsupportedOperationException.class)

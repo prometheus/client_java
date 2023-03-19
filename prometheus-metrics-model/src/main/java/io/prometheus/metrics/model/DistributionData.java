@@ -8,6 +8,7 @@ public abstract class DistributionData extends MetricData {
     private final double sum;
     private final Exemplars exemplars;
 
+    // TODO: In OpenMetrics, count and sum are either both present or both absent. Do we want to enforce this?
     protected DistributionData(long count, double sum, Exemplars exemplars, Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
         super(labels, createdTimestampMillis, scrapeTimestampMillis);
         this.count = count;
