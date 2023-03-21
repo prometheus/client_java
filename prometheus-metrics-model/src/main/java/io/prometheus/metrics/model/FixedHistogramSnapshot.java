@@ -47,13 +47,11 @@ public final class FixedHistogramSnapshot extends MetricSnapshot {
          * To create a new {@link FixedHistogramData}, you can either call the constructor directly
          * or use the Builder with {@link FixedHistogramData#newBuilder()}.
          *
-         * @param count total number of observations. Optional, pass {@code -1} if not available.
-         *              If the count is present, it must have the same value as the +Inf bucket.
+         * @param buckets required, there must be at least the +Inf bucket.
          * @param sum                      sum of all observed values.
          *                                 Semantically the sum is a counter, so it should only be present if all
          *                                 observed values are positive (example: latencies are always positive).
          *                                 The sum is optional, pass {@link Double#NaN} if no sum is available.
-         * @param buckets required, there must be at least the +Inf bucket.
          * @param labels                   must not be null. Use {@link Labels#EMPTY} if there are no labels.
          * @param exemplars                must not be null. Use {@link Exemplars#EMPTY} if there are no exemplars.
          * @param createdTimestampMillis   timestamp (as in {@link System#currentTimeMillis()}) when this histogram
@@ -62,8 +60,8 @@ public final class FixedHistogramSnapshot extends MetricSnapshot {
          *                                 not the creation of the snapshot.
          *                                 It's optional. Use {@code 0L} if there is no created timestamp.
          */
-        public FixedHistogramData(long count, double sum, FixedHistogramBuckets buckets, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
-            this(count, sum, buckets, labels, exemplars, createdTimestampMillis, 0);
+        public FixedHistogramData(FixedHistogramBuckets buckets, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
+            this(buckets, sum, labels, exemplars, createdTimestampMillis, 0);
         }
 
         /**
@@ -71,8 +69,8 @@ public final class FixedHistogramSnapshot extends MetricSnapshot {
          * as the timestamp of a Prometheus metric is set by the Prometheus server during scraping.
          * Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public FixedHistogramData(long count, double sum, FixedHistogramBuckets buckets, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
-            super(count, sum, exemplars, labels, createdTimestampMillis, timestampMillis);
+        public FixedHistogramData(FixedHistogramBuckets buckets, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
+            super(buckets.getCumulativeCount(buckets.size()-1), sum, exemplars, labels, createdTimestampMillis, timestampMillis);
             this.buckets = buckets;
             validate();
         }
@@ -114,7 +112,7 @@ public final class FixedHistogramSnapshot extends MetricSnapshot {
                 if (buckets == null) {
                     throw new IllegalArgumentException("buckets are required");
                 }
-                return new FixedHistogramData(count, sum, buckets, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
+                return new FixedHistogramData(buckets, sum, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
 

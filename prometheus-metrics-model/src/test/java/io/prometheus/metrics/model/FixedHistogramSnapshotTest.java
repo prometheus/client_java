@@ -85,7 +85,7 @@ public class FixedHistogramSnapshotTest {
 
         // FixedHistogramData 2
         data = snapshot.getData().get(1);
-        Assert.assertEquals(3, data.getCount());
+        Assert.assertEquals(2, data.getCount());
         // skip the rest, because we covered it with other tests.
     }
 
@@ -106,7 +106,6 @@ public class FixedHistogramSnapshotTest {
                         .build())
                 .build();
         FixedHistogramData data = snapshot.getData().get(0);
-        Assert.assertFalse(data.hasCount());
         Assert.assertFalse(data.hasSum());
         Assert.assertEquals(1, snapshot.getData().get(0).getBuckets().size());
     }

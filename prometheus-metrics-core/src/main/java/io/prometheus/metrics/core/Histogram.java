@@ -130,7 +130,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                                 cumulativeCounts[i] = cumulativeCount;
                             }
                             FixedHistogramBuckets buckets = FixedHistogramBuckets.of(upperBounds, cumulativeCounts);
-                            return new FixedHistogramSnapshot.FixedHistogramData(count.longValue(), sum.sum(), buckets, labels, exemplars, createdTimeMillis);
+                            return new FixedHistogramSnapshot.FixedHistogramData(buckets, sum.sum(), labels, exemplars, createdTimeMillis);
                         },
                         this::doObserve
                 );
@@ -331,13 +331,12 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
                         () -> new NativeHistogramSnapshot.NativeHistogramData(
-                                count.sum(),
-                                sum.sum(),
                                 schema,
                                 zeroCount.sum(),
                                 zeroThreshold,
                                 toBucketList(bucketsForPositiveValues),
                                 toBucketList(bucketsForNegativeValues),
+                                sum.sum(),
                                 labels,
                                 exemplars,
                                 createdTimeMillis

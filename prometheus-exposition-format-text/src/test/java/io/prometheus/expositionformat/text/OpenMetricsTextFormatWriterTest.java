@@ -250,8 +250,39 @@ public class OpenMetricsTextFormatWriterTest {
     }
 
     @Test
+    public void testSummaryJustCount() throws IOException {
+        String expected = "" +
+                "# TYPE latency_seconds summary\n" +
+                "latency_seconds_count 1\n" +
+                "# EOF\n";
+        SummarySnapshot summary = SummarySnapshot.newBuilder()
+                .withName("latency_seconds")
+                .addSummaryData(SummaryData.newBuilder()
+                        .withCount(1)
+                        .build())
+                .build();
+        assertOutput(expected, summary);
+    }
+
+    @Test
+    public void testSummaryJustSum() throws IOException {
+        String expected = "" +
+                "# TYPE latency_seconds summary\n" +
+                "latency_seconds_sum 12.3\n" +
+                "# EOF\n";
+        SummarySnapshot summary = SummarySnapshot.newBuilder()
+                .withName("latency_seconds")
+                .addSummaryData(SummaryData.newBuilder()
+                        .withSum(12.3)
+                        .build())
+                .build();
+        assertOutput(expected, summary);
+    }
+
+    @Test
     public void testSummaryEmptyData() throws IOException {
-        // SummaryData can be present but empty. This should be treated like no data is present.
+        // SummaryData can be present but empty (no count, no sum, no quantiles).
+        // This should be treated like no data is present.
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
                 .withHelp("latency")
@@ -307,7 +338,6 @@ public class OpenMetricsTextFormatWriterTest {
                 .withHelp("help")
                 .withUnit(Unit.BYTES)
                 .addData(FixedHistogramData.newBuilder()
-                        .withCount(2)
                         .withSum(3.2)
                         .withBuckets(FixedHistogramBuckets.newBuilder()
                                 .addBucket(2.2, 2)
@@ -319,7 +349,6 @@ public class OpenMetricsTextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
                 .addData(FixedHistogramData.newBuilder()
-                        .withCount(4)
                         .withSum(4.1)
                         .withBuckets(FixedHistogramBuckets.newBuilder()
                                 .addBucket(2.2, 2)
@@ -362,7 +391,6 @@ public class OpenMetricsTextFormatWriterTest {
         FixedHistogramSnapshot histogram = FixedHistogramSnapshot.newBuilder()
                 .withName("request_latency_seconds")
                 .addData(FixedHistogramData.newBuilder()
-                        .withCount(2)
                         .withSum(3.2)
                         .withBuckets(FixedHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 2)
@@ -395,7 +423,6 @@ public class OpenMetricsTextFormatWriterTest {
                 .withHelp("number of bytes in the cache")
                 .withUnit(Unit.BYTES)
                 .addData(FixedHistogramData.newBuilder()
-                        .withCount(7)
                         .withSum(17)
                         .withBuckets(FixedHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 3)
@@ -407,7 +434,6 @@ public class OpenMetricsTextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .addData(FixedHistogramData.newBuilder()
-                        .withCount(8)
                         .withSum(18)
                         .withBuckets(FixedHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 4)
@@ -453,7 +479,6 @@ public class OpenMetricsTextFormatWriterTest {
                 .asGaugeHistogram()
                 .withName("queue_size_bytes")
                 .addData(FixedHistogramData.newBuilder()
-                        .withCount(130)
                         .withSum(27000)
                         .withBuckets(FixedHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 130)
@@ -468,7 +493,7 @@ public class OpenMetricsTextFormatWriterTest {
         String expected = "" +
                 "# TYPE version info\n" +
                 "# HELP version version information\n" +
-                "version_info{version=\"1.2.3\"} 1.0\n" +
+                "version_info{version=\"1.2.3\"} 1\n" +
                 "# EOF\n";
         InfoSnapshot info = InfoSnapshot.newBuilder()
                 .withName("version")

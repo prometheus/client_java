@@ -46,7 +46,11 @@ public abstract class DistributionData extends MetricData {
         protected long createdTimestampMillis = 0L;
         protected Exemplars exemplars = Exemplars.EMPTY;
 
-        public T withCount(long count) {
+        /**
+         * Count can be explicitly set on summaries (this is a public method for summary metrics),
+         * and it is set implicitly on histograms (must be the same value as the +Inf bucket).
+         */
+        protected T withCount(long count) {
             this.count = count;
             return self();
         }

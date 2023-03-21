@@ -47,13 +47,6 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
          * To create a new {@link NativeHistogramData}, you can either call the constructor directly
          * or use the Builder with {@link NativeHistogramData#newBuilder()}.
          *
-         * @param count                    total number of observations.
-         *                                 If present, the count must be the same as the value of the highest bucket.
-         *                                 Count is optional, pass -1 if no count is available.
-         * @param sum                      sum of all observed values.
-         *                                 Semantically the sum is a counter, so it should only be present if all
-         *                                 observed values are positive (example: latencies are always positive).
-         *                                 The sum is optional, pass {@link Double#NaN} if no sum is available.
          * @param schema                   Number between -4 and 8. Required. See Prometheus data model.
          * @param zeroCount                Total number of observed zero values (zero values do not fit into
          *                                 a histogram bucket, that's why there's an extra counter for them).
@@ -63,6 +56,10 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
          *                                 {@link NativeHistogramBuckets#EMPTY}, but must not be {@code null}.
          * @param bucketsForNegativeValues buckets representing positive values. Can be empty,
          *                                 {@link NativeHistogramBuckets#EMPTY}, but must not be {@code null}.
+         * @param sum                      sum of all observed values.
+         *                                 Semantically the sum is a counter, so it should only be present if all
+         *                                 observed values are positive (example: latencies are always positive).
+         *                                 The sum is optional, pass {@link Double#NaN} if no sum is available.
          * @param labels                   must not be null. Use {@link Labels#EMPTY} if there are no labels.
          * @param exemplars                must not be null. Use {@link Exemplars#EMPTY} if there are no exemplars.
          * @param createdTimestampMillis   timestamp (as in {@link System#currentTimeMillis()}) when this histogram
@@ -71,8 +68,8 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
          *                                 not the creation of the snapshot.
          *                                 It's optional. Use {@code 0L} if there is no created timestamp.
          */
-        public NativeHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
-            this(count, sum, schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, labels, exemplars, createdTimestampMillis, 0L);
+        public NativeHistogramData(int schema, long zeroCount, double zeroThreshold, NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
+            this(schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, sum, labels, exemplars, createdTimestampMillis, 0L);
         }
 
         /**
@@ -80,14 +77,25 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
          * as the timestamp of a Prometheus metric is set by the Prometheus server during scraping.
          * Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public NativeHistogramData(long count, double sum, int schema, long zeroCount, double zeroThreshold, NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
-            super(count, sum, exemplars, labels, createdTimestampMillis, timestampMillis);
+        public NativeHistogramData(int schema, long zeroCount, double zeroThreshold, NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
+            super(calculateCount(bucketsForPositiveValues, bucketsForNegativeValues), sum, exemplars, labels, createdTimestampMillis, timestampMillis);
             this.schema = schema;
             this.zeroCount = zeroCount;
             this.zeroThreshold = zeroThreshold;
             this.bucketsForPositiveValues = bucketsForPositiveValues;
             this.bucketsForNegativeValues = bucketsForNegativeValues;
             validate();
+        }
+
+        private static long calculateCount(NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues) {
+            long count = 0;
+            if (bucketsForPositiveValues.size() > 0) {
+                count += bucketsForPositiveValues.getCumulativeCount(bucketsForPositiveValues.size()-1);
+            }
+            if (bucketsForNegativeValues.size() > 0) {
+                count += bucketsForNegativeValues.getCumulativeCount(bucketsForNegativeValues.size()-1);
+            }
+            return count;
         }
 
         public int getSchema() {
@@ -162,7 +170,7 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
                 if (schema == null) {
                     throw new IllegalArgumentException("schema is required");
                 }
-                return new NativeHistogramData(count, sum, schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
+                return new NativeHistogramData(schema, zeroCount, zeroThreshold, bucketsForPositiveValues, bucketsForNegativeValues, sum, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
 

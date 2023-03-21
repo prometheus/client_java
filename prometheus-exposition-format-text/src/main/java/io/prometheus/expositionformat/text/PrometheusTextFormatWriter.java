@@ -1,7 +1,6 @@
 package io.prometheus.expositionformat.text;
 
 import io.prometheus.metrics.model.CounterSnapshot;
-import io.prometheus.metrics.model.DistributionData;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.FixedHistogramBuckets;
@@ -26,16 +25,18 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class OpenMetricsTextFormatWriter {
+public class PrometheusTextFormatWriter {
 
-    public final static String CONTENT_TYPE = "application/openmetrics-text; version=1.0.0; charset=utf-8";
-    private final boolean createdTimestampsEnabled;
+    public final static String CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8";
 
-    public OpenMetricsTextFormatWriter(boolean createdTimestampsEnabled) {
-        this.createdTimestampsEnabled = createdTimestampsEnabled;
+    private final boolean writeCreatedTimestamps;
+
+    public PrometheusTextFormatWriter(boolean writeCreatedTimestamps) {
+        this.writeCreatedTimestamps = writeCreatedTimestamps;
     }
 
     public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
+        // See https://prometheus.io/docs/instrumenting/exposition_formats/
         // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and "summary".
         OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
         for (MetricSnapshot snapshot : metricSnapshots) {
@@ -57,108 +58,167 @@ public class OpenMetricsTextFormatWriter {
                 }
             }
         }
+        if (writeCreatedTimestamps) {
+            for (MetricSnapshot snapshot : metricSnapshots) {
+                if (snapshot.getData().size() > 0) {
+                    if (snapshot instanceof CounterSnapshot) {
+                        writeCreated(writer, snapshot);
+                    } else if (snapshot instanceof FixedHistogramSnapshot) {
+                        writeCreated(writer, snapshot);
+                    } else if (snapshot instanceof SummarySnapshot) {
+                        writeCreated(writer, snapshot);
+                    }
+                }
+            }
+        }
         writer.write("# EOF\n");
         writer.flush();
     }
 
+    public void writeCreated(OutputStreamWriter writer, MetricSnapshot snapshot) throws IOException {
+            boolean metadataWritten = false;
+            MetricMetadata metadata = snapshot.getMetadata();
+            for (MetricData data : snapshot.getData()) {
+                if (data.hasCreatedTimestamp()) {
+                    if (!metadataWritten) {
+                        writeMetadata(writer, "_created", "gauge", metadata);
+                        metadataWritten = true;
+                    }
+                    writeNameAndLabels(writer, metadata.getName(), "_created", data.getLabels());
+                    writeTimestamp(writer, data.getCreatedTimestampMillis());
+                    writeScrapeTimestamp(writer, data);
+                    writer.write('\n');
+
+                }
+            }
+
+    }
+
     private void writeCounter(OutputStreamWriter writer, CounterSnapshot snapshot) throws IOException {
-        MetricMetadata metadata = snapshot.getMetadata();
-        writeMetadata(writer, "counter", metadata);
-        for (CounterSnapshot.CounterData data : snapshot.getData()) {
-            writeNameAndLabels(writer, metadata.getName(), "_total", data.getLabels());
-            writeDouble(writer, data.getValue());
-            writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
-            writeCreated(writer, metadata, data);
+        if (snapshot.getData().size() > 0) {
+            MetricMetadata metadata = snapshot.getMetadata();
+            writeMetadata(writer, "_total", "counter", metadata);
+            for (CounterSnapshot.CounterData data : snapshot.getData()) {
+                writeNameAndLabels(writer, metadata.getName(), "_total", data.getLabels());
+                writeDouble(writer, data.getValue());
+                writeScrapeTimestamp(writer, data);
+                writer.write('\n');
+            }
         }
     }
 
     private void writeGauge(OutputStreamWriter writer, GaugeSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
-        writeMetadata(writer, "gauge", metadata);
+        writeMetadata(writer, "", "gauge", metadata);
         for (GaugeSnapshot.GaugeData data : snapshot.getData()) {
             writeNameAndLabels(writer, metadata.getName(), null, data.getLabels());
             writeDouble(writer, data.getValue());
-            writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
+            writeScrapeTimestamp(writer, data);
+            writer.write('\n');
         }
     }
 
     private void writeHistogram(OutputStreamWriter writer, FixedHistogramSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
-        if (snapshot.isGaugeHistogram()) {
-            writeMetadata(writer, "gaugehistogram", metadata);
-            writeHistogramBuckets(writer, metadata, "_gcount", "_gsum", snapshot.getData());
-        } else {
-            writeMetadata(writer, "histogram", metadata);
-            writeHistogramBuckets(writer, metadata, "_count", "_sum", snapshot.getData());
-        }
-    }
-
-    private void writeHistogramBuckets(OutputStreamWriter writer, MetricMetadata metadata, String countSuffix, String sumSuffix, List<FixedHistogramSnapshot.FixedHistogramData> dataList) throws IOException {
-        for (FixedHistogramSnapshot.FixedHistogramData data : dataList) {
+        writeMetadata(writer, "", "histogram", metadata);
+        for (FixedHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
             FixedHistogramBuckets buckets = data.getBuckets();
-            Exemplars exemplars = data.getExemplars();
             for (int i = 0; i < buckets.size(); i++) {
                 writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
                 writeLong(writer, buckets.getCumulativeCount(i));
-                Exemplar exemplar;
-                if (i == 0) {
-                    exemplar = exemplars.get(Double.NEGATIVE_INFINITY, buckets.getUpperBound(i));
-                } else {
-                    exemplar = exemplars.get(buckets.getUpperBound(i - 1), buckets.getUpperBound(i));
+                writeScrapeTimestamp(writer, data);
+                writer.write('\n');
+            }
+            if (!snapshot.isGaugeHistogram()) {
+                if (data.hasCount()) {
+                    writeNameAndLabels(writer, metadata.getName(), "_count", data.getLabels());
+                    writeLong(writer, data.getCount());
+                    writeScrapeTimestamp(writer, data);
                 }
-                writeScrapeTimestampAndExemplar(writer, data, exemplar);
+                if (data.hasSum()) {
+                    writeNameAndLabels(writer, metadata.getName(), "_sum", data.getLabels());
+                    writeDouble(writer, data.getSum());
+                    writeScrapeTimestamp(writer, data);
+                }
             }
-            if (data.hasCount() && data.hasSum()) {
-                // In OpenMetrics format, histogram _count and _sum are either both present or both absent.
-                writeCountAndSum(writer, metadata, data, countSuffix, sumSuffix, Exemplars.EMPTY);
+        }
+        if (snapshot.isGaugeHistogram()) {
+            writeGaugeCountSum(writer, snapshot, metadata);
+        }
+    }
+
+    private void writeGaugeCountSum(OutputStreamWriter writer, FixedHistogramSnapshot snapshot, MetricMetadata metadata) throws IOException {
+        // Prometheus text format does not support gaugehistogram's _gcount and _gsum.
+        // So we append _gcount and _gsum as gauge metrics.
+        boolean metadataWritten = false;
+        for (FixedHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
+            if (data.hasCount()) {
+                if (!metadataWritten) {
+                    writeMetadata(writer, "_gcount", "gauge", metadata);
+                    metadataWritten = true;
+                }
+                writeNameAndLabels(writer, metadata.getName(), "_gcount", data.getLabels());
+                writeLong(writer, data.getCount());
+                writeScrapeTimestamp(writer, data);
             }
-            writeCreated(writer, metadata, data);
+        }
+        metadataWritten = false;
+        for (FixedHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
+            if (data.hasSum()) {
+                if (!metadataWritten) {
+                    writeMetadata(writer, "_gsum", "gauge", metadata);
+                    metadataWritten = true;
+                }
+                writeNameAndLabels(writer, metadata.getName(), "_gsum", data.getLabels());
+                writeLong(writer, data.getCount());
+                writeScrapeTimestamp(writer, data);
+            }
         }
     }
 
     private void writeSummary(OutputStreamWriter writer, SummarySnapshot snapshot) throws IOException {
         boolean metadataWritten = false;
         MetricMetadata metadata = snapshot.getMetadata();
-        int exemplarIndex = 0;
         for (SummarySnapshot.SummaryData data : snapshot.getData()) {
             if (data.getQuantiles().size() == 0 && !data.hasCount() && !data.hasSum()) {
                 continue;
             }
             if (!metadataWritten) {
-                writeMetadata(writer, "summary", metadata);
+                writeMetadata(writer, "", "summary", metadata);
                 metadataWritten = true;
             }
-            Exemplars exemplars = data.getExemplars();
             for (Quantile quantile : data.getQuantiles()) {
                 writeNameAndLabels(writer, metadata.getName(), null, data.getLabels(), "quantile", quantile.getQuantile());
                 writeDouble(writer, quantile.getValue());
-                // TODO: How to allow Exemplar support for Summary metrics
-                if (exemplars.size() > 0) {
-                    writeScrapeTimestampAndExemplar(writer, data, exemplars.get(exemplarIndex));
-                    exemplarIndex = exemplarIndex + 1 % exemplars.size();
-                } else {
-                    writeScrapeTimestampAndExemplar(writer, data, null);
-                }
+                writeScrapeTimestamp(writer, data);
             }
-            // Unlike histograms, summaries can have only a count or only a sum according to OpenMetrics.
-            writeCountAndSum(writer, metadata, data, "_count", "_sum", exemplars);
-            writeCreated(writer, metadata, data);
+            if (data.hasCount()) {
+                writeNameAndLabels(writer, metadata.getName(), "_count", data.getLabels());
+                writeLong(writer, data.getCount());
+                writeScrapeTimestamp(writer, data);
+            }
+            if (data.hasSum()) {
+                writeNameAndLabels(writer, metadata.getName(), "_sum", data.getLabels());
+                writeDouble(writer, data.getSum());
+                writeScrapeTimestamp(writer, data);
+            }
         }
     }
 
     private void writeInfo(OutputStreamWriter writer, InfoSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
-        writeMetadata(writer, "info", metadata);
+        writeMetadata(writer, "_info", "gauge", metadata);
         for (InfoSnapshot.InfoData data : snapshot.getData()) {
             writeNameAndLabels(writer, metadata.getName(), "_info", data.getLabels());
-            writer.write("1");
-            writeScrapeTimestampAndExemplar(writer, data, null);
+            writer.write("1.0");
+            writeScrapeTimestamp(writer, data);
+            writer.write('\n');
         }
     }
 
     private void writeStateSet(OutputStreamWriter writer, StateSetSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
-        writeMetadata(writer, "stateset", metadata);
+        writeMetadata(writer, "", "gauge", metadata);
         for (StateSetSnapshot.StateSetData data : snapshot.getData()) {
             for (int i = 0; i < data.size(); i++) {
                 writer.write(metadata.getName());
@@ -184,42 +244,19 @@ public class OpenMetricsTextFormatWriter {
                 } else {
                     writer.write("0");
                 }
-                writeScrapeTimestampAndExemplar(writer, data, null);
+                writeScrapeTimestamp(writer, data);
+                writer.write('\n');
             }
         }
     }
 
     private void writeUnknown(OutputStreamWriter writer, UnknownSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
-        writeMetadata(writer, "unknown", metadata);
+        writeMetadata(writer, "", "untyped", metadata);
         for (UnknownSnapshot.UnknownData data : snapshot.getData()) {
             writeNameAndLabels(writer, metadata.getName(), null, data.getLabels());
             writeDouble(writer, data.getValue());
-            writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
-        }
-    }
-
-    private void writeCountAndSum(OutputStreamWriter writer, MetricMetadata metadata, DistributionData data, String countSuffix, String sumSuffix, Exemplars exemplars) throws IOException {
-        if (data.hasCount()) {
-            writeNameAndLabels(writer, metadata.getName(), countSuffix, data.getLabels());
-            writeLong(writer, data.getCount());
-            writeScrapeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(0) : null);
-        }
-        if (data.hasSum()) {
-            writeNameAndLabels(writer, metadata.getName(), sumSuffix, data.getLabels());
-            writeDouble(writer, data.getSum());
-            writeScrapeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(exemplars.size() - 1) : null);
-        }
-    }
-
-    private void writeCreated(OutputStreamWriter writer, MetricMetadata metadata, MetricData data) throws IOException {
-        if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
-            writeNameAndLabels(writer, metadata.getName(), "_created", data.getLabels());
-            writeTimestamp(writer, data.getCreatedTimestampMillis());
-            if (data.hasScrapeTimestamp()) {
-                writer.write(' ');
-                writeTimestamp(writer, data.getScrapeTimestampMillis());
-            }
+            writeScrapeTimestamp(writer, data);
             writer.write('\n');
         }
     }
@@ -240,43 +277,40 @@ public class OpenMetricsTextFormatWriter {
         writer.write(' ');
     }
 
-    private void writeScrapeTimestampAndExemplar(OutputStreamWriter writer, MetricData data, Exemplar exemplar) throws IOException {
-        if (data.hasScrapeTimestamp()) {
-            writer.write(' ');
-            writeTimestamp(writer, data.getScrapeTimestampMillis());
-        }
-        if (exemplar != null) {
-            writer.write(" # ");
-            writeLabels(writer, exemplar.getLabels(), null, 0);
-            writer.write(' ');
-            writeDouble(writer, exemplar.getValue());
-            if (exemplar.hasTimestamp()) {
-                writer.write(' ');
-                writeTimestamp(writer, exemplar.getTimestampMillis());
-            }
-        }
-        writer.write('\n');
-    }
-
-    private void writeMetadata(OutputStreamWriter writer, String typeName, MetricMetadata metadata) throws IOException {
-        writer.write("# TYPE ");
-        writer.write(metadata.getName());
-        writer.write(' ');
-        writer.write(typeName);
-        writer.write('\n');
-        if (metadata.getUnit() != null) {
-            writer.write("# UNIT ");
-            writer.write(metadata.getName());
-            writer.write(' ');
-            writeEscapedLabelValue(writer, metadata.getUnit().toString());
-            writer.write('\n');
-        }
+    private void writeMetadata(OutputStreamWriter writer, String suffix, String typeString, MetricMetadata metadata) throws IOException {
         if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
             writer.write("# HELP ");
             writer.write(metadata.getName());
+            if (suffix != null) {
+                writer.write(suffix);
+            }
             writer.write(' ');
-            writeEscapedLabelValue(writer, metadata.getHelp());
+            writeEscapedHelp(writer, metadata.getHelp());
             writer.write('\n');
+        }
+        writer.write("# TYPE ");
+        writer.write(metadata.getName());
+        if (suffix != null) {
+            writer.write(suffix);
+        }
+        writer.write(' ');
+        writer.write(typeString);
+        writer.write('\n');
+    }
+
+    private void writeEscapedHelp(Writer writer, String s) throws IOException {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '\\':
+                    writer.append("\\\\");
+                    break;
+                case '\n':
+                    writer.append("\\n");
+                    break;
+                default:
+                    writer.append(c);
+            }
         }
     }
 
@@ -349,5 +383,11 @@ public class OpenMetricsTextFormatWriter {
             writer.write("0");
         }
         writer.write(Long.toString(ms));
+    }
+
+    private void writeScrapeTimestamp(OutputStreamWriter writer, MetricData data) throws IOException {
+        if (data.hasScrapeTimestamp()) {
+            writeTimestamp(writer, data.getScrapeTimestampMillis());
+        }
     }
 }
