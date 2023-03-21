@@ -1,8 +1,6 @@
 package io.prometheus.expositionformat.text;
 
 import io.prometheus.metrics.model.CounterSnapshot;
-import io.prometheus.metrics.model.Exemplar;
-import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.FixedHistogramBuckets;
 import io.prometheus.metrics.model.FixedHistogramSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot;
@@ -23,7 +21,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 public class PrometheusTextFormatWriter {
 
@@ -71,7 +68,6 @@ public class PrometheusTextFormatWriter {
                 }
             }
         }
-        writer.write("# EOF\n");
         writer.flush();
     }
 
@@ -86,9 +82,7 @@ public class PrometheusTextFormatWriter {
                     }
                     writeNameAndLabels(writer, metadata.getName(), "_created", data.getLabels());
                     writeTimestamp(writer, data.getCreatedTimestampMillis());
-                    writeScrapeTimestamp(writer, data);
-                    writer.write('\n');
-
+                    writeScrapeTimestampAndNewline(writer, data);
                 }
             }
 
@@ -101,8 +95,7 @@ public class PrometheusTextFormatWriter {
             for (CounterSnapshot.CounterData data : snapshot.getData()) {
                 writeNameAndLabels(writer, metadata.getName(), "_total", data.getLabels());
                 writeDouble(writer, data.getValue());
-                writeScrapeTimestamp(writer, data);
-                writer.write('\n');
+                writeScrapeTimestampAndNewline(writer, data);
             }
         }
     }
@@ -113,8 +106,7 @@ public class PrometheusTextFormatWriter {
         for (GaugeSnapshot.GaugeData data : snapshot.getData()) {
             writeNameAndLabels(writer, metadata.getName(), null, data.getLabels());
             writeDouble(writer, data.getValue());
-            writeScrapeTimestamp(writer, data);
-            writer.write('\n');
+            writeScrapeTimestampAndNewline(writer, data);
         }
     }
 
@@ -126,19 +118,18 @@ public class PrometheusTextFormatWriter {
             for (int i = 0; i < buckets.size(); i++) {
                 writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
                 writeLong(writer, buckets.getCumulativeCount(i));
-                writeScrapeTimestamp(writer, data);
-                writer.write('\n');
+                writeScrapeTimestampAndNewline(writer, data);
             }
             if (!snapshot.isGaugeHistogram()) {
                 if (data.hasCount()) {
                     writeNameAndLabels(writer, metadata.getName(), "_count", data.getLabels());
                     writeLong(writer, data.getCount());
-                    writeScrapeTimestamp(writer, data);
+                    writeScrapeTimestampAndNewline(writer, data);
                 }
                 if (data.hasSum()) {
                     writeNameAndLabels(writer, metadata.getName(), "_sum", data.getLabels());
                     writeDouble(writer, data.getSum());
-                    writeScrapeTimestamp(writer, data);
+                    writeScrapeTimestampAndNewline(writer, data);
                 }
             }
         }
@@ -159,7 +150,7 @@ public class PrometheusTextFormatWriter {
                 }
                 writeNameAndLabels(writer, metadata.getName(), "_gcount", data.getLabels());
                 writeLong(writer, data.getCount());
-                writeScrapeTimestamp(writer, data);
+                writeScrapeTimestampAndNewline(writer, data);
             }
         }
         metadataWritten = false;
@@ -170,8 +161,8 @@ public class PrometheusTextFormatWriter {
                     metadataWritten = true;
                 }
                 writeNameAndLabels(writer, metadata.getName(), "_gsum", data.getLabels());
-                writeLong(writer, data.getCount());
-                writeScrapeTimestamp(writer, data);
+                writeDouble(writer, data.getSum());
+                writeScrapeTimestampAndNewline(writer, data);
             }
         }
     }
@@ -190,17 +181,17 @@ public class PrometheusTextFormatWriter {
             for (Quantile quantile : data.getQuantiles()) {
                 writeNameAndLabels(writer, metadata.getName(), null, data.getLabels(), "quantile", quantile.getQuantile());
                 writeDouble(writer, quantile.getValue());
-                writeScrapeTimestamp(writer, data);
+                writeScrapeTimestampAndNewline(writer, data);
             }
             if (data.hasCount()) {
                 writeNameAndLabels(writer, metadata.getName(), "_count", data.getLabels());
                 writeLong(writer, data.getCount());
-                writeScrapeTimestamp(writer, data);
+                writeScrapeTimestampAndNewline(writer, data);
             }
             if (data.hasSum()) {
                 writeNameAndLabels(writer, metadata.getName(), "_sum", data.getLabels());
                 writeDouble(writer, data.getSum());
-                writeScrapeTimestamp(writer, data);
+                writeScrapeTimestampAndNewline(writer, data);
             }
         }
     }
@@ -210,9 +201,8 @@ public class PrometheusTextFormatWriter {
         writeMetadata(writer, "_info", "gauge", metadata);
         for (InfoSnapshot.InfoData data : snapshot.getData()) {
             writeNameAndLabels(writer, metadata.getName(), "_info", data.getLabels());
-            writer.write("1.0");
-            writeScrapeTimestamp(writer, data);
-            writer.write('\n');
+            writer.write("1");
+            writeScrapeTimestampAndNewline(writer, data);
         }
     }
 
@@ -244,8 +234,7 @@ public class PrometheusTextFormatWriter {
                 } else {
                     writer.write("0");
                 }
-                writeScrapeTimestamp(writer, data);
-                writer.write('\n');
+                writeScrapeTimestampAndNewline(writer, data);
             }
         }
     }
@@ -256,8 +245,7 @@ public class PrometheusTextFormatWriter {
         for (UnknownSnapshot.UnknownData data : snapshot.getData()) {
             writeNameAndLabels(writer, metadata.getName(), null, data.getLabels());
             writeDouble(writer, data.getValue());
-            writeScrapeTimestamp(writer, data);
-            writer.write('\n');
+            writeScrapeTimestampAndNewline(writer, data);
         }
     }
 
@@ -385,9 +373,11 @@ public class PrometheusTextFormatWriter {
         writer.write(Long.toString(ms));
     }
 
-    private void writeScrapeTimestamp(OutputStreamWriter writer, MetricData data) throws IOException {
+    private void writeScrapeTimestampAndNewline(OutputStreamWriter writer, MetricData data) throws IOException {
         if (data.hasScrapeTimestamp()) {
+            writer.write(' ');
             writeTimestamp(writer, data.getScrapeTimestampMillis());
         }
+        writer.write('\n');
     }
 }
