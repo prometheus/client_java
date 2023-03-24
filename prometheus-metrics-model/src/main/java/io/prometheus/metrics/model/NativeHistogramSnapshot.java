@@ -30,6 +30,10 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
         this.gaugeHistogram = isGaugeHistogram;
     }
 
+    public boolean isGaugeHistogram() {
+        return gaugeHistogram;
+    }
+
     @Override
     public List<NativeHistogramData> getData() {
         return (List<NativeHistogramData>) data;
@@ -78,7 +82,7 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
          * Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
         public NativeHistogramData(int schema, long zeroCount, double zeroThreshold, NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
-            super(calculateCount(bucketsForPositiveValues, bucketsForNegativeValues), sum, exemplars, labels, createdTimestampMillis, timestampMillis);
+            super(calculateCount(zeroCount, bucketsForPositiveValues, bucketsForNegativeValues), sum, exemplars, labels, createdTimestampMillis, timestampMillis);
             this.schema = schema;
             this.zeroCount = zeroCount;
             this.zeroThreshold = zeroThreshold;
@@ -87,8 +91,8 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
             validate();
         }
 
-        private static long calculateCount(NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues) {
-            long count = 0;
+        private static long calculateCount(long zeroCount, NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues) {
+            long count = zeroCount;
             if (bucketsForPositiveValues.size() > 0) {
                 count += bucketsForPositiveValues.getCumulativeCount(bucketsForPositiveValues.size()-1);
             }

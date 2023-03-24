@@ -13,6 +13,7 @@ import io.prometheus.metrics.model.MetricData;
 import io.prometheus.metrics.model.MetricMetadata;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.model.MetricSnapshots;
+import io.prometheus.metrics.model.NativeHistogramSnapshot;
 import io.prometheus.metrics.model.Quantile;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.model.SummarySnapshot;
@@ -24,7 +25,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+
+import static io.prometheus.expositionformat.text.TextFormatUtil.nativeToClassic;
 
 public class OpenMetricsTextFormatWriter {
 
@@ -45,7 +49,9 @@ public class OpenMetricsTextFormatWriter {
                 } else if (snapshot instanceof GaugeSnapshot) {
                     writeGauge(writer, (GaugeSnapshot) snapshot);
                 } else if (snapshot instanceof ClassicHistogramSnapshot) {
-                    writeHistogram(writer, (ClassicHistogramSnapshot) snapshot);
+                    writeClassicHistogram(writer, (ClassicHistogramSnapshot) snapshot);
+                } else if (snapshot instanceof NativeHistogramSnapshot) {
+                    writeNativeHistogram(writer, (NativeHistogramSnapshot) snapshot);
                 } else if (snapshot instanceof SummarySnapshot) {
                     writeSummary(writer, (SummarySnapshot) snapshot);
                 } else if (snapshot instanceof InfoSnapshot) {
@@ -82,19 +88,20 @@ public class OpenMetricsTextFormatWriter {
         }
     }
 
-    private void writeHistogram(OutputStreamWriter writer, ClassicHistogramSnapshot snapshot) throws IOException {
+    private void writeClassicHistogram(OutputStreamWriter writer, ClassicHistogramSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
         if (snapshot.isGaugeHistogram()) {
             writeMetadata(writer, "gaugehistogram", metadata);
-            writeHistogramBuckets(writer, metadata, "_gcount", "_gsum", snapshot.getData());
+
+            writeClassicHistogramBuckets(writer, metadata, "_gcount", "_gsum", snapshot.getData());
         } else {
             writeMetadata(writer, "histogram", metadata);
-            writeHistogramBuckets(writer, metadata, "_count", "_sum", snapshot.getData());
+            writeClassicHistogramBuckets(writer, metadata, "_count", "_sum", snapshot.getData());
         }
     }
 
-    private void writeHistogramBuckets(OutputStreamWriter writer, MetricMetadata metadata, String countSuffix, String sumSuffix, List<ClassicHistogramSnapshot.FixedHistogramData> dataList) throws IOException {
-        for (ClassicHistogramSnapshot.FixedHistogramData data : dataList) {
+    private void writeClassicHistogramBuckets(OutputStreamWriter writer, MetricMetadata metadata, String countSuffix, String sumSuffix, List<ClassicHistogramSnapshot.ClassicHistogramData> dataList) throws IOException {
+        for (ClassicHistogramSnapshot.ClassicHistogramData data : dataList) {
             ClassicHistogramBuckets buckets = data.getBuckets();
             Exemplars exemplars = data.getExemplars();
             for (int i = 0; i < buckets.size(); i++) {
@@ -114,6 +121,14 @@ public class OpenMetricsTextFormatWriter {
             }
             writeCreated(writer, metadata, data);
         }
+    }
+
+    private void writeNativeHistogram(OutputStreamWriter writer, NativeHistogramSnapshot snapshot) throws IOException {
+        // There is no representation of native histograms in text format (yet).
+        // Implicitly converting to classic histogram might not be a good idea, because that means if you
+        // switch the exposition format data will change (native histograms don't have a _count and _sum series).
+        // However, the alternative is dropping native histograms, which is not great either.
+        writeClassicHistogram(writer, nativeToClassic(snapshot));
     }
 
     private void writeSummary(OutputStreamWriter writer, SummarySnapshot snapshot) throws IOException {

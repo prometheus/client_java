@@ -15,7 +15,7 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
      * @param metadata see {@link MetricMetadata} for more naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
      */
-    public ClassicHistogramSnapshot(MetricMetadata metadata, Collection<FixedHistogramData> data) {
+    public ClassicHistogramSnapshot(MetricMetadata metadata, Collection<ClassicHistogramData> data) {
         this(false, metadata, data);
     }
 
@@ -25,7 +25,7 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
      * are semantically gauges and not counters. See <a href="https://openmetrics.io">openmetrics.io</a> for more
      * info on Gauge Histograms.
      */
-    public ClassicHistogramSnapshot(boolean isGaugeHistogram, MetricMetadata metadata, Collection<FixedHistogramData> data) {
+    public ClassicHistogramSnapshot(boolean isGaugeHistogram, MetricMetadata metadata, Collection<ClassicHistogramData> data) {
         super(metadata, data);
         this.gaugeHistogram = isGaugeHistogram;
     }
@@ -35,17 +35,17 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<FixedHistogramData> getData() {
-        return (List<FixedHistogramData>) data;
+    public List<ClassicHistogramData> getData() {
+        return (List<ClassicHistogramData>) data;
     }
 
-    public static final class FixedHistogramData extends DistributionData {
+    public static final class ClassicHistogramData extends DistributionData {
 
         private final ClassicHistogramBuckets buckets;
 
         /**
-         * To create a new {@link FixedHistogramData}, you can either call the constructor directly
-         * or use the Builder with {@link FixedHistogramData#newBuilder()}.
+         * To create a new {@link ClassicHistogramData}, you can either call the constructor directly
+         * or use the Builder with {@link ClassicHistogramData#newBuilder()}.
          *
          * @param buckets required, there must be at least the +Inf bucket.
          * @param sum                      sum of all observed values.
@@ -60,7 +60,7 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
          *                                 not the creation of the snapshot.
          *                                 It's optional. Use {@code 0L} if there is no created timestamp.
          */
-        public FixedHistogramData(ClassicHistogramBuckets buckets, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
+        public ClassicHistogramData(ClassicHistogramBuckets buckets, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis) {
             this(buckets, sum, labels, exemplars, createdTimestampMillis, 0);
         }
 
@@ -69,7 +69,7 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
          * as the timestamp of a Prometheus metric is set by the Prometheus server during scraping.
          * Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public FixedHistogramData(ClassicHistogramBuckets buckets, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
+        public ClassicHistogramData(ClassicHistogramBuckets buckets, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
             super(buckets.getCumulativeCount(buckets.size()-1), sum, exemplars, labels, createdTimestampMillis, timestampMillis);
             this.buckets = buckets;
             validate();
@@ -92,7 +92,7 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
             }
         }
 
-        public static class Builder extends DistributionData.Builder<FixedHistogramData.Builder> {
+        public static class Builder extends DistributionData.Builder<ClassicHistogramData.Builder> {
 
             private ClassicHistogramBuckets buckets;
 
@@ -108,11 +108,11 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
                 return this;
             }
 
-            public FixedHistogramData build() {
+            public ClassicHistogramData build() {
                 if (buckets == null) {
                     throw new IllegalArgumentException("buckets are required");
                 }
-                return new FixedHistogramData(buckets, sum, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
+                return new ClassicHistogramData(buckets, sum, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
 
@@ -123,13 +123,13 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
 
-        private final List<FixedHistogramData> histogramData = new ArrayList<>();
+        private final List<ClassicHistogramData> histogramData = new ArrayList<>();
         private boolean isGaugeHistogram = false;
 
         private Builder() {
         }
 
-        public Builder addData(FixedHistogramData data) {
+        public Builder addData(ClassicHistogramData data) {
             histogramData.add(data);
             return this;
         }

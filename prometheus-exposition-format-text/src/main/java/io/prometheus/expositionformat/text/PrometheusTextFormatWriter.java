@@ -10,6 +10,7 @@ import io.prometheus.metrics.model.MetricData;
 import io.prometheus.metrics.model.MetricMetadata;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.model.MetricSnapshots;
+import io.prometheus.metrics.model.NativeHistogramSnapshot;
 import io.prometheus.metrics.model.Quantile;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.model.SummarySnapshot;
@@ -21,6 +22,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+
+import static io.prometheus.expositionformat.text.TextFormatUtil.nativeToClassic;
 
 public class PrometheusTextFormatWriter {
 
@@ -43,7 +46,9 @@ public class PrometheusTextFormatWriter {
                 } else if (snapshot instanceof GaugeSnapshot) {
                     writeGauge(writer, (GaugeSnapshot) snapshot);
                 } else if (snapshot instanceof ClassicHistogramSnapshot) {
-                    writeHistogram(writer, (ClassicHistogramSnapshot) snapshot);
+                    writeClassicHistogram(writer, (ClassicHistogramSnapshot) snapshot);
+                } else if (snapshot instanceof NativeHistogramSnapshot) {
+                    writeNativeHistogram(writer, (NativeHistogramSnapshot) snapshot);
                 } else if (snapshot instanceof SummarySnapshot) {
                     writeSummary(writer, (SummarySnapshot) snapshot);
                 } else if (snapshot instanceof InfoSnapshot) {
@@ -61,6 +66,8 @@ public class PrometheusTextFormatWriter {
                     if (snapshot instanceof CounterSnapshot) {
                         writeCreated(writer, snapshot);
                     } else if (snapshot instanceof ClassicHistogramSnapshot) {
+                        writeCreated(writer, snapshot);
+                    } else if (snapshot instanceof NativeHistogramSnapshot) {
                         writeCreated(writer, snapshot);
                     } else if (snapshot instanceof SummarySnapshot) {
                         writeCreated(writer, snapshot);
@@ -110,10 +117,10 @@ public class PrometheusTextFormatWriter {
         }
     }
 
-    private void writeHistogram(OutputStreamWriter writer, ClassicHistogramSnapshot snapshot) throws IOException {
+    private void writeClassicHistogram(OutputStreamWriter writer, ClassicHistogramSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
         writeMetadata(writer, "", "histogram", metadata);
-        for (ClassicHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
+        for (ClassicHistogramSnapshot.ClassicHistogramData data : snapshot.getData()) {
             ClassicHistogramBuckets buckets = data.getBuckets();
             for (int i = 0; i < buckets.size(); i++) {
                 writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
@@ -142,7 +149,7 @@ public class PrometheusTextFormatWriter {
         // Prometheus text format does not support gaugehistogram's _gcount and _gsum.
         // So we append _gcount and _gsum as gauge metrics.
         boolean metadataWritten = false;
-        for (ClassicHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
+        for (ClassicHistogramSnapshot.ClassicHistogramData data : snapshot.getData()) {
             if (data.hasCount()) {
                 if (!metadataWritten) {
                     writeMetadata(writer, "_gcount", "gauge", metadata);
@@ -154,7 +161,7 @@ public class PrometheusTextFormatWriter {
             }
         }
         metadataWritten = false;
-        for (ClassicHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
+        for (ClassicHistogramSnapshot.ClassicHistogramData data : snapshot.getData()) {
             if (data.hasSum()) {
                 if (!metadataWritten) {
                     writeMetadata(writer, "_gsum", "gauge", metadata);
@@ -165,6 +172,14 @@ public class PrometheusTextFormatWriter {
                 writeScrapeTimestampAndNewline(writer, data);
             }
         }
+    }
+
+    private void writeNativeHistogram(OutputStreamWriter writer, NativeHistogramSnapshot snapshot) throws IOException {
+        // There is no representation of native histograms in text format (yet).
+        // Implicitly converting to classic histogram might not be a good idea, because that means if you
+        // switch the exposition format data will change (native histograms don't have a _count and _sum series).
+        // However, the alternative is dropping native histograms, which is not great either.
+        writeClassicHistogram(writer, nativeToClassic(snapshot));
     }
 
     private void writeSummary(OutputStreamWriter writer, SummarySnapshot snapshot) throws IOException {

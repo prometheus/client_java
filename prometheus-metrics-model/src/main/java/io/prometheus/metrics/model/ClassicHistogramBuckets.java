@@ -21,7 +21,7 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
     }
 
     /**
-     * To create new FixedHistogramBuckets, you can either use one of the static of(...) methods,
+     * To create new {@link ClassicHistogramBuckets}, you can either use one of the static of(...) methods,
      * or use {@link ClassicHistogramBuckets#newBuilder()}.
      * <p>
      * This method will copy the data out of upperBounds and cumulativeCounts.
@@ -48,7 +48,7 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
     }
 
     /**
-     * To create new FixedHistogramBuckets, you can either use one of the static of(...) methods,
+     * To create new {@link ClassicHistogramBuckets}, you can either use one of the static of(...) methods,
      * or use {@link ClassicHistogramBuckets#newBuilder()}.
      * <p>
      * This method will create a copy of upperBounds and cumulativeCounts.

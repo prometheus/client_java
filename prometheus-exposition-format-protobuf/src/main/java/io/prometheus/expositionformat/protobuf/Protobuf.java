@@ -40,7 +40,7 @@ public class Protobuf {
         } else if (snapshot instanceof ClassicHistogramSnapshot) {
             ClassicHistogramSnapshot histogram = (ClassicHistogramSnapshot) snapshot;
             builder.setType(Metrics.MetricType.HISTOGRAM);
-            for (ClassicHistogramSnapshot.FixedHistogramData data : histogram.getData()) {
+            for (ClassicHistogramSnapshot.ClassicHistogramData data : histogram.getData()) {
                 builder.addMetric(convert(data));
             }
         } else if (snapshot instanceof NativeHistogramSnapshot) {
@@ -84,7 +84,7 @@ public class Protobuf {
         return metricBuilder.build();
     }
 
-    private static Metrics.Metric convert(ClassicHistogramSnapshot.FixedHistogramData data) {
+    private static Metrics.Metric convert(ClassicHistogramSnapshot.ClassicHistogramData data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
         for (ClassicHistogramBucket bucket : data.getBuckets()) {

@@ -64,7 +64,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
         @Override
         protected ClassicHistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
-            List<ClassicHistogramSnapshot.FixedHistogramData> data = new ArrayList<>(labels.size());
+            List<ClassicHistogramSnapshot.ClassicHistogramData> data = new ArrayList<>(labels.size());
             for (int i=0; i<labels.size(); i++) {
                 data.add(((FixedBucketsHistogramData) metricData.get(i)).collect(labels.get(i)));
             }
@@ -75,7 +75,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
             private final LongAdder[] buckets;
             protected final DoubleAdder sum = new DoubleAdder();
             protected final LongAdder count = new LongAdder();
-            private final Buffer<ClassicHistogramSnapshot.FixedHistogramData> buffer = new Buffer<>();
+            private final Buffer<ClassicHistogramSnapshot.ClassicHistogramData> buffer = new Buffer<>();
 
             private FixedBucketsHistogramData() {
                 buckets = new LongAdder[upperBounds.length];
@@ -118,7 +118,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 count.increment(); // must be the last step, because count is used to signal that the operation is complete.
             }
 
-            public ClassicHistogramSnapshot.FixedHistogramData collect(Labels labels) {
+            public ClassicHistogramSnapshot.ClassicHistogramData collect(Labels labels) {
                 Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
@@ -130,7 +130,7 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                                 cumulativeCounts[i] = cumulativeCount;
                             }
                             ClassicHistogramBuckets buckets = ClassicHistogramBuckets.of(upperBounds, cumulativeCounts);
-                            return new ClassicHistogramSnapshot.FixedHistogramData(buckets, sum.sum(), labels, exemplars, createdTimeMillis);
+                            return new ClassicHistogramSnapshot.ClassicHistogramData(buckets, sum.sum(), labels, exemplars, createdTimeMillis);
                         },
                         this::doObserve
                 );

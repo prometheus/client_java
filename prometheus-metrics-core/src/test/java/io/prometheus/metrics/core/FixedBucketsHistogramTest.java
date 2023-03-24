@@ -6,7 +6,7 @@ import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.ClassicHistogramBucket;
 import io.prometheus.metrics.model.ClassicHistogramSnapshot;
-import io.prometheus.metrics.model.ClassicHistogramSnapshot.FixedHistogramData;
+import io.prometheus.metrics.model.ClassicHistogramSnapshot.ClassicHistogramData;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.observer.DistributionObserver;
 import org.junit.Assert;
@@ -80,7 +80,7 @@ public class FixedBucketsHistogramTest {
 
    */
 
-  private FixedHistogramData getData(Histogram histogram, String... labels) {
+  private ClassicHistogramData getData(Histogram histogram, String... labels) {
     return ((ClassicHistogramSnapshot) histogram.collect()).getData().stream()
             .filter(d -> d.getLabels().equals(Labels.of(labels)))
             .findAny()
@@ -290,8 +290,8 @@ public class FixedBucketsHistogramTest {
     histogram.withLabels("/hello", "200").observe(0.11);
     histogram.withLabels("/hello", "200").observe(0.2);
     histogram.withLabels("/hello", "500").observe(0.19);
-    FixedHistogramData data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
-    FixedHistogramData data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
+    ClassicHistogramData data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
+    ClassicHistogramData data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
     assertEquals(2, data200.getCount());
     assertEquals(0.31, data200.getSum(), 0.0000001);
     assertEquals(1, data500.getCount());
@@ -339,7 +339,7 @@ public class FixedBucketsHistogramTest {
       long count = 0;
       for (ClassicHistogramSnapshot snapshot : snapshots) {
         Assert.assertEquals(1, snapshot.getData().size());
-        FixedHistogramData data = snapshot.getData().stream().findFirst().orElseThrow(RuntimeException::new);
+        ClassicHistogramData data = snapshot.getData().stream().findFirst().orElseThrow(RuntimeException::new);
         Assert.assertTrue(data.getCount() >= (count + 1000)); // 1000 own observations plus the ones from other threads
         count = data.getCount();
       }

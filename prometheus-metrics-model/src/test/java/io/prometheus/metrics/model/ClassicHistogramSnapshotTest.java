@@ -1,6 +1,6 @@
 package io.prometheus.metrics.model;
 
-import io.prometheus.metrics.model.ClassicHistogramSnapshot.FixedHistogramData;
+import io.prometheus.metrics.model.ClassicHistogramSnapshot.ClassicHistogramData;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,7 +26,7 @@ public class ClassicHistogramSnapshotTest {
                 .withHelp("request sizes in bytes")
                 .withUnit(Unit.BYTES)
                 .addData(
-                        FixedHistogramData.newBuilder()
+                        ClassicHistogramData.newBuilder()
                                 .withCount(12)
                                 .withSum(27000.0)
                                 .withBuckets(ClassicHistogramBuckets.newBuilder()
@@ -40,7 +40,7 @@ public class ClassicHistogramSnapshotTest {
                                 .withScrapeTimestampMillis(scrapeTimestamp)
                                 .build())
                 .addData(
-                        FixedHistogramData.newBuilder()
+                        ClassicHistogramData.newBuilder()
                                 .withCount(3)
                                 .withSum(400.2)
                                 .withBuckets(ClassicHistogramBuckets.newBuilder()
@@ -57,7 +57,7 @@ public class ClassicHistogramSnapshotTest {
         SnapshotTestUtil.assertMetadata(snapshot, "request_size_bytes", "request sizes in bytes", "bytes");
 
         Assert.assertEquals(2, snapshot.getData().size());
-        FixedHistogramData data = snapshot.getData().get(0); // data is sorted by labels, so the first one should be path="/"
+        ClassicHistogramData data = snapshot.getData().get(0); // data is sorted by labels, so the first one should be path="/"
         Assert.assertEquals(12, data.getCount());
         Assert.assertEquals(27000.0, data.getSum(), 0.0);
         int i = 0;
@@ -101,34 +101,34 @@ public class ClassicHistogramSnapshotTest {
     public void testMinimalHistogram() {
         ClassicHistogramSnapshot snapshot = ClassicHistogramSnapshot.newBuilder()
                 .withName("minimal_histogram")
-                .addData(FixedHistogramData.newBuilder()
+                .addData(ClassicHistogramData.newBuilder()
                         .withBuckets(ClassicHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
                         .build())
                 .build();
-        FixedHistogramData data = snapshot.getData().get(0);
+        ClassicHistogramData data = snapshot.getData().get(0);
         Assert.assertFalse(data.hasSum());
         Assert.assertEquals(1, snapshot.getData().get(0).getBuckets().size());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyData() {
-        FixedHistogramData.newBuilder().build();
+        ClassicHistogramData.newBuilder().build();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testDataImmutable() {
         ClassicHistogramSnapshot snapshot = ClassicHistogramSnapshot.newBuilder()
                 .withName("test_histogram")
-                .addData(FixedHistogramData.newBuilder()
+                .addData(ClassicHistogramData.newBuilder()
                         .withLabels(Labels.of("a", "a"))
                         .withBuckets(ClassicHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
                         .build())
-                .addData(FixedHistogramData.newBuilder()
+                .addData(ClassicHistogramData.newBuilder()
                         .withLabels(Labels.of("a", "b"))
                         .withBuckets(ClassicHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{2}))
                         .build())
                 .build();
-        Iterator<ClassicHistogramSnapshot.FixedHistogramData> iterator = snapshot.getData().iterator();
+        Iterator<ClassicHistogramData> iterator = snapshot.getData().iterator();
         iterator.next();
         iterator.remove();
     }
