@@ -1,8 +1,8 @@
 package io.prometheus.expositionformat.text;
 
 import io.prometheus.metrics.model.CounterSnapshot;
-import io.prometheus.metrics.model.FixedHistogramBuckets;
-import io.prometheus.metrics.model.FixedHistogramSnapshot;
+import io.prometheus.metrics.model.ClassicHistogramBuckets;
+import io.prometheus.metrics.model.ClassicHistogramSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Labels;
@@ -42,8 +42,8 @@ public class PrometheusTextFormatWriter {
                     writeCounter(writer, (CounterSnapshot) snapshot);
                 } else if (snapshot instanceof GaugeSnapshot) {
                     writeGauge(writer, (GaugeSnapshot) snapshot);
-                } else if (snapshot instanceof FixedHistogramSnapshot) {
-                    writeHistogram(writer, (FixedHistogramSnapshot) snapshot);
+                } else if (snapshot instanceof ClassicHistogramSnapshot) {
+                    writeHistogram(writer, (ClassicHistogramSnapshot) snapshot);
                 } else if (snapshot instanceof SummarySnapshot) {
                     writeSummary(writer, (SummarySnapshot) snapshot);
                 } else if (snapshot instanceof InfoSnapshot) {
@@ -60,7 +60,7 @@ public class PrometheusTextFormatWriter {
                 if (snapshot.getData().size() > 0) {
                     if (snapshot instanceof CounterSnapshot) {
                         writeCreated(writer, snapshot);
-                    } else if (snapshot instanceof FixedHistogramSnapshot) {
+                    } else if (snapshot instanceof ClassicHistogramSnapshot) {
                         writeCreated(writer, snapshot);
                     } else if (snapshot instanceof SummarySnapshot) {
                         writeCreated(writer, snapshot);
@@ -110,11 +110,11 @@ public class PrometheusTextFormatWriter {
         }
     }
 
-    private void writeHistogram(OutputStreamWriter writer, FixedHistogramSnapshot snapshot) throws IOException {
+    private void writeHistogram(OutputStreamWriter writer, ClassicHistogramSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
         writeMetadata(writer, "", "histogram", metadata);
-        for (FixedHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
-            FixedHistogramBuckets buckets = data.getBuckets();
+        for (ClassicHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
+            ClassicHistogramBuckets buckets = data.getBuckets();
             for (int i = 0; i < buckets.size(); i++) {
                 writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
                 writeLong(writer, buckets.getCumulativeCount(i));
@@ -138,11 +138,11 @@ public class PrometheusTextFormatWriter {
         }
     }
 
-    private void writeGaugeCountSum(OutputStreamWriter writer, FixedHistogramSnapshot snapshot, MetricMetadata metadata) throws IOException {
+    private void writeGaugeCountSum(OutputStreamWriter writer, ClassicHistogramSnapshot snapshot, MetricMetadata metadata) throws IOException {
         // Prometheus text format does not support gaugehistogram's _gcount and _gsum.
         // So we append _gcount and _gsum as gauge metrics.
         boolean metadataWritten = false;
-        for (FixedHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
+        for (ClassicHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
             if (data.hasCount()) {
                 if (!metadataWritten) {
                     writeMetadata(writer, "_gcount", "gauge", metadata);
@@ -154,7 +154,7 @@ public class PrometheusTextFormatWriter {
             }
         }
         metadataWritten = false;
-        for (FixedHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
+        for (ClassicHistogramSnapshot.FixedHistogramData data : snapshot.getData()) {
             if (data.hasSum()) {
                 if (!metadataWritten) {
                     writeMetadata(writer, "_gsum", "gauge", metadata);

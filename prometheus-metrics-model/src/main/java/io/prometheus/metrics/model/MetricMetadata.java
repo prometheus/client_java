@@ -45,8 +45,8 @@ public final class MetricMetadata {
      *         This is not enforced. No Exception will be thrown if the name does not have the unit as suffix.</li>
      *     <li>The name MUST NOT contain the {@code _total} or {@code _created} suffixes for counters,
      *         the {@code _count}, {@code _sum}, or {@code _created} suffixes for summaries,
-     *         the {@code _count}, {@code _sum}, {@code _bucket}, or {@code _created} suffixes for fixed histograms,
-     *         the {@code _gcount}, {@code _gsum}, {@code _bucket} suffixes for fixed gauge histograms,
+     *         the {@code _count}, {@code _sum}, {@code _bucket}, or {@code _created} suffixes for classic histograms,
+     *         the {@code _gcount}, {@code _gsum}, {@code _bucket} suffixes for classic gauge histograms,
      *         or the {@code _info} suffix for info metrics.</li>
      * </ul>
      *

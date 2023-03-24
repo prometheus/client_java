@@ -1,13 +1,13 @@
 package io.prometheus.metrics.model;
 
-import io.prometheus.metrics.model.FixedHistogramSnapshot.FixedHistogramData;
+import io.prometheus.metrics.model.ClassicHistogramSnapshot.FixedHistogramData;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
-public class FixedHistogramSnapshotTest {
+public class ClassicHistogramSnapshotTest {
 
     @Test
     public void testGoodCaseComplete() {
@@ -21,7 +21,7 @@ public class FixedHistogramSnapshotTest {
                 .withLabels(Labels.of("status", "200"))
                 .withTimestampMillis(exemplarTimestamp)
                 .build();
-        FixedHistogramSnapshot snapshot = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot snapshot = ClassicHistogramSnapshot.newBuilder()
                 .withName("request_size_bytes")
                 .withHelp("request sizes in bytes")
                 .withUnit(Unit.BYTES)
@@ -29,7 +29,7 @@ public class FixedHistogramSnapshotTest {
                         FixedHistogramData.newBuilder()
                                 .withCount(12)
                                 .withSum(27000.0)
-                                .withBuckets(FixedHistogramBuckets.newBuilder()
+                                .withBuckets(ClassicHistogramBuckets.newBuilder()
                                         .addBucket(Double.POSITIVE_INFINITY, 12)
                                         .addBucket(128.0, 7)
                                         .addBucket(1024.0, 10)
@@ -43,7 +43,7 @@ public class FixedHistogramSnapshotTest {
                         FixedHistogramData.newBuilder()
                                 .withCount(3)
                                 .withSum(400.2)
-                                .withBuckets(FixedHistogramBuckets.newBuilder()
+                                .withBuckets(ClassicHistogramBuckets.newBuilder()
                                         .addBucket(128.0, 0)
                                         .addBucket(1024.0, 2)
                                         .addBucket(Double.POSITIVE_INFINITY, 2)
@@ -61,7 +61,7 @@ public class FixedHistogramSnapshotTest {
         Assert.assertEquals(12, data.getCount());
         Assert.assertEquals(27000.0, data.getSum(), 0.0);
         int i = 0;
-        for (FixedHistogramBucket bucket : data.getBuckets()) {
+        for (ClassicHistogramBucket bucket : data.getBuckets()) {
             switch (i++) {
                 case 0:
                     Assert.assertEquals(128.0, bucket.getUpperBound(), 0.0);
@@ -91,7 +91,7 @@ public class FixedHistogramSnapshotTest {
 
     @Test
     public void testEmptyHistogram() {
-        FixedHistogramSnapshot snapshot = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot snapshot = ClassicHistogramSnapshot.newBuilder()
                 .withName("empty_histogram")
                 .build();
         Assert.assertEquals(0, snapshot.getData().size());
@@ -99,10 +99,10 @@ public class FixedHistogramSnapshotTest {
 
     @Test
     public void testMinimalHistogram() {
-        FixedHistogramSnapshot snapshot = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot snapshot = ClassicHistogramSnapshot.newBuilder()
                 .withName("minimal_histogram")
                 .addData(FixedHistogramData.newBuilder()
-                        .withBuckets(FixedHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
+                        .withBuckets(ClassicHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
                         .build())
                 .build();
         FixedHistogramData data = snapshot.getData().get(0);
@@ -117,18 +117,18 @@ public class FixedHistogramSnapshotTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testDataImmutable() {
-        FixedHistogramSnapshot snapshot = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot snapshot = ClassicHistogramSnapshot.newBuilder()
                 .withName("test_histogram")
                 .addData(FixedHistogramData.newBuilder()
                         .withLabels(Labels.of("a", "a"))
-                        .withBuckets(FixedHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
+                        .withBuckets(ClassicHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
                         .build())
                 .addData(FixedHistogramData.newBuilder()
                         .withLabels(Labels.of("a", "b"))
-                        .withBuckets(FixedHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{2}))
+                        .withBuckets(ClassicHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{2}))
                         .build())
                 .build();
-        Iterator<FixedHistogramSnapshot.FixedHistogramData> iterator = snapshot.getData().iterator();
+        Iterator<ClassicHistogramSnapshot.FixedHistogramData> iterator = snapshot.getData().iterator();
         iterator.next();
         iterator.remove();
     }

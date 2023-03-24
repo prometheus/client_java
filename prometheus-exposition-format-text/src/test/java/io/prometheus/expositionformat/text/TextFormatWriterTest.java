@@ -4,9 +4,9 @@ import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.CounterSnapshot.CounterData;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.FixedHistogramBuckets;
-import io.prometheus.metrics.model.FixedHistogramSnapshot;
-import io.prometheus.metrics.model.FixedHistogramSnapshot.FixedHistogramData;
+import io.prometheus.metrics.model.ClassicHistogramBuckets;
+import io.prometheus.metrics.model.ClassicHistogramSnapshot;
+import io.prometheus.metrics.model.ClassicHistogramSnapshot.FixedHistogramData;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot.GaugeData;
 import io.prometheus.metrics.model.InfoSnapshot;
@@ -414,13 +414,13 @@ public class TextFormatWriterTest {
                 "# TYPE response_size_bytes_created gauge\n" +
                 "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n";
-        FixedHistogramSnapshot histogram = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot histogram = ClassicHistogramSnapshot.newBuilder()
                 .withName("response_size_bytes")
                 .withHelp("help")
                 .withUnit(Unit.BYTES)
                 .addData(FixedHistogramData.newBuilder()
                         .withSum(3.2)
-                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                        .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.2, 2)
                                 .addBucket(Double.POSITIVE_INFINITY, 2)
                                 .build())
@@ -431,7 +431,7 @@ public class TextFormatWriterTest {
                         .build())
                 .addData(FixedHistogramData.newBuilder()
                         .withSum(4.1)
-                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                        .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.2, 2)
                                 .addBucket(Double.POSITIVE_INFINITY, 4)
                                 .build())
@@ -457,10 +457,10 @@ public class TextFormatWriterTest {
                 "# TYPE request_latency_seconds histogram\n" +
                 "request_latency_seconds_bucket{le=\"+Inf\"} 2\n" +
                 "request_latency_seconds_count 2\n";
-        FixedHistogramSnapshot histogram = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot histogram = ClassicHistogramSnapshot.newBuilder()
                 .withName("request_latency_seconds")
                 .addData(FixedHistogramData.newBuilder()
-                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                        .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 2)
                                 .build())
                         .build())
@@ -482,11 +482,11 @@ public class TextFormatWriterTest {
                 "request_latency_seconds_bucket{le=\"+Inf\"} 2\n" +
                 "request_latency_seconds_count 2\n" +
                 "request_latency_seconds_sum 3.2\n";
-        FixedHistogramSnapshot histogram = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot histogram = ClassicHistogramSnapshot.newBuilder()
                 .withName("request_latency_seconds")
                 .addData(FixedHistogramData.newBuilder()
                         .withSum(3.2)
-                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                        .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 2)
                                 .build())
                         .build())
@@ -531,14 +531,14 @@ public class TextFormatWriterTest {
                 "# TYPE cache_size_bytes_created gauge\n" +
                 "cache_size_bytes_created{db=\"items\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_created{db=\"options\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n";
-        FixedHistogramSnapshot gaugeHistogram = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot gaugeHistogram = ClassicHistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("cache_size_bytes")
                 .withHelp("number of bytes in the cache")
                 .withUnit(Unit.BYTES)
                 .addData(FixedHistogramData.newBuilder()
                         .withSum(17)
-                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                        .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 3)
                                 .addBucket(Double.POSITIVE_INFINITY, 7)
                                 .build())
@@ -549,7 +549,7 @@ public class TextFormatWriterTest {
                         .build())
                 .addData(FixedHistogramData.newBuilder()
                         .withSum(18)
-                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                        .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 4)
                                 .addBucket(Double.POSITIVE_INFINITY, 8)
                                 .build()
@@ -577,11 +577,11 @@ public class TextFormatWriterTest {
                 "queue_size_bytes_bucket{le=\"+Inf\"} 130\n" +
                 "# TYPE queue_size_bytes_gcount gauge\n" +
                 "queue_size_bytes_gcount 130\n";
-        FixedHistogramSnapshot gaugeHistogram = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot gaugeHistogram = ClassicHistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("queue_size_bytes")
                 .addData(FixedHistogramData.newBuilder()
-                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                        .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 130)
                                 .build())
                         .build())
@@ -605,12 +605,12 @@ public class TextFormatWriterTest {
                 "queue_size_bytes_gcount 130\n" +
                 "# TYPE queue_size_bytes_gsum gauge\n" +
                 "queue_size_bytes_gsum 27000.0\n";
-        FixedHistogramSnapshot gaugeHistogram = FixedHistogramSnapshot.newBuilder()
+        ClassicHistogramSnapshot gaugeHistogram = ClassicHistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("queue_size_bytes")
                 .addData(FixedHistogramData.newBuilder()
                         .withSum(27000)
-                        .withBuckets(FixedHistogramBuckets.newBuilder()
+                        .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 130)
                                 .build())
                         .build())

@@ -65,7 +65,7 @@ public class Exemplars implements Iterable<Exemplar> {
     }
 
     /**
-     * This is used by fixed histograms to find an exemplar with a value between lowerBound and upperBound.
+     * This is used by classic histograms to find an exemplar with a value between lowerBound and upperBound.
      */
     public Exemplar get(double lowerBound, double upperBound) {
         for (int i = 0; i < exemplars.size(); i++) {

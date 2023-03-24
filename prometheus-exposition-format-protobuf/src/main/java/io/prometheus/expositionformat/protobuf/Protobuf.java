@@ -37,10 +37,10 @@ public class Protobuf {
             for (GaugeSnapshot.GaugeData data : gauge.getData()) {
                 builder.addMetric(convert(data));
             }
-        } else if (snapshot instanceof FixedHistogramSnapshot) {
-            FixedHistogramSnapshot histogram = (FixedHistogramSnapshot) snapshot;
+        } else if (snapshot instanceof ClassicHistogramSnapshot) {
+            ClassicHistogramSnapshot histogram = (ClassicHistogramSnapshot) snapshot;
             builder.setType(Metrics.MetricType.HISTOGRAM);
-            for (FixedHistogramSnapshot.FixedHistogramData data : histogram.getData()) {
+            for (ClassicHistogramSnapshot.FixedHistogramData data : histogram.getData()) {
                 builder.addMetric(convert(data));
             }
         } else if (snapshot instanceof NativeHistogramSnapshot) {
@@ -84,10 +84,10 @@ public class Protobuf {
         return metricBuilder.build();
     }
 
-    private static Metrics.Metric convert(FixedHistogramSnapshot.FixedHistogramData data) {
+    private static Metrics.Metric convert(ClassicHistogramSnapshot.FixedHistogramData data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
-        for (FixedHistogramBucket bucket : data.getBuckets()) {
+        for (ClassicHistogramBucket bucket : data.getBuckets()) {
             histogramBuilder.addBucket(convert(bucket));
         }
         histogramBuilder.setSampleCount(data.getCount());
@@ -197,7 +197,7 @@ public class Protobuf {
         return builder.build();
     }
 
-    private static Metrics.Bucket convert(FixedHistogramBucket bucket) {
+    private static Metrics.Bucket convert(ClassicHistogramBucket bucket) {
         Metrics.Bucket.Builder builder = Metrics.Bucket.newBuilder();
         // TODO exemplars
         //if (bucket.getExemplar() != null) {

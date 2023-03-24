@@ -8,21 +8,21 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Immutable container for buckets of a fixed histogram.
+ * Immutable container for buckets of a classic histogram.
  */
-public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
+public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket> {
 
     private final double[] upperBounds;
     private final long[] cumulativeCounts;
 
-    private FixedHistogramBuckets(double[] upperBounds, long[] cumulativeCounts) {
+    private ClassicHistogramBuckets(double[] upperBounds, long[] cumulativeCounts) {
         this.upperBounds = upperBounds;
         this.cumulativeCounts = cumulativeCounts;
     }
 
     /**
      * To create new FixedHistogramBuckets, you can either use one of the static of(...) methods,
-     * or use {@link FixedHistogramBuckets#newBuilder()}.
+     * or use {@link ClassicHistogramBuckets#newBuilder()}.
      * <p>
      * This method will copy the data out of upperBounds and cumulativeCounts.
      *
@@ -34,7 +34,7 @@ public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
      *                         Counts must be <a href="https://www.robustperception.io/why-are-prometheus-histograms-cumulative/">cumulative</a>.
      *                         Counts cannot be negative.
      */
-    public static FixedHistogramBuckets of(List<Double> upperBounds, List<Long> cumulativeCounts) {
+    public static ClassicHistogramBuckets of(List<Double> upperBounds, List<Long> cumulativeCounts) {
         double[] upperBoundsCopy = new double[upperBounds.size()];
         for (int i = 0; i < upperBounds.size(); i++) {
             upperBoundsCopy[i] = upperBounds.get(i);
@@ -44,12 +44,12 @@ public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
             cumulativeCountsCopy[i] = cumulativeCounts.get(i);
         }
         sortAndValidate(upperBoundsCopy, cumulativeCountsCopy);
-        return new FixedHistogramBuckets(upperBoundsCopy, cumulativeCountsCopy);
+        return new ClassicHistogramBuckets(upperBoundsCopy, cumulativeCountsCopy);
     }
 
     /**
      * To create new FixedHistogramBuckets, you can either use one of the static of(...) methods,
-     * or use {@link FixedHistogramBuckets#newBuilder()}.
+     * or use {@link ClassicHistogramBuckets#newBuilder()}.
      * <p>
      * This method will create a copy of upperBounds and cumulativeCounts.
      *
@@ -61,11 +61,11 @@ public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
      *                         Counts must be <a href="https://www.robustperception.io/why-are-prometheus-histograms-cumulative/">cumulative</a>.
      *                         Counts cannot be negative.
      */
-    public static FixedHistogramBuckets of(double[] upperBounds, long[] cumulativeCounts) {
+    public static ClassicHistogramBuckets of(double[] upperBounds, long[] cumulativeCounts) {
         double[] upperBoundsCopy = Arrays.copyOf(upperBounds, upperBounds.length);
         long[] cumulativeCountsCopy = Arrays.copyOf(cumulativeCounts, cumulativeCounts.length);
         sortAndValidate(upperBoundsCopy, cumulativeCountsCopy);
-        return new FixedHistogramBuckets(upperBoundsCopy, cumulativeCountsCopy);
+        return new ClassicHistogramBuckets(upperBoundsCopy, cumulativeCountsCopy);
     }
 
     private static void sortAndValidate(double[] upperBounds, long[] cumulativeCounts) {
@@ -102,24 +102,24 @@ public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
         // * upperBounds sorted
         // * upperBounds and cumulativeCounts have the same length
         if (upperBounds.length == 0) {
-            throw new IllegalArgumentException(FixedHistogramBuckets.class.getSimpleName() + " cannot be empty. They must contain at least the +Inf bucket.");
+            throw new IllegalArgumentException(ClassicHistogramBuckets.class.getSimpleName() + " cannot be empty. They must contain at least the +Inf bucket.");
         }
         if (upperBounds[upperBounds.length - 1] != Double.POSITIVE_INFINITY) {
-            throw new IllegalArgumentException(FixedHistogramBuckets.class.getSimpleName() + " must contain the +Inf bucket.");
+            throw new IllegalArgumentException(ClassicHistogramBuckets.class.getSimpleName() + " must contain the +Inf bucket.");
         }
         for (int i = 0; i < upperBounds.length; i++) {
             if (Double.isNaN(upperBounds[i])) {
-                throw new IllegalArgumentException("Cannot use NaN as an upper bound in " + FixedHistogramBuckets.class.getSimpleName());
+                throw new IllegalArgumentException("Cannot use NaN as an upper bound in " + ClassicHistogramBuckets.class.getSimpleName());
             }
             if (cumulativeCounts[i] < 0) {
-                throw new IllegalArgumentException("The cumulative counts in " + FixedHistogramBuckets.class.getSimpleName() + " cannot be negative.");
+                throw new IllegalArgumentException("The cumulative counts in " + ClassicHistogramBuckets.class.getSimpleName() + " cannot be negative.");
             }
             if (i > 0) {
                 if (upperBounds[i - 1] == upperBounds[i]) {
                     throw new IllegalArgumentException("Duplicate upper bound " + upperBounds[i]);
                 }
                 if (cumulativeCounts[i - 1] > cumulativeCounts[i]) {
-                    throw new IllegalArgumentException(FixedHistogramBucket.class.getSimpleName() + " counts must be cumulative (count for le=\"" + upperBounds[i-1] + "\" is "  + cumulativeCounts[i-1] + " but count for le=\"" + upperBounds[i] + "\" is " + cumulativeCounts[i] + ").");
+                    throw new IllegalArgumentException(ClassicHistogramBucket.class.getSimpleName() + " counts must be cumulative (count for le=\"" + upperBounds[i-1] + "\" is "  + cumulativeCounts[i-1] + " but count for le=\"" + upperBounds[i] + "\" is " + cumulativeCounts[i] + ").");
                 }
             }
         }
@@ -137,20 +137,20 @@ public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
         return cumulativeCounts[i];
     }
 
-    private List<FixedHistogramBucket> asList() {
-        List<FixedHistogramBucket> result = new ArrayList<>(size());
+    private List<ClassicHistogramBucket> asList() {
+        List<ClassicHistogramBucket> result = new ArrayList<>(size());
         for (int i = 0; i < upperBounds.length; i++) {
-            result.add(new FixedHistogramBucket(upperBounds[i], cumulativeCounts[i]));
+            result.add(new ClassicHistogramBucket(upperBounds[i], cumulativeCounts[i]));
         }
         return Collections.unmodifiableList(result);
     }
 
     @Override
-    public Iterator<FixedHistogramBucket> iterator() {
+    public Iterator<ClassicHistogramBucket> iterator() {
         return asList().iterator();
     }
 
-    public Stream<FixedHistogramBucket> stream() {
+    public Stream<ClassicHistogramBucket> stream() {
         return asList().stream();
     }
 
@@ -171,8 +171,8 @@ public class FixedHistogramBuckets implements Iterable<FixedHistogramBucket> {
             return this;
         }
 
-        public FixedHistogramBuckets build() {
-            return FixedHistogramBuckets.of(upperBounds, cumulativeCounts);
+        public ClassicHistogramBuckets build() {
+            return ClassicHistogramBuckets.of(upperBounds, cumulativeCounts);
         }
     }
 }

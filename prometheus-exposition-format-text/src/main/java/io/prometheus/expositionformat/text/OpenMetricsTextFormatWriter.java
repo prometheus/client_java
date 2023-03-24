@@ -4,8 +4,8 @@ import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.DistributionData;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.FixedHistogramBuckets;
-import io.prometheus.metrics.model.FixedHistogramSnapshot;
+import io.prometheus.metrics.model.ClassicHistogramBuckets;
+import io.prometheus.metrics.model.ClassicHistogramSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Labels;
@@ -44,8 +44,8 @@ public class OpenMetricsTextFormatWriter {
                     writeCounter(writer, (CounterSnapshot) snapshot);
                 } else if (snapshot instanceof GaugeSnapshot) {
                     writeGauge(writer, (GaugeSnapshot) snapshot);
-                } else if (snapshot instanceof FixedHistogramSnapshot) {
-                    writeHistogram(writer, (FixedHistogramSnapshot) snapshot);
+                } else if (snapshot instanceof ClassicHistogramSnapshot) {
+                    writeHistogram(writer, (ClassicHistogramSnapshot) snapshot);
                 } else if (snapshot instanceof SummarySnapshot) {
                     writeSummary(writer, (SummarySnapshot) snapshot);
                 } else if (snapshot instanceof InfoSnapshot) {
@@ -82,7 +82,7 @@ public class OpenMetricsTextFormatWriter {
         }
     }
 
-    private void writeHistogram(OutputStreamWriter writer, FixedHistogramSnapshot snapshot) throws IOException {
+    private void writeHistogram(OutputStreamWriter writer, ClassicHistogramSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
         if (snapshot.isGaugeHistogram()) {
             writeMetadata(writer, "gaugehistogram", metadata);
@@ -93,9 +93,9 @@ public class OpenMetricsTextFormatWriter {
         }
     }
 
-    private void writeHistogramBuckets(OutputStreamWriter writer, MetricMetadata metadata, String countSuffix, String sumSuffix, List<FixedHistogramSnapshot.FixedHistogramData> dataList) throws IOException {
-        for (FixedHistogramSnapshot.FixedHistogramData data : dataList) {
-            FixedHistogramBuckets buckets = data.getBuckets();
+    private void writeHistogramBuckets(OutputStreamWriter writer, MetricMetadata metadata, String countSuffix, String sumSuffix, List<ClassicHistogramSnapshot.FixedHistogramData> dataList) throws IOException {
+        for (ClassicHistogramSnapshot.FixedHistogramData data : dataList) {
+            ClassicHistogramBuckets buckets = data.getBuckets();
             Exemplars exemplars = data.getExemplars();
             for (int i = 0; i < buckets.size(); i++) {
                 writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));

@@ -3,11 +3,11 @@ package io.prometheus.metrics.model;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class FixedHistogramBucketsTest {
+public class ClassicHistogramBucketsTest {
 
     @Test
     public void testGoodCase() {
-        FixedHistogramBuckets buckets = FixedHistogramBuckets.newBuilder()
+        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.newBuilder()
                 .addBucket(Double.NEGATIVE_INFINITY, 0)
                 .addBucket(-10.0, 7)
                 .addBucket(1024, 8)
@@ -18,7 +18,7 @@ public class FixedHistogramBucketsTest {
 
     @Test
     public void testSort() {
-        FixedHistogramBuckets buckets = FixedHistogramBuckets.newBuilder()
+        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.newBuilder()
                 .addBucket(7, 2)
                 .addBucket(2, 0)
                 .addBucket(Double.POSITIVE_INFINITY, 3)
@@ -34,7 +34,7 @@ public class FixedHistogramBucketsTest {
 
     @Test
     public void testMinimalBuckets() {
-        FixedHistogramBuckets buckets = FixedHistogramBuckets.newBuilder()
+        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.newBuilder()
                 .addBucket(Double.POSITIVE_INFINITY, 0)
                 .build();
         Assert.assertEquals(1, buckets.size());
@@ -42,14 +42,14 @@ public class FixedHistogramBucketsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testInfBucketMissing() {
-        FixedHistogramBuckets.newBuilder()
+        ClassicHistogramBuckets.newBuilder()
                 .addBucket(Double.NEGATIVE_INFINITY, 0)
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNotCumulative() {
-        FixedHistogramBuckets.newBuilder()
+        ClassicHistogramBuckets.newBuilder()
                 .addBucket(0.0, 10)
                 .addBucket(Double.POSITIVE_INFINITY, 7)
                 .build();
@@ -57,13 +57,13 @@ public class FixedHistogramBucketsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyBuckets() {
-        FixedHistogramBuckets.newBuilder().build();
+        ClassicHistogramBuckets.newBuilder().build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testDifferentLength() {
         double[] upperBounds = new double[] {0.7, 1.3, Double.POSITIVE_INFINITY};
         long[] cumulativeCounts = new long[] {13, 178, 1024, 3000};
-        FixedHistogramBuckets.of(upperBounds, cumulativeCounts);
+        ClassicHistogramBuckets.of(upperBounds, cumulativeCounts);
     }
 }
