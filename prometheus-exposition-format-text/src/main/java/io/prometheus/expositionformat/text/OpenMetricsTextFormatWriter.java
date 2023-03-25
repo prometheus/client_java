@@ -1,11 +1,11 @@
 package io.prometheus.expositionformat.text;
 
+import io.prometheus.metrics.model.ClassicHistogramBuckets;
+import io.prometheus.metrics.model.ClassicHistogramSnapshot;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.DistributionData;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.ClassicHistogramBuckets;
-import io.prometheus.metrics.model.ClassicHistogramSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Labels;
@@ -18,14 +18,12 @@ import io.prometheus.metrics.model.Quantile;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.model.SummarySnapshot;
 import io.prometheus.metrics.model.UnknownSnapshot;
-import sun.misc.FloatingDecimal;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 import static io.prometheus.expositionformat.text.TextFormatUtil.nativeToClassic;
@@ -363,7 +361,7 @@ public class OpenMetricsTextFormatWriter {
             writer.write("-Inf");
         } else {
             writer.write(Double.toString(d));
-            FloatingDecimal.getBinaryToASCIIConverter(d).appendTo(writer);
+            // FloatingDecimal.getBinaryToASCIIConverter(d).appendTo(writer);
         }
     }
 

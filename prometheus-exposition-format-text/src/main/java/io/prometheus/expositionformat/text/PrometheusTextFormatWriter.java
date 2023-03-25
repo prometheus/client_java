@@ -15,7 +15,6 @@ import io.prometheus.metrics.model.Quantile;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.model.SummarySnapshot;
 import io.prometheus.metrics.model.UnknownSnapshot;
-import sun.misc.FloatingDecimal;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -371,7 +370,7 @@ public class PrometheusTextFormatWriter {
             writer.write("-Inf");
         } else {
             writer.write(Double.toString(d));
-            FloatingDecimal.getBinaryToASCIIConverter(d).appendTo(writer);
+            // FloatingDecimal.getBinaryToASCIIConverter(d).appendTo(writer);
         }
     }
 
