@@ -117,6 +117,8 @@ public class OpenMetricsTextFormatWriter {
             }
             if (data.hasCount() && data.hasSum()) {
                 // In OpenMetrics format, histogram _count and _sum are either both present or both absent.
+                // While Prometheus allows Exemplars for histogram's _count and _sum now, we don't
+                // use Exemplars here to be backwards compatible with previous behavior.
                 writeCountAndSum(writer, metadata, data, countSuffix, sumSuffix, Exemplars.EMPTY);
             }
             writeCreated(writer, metadata, data);
@@ -134,7 +136,6 @@ public class OpenMetricsTextFormatWriter {
     private void writeSummary(OutputStreamWriter writer, SummarySnapshot snapshot) throws IOException {
         boolean metadataWritten = false;
         MetricMetadata metadata = snapshot.getMetadata();
-        int exemplarIndex = 0;
         for (SummarySnapshot.SummaryData data : snapshot.getData()) {
             if (data.getQuantiles().size() == 0 && !data.hasCount() && !data.hasSum()) {
                 continue;
@@ -144,13 +145,16 @@ public class OpenMetricsTextFormatWriter {
                 metadataWritten = true;
             }
             Exemplars exemplars = data.getExemplars();
+            // Exemplars for summaries are new, and there's no best practice yet which Exemplars to choose for which
+            // time series. We select exemplars[0] for _count, exemplars[1] for _sum, and exemplars[2...] for the
+            // quantiles, all indexes modulo exemplars.length.
+            int exemplarIndex = 1;
             for (Quantile quantile : data.getQuantiles()) {
                 writeNameAndLabels(writer, metadata.getName(), null, data.getLabels(), "quantile", quantile.getQuantile());
                 writeDouble(writer, quantile.getValue());
-                // TODO: How to allow Exemplar support for Summary metrics
                 if (exemplars.size() > 0) {
+                    exemplarIndex = (exemplarIndex + 1) % exemplars.size();
                     writeScrapeTimestampAndExemplar(writer, data, exemplars.get(exemplarIndex));
-                    exemplarIndex = exemplarIndex + 1 % exemplars.size();
                 } else {
                     writeScrapeTimestampAndExemplar(writer, data, null);
                 }
@@ -215,15 +219,25 @@ public class OpenMetricsTextFormatWriter {
     }
 
     private void writeCountAndSum(OutputStreamWriter writer, MetricMetadata metadata, DistributionData data, String countSuffix, String sumSuffix, Exemplars exemplars) throws IOException {
+        int exemplarIndex = 0;
         if (data.hasCount()) {
             writeNameAndLabels(writer, metadata.getName(), countSuffix, data.getLabels());
             writeLong(writer, data.getCount());
-            writeScrapeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(0) : null);
+            if (exemplars.size() > 0) {
+                writeScrapeTimestampAndExemplar(writer, data, exemplars.get(exemplarIndex));
+                exemplarIndex = exemplarIndex + 1 % exemplars.size();
+            } else {
+                writeScrapeTimestampAndExemplar(writer, data, null);
+            }
         }
         if (data.hasSum()) {
             writeNameAndLabels(writer, metadata.getName(), sumSuffix, data.getLabels());
             writeDouble(writer, data.getSum());
-            writeScrapeTimestampAndExemplar(writer, data, exemplars.size() > 0 ? exemplars.get(exemplars.size() - 1) : null);
+            if (exemplars.size() > 0) {
+                writeScrapeTimestampAndExemplar(writer, data, exemplars.get(exemplarIndex));
+            } else {
+                writeScrapeTimestampAndExemplar(writer, data, null);
+            }
         }
     }
 
