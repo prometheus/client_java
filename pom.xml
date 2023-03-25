@@ -37,6 +37,9 @@
     </developers>
 
     <modules>
+        <!-- protobuf-shaded is not included, because the source code contains the un-shaded packages. -->
+        <!-- By not including it, we force Maven to load the shaded version from the Maven repository. -->
+        <!-- However, that means protobuf-shaded must be built and installed manually if there are any changes. -->
         <module>prometheus-metrics-model</module>
         <module>prometheus-metrics-core</module>
         <module>prometheus-exposition-format-protobuf</module>

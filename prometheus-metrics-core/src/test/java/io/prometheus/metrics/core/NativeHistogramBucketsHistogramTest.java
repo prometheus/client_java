@@ -2,7 +2,7 @@ package io.prometheus.metrics.core;
 
 import com.google.protobuf.TextFormat;
 import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
-import io.prometheus.expositionformat.protobuf.Protobuf;
+import io.prometheus.expositionformat.protobuf.PrometheusProtobufFormatWriter;
 import io.prometheus.expositionformat.protobuf.generated.Metrics;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplar;
@@ -256,7 +256,7 @@ public class NativeHistogramBucketsHistogramTest {
             for (double observation : testCase.observations) {
                 testCase.histogram.observe(observation);
             }
-            Metrics.MetricFamily protobufData = Protobuf.convert(testCase.histogram.collect());
+            Metrics.MetricFamily protobufData = PrometheusProtobufFormatWriter.convert(testCase.histogram.collect());
             String expected = "name: \"test\" type: HISTOGRAM metric { histogram { " + testCase.expected + " } }";
             assertEquals("test \"" + testCase.name + "\" failed", expected, TextFormat.printer().shortDebugString(protobufData));
         }

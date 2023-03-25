@@ -2,7 +2,7 @@ package io.prometheus.metrics.core;
 
 import com.google.protobuf.TextFormat;
 import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
-import io.prometheus.expositionformat.protobuf.Protobuf;
+import io.prometheus.expositionformat.protobuf.PrometheusProtobufFormatWriter;
 import io.prometheus.expositionformat.protobuf.generated.Metrics;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.CounterSnapshot;
@@ -107,13 +107,13 @@ public class CounterTest {
             .withName("my_counter_total")
             .withUnit(Unit.SECONDS)
             .build();
-    Metrics.MetricFamily protobufData = Protobuf.convert(counter.collect());
+    Metrics.MetricFamily protobufData = PrometheusProtobufFormatWriter.convert(counter.collect());
     assertEquals("name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }", TextFormat.printer().shortDebugString(protobufData));
 
     counter = Counter.newBuilder()
             .withName("my_counter")
             .build();
-    protobufData = Protobuf.convert(counter.collect());
+    protobufData = PrometheusProtobufFormatWriter.convert(counter.collect());
     assertEquals("name: \"my_counter_total\" type: COUNTER metric { counter { value: 0.0 } }", TextFormat.printer().shortDebugString(protobufData));
   }
 
