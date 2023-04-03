@@ -124,6 +124,15 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
 
         @Override
         protected void validate() {
+            if (zeroCount < 0) {
+                throw new IllegalArgumentException(zeroCount + ": zeroCount cannot be negative");
+            }
+            if (schema < -4 || schema > 8) {
+                throw new IllegalArgumentException(schema + ": illegal schema. Expecting number in [-4, 8].");
+            }
+            if (Double.isNaN(zeroThreshold) || zeroThreshold < 0) {
+                throw new IllegalArgumentException(zeroThreshold + ": illegal zeroThreshold. Must be >= 0.");
+            }
             for (Label label : getLabels()) {
                 if (label.getName().equals("le")) {
                     throw new IllegalArgumentException("le is a reserved label name for histograms");
