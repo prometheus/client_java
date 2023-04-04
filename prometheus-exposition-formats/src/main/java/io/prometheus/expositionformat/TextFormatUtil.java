@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat.text;
+package io.prometheus.expositionformat;
 
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.ClassicHistogramSnapshot;

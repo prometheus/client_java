@@ -1,5 +1,10 @@
 package io.prometheus.expositionformat.text;
 
+import io.prometheus.com_google_protobuf_3_21_7.TextFormat;
+import io.prometheus.expositionformat.OpenMetricsTextFormatWriter;
+import io.prometheus.expositionformat.PrometheusProtobufFormatWriter;
+import io.prometheus.expositionformat.PrometheusTextFormatWriter;
+import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.CounterSnapshot.CounterData;
 import io.prometheus.metrics.model.Exemplar;
@@ -29,10 +34,24 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class TextFormatWriterTest {
+public class ExpositionFormatsTest {
 
     private final String exemplar1String = "{env=\"prod\",span_id=\"12345\",trace_id=\"abcde\"} 1.7 1672850685.829";
     private final String exemplar2String = "{env=\"dev\",span_id=\"23456\",trace_id=\"bcdef\"} 2.4 1672850685.830";
+
+    private final String exemplar1protoString = "exemplar { " +
+                                "label { name: \"env\" value: \"prod\" } " +
+                                "label { name: \"span_id\" value: \"12345\" } " +
+                                "label { name: \"trace_id\" value: \"abcde\" } " +
+                                "value: 1.7 " +
+                                "timestamp { seconds: 1672850685 nanos: 829000000 } }";
+
+    private final String exemplar2protoString = "exemplar { " +
+            "label { name: \"env\" value: \"dev\" } " +
+            "label { name: \"span_id\" value: \"23456\" } " +
+            "label { name: \"trace_id\" value: \"bcdef\" } " +
+            "value: 2.4 " +
+            "timestamp { seconds: 1672850685 nanos: 830000000 } }";
 
     private final String createdTimestamp1s = "1672850385.800";
     private final long createdTimestamp1 = (long) (1000 * Double.parseDouble(createdTimestamp1s));
@@ -61,7 +80,7 @@ public class TextFormatWriterTest {
 
     @Test
     public void testCounterComplete() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE service_time_seconds counter\n" +
                 "# UNIT service_time_seconds seconds\n" +
                 "# HELP service_time_seconds total time spent serving\n" +
@@ -70,7 +89,7 @@ public class TextFormatWriterTest {
                 "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "service_time_seconds_created{path=\"/hello\",status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# HELP service_time_seconds_total total time spent serving\n" +
                 "# TYPE service_time_seconds_total counter\n" +
                 "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 " + scrapeTimestamp1s + "\n" +
@@ -79,18 +98,41 @@ public class TextFormatWriterTest {
                 "# TYPE service_time_seconds_created gauge\n" +
                 "service_time_seconds_created{path=\"/hello\",status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "service_time_seconds_created{path=\"/hello\",status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n";
-        String openMetricsWithoutCreated = "" +
+        String openMetricsTextWithoutCreated = "" +
                 "# TYPE service_time_seconds counter\n" +
                 "# UNIT service_time_seconds seconds\n" +
                 "# HELP service_time_seconds total time spent serving\n" +
                 "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
                 "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "# EOF\n";
-        String prometheusWithoutCreated = "" +
+        String prometheusTextWithoutCreated = "" +
                 "# HELP service_time_seconds_total total time spent serving\n" +
                 "# TYPE service_time_seconds_total counter\n" +
                 "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 " + scrapeTimestamp1s + "\n" +
                 "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 " + scrapeTimestamp2s + "\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "help: \"total time spent serving\" " +
+                "type: COUNTER " +
+                "metric { " +
+                    "label { name: \"path\" value: \"/hello\" } " +
+                    "label { name: \"status\" value: \"200\" } " +
+                    "counter { " +
+                        "value: 0.8 " +
+                        exemplar1protoString + " " +
+                    "} " +
+                    "timestamp_ms: 1672850685829 " +
+                "} " +
+                "metric { " +
+                    "label { name: \"path\" value: \"/hello\" } " +
+                    "label { name: \"status\" value: \"500\" } " +
+                    "counter { " +
+                        "value: 0.9 " +
+                        exemplar2protoString + " " +
+                    "} " +
+                    "timestamp_ms: 1672850585820 " +
+                "}";
+                //@formatter:on
 
         CounterSnapshot counter = CounterSnapshot.newBuilder()
                 .withName("service_time_seconds")
@@ -117,10 +159,11 @@ public class TextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, counter);
-        assertPrometheus(prometheus, counter);
-        assertOpenMetricsWithoutCreated(openMetricsWithoutCreated, counter);
-        assertPrometheusWithoutCreated(prometheusWithoutCreated, counter);
+        assertOpenMetricsText(openMetricsText, counter);
+        assertPrometheusText(prometheusText, counter);
+        assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, counter);
+        assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, counter);
+        assertPrometheusProtobuf(prometheusProtobuf, counter);
     }
 
     @Test
@@ -136,10 +179,10 @@ public class TextFormatWriterTest {
                 .withName("my_counter")
                 .addCounterData(CounterData.newBuilder().withValue(1.1).build())
                 .build();
-        assertOpenMetrics(openMetrics, counter);
-        assertPrometheus(prometheus, counter);
-        assertOpenMetricsWithoutCreated(openMetrics, counter);
-        assertPrometheusWithoutCreated(prometheus, counter);
+        assertOpenMetricsText(openMetrics, counter);
+        assertPrometheusText(prometheus, counter);
+        assertOpenMetricsTextWithoutCreated(openMetrics, counter);
+        assertPrometheusTextWithoutCreated(prometheus, counter);
     }
 
     @Test
@@ -177,10 +220,10 @@ public class TextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, gauge);
-        assertPrometheus(prometheus, gauge);
-        assertOpenMetricsWithoutCreated(openMetrics, gauge);
-        assertPrometheusWithoutCreated(prometheus, gauge);
+        assertOpenMetricsText(openMetrics, gauge);
+        assertPrometheusText(prometheus, gauge);
+        assertOpenMetricsTextWithoutCreated(openMetrics, gauge);
+        assertPrometheusTextWithoutCreated(prometheus, gauge);
     }
 
     @Test
@@ -198,10 +241,10 @@ public class TextFormatWriterTest {
                         .withValue(22.3)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, gauge);
-        assertPrometheus(prometheus, gauge);
-        assertOpenMetricsWithoutCreated(openMetrics, gauge);
-        assertPrometheusWithoutCreated(prometheus, gauge);
+        assertOpenMetricsText(openMetrics, gauge);
+        assertPrometheusText(prometheus, gauge);
+        assertOpenMetricsTextWithoutCreated(openMetrics, gauge);
+        assertPrometheusTextWithoutCreated(prometheus, gauge);
     }
 
     @Test
@@ -303,10 +346,10 @@ public class TextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, summary);
-        assertPrometheus(prometheus, summary);
-        assertOpenMetricsWithoutCreated(openMetricsWithoutCreated, summary);
-        assertPrometheusWithoutCreated(prometheusWithoutCreated, summary);
+        assertOpenMetricsText(openMetrics, summary);
+        assertPrometheusText(prometheus, summary);
+        assertOpenMetricsTextWithoutCreated(openMetricsWithoutCreated, summary);
+        assertPrometheusTextWithoutCreated(prometheusWithoutCreated, summary);
     }
 
     @Test
@@ -332,10 +375,10 @@ public class TextFormatWriterTest {
                         .withSum(1.2)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, summary);
-        assertPrometheus(prometheus, summary);
-        assertOpenMetricsWithoutCreated(openMetrics, summary);
-        assertPrometheusWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetrics, summary);
+        assertPrometheusText(prometheus, summary);
+        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
+        assertPrometheusTextWithoutCreated(prometheus, summary);
     }
 
     @Test
@@ -353,10 +396,10 @@ public class TextFormatWriterTest {
                         .withQuantiles(Quantiles.newBuilder().addQuantile(0.95, 200.0).build())
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, summary);
-        assertPrometheus(prometheus, summary);
-        assertOpenMetricsWithoutCreated(openMetrics, summary);
-        assertPrometheusWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetrics, summary);
+        assertPrometheusText(prometheus, summary);
+        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
+        assertPrometheusTextWithoutCreated(prometheus, summary);
     }
 
     @Test
@@ -374,10 +417,10 @@ public class TextFormatWriterTest {
                         .withCount(1)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, summary);
-        assertPrometheus(prometheus, summary);
-        assertOpenMetricsWithoutCreated(openMetrics, summary);
-        assertPrometheusWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetrics, summary);
+        assertPrometheusText(prometheus, summary);
+        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
+        assertPrometheusTextWithoutCreated(prometheus, summary);
     }
 
     @Test
@@ -395,10 +438,10 @@ public class TextFormatWriterTest {
                         .withSum(12.3)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, summary);
-        assertPrometheus(prometheus, summary);
-        assertOpenMetricsWithoutCreated(openMetrics, summary);
-        assertPrometheusWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetrics, summary);
+        assertPrometheusText(prometheus, summary);
+        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
+        assertPrometheusTextWithoutCreated(prometheus, summary);
     }
 
     @Test
@@ -411,10 +454,10 @@ public class TextFormatWriterTest {
                 .withUnit(Unit.SECONDS)
                 .addSummaryData(SummaryData.newBuilder().build())
                 .build();
-        assertOpenMetrics("# EOF\n", summary);
-        assertPrometheus("", summary);
-        assertOpenMetricsWithoutCreated("# EOF\n", summary);
-        assertPrometheusWithoutCreated("", summary);
+        assertOpenMetricsText("# EOF\n", summary);
+        assertPrometheusText("", summary);
+        assertOpenMetricsTextWithoutCreated("# EOF\n", summary);
+        assertPrometheusTextWithoutCreated("", summary);
     }
 
     @Test
@@ -442,10 +485,10 @@ public class TextFormatWriterTest {
                         .withLabels(Labels.of("path", "/v3"))
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, summary);
-        assertPrometheus(prometheus, summary);
-        assertOpenMetricsWithoutCreated(openMetrics, summary);
-        assertPrometheusWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetrics, summary);
+        assertPrometheusText(prometheus, summary);
+        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
+        assertPrometheusTextWithoutCreated(prometheus, summary);
     }
 
     @Test
@@ -531,10 +574,10 @@ public class TextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, histogram);
-        assertPrometheus(prometheus, histogram);
-        assertOpenMetricsWithoutCreated(openMetricsWithoutCreated, histogram);
-        assertPrometheusWithoutCreated(prometheusWithoutCreated, histogram);
+        assertOpenMetricsText(openMetrics, histogram);
+        assertPrometheusText(prometheus, histogram);
+        assertOpenMetricsTextWithoutCreated(openMetricsWithoutCreated, histogram);
+        assertPrometheusTextWithoutCreated(prometheusWithoutCreated, histogram);
     }
 
     @Test
@@ -557,10 +600,10 @@ public class TextFormatWriterTest {
                                 .build())
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, histogram);
-        assertPrometheus(prometheus, histogram);
-        assertOpenMetricsWithoutCreated(openMetrics, histogram);
-        assertPrometheusWithoutCreated(prometheus, histogram);
+        assertOpenMetricsText(openMetrics, histogram);
+        assertPrometheusText(prometheus, histogram);
+        assertOpenMetricsTextWithoutCreated(openMetrics, histogram);
+        assertPrometheusTextWithoutCreated(prometheus, histogram);
     }
 
     @Test
@@ -585,10 +628,10 @@ public class TextFormatWriterTest {
                                 .build())
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, histogram);
-        assertPrometheus(prometheus, histogram);
-        assertOpenMetricsWithoutCreated(openMetrics, histogram);
-        assertPrometheusWithoutCreated(prometheus, histogram);
+        assertOpenMetricsText(openMetrics, histogram);
+        assertPrometheusText(prometheus, histogram);
+        assertOpenMetricsTextWithoutCreated(openMetrics, histogram);
+        assertPrometheusTextWithoutCreated(prometheus, histogram);
     }
 
     @Test
@@ -684,10 +727,10 @@ public class TextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, gaugeHistogram);
-        assertPrometheus(prometheus, gaugeHistogram);
-        assertOpenMetricsWithoutCreated(openMetricsWithoutCreated, gaugeHistogram);
-        assertPrometheusWithoutCreated(prometheusWithoutCreated, gaugeHistogram);
+        assertOpenMetricsText(openMetrics, gaugeHistogram);
+        assertPrometheusText(prometheus, gaugeHistogram);
+        assertOpenMetricsTextWithoutCreated(openMetricsWithoutCreated, gaugeHistogram);
+        assertPrometheusTextWithoutCreated(prometheusWithoutCreated, gaugeHistogram);
     }
 
     @Test
@@ -712,11 +755,11 @@ public class TextFormatWriterTest {
                                 .build())
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, gaugeHistogram);
-        assertPrometheus(prometheus, gaugeHistogram);
-        assertOpenMetricsWithoutCreated(openMetrics, gaugeHistogram);
-        assertPrometheusWithoutCreated(prometheus, gaugeHistogram);
-     }
+        assertOpenMetricsText(openMetrics, gaugeHistogram);
+        assertPrometheusText(prometheus, gaugeHistogram);
+        assertOpenMetricsTextWithoutCreated(openMetrics, gaugeHistogram);
+        assertPrometheusTextWithoutCreated(prometheus, gaugeHistogram);
+    }
 
     @Test
     public void testClassicGaugeHistogramCountAndSum() throws IOException {
@@ -743,10 +786,10 @@ public class TextFormatWriterTest {
                                 .build())
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, gaugeHistogram);
-        assertPrometheus(prometheus, gaugeHistogram);
-        assertOpenMetricsWithoutCreated(openMetrics, gaugeHistogram);
-        assertPrometheusWithoutCreated(prometheus, gaugeHistogram);
+        assertOpenMetricsText(openMetrics, gaugeHistogram);
+        assertPrometheusText(prometheus, gaugeHistogram);
+        assertOpenMetricsTextWithoutCreated(openMetrics, gaugeHistogram);
+        assertPrometheusTextWithoutCreated(prometheus, gaugeHistogram);
     }
 
     @Test
@@ -809,8 +852,8 @@ public class TextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, nativeHistogram);
-        assertPrometheus(prometheus, nativeHistogram);
+        assertOpenMetricsText(openMetrics, nativeHistogram);
+        assertPrometheusText(prometheus, nativeHistogram);
     }
 
     @Test
@@ -831,10 +874,10 @@ public class TextFormatWriterTest {
                         .withLabels(Labels.of("version", "1.2.3"))
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, info);
-        assertPrometheus(prometheus, info);
-        assertOpenMetricsWithoutCreated(openMetrics, info);
-        assertPrometheusWithoutCreated(prometheus, info);
+        assertOpenMetricsText(openMetrics, info);
+        assertPrometheusText(prometheus, info);
+        assertOpenMetricsTextWithoutCreated(openMetrics, info);
+        assertPrometheusTextWithoutCreated(prometheus, info);
     }
 
     @Test
@@ -870,10 +913,10 @@ public class TextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, stateSet);
-        assertPrometheus(prometheus, stateSet);
-        assertOpenMetricsWithoutCreated(openMetrics, stateSet);
-        assertPrometheusWithoutCreated(prometheus, stateSet);
+        assertOpenMetricsText(openMetrics, stateSet);
+        assertPrometheusText(prometheus, stateSet);
+        assertOpenMetricsTextWithoutCreated(openMetrics, stateSet);
+        assertPrometheusTextWithoutCreated(prometheus, stateSet);
     }
 
     @Test
@@ -894,10 +937,10 @@ public class TextFormatWriterTest {
                         .addState("bb", false)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, stateSet);
-        assertPrometheus(prometheus, stateSet);
-        assertOpenMetricsWithoutCreated(openMetrics, stateSet);
-        assertPrometheusWithoutCreated(prometheus, stateSet);
+        assertOpenMetricsText(openMetrics, stateSet);
+        assertPrometheusText(prometheus, stateSet);
+        assertOpenMetricsTextWithoutCreated(openMetrics, stateSet);
+        assertPrometheusTextWithoutCreated(prometheus, stateSet);
     }
 
     @Test
@@ -931,10 +974,10 @@ public class TextFormatWriterTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, unknown);
-        assertPrometheus(prometheus, unknown);
-        assertOpenMetricsWithoutCreated(openMetrics, unknown);
-        assertPrometheusWithoutCreated(prometheus, unknown);
+        assertOpenMetricsText(openMetrics, unknown);
+        assertPrometheusText(prometheus, unknown);
+        assertOpenMetricsTextWithoutCreated(openMetrics, unknown);
+        assertPrometheusTextWithoutCreated(prometheus, unknown);
     }
 
     @Test
@@ -952,10 +995,10 @@ public class TextFormatWriterTest {
                         .withValue(22.3)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, unknown);
-        assertPrometheus(prometheus, unknown);
-        assertOpenMetricsWithoutCreated(openMetrics, unknown);
-        assertPrometheusWithoutCreated(prometheus, unknown);
+        assertOpenMetricsText(openMetrics, unknown);
+        assertPrometheusText(prometheus, unknown);
+        assertOpenMetricsTextWithoutCreated(openMetrics, unknown);
+        assertPrometheusTextWithoutCreated(prometheus, unknown);
     }
 
     @Test
@@ -974,10 +1017,10 @@ public class TextFormatWriterTest {
                 .withHelp("Some text and \n some \" escaping") // example from https://openMetrics.io
                 .addCounterData(CounterData.newBuilder().withValue(1.0).build())
                 .build();
-        assertOpenMetrics(openMetrics, counter);
-        assertPrometheus(prometheus, counter);
-        assertOpenMetricsWithoutCreated(openMetrics, counter);
-        assertPrometheusWithoutCreated(prometheus, counter);
+        assertOpenMetricsText(openMetrics, counter);
+        assertPrometheusText(prometheus, counter);
+        assertOpenMetricsTextWithoutCreated(openMetrics, counter);
+        assertPrometheusTextWithoutCreated(prometheus, counter);
     }
 
     @Test
@@ -997,35 +1040,42 @@ public class TextFormatWriterTest {
                         .withValue(1.0)
                         .build())
                 .build();
-        assertOpenMetrics(openMetrics, counter);
-        assertPrometheus(prometheus, counter);
+        assertOpenMetricsText(openMetrics, counter);
+        assertPrometheusText(prometheus, counter);
     }
 
-    private void assertOpenMetrics(String openMetrics, MetricSnapshot snapshot) throws IOException {
+    private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true);
         writer.write(out, MetricSnapshots.of(snapshot));
-        Assert.assertEquals(openMetrics, out.toString());
+        Assert.assertEquals(expected, out.toString());
     }
 
-    private void assertOpenMetricsWithoutCreated(String openMetrics, MetricSnapshot snapshot) throws IOException {
+    private void assertOpenMetricsTextWithoutCreated(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false);
         writer.write(out, MetricSnapshots.of(snapshot));
-        Assert.assertEquals(openMetrics, out.toString());
+        Assert.assertEquals(expected, out.toString());
     }
 
-    private void assertPrometheus(String prometheus, MetricSnapshot snapshot) throws IOException {
+    private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(true);
         writer.write(out, MetricSnapshots.of(snapshot));
-        Assert.assertEquals(prometheus, out.toString());
+        Assert.assertEquals(expected, out.toString());
     }
 
-    private void assertPrometheusWithoutCreated(String prometheus, MetricSnapshot snapshot) throws IOException {
+    private void assertPrometheusTextWithoutCreated(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(false);
         writer.write(out, MetricSnapshots.of(snapshot));
-        Assert.assertEquals(prometheus, out.toString());
+        Assert.assertEquals(expected, out.toString());
+    }
+
+    private void assertPrometheusProtobuf(String expected, MetricSnapshot snapshot) {
+        PrometheusProtobufFormatWriter writer = new PrometheusProtobufFormatWriter();
+        Metrics.MetricFamily protobufData = writer.convert(snapshot);
+        String actual = TextFormat.printer().shortDebugString(protobufData);
+        Assert.assertEquals(expected, actual);
     }
 }

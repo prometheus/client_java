@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat.text;
+package io.prometheus.expositionformat;
 
 import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
@@ -22,6 +22,8 @@ import io.prometheus.metrics.model.UnknownSnapshot;
 
 import java.io.IOException;
 import java.io.OutputStream;
+
+import static io.prometheus.expositionformat.ProtobufUtil.timestampFromMillis;
 
 public class PrometheusProtobufFormatWriter {
 
@@ -112,6 +114,7 @@ public class PrometheusProtobufFormatWriter {
         }
         addLabels(metricBuilder, data.getLabels());
         metricBuilder.setCounter(counterBuilder.build());
+        setScrapeTimestamp(metricBuilder, data);
         return metricBuilder;
     }
 
@@ -305,6 +308,9 @@ public class PrometheusProtobufFormatWriter {
         Metrics.Exemplar.Builder builder = Metrics.Exemplar.newBuilder();
         builder.setValue(exemplar.getValue());
         addLabels(builder, exemplar.getLabels());
+        if (exemplar.hasTimestamp()) {
+            builder.setTimestamp(timestampFromMillis(exemplar.getTimestampMillis()));
+        }
         return builder;
     }
 

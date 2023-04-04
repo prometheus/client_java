@@ -9,7 +9,7 @@
         <version>0.16.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>prometheus-exposition-format-text</artifactId>
+    <artifactId>prometheus-exposition-formats</artifactId>
     <packaging>bundle</packaging>
 
     <name>Prometheus Java Simpleclient</name>

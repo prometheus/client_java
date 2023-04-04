@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat.text;
+package io.prometheus.expositionformat;
 
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.ClassicHistogramSnapshot;
@@ -26,7 +26,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static io.prometheus.expositionformat.text.TextFormatUtil.nativeToClassic;
+import static io.prometheus.expositionformat.TextFormatUtil.nativeToClassic;
 
 public class OpenMetricsTextFormatWriter {
 

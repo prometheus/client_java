@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat.text;
+package io.prometheus.expositionformat;
 
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
@@ -22,7 +22,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
-import static io.prometheus.expositionformat.text.TextFormatUtil.nativeToClassic;
+import static io.prometheus.expositionformat.TextFormatUtil.nativeToClassic;
 
 public class PrometheusTextFormatWriter {
 

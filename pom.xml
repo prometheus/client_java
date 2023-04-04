@@ -43,7 +43,7 @@
         <module>prometheus-metrics-model</module>
         <module>prometheus-metrics-core</module>
         <module>prometheus-exposition-format-protobuf</module>
-        <module>prometheus-exposition-format-text</module>
+        <module>prometheus-exposition-formats</module>
         <module>simpleclient_common</module>
         <module>simpleclient_caffeine</module>
         <module>simpleclient_dropwizard</module>
