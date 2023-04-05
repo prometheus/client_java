@@ -97,7 +97,7 @@ public class PrometheusProtobufFormatWriter {
         if (nameSuffix == null) {
             builder.setName(metadata.getName());
         } else {
-            builder.setHelp(metadata.getName() + nameSuffix);
+            builder.setName(metadata.getName() + nameSuffix);
         }
         if (metadata.getHelp() != null) {
             builder.setHelp(metadata.getHelp());

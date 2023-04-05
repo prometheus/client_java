@@ -112,6 +112,7 @@ public class ExpositionFormatsTest {
                 "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 " + scrapeTimestamp2s + "\n";
         String prometheusProtobuf = "" +
                 //@formatter:off
+                "name: \"service_time_seconds_total\" " +
                 "help: \"total time spent serving\" " +
                 "type: COUNTER " +
                 "metric { " +
@@ -168,37 +169,55 @@ public class ExpositionFormatsTest {
 
     @Test
     public void testCounterMinimal() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE my_counter counter\n" +
                 "my_counter_total 1.1\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE my_counter_total counter\n" +
                 "my_counter_total 1.1\n";
+        String prometheusProtobuf = "" +
+                "name: \"my_counter_total\" type: COUNTER metric { counter { value: 1.1 } }";
         CounterSnapshot counter = CounterSnapshot.newBuilder()
                 .withName("my_counter")
                 .addCounterData(CounterData.newBuilder().withValue(1.1).build())
                 .build();
-        assertOpenMetricsText(openMetrics, counter);
-        assertPrometheusText(prometheus, counter);
-        assertOpenMetricsTextWithoutCreated(openMetrics, counter);
-        assertPrometheusTextWithoutCreated(prometheus, counter);
+        assertOpenMetricsText(openMetricsText, counter);
+        assertPrometheusText(prometheusText, counter);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, counter);
+        assertPrometheusTextWithoutCreated(prometheusText, counter);
+        assertPrometheusProtobuf(prometheusProtobuf, counter);
     }
 
     @Test
     public void testGaugeComplete() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE disk_usage_ratio gauge\n" +
                 "# UNIT disk_usage_ratio ratio\n" +
                 "# HELP disk_usage_ratio percentage used\n" +
                 "disk_usage_ratio{device=\"/dev/sda1\"} 0.2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
                 "disk_usage_ratio{device=\"/dev/sda2\"} 0.7 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# HELP disk_usage_ratio percentage used\n" +
                 "# TYPE disk_usage_ratio gauge\n" +
                 "disk_usage_ratio{device=\"/dev/sda1\"} 0.2 " + scrapeTimestamp1s + "\n" +
                 "disk_usage_ratio{device=\"/dev/sda2\"} 0.7 " + scrapeTimestamp2s + "\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"disk_usage_ratio\" " +
+                "help: \"percentage used\" " +
+                "type: GAUGE " +
+                "metric { " +
+                    "label { name: \"device\" value: \"/dev/sda1\" } " +
+                    "gauge { value: 0.2 } " +
+                    "timestamp_ms: 1672850685829 " +
+                "} metric { " +
+                    "label { name: \"device\" value: \"/dev/sda2\" } " +
+                    "gauge { value: 0.7 } " +
+                    "timestamp_ms: 1672850585820 " +
+                "}";
+                //@formatter:on
         GaugeSnapshot gauge = GaugeSnapshot.newBuilder()
                 .withName("disk_usage_ratio")
                 .withHelp("percentage used")
@@ -220,36 +239,40 @@ public class ExpositionFormatsTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, gauge);
-        assertPrometheusText(prometheus, gauge);
-        assertOpenMetricsTextWithoutCreated(openMetrics, gauge);
-        assertPrometheusTextWithoutCreated(prometheus, gauge);
+        assertOpenMetricsText(openMetricsText, gauge);
+        assertPrometheusText(prometheusText, gauge);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, gauge);
+        assertPrometheusTextWithoutCreated(prometheusText, gauge);
+        assertPrometheusProtobuf(prometheusProtobuf, gauge);
     }
 
     @Test
     public void testGaugeMinimal() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE temperature_centigrade gauge\n" +
                 "temperature_centigrade 22.3\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE temperature_centigrade gauge\n" +
                 "temperature_centigrade 22.3\n";
+        String prometheusProtobuf = "" +
+                "name: \"temperature_centigrade\" type: GAUGE metric { gauge { value: 22.3 } }";
         GaugeSnapshot gauge = GaugeSnapshot.newBuilder()
                 .withName("temperature_centigrade")
                 .addGaugeData(GaugeData.newBuilder()
                         .withValue(22.3)
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, gauge);
-        assertPrometheusText(prometheus, gauge);
-        assertOpenMetricsTextWithoutCreated(openMetrics, gauge);
-        assertPrometheusTextWithoutCreated(prometheus, gauge);
+        assertOpenMetricsText(openMetricsText, gauge);
+        assertPrometheusText(prometheusText, gauge);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, gauge);
+        assertPrometheusTextWithoutCreated(prometheusText, gauge);
+        assertPrometheusProtobuf(prometheusProtobuf, gauge);
     }
 
     @Test
     public void testSummaryComplete() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE http_request_duration_seconds summary\n" +
                 "# UNIT http_request_duration_seconds seconds\n" +
                 "# HELP http_request_duration_seconds request duration\n" +
@@ -266,7 +289,7 @@ public class ExpositionFormatsTest {
                 "http_request_duration_seconds_sum{status=\"500\"} 2.2 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "http_request_duration_seconds_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# HELP http_request_duration_seconds request duration\n" +
                 "# TYPE http_request_duration_seconds summary\n" +
                 "http_request_duration_seconds{status=\"200\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp1s + "\n" +
@@ -283,7 +306,7 @@ public class ExpositionFormatsTest {
                 "# TYPE http_request_duration_seconds_created gauge\n" +
                 "http_request_duration_seconds_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "http_request_duration_seconds_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n";
-        String openMetricsWithoutCreated = "" +
+        String openMetricsTextWithoutCreated = "" +
                 "# TYPE http_request_duration_seconds summary\n" +
                 "# UNIT http_request_duration_seconds seconds\n" +
                 "# HELP http_request_duration_seconds request duration\n" +
@@ -298,7 +321,7 @@ public class ExpositionFormatsTest {
                 "http_request_duration_seconds_count{status=\"500\"} 7 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "http_request_duration_seconds_sum{status=\"500\"} 2.2 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "# EOF\n";
-        String prometheusWithoutCreated = "" +
+        String prometheusTextWithoutCreated = "" +
                 "# HELP http_request_duration_seconds request duration\n" +
                 "# TYPE http_request_duration_seconds summary\n" +
                 "http_request_duration_seconds{status=\"200\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp1s + "\n" +
@@ -311,6 +334,33 @@ public class ExpositionFormatsTest {
                 "http_request_duration_seconds{status=\"500\",quantile=\"0.95\"} 245.1 " + scrapeTimestamp2s + "\n" +
                 "http_request_duration_seconds_count{status=\"500\"} 7 " + scrapeTimestamp2s + "\n" +
                 "http_request_duration_seconds_sum{status=\"500\"} 2.2 " + scrapeTimestamp2s + "\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"http_request_duration_seconds\" " +
+                "help: \"request duration\" " +
+                "type: SUMMARY " +
+                "metric { " +
+                    "label { name: \"status\" value: \"200\" } " +
+                    "summary { " +
+                        "sample_count: 3 " +
+                        "sample_sum: 1.2 " +
+                        "quantile { quantile: 0.5 value: 225.3 } " +
+                        "quantile { quantile: 0.9 value: 240.7 } " +
+                        "quantile { quantile: 0.95 value: 245.1 } " +
+                    "} " +
+                    "timestamp_ms: 1672850685829 " +
+                "} metric { " +
+                    "label { name: \"status\" value: \"500\" } " +
+                    "summary { " +
+                        "sample_count: 7 " +
+                        "sample_sum: 2.2 " +
+                        "quantile { quantile: 0.5 value: 225.3 } " +
+                        "quantile { quantile: 0.9 value: 240.7 } " +
+                        "quantile { quantile: 0.95 value: 245.1 } " +
+                    "} " + "" +
+                    "timestamp_ms: 1672850585820 " +
+                "}";
+                //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("http_request_duration_seconds")
                 .withHelp("request duration")
@@ -346,10 +396,11 @@ public class ExpositionFormatsTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, summary);
-        assertPrometheusText(prometheus, summary);
-        assertOpenMetricsTextWithoutCreated(openMetricsWithoutCreated, summary);
-        assertPrometheusTextWithoutCreated(prometheusWithoutCreated, summary);
+        assertOpenMetricsText(openMetricsText, summary);
+        assertPrometheusText(prometheusText, summary);
+        assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, summary);
+        assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, summary);
+        assertPrometheusProtobuf(prometheusProtobuf, summary);
     }
 
     @Test
