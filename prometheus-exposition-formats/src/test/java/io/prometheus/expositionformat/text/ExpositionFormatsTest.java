@@ -405,18 +405,30 @@ public class ExpositionFormatsTest {
 
     @Test
     public void testSummaryWithoutQuantiles() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE latency_seconds summary\n" +
                 "# UNIT latency_seconds seconds\n" +
                 "# HELP latency_seconds latency\n" +
                 "latency_seconds_count 3\n" +
                 "latency_seconds_sum 1.2\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# HELP latency_seconds latency\n" +
                 "# TYPE latency_seconds summary\n" +
                 "latency_seconds_count 3\n" +
                 "latency_seconds_sum 1.2\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"latency_seconds\" " +
+                "help: \"latency\" " +
+                "type: SUMMARY " +
+                "metric { " +
+                    "summary { " +
+                        "sample_count: 3 " +
+                        "sample_sum: 1.2 " +
+                    "} " +
+                "}";
+                //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
                 .withHelp("latency")
@@ -426,73 +438,107 @@ public class ExpositionFormatsTest {
                         .withSum(1.2)
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, summary);
-        assertPrometheusText(prometheus, summary);
-        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
-        assertPrometheusTextWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetricsText, summary);
+        assertPrometheusText(prometheusText, summary);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
+        assertPrometheusTextWithoutCreated(prometheusText, summary);
+        assertPrometheusProtobuf(prometheusProtobuf, summary);
     }
 
     @Test
     public void testSummaryNoCountAndSum() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE latency_seconds summary\n" +
                 "latency_seconds{quantile=\"0.95\"} 200.0\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE latency_seconds summary\n" +
                 "latency_seconds{quantile=\"0.95\"} 200.0\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"latency_seconds\" " +
+                "type: SUMMARY " +
+                "metric { " +
+                    "summary { " +
+                        "quantile { quantile: 0.95 value: 200.0 } " +
+                    "} " +
+                "}";
+                //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
                 .addSummaryData(SummaryData.newBuilder()
                         .withQuantiles(Quantiles.newBuilder().addQuantile(0.95, 200.0).build())
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, summary);
-        assertPrometheusText(prometheus, summary);
-        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
-        assertPrometheusTextWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetricsText, summary);
+        assertPrometheusText(prometheusText, summary);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
+        assertPrometheusTextWithoutCreated(prometheusText, summary);
+        assertPrometheusProtobuf(prometheusProtobuf, summary);
     }
 
     @Test
     public void testSummaryJustCount() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE latency_seconds summary\n" +
                 "latency_seconds_count 1\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE latency_seconds summary\n" +
                 "latency_seconds_count 1\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"latency_seconds\" " +
+                "type: SUMMARY " +
+                "metric { " +
+                    "summary { " +
+                        "sample_count: 1 " +
+                    "} " +
+                "}";
+        //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
                 .addSummaryData(SummaryData.newBuilder()
                         .withCount(1)
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, summary);
-        assertPrometheusText(prometheus, summary);
-        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
-        assertPrometheusTextWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetricsText, summary);
+        assertPrometheusText(prometheusText, summary);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
+        assertPrometheusTextWithoutCreated(prometheusText, summary);
+        assertPrometheusProtobuf(prometheusProtobuf, summary);
     }
 
     @Test
     public void testSummaryJustSum() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE latency_seconds summary\n" +
                 "latency_seconds_sum 12.3\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE latency_seconds summary\n" +
                 "latency_seconds_sum 12.3\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"latency_seconds\" " +
+                "type: SUMMARY " +
+                "metric { " +
+                    "summary { " +
+                        "sample_sum: 12.3 " +
+                    "} " +
+                "}";
+                //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
                 .addSummaryData(SummaryData.newBuilder()
                         .withSum(12.3)
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, summary);
-        assertPrometheusText(prometheus, summary);
-        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
-        assertPrometheusTextWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetricsText, summary);
+        assertPrometheusText(prometheusText, summary);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
+        assertPrometheusTextWithoutCreated(prometheusText, summary);
+        assertPrometheusProtobuf(prometheusProtobuf, summary);
     }
 
     @Test
@@ -509,6 +555,7 @@ public class ExpositionFormatsTest {
         assertPrometheusText("", summary);
         assertOpenMetricsTextWithoutCreated("# EOF\n", summary);
         assertPrometheusTextWithoutCreated("", summary);
+        assertPrometheusProtobuf("", summary);
     }
 
     @Test
