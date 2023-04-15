@@ -41,59 +41,61 @@ public class PrometheusProtobufFormatWriter {
         // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and "summary".
         Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
         if (snapshot instanceof CounterSnapshot) {
-            setMetadata(builder, snapshot.getMetadata(), "_total", Metrics.MetricType.COUNTER);
-            builder.setType(Metrics.MetricType.COUNTER);
             for (CounterData data : ((CounterSnapshot) snapshot).getData()) {
                 builder.addMetric(convert(data));
             }
+            setMetadataUnlessEmpty(builder, snapshot.getMetadata(), "_total", Metrics.MetricType.COUNTER);
         } else if (snapshot instanceof GaugeSnapshot) {
-            setMetadata(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
             for (GaugeSnapshot.GaugeData data : ((GaugeSnapshot) snapshot).getData()) {
                 builder.addMetric(convert(data));
             }
+            setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof ClassicHistogramSnapshot) {
             ClassicHistogramSnapshot histogram = (ClassicHistogramSnapshot) snapshot;
-            Metrics.MetricType type = histogram.isGaugeHistogram() ? Metrics.MetricType.GAUGE_HISTOGRAM : Metrics.MetricType.HISTOGRAM;
-            setMetadata(builder, snapshot.getMetadata(), null, type);
             for (ClassicHistogramSnapshot.ClassicHistogramData data : histogram.getData()) {
                 builder.addMetric(convert(data));
             }
+            Metrics.MetricType type = histogram.isGaugeHistogram() ? Metrics.MetricType.GAUGE_HISTOGRAM : Metrics.MetricType.HISTOGRAM;
+            setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, type);
         } else if (snapshot instanceof NativeHistogramSnapshot) {
             NativeHistogramSnapshot histogram = (NativeHistogramSnapshot) snapshot;
-            Metrics.MetricType type = histogram.isGaugeHistogram() ? Metrics.MetricType.GAUGE_HISTOGRAM : Metrics.MetricType.HISTOGRAM;
-            setMetadata(builder, snapshot.getMetadata(), null, type);
             for (NativeHistogramSnapshot.NativeHistogramData data : histogram.getData()) {
                 builder.addMetric(convert(data));
             }
+            Metrics.MetricType type = histogram.isGaugeHistogram() ? Metrics.MetricType.GAUGE_HISTOGRAM : Metrics.MetricType.HISTOGRAM;
+            setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, type);
         } else if (snapshot instanceof SummarySnapshot) {
-            setMetadata(builder, snapshot.getMetadata(), null, Metrics.MetricType.SUMMARY);
             for (SummarySnapshot.SummaryData data : ((SummarySnapshot) snapshot).getData()) {
-                builder.addMetric(convert(data));
+                if (data.hasCount() || data.hasSum() || data.getQuantiles().size() > 0) {
+                    builder.addMetric(convert(data));
+                }
             }
+            setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.SUMMARY);
         } else if (snapshot instanceof InfoSnapshot) {
-            setMetadata(builder, snapshot.getMetadata(), "_info", Metrics.MetricType.GAUGE);
             for (InfoSnapshot.InfoData data : ((InfoSnapshot) snapshot).getData()) {
                 builder.addMetric(convert(data));
             }
-
+            setMetadataUnlessEmpty(builder, snapshot.getMetadata(), "_info", Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof StateSetSnapshot) {
-            setMetadata(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
             for (StateSetSnapshot.StateSetData data : ((StateSetSnapshot) snapshot).getData()) {
                 for (int i=0; i<data.size(); i++) {
                 builder.addMetric(convert(data, snapshot.getMetadata().getName(), i));
                 }
             }
-
+            setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof UnknownSnapshot) {
-            setMetadata(builder, snapshot.getMetadata(), null, Metrics.MetricType.UNTYPED);
             for (UnknownSnapshot.UnknownData data : ((UnknownSnapshot) snapshot).getData()) {
                 builder.addMetric(convert(data));
             }
+            setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.UNTYPED);
         }
         return builder.build();
     }
 
-    private void setMetadata(Metrics.MetricFamily.Builder builder, MetricMetadata metadata, String nameSuffix, Metrics.MetricType type) {
+    private void setMetadataUnlessEmpty(Metrics.MetricFamily.Builder builder, MetricMetadata metadata, String nameSuffix, Metrics.MetricType type) {
+        if (builder.getMetricCount() == 0) {
+            return;
+        }
         if (nameSuffix == null) {
             builder.setName(metadata.getName());
         } else {

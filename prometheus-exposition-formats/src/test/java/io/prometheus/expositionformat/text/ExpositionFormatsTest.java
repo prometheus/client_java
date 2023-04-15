@@ -560,15 +560,27 @@ public class ExpositionFormatsTest {
 
     @Test
     public void testSummaryEmptyAndNonEmpty() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE latency_seconds summary\n" +
                 "latency_seconds_count{path=\"/v2\"} 2\n" +
                 "latency_seconds_sum{path=\"/v2\"} 10.7\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE latency_seconds summary\n" +
                 "latency_seconds_count{path=\"/v2\"} 2\n" +
                 "latency_seconds_sum{path=\"/v2\"} 10.7\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"latency_seconds\" " +
+                "type: SUMMARY " +
+                "metric { " +
+                    "label { name: \"path\" value: \"/v2\" } " +
+                    "summary { " +
+                        "sample_count: 2 " +
+                        "sample_sum: 10.7 " +
+                    "} " +
+                "}";
+                //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
                 .addSummaryData(SummaryData.newBuilder()
@@ -583,10 +595,11 @@ public class ExpositionFormatsTest {
                         .withLabels(Labels.of("path", "/v3"))
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, summary);
-        assertPrometheusText(prometheus, summary);
-        assertOpenMetricsTextWithoutCreated(openMetrics, summary);
-        assertPrometheusTextWithoutCreated(prometheus, summary);
+        assertOpenMetricsText(openMetricsText, summary);
+        assertPrometheusText(prometheusText, summary);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
+        assertPrometheusTextWithoutCreated(prometheusText, summary);
+        assertPrometheusProtobuf(prometheusProtobuf, summary);
     }
 
     @Test

@@ -68,6 +68,9 @@ public final class SummarySnapshot extends MetricSnapshot {
                     throw new IllegalArgumentException("quantile is a reserved label name for summaries");
                 }
             }
+            if (quantiles == null) {
+                throw new NullPointerException();
+            }
         }
 
         public static class Builder extends DistributionData.Builder<Builder> {
