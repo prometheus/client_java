@@ -40,11 +40,11 @@ public class ExpositionFormatsTest {
     private final String exemplar2String = "{env=\"dev\",span_id=\"23456\",trace_id=\"bcdef\"} 2.4 1672850685.830";
 
     private final String exemplar1protoString = "exemplar { " +
-                                "label { name: \"env\" value: \"prod\" } " +
-                                "label { name: \"span_id\" value: \"12345\" } " +
-                                "label { name: \"trace_id\" value: \"abcde\" } " +
-                                "value: 1.7 " +
-                                "timestamp { seconds: 1672850685 nanos: 829000000 } }";
+            "label { name: \"env\" value: \"prod\" } " +
+            "label { name: \"span_id\" value: \"12345\" } " +
+            "label { name: \"trace_id\" value: \"abcde\" } " +
+            "value: 1.7 " +
+            "timestamp { seconds: 1672850685 nanos: 829000000 } }";
 
     private final String exemplar2protoString = "exemplar { " +
             "label { name: \"env\" value: \"dev\" } " +
@@ -604,7 +604,7 @@ public class ExpositionFormatsTest {
 
     @Test
     public void testClassicHistogramComplete() throws Exception {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE response_size_bytes histogram\n" +
                 "# UNIT response_size_bytes bytes\n" +
                 "# HELP response_size_bytes help\n" +
@@ -619,7 +619,7 @@ public class ExpositionFormatsTest {
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# HELP response_size_bytes help\n" +
                 "# TYPE response_size_bytes histogram\n" +
                 "response_size_bytes_bucket{status=\"200\",le=\"2.2\"} 2 " + scrapeTimestamp1s + "\n" +
@@ -634,7 +634,7 @@ public class ExpositionFormatsTest {
                 "# TYPE response_size_bytes_created gauge\n" +
                 "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n";
-        String openMetricsWithoutCreated = "" +
+        String openMetricsTextWithoutCreated = "" +
                 "# TYPE response_size_bytes histogram\n" +
                 "# UNIT response_size_bytes bytes\n" +
                 "# HELP response_size_bytes help\n" +
@@ -647,7 +647,7 @@ public class ExpositionFormatsTest {
                 "response_size_bytes_count{status=\"500\"} 2 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
-        String prometheusWithoutCreated = "" +
+        String prometheusTextWithoutCreated = "" +
                 "# HELP response_size_bytes help\n" +
                 "# TYPE response_size_bytes histogram\n" +
                 "response_size_bytes_bucket{status=\"200\",le=\"2.2\"} 2 " + scrapeTimestamp1s + "\n" +
@@ -658,6 +658,45 @@ public class ExpositionFormatsTest {
                 "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 2 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_count{status=\"500\"} 2 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"response_size_bytes\" " +
+                "help: \"help\" " +
+                "type: HISTOGRAM " +
+                "metric { " +
+                    "label { name: \"status\" value: \"200\" } " +
+                    "timestamp_ms: 1672850685829 " +
+                    "histogram { " +
+                        "sample_count: 4 " +
+                        "sample_sum: 4.1 " +
+                        "bucket { " +
+                            "cumulative_count: 2 " +
+                            "upper_bound: 2.2 " +
+                            exemplar1protoString + " " +
+                        "} bucket { " +
+                            "cumulative_count: 4 " +
+                            "upper_bound: Infinity " +
+                            exemplar2protoString + " " +
+                        "} " +
+                    "} " +
+                "} metric { " +
+                    "label { name: \"status\" value: \"500\" } " +
+                    "timestamp_ms: 1672850585820 " +
+                    "histogram { " +
+                        "sample_count: 2 " +
+                        "sample_sum: 3.2 " +
+                        "bucket { " +
+                            "cumulative_count: 2 " +
+                            "upper_bound: 2.2 " +
+                            exemplar1protoString + " " +
+                        "} bucket { " +
+                            "cumulative_count: 2 " +
+                            "upper_bound: Infinity " +
+                            exemplar2protoString + " " +
+                        "} " +
+                    "} " +
+                "}";
+                //@formatter:on
         ClassicHistogramSnapshot histogram = ClassicHistogramSnapshot.newBuilder()
                 .withName("response_size_bytes")
                 .withHelp("help")
@@ -685,24 +724,39 @@ public class ExpositionFormatsTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, histogram);
-        assertPrometheusText(prometheus, histogram);
-        assertOpenMetricsTextWithoutCreated(openMetricsWithoutCreated, histogram);
-        assertPrometheusTextWithoutCreated(prometheusWithoutCreated, histogram);
+        assertOpenMetricsText(openMetricsText, histogram);
+        assertPrometheusText(prometheusText, histogram);
+        assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, histogram);
+        assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, histogram);
+        assertPrometheusProtobuf(prometheusProtobuf, histogram);
     }
 
     @Test
     public void testClassicHistogramMinimal() throws Exception {
         // In OpenMetrics a histogram can have a _count if and only if it has a _sum.
         // In Prometheus format, a histogram can have a _count without a _sum.
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE request_latency_seconds histogram\n" +
                 "request_latency_seconds_bucket{le=\"+Inf\"} 2\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE request_latency_seconds histogram\n" +
                 "request_latency_seconds_bucket{le=\"+Inf\"} 2\n" +
                 "request_latency_seconds_count 2\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"request_latency_seconds\" " +
+                "type: HISTOGRAM " +
+                "metric { " +
+                    "histogram { " +
+                        "sample_count: 2 " +
+                        "bucket { " +
+                            "cumulative_count: 2 " +
+                            "upper_bound: Infinity " +
+                        "} " +
+                    "} " +
+                "}";
+                //@formatter:on
         ClassicHistogramSnapshot histogram = ClassicHistogramSnapshot.newBuilder()
                 .withName("request_latency_seconds")
                 .addData(ClassicHistogramData.newBuilder()
@@ -711,25 +765,41 @@ public class ExpositionFormatsTest {
                                 .build())
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, histogram);
-        assertPrometheusText(prometheus, histogram);
-        assertOpenMetricsTextWithoutCreated(openMetrics, histogram);
-        assertPrometheusTextWithoutCreated(prometheus, histogram);
+        assertOpenMetricsText(openMetricsText, histogram);
+        assertPrometheusText(prometheusText, histogram);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, histogram);
+        assertPrometheusTextWithoutCreated(prometheusText, histogram);
+        assertPrometheusProtobuf(prometheusProtobuf, histogram);
     }
 
     @Test
     public void testClassicHistogramCountAndSum() throws Exception {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE request_latency_seconds histogram\n" +
                 "request_latency_seconds_bucket{le=\"+Inf\"} 2\n" +
                 "request_latency_seconds_count 2\n" +
                 "request_latency_seconds_sum 3.2\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE request_latency_seconds histogram\n" +
                 "request_latency_seconds_bucket{le=\"+Inf\"} 2\n" +
                 "request_latency_seconds_count 2\n" +
                 "request_latency_seconds_sum 3.2\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"request_latency_seconds\" " +
+                "type: HISTOGRAM " +
+                "metric { " +
+                    "histogram { " +
+                        "sample_count: 2 " +
+                        "sample_sum: 3.2 " +
+                        "bucket { " +
+                            "cumulative_count: 2 " +
+                            "upper_bound: Infinity " +
+                        "} " +
+                    "} " +
+                "}";
+                //@formatter:on
         ClassicHistogramSnapshot histogram = ClassicHistogramSnapshot.newBuilder()
                 .withName("request_latency_seconds")
                 .addData(ClassicHistogramData.newBuilder()
@@ -739,15 +809,16 @@ public class ExpositionFormatsTest {
                                 .build())
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, histogram);
-        assertPrometheusText(prometheus, histogram);
-        assertOpenMetricsTextWithoutCreated(openMetrics, histogram);
-        assertPrometheusTextWithoutCreated(prometheus, histogram);
+        assertOpenMetricsText(openMetricsText, histogram);
+        assertPrometheusText(prometheusText, histogram);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, histogram);
+        assertPrometheusTextWithoutCreated(prometheusText, histogram);
+        assertPrometheusProtobuf(prometheusProtobuf, histogram);
     }
 
     @Test
     public void testClassicGaugeHistogramComplete() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE cache_size_bytes gaugehistogram\n" +
                 "# UNIT cache_size_bytes bytes\n" +
                 "# HELP cache_size_bytes number of bytes in the cache\n" +
@@ -762,7 +833,7 @@ public class ExpositionFormatsTest {
                 "cache_size_bytes_gsum{db=\"options\"} 18.0 " + scrapeTimestamp2s + "\n" +
                 "cache_size_bytes_created{db=\"options\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# HELP cache_size_bytes number of bytes in the cache\n" +
                 "# TYPE cache_size_bytes histogram\n" +
                 "cache_size_bytes_bucket{db=\"items\",le=\"2.0\"} 3 " + scrapeTimestamp1s + "\n" +
@@ -781,7 +852,7 @@ public class ExpositionFormatsTest {
                 "# TYPE cache_size_bytes_created gauge\n" +
                 "cache_size_bytes_created{db=\"items\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_created{db=\"options\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n";
-        String openMetricsWithoutCreated = "" +
+        String openMetricsTextWithoutCreated = "" +
                 "# TYPE cache_size_bytes gaugehistogram\n" +
                 "# UNIT cache_size_bytes bytes\n" +
                 "# HELP cache_size_bytes number of bytes in the cache\n" +
@@ -794,7 +865,7 @@ public class ExpositionFormatsTest {
                 "cache_size_bytes_gcount{db=\"options\"} 8 " + scrapeTimestamp2s + "\n" +
                 "cache_size_bytes_gsum{db=\"options\"} 18.0 " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
-        String prometheusWithoutCreated = "" +
+        String prometheusTextWithoutCreated = "" +
                 "# HELP cache_size_bytes number of bytes in the cache\n" +
                 "# TYPE cache_size_bytes histogram\n" +
                 "cache_size_bytes_bucket{db=\"items\",le=\"2.0\"} 3 " + scrapeTimestamp1s + "\n" +
@@ -809,6 +880,45 @@ public class ExpositionFormatsTest {
                 "# TYPE cache_size_bytes_gsum gauge\n" +
                 "cache_size_bytes_gsum{db=\"items\"} 17.0 " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_gsum{db=\"options\"} 18.0 " + scrapeTimestamp2s + "\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"cache_size_bytes\" " +
+                "help: \"number of bytes in the cache\" " +
+                "type: GAUGE_HISTOGRAM " +
+                "metric { " +
+                    "label { name: \"db\" value: \"items\" } " +
+                    "timestamp_ms: 1672850685829 " +
+                    "histogram { " +
+                        "sample_count: 7 " +
+                        "sample_sum: 17.0 " +
+                        "bucket { " +
+                            "cumulative_count: 3 " +
+                            "upper_bound: 2.0 " +
+                            exemplar1protoString + " " +
+                        "} bucket { " +
+                            "cumulative_count: 7 " +
+                            "upper_bound: Infinity " +
+                            exemplar2protoString + " " +
+                        "} " +
+                    "} " +
+                "} metric { " +
+                    "label { name: \"db\" value: \"options\" } " +
+                    "timestamp_ms: 1672850585820 " +
+                    "histogram { " +
+                        "sample_count: 8 " +
+                        "sample_sum: 18.0 " +
+                        "bucket { " +
+                            "cumulative_count: 4 " +
+                            "upper_bound: 2.0 " +
+                            exemplar1protoString + " " +
+                        "} bucket { " +
+                            "cumulative_count: 8 " +
+                            "upper_bound: Infinity " +
+                            exemplar2protoString + " " +
+                        "} " +
+                    "} " +
+                "}";
+                //@formatter:on
         ClassicHistogramSnapshot gaugeHistogram = ClassicHistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("cache_size_bytes")
@@ -838,25 +948,40 @@ public class ExpositionFormatsTest {
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, gaugeHistogram);
-        assertPrometheusText(prometheus, gaugeHistogram);
-        assertOpenMetricsTextWithoutCreated(openMetricsWithoutCreated, gaugeHistogram);
-        assertPrometheusTextWithoutCreated(prometheusWithoutCreated, gaugeHistogram);
+        assertOpenMetricsText(openMetricsText, gaugeHistogram);
+        assertPrometheusText(prometheusText, gaugeHistogram);
+        assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, gaugeHistogram);
+        assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, gaugeHistogram);
+        assertPrometheusProtobuf(prometheusProtobuf, gaugeHistogram);
     }
 
     @Test
     public void testClassicGaugeHistogramMinimal() throws IOException {
         // In OpenMetrics a histogram can have a _count if and only if it has a _sum.
         // In Prometheus format, a histogram can have a _count without a _sum.
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE queue_size_bytes gaugehistogram\n" +
                 "queue_size_bytes_bucket{le=\"+Inf\"} 130\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE queue_size_bytes histogram\n" +
                 "queue_size_bytes_bucket{le=\"+Inf\"} 130\n" +
                 "# TYPE queue_size_bytes_gcount gauge\n" +
                 "queue_size_bytes_gcount 130\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"queue_size_bytes\" " +
+                "type: GAUGE_HISTOGRAM " +
+                "metric { " +
+                    "histogram { " +
+                        "sample_count: 130 " +
+                        "bucket { " +
+                            "cumulative_count: 130 " +
+                            "upper_bound: Infinity " +
+                        "} " +
+                    "} " +
+                "}";
+                //@formatter:on
         ClassicHistogramSnapshot gaugeHistogram = ClassicHistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("queue_size_bytes")
@@ -866,27 +991,43 @@ public class ExpositionFormatsTest {
                                 .build())
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, gaugeHistogram);
-        assertPrometheusText(prometheus, gaugeHistogram);
-        assertOpenMetricsTextWithoutCreated(openMetrics, gaugeHistogram);
-        assertPrometheusTextWithoutCreated(prometheus, gaugeHistogram);
+        assertOpenMetricsText(openMetricsText, gaugeHistogram);
+        assertPrometheusText(prometheusText, gaugeHistogram);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, gaugeHistogram);
+        assertPrometheusTextWithoutCreated(prometheusText, gaugeHistogram);
+        assertPrometheusProtobuf(prometheusProtobuf, gaugeHistogram);
     }
 
     @Test
     public void testClassicGaugeHistogramCountAndSum() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE queue_size_bytes gaugehistogram\n" +
                 "queue_size_bytes_bucket{le=\"+Inf\"} 130\n" +
                 "queue_size_bytes_gcount 130\n" +
                 "queue_size_bytes_gsum 27000.0\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# TYPE queue_size_bytes histogram\n" +
                 "queue_size_bytes_bucket{le=\"+Inf\"} 130\n" +
                 "# TYPE queue_size_bytes_gcount gauge\n" +
                 "queue_size_bytes_gcount 130\n" +
                 "# TYPE queue_size_bytes_gsum gauge\n" +
                 "queue_size_bytes_gsum 27000.0\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"queue_size_bytes\" " +
+                "type: GAUGE_HISTOGRAM " +
+                "metric { " +
+                    "histogram { " +
+                        "sample_count: 130 " +
+                        "sample_sum: 27000.0 " +
+                        "bucket { " +
+                            "cumulative_count: 130 " +
+                            "upper_bound: Infinity " +
+                        "} " +
+                    "} " +
+                "}";
+                //@formatter:on
         ClassicHistogramSnapshot gaugeHistogram = ClassicHistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("queue_size_bytes")
@@ -897,10 +1038,11 @@ public class ExpositionFormatsTest {
                                 .build())
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, gaugeHistogram);
-        assertPrometheusText(prometheus, gaugeHistogram);
-        assertOpenMetricsTextWithoutCreated(openMetrics, gaugeHistogram);
-        assertPrometheusTextWithoutCreated(prometheus, gaugeHistogram);
+        assertOpenMetricsText(openMetricsText, gaugeHistogram);
+        assertPrometheusText(prometheusText, gaugeHistogram);
+        assertOpenMetricsTextWithoutCreated(openMetricsText, gaugeHistogram);
+        assertPrometheusTextWithoutCreated(prometheusText, gaugeHistogram);
+        assertPrometheusProtobuf(prometheusProtobuf, gaugeHistogram);
     }
 
     @Test
