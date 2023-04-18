@@ -64,7 +64,6 @@ public class GaugeSnapshotTest {
     public void testMinimalGoodCase() {
         GaugeSnapshot snapshot = GaugeSnapshot.newBuilder()
                 .withName("temperature")
-                .withUnit(Unit.CELSIUS)
                 .addGaugeData(GaugeData.newBuilder().withValue(23.0).build())
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "temperature", null, null);

@@ -609,13 +609,14 @@ public class ExpositionFormatsTest {
                 "# UNIT response_size_bytes bytes\n" +
                 "# HELP response_size_bytes help\n" +
                 "response_size_bytes_bucket{status=\"200\",le=\"2.2\"} 2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 4 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
-                "response_size_bytes_count{status=\"200\"} 4 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 3 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.1 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 2 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 2 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
-                "response_size_bytes_count{status=\"500\"} 2 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"0.0\"} 3 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
@@ -623,12 +624,13 @@ public class ExpositionFormatsTest {
                 "# HELP response_size_bytes help\n" +
                 "# TYPE response_size_bytes histogram\n" +
                 "response_size_bytes_bucket{status=\"200\",le=\"2.2\"} 2 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 4 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_count{status=\"200\"} 4 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 3 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.1 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 2 " + scrapeTimestamp2s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 2 " + scrapeTimestamp2s + "\n" +
-                "response_size_bytes_count{status=\"500\"} 2 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"0.0\"} 3 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "# HELP response_size_bytes_created help\n" +
                 "# TYPE response_size_bytes_created gauge\n" +
@@ -639,24 +641,26 @@ public class ExpositionFormatsTest {
                 "# UNIT response_size_bytes bytes\n" +
                 "# HELP response_size_bytes help\n" +
                 "response_size_bytes_bucket{status=\"200\",le=\"2.2\"} 2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 4 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
-                "response_size_bytes_count{status=\"200\"} 4 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 3 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.1 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 2 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 2 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
-                "response_size_bytes_count{status=\"500\"} 2 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"0.0\"} 3 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
         String prometheusTextWithoutCreated = "" +
                 "# HELP response_size_bytes help\n" +
                 "# TYPE response_size_bytes histogram\n" +
                 "response_size_bytes_bucket{status=\"200\",le=\"2.2\"} 2 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 4 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_count{status=\"200\"} 4 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 3 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.1 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 2 " + scrapeTimestamp2s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 2 " + scrapeTimestamp2s + "\n" +
-                "response_size_bytes_count{status=\"500\"} 2 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"0.0\"} 3 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n";
         String prometheusProtobuf = "" +
                 //@formatter:off
@@ -667,14 +671,14 @@ public class ExpositionFormatsTest {
                     "label { name: \"status\" value: \"200\" } " +
                     "timestamp_ms: 1672850685829 " +
                     "histogram { " +
-                        "sample_count: 4 " +
+                        "sample_count: 3 " +
                         "sample_sum: 4.1 " +
                         "bucket { " +
                             "cumulative_count: 2 " +
                             "upper_bound: 2.2 " +
                             exemplar1protoString + " " +
                         "} bucket { " +
-                            "cumulative_count: 4 " +
+                            "cumulative_count: 3 " +
                             "upper_bound: Infinity " +
                             exemplar2protoString + " " +
                         "} " +
@@ -683,14 +687,17 @@ public class ExpositionFormatsTest {
                     "label { name: \"status\" value: \"500\" } " +
                     "timestamp_ms: 1672850585820 " +
                     "histogram { " +
-                        "sample_count: 2 " +
+                        "sample_count: 5 " +
                         "sample_sum: 3.2 " +
                         "bucket { " +
-                            "cumulative_count: 2 " +
+                            "cumulative_count: 3 " +
+                            "upper_bound: 0.0 " +
+                        "} bucket { " +
+                            "cumulative_count: 5 " +
                             "upper_bound: 2.2 " +
                             exemplar1protoString + " " +
                         "} bucket { " +
-                            "cumulative_count: 2 " +
+                            "cumulative_count: 5 " +
                             "upper_bound: Infinity " +
                             exemplar2protoString + " " +
                         "} " +
@@ -704,8 +711,9 @@ public class ExpositionFormatsTest {
                 .addData(ClassicHistogramData.newBuilder()
                         .withSum(3.2)
                         .withBuckets(ClassicHistogramBuckets.newBuilder()
+                                .addBucket(0.0, 3)
                                 .addBucket(2.2, 2)
-                                .addBucket(Double.POSITIVE_INFINITY, 2)
+                                .addBucket(Double.POSITIVE_INFINITY, 0)
                                 .build())
                         .withLabels(Labels.of("status", "500"))
                         .withExemplars(Exemplars.of(exemplar1, exemplar2))
@@ -716,7 +724,7 @@ public class ExpositionFormatsTest {
                         .withSum(4.1)
                         .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.2, 2)
-                                .addBucket(Double.POSITIVE_INFINITY, 4)
+                                .addBucket(Double.POSITIVE_INFINITY, 1)
                                 .build())
                         .withLabels(Labels.of("status", "200"))
                         .withExemplars(Exemplars.of(exemplar1, exemplar2))
@@ -823,13 +831,13 @@ public class ExpositionFormatsTest {
                 "# UNIT cache_size_bytes bytes\n" +
                 "# HELP cache_size_bytes number of bytes in the cache\n" +
                 "cache_size_bytes_bucket{db=\"items\",le=\"2.0\"} 3 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 7 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
-                "cache_size_bytes_gcount{db=\"items\"} 7 " + scrapeTimestamp1s + "\n" +
+                "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 4 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "cache_size_bytes_gcount{db=\"items\"} 4 " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_gsum{db=\"items\"} 17.0 " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_created{db=\"items\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_bucket{db=\"options\",le=\"2.0\"} 4 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
-                "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 8 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
-                "cache_size_bytes_gcount{db=\"options\"} 8 " + scrapeTimestamp2s + "\n" +
+                "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 4 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
+                "cache_size_bytes_gcount{db=\"options\"} 4 " + scrapeTimestamp2s + "\n" +
                 "cache_size_bytes_gsum{db=\"options\"} 18.0 " + scrapeTimestamp2s + "\n" +
                 "cache_size_bytes_created{db=\"options\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
@@ -837,13 +845,13 @@ public class ExpositionFormatsTest {
                 "# HELP cache_size_bytes number of bytes in the cache\n" +
                 "# TYPE cache_size_bytes histogram\n" +
                 "cache_size_bytes_bucket{db=\"items\",le=\"2.0\"} 3 " + scrapeTimestamp1s + "\n" +
-                "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 7 " + scrapeTimestamp1s + "\n" +
+                "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 4 " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_bucket{db=\"options\",le=\"2.0\"} 4 " + scrapeTimestamp2s + "\n" +
-                "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 8 " + scrapeTimestamp2s + "\n" +
+                "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 4 " + scrapeTimestamp2s + "\n" +
                 "# HELP cache_size_bytes_gcount number of bytes in the cache\n" +
                 "# TYPE cache_size_bytes_gcount gauge\n" +
-                "cache_size_bytes_gcount{db=\"items\"} 7 " + scrapeTimestamp1s + "\n" +
-                "cache_size_bytes_gcount{db=\"options\"} 8 " + scrapeTimestamp2s + "\n" +
+                "cache_size_bytes_gcount{db=\"items\"} 4 " + scrapeTimestamp1s + "\n" +
+                "cache_size_bytes_gcount{db=\"options\"} 4 " + scrapeTimestamp2s + "\n" +
                 "# HELP cache_size_bytes_gsum number of bytes in the cache\n" +
                 "# TYPE cache_size_bytes_gsum gauge\n" +
                 "cache_size_bytes_gsum{db=\"items\"} 17.0 " + scrapeTimestamp1s + "\n" +
@@ -857,25 +865,25 @@ public class ExpositionFormatsTest {
                 "# UNIT cache_size_bytes bytes\n" +
                 "# HELP cache_size_bytes number of bytes in the cache\n" +
                 "cache_size_bytes_bucket{db=\"items\",le=\"2.0\"} 3 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 7 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
-                "cache_size_bytes_gcount{db=\"items\"} 7 " + scrapeTimestamp1s + "\n" +
+                "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 4 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "cache_size_bytes_gcount{db=\"items\"} 4 " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_gsum{db=\"items\"} 17.0 " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_bucket{db=\"options\",le=\"2.0\"} 4 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
-                "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 8 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
-                "cache_size_bytes_gcount{db=\"options\"} 8 " + scrapeTimestamp2s + "\n" +
+                "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 4 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
+                "cache_size_bytes_gcount{db=\"options\"} 4 " + scrapeTimestamp2s + "\n" +
                 "cache_size_bytes_gsum{db=\"options\"} 18.0 " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
         String prometheusTextWithoutCreated = "" +
                 "# HELP cache_size_bytes number of bytes in the cache\n" +
                 "# TYPE cache_size_bytes histogram\n" +
                 "cache_size_bytes_bucket{db=\"items\",le=\"2.0\"} 3 " + scrapeTimestamp1s + "\n" +
-                "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 7 " + scrapeTimestamp1s + "\n" +
+                "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 4 " + scrapeTimestamp1s + "\n" +
                 "cache_size_bytes_bucket{db=\"options\",le=\"2.0\"} 4 " + scrapeTimestamp2s + "\n" +
-                "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 8 " + scrapeTimestamp2s + "\n" +
+                "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 4 " + scrapeTimestamp2s + "\n" +
                 "# HELP cache_size_bytes_gcount number of bytes in the cache\n" +
                 "# TYPE cache_size_bytes_gcount gauge\n" +
-                "cache_size_bytes_gcount{db=\"items\"} 7 " + scrapeTimestamp1s + "\n" +
-                "cache_size_bytes_gcount{db=\"options\"} 8 " + scrapeTimestamp2s + "\n" +
+                "cache_size_bytes_gcount{db=\"items\"} 4 " + scrapeTimestamp1s + "\n" +
+                "cache_size_bytes_gcount{db=\"options\"} 4 " + scrapeTimestamp2s + "\n" +
                 "# HELP cache_size_bytes_gsum number of bytes in the cache\n" +
                 "# TYPE cache_size_bytes_gsum gauge\n" +
                 "cache_size_bytes_gsum{db=\"items\"} 17.0 " + scrapeTimestamp1s + "\n" +
@@ -889,14 +897,14 @@ public class ExpositionFormatsTest {
                     "label { name: \"db\" value: \"items\" } " +
                     "timestamp_ms: 1672850685829 " +
                     "histogram { " +
-                        "sample_count: 7 " +
+                        "sample_count: 4 " +
                         "sample_sum: 17.0 " +
                         "bucket { " +
                             "cumulative_count: 3 " +
                             "upper_bound: 2.0 " +
                             exemplar1protoString + " " +
                         "} bucket { " +
-                            "cumulative_count: 7 " +
+                            "cumulative_count: 4 " +
                             "upper_bound: Infinity " +
                             exemplar2protoString + " " +
                         "} " +
@@ -905,14 +913,14 @@ public class ExpositionFormatsTest {
                     "label { name: \"db\" value: \"options\" } " +
                     "timestamp_ms: 1672850585820 " +
                     "histogram { " +
-                        "sample_count: 8 " +
+                        "sample_count: 4 " +
                         "sample_sum: 18.0 " +
                         "bucket { " +
                             "cumulative_count: 4 " +
                             "upper_bound: 2.0 " +
                             exemplar1protoString + " " +
                         "} bucket { " +
-                            "cumulative_count: 8 " +
+                            "cumulative_count: 4 " +
                             "upper_bound: Infinity " +
                             exemplar2protoString + " " +
                         "} " +
@@ -928,7 +936,7 @@ public class ExpositionFormatsTest {
                         .withSum(17)
                         .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 3)
-                                .addBucket(Double.POSITIVE_INFINITY, 7)
+                                .addBucket(Double.POSITIVE_INFINITY, 1)
                                 .build())
                         .withLabels(Labels.of("db", "items"))
                         .withExemplars(Exemplars.of(exemplar1, exemplar2))
@@ -939,7 +947,7 @@ public class ExpositionFormatsTest {
                         .withSum(18)
                         .withBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 4)
-                                .addBucket(Double.POSITIVE_INFINITY, 8)
+                                .addBucket(Double.POSITIVE_INFINITY, 0)
                                 .build()
                         )
                         .withLabels(Labels.of("db", "options"))
@@ -1047,7 +1055,7 @@ public class ExpositionFormatsTest {
 
     @Test
     public void testNativeHistogram() throws IOException {
-        String openMetrics = "" +
+        String openMetricsText = "" +
                 "# TYPE response_size_bytes histogram\n" +
                 "# UNIT response_size_bytes bytes\n" +
                 "# HELP response_size_bytes help\n" +
@@ -1055,24 +1063,80 @@ public class ExpositionFormatsTest {
                 "response_size_bytes_count{status=\"200\"} 2 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.2 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 9 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
-                "response_size_bytes_count{status=\"500\"} 9 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 55 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_count{status=\"500\"} 55 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
-        String prometheus = "" +
+        String prometheusText = "" +
                 "# HELP response_size_bytes help\n" +
                 "# TYPE response_size_bytes histogram\n" +
                 "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 2 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_count{status=\"200\"} 2 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.2 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 9 " + scrapeTimestamp2s + "\n" +
-                "response_size_bytes_count{status=\"500\"} 9 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 55 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_count{status=\"500\"} 55 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "# HELP response_size_bytes_created help\n" +
                 "# TYPE response_size_bytes_created gauge\n" +
                 "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"response_size_bytes\" " +
+                "help: \"help\" " +
+                "type: HISTOGRAM " +
+                "metric { " +
+                    "label { name: \"status\" value: \"200\" } " +
+                    "timestamp_ms: 1672850685829 " +
+                    "histogram { " +
+                        "sample_count: 2 " +
+                        "sample_sum: 4.2 " +
+                        "schema: 5 " +
+                        "zero_threshold: 0.0 " +
+                        "zero_count: 0 " +
+                        "positive_span { offset: 0 length: 1 } " +
+                        "positive_delta: 2 " +
+                    "} " +
+                "} metric { " +
+                    "label { name: \"status\" value: \"500\" } " +
+                    "timestamp_ms: 1672850585820 " +
+                    "histogram { " +
+                        "sample_count: 55 " + // bucket counts + zero count
+                        "sample_sum: 3.2 " +
+                        "schema: 5 " +
+                        "zero_threshold: 0.0 " +
+                        "zero_count: 1 " +
+                        "negative_span { offset: 0 length: 1 } " +
+                        "negative_span { offset: 9 length: 1 } " +
+                        "negative_delta: 1 " +
+                        "negative_delta: -1 " + // span with count 0
+                        "positive_span { offset: 2 length: 3 } " + // span with 3 buckets (indexes 2-4)
+                        "positive_span { offset: 7 length: 1 } " + // span with 1 bucket (index 12)
+                        "positive_span { offset: 9 length: 4 } " + // span with gap of size 1 (indexes 22-25)
+                        "positive_span { offset: 6 length: 5 } " + // span with gap of size 2 (indexes 32-36)
+                        "positive_span { offset: 4 length: 2 } " + // span with gap of size 3 part 1 (indexes 41-42)
+                        "positive_span { offset: 3 length: 2 } " + // span with gap of size 3 part 2 (indexes 46-47)
+                        "positive_delta: 3 " + // index 2, count 3
+                        "positive_delta: 2 " + // index 3, count 5
+                        "positive_delta: -1 " + // index 4, count 4
+                        "positive_delta: 2 " + // index 12, count 6
+                        "positive_delta: -4 " + // index 22, count 2
+                        "positive_delta: -2 " + // index 23, gap
+                        "positive_delta: 1 " + // index 24, count 1
+                        "positive_delta: 2 " + // index 25, count 3
+                        "positive_delta: 1 " + // index 32, count 4
+                        "positive_delta: -1 " + // index 33, count 3
+                        "positive_delta: -3 " + // index 34, gap
+                        "positive_delta: 0 " + // index 35, gap
+                        "positive_delta: 7 " + // index 36, count 7
+                        "positive_delta: -4 " + // index 41, count 3
+                        "positive_delta: 6 " + // index 42, count 9
+                        "positive_delta: -7 " + // index 46, count 2
+                        "positive_delta: -1 " + // index 47, count 1
+                    "} " +
+                "}";
+                //@formatter:on
         NativeHistogramSnapshot nativeHistogram = NativeHistogramSnapshot.newBuilder()
                 .withName("response_size_bytes")
                 .withHelp("help")
@@ -1082,11 +1146,29 @@ public class ExpositionFormatsTest {
                         .withSchema(5)
                         .withZeroCount(1)
                         .withBucketsForPositiveValues(NativeHistogramBuckets.newBuilder()
+                                // span with 3 buckets
                                 .addBucket(2, 3)
-                                .addBucket(3, 7)
+                                .addBucket(3, 5)
+                                .addBucket(4, 4)
+                                // span with just 1 bucket
+                                .addBucket(12, 6)
+                                // span with gap of size 1
+                                .addBucket(22, 2)
+                                .addBucket(24, 1)
+                                .addBucket(25, 3)
+                                // span with gap of size 2
+                                .addBucket(32, 4)
+                                .addBucket(33, 3)
+                                .addBucket(36, 7)
+                                // span with gap of size 3
+                                .addBucket(41, 3)
+                                .addBucket(42, 9)
+                                .addBucket(46, 2)
+                                .addBucket(47, 1)
                                 .build())
                         .withBucketsForNegativeValues(NativeHistogramBuckets.newBuilder()
                                 .addBucket(0, 1)
+                                .addBucket(10, 0) // bucket with count 0
                                 .build())
                         .withLabels(Labels.of("status", "500"))
                         .withExemplars(Exemplars.of(exemplar1, exemplar2))
@@ -1105,8 +1187,9 @@ public class ExpositionFormatsTest {
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
                 .build();
-        assertOpenMetricsText(openMetrics, nativeHistogram);
-        assertPrometheusText(prometheus, nativeHistogram);
+        assertOpenMetricsText(openMetricsText, nativeHistogram);
+        assertPrometheusText(prometheusText, nativeHistogram);
+        assertPrometheusProtobuf(prometheusProtobuf, nativeHistogram);
     }
 
     @Test

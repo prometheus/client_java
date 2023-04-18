@@ -3,18 +3,18 @@ package io.prometheus.metrics.model;
 public class NativeHistogramBucket {
 
     private final int bucketIndex;
-    private final long cumulativeCount;
+    private final long count;
 
-    public NativeHistogramBucket(int bucketIndex, long cumulativeCount) {
+    public NativeHistogramBucket(int bucketIndex, long count) {
         this.bucketIndex = bucketIndex;
-        this.cumulativeCount = cumulativeCount;
+        this.count = count;
     }
 
     public int getBucketIndex() {
         return bucketIndex;
     }
 
-    public long getCumulativeCount() {
-        return cumulativeCount;
+    public long getCount() {
+        return count;
     }
 }

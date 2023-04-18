@@ -30,7 +30,7 @@ public class ClassicHistogramSnapshotTest {
                                 .withCount(12)
                                 .withSum(27000.0)
                                 .withBuckets(ClassicHistogramBuckets.newBuilder()
-                                        .addBucket(Double.POSITIVE_INFINITY, 12)
+                                        .addBucket(Double.POSITIVE_INFINITY, 0)
                                         .addBucket(128.0, 7)
                                         .addBucket(1024.0, 10)
                                         .build())
@@ -46,7 +46,7 @@ public class ClassicHistogramSnapshotTest {
                                 .withBuckets(ClassicHistogramBuckets.newBuilder()
                                         .addBucket(128.0, 0)
                                         .addBucket(1024.0, 2)
-                                        .addBucket(Double.POSITIVE_INFINITY, 2)
+                                        .addBucket(Double.POSITIVE_INFINITY, 1)
                                         .build())
                                 .withLabels(Labels.of("path", "/api/v1"))
                                 .withExemplars(Exemplars.of(exemplar1))
@@ -58,22 +58,22 @@ public class ClassicHistogramSnapshotTest {
 
         Assert.assertEquals(2, snapshot.getData().size());
         ClassicHistogramData data = snapshot.getData().get(0); // data is sorted by labels, so the first one should be path="/"
-        Assert.assertEquals(12, data.getCount());
+        Assert.assertEquals(17, data.getCount());
         Assert.assertEquals(27000.0, data.getSum(), 0.0);
         int i = 0;
         for (ClassicHistogramBucket bucket : data.getBuckets()) {
             switch (i++) {
                 case 0:
                     Assert.assertEquals(128.0, bucket.getUpperBound(), 0.0);
-                    Assert.assertEquals(7, bucket.getCumulativeCount());
+                    Assert.assertEquals(7, bucket.getCount());
                     break;
                 case 1:
                     Assert.assertEquals(1024.0, bucket.getUpperBound(), 0.0);
-                    Assert.assertEquals(10, bucket.getCumulativeCount());
+                    Assert.assertEquals(10, bucket.getCount());
                     break;
                 case 2:
                     Assert.assertEquals(Double.POSITIVE_INFINITY, bucket.getUpperBound(), 0.0);
-                    Assert.assertEquals(12, bucket.getCumulativeCount());
+                    Assert.assertEquals(0, bucket.getCount());
                     break;
             }
         }
@@ -85,7 +85,7 @@ public class ClassicHistogramSnapshotTest {
 
         // FixedHistogramData 2
         data = snapshot.getData().get(1);
-        Assert.assertEquals(2, data.getCount());
+        Assert.assertEquals(3, data.getCount());
         // skip the rest, because we covered it with other tests.
     }
 
@@ -108,6 +108,24 @@ public class ClassicHistogramSnapshotTest {
         ClassicHistogramData data = snapshot.getData().get(0);
         Assert.assertFalse(data.hasSum());
         Assert.assertEquals(1, snapshot.getData().get(0).getBuckets().size());
+    }
+
+    @Test
+    public void testCount() {
+        ClassicHistogramSnapshot snapshot = ClassicHistogramSnapshot.newBuilder()
+                .withName("test_histogram")
+                .addData(ClassicHistogramData.newBuilder()
+                        .withBuckets(ClassicHistogramBuckets.newBuilder()
+                                .addBucket(1.0, 3)
+                                .addBucket(2.0, 2)
+                                .addBucket(Double.POSITIVE_INFINITY, 0)
+                                .build())
+                        .build())
+                .build();
+        ClassicHistogramData data = snapshot.getData().get(0);
+        Assert.assertFalse(data.hasSum());
+        Assert.assertTrue(data.hasCount());
+        Assert.assertEquals(5, data.getCount());
     }
 
     @Test(expected = IllegalArgumentException.class)

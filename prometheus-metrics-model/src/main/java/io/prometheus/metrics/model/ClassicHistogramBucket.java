@@ -2,22 +2,22 @@ package io.prometheus.metrics.model;
 
 public class ClassicHistogramBucket implements Comparable<ClassicHistogramBucket> {
 
-    private final long cumulativeCount;
+    private final long count;
     private final double upperBound;
 
-    public ClassicHistogramBucket(double upperBound, long cumulativeCount) {
-        this.cumulativeCount = cumulativeCount;
+    public ClassicHistogramBucket(double upperBound, long count) {
+        this.count = count;
         this.upperBound = upperBound;
         if (Double.isNaN(upperBound)) {
             throw new IllegalArgumentException("Cannot use NaN as an upper bound for a histogram bucket");
         }
-        if (cumulativeCount < 0) {
-            throw new IllegalArgumentException(cumulativeCount + ": Histogram buckets cannot have a negative count");
+        if (count < 0) {
+            throw new IllegalArgumentException(count + ": " + ClassicHistogramBuckets.class.getSimpleName() + " cannot have a negative count");
         }
     }
 
-    public long getCumulativeCount() {
-        return cumulativeCount;
+    public long getCount() {
+        return count;
     }
 
     public double getUpperBound() {

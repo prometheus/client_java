@@ -93,11 +93,11 @@ public final class NativeHistogramSnapshot extends MetricSnapshot {
 
         private static long calculateCount(long zeroCount, NativeHistogramBuckets bucketsForPositiveValues, NativeHistogramBuckets bucketsForNegativeValues) {
             long count = zeroCount;
-            if (bucketsForPositiveValues.size() > 0) {
-                count += bucketsForPositiveValues.getCumulativeCount(bucketsForPositiveValues.size()-1);
+            for (int i=0; i<bucketsForNegativeValues.size(); i++) {
+                count += bucketsForNegativeValues.getCount(i);
             }
-            if (bucketsForNegativeValues.size() > 0) {
-                count += bucketsForNegativeValues.getCumulativeCount(bucketsForNegativeValues.size()-1);
+            for (int i=0; i<bucketsForPositiveValues.size(); i++) {
+                count += bucketsForPositiveValues.getCount(i);
             }
             return count;
         }

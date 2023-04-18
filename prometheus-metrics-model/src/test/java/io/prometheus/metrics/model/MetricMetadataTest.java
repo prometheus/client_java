@@ -10,7 +10,7 @@ public class MetricMetadataTest {
         new MetricMetadata("");
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testNullName() {
         new MetricMetadata(null);
     }

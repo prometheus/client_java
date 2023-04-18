@@ -90,7 +90,6 @@ public class OpenMetricsTextFormatWriter {
         MetricMetadata metadata = snapshot.getMetadata();
         if (snapshot.isGaugeHistogram()) {
             writeMetadata(writer, "gaugehistogram", metadata);
-
             writeClassicHistogramBuckets(writer, metadata, "_gcount", "_gsum", snapshot.getData());
         } else {
             writeMetadata(writer, "histogram", metadata);
@@ -102,9 +101,11 @@ public class OpenMetricsTextFormatWriter {
         for (ClassicHistogramSnapshot.ClassicHistogramData data : dataList) {
             ClassicHistogramBuckets buckets = data.getBuckets();
             Exemplars exemplars = data.getExemplars();
+            long cumulativeCount = 0;
             for (int i = 0; i < buckets.size(); i++) {
+                cumulativeCount += buckets.getCount(i);
                 writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
-                writeLong(writer, buckets.getCumulativeCount(i));
+                writeLong(writer, cumulativeCount);
                 Exemplar exemplar;
                 if (i == 0) {
                     exemplar = exemplars.get(Double.NEGATIVE_INFINITY, buckets.getUpperBound(i));

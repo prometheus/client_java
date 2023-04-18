@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
+// TODO: The default should be a histogram with both, classic buckets and native buckets for transition.
 public abstract class Histogram extends ObservingMetric<DistributionObserver, Histogram.HistogramData> implements DistributionObserver {
 
     protected final long createdTimeMillis = System.currentTimeMillis();
@@ -123,14 +124,8 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
                 return buffer.run(
                         expectedCount -> count.sum() == expectedCount,
                         () -> {
-                            long[] cumulativeCounts = new long[buckets.length];
-                            long cumulativeCount = 0;
-                            for (int i=0; i<upperBounds.length; i++) {
-                                cumulativeCount += buckets[i].sum();
-                                cumulativeCounts[i] = cumulativeCount;
-                            }
-                            ClassicHistogramBuckets buckets = ClassicHistogramBuckets.of(upperBounds, cumulativeCounts);
-                            return new ClassicHistogramSnapshot.ClassicHistogramData(buckets, sum.sum(), labels, exemplars, createdTimeMillis);
+                            ClassicHistogramBuckets classicBuckets = ClassicHistogramBuckets.of(upperBounds, buckets);
+                            return new ClassicHistogramSnapshot.ClassicHistogramData(classicBuckets, sum.sum(), labels, exemplars, createdTimeMillis);
                         },
                         this::doObserve
                 );
@@ -352,14 +347,14 @@ public abstract class Histogram extends ObservingMetric<DistributionObserver, Hi
 
             private NativeHistogramBuckets toBucketList(ConcurrentHashMap<Integer, LongAdder> map) {
                 int[] bucketIndexes = new int[map.size()];
-                long[] cumulativeCounts = new long[map.size()];
+                long[] counts = new long[map.size()];
                 int i=0;
                 for (Map.Entry<Integer, LongAdder> entry : map.entrySet()) {
                     bucketIndexes[i] = entry.getKey();
-                    cumulativeCounts[i] = entry.getValue().sum();
+                    counts[i] = entry.getValue().sum();
                     i++;
                 }
-                return NativeHistogramBuckets.of(bucketIndexes, cumulativeCounts);
+                return NativeHistogramBuckets.of(bucketIndexes, counts);
             }
         }
     }

@@ -26,7 +26,7 @@ public class NativeHistogramSnapshotTest {
                 .withUnit(Unit.BYTES)
                 .addData(
                         NativeHistogramSnapshot.NativeHistogramData.newBuilder()
-                                .withCount(12)
+                                .withCount(12) // TODO how is that not a compile error? This is a protected method!
                                 .withSum(27000.0)
                                 .withSchema(5)
                                 .withZeroCount(2)
@@ -34,7 +34,7 @@ public class NativeHistogramSnapshotTest {
                                 .withBucketsForPositiveValues(NativeHistogramBuckets.newBuilder()
                                         .addBucket(1, 12)
                                         .addBucket(2, 13)
-                                        .addBucket(4, 14)
+                                        .addBucket(4, 12)
                                         .build())
                                 .withBucketsForNegativeValues(NativeHistogramBuckets.newBuilder()
                                         .addBucket(-1, 1)
@@ -47,7 +47,7 @@ public class NativeHistogramSnapshotTest {
                                 .build())
                 .addData(
                         NativeHistogramSnapshot.NativeHistogramData.newBuilder()
-                                .withCount(3)
+                                .withCount(3) // TODO how is that not a compile error? This is a protected method!
                                 .withSum(400.2)
                                 .withSchema(5)
                                 .withBucketsForPositiveValues(NativeHistogramBuckets.newBuilder()
@@ -69,7 +69,7 @@ public class NativeHistogramSnapshotTest {
         Assert.assertTrue(data.hasCount());
         Assert.assertTrue(data.hasCreatedTimestamp());
         Assert.assertTrue(data.hasScrapeTimestamp());
-        Assert.assertEquals(12, data.getCount());
+        Assert.assertEquals(42, data.getCount());
         Assert.assertEquals(27000.0, data.getSum(), 0.0);
         Assert.assertEquals(createdTimestamp, data.getCreatedTimestampMillis());
         Assert.assertEquals(scrapeTimestamp, data.getScrapeTimestampMillis());
@@ -82,15 +82,15 @@ public class NativeHistogramSnapshotTest {
             switch (i++) {
                 case 0:
                     Assert.assertEquals(1, bucket.getBucketIndex());
-                    Assert.assertEquals(12, bucket.getCumulativeCount());
+                    Assert.assertEquals(12, bucket.getCount());
                     break;
                 case 1:
                     Assert.assertEquals(2, bucket.getBucketIndex());
-                    Assert.assertEquals(13, bucket.getCumulativeCount());
+                    Assert.assertEquals(13, bucket.getCount());
                     break;
                 case 2:
                     Assert.assertEquals(4, bucket.getBucketIndex());
-                    Assert.assertEquals(14, bucket.getCumulativeCount());
+                    Assert.assertEquals(12, bucket.getCount());
                     break;
             }
         }
@@ -100,11 +100,11 @@ public class NativeHistogramSnapshotTest {
             switch (i++) {
                 case 0:
                     Assert.assertEquals(-1, bucket.getBucketIndex());
-                    Assert.assertEquals(1, bucket.getCumulativeCount());
+                    Assert.assertEquals(1, bucket.getCount());
                     break;
                 case 1:
                     Assert.assertEquals(0, bucket.getBucketIndex());
-                    Assert.assertEquals(2, bucket.getCumulativeCount());
+                    Assert.assertEquals(2, bucket.getCount());
                     break;
             }
         }
@@ -114,7 +114,7 @@ public class NativeHistogramSnapshotTest {
         Assert.assertEquals(scrapeTimestamp, data.getScrapeTimestampMillis());
 
         data = snapshot.getData().get(1);
-        Assert.assertEquals(3, data.getCount());
+        Assert.assertEquals(8, data.getCount());
         Assert.assertEquals(5, data.getSchema());
         Assert.assertEquals(0, data.getZeroCount());
         Assert.assertEquals(0, data.getZeroThreshold(), 0);
@@ -134,7 +134,8 @@ public class NativeHistogramSnapshotTest {
         NativeHistogramSnapshot.NativeHistogramData data = snapshot.getData().get(0);
         Assert.assertFalse(data.hasCreatedTimestamp());
         Assert.assertFalse(data.hasScrapeTimestamp());
-        Assert.assertFalse(data.hasCount());
+        Assert.assertTrue(data.hasCount());
+        Assert.assertEquals(0, data.getCount());
         Assert.assertFalse(data.hasSum());
         Assert.assertEquals(0, data.getBucketsForNegativeValues().size());
         Assert.assertEquals(0, data.getBucketsForPositiveValues().size());

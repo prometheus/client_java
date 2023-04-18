@@ -121,9 +121,11 @@ public class PrometheusTextFormatWriter {
         writeMetadata(writer, "", "histogram", metadata);
         for (ClassicHistogramSnapshot.ClassicHistogramData data : snapshot.getData()) {
             ClassicHistogramBuckets buckets = data.getBuckets();
+            long cumulativeCount = 0;
             for (int i = 0; i < buckets.size(); i++) {
+                cumulativeCount += buckets.getCount(i);
                 writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
-                writeLong(writer, buckets.getCumulativeCount(i));
+                writeLong(writer, cumulativeCount);
                 writeScrapeTimestampAndNewline(writer, data);
             }
             if (!snapshot.isGaugeHistogram()) {

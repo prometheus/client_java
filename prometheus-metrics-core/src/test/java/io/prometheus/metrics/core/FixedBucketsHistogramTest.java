@@ -209,7 +209,7 @@ public class FixedBucketsHistogramTest {
   @Test
   public void testNoLabelsDefaultZeroValue() {
     Histogram noLabels = Histogram.newBuilder().withName("test").withDefaultBuckets().build();
-    assertEquals(0.0, getBucket(noLabels, 0.005).getCumulativeCount(), 0.000001);
+    assertEquals(0.0, getBucket(noLabels, 0.005).getCount(), 0.000001);
     assertEquals(0, getData(noLabels).getCount());
     assertEquals(0.0, getData(noLabels).getSum(), 0.000001);
   }
@@ -223,17 +223,17 @@ public class FixedBucketsHistogramTest {
     noLabels.observe(2);
     assertEquals(1, getData(noLabels).getCount());
     assertEquals(2.0, getData(noLabels).getSum(), .001);
-    assertEquals(0.0, getBucket(noLabels, 1).getCumulativeCount(), .001);
-    assertEquals(1.0, getBucket(noLabels, 2.5).getCumulativeCount(), .001);
+    assertEquals(0.0, getBucket(noLabels, 1).getCount(), .001);
+    assertEquals(1.0, getBucket(noLabels, 2.5).getCount(), .001);
     noLabels.observe(4);
     assertEquals(2.0, getData(noLabels).getCount(), .001);
     assertEquals(6.0, getData(noLabels).getSum(), .001);
-    assertEquals(0.0, getBucket(noLabels, 1).getCumulativeCount(), .001);
-    assertEquals(1.0, getBucket(noLabels, 2.5).getCumulativeCount(), .001);
-    assertEquals(2.0, getBucket(noLabels, 5).getCumulativeCount(), .001);
-    assertEquals(2.0, getBucket(noLabels, 7.5).getCumulativeCount(), .001);
-    assertEquals(2.0, getBucket(noLabels, 10).getCumulativeCount(), .001);
-    assertEquals(2.0, getBucket(noLabels, Double.POSITIVE_INFINITY).getCumulativeCount(), .001);
+    assertEquals(0.0, getBucket(noLabels, 1).getCount(), .001);
+    assertEquals(1.0, getBucket(noLabels, 2.5).getCount(), .001);
+    assertEquals(2.0, getBucket(noLabels, 5).getCount(), .001);
+    assertEquals(2.0, getBucket(noLabels, 7.5).getCount(), .001);
+    assertEquals(2.0, getBucket(noLabels, 10).getCount(), .001);
+    assertEquals(2.0, getBucket(noLabels, Double.POSITIVE_INFINITY).getCount(), .001);
   }
 
   @Test
@@ -255,7 +255,7 @@ public class FixedBucketsHistogramTest {
     }
     List<Long> expectedBucketCounts = Arrays.asList(2L, 7L, 12L, 17L, 22L, 22L); // buckets -10, -5, 0, 5, 10, +Inf
     List<Long> actualBucketCounts = getData(histogram).getBuckets().stream()
-            .map(ClassicHistogramBucket::getCumulativeCount)
+            .map(ClassicHistogramBucket::getCount)
             .collect(Collectors.toList());
     assertEquals(expectedBucketCounts, actualBucketCounts);
   }
@@ -267,16 +267,16 @@ public class FixedBucketsHistogramTest {
             .withDefaultBuckets()
             .build();
     histogram.observe(2.5);
-    assertEquals(0, getBucket(histogram, 1).getCumulativeCount());
-    assertEquals(1, getBucket(histogram, 2.5).getCumulativeCount());
+    assertEquals(0, getBucket(histogram, 1).getCount());
+    assertEquals(1, getBucket(histogram, 2.5).getCount());
 
     histogram.observe(Double.POSITIVE_INFINITY);
-    assertEquals(0, getBucket(histogram, 1).getCumulativeCount());
-    assertEquals(1, getBucket(histogram, 2.5).getCumulativeCount());
-    assertEquals(1, getBucket(histogram, 5).getCumulativeCount());
-    assertEquals(1, getBucket(histogram, 7.5).getCumulativeCount());
-    assertEquals(1, getBucket(histogram, 10).getCumulativeCount());
-    assertEquals(2, getBucket(histogram, Double.POSITIVE_INFINITY).getCumulativeCount());
+    assertEquals(0, getBucket(histogram, 1).getCount());
+    assertEquals(1, getBucket(histogram, 2.5).getCount());
+    assertEquals(1, getBucket(histogram, 5).getCount());
+    assertEquals(1, getBucket(histogram, 7.5).getCount());
+    assertEquals(1, getBucket(histogram, 10).getCount());
+    assertEquals(2, getBucket(histogram, Double.POSITIVE_INFINITY).getCount());
   }
 
   @Test
@@ -348,7 +348,7 @@ public class FixedBucketsHistogramTest {
       }
     }
     Assert.assertEquals(nThreads * 10_000, maxCount); // the last collect() has seen all observations
-    Assert.assertEquals(getBucket(histogram, 2.5, "status", "200").getCumulativeCount(), nThreads * 10_000);
+    Assert.assertEquals(getBucket(histogram, 2.5, "status", "200").getCount(), nThreads * 10_000);
     executor.shutdown();
     Assert.assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
   }

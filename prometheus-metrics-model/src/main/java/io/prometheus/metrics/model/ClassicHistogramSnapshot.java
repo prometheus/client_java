@@ -70,7 +70,7 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
          * Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
         public ClassicHistogramData(ClassicHistogramBuckets buckets, double sum, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
-            super(buckets.getCumulativeCount(buckets.size()-1), sum, exemplars, labels, createdTimestampMillis, timestampMillis);
+            super(buckets.sumOfCounts(), sum, exemplars, labels, createdTimestampMillis, timestampMillis);
             this.buckets = buckets;
             validate();
         }
@@ -86,9 +86,9 @@ public final class ClassicHistogramSnapshot extends MetricSnapshot {
                     throw new IllegalArgumentException("le is a reserved label name for histograms");
                 }
             }
-            if (hasCount() && buckets.getCumulativeCount(buckets.size()-1) > getCount()) {
+            if (hasCount() && buckets.getCount(buckets.size()-1) > getCount()) {
                 // Can count be greater than +Inf bucket? Yes, if NaN values were observed.
-                throw new IllegalArgumentException("Count is " + getCount() + ", but the +Inf bucket is " + buckets.getCumulativeCount(buckets.size()-1) + ".");
+                throw new IllegalArgumentException("Count is " + getCount() + ", but the +Inf bucket is " + buckets.getCount(buckets.size()-1) + ".");
             }
         }
 

@@ -12,6 +12,10 @@ public class NativeHistogramBucketsTest {
                 .addBucket(120, 17)
                 .build();
         Assert.assertEquals(2, buckets.size());
+        Assert.assertEquals(-10, buckets.getBucketIndex(0));
+        Assert.assertEquals(12, buckets.getCount(0));
+        Assert.assertEquals(120, buckets.getBucketIndex(1));
+        Assert.assertEquals(17, buckets.getCount(1));
     }
 
     @Test
@@ -31,17 +35,9 @@ public class NativeHistogramBucketsTest {
         Assert.assertEquals(2, buckets.getBucketIndex(0));
         Assert.assertEquals(5, buckets.getBucketIndex(1));
         Assert.assertEquals(7, buckets.getBucketIndex(2));
-        Assert.assertEquals(0, buckets.getCumulativeCount(0));
-        Assert.assertEquals(3, buckets.getCumulativeCount(1));
-        Assert.assertEquals(4, buckets.getCumulativeCount(2));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testNotCumulative() {
-        NativeHistogramBuckets.newBuilder()
-                .addBucket(0, 10)
-                .addBucket(1, 7)
-                .build();
+        Assert.assertEquals(0, buckets.getCount(0));
+        Assert.assertEquals(3, buckets.getCount(1));
+        Assert.assertEquals(4, buckets.getCount(2));
     }
 
     @Test(expected = IllegalArgumentException.class)

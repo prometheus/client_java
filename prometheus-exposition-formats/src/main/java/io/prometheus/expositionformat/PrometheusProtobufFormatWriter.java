@@ -135,10 +135,12 @@ public class PrometheusProtobufFormatWriter {
         Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
         ClassicHistogramBuckets buckets = data.getBuckets();
         double lowerBound = Double.NEGATIVE_INFINITY;
+        long cumulativeCount = 0;
         for (int i = 0; i < buckets.size(); i++) {
+            cumulativeCount += buckets.getCount(i);
             double upperBound = buckets.getUpperBound(i);
             Metrics.Bucket.Builder bucketBuilder = Metrics.Bucket.newBuilder()
-                    .setCumulativeCount(buckets.getCumulativeCount(i))
+                    .setCumulativeCount(cumulativeCount)
                     .setUpperBound(upperBound);
             Exemplar exemplar = data.getExemplars().get(lowerBound, upperBound);
             if (exemplar != null) {
@@ -191,7 +193,7 @@ public class PrometheusProtobufFormatWriter {
                 if (buckets.getBucketIndex(i) > previousIndex + 1) {
                     // If the gap between bucketIndex and previousIndex is just 1 or 2,
                     // we don't start a new span but continue the existing span and add 1 or 2 empty buckets.
-                    if (buckets.getBucketIndex(i) < previousIndex + 3) {
+                    if (buckets.getBucketIndex(i) <= previousIndex + 3) {
                         while (buckets.getBucketIndex(i) > previousIndex + 1) {
                             currentSpan.setLength(currentSpan.getLength() + 1);
                             previousIndex++;
@@ -215,11 +217,11 @@ public class PrometheusProtobufFormatWriter {
                 currentSpan.setLength(currentSpan.getLength() + 1);
                 previousIndex = buckets.getBucketIndex(i);
                 if (sgn > 0) {
-                    histogramBuilder.addPositiveDelta(buckets.getCumulativeCount(i) - previousCount);
+                    histogramBuilder.addPositiveDelta(buckets.getCount(i) - previousCount);
                 } else {
-                    histogramBuilder.addNegativeDelta(buckets.getCumulativeCount(i) - previousCount);
+                    histogramBuilder.addNegativeDelta(buckets.getCount(i) - previousCount);
                 }
-                previousCount = buckets.getCumulativeCount(i);
+                previousCount = buckets.getCount(i);
             }
             if (sgn > 0) {
                 histogramBuilder.addPositiveSpan(currentSpan.build());

@@ -11,31 +11,31 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
 
     public static final NativeHistogramBuckets EMPTY = new NativeHistogramBuckets(new int[]{}, new long[]{});
     private final int[] bucketIndexes;
-    private final long[] cumulativeCounts;
+    private final long[] counts;
 
-    private NativeHistogramBuckets(int[] bucketIndexes, long[] cumulativeCounts) {
+    private NativeHistogramBuckets(int[] bucketIndexes, long[] counts) {
         this.bucketIndexes = bucketIndexes;
-        this.cumulativeCounts = cumulativeCounts;
+        this.counts = counts;
     }
 
-    public static NativeHistogramBuckets of(int[] bucketIndexes, long[] cumulativeCounts) {
+    public static NativeHistogramBuckets of(int[] bucketIndexes, long[] counts) {
         int[] bucketIndexesCopy = Arrays.copyOf(bucketIndexes, bucketIndexes.length);
-        long[] cumulativeCountsCopy = Arrays.copyOf(cumulativeCounts, cumulativeCounts.length);
-        sortAndValidate(bucketIndexesCopy, cumulativeCountsCopy);
-        return new NativeHistogramBuckets(bucketIndexesCopy, cumulativeCountsCopy);
+        long[] countsCopy = Arrays.copyOf(counts, counts.length);
+        sortAndValidate(bucketIndexesCopy, countsCopy);
+        return new NativeHistogramBuckets(bucketIndexesCopy, countsCopy);
     }
 
-    public static NativeHistogramBuckets of(List<Integer> bucketIndexes, List<Long> cumulativeCounts) {
+    public static NativeHistogramBuckets of(List<Integer> bucketIndexes, List<Long> counts) {
         int[] bucketIndexesCopy = new int[bucketIndexes.size()];
         for (int i=0; i<bucketIndexes.size(); i++) {
             bucketIndexesCopy[i] = bucketIndexes.get(i);
         }
-        long[] cumulativeCountsCopy = new long[cumulativeCounts.size()];
-        for (int i=0; i<cumulativeCounts.size(); i++) {
-            cumulativeCountsCopy[i] = cumulativeCounts.get(i);
+        long[] countsCopy = new long[counts.size()];
+        for (int i=0; i<counts.size(); i++) {
+            countsCopy[i] = counts.get(i);
         }
-        sortAndValidate(bucketIndexesCopy, cumulativeCountsCopy);
-        return new NativeHistogramBuckets(bucketIndexesCopy, cumulativeCountsCopy);
+        sortAndValidate(bucketIndexesCopy, countsCopy);
+        return new NativeHistogramBuckets(bucketIndexesCopy, countsCopy);
     }
 
     public int size() {
@@ -45,7 +45,7 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
     private List<NativeHistogramBucket> asList() {
         List<NativeHistogramBucket> result = new ArrayList<>(size());
         for (int i=0; i<bucketIndexes.length; i++) {
-            result.add(new NativeHistogramBucket(bucketIndexes[i], cumulativeCounts[i]));
+            result.add(new NativeHistogramBucket(bucketIndexes[i], counts[i]));
         }
         return Collections.unmodifiableList(result);
     }
@@ -63,53 +63,50 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
         return bucketIndexes[i];
     }
 
-    public long getCumulativeCount(int i) {
-        return cumulativeCounts[i];
+    public long getCount(int i) {
+        return counts[i];
     }
 
-    private static void sortAndValidate(int[] bucketIndexes, long[] cumulativeCounts) {
-        if (bucketIndexes.length != cumulativeCounts.length) {
-            throw new IllegalArgumentException("bucketIndexes.length == " + bucketIndexes.length + " but cumulativeCounts.length == " + cumulativeCounts.length + ". Expected the same length.");
+    private static void sortAndValidate(int[] bucketIndexes, long[] counts) {
+        if (bucketIndexes.length != counts.length) {
+            throw new IllegalArgumentException("bucketIndexes.length == " + bucketIndexes.length + " but counts.length == " + counts.length + ". Expected the same length.");
         }
-        sort(bucketIndexes, cumulativeCounts);
-        validate(bucketIndexes, cumulativeCounts);
+        sort(bucketIndexes, counts);
+        validate(bucketIndexes, counts);
     }
 
-    private static void sort(int[] bucketIndexes, long[] cumulativeCounts) {
+    private static void sort(int[] bucketIndexes, long[] counts) {
         // Bubblesort. Should be efficient here as in most cases bucketIndexes is already sorted.
         int n = bucketIndexes.length;
         for (int i = 0; i < n - 1; i++) {
             for (int j = 0; j < n - i - 1; j++) {
                 if (bucketIndexes[j] > bucketIndexes[j + 1]) {
-                    swap(j, j+1, bucketIndexes, cumulativeCounts);
+                    swap(j, j+1, bucketIndexes, counts);
                 }
             }
         }
     }
 
-    private static void swap(int i, int j, int[] bucketIndexes, long[] cumulativeCounts) {
+    private static void swap(int i, int j, int[] bucketIndexes, long[] counts) {
         int tmpInt = bucketIndexes[j];
         bucketIndexes[j] = bucketIndexes[i];
         bucketIndexes[i] = tmpInt;
-        long tmpLong = cumulativeCounts[j];
-        cumulativeCounts[j] = cumulativeCounts[i];
-        cumulativeCounts[i] = tmpLong;
+        long tmpLong = counts[j];
+        counts[j] = counts[i];
+        counts[i] = tmpLong;
     }
 
-    private static void validate(int[] bucketIndexes, long[] cumulativeCounts) {
+    private static void validate(int[] bucketIndexes, long[] counts) {
         // Preconditions:
         // * bucketIndexes sorted
-        // * bucketIndexes and cumulativeCounts have the same length
+        // * bucketIndexes and counts have the same length
         for (int i=0; i<bucketIndexes.length; i++) {
-            if (cumulativeCounts[i] < 0) {
+            if (counts[i] < 0) {
                 throw new IllegalArgumentException("Bucket counts cannot be negative.");
             }
             if (i > 0) {
                 if (bucketIndexes[i-1] == bucketIndexes[i]) {
                     throw new IllegalArgumentException("Duplicate bucket index " + bucketIndexes[i]);
-                }
-                if (cumulativeCounts[i-1] > cumulativeCounts[i]) {
-                    throw new IllegalArgumentException("Bucket counts must be cumulative.");
                 }
             }
         }
@@ -122,18 +119,18 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
     public static class Builder {
 
         private final List<Integer> bucketIndexes = new ArrayList<>();
-        private final List<Long> cumulativeCounts = new ArrayList<>();
+        private final List<Long> counts = new ArrayList<>();
 
         private Builder() {}
 
-        public Builder addBucket(int bucketIndex, long cumulativeCount) {
+        public Builder addBucket(int bucketIndex, long count) {
             bucketIndexes.add(bucketIndex);
-            cumulativeCounts.add(cumulativeCount);
+            counts.add(count);
             return this;
         }
 
         public NativeHistogramBuckets build() {
-            return NativeHistogramBuckets.of(bucketIndexes, cumulativeCounts);
+            return NativeHistogramBuckets.of(bucketIndexes, counts);
         }
     }
 }
