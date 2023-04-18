@@ -1054,7 +1054,7 @@ public class ExpositionFormatsTest {
     }
 
     @Test
-    public void testNativeHistogram() throws IOException {
+    public void testNativeHistogramComplete() throws IOException {
         String openMetricsText = "" +
                 "# TYPE response_size_bytes histogram\n" +
                 "# UNIT response_size_bytes bytes\n" +
@@ -1081,6 +1081,26 @@ public class ExpositionFormatsTest {
                 "# TYPE response_size_bytes_created gauge\n" +
                 "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n";
+        String openMetricsTextWithoutCreated = "" +
+                "# TYPE response_size_bytes histogram\n" +
+                "# UNIT response_size_bytes bytes\n" +
+                "# HELP response_size_bytes help\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_count{status=\"200\"} 2 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_sum{status=\"200\"} 4.2 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 55 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_count{status=\"500\"} 55 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
+                "# EOF\n";
+        String prometheusTextWithoutCreated = "" +
+                "# HELP response_size_bytes help\n" +
+                "# TYPE response_size_bytes histogram\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 2 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_count{status=\"200\"} 2 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_sum{status=\"200\"} 4.2 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 55 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_count{status=\"500\"} 55 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n";
         String prometheusProtobuf = "" +
                 //@formatter:off
                 "name: \"response_size_bytes\" " +
@@ -1189,8 +1209,46 @@ public class ExpositionFormatsTest {
                 .build();
         assertOpenMetricsText(openMetricsText, nativeHistogram);
         assertPrometheusText(prometheusText, nativeHistogram);
+        assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, nativeHistogram);
+        assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, nativeHistogram);
         assertPrometheusProtobuf(prometheusProtobuf, nativeHistogram);
     }
+
+    @Test
+    public void testNativeHistogramMinimal() throws IOException {
+        String openMetricsText = "" +
+                "# TYPE latency_seconds histogram\n" +
+                "latency_seconds_bucket{le=\"+Inf\"} 0\n" +
+                "# EOF\n";
+        String prometheusText = "" +
+                "# TYPE latency_seconds histogram\n" +
+                "latency_seconds_bucket{le=\"+Inf\"} 0\n" +
+                "latency_seconds_count 0\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"latency_seconds\" " +
+                "type: HISTOGRAM " +
+                "metric { " +
+                    "histogram { " +
+                        "sample_count: 0 " +
+                        "schema: 5 " +
+                        "zero_threshold: 0.0 " +
+                        "zero_count: 0 " +
+                    "} " +
+                "}";
+                //@formatter:on
+        NativeHistogramSnapshot nativeHistogram = NativeHistogramSnapshot.newBuilder()
+                .withName("latency_seconds")
+                .addData(NativeHistogramData.newBuilder()
+                        .withSchema(5)
+                        .build())
+                .build();
+        assertOpenMetricsText(openMetricsText, nativeHistogram);
+        assertPrometheusText(prometheusText, nativeHistogram);
+        assertPrometheusProtobuf(prometheusProtobuf, nativeHistogram);
+    }
+
+    // TODO: Gauge Native Histogram
 
     @Test
     public void testInfo() throws IOException {
