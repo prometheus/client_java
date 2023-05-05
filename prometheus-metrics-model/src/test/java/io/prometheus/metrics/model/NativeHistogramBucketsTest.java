@@ -3,6 +3,8 @@ package io.prometheus.metrics.model;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 public class NativeHistogramBucketsTest {
 
     @Test
@@ -46,4 +48,16 @@ public class NativeHistogramBucketsTest {
         long[] cumulativeCounts = new long[] {13, 178, 1024, 3000};
         NativeHistogramBuckets.of(bucketIndexes, cumulativeCounts);
     }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testImmutable() {
+        NativeHistogramBuckets buckets = NativeHistogramBuckets.newBuilder()
+                .addBucket(1, 1)
+                .addBucket(2, 1)
+                .build();
+        Iterator<NativeHistogramBucket> iterator = buckets.iterator();
+        iterator.next();
+        iterator.remove();
+    }
+
 }

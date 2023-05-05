@@ -12,6 +12,8 @@ import java.util.stream.Stream;
  */
 public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket> {
 
+    public static final ClassicHistogramBuckets EMPTY = new ClassicHistogramBuckets(new double[]{}, new long[]{});
+
     private final double[] upperBounds;
     private final long[] counts;
 
@@ -154,12 +156,8 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
         return counts[i];
     }
 
-    public long sumOfCounts() {
-        long result = 0;
-        for (int i=0; i<counts.length; i++) {
-            result += counts[i];
-        }
-        return result;
+    public boolean isEmpty() {
+        return this.upperBounds.length == 0;
     }
 
     private List<ClassicHistogramBucket> asList() {
