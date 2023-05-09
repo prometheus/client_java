@@ -2,11 +2,11 @@ package io.prometheus.expositionformat;
 
 import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
-import io.prometheus.metrics.model.ClassicHistogramSnapshot;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.CounterSnapshot.CounterData;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.GaugeSnapshot;
+import io.prometheus.metrics.model.HistogramSnapshot;
 import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricData;
@@ -14,7 +14,6 @@ import io.prometheus.metrics.model.MetricMetadata;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.model.MetricSnapshots;
 import io.prometheus.metrics.model.NativeHistogramBuckets;
-import io.prometheus.metrics.model.NativeHistogramSnapshot;
 import io.prometheus.metrics.model.Quantiles;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.model.SummarySnapshot;
@@ -50,16 +49,9 @@ public class PrometheusProtobufFormatWriter {
                 builder.addMetric(convert(data));
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
-        } else if (snapshot instanceof ClassicHistogramSnapshot) {
-            ClassicHistogramSnapshot histogram = (ClassicHistogramSnapshot) snapshot;
-            for (ClassicHistogramSnapshot.ClassicHistogramData data : histogram.getData()) {
-                builder.addMetric(convert(data));
-            }
-            Metrics.MetricType type = histogram.isGaugeHistogram() ? Metrics.MetricType.GAUGE_HISTOGRAM : Metrics.MetricType.HISTOGRAM;
-            setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, type);
-        } else if (snapshot instanceof NativeHistogramSnapshot) {
-            NativeHistogramSnapshot histogram = (NativeHistogramSnapshot) snapshot;
-            for (NativeHistogramSnapshot.NativeHistogramData data : histogram.getData()) {
+        } else if (snapshot instanceof HistogramSnapshot) {
+            HistogramSnapshot histogram = (HistogramSnapshot) snapshot;
+            for (HistogramSnapshot.HistogramData data : histogram.getData()) {
                 builder.addMetric(convert(data));
             }
             Metrics.MetricType type = histogram.isGaugeHistogram() ? Metrics.MetricType.GAUGE_HISTOGRAM : Metrics.MetricType.HISTOGRAM;
@@ -78,8 +70,8 @@ public class PrometheusProtobufFormatWriter {
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), "_info", Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof StateSetSnapshot) {
             for (StateSetSnapshot.StateSetData data : ((StateSetSnapshot) snapshot).getData()) {
-                for (int i=0; i<data.size(); i++) {
-                builder.addMetric(convert(data, snapshot.getMetadata().getName(), i));
+                for (int i = 0; i < data.size(); i++) {
+                    builder.addMetric(convert(data, snapshot.getMetadata().getName(), i));
                 }
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
@@ -130,55 +122,43 @@ public class PrometheusProtobufFormatWriter {
         return metricBuilder;
     }
 
-    private Metrics.Metric.Builder convert(ClassicHistogramSnapshot.ClassicHistogramData data) {
+    private Metrics.Metric.Builder convert(HistogramSnapshot.HistogramData data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
-        ClassicHistogramBuckets buckets = data.getBuckets();
-        double lowerBound = Double.NEGATIVE_INFINITY;
-        long cumulativeCount = 0;
-        for (int i = 0; i < buckets.size(); i++) {
-            cumulativeCount += buckets.getCount(i);
-            double upperBound = buckets.getUpperBound(i);
-            Metrics.Bucket.Builder bucketBuilder = Metrics.Bucket.newBuilder()
-                    .setCumulativeCount(cumulativeCount)
-                    .setUpperBound(upperBound);
-            Exemplar exemplar = data.getExemplars().get(lowerBound, upperBound);
-            if (exemplar != null) {
-                bucketBuilder.setExemplar(convert(exemplar));
+        if (data.hasClassicHistogramData()) {
+            ClassicHistogramBuckets buckets = data.getClassicBuckets();
+            double lowerBound = Double.NEGATIVE_INFINITY;
+            long cumulativeCount = 0;
+            for (int i = 0; i < buckets.size(); i++) {
+                cumulativeCount += buckets.getCount(i);
+                double upperBound = buckets.getUpperBound(i);
+                Metrics.Bucket.Builder bucketBuilder = Metrics.Bucket.newBuilder()
+                        .setCumulativeCount(cumulativeCount)
+                        .setUpperBound(upperBound);
+                Exemplar exemplar = data.getExemplars().get(lowerBound, upperBound);
+                if (exemplar != null) {
+                    bucketBuilder.setExemplar(convert(exemplar));
+                }
+                histogramBuilder.addBucket(bucketBuilder);
+                lowerBound = upperBound;
             }
-            histogramBuilder.addBucket(bucketBuilder);
-            lowerBound = upperBound;
         }
+        if (data.hasNativeHistogramData()) {
+            histogramBuilder.setSchema(data.getNativeSchema());
+            histogramBuilder.setZeroCount(data.getNativeZeroCount());
+            histogramBuilder.setZeroThreshold(data.getNativeZeroThreshold());
+            addBuckets(histogramBuilder, data.getNativeBucketsForPositiveValues(), +1);
+            addBuckets(histogramBuilder, data.getNativeBucketsForNegativeValues(), -1);
+        }
+        addLabels(metricBuilder, data.getLabels());
+        setScrapeTimestamp(metricBuilder, data);
         if (data.hasCount()) {
             histogramBuilder.setSampleCount(data.getCount());
         }
         if (data.hasSum()) {
             histogramBuilder.setSampleSum(data.getSum());
         }
-        addLabels(metricBuilder, data.getLabels());
         metricBuilder.setHistogram(histogramBuilder.build());
-        setScrapeTimestamp(metricBuilder, data);
-        return metricBuilder;
-    }
-
-    private Metrics.Metric.Builder convert(NativeHistogramSnapshot.NativeHistogramData data) {
-        Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
-        Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
-        histogramBuilder.setSchema(data.getSchema());
-        if (data.hasCount()) {
-            histogramBuilder.setSampleCount(data.getCount());
-        }
-        if (data.hasSum()) {
-            histogramBuilder.setSampleSum(data.getSum());
-        }
-        histogramBuilder.setZeroCount(data.getZeroCount());
-        histogramBuilder.setZeroThreshold(data.getZeroThreshold());
-        addBuckets(histogramBuilder, data.getBucketsForPositiveValues(), +1);
-        addBuckets(histogramBuilder, data.getBucketsForNegativeValues(), -1);
-        // TODO: Add classic buckets for exemplars
-        addLabels(metricBuilder, data.getLabels());
-        metricBuilder.setHistogram(histogramBuilder.build());
-        setScrapeTimestamp(metricBuilder, data);
         return metricBuilder;
     }
 
@@ -241,7 +221,7 @@ public class PrometheusProtobufFormatWriter {
             summaryBuilder.setSampleSum(data.getSum());
         }
         Quantiles quantiles = data.getQuantiles();
-        for (int i=0; i<quantiles.size(); i++) {
+        for (int i = 0; i < quantiles.size(); i++) {
             summaryBuilder.addQuantile(Metrics.Quantile.newBuilder()
                     .setQuantile(quantiles.get(i).getQuantile())
                     .setValue(quantiles.get(i).getValue())

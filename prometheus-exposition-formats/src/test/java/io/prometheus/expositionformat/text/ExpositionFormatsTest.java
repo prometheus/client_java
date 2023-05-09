@@ -10,17 +10,14 @@ import io.prometheus.metrics.model.CounterSnapshot.CounterData;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
-import io.prometheus.metrics.model.ClassicHistogramSnapshot;
-import io.prometheus.metrics.model.ClassicHistogramSnapshot.ClassicHistogramData;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.GaugeSnapshot.GaugeData;
+import io.prometheus.metrics.model.HistogramSnapshot;
 import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.model.MetricSnapshots;
 import io.prometheus.metrics.model.NativeHistogramBuckets;
-import io.prometheus.metrics.model.NativeHistogramSnapshot;
-import io.prometheus.metrics.model.NativeHistogramSnapshot.NativeHistogramData;
 import io.prometheus.metrics.model.Quantiles;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.model.SummarySnapshot;
@@ -704,13 +701,13 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
-        ClassicHistogramSnapshot histogram = ClassicHistogramSnapshot.newBuilder()
+        HistogramSnapshot histogram = HistogramSnapshot.newBuilder()
                 .withName("response_size_bytes")
                 .withHelp("help")
                 .withUnit(Unit.BYTES)
-                .addData(ClassicHistogramData.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
                         .withSum(3.2)
-                        .withBuckets(ClassicHistogramBuckets.newBuilder()
+                        .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(0.0, 3)
                                 .addBucket(2.2, 2)
                                 .addBucket(Double.POSITIVE_INFINITY, 0)
@@ -720,9 +717,9 @@ public class ExpositionFormatsTest {
                         .withCreatedTimestampMillis(createdTimestamp2)
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
-                .addData(ClassicHistogramData.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
                         .withSum(4.1)
-                        .withBuckets(ClassicHistogramBuckets.newBuilder()
+                        .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.2, 2)
                                 .addBucket(Double.POSITIVE_INFINITY, 1)
                                 .build())
@@ -765,10 +762,10 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
-        ClassicHistogramSnapshot histogram = ClassicHistogramSnapshot.newBuilder()
+        HistogramSnapshot histogram = HistogramSnapshot.newBuilder()
                 .withName("request_latency_seconds")
-                .addData(ClassicHistogramData.newBuilder()
-                        .withBuckets(ClassicHistogramBuckets.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                        .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 2)
                                 .build())
                         .build())
@@ -808,11 +805,11 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
-        ClassicHistogramSnapshot histogram = ClassicHistogramSnapshot.newBuilder()
+        HistogramSnapshot histogram = HistogramSnapshot.newBuilder()
                 .withName("request_latency_seconds")
-                .addData(ClassicHistogramData.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
                         .withSum(3.2)
-                        .withBuckets(ClassicHistogramBuckets.newBuilder()
+                        .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 2)
                                 .build())
                         .build())
@@ -927,14 +924,14 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
-        ClassicHistogramSnapshot gaugeHistogram = ClassicHistogramSnapshot.newBuilder()
+        HistogramSnapshot gaugeHistogram = HistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("cache_size_bytes")
                 .withHelp("number of bytes in the cache")
                 .withUnit(Unit.BYTES)
-                .addData(ClassicHistogramData.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
                         .withSum(17)
-                        .withBuckets(ClassicHistogramBuckets.newBuilder()
+                        .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 3)
                                 .addBucket(Double.POSITIVE_INFINITY, 1)
                                 .build())
@@ -943,9 +940,9 @@ public class ExpositionFormatsTest {
                         .withCreatedTimestampMillis(createdTimestamp1)
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
-                .addData(ClassicHistogramData.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
                         .withSum(18)
-                        .withBuckets(ClassicHistogramBuckets.newBuilder()
+                        .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 4)
                                 .addBucket(Double.POSITIVE_INFINITY, 0)
                                 .build()
@@ -990,11 +987,11 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
-        ClassicHistogramSnapshot gaugeHistogram = ClassicHistogramSnapshot.newBuilder()
+        HistogramSnapshot gaugeHistogram = HistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("queue_size_bytes")
-                .addData(ClassicHistogramData.newBuilder()
-                        .withBuckets(ClassicHistogramBuckets.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                        .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 130)
                                 .build())
                         .build())
@@ -1036,12 +1033,12 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
-        ClassicHistogramSnapshot gaugeHistogram = ClassicHistogramSnapshot.newBuilder()
+        HistogramSnapshot gaugeHistogram = HistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("queue_size_bytes")
-                .addData(ClassicHistogramData.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
                         .withSum(27000)
-                        .withBuckets(ClassicHistogramBuckets.newBuilder()
+                        .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 130)
                                 .build())
                         .build())
@@ -1157,15 +1154,15 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
-        NativeHistogramSnapshot nativeHistogram = NativeHistogramSnapshot.newBuilder()
+        HistogramSnapshot nativeHistogram = HistogramSnapshot.newBuilder()
                 .withName("response_size_bytes")
                 .withHelp("help")
                 .withUnit(Unit.BYTES)
-                .addData(NativeHistogramData.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
                         .withSum(3.2)
-                        .withSchema(5)
-                        .withZeroCount(1)
-                        .withBucketsForPositiveValues(NativeHistogramBuckets.newBuilder()
+                        .withNativeSchema(5)
+                        .withNativeZeroCount(1)
+                        .withNativeBucketsForPositiveValues(NativeHistogramBuckets.newBuilder()
                                 // span with 3 buckets
                                 .addBucket(2, 3)
                                 .addBucket(3, 5)
@@ -1186,7 +1183,7 @@ public class ExpositionFormatsTest {
                                 .addBucket(46, 2)
                                 .addBucket(47, 1)
                                 .build())
-                        .withBucketsForNegativeValues(NativeHistogramBuckets.newBuilder()
+                        .withNativeBucketsForNegativeValues(NativeHistogramBuckets.newBuilder()
                                 .addBucket(0, 1)
                                 .addBucket(10, 0) // bucket with count 0
                                 .build())
@@ -1195,10 +1192,10 @@ public class ExpositionFormatsTest {
                         .withCreatedTimestampMillis(createdTimestamp2)
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
-                .addData(NativeHistogramData.newBuilder()
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
                         .withSum(4.2)
-                        .withSchema(5)
-                        .withBucketsForPositiveValues(NativeHistogramBuckets.newBuilder()
+                        .withNativeSchema(5)
+                        .withNativeBucketsForPositiveValues(NativeHistogramBuckets.newBuilder()
                                 .addBucket(0, 2)
                                 .build())
                         .withLabels(Labels.of("status", "200"))
@@ -1237,10 +1234,10 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
-        NativeHistogramSnapshot nativeHistogram = NativeHistogramSnapshot.newBuilder()
+        HistogramSnapshot nativeHistogram = HistogramSnapshot.newBuilder()
                 .withName("latency_seconds")
-                .addData(NativeHistogramData.newBuilder()
-                        .withSchema(5)
+                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                        .withNativeSchema(5)
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, nativeHistogram);

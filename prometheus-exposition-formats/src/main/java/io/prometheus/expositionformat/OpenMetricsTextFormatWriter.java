@@ -1,19 +1,18 @@
 package io.prometheus.expositionformat;
 
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
-import io.prometheus.metrics.model.ClassicHistogramSnapshot;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.DistributionData;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.GaugeSnapshot;
+import io.prometheus.metrics.model.HistogramSnapshot;
 import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricData;
 import io.prometheus.metrics.model.MetricMetadata;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.model.MetricSnapshots;
-import io.prometheus.metrics.model.NativeHistogramSnapshot;
 import io.prometheus.metrics.model.Quantile;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.model.SummarySnapshot;
@@ -25,8 +24,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static io.prometheus.expositionformat.TextFormatUtil.nativeToClassic;
 
 public class OpenMetricsTextFormatWriter {
 
@@ -46,10 +43,8 @@ public class OpenMetricsTextFormatWriter {
                     writeCounter(writer, (CounterSnapshot) snapshot);
                 } else if (snapshot instanceof GaugeSnapshot) {
                     writeGauge(writer, (GaugeSnapshot) snapshot);
-                } else if (snapshot instanceof ClassicHistogramSnapshot) {
-                    writeClassicHistogram(writer, (ClassicHistogramSnapshot) snapshot);
-                } else if (snapshot instanceof NativeHistogramSnapshot) {
-                    writeNativeHistogram(writer, (NativeHistogramSnapshot) snapshot);
+                } else if (snapshot instanceof HistogramSnapshot) {
+                    writeHistogram(writer, (HistogramSnapshot) snapshot);
                 } else if (snapshot instanceof SummarySnapshot) {
                     writeSummary(writer, (SummarySnapshot) snapshot);
                 } else if (snapshot instanceof InfoSnapshot) {
@@ -86,7 +81,7 @@ public class OpenMetricsTextFormatWriter {
         }
     }
 
-    private void writeClassicHistogram(OutputStreamWriter writer, ClassicHistogramSnapshot snapshot) throws IOException {
+    private void writeHistogram(OutputStreamWriter writer, HistogramSnapshot snapshot) throws IOException {
         MetricMetadata metadata = snapshot.getMetadata();
         if (snapshot.isGaugeHistogram()) {
             writeMetadata(writer, "gaugehistogram", metadata);
@@ -97,9 +92,9 @@ public class OpenMetricsTextFormatWriter {
         }
     }
 
-    private void writeClassicHistogramBuckets(OutputStreamWriter writer, MetricMetadata metadata, String countSuffix, String sumSuffix, List<ClassicHistogramSnapshot.ClassicHistogramData> dataList) throws IOException {
-        for (ClassicHistogramSnapshot.ClassicHistogramData data : dataList) {
-            ClassicHistogramBuckets buckets = data.getBuckets();
+    private void writeClassicHistogramBuckets(OutputStreamWriter writer, MetricMetadata metadata, String countSuffix, String sumSuffix, List<HistogramSnapshot.HistogramData> dataList) throws IOException {
+        for (HistogramSnapshot.HistogramData data : dataList) {
+            ClassicHistogramBuckets buckets = getClassicBuckets(data);
             Exemplars exemplars = data.getExemplars();
             long cumulativeCount = 0;
             for (int i = 0; i < buckets.size(); i++) {
@@ -124,12 +119,15 @@ public class OpenMetricsTextFormatWriter {
         }
     }
 
-    private void writeNativeHistogram(OutputStreamWriter writer, NativeHistogramSnapshot snapshot) throws IOException {
-        // There is no representation of native histograms in text format (yet).
-        // Implicitly converting to classic histogram might not be a good idea, because that means if you
-        // switch the exposition format data will change (native histograms don't have a _count and _sum series).
-        // However, the alternative is dropping native histograms, which is not great either.
-        writeClassicHistogram(writer, nativeToClassic(snapshot));
+    private ClassicHistogramBuckets getClassicBuckets(HistogramSnapshot.HistogramData data) {
+        if (data.getClassicBuckets().isEmpty()) {
+            return ClassicHistogramBuckets.of(
+                    new double[]{Double.POSITIVE_INFINITY},
+                    new long[]{data.getCount()}
+            );
+        } else {
+            return data.getClassicBuckets();
+        }
     }
 
     private void writeSummary(OutputStreamWriter writer, SummarySnapshot snapshot) throws IOException {

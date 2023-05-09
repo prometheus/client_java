@@ -144,6 +144,14 @@ public final class HistogramSnapshot extends MetricSnapshot {
             return count;
         }
 
+        public boolean hasClassicHistogramData() {
+            return !classicBuckets.isEmpty();
+        }
+
+        public boolean hasNativeHistogramData() {
+            return nativeSchema != CLASSIC_HISTOGRAM;
+        }
+
         public ClassicHistogramBuckets getClassicBuckets() {
             return classicBuckets;
         }
