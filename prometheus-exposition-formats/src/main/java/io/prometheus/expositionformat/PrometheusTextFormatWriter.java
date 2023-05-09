@@ -21,6 +21,12 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
+import static io.prometheus.expositionformat.TextFormatUtil.writeDouble;
+import static io.prometheus.expositionformat.TextFormatUtil.writeEscapedLabelValue;
+import static io.prometheus.expositionformat.TextFormatUtil.writeLabels;
+import static io.prometheus.expositionformat.TextFormatUtil.writeLong;
+import static io.prometheus.expositionformat.TextFormatUtil.writeTimestamp;
+
 public class PrometheusTextFormatWriter {
 
     public final static String CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8";
@@ -312,77 +318,6 @@ public class PrometheusTextFormatWriter {
                     writer.append(c);
             }
         }
-    }
-
-    private void writeEscapedLabelValue(Writer writer, String s) throws IOException {
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            switch (c) {
-                case '\\':
-                    writer.append("\\\\");
-                    break;
-                case '\"':
-                    writer.append("\\\"");
-                    break;
-                case '\n':
-                    writer.append("\\n");
-                    break;
-                default:
-                    writer.append(c);
-            }
-        }
-    }
-
-
-    private void writeLabels(OutputStreamWriter writer, Labels labels, String additionalLabelName, double additionalLabelValue) throws IOException {
-        writer.write('{');
-        for (int i = 0; i < labels.size(); i++) {
-            if (i > 0) {
-                writer.write(",");
-            }
-            writer.write(labels.getName(i));
-            writer.write("=\"");
-            writeEscapedLabelValue(writer, labels.getValue(i));
-            writer.write("\"");
-        }
-        if (additionalLabelName != null) {
-            if (!labels.isEmpty()) {
-                writer.write(",");
-            }
-            writer.write(additionalLabelName);
-            writer.write("=\"");
-            writeDouble(writer, additionalLabelValue);
-            writer.write("\"");
-        }
-        writer.write('}');
-    }
-
-    private void writeLong(OutputStreamWriter writer, long value) throws IOException {
-        writer.append(Long.toString(value));
-    }
-
-    private void writeDouble(OutputStreamWriter writer, double d) throws IOException {
-        if (d == Double.POSITIVE_INFINITY) {
-            writer.write("+Inf");
-        } else if (d == Double.NEGATIVE_INFINITY) {
-            writer.write("-Inf");
-        } else {
-            writer.write(Double.toString(d));
-            // FloatingDecimal.getBinaryToASCIIConverter(d).appendTo(writer);
-        }
-    }
-
-    private void writeTimestamp(OutputStreamWriter writer, long timestampMs) throws IOException {
-        writer.write(Long.toString(timestampMs / 1000L));
-        writer.write(".");
-        long ms = timestampMs % 1000;
-        if (ms < 100) {
-            writer.write("0");
-        }
-        if (ms < 10) {
-            writer.write("0");
-        }
-        writer.write(Long.toString(ms));
     }
 
     private void writeScrapeTimestampAndNewline(OutputStreamWriter writer, MetricData data) throws IOException {
