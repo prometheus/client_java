@@ -3,6 +3,8 @@ package io.prometheus.metrics.model;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 public class ExemplarsTest {
 
     @Test
@@ -31,6 +33,8 @@ public class ExemplarsTest {
                 Exemplar.newBuilder().withValue(3.0).build(),
                 Exemplar.newBuilder().withValue(2.0).build()
         );
-        exemplars.iterator().remove();
+        Iterator<Exemplar> iterator = exemplars.iterator();
+        iterator.next();
+        iterator.remove();
     }
 }

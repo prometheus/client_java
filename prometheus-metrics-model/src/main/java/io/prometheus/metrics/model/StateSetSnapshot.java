@@ -8,6 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Immutable snapshot of a StateSet metric.
+ */
 public final class StateSetSnapshot extends MetricSnapshot {
 
     /**
@@ -58,10 +61,9 @@ public final class StateSetSnapshot extends MetricSnapshot {
         }
 
         /**
-         * Constructor with an additional metric timestamp parameter. In most cases you should not need this.
-         * This is only useful in rare cases as the timestamp of a Prometheus metric should usually be set by the
-         * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
-         * metric sources.
+         * Constructor with an additional scrape timestamp.
+         * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
+         * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
         public StateSetData(String[] names, boolean[] values, Labels labels, long scrapeTimestampMillis) {
             super(labels, 0L, scrapeTimestampMillis);
@@ -91,8 +93,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
             return values[i];
         }
 
-        @Override
-        protected void validate() {
+        private void validate() {
             for (int i = 0; i < names.length; i++) {
                 if (names[i].length() == 0) {
                     throw new IllegalArgumentException("Empty string as state name");

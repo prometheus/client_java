@@ -1,5 +1,8 @@
 package io.prometheus.metrics.model;
 
+/**
+ * Immutable representation of an Exemplar.
+ */
 public class Exemplar {
 
     /**
@@ -19,9 +22,10 @@ public class Exemplar {
     /**
      * To create a new {@link Exemplar}, you can either call the constructor directly
      * or use the Builder with {@link Exemplar#newBuilder()}.
-     * @param value the observed value
-     * @param labels in most cases the labels will contain the {@link #TRACE_ID} and {@link #SPAN_ID}.
-     *               Must not be {@code null}. Use {@link Labels#EMPTY} if no labels are present.
+     *
+     * @param value           the observed value. This is required.
+     * @param labels          in most cases the labels will contain the {@link #TRACE_ID} and {@link #SPAN_ID}.
+     *                        Must not be {@code null}. Use {@link Labels#EMPTY} if no labels are present.
      * @param timestampMillis timestamp when the value was observed. Optional. Use 0L if not available.
      */
     public Exemplar(double value, Labels labels, long timestampMillis) {
@@ -37,6 +41,10 @@ public class Exemplar {
         return value;
     }
 
+    /**
+     * In most cases labels will contain {@link #TRACE_ID} and {@link #SPAN_ID}, but this is not required.
+     * May be {@link Labels#EMPTY}, but may not be {@code null}.
+     */
     public Labels getLabels() {
         return labels;
     }
@@ -45,6 +53,9 @@ public class Exemplar {
         return timestampMillis != 0L;
     }
 
+    /**
+     * Will return garbage if {@link #hasTimestamp()} is {@code false}.
+     */
     public long getTimestampMillis() {
         return timestampMillis;
     }
@@ -61,7 +72,8 @@ public class Exemplar {
         private String spanId = null;
         private long timestampMillis = 0L;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder withValue(double value) {
             this.value = value;

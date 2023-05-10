@@ -10,13 +10,12 @@ import java.util.List;
 /**
  * Immutable container for Exemplars.
  * <p>
- * This is currently backed by a {@code List<Exemplar>}, but can be refactored later to use a more
- * efficient data structure.
+ * This is currently backed by a {@code List<Exemplar>}. May be refactored later to use a more efficient data structure.
  */
 public class Exemplars implements Iterable<Exemplar> {
 
     /**
-     * For convenience, this means "no Exemplars".
+     * EMPTY means no Exemplars.
      */
     public static final Exemplars EMPTY = new Exemplars(Collections.emptyList());
     private final List<Exemplar> exemplars;
@@ -47,10 +46,6 @@ public class Exemplars implements Iterable<Exemplar> {
         return new Exemplars(Arrays.asList(exemplars));
     }
 
-    /**
-     * Exemplars is immutable, so the iterator throws an {@link UnsupportedOperationException}
-     * if {@link Iterator#remove()} is called.
-     */
     @Override
     public Iterator<Exemplar> iterator() {
         return exemplars.iterator();

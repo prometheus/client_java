@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-// See https://github.com/prometheus/prometheus/blob/main/prompb/types.proto
+/**
+ * Immutable set of name/value pairs, sorted by name.
+ */
 public class Labels implements Comparable<Labels>, Iterable<Label> {
 
     public static final Labels EMPTY = new Labels(new String[]{}, new String[]{});
@@ -27,9 +29,22 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return this == EMPTY || this.equals(EMPTY);
     }
 
+    /**
+     * Create a new Labels instance.
+     * You can either create Labels with one of the static {@code Labels.of(...)} methods,
+     * or you can use the {@link Labels#newBuilder()}.
+     *
+     * @param keyValuePairs as in {@code {name1, value1, name2, value2}}. Length must be even.
+     *                      {@link #isValidLabelName(String)} must be true for each name.
+     *                      Use {@link #sanitizeLabelName(String)} to convert arbitrary strings to valid
+     *                      label names. Label names must be unique (no duplicate label names).
+     */
     public static Labels of(String... keyValuePairs) {
         if (keyValuePairs.length % 2 != 0) {
             throw new IllegalArgumentException("Key/value pairs must have an even length");
+        }
+        if (keyValuePairs.length == 0) {
+            return EMPTY;
         }
         String[] names = new String[keyValuePairs.length / 2];
         String[] values = new String[keyValuePairs.length / 2];
@@ -40,20 +55,55 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return Labels.of(names, values);
     }
 
+    /**
+     * Create a new Labels instance.
+     * You can either create Labels with one of the static {@code Labels.of(...)} methods,
+     * or you can use the {@link Labels#newBuilder()}.
+     *
+     * @param names  label names. {@link #isValidLabelName(String)} must be true for each name.
+     *               Use {@link #sanitizeLabelName(String)} to convert arbitrary strings to valid label names.
+     *               Label names must be unique (no duplicate label names).
+     * @param values label values. names.size() must be equal to values.size().
+     */
     public static Labels of(List<String> names, List<String> values) {
+        if (names.size() != values.size()) {
+            throw new IllegalArgumentException("Names and values must have the same size.");
+        }
+        if (names.size() == 0) {
+            return EMPTY;
+        }
         String[] namesCopy = names.toArray(new String[0]);
         String[] valuesCopy = values.toArray(new String[0]);
         sortAndValidate(namesCopy, valuesCopy);
         return new Labels(namesCopy, valuesCopy);
     }
 
+    /**
+     * Create a new Labels instance.
+     * You can either create Labels with one of the static {@code Labels.of(...)} methods,
+     * or you can use the {@link Labels#newBuilder()}.
+     *
+     * @param names  label names. {@link #isValidLabelName(String)} must be true for each name.
+     *               Use {@link #sanitizeLabelName(String)} to convert arbitrary strings to valid label names.
+     *               Label names must be unique (no duplicate label names).
+     * @param values label values. names.length must be equal to values.length.
+     */
     public static Labels of(String[] names, String[] values) {
+        if (names.length != values.length) {
+            throw new IllegalArgumentException("Names and values must have the same length.");
+        }
+        if (names.length == 0) {
+            return EMPTY;
+        }
         String[] namesCopy = Arrays.copyOf(names, names.length);
         String[] valuesCopy = Arrays.copyOf(values, values.length);
         sortAndValidate(namesCopy, valuesCopy);
         return new Labels(namesCopy, valuesCopy);
     }
 
+    /**
+     * Test if these labels contain a specific label name.
+     */
     public boolean contains(String labelName) {
         for (String name : names) {
             if (name.equals(labelName)) {
@@ -64,19 +114,17 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
     }
 
     private static void sortAndValidate(String[] names, String[] values) {
-        // names.length == values.length
-        // implement regex for names here?
-        // make sure there are no duplicates in names
-        // sort arrays by name
-        validateNames(names);
         sort(names, values);
+        validateNames(names);
     }
 
     private static void validateNames(String[] names) {
-        // TODO: Duplicate names are illegal
-        for (String name : names) {
-            if (!isValidLabelName(name)) {
-                throw new IllegalArgumentException("'" + name + "' is an illegal label name");
+        for (int i = 0; i < names.length; i++) {
+            if (!isValidLabelName(names[i])) {
+                throw new IllegalArgumentException("'" + names[i] + "' is an illegal label name");
+            }
+            if (i > 0 && names[i - 1].equals(names[i])) {
+                throw new IllegalArgumentException(names[i] + ": duplicate label name");
             }
         }
     }
@@ -87,7 +135,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         for (int i = 0; i < n - 1; i++) {
             for (int j = 0; j < n - i - 1; j++) {
                 if (names[j].compareTo(names[j + 1]) > 0) {
-                    swap(j, j+1, names, values);
+                    swap(j, j + 1, names, values);
                 }
             }
         }
@@ -117,6 +165,31 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return result;
     }
 
+    @Override
+    public Iterator<Label> iterator() {
+        return asList().iterator();
+    }
+
+    public Stream<Label> stream() {
+        return asList().stream();
+    }
+
+    public int size() {
+        return names.length;
+    }
+
+    public String getName(int i) {
+        return names[i];
+    }
+
+    public String getValue(int i) {
+        return values[i];
+    }
+
+    /**
+     * Create a new Labels instance containing the labels of this and the labels of other.
+     * This and other must not contain the same label name.
+     */
     public Labels merge(Labels other) {
         String[] names = new String[this.names.length + other.names.length];
         String[] values = new String[names.length];
@@ -146,10 +219,18 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return new Labels(names, values);
     }
 
+    /**
+     * Create a new Labels instance containing the labels of this and the label passed as name and value.
+     * The label name must not already be contained in this Labels instance.
+     */
     public Labels add(String name, String value) {
         return merge(Labels.of(name, value));
     }
 
+    /**
+     * Create a new Labels instance containing the labels of this and the labels passed as names and values.
+     * The new label names must not already be contained in this Labels instance.
+     */
     public Labels merge(String[] names, String[] values) {
         if (this.equals(EMPTY)) {
             return Labels.of(names, values);
@@ -184,7 +265,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
     // Looks like Java doesn't have a compareTo() method for arrays.
     private int compare(String[] array1, String[] array2) {
         int result;
-        for (int i=0; i<array1.length; i++) {
+        for (int i = 0; i < array1.length; i++) {
             if (array2.length <= i) {
                 return 1;
             }
@@ -205,27 +286,6 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
             result.add(new Label(names[i], values[i]));
         }
         return Collections.unmodifiableList(result);
-    }
-
-    @Override
-    public Iterator<Label> iterator() {
-        return asList().iterator();
-    }
-
-    public Stream<Label> stream() {
-        return asList().stream();
-    }
-
-    public int size() {
-        return names.length;
-    }
-
-    public String getName(int i) {
-        return names[i];
-    }
-
-    public String getValue(int i) {
-        return values[i];
     }
 
     @Override
@@ -288,7 +348,8 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         private final List<String> names = new ArrayList<>();
         private final List<String> values = new ArrayList<>();
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder addLabel(String name, String value) {
             names.add(name);

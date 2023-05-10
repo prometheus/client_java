@@ -1,6 +1,8 @@
 package io.prometheus.metrics.model;
 
-// See https://github.com/prometheus/prometheus/blob/main/prompb/types.proto
+/**
+ * Utility for iterating over {@link Labels}.
+ */
 public final class Label implements Comparable<Label> {
 
     private final String name;

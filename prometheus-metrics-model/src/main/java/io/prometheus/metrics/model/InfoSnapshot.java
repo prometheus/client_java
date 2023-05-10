@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Immutable snapshot of an Info metric.
+ */
 public final class InfoSnapshot extends MetricSnapshot {
 
     /**
@@ -36,25 +39,20 @@ public final class InfoSnapshot extends MetricSnapshot {
          * To create a new {@link InfoData}, you can either call the constructor directly or use the
          * Builder with {@link InfoData#newBuilder()}.
          *
-         * @param labels                 must not be null. Use {@link Labels#EMPTY} if there are no labels.
+         * @param labels must not be null. Use {@link Labels#EMPTY} if there are no labels.
          */
         public InfoData(Labels labels) {
             this(labels, 0L);
         }
 
         /**
-         * Constructor with an additional metric timestamp parameter. In most cases you should not need this.
-         * This is only useful in rare cases as the timestamp of a Prometheus metric should usually be set by the
-         * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
-         * metric sources.
+         * Constructor with an additional scrape timestamp.
+         * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
+         * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
         public InfoData(Labels labels, long scrapeTimestampMillis) {
             super(labels, 0L, scrapeTimestampMillis);
-            validate();
         }
-
-        @Override
-        protected void validate() {}
 
         public static class Builder extends MetricData.Builder<Builder> {
 
@@ -77,7 +75,8 @@ public final class InfoSnapshot extends MetricSnapshot {
 
         private final List<InfoData> infoData = new ArrayList<>();
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder addInfoData(InfoData data) {
             infoData.add(data);

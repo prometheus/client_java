@@ -7,7 +7,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Base class for all metric snapshots.
+ */
 public abstract class MetricSnapshot {
+
     private final MetricMetadata metadata;
     protected final List<? extends MetricData> data;
 
@@ -33,15 +37,14 @@ public abstract class MetricSnapshot {
     public abstract List<? extends MetricData> getData();
 
     protected void validateLabels() {
-        // According to the OpenMetrics standard the metric data SHOULD have the same label names.
-        // However, this is a SHOULD and not a MUST, so this is not enforced.
-        // So let's just make sure that labels (including name and value) are unique.
-        // Data is already sorted by labels, so if there are duplicates they will be next to each other.
+        // Verify that labels are unique (the same set of names/values must not be used multiple times for the same metric).
         for (int i = 0; i < data.size() - 1; i++) {
             if (data.get(i).getLabels().equals(data.get(i + 1).getLabels())) {
                 throw new IllegalArgumentException("Duplicate labels in metric data: " + data.get(i).getLabels());
             }
         }
+        // Should we verify that all entries in data have the same label names?
+        // No. They should have the same label names, but according to OpenMetrics this is not a MUST.
     }
 
     public static abstract class Builder<T extends Builder<T>> {

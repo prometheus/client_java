@@ -246,4 +246,24 @@ public class HistogramSnapshotTest {
         iterator.next();
         iterator.remove();
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEmptyClassicBuckets() {
+        new HistogramData(ClassicHistogramBuckets.EMPTY, Double.NaN, Labels.EMPTY, Exemplars.EMPTY, 0L);
+    }
+
+    @Test
+    public void testMinimalNativeData() {
+        new HistogramData(ClassicHistogramBuckets.EMPTY, 0, 0, 0.0,
+                NativeHistogramBuckets.EMPTY, NativeHistogramBuckets.EMPTY, Double.NaN, Labels.EMPTY, Exemplars.EMPTY, 0L);
+    }
+
+    @Test
+    public void testMinimalClassicData() {
+        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.newBuilder()
+                .addBucket(Double.POSITIVE_INFINITY, 0)
+                .build();
+        new HistogramData(buckets, HistogramSnapshot.CLASSIC_HISTOGRAM, 0, 0.0,
+                NativeHistogramBuckets.EMPTY, NativeHistogramBuckets.EMPTY, Double.NaN, Labels.EMPTY, Exemplars.EMPTY, 0L);
+    }
 }

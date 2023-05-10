@@ -8,14 +8,18 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Immutable container for buckets of a classic histogram.
+ * Immutable container for histogram buckets with fixed bucket boundaries.
+ * Note that the counts are <i>not</i> cumulative.
  */
 public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket> {
 
+    /**
+     * Used in native histograms to indicate that no classic histogram buckets are present.
+     */
     public static final ClassicHistogramBuckets EMPTY = new ClassicHistogramBuckets(new double[]{}, new long[]{});
 
     private final double[] upperBounds;
-    private final long[] counts;
+    private final long[] counts; // not cumulative
 
     private ClassicHistogramBuckets(double[] upperBounds, long[] counts) {
         this.upperBounds = upperBounds;
@@ -23,25 +27,27 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
     }
 
     /**
-     * To create new {@link ClassicHistogramBuckets}, you can either use one of the static of(...) methods,
+     * To create new {@link ClassicHistogramBuckets}, you can either use one of the static {@code of(...)} methods,
      * or use {@link ClassicHistogramBuckets#newBuilder()}.
      * <p>
      * This method will create a copy of upperBounds and counts.
      *
-     * @param upperBounds      must have the same length as counts. Must not contain duplicates.
-     *                         Must contain at least the {@link Double#POSITIVE_INFINITY} for this +Inf bucket.
-     *                         An upper bound must not be NaN. The upperBounds array does not need to be sorted.
-     * @param counts must have the same length as upperBounds. The entry at index i is the count for the upperBound
-     *                         at index i. For each count, {@link Number#longValue()} is called to get the value.
-     *                         Counts are <i>not</i> cumulative. Counts cannot be negative.
+     * @param upperBounds must have the same length as counts. Must not contain duplicates.
+     *                    Must contain at least {@link Double#POSITIVE_INFINITY} for the {@code +Inf} bucket.
+     *                    An upper bound must not be {@link Double#NaN}.
+     *                    The upperBounds array does not need to be sorted.
+     * @param counts      must have the same length as {@code upperBounds}.
+     *                    The entry at index {@code i} is the count for the {@code upperBound} at index {@code i}.
+     *                    For each count, {@link Number#longValue()} is called to get the value.
+     *                    Counts are <i>not</i> cumulative. Counts must not be negative.
      */
     public static ClassicHistogramBuckets of(List<Double> upperBounds, List<? extends Number> counts) {
         double[] upperBoundsCopy = new double[upperBounds.size()];
-        for (int i=0; i< upperBounds.size(); i++) {
+        for (int i = 0; i < upperBounds.size(); i++) {
             upperBoundsCopy[i] = upperBounds.get(i);
         }
         long[] countsCopy = new long[counts.size()];
-        for (int i=0; i< counts.size(); i++) {
+        for (int i = 0; i < counts.size(); i++) {
             countsCopy[i] = counts.get(i).longValue();
         }
         sortAndValidate(upperBoundsCopy, countsCopy);
@@ -49,22 +55,24 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
     }
 
     /**
-     * To create new {@link ClassicHistogramBuckets}, you can either use one of the static of(...) methods,
+     * To create new {@link ClassicHistogramBuckets}, you can either use one of the static {@code of(...)} methods,
      * or use {@link ClassicHistogramBuckets#newBuilder()}.
      * <p>
      * This method will create a copy of upperBounds and counts.
      *
-     * @param upperBounds      must have the same length as counts. Must not contain duplicates.
-     *                         Must contain at least the {@link Double#POSITIVE_INFINITY} for this +Inf bucket.
-     *                         An upper bound must not be NaN. The upperBounds array does not need to be sorted.
-     * @param counts must have the same length as upperBounds. The entry at index i is the count for the upperBound
-     *                         at index i. For each count, {@link Number#longValue()} is called to get the value.
-     *                         Counts are <i>not</i> cumulative. Counts cannot be negative.
+     * @param upperBounds must have the same length as counts. Must not contain duplicates.
+     *                    Must contain at least {@link Double#POSITIVE_INFINITY} for the {@code +Inf} bucket.
+     *                    An upper bound must not be {@link Double#NaN}.
+     *                    The upperBounds array does not need to be sorted.
+     * @param counts      must have the same length as {@code upperBounds}.
+     *                    The entry at index {@code i} is the count for the {@code upperBound} at index {@code i}.
+     *                    For each count, {@link Number#longValue()} is called to get the value.
+     *                    Counts are <i>not</i> cumulative. Counts must not be negative.
      */
     public static ClassicHistogramBuckets of(double[] upperBounds, Number[] counts) {
         double[] upperBoundsCopy = Arrays.copyOf(upperBounds, upperBounds.length);
         long[] countsCopy = new long[counts.length];
-        for (int i=0; i<counts.length; i++) {
+        for (int i = 0; i < counts.length; i++) {
             countsCopy[i] = counts[i].longValue();
         }
         sortAndValidate(upperBoundsCopy, countsCopy);
@@ -72,16 +80,18 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
     }
 
     /**
-     * To create new {@link ClassicHistogramBuckets}, you can either use one of the static of(...) methods,
+     * To create new {@link ClassicHistogramBuckets}, you can either use one of the static {@code of(...)} methods,
      * or use {@link ClassicHistogramBuckets#newBuilder()}.
      * <p>
      * This method will create a copy of upperBounds and counts.
      *
-     * @param upperBounds      must have the same length as counts. Must not contain duplicates.
-     *                         Must contain at least the {@link Double#POSITIVE_INFINITY} for this +Inf bucket.
-     *                         An upper bound must not be NaN. The upperBounds array does not need to be sorted.
-     * @param counts must have the same length as upperBounds. The entry at index i is the count for the upperBound
-     *                         at index i. Counts are <i>not</i> cumulative. Counts cannot be negative.
+     * @param upperBounds must have the same length as counts. Must not contain duplicates.
+     *                    Must contain at least {@link Double#POSITIVE_INFINITY} for the {@code +Inf} bucket.
+     *                    An upper bound must not be {@link Double#NaN}.
+     *                    The upperBounds array does not need to be sorted.
+     * @param counts      must have the same length as {@code upperBounds}.
+     *                    The entry at index {@code i} is the count for the {@code upperBound} at index {@code i}.
+     *                    Counts are <i>not</i> cumulative. Counts must not be negative.
      */
     public static ClassicHistogramBuckets of(double[] upperBounds, long[] counts) {
         double[] upperBoundsCopy = Arrays.copyOf(upperBounds, upperBounds.length);
@@ -152,6 +162,9 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
         return upperBounds[i];
     }
 
+    /**
+     * The count is <i>not</i> cumulative.
+     */
     public long getCount(int i) {
         return counts[i];
     }
@@ -177,6 +190,10 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
         return asList().stream();
     }
 
+    /**
+     * To create new {@link ClassicHistogramBuckets}, you can either use one of the static {@code of(...)} methods,
+     * or use {@code newBuilder()}.
+     */
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -185,15 +202,20 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
         private final List<Double> upperBounds = new ArrayList<>();
         private final List<Long> counts = new ArrayList<>();
 
-        private Builder() {
-        }
+        private Builder() {}
 
+        /**
+         * Must be called at least once for the {@link Double#POSITIVE_INFINITY} bucket.
+         */
         public Builder addBucket(double upperBound, long count) {
             upperBounds.add(upperBound);
             counts.add(count);
             return this;
         }
 
+        /**
+         * Will throw an {@link IllegalArgumentException} if the {@link Double#POSITIVE_INFINITY} bucket is missing.
+         */
         public ClassicHistogramBuckets build() {
             return ClassicHistogramBuckets.of(upperBounds, counts);
         }

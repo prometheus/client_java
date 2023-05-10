@@ -71,4 +71,9 @@ public class LabelsTest {
     public void testSanitizeLabelName() {
         Assert.assertEquals("_my_label", Labels.sanitizeLabelName("...my/label"));
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDuplicateLabelName() {
+        Labels.of("name1", "value1", "name2", "value2", "name1", "value3");
+    }
 }

@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Immutable snapshot of a Summary metric.
+ */
 public final class SummarySnapshot extends MetricSnapshot {
 
     /**
@@ -47,12 +50,12 @@ public final class SummarySnapshot extends MetricSnapshot {
         }
 
         /**
-         * Constructor with an additional metric timestamp parameter. In most cases you should not need this,
-         * as the timestamp of a Prometheus metric is set by the Prometheus server during scraping.
-         * Exceptions include mirroring metrics with given timestamps from other metric sources.
+         * Constructor with an additional scrape timestamp.
+         * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
+         * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public SummaryData(long count, double sum, Quantiles quantiles, Labels labels, Exemplars exemplars, long createdTimestampMillis, long timestampMillis) {
-            super(count, sum, exemplars, labels, createdTimestampMillis, timestampMillis);
+        public SummaryData(long count, double sum, Quantiles quantiles, Labels labels, Exemplars exemplars, long createdTimestampMillis, long scrapeTimestampMillis) {
+            super(count, sum, exemplars, labels, createdTimestampMillis, scrapeTimestampMillis);
             this.quantiles = quantiles;
             validate();
         }
@@ -61,8 +64,7 @@ public final class SummarySnapshot extends MetricSnapshot {
             return quantiles;
         }
 
-        @Override
-        protected void validate() {
+        private void validate() {
             for (Label label : getLabels()) {
                 if (label.getName().equals("quantile")) {
                     throw new IllegalArgumentException("quantile is a reserved label name for summaries");

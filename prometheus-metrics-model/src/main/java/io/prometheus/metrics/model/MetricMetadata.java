@@ -2,13 +2,18 @@ package io.prometheus.metrics.model;
 
 import java.util.regex.Pattern;
 
+/**
+ * Immutable container for metric metadata: name, help, unit.
+ */
 public final class MetricMetadata {
     private static final Pattern METRIC_NAME_RE = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]+$");
     private static final String[] RESERVED_SUFFIXES = {"_total", "_created", "_count", "_sum", "_bucket", "_gcount", "gsum", "_info"};
 
     /**
-     * Name is the name without suffix. For example, the name for a counter "http_requests_total" would be "http_requests".
-     * The name of a info called "target_info" is "target".
+     * Name is the name without suffix.
+     * For example, the name for a counter "http_requests_total" is "http_requests".
+     * The name of an info called "target_info" is "target".
+     * See {@link #MetricMetadata(String, String, Unit)} for more info on naming conventions.
      */
     private final String name;
     private final String help;
@@ -33,7 +38,7 @@ public final class MetricMetadata {
      * <ul>
      *     <li>The name MUST NOT include the {@code _total} suffix for counter metrics or the
      *         {@code _info} suffix for info metrics.
-     *         If in doubt, use {@link #sanitizeMetricName(String)} to remove these prefixes.</li>
+     *         If in doubt, use {@link #sanitizeMetricName(String)} to remove the suffix.</li>
      *     <li>If name is {@code null}, a {@link NullPointerException} is thrown.</li>
      *     <li>If {@link #isValidMetricName(String) isValidMetricName(name)} is false,
      *         an {@link IllegalArgumentException} is thrown.

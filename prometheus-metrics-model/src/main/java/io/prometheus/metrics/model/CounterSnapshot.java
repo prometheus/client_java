@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Immutable snapshot of a Counter.
+ */
 public class CounterSnapshot extends MetricSnapshot {
 
     /**
@@ -37,8 +40,6 @@ public class CounterSnapshot extends MetricSnapshot {
          * @param exemplar               may be null.
          * @param createdTimestampMillis timestamp (as in {@link System#currentTimeMillis()}) when the time series
          *                               (this specific set of labels) was created (or reset to zero).
-         *                               Note that this refers to the creation of the timeseries,
-         *                               not the creation of the snapshot.
          *                               It's optional. Use {@code 0L} if there is no created timestamp.
          */
         public CounterData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis) {
@@ -46,10 +47,9 @@ public class CounterSnapshot extends MetricSnapshot {
         }
 
         /**
-         * Constructor with an additional metric timestamp parameter. In most cases you should not need this.
-         * This is only useful in rare cases as the timestamp of a Prometheus metric should usually be set by the
-         * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
-         * metric sources.
+         * Constructor with an additional scrape timestamp.
+         * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
+         * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
         public CounterData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis, long scrapeTimestampMillis) {
             super(labels, createdTimestampMillis, scrapeTimestampMillis);
@@ -62,11 +62,13 @@ public class CounterSnapshot extends MetricSnapshot {
             return value;
         }
 
+        /**
+         * May be {@code null}.
+         */
         public Exemplar getExemplar() {
             return exemplar;
         }
 
-        @Override
         protected void validate() {
             if (value < 0.0) {
                 throw new IllegalArgumentException(value + ": counters cannot have a negative value");
@@ -79,7 +81,8 @@ public class CounterSnapshot extends MetricSnapshot {
             private Double value = null;
             private long createdTimestampMillis = 0L;
 
-            private Builder() {}
+            private Builder() {
+            }
 
             /**
              * Counter value. This is required. The value must not be negative.
@@ -121,7 +124,8 @@ public class CounterSnapshot extends MetricSnapshot {
 
         private final List<CounterData> counterData = new ArrayList<>();
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder addCounterData(CounterData data) {
             counterData.add(data);

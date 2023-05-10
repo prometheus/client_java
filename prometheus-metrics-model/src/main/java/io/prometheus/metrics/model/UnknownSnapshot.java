@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Immutable snapshot of an Unknown (Untyped) metric.
+ */
 public final class UnknownSnapshot extends MetricSnapshot {
 
     /**
@@ -33,25 +36,23 @@ public final class UnknownSnapshot extends MetricSnapshot {
          * To create a new {@link UnknownData}, you can either call the constructor directly or use the
          * Builder with {@link UnknownData#newBuilder()}.
          *
-         * @param value                  the value.
-         * @param labels                 must not be null. Use {@link Labels#EMPTY} if there are no labels.
-         * @param exemplar               may be null.
+         * @param value    the value.
+         * @param labels   must not be null. Use {@link Labels#EMPTY} if there are no labels.
+         * @param exemplar may be null.
          */
         public UnknownData(double value, Labels labels, Exemplar exemplar) {
             this(value, Labels.EMPTY, exemplar, 0);
         }
 
         /**
-         * Constructor with an additional scrape timestamp parameter. In most cases you should not need this.
-         * This is only useful in rare cases as the timestamp of a Prometheus metric should usually be set by the
-         * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
-         * metric sources.
+         * Constructor with an additional scrape timestamp.
+         * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
+         * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
         public UnknownData(double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
             super(labels, 0L, scrapeTimestampMillis);
             this.value = value;
             this.exemplar = exemplar;
-            validate();
         }
 
         public double getValue() {
@@ -62,15 +63,13 @@ public final class UnknownSnapshot extends MetricSnapshot {
             return exemplar;
         }
 
-        @Override
-        protected void validate() {}
-
         public static class Builder extends MetricData.Builder<Builder> {
 
             private Exemplar exemplar = null;
             private Double value = null;
 
-            private Builder() {}
+            private Builder() {
+            }
 
             /**
              * required.
@@ -110,7 +109,8 @@ public final class UnknownSnapshot extends MetricSnapshot {
 
         private final List<UnknownData> unknownData = new ArrayList<>();
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder addUnknownData(UnknownData data) {
             unknownData.add(data);

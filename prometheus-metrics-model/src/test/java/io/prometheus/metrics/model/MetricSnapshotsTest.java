@@ -3,6 +3,8 @@ package io.prometheus.metrics.model;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Iterator;
+
 public class MetricSnapshotsTest {
 
     @Test
@@ -60,5 +62,25 @@ public class MetricSnapshotsTest {
         Assert.assertFalse(builder.containsMetricName("my_metric"));
         builder.addMetricSnapshot(counter);
         Assert.assertTrue(builder.containsMetricName("my_metric"));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testImmutable() {
+        CounterSnapshot c1 = CounterSnapshot.newBuilder()
+                .withName("counter1")
+                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .build();
+        CounterSnapshot c2 = CounterSnapshot.newBuilder()
+                .withName("counter2")
+                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .build();
+        CounterSnapshot c3 = CounterSnapshot.newBuilder()
+                .withName("counter3")
+                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .build();
+        MetricSnapshots snapshots = new MetricSnapshots(c2, c3, c1);
+        Iterator<MetricSnapshot> iterator = snapshots.iterator();
+        iterator.next();
+        iterator.remove();
     }
 }

@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Immutable snapshot of a Gauge.
+ */
 public final class GaugeSnapshot extends MetricSnapshot {
 
     /**
      * To create a new {@link GaugeSnapshot}, you can either call the constructor directly or use
      * the builder with {@link GaugeSnapshot#newBuilder()}.
      *
-     * @param metadata required name and optional help and unit.
-     *                 See {@link MetricMetadata} for naming conventions.
+     * @param metadata see {@link MetricMetadata} for naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
      */
     public GaugeSnapshot(MetricMetadata metadata, Collection<GaugeData> data) {
@@ -26,50 +28,49 @@ public final class GaugeSnapshot extends MetricSnapshot {
     public static final class GaugeData extends MetricData {
 
         private final double value;
-        private final Exemplar exemplar;
+        private final Exemplar exemplar; // may be null
 
         /**
          * To create a new {@link GaugeData}, you can either call the constructor directly or use the
          * Builder with {@link GaugeData#newBuilder()}.
          *
-         * @param value                  the gauge value.
-         * @param labels                 must not be null. Use {@link Labels#EMPTY} if there are no labels.
-         * @param exemplar               may be null.
+         * @param value    the gauge value.
+         * @param labels   must not be null. Use {@link Labels#EMPTY} if there are no labels.
+         * @param exemplar may be null.
          */
         public GaugeData(double value, Labels labels, Exemplar exemplar) {
             this(value, labels, exemplar, 0);
         }
 
         /**
-         * Constructor with an additional metric timestamp parameter. In most cases you should not need this.
-         * This is only useful in rare cases as the timestamp of a Prometheus metric should usually be set by the
-         * Prometheus server during scraping. Exceptions include mirroring metrics with given timestamps from other
-         * metric sources.
+         * Constructor with an additional scrape timestamp.
+         * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
+         * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
         public GaugeData(double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
             super(labels, 0L, scrapeTimestampMillis);
             this.value = value;
             this.exemplar = exemplar;
-            validate();
         }
 
         public double getValue() {
             return value;
         }
 
+        /**
+         * May be {@code null}.
+         */
         public Exemplar getExemplar() {
             return exemplar;
         }
-
-        @Override
-        protected void validate() {}
 
         public static class Builder extends MetricData.Builder<Builder> {
 
             private Exemplar exemplar = null;
             private Double value = null;
 
-            private Builder() {}
+            private Builder() {
+            }
 
             /**
              * Gauge value. This is required.
@@ -109,7 +110,8 @@ public final class GaugeSnapshot extends MetricSnapshot {
 
         private final List<GaugeData> gaugeData = new ArrayList<>();
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder addGaugeData(GaugeData data) {
             gaugeData.add(data);

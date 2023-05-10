@@ -27,17 +27,18 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
     /**
      * To create MetricSnapshots, you can either call the constructor directly
      * or use {@link #newBuilder()}.
+     *
      * @param snapshots the constructor creates a sorted copy of snapshots.
      * @throws IllegalArgumentException if snapshots contains duplicate metric names.
-     *         To avoid duplicate metric names use {@link #newBuilder()} and check
-     *         {@link Builder#containsMetricName(String)} before calling
-     *         {@link Builder#addMetricSnapshot(MetricSnapshot)}.
+     *                                  To avoid duplicate metric names use {@link #newBuilder()} and check
+     *                                  {@link Builder#containsMetricName(String)} before calling
+     *                                  {@link Builder#addMetricSnapshot(MetricSnapshot)}.
      */
     public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
         List<MetricSnapshot> list = new ArrayList<>(snapshots);
         list.sort(comparing(s -> s.getMetadata().getName()));
-        for (int i=0; i<snapshots.size()-1; i++) {
-            if (list.get(i).getMetadata().getName().equals(list.get(i+1).getMetadata().getName())) {
+        for (int i = 0; i < snapshots.size() - 1; i++) {
+            if (list.get(i).getMetadata().getName().equals(list.get(i + 1).getMetadata().getName())) {
                 throw new IllegalArgumentException(list.get(i).getMetadata().getName() + ": duplicate metric name");
             }
         }
@@ -68,11 +69,13 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
     public static Builder newBuilder() {
         return new Builder();
     }
+
     public static class Builder {
 
         private final List<MetricSnapshot> snapshots = new ArrayList<>();
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public boolean containsMetricName(String name) {
             for (MetricSnapshot snapshot : snapshots) {

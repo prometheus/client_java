@@ -4,15 +4,31 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Immutable snapshot of a Histogram.
+ */
 public final class HistogramSnapshot extends MetricSnapshot {
 
     private final boolean gaugeHistogram;
     public static final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
 
+    /**
+     * To create a new {@link HistogramSnapshot}, you can either call the constructor directly or use
+     * the builder with {@link HistogramSnapshot#newBuilder()}.
+     *
+     * @param metadata see {@link MetricMetadata} for naming conventions.
+     * @param data     the constructor will create a sorted copy of the collection.
+     */
     public HistogramSnapshot(MetricMetadata metadata, Collection<HistogramData> data) {
         this(false, metadata, data);
     }
 
+    /**
+     * Use this with the first parameter {@code true} to create a snapshot of a Gauge Histogram.
+     * The data model for Gauge Histograms is the same as for regular histograms, except that bucket values
+     * are semantically gauges and not counters.
+     * See <a href="https://openmetrics.io">openmetrics.io</a> for more info on Gauge Histograms.
+     */
     public HistogramSnapshot(boolean isGaugeHistogram, MetricMetadata metadata, Collection<HistogramData> data) {
         super(metadata, data);
         this.gaugeHistogram = isGaugeHistogram;
@@ -29,15 +45,39 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
     public static final class HistogramData extends DistributionData {
 
-        private final ClassicHistogramBuckets classicBuckets;
-        private final int nativeSchema;
-        private final long nativeZeroCount;
-        private final double nativeZeroThreshold;
-        private final NativeHistogramBuckets nativeBucketsForPositiveValues;
-        private final NativeHistogramBuckets nativeBucketsForNegativeValues;
+        // There are two types of histograms: Classic histograms and native histograms.
+        // Classic histograms have a fixed set of buckets.
+        // Native histograms have "infinitely many" buckets with exponentially growing boundaries.
+        // The OpenTelemetry terminology for native histogram is "exponential histogram".
+        // ---
+        // A histogram can be a classic histogram (indicated by nativeSchema == CLASSIC_HISTOGRAM),
+        // or a native histogram (indicated by classicBuckets == ClassicHistogramBuckets.EMPTY),
+        // or both.
+        // ---
+        // A histogram that is both classic and native is great for migrating from classic histograms
+        // to native histograms: Old Prometheus servers can still scrape the classic histogram, while
+        // new Prometheus servers can scrape the native histogram.
+
+        private final ClassicHistogramBuckets classicBuckets; // May be ClassicHistogramBuckets.EMPTY for native histograms.
+        private final int nativeSchema; // Number in [-4, 8]. May be CLASSIC_HISTOGRAM for classic histograms.
+        private final long nativeZeroCount; // only used if nativeSchema != CLASSIC_HISTOGRAM
+        private final double nativeZeroThreshold; // only used if nativeSchema != CLASSIC_HISTOGRAM
+        private final NativeHistogramBuckets nativeBucketsForPositiveValues; // only used if nativeSchema != CLASSIC_HISTOGRAM
+        private final NativeHistogramBuckets nativeBucketsForNegativeValues; // only used if nativeSchema != CLASSIC_HISTOGRAM
 
         /**
-         * Constructor for classic histograms.
+         * Constructor for classic histograms (as opposed to native histograms).
+         * <p/>
+         * To create a new {@link HistogramData}, you can either call the constructor directly or use the
+         * Builder with {@link HistogramSnapshot#newBuilder()}.
+         *
+         * @param classicBuckets         required. Must not be empty. Must at least contain the +Inf bucket.
+         * @param sum                    sum of all observed values. Optional, pass {@link Double#NaN} if not available.
+         * @param labels                 must not be null. Use {@link Labels#EMPTY} if there are no labels.
+         * @param exemplars              must not be null. Use {@link Exemplars#EMPTY} if there are no Exemplars.
+         * @param createdTimestampMillis timestamp (as in {@link System#currentTimeMillis()}) when the time series
+         *                               (this specific set of labels) was created (or reset to zero).
+         *                               It's optional. Use {@code 0L} if there is no created timestamp.
          */
         public HistogramData(
                 ClassicHistogramBuckets classicBuckets,
@@ -49,7 +89,24 @@ public final class HistogramSnapshot extends MetricSnapshot {
         }
 
         /**
-         * Constructor for native histograms.
+         * Constructor for native histograms (as opposed to classic histograms).
+         * <p/>
+         * To create a new {@link HistogramData}, you can either call the constructor directly or use the
+         * Builder with {@link HistogramSnapshot#newBuilder()}.
+         *
+         * @param nativeSchema                   number in [-4, 8]. See <a href="https://github.com/prometheus/client_model/blob/7f720d22828060526c55ac83bceff08f43d4cdbc/io/prometheus/client/metrics.proto#L76-L80">Prometheus client_model metrics.proto</a>.
+         * @param nativeZeroCount                number of observed zero values (zero is special because there is no
+         *                                       histogram bucket for zero values).
+         * @param nativeZeroThreshold            observations in [-zeroThreshold, +zeroThreshold] are treated as zero.
+         *                                       This is to avoid creating a large number of buckets if observations fluctuate around zero.
+         * @param nativeBucketsForPositiveValues must not be {@code null}. Use {@link NativeHistogramBuckets#EMPTY} if empty.
+         * @param nativeBucketsForNegativeValues must not be {@code null}. Use {@link NativeHistogramBuckets#EMPTY} if empty.
+         * @param sum                            sum of all observed values. Optional, use {@link Double#NaN} if not available.
+         * @param labels                         must not be null. Use {@link Labels#EMPTY} if there are no labels.
+         * @param exemplars                      must not be null. Use {@link Exemplars#EMPTY} if there are no Exemplars.
+         * @param createdTimestampMillis         timestamp (as in {@link System#currentTimeMillis()}) when the time series
+         *                                       (this specific set of labels) was created (or reset to zero).
+         *                                       It's optional. Use {@code 0L} if there is no created timestamp.
          */
         public HistogramData(
                 int nativeSchema,
@@ -66,6 +123,24 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
         /**
          * Constructor for a histogram with both, classic and native data.
+         * <p/>
+         * To create a new {@link HistogramData}, you can either call the constructor directly or use the
+         * Builder with {@link HistogramSnapshot#newBuilder()}.
+         *
+         * @param classicBuckets                 required. Must not be empty. Must at least contain the +Inf bucket.
+         * @param nativeSchema                   number in [-4, 8]. See <a href="https://github.com/prometheus/client_model/blob/7f720d22828060526c55ac83bceff08f43d4cdbc/io/prometheus/client/metrics.proto#L76-L80">Prometheus client_model metrics.proto</a>.
+         * @param nativeZeroCount                number of observed zero values (zero is special because there is no
+         *                                       histogram bucket for zero values).
+         * @param nativeZeroThreshold            observations in [-zeroThreshold, +zeroThreshold] are treated as zero.
+         *                                       This is to avoid creating a large number of buckets if observations fluctuate around zero.
+         * @param nativeBucketsForPositiveValues must not be {@code null}. Use {@link NativeHistogramBuckets#EMPTY} if empty.
+         * @param nativeBucketsForNegativeValues must not be {@code null}. Use {@link NativeHistogramBuckets#EMPTY} if empty.
+         * @param sum                            sum of all observed values. Optional, use {@link Double#NaN} if not available.
+         * @param labels                         must not be null. Use {@link Labels#EMPTY} if there are no labels.
+         * @param exemplars                      must not be null. Use {@link Exemplars#EMPTY} if there are no Exemplars.
+         * @param createdTimestampMillis         timestamp (as in {@link System#currentTimeMillis()}) when the time series
+         *                                       (this specific set of labels) was created (or reset to zero).
+         *                                       It's optional. Use {@code 0L} if there is no created timestamp.
          */
         public HistogramData(
                 ClassicHistogramBuckets classicBuckets,
@@ -82,9 +157,9 @@ public final class HistogramSnapshot extends MetricSnapshot {
         }
 
         /**
-         * Constructor with an additional scrape timestamp parameter. In most cases you should not need this,
-         * as the scrape timestamp is set by the Prometheus server during scraping.
-         * Exceptions include mirroring metrics with given timestamps from other metric sources.
+         * Constructor with an additional scrape timestamp.
+         * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
+         * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
         public HistogramData(
                 ClassicHistogramBuckets classicBuckets,
@@ -105,6 +180,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
             this.nativeZeroThreshold = nativeSchema == CLASSIC_HISTOGRAM ? 0 : nativeZeroThreshold;
             this.nativeBucketsForPositiveValues = nativeSchema == CLASSIC_HISTOGRAM ? NativeHistogramBuckets.EMPTY : nativeBucketsForPositiveValues;
             this.nativeBucketsForNegativeValues = nativeSchema == CLASSIC_HISTOGRAM ? NativeHistogramBuckets.EMPTY : nativeBucketsForNegativeValues;
+            validate();
         }
 
         private static long calculateCount(ClassicHistogramBuckets classicBuckets, int nativeSchema, long nativeZeroCount, NativeHistogramBuckets nativeBucketsForPositiveValues, NativeHistogramBuckets nativeBucketsForNegativeValues) {
@@ -127,7 +203,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
         private static long calculateClassicCount(ClassicHistogramBuckets classicBuckets) {
             long count = 0;
-            for (int i=0; i<classicBuckets.size(); i++) {
+            for (int i = 0; i < classicBuckets.size(); i++) {
                 count += classicBuckets.getCount(i);
             }
             return count;
@@ -135,10 +211,10 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
         private static long calculateNativeCount(long nativeZeroCount, NativeHistogramBuckets nativeBucketsForPositiveValues, NativeHistogramBuckets nativeBucketsForNegativeValues) {
             long count = nativeZeroCount;
-            for (int i=0; i<nativeBucketsForNegativeValues.size(); i++) {
+            for (int i = 0; i < nativeBucketsForNegativeValues.size(); i++) {
                 count += nativeBucketsForNegativeValues.getCount(i);
             }
-            for (int i=0; i<nativeBucketsForPositiveValues.size(); i++) {
+            for (int i = 0; i < nativeBucketsForPositiveValues.size(); i++) {
                 count += nativeBucketsForPositiveValues.getCount(i);
             }
             return count;
@@ -152,44 +228,58 @@ public final class HistogramSnapshot extends MetricSnapshot {
             return nativeSchema != CLASSIC_HISTOGRAM;
         }
 
+        /**
+         * Will return garbage if {@link #hasClassicHistogramData()} is {@code false}.
+         */
         public ClassicHistogramBuckets getClassicBuckets() {
             return classicBuckets;
         }
 
+        /**
+         * Will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
+         */
         public int getNativeSchema() {
             return nativeSchema;
         }
 
+        /**
+         * Will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
+         */
         public long getNativeZeroCount() {
             return nativeZeroCount;
         }
 
+        /**
+         * Will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
+         */
         public double getNativeZeroThreshold() {
             return nativeZeroThreshold;
         }
 
+        /**
+         * Will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
+         */
         public NativeHistogramBuckets getNativeBucketsForPositiveValues() {
             return nativeBucketsForPositiveValues;
         }
 
+        /**
+         * Will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
+         */
         public NativeHistogramBuckets getNativeBucketsForNegativeValues() {
             return nativeBucketsForNegativeValues;
         }
 
-        @Override
-        protected void validate() {
+        private void validate() {
             for (Label label : getLabels()) {
                 if (label.getName().equals("le")) {
                     throw new IllegalArgumentException("le is a reserved label name for histograms");
                 }
             }
-            if (nativeSchema == CLASSIC_HISTOGRAM) {
-                // validate classic histogram
-                if (classicBuckets.isEmpty()) {
-                    throw new IllegalArgumentException("A classic histogram must not have empty classic histogram buckets.");
-                }
-            } else {
-                // validate native histogram
+            if (nativeSchema == CLASSIC_HISTOGRAM && classicBuckets.isEmpty()) {
+                throw new IllegalArgumentException("Histogram buckets cannot be empty, must at least have the +Inf bucket.");
+            }
+            if (nativeSchema != CLASSIC_HISTOGRAM) {
                 if (nativeSchema < -4 || nativeSchema > 8) {
                     throw new IllegalArgumentException(nativeSchema + ": illegal schema. Expecting number in [-4, 8].");
                 }
@@ -211,7 +301,8 @@ public final class HistogramSnapshot extends MetricSnapshot {
             private NativeHistogramBuckets nativeBucketsForPositiveValues = NativeHistogramBuckets.EMPTY;
             private NativeHistogramBuckets nativeBucketsForNegativeValues = NativeHistogramBuckets.EMPTY;
 
-            private Builder() {}
+            private Builder() {
+            }
 
             @Override
             protected Builder self() {

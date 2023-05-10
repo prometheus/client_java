@@ -9,6 +9,19 @@ public abstract class MetricData {
         this.labels = labels;
         this.createdTimestampMillis = createdTimestampMillis;
         this.scrapeTimestampMillis = scrapeTimestampMillis;
+        validate();
+    }
+
+    private void validate() {
+        if (labels == null) {
+            throw new IllegalArgumentException("Labels cannot be null. Use Labels.EMPTY if there are no labels.");
+        }
+        if (createdTimestampMillis < 0) {
+            throw new IllegalArgumentException("Created timestamp cannot be negative. Use 0 if the metric doesn't have a created timestamp.");
+        }
+        if (scrapeTimestampMillis < 0) {
+            throw new IllegalArgumentException("Scrape timestamp cannot be negative. Use 0 to indicate that the Prometheus server should set the scrape timestamp.");
+        }
         if (hasCreatedTimestamp() && hasScrapeTimestamp()) {
             if (scrapeTimestampMillis < createdTimestampMillis) {
                 throw new IllegalArgumentException("The scrape timestamp cannot be before the created timestamp");
@@ -19,8 +32,6 @@ public abstract class MetricData {
     public Labels getLabels() {
         return labels;
     }
-
-    protected abstract void validate();
 
     public boolean hasScrapeTimestamp() {
         return scrapeTimestampMillis != 0L;
