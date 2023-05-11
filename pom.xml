@@ -42,7 +42,6 @@
         <!-- However, that means protobuf-shaded must be built and installed manually if there are any changes. -->
         <module>prometheus-metrics-model</module>
         <module>prometheus-metrics-core</module>
-        <module>prometheus-exposition-format-protobuf</module>
         <module>prometheus-exposition-formats</module>
         <module>simpleclient_common</module>
         <module>simpleclient_caffeine</module>

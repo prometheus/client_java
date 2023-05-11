@@ -2,7 +2,7 @@ package io.prometheus.expositionformat.text;
 
 import io.prometheus.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.expositionformat.OpenMetricsTextFormatWriter;
-import io.prometheus.expositionformat.PrometheusProtobufFormatWriter;
+import io.prometheus.expositionformat.PrometheusProtobufWriter;
 import io.prometheus.expositionformat.PrometheusTextFormatWriter;
 import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.CounterSnapshot;
@@ -1464,7 +1464,7 @@ public class ExpositionFormatsTest {
     }
 
     private void assertPrometheusProtobuf(String expected, MetricSnapshot snapshot) {
-        PrometheusProtobufFormatWriter writer = new PrometheusProtobufFormatWriter();
+        PrometheusProtobufWriter writer = new PrometheusProtobufWriter();
         Metrics.MetricFamily protobufData = writer.convert(snapshot);
         String actual = TextFormat.printer().shortDebugString(protobufData);
         Assert.assertEquals(expected, actual);

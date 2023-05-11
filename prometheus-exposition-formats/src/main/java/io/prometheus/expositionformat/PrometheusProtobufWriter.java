@@ -24,7 +24,7 @@ import java.io.OutputStream;
 
 import static io.prometheus.expositionformat.ProtobufUtil.timestampFromMillis;
 
-public class PrometheusProtobufFormatWriter {
+public class PrometheusProtobufWriter {
 
     public final String CONTENT_TYPE = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
 
