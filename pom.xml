@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.prometheus</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>client_java</artifactId>
     <version>0.16.1-SNAPSHOT</version>
 
     <name>Prometheus Java Suite</name>
@@ -37,6 +37,12 @@
     </developers>
 
     <modules>
+        <!-- protobuf-shaded is not included, because the source code contains the un-shaded packages. -->
+        <!-- By not including it, we force Maven to load the shaded version from the Maven repository. -->
+        <!-- However, that means protobuf-shaded must be built and installed manually if there are any changes. -->
+        <module>prometheus-metrics-model</module>
+        <module>prometheus-exposition-formats</module>
+
         <module>simpleclient</module>
         <module>simpleclient_common</module>
         <module>simpleclient_caffeine</module>

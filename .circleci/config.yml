@@ -10,6 +10,7 @@ jobs:
       - restore_cache:
           key: maven-dependencies-{{ checksum "pom.xml" }}
       - run: java -version
+      - run: cd protobuf-shaded && mvn install && cd ..
       - run: ./mvnw clean install
       - run: ./mvnw javadoc:jar
       - save_cache:

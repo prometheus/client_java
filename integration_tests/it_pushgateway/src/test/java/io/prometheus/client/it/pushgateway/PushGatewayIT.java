@@ -1,5 +1,6 @@
 package io.prometheus.client.it.pushgateway;
 
+import com.github.dockerjava.api.model.Ulimit;
 import io.prometheus.client.it.common.LogConsumer;
 import io.prometheus.client.it.common.Scraper;
 import io.prometheus.client.it.common.Version;
@@ -47,6 +48,7 @@ public class PushGatewayIT {
                 .copyFromTargetDirectory(batchJobJar);
         Network network = Network.newNetwork();
         pushGatewayContainer = new GenericContainer<>("prom/pushgateway")
+                .withCreateContainerCmdModifier(c -> c.getHostConfig().withUlimits(new Ulimit[]{new Ulimit("nofile", 65536L, 65536L)}))
                 .withCopyFileToContainer(MountableFile.forClasspathResource("web-config.yml", 0644), "/")
                 .withNetwork(network)
                 .withNetworkAliases("pushgateway")
@@ -54,6 +56,7 @@ public class PushGatewayIT {
                 .withCommand("--web.config.file=/web-config.yml")
                 .withExposedPorts(9091);
         javaContainer = new GenericContainer<>(image)
+                .withCreateContainerCmdModifier(c -> c.getHostConfig().withUlimits(new Ulimit[]{new Ulimit("nofile", 65536L, 65536L)}))
                 .withFileSystemBind(batchJobDir.getHostPath(), "/app", BindMode.READ_ONLY)
                 .withNetwork(network)
                 .withWorkingDirectory("/app")
