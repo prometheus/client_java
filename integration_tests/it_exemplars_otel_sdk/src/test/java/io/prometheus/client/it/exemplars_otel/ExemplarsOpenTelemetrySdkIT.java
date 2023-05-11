@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * Test if traces from the OpenTelemetry SDK are picked up as Exemplars.
- * <p/>
+ * <p>
  * In addition, we make sure that missing OpenTelemetry dependencies do not cause client_java to crash the application.
  **/
 public class ExemplarsOpenTelemetrySdkIT {
@@ -65,7 +65,7 @@ public class ExemplarsOpenTelemetrySdkIT {
     /**
      * The dependency simpleclient_tracer_otel_agent is for getting the trace context from the OpenTelemetry Java agent.
      * As we are getting the trace context from the OpenTelemetry SDK and not from the agent, Exemplars should work.
-     * <p/>
+     * <p>
      * We test this because if a user excludes simpleclient_tracer_otel_agent from the transitive dependencies for some reason
      * we don't want client_java to break.
      */
@@ -78,7 +78,7 @@ public class ExemplarsOpenTelemetrySdkIT {
     /**
      * The dependency simpleclient_tracer_otel is for getting the trace context from the OpenTelemetry SDK.
      * If this dependency is missing, Exemplars will be missing, but metrics should still work.
-     * <p/>
+     * <p>
      * We test this because users may exclude simpleclient_tracer_otel as a way to disable OpenTelemetry Exemplars.
      */
     @Test
