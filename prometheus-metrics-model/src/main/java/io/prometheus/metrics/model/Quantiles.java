@@ -67,7 +67,7 @@ public class Quantiles implements Iterable<Quantile> {
         }
 
         /**
-         * @param quantile 0.0 <= quantile <= 1.0
+         * @param quantile 0.0 &lt;= quantile &lt;= 1.0
          */
         public Builder addQuantile(double quantile, double value) {
             quantiles.add(new Quantile(quantile, value));

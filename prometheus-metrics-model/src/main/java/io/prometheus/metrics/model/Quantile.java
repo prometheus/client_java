@@ -9,7 +9,7 @@ public class Quantile {
     private final double value;
 
     /**
-     * @param quantile expecting 0.0 <= quantile <= 1.0, otherwise an {@link IllegalArgumentException} will be thrown.
+     * @param quantile expecting 0.0 &lt;= quantile &lt;= 1.0, otherwise an {@link IllegalArgumentException} will be thrown.
      * @param value
      */
     public Quantile(double quantile, double value) {
