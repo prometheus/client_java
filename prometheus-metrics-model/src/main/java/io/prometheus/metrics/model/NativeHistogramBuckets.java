@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 /**
  * Immutable representation of native histogram buckets.
- * <p/>
+ * <p>
  * The bucket index defines the boundaries of the bucket,
  * depending on the histogram's {@link HistogramSnapshot.HistogramData#getNativeSchema() schema}.
  * <pre>

@@ -67,7 +67,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
         /**
          * Constructor for classic histograms (as opposed to native histograms).
-         * <p/>
+         * <p>
          * To create a new {@link HistogramData}, you can either call the constructor directly or use the
          * Builder with {@link HistogramSnapshot#newBuilder()}.
          *
@@ -90,7 +90,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
         /**
          * Constructor for native histograms (as opposed to classic histograms).
-         * <p/>
+         * <p>
          * To create a new {@link HistogramData}, you can either call the constructor directly or use the
          * Builder with {@link HistogramSnapshot#newBuilder()}.
          *
@@ -123,7 +123,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
         /**
          * Constructor for a histogram with both, classic and native data.
-         * <p/>
+         * <p>
          * To create a new {@link HistogramData}, you can either call the constructor directly or use the
          * Builder with {@link HistogramSnapshot#newBuilder()}.
          *
@@ -237,7 +237,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
         /**
          * The schema defines the scale of the native histogram, i.g. the granularity of the buckets.
-         * Current supported values are -4 <= schema <= 8.
+         * Current supported values are -4 &lt;= schema &lt;= 8.
          * See {@link NativeHistogramBuckets} for more info.
          * This will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
          */
