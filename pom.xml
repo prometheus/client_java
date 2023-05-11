@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.prometheus</groupId>
-    <artifactId>parent</artifactId>
-    <version>0.16.1-SNAPSHOT</version>
+    <artifactId>client_java</artifactId>
+    <version>1.0.0-alpha-1-SNAPSHOT</version>
 
     <name>Prometheus Java Suite</name>
     <url>http://github.com/prometheus/client_java</url>
@@ -37,6 +37,17 @@
     </developers>
 
     <modules>
+        <!-- protobuf-shaded is not included, because the source code contains the un-shaded packages. -->
+        <!-- By not including it, we force Maven to load the shaded version from the Maven repository. -->
+        <!-- However, that means protobuf-shaded must be built and installed manually if there are any changes. -->
+        <module>prometheus-metrics-core</module>
+        <module>prometheus-metrics-config</module>
+        <module>prometheus-metrics-model</module>
+        <module>prometheus-metrics-tracer</module>
+        <module>prometheus-metrics-exposition-formats</module>
+        <module>prometheus-metrics-exporter-servlet-jakarta</module>
+        <module>examples</module>
+
         <module>simpleclient</module>
         <module>simpleclient_common</module>
         <module>simpleclient_caffeine</module>
@@ -54,7 +65,7 @@
         <module>simpleclient_servlet_common</module>
         <module>simpleclient_servlet_jakarta</module>
         <module>simpleclient_spring_web</module>
-        <module>simpleclient_spring_boot</module>
+        <!-- <module>simpleclient_spring_boot</module> --> <!-- requires Java <= 11 to compile. removing to enable compilation with Java 17 -->
         <module>simpleclient_jetty</module>
         <module>simpleclient_jetty_jdk8</module>
         <module>simpleclient_tracer</module>
@@ -206,6 +217,7 @@
                     <linksource>true</linksource>
                     <source>8</source>
                     <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+                    <sourcepath>src/main/java;src/main/generated</sourcepath>
                 </configuration>
                 <executions>
                     <execution>
@@ -218,11 +230,10 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>

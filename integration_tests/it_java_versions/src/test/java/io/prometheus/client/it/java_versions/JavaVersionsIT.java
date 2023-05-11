@@ -1,5 +1,6 @@
 package io.prometheus.client.it.java_versions;
 
+import com.github.dockerjava.api.model.Ulimit;
 import io.prometheus.client.it.common.LogConsumer;
 import io.prometheus.client.it.common.Scraper;
 import io.prometheus.client.it.common.Version;
@@ -35,9 +36,7 @@ public class JavaVersionsIT {
             "openjdk:8-jre",
             "openjdk:11-jre",
             "openjdk:17",
-            "ticketfly/java:6",
             "adoptopenjdk/openjdk16:ubi-minimal-jre",
-            "azul/zulu-openjdk:6",
 
             // OpenJ9
             "ibmjava:8-jre",
@@ -50,6 +49,7 @@ public class JavaVersionsIT {
     exampleApplicationDir = Volume.create("it-java-versions")
             .copyFromTargetDirectory(exampleApplicationJar);
     javaContainer = new GenericContainer<>(image)
+            .withCreateContainerCmdModifier(c -> c.getHostConfig().withUlimits(new Ulimit[]{new Ulimit("nofile", 65536L, 65536L)}))
             .withFileSystemBind(exampleApplicationDir.getHostPath(), "/app", BindMode.READ_ONLY)
             .withWorkingDirectory("/app")
             .withLogConsumer(LogConsumer.withPrefix(image))

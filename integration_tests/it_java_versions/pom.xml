@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>integration_tests</artifactId>
-    <version>0.16.1-SNAPSHOT</version>
+    <version>1.0.0-alpha-1-SNAPSHOT</version>
   </parent>
 
   <artifactId>it_java_versions</artifactId>
@@ -74,50 +74,10 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-          <testSource>1.8</testSource>
-          <testTarget>1.8</testTarget>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <!-- Intellij does not support different Java versions for source and testSource -->
-      <!-- As a workaround, use Java 8 in Intellij. -->
-      <!-- This will be fixed with https://youtrack.jetbrains.com/issue/IDEA-85478 -->
-      <id>intellij</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <property>
-          <!-- This property is only set when you open the project in Intellij. -->
-          <!-- When you compile in the command line, the property will not be set -->
-          <!-- and this profile will not be used. -->
-          <name>idea.maven.embedder.version</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              <source>1.8</source>
-              <target>1.8</target>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
   <licenses>
     <license>

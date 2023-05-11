@@ -4,8 +4,8 @@
 
     <parent>
         <groupId>io.prometheus</groupId>
-        <artifactId>parent</artifactId>
-        <version>0.16.1-SNAPSHOT</version>
+        <artifactId>client_java</artifactId>
+        <version>1.0.0-alpha-1-SNAPSHOT</version>
     </parent>
 
     <artifactId>integration_tests</artifactId>
