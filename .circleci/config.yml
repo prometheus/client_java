@@ -3,13 +3,19 @@ machine: true
 jobs:
   build:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2204:2023.04.2
     working_directory: ~/circleci-java
     steps:
+      - run:
+          name: Install OpenJDK 11
+          command: |
+              sudo apt-get update && sudo apt-get install openjdk-11-jdk
+              sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+              sudo update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
+              java -version
       - checkout
       - restore_cache:
           key: maven-dependencies-{{ checksum "pom.xml" }}
-      - run: java -version
       - run: cd protobuf-shaded && mvn install && cd ..
       - run: ./mvnw clean install
       - run: ./mvnw javadoc:jar
