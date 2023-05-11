@@ -1,6 +1,5 @@
 package io.prometheus.metrics.registry;
 
-import io.prometheus.metrics.model.Collector;
 import io.prometheus.metrics.model.Labels;
 
 public class PrometheusRegistry {

@@ -1,4 +1,6 @@
-package io.prometheus.metrics.model;
+package io.prometheus.metrics.registry;
+
+import io.prometheus.metrics.model.MetricSnapshots;
 
 /**
  * To be registered with the Prometheus collector registry.

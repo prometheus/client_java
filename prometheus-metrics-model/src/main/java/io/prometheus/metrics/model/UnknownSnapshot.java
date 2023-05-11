@@ -30,7 +30,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
     public static final class UnknownData extends MetricData {
 
         private final double value;
-        private final Exemplar exemplar;
+        private final Exemplar exemplar; // may be null
 
         /**
          * To create a new {@link UnknownData}, you can either call the constructor directly or use the
@@ -59,6 +59,9 @@ public final class UnknownSnapshot extends MetricSnapshot {
             return value;
         }
 
+        /**
+         * May return {@code null}.
+         */
         public Exemplar getExemplar() {
             return exemplar;
         }

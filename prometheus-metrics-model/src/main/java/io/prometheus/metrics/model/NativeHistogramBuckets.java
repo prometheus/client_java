@@ -7,6 +7,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Immutable representation of native histogram buckets.
+ * <p/>
+ * The bucket index defines the boundaries of the bucket,
+ * depending on the histogram's {@link HistogramSnapshot.HistogramData#getNativeSchema() schema}.
+ * <pre>
+ *     base = 2^(2^-schema)
+ *     lower bound = base^(index - 1)
+ *     upper bound = base^index
+ * </pre>
+ */
 public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
 
     public static final NativeHistogramBuckets EMPTY = new NativeHistogramBuckets(new int[]{}, new long[]{});
@@ -18,6 +29,12 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
         this.counts = counts;
     }
 
+    /**
+     * To create a new {@link NativeHistogramBuckets} instance, you can either use one of the static {@code of(...)}
+     * methods, or use {@link NativeHistogramBuckets#newBuilder()}.
+     * @param bucketIndexes see class javadoc of {@link NativeHistogramBuckets}. May be empty.
+     * @param counts must have the same length as bucketIndexes
+     */
     public static NativeHistogramBuckets of(int[] bucketIndexes, long[] counts) {
         int[] bucketIndexesCopy = Arrays.copyOf(bucketIndexes, bucketIndexes.length);
         long[] countsCopy = Arrays.copyOf(counts, counts.length);
@@ -25,6 +42,12 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
         return new NativeHistogramBuckets(bucketIndexesCopy, countsCopy);
     }
 
+    /**
+     * To create a new {@link NativeHistogramBuckets} instance, you can either use one of the static {@code of(...)}
+     * methods, or use {@link NativeHistogramBuckets#newBuilder()}.
+     * @param bucketIndexes see class javadoc of {@link NativeHistogramBuckets}. May be empty.
+     * @param counts must have the same size as bucketIndexes
+     */
     public static NativeHistogramBuckets of(List<Integer> bucketIndexes, List<Long> counts) {
         int[] bucketIndexesCopy = new int[bucketIndexes.size()];
         for (int i=0; i<bucketIndexes.size(); i++) {

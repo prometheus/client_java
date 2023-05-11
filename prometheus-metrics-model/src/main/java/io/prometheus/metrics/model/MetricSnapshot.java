@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Base class for all metric snapshots.
+ * Base class for metric snapshots.
  */
 public abstract class MetricSnapshot {
 

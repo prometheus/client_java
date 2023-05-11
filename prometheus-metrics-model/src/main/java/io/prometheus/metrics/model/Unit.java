@@ -1,13 +1,12 @@
 package io.prometheus.metrics.model;
 
 /**
- * In Prometheus, units are largely based on SI base units.
- * Base units include seconds, bytes, joules, grams, meters, ratios, volts, amperes, and celsius.
- * This class provides predefined units for convenience.
- * If none of these work, you can create your own units with
+ * Some pre-defined units for convenience. You can create your own units with
  * <pre>
  *     new Unit("myUnit");
  * </pre>
+ * Note that in Prometheus, units are largely based on SI base units
+ * (seconds, bytes, joules, grams, meters, ratio, volts, amperes, and celsius).
  */
 public class Unit {
 

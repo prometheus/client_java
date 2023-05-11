@@ -236,13 +236,17 @@ public final class HistogramSnapshot extends MetricSnapshot {
         }
 
         /**
-         * Will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
+         * The schema defines the scale of the native histogram, i.g. the granularity of the buckets.
+         * Current supported values are -4 <= schema <= 8.
+         * See {@link NativeHistogramBuckets} for more info.
+         * This will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
          */
         public int getNativeSchema() {
             return nativeSchema;
         }
 
         /**
+         * Number of observed zero values.
          * Will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
          */
         public long getNativeZeroCount() {
@@ -250,6 +254,8 @@ public final class HistogramSnapshot extends MetricSnapshot {
         }
 
         /**
+         * All observations in [-nativeZeroThreshold; +nativeZeroThreshold] are treated as zero.
+         * This is useful to avoid creation of a large number of buckets if observations fluctuate around zero.
          * Will return garbage if {@link #hasNativeHistogramData()} is {@code false}.
          */
         public double getNativeZeroThreshold() {

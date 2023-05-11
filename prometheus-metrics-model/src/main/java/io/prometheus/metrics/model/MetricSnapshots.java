@@ -11,7 +11,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 
 /**
- * Immutable container for metric snapshots.
+ * Immutable list of metric snapshots.
  */
 public class MetricSnapshots implements Iterable<MetricSnapshot> {
 

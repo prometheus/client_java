@@ -27,7 +27,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
 
     private void validate() {
         if (getMetadata().hasUnit()) {
-            throw new IllegalArgumentException("An Info metric cannot have a unit.");
+            throw new IllegalArgumentException("An state set metric cannot have a unit.");
         }
         for (StateSetData entry : getData()) {
             if (entry.getLabels().contains(getMetadata().getName())) {

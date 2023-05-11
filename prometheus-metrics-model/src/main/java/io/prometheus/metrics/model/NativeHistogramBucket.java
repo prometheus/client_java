@@ -1,5 +1,8 @@
 package io.prometheus.metrics.model;
 
+/**
+ * For iterating over {@link NativeHistogramBuckets}.
+ */
 public class NativeHistogramBucket {
 
     private final int bucketIndex;
@@ -10,6 +13,9 @@ public class NativeHistogramBucket {
         this.count = count;
     }
 
+    /**
+     * See {@link NativeHistogramBuckets} for info on native bucket indexes.
+     */
     public int getBucketIndex() {
         return bucketIndex;
     }
