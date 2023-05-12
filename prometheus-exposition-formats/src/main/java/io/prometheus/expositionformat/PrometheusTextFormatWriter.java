@@ -27,6 +27,9 @@ import static io.prometheus.expositionformat.TextFormatUtil.writeLabels;
 import static io.prometheus.expositionformat.TextFormatUtil.writeLong;
 import static io.prometheus.expositionformat.TextFormatUtil.writeTimestamp;
 
+/**
+ * Write the Prometheus text format. This is the default if you view a Prometheus endpoint with your Web browser.
+ */
 public class PrometheusTextFormatWriter {
 
     public final static String CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8";
