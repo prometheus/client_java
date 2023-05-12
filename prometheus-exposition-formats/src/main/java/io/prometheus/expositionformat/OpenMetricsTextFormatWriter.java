@@ -30,17 +30,22 @@ import static io.prometheus.expositionformat.TextFormatUtil.writeLabels;
 import static io.prometheus.expositionformat.TextFormatUtil.writeLong;
 import static io.prometheus.expositionformat.TextFormatUtil.writeTimestamp;
 
+/**
+ * Write the OpenMetrics text format as defined on <a href="https://openmetrics.io/">https://openmetrics.io</a>.
+ */
 public class OpenMetricsTextFormatWriter {
 
     public final static String CONTENT_TYPE = "application/openmetrics-text; version=1.0.0; charset=utf-8";
     private final boolean createdTimestampsEnabled;
 
+    /**
+     * @param createdTimestampsEnabled defines if {@code _created} timestamps should be included in the output or not.
+     */
     public OpenMetricsTextFormatWriter(boolean createdTimestampsEnabled) {
         this.createdTimestampsEnabled = createdTimestampsEnabled;
     }
 
     public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
-        // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and "summary".
         OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
         for (MetricSnapshot snapshot : metricSnapshots) {
             if (snapshot.getData().size() > 0) {

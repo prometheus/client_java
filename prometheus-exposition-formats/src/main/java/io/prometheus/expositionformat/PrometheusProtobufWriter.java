@@ -24,6 +24,12 @@ import java.io.OutputStream;
 
 import static io.prometheus.expositionformat.ProtobufUtil.timestampFromMillis;
 
+/**
+ * Write the Prometheus protobuf format as defined in
+ * <a href="https://github.com/prometheus/client_model/tree/master/io/prometheus/client">github.com/prometheus/client_model</a>.
+ * <p>
+ * As of today, this is the only exposition format that supports native histograms.
+ */
 public class PrometheusProtobufWriter {
 
     public final String CONTENT_TYPE = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
@@ -37,7 +43,6 @@ public class PrometheusProtobufWriter {
     }
 
     public Metrics.MetricFamily convert(MetricSnapshot snapshot) {
-        // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and "summary".
         Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
         if (snapshot instanceof CounterSnapshot) {
             for (CounterData data : ((CounterSnapshot) snapshot).getData()) {
