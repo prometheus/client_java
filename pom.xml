@@ -212,7 +212,7 @@
                     <linksource>true</linksource>
                     <source>8</source>
                     <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
-                    <doclint>all,-missing</doclint>
+                    <sourcepath>src/main/java;src/main/generated</sourcepath>
                 </configuration>
                 <executions>
                     <execution>
