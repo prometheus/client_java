@@ -24,7 +24,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
 
     private static final double[][] NATIVE_BOUNDS;
-    public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS = new double[]{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10};
+    public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS = new double[]{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10};
 
     private final double[] classicUpperBounds; // null or empty for native histograms?
     private final int nativeSchema; // integer in [-4, 8]
@@ -71,7 +71,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
 
         @Override
         public void observe(double amount) {
-            if (Double.isNaN(amount) || Double.isInfinite(amount)) {
+            if (Double.isNaN(amount)) {
                 return;
             }
             if (!buffer.append(amount)) {
@@ -100,30 +100,34 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         private void doObserve(double value) {
-            if (Double.isNaN(value) || Double.isInfinite(value)) {
+            if (Double.isNaN(value)) {
                 // This cannot happen because the observe() methods don't pass NaN or infinite to doObserve()
                 throw new IllegalArgumentException("value must not be NaN or infinite.");
             }
             if (classicUpperBounds != null) {
-            for (int i = 0; i < classicUpperBounds.length; ++i) {
-                // The last bucket is +Inf, so we always increment.
-                if (value <= classicUpperBounds[i]) {
-                    buckets[i].add(1);
-                    break;
+                for (int i = 0; i < classicUpperBounds.length; ++i) {
+                    // The last bucket is +Inf, so we always increment.
+                    if (value <= classicUpperBounds[i]) {
+                        buckets[i].add(1);
+                        break;
+                    }
                 }
             }
-            }
+            boolean bucketCreated = false;
             if (nativeSchema != CLASSIC_HISTOGRAM) {
                 if (value > zeroThreshold) {
-                    addToBucket(bucketsForPositiveValues, value);
+                    bucketCreated = addToBucket(bucketsForPositiveValues, value);
                 } else if (value < -zeroThreshold) {
-                    addToBucket(bucketsForNegativeValues, -value);
+                    bucketCreated = addToBucket(bucketsForNegativeValues, -value);
                 } else {
                     zeroCount.add(1);
                 }
             }
             sum.add(value);
             count.increment(); // must be the last step, because count is used to signal that the operation is complete.
+            if (bucketCreated) {
+                maybeScaleDown();
+            }
         }
 
         public HistogramSnapshot.HistogramData collect(Labels labels) {
@@ -176,8 +180,14 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
 
-        private void addToBucket(ConcurrentHashMap<Integer, LongAdder> buckets, double value) {
-            int bucketIndex = findBucketIndex(value);
+        private boolean addToBucket(ConcurrentHashMap<Integer, LongAdder> buckets, double value) {
+            boolean newBucketCreated = false;
+            int bucketIndex;
+            if (Double.isInfinite(value)) {
+                bucketIndex = findBucketIndex(Double.MAX_VALUE) + 1;
+            } else {
+                bucketIndex = findBucketIndex(value);
+            }
             // debug: the IllegalStateException should never happen
             // todo: remove and write a unit test for findBucketIndex() instead
             double base = Math.pow(2, Math.pow(2, -schema));
@@ -189,12 +199,10 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                 LongAdder newBucketCount = new LongAdder();
                 LongAdder existingBucketCount = buckets.putIfAbsent(bucketIndex, newBucketCount);
                 bucketCount = existingBucketCount == null ? newBucketCount : existingBucketCount;
+                newBucketCreated = true;
             }
             bucketCount.increment();
-            int numberOfBuckets = buckets.size();
-            if (numberOfBuckets == Integer.MAX_VALUE || numberOfBuckets > nativeMaxBuckets) {
-                scaleDown();
-            }
+            return newBucketCreated;
         }
 
         // Assumptions:
@@ -249,10 +257,48 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return last + 1;
         }
 
-        private void scaleDown() {
-            // TODO
+        private void maybeScaleDown() {
+            int numberOfBuckets = bucketsForPositiveValues.size() + bucketsForNegativeValues.size();
+            if (numberOfBuckets <= nativeMaxBuckets || schema == -4) {
+                return;
+            }
+            buffer.run(
+                    expectedCount -> count.sum() == expectedCount,
+                    () -> {
+                        // TODO: Can the smallest bucket approach zeroThreshold after scale down?
+                        int nBuckets = bucketsForPositiveValues.size() + bucketsForNegativeValues.size();
+                        if (nBuckets <= nativeMaxBuckets || schema == -4) {
+                            return null;
+                        }
+                        ArrayList<Map<Integer, LongAdder>> allBuckets = new ArrayList<>(2);
+                        allBuckets.add(bucketsForPositiveValues);
+                        allBuckets.add(bucketsForNegativeValues);
+                        for (Map<Integer, LongAdder> buckets : allBuckets) {
+                            int[] keys = new int[buckets.size()];
+                            long[] values = new long[keys.length];
+                            int i = 0;
+                            for (Map.Entry<Integer, LongAdder> entry : buckets.entrySet()) {
+                                keys[i] = entry.getKey();
+                                values[i] = entry.getValue().sum();
+                                i++;
+                            }
+                            buckets.clear();
+                            for (i = 0; i < keys.length; i++) {
+                                int index = (keys[i] + 1) / 2;
+                                LongAdder count = buckets.get(index);
+                                if (count == null) {
+                                    count = new LongAdder();
+                                    buckets.put(index, count);
+                                }
+                                count.add(values[i]);
+                            }
+                        }
+                        schema--;
+                        return null;
+                    },
+                    this::doObserve
+            );
         }
-
 
         private NativeHistogramBuckets toBucketList(ConcurrentHashMap<Integer, LongAdder> map) {
             int[] bucketIndexes = new int[map.size()];

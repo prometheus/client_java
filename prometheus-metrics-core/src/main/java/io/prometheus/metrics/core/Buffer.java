@@ -34,21 +34,28 @@ class Buffer<T extends io.prometheus.metrics.model.MetricData> {
         }
     }
 
-    synchronized T run(Function<Long, Boolean> complete, Supplier<T> runnable, Consumer<Double> observeFunction) {
-        Long count = observationCount.getAndAdd(signBit);
-        while (!complete.apply(count)) {
-            Thread.yield();
+    T run(Function<Long, Boolean> complete, Supplier<T> runnable, Consumer<Double> observeFunction) {
+        double[] buffer;
+        int bufferSize;
+        T result;
+        synchronized (this) {
+            Long count = observationCount.getAndAdd(signBit);
+            while (!complete.apply(count)) {
+                Thread.yield();
+            }
+            result = runnable.get();
+            int expectedBufferSize = (int) (observationCount.addAndGet(signBit) - count);
+            while (bufferPos != expectedBufferSize) {
+                Thread.yield();
+            }
+            buffer = observationBuffer;
+            bufferSize = bufferPos;
+            observationBuffer = new double[0];
+            bufferPos = 0;
         }
-        T result = runnable.get();
-        int expectedBufferSize = (int) (observationCount.addAndGet(signBit) - count);
-        while (bufferPos != expectedBufferSize) {
-            Thread.yield();
+        for (int i = 0; i < bufferSize; i++) {
+            observeFunction.accept(buffer[i]);
         }
-        for (int i=0; i<bufferPos; i++) {
-            observeFunction.accept(observationBuffer[i]);
-        }
-        observationBuffer = new double[0];
-        bufferPos = 0;
         return result;
     }
 }

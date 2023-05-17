@@ -34,6 +34,15 @@ public class NativeHistogramBucketsHistogramTest {
             this.histogram = histogram;
             this.observations = observations;
         }
+
+        private void run() {
+            for (double observation : observations) {
+                histogram.observe(observation);
+            }
+            Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(histogram.collect());
+            String expectedWithMetadata = "name: \"test\" type: HISTOGRAM metric { histogram { " + expected + " } }";
+            assertEquals("test \"" + name + "\" failed", expectedWithMetadata, TextFormat.printer().shortDebugString(protobufData));
+        }
     }
 
     /**
@@ -42,22 +51,26 @@ public class NativeHistogramBucketsHistogramTest {
     @Test
     public void testGolangTests() throws NoSuchFieldException, IllegalAccessException {
         TestCase[] testCases = new TestCase[]{
-                new TestCase("observed values are exactly at bucket boundaries",
+                new TestCase("'no sparse buckets' from client_golang",
                         "sample_count: 3 " +
-                                "sample_sum: 1.5 " +
-                                "schema: 0 " +
-                                "zero_threshold: 0.0 " +
-                                "zero_count: 1 " +
-                                "positive_span { offset: -1 length: 2 } " +
-                                "positive_delta: 1 " +
-                                "positive_delta: 0",
+                                "sample_sum: 6.0 " +
+                                "bucket { cumulative_count: 0 upper_bound: 0.005 } " +
+                                "bucket { cumulative_count: 0 upper_bound: 0.01 } " +
+                                "bucket { cumulative_count: 0 upper_bound: 0.025 } " +
+                                "bucket { cumulative_count: 0 upper_bound: 0.05 } " +
+                                "bucket { cumulative_count: 0 upper_bound: 0.1 } " +
+                                "bucket { cumulative_count: 0 upper_bound: 0.25 } " +
+                                "bucket { cumulative_count: 0 upper_bound: 0.5 } " +
+                                "bucket { cumulative_count: 1 upper_bound: 1.0 } " +
+                                "bucket { cumulative_count: 2 upper_bound: 2.5 } " +
+                                "bucket { cumulative_count: 3 upper_bound: 5.0 } " +
+                                "bucket { cumulative_count: 3 upper_bound: 10.0 } " +
+                                "bucket { cumulative_count: 3 upper_bound: Infinity }",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
-                                .withNativeSchema(0)
-                                .withNativeZeroThreshold(0)
+                                .asClassicHistogram()
                                 .build(),
-                        0.0, 0.5, 1.0),
+                        1.0, 2.0, 3.0),
                 new TestCase("'factor 1.1 results in schema 3' from client_golang",
                         "sample_count: 4 " +
                                 "sample_sum: 6.0 " +
@@ -203,6 +216,7 @@ public class NativeHistogramBucketsHistogramTest {
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
                 ),
                 /*
+                // See https://github.com/prometheus/client_golang/issues/1275
                 new TestCase("'NaN observation' from client_golang",
                         "sample_count: 7 " +
                                 "sample_sum: NaN " +
@@ -223,6 +237,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NaN
                 ),
+                */
                 new TestCase("'+Inf observation' from client_golang",
                         "sample_count: 7 " +
                                 "sample_sum: Infinity " +
@@ -230,11 +245,13 @@ public class NativeHistogramBucketsHistogramTest {
                                 "zero_threshold: 0.0 " +
                                 "zero_count: 1 " +
                                 "positive_span { offset: 0 length: 5 } " +
+                                "positive_span { offset: 4092 length: 1 } " +
                                 "positive_delta: 1 " +
                                 "positive_delta: -1 " +
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
-                                "positive_delta: 2",
+                                "positive_delta: 2 " +
+                                "positive_delta: -1",
                         Histogram.newBuilder()
                                 .withName("test")
                                 .asNativeHistogram()
@@ -249,6 +266,8 @@ public class NativeHistogramBucketsHistogramTest {
                                 "schema: 2 " +
                                 "zero_threshold: 0.0 " +
                                 "zero_count: 1 " +
+                                "negative_span { offset: 4097 length: 1 } " +
+                                "negative_delta: 1 " +
                                 "positive_span { offset: 0 length: 5 } " +
                                 "positive_delta: 1 " +
                                 "positive_delta: -1 " +
@@ -262,16 +281,165 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withNativeZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NEGATIVE_INFINITY
+                ),
+                new TestCase("'limited buckets but nothing triggered' from client_golang",
+                        "sample_count: 6 " +
+                                "sample_sum: 7.4 " +
+                                "schema: 2 " +
+                                "zero_threshold: 0.0 " +
+                                "zero_count: 1 " +
+                                "positive_span { offset: 0 length: 5 } " +
+                                "positive_delta: 1 " +
+                                "positive_delta: -1 " +
+                                "positive_delta: 2 " +
+                                "positive_delta: -2 " +
+                                "positive_delta: 2",
+                        Histogram.newBuilder()
+                                .withName("test")
+                                .asNativeHistogram()
+                                .withNativeSchema(2)
+                                .withNativeZeroThreshold(0)
+                                .withMaxNativeBuckets(4)
+                                .build(),
+                        0, 1, 1.2, 1.4, 1.8, 2
+                        ),
+                new TestCase("'buckets limited by halving resolution' from client_golang",
+                "sample_count: 8 " +
+                        "sample_sum: 11.5 " +
+                        "schema: 1 " +
+                        "zero_threshold: 0.0 " +
+                        "zero_count: 1 " +
+                        "positive_span { offset: 0 length: 5 } " +
+                        "positive_delta: 1 " +
+                        "positive_delta: 2 " +
+                        "positive_delta: -1 " +
+                        "positive_delta: -2 " +
+                        "positive_delta: 1",
+                        Histogram.newBuilder()
+                                .withName("test")
+                                .asNativeHistogram()
+                                .withNativeSchema(2)
+                                .withNativeZeroThreshold(0)
+                                .withMaxNativeBuckets(4)
+                                .build(),
+                0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
                 )
+                /*
+                {
+		{
+			name:             "buckets limited by widening the zero bucket",
+			observations:     []float64{0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3},
+			factor:           1.2,
+			maxBuckets:       4,
+			maxZeroThreshold: 1.2,
+			want:             `sample_count:8 sample_sum:11.5 schema:2 zero_threshold:1 zero_count:2 positive_span:<offset:1 length:7 > positive_delta:1 positive_delta:1 positive_delta:-2 positive_delta:2 positive_delta:-2 positive_delta:0 positive_delta:1 `,
+		},
+		{
+			name:             "buckets limited by widening the zero bucket twice",
+			observations:     []float64{0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3, 4},
+			factor:           1.2,
+			maxBuckets:       4,
+			maxZeroThreshold: 1.2,
+			want:             `sample_count:9 sample_sum:15.5 schema:2 zero_threshold:1.189207115002721 zero_count:3 positive_span:<offset:2 length:7 > positive_delta:2 positive_delta:-2 positive_delta:2 positive_delta:-2 positive_delta:0 positive_delta:1 positive_delta:0 `,
+		},
+		{
+			name:             "buckets limited by reset",
+			observations:     []float64{0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3, 4},
+			factor:           1.2,
+			maxBuckets:       4,
+			maxZeroThreshold: 1.2,
+			minResetDuration: 5 * time.Minute,
+			want:             `sample_count:2 sample_sum:7 schema:2 zero_threshold:2.938735877055719e-39 zero_count:0 positive_span:<offset:7 length:2 > positive_delta:1 positive_delta:0 `,
+		},
+		{
+			name:         "limited buckets but nothing triggered, negative observations",
+			observations: []float64{0, -1, -1.2, -1.4, -1.8, -2},
+			factor:       1.2,
+			maxBuckets:   4,
+			want:         `sample_count:6 sample_sum:-7.4 schema:2 zero_threshold:2.938735877055719e-39 zero_count:1 negative_span:<offset:0 length:5 > negative_delta:1 negative_delta:-1 negative_delta:2 negative_delta:-2 negative_delta:2 `,
+		},
+		{
+			name:         "buckets limited by halving resolution, negative observations",
+			observations: []float64{0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3},
+			factor:       1.2,
+			maxBuckets:   4,
+			want:         `sample_count:8 sample_sum:-11.5 schema:1 zero_threshold:2.938735877055719e-39 zero_count:1 negative_span:<offset:0 length:5 > negative_delta:1 negative_delta:2 negative_delta:-1 negative_delta:-2 negative_delta:1 `,
+		},
+		{
+			name:             "buckets limited by widening the zero bucket, negative observations",
+			observations:     []float64{0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3},
+			factor:           1.2,
+			maxBuckets:       4,
+			maxZeroThreshold: 1.2,
+			want:             `sample_count:8 sample_sum:-11.5 schema:2 zero_threshold:1 zero_count:2 negative_span:<offset:1 length:7 > negative_delta:1 negative_delta:1 negative_delta:-2 negative_delta:2 negative_delta:-2 negative_delta:0 negative_delta:1 `,
+		},
+		{
+			name:             "buckets limited by widening the zero bucket twice, negative observations",
+			observations:     []float64{0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3, -4},
+			factor:           1.2,
+			maxBuckets:       4,
+			maxZeroThreshold: 1.2,
+			want:             `sample_count:9 sample_sum:-15.5 schema:2 zero_threshold:1.189207115002721 zero_count:3 negative_span:<offset:2 length:7 > negative_delta:2 negative_delta:-2 negative_delta:2 negative_delta:-2 negative_delta:0 negative_delta:1 negative_delta:0 `,
+		},
+		{
+			name:             "buckets limited by reset, negative observations",
+			observations:     []float64{0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3, -4},
+			factor:           1.2,
+			maxBuckets:       4,
+			maxZeroThreshold: 1.2,
+			minResetDuration: 5 * time.Minute,
+			want:             `sample_count:2 sample_sum:-7 schema:2 zero_threshold:2.938735877055719e-39 zero_count:0 negative_span:<offset:7 length:2 > negative_delta:1 negative_delta:0 `,
+		},
+		{
+			name:             "buckets limited by halving resolution, then reset",
+			observations:     []float64{0, 1, 1.1, 1.2, 1.4, 1.8, 2, 5, 5.1, 3, 4},
+			factor:           1.2,
+			maxBuckets:       4,
+			minResetDuration: 9 * time.Minute,
+			want:             `sample_count:2 sample_sum:7 schema:2 zero_threshold:2.938735877055719e-39 zero_count:0 positive_span:<offset:7 length:2 > positive_delta:1 positive_delta:0 `,
+		},
+		{
+			name:             "buckets limited by widening the zero bucket, then reset",
+			observations:     []float64{0, 1, 1.1, 1.2, 1.4, 1.8, 2, 5, 5.1, 3, 4},
+			factor:           1.2,
+			maxBuckets:       4,
+			maxZeroThreshold: 1.2,
+			minResetDuration: 9 * time.Minute,
+			want:             `sample_count:2 sample_sum:7 schema:2 zero_threshold:2.938735877055719e-39 zero_count:0 positive_span:<offset:7 length:2 > positive_delta:1 positive_delta:0 `,
+		},
+		}
                  */
         };
         for (TestCase testCase : testCases) {
-            for (double observation : testCase.observations) {
-                testCase.histogram.observe(observation);
-            }
-            Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(testCase.histogram.collect());
-            String expected = "name: \"test\" type: HISTOGRAM metric { histogram { " + testCase.expected + " } }";
-            assertEquals("test \"" + testCase.name + "\" failed", expected, TextFormat.printer().shortDebugString(protobufData));
+            testCase.run();
+        }
+    }
+
+    /**
+     * Additional tests that are not part of client_golang's test suite.
+     */
+    @Test
+    public void testAdditional() throws NoSuchFieldException, IllegalAccessException {
+        TestCase[] testCases = new TestCase[]{
+                new TestCase("observed values are exactly at bucket boundaries",
+                        "sample_count: 3 " +
+                                "sample_sum: 1.5 " +
+                                "schema: 0 " +
+                                "zero_threshold: 0.0 " +
+                                "zero_count: 1 " +
+                                "positive_span { offset: -1 length: 2 } " +
+                                "positive_delta: 1 " +
+                                "positive_delta: 0",
+                        Histogram.newBuilder()
+                                .withName("test")
+                                .asNativeHistogram()
+                                .withNativeSchema(0)
+                                .withNativeZeroThreshold(0)
+                                .build(),
+                        0.0, 0.5, 1.0)
+        };
+        for (TestCase testCase : testCases) {
+            testCase.run();
         }
     }
 
