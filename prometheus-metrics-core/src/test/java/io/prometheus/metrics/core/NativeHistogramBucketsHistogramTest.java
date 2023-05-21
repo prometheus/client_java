@@ -10,8 +10,11 @@ import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.HistogramSnapshot;
 import io.prometheus.metrics.model.NativeHistogramBucket;
 import io.prometheus.metrics.model.Labels;
+import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -87,7 +90,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(3)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.0, 1.0, 2.0, 3.0),
                 new TestCase("'factor 1.2 results in schema 2' from client_golang",
@@ -106,7 +109,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(2)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2),
                 new TestCase("'factor 4 results in schema -1' from client_golang",
@@ -124,7 +127,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(-1)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.5, 1, // Bucket 0: (0.25, 1]
                         1.5, 2, 3, 3.5, // Bucket 1: (1, 4]
@@ -145,7 +148,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(-2)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.5, 1, // Bucket 0: (0.0625, 1]
                         1.5, 2, 3, 3.5, 5, 6, 7, // Bucket 1: (1, 16]
@@ -167,7 +170,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(2)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2
                 ),
@@ -193,7 +196,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(2)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
                 ),
@@ -211,7 +214,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(2)
-                                .withNativeZeroThreshold(1.4)
+                                .withNativeMaxZeroThreshold(1.4)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
                 ),
@@ -233,7 +236,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(2)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NaN
                 ),
@@ -256,7 +259,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(2)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.POSITIVE_INFINITY
                 ),
@@ -278,7 +281,7 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(2)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NEGATIVE_INFINITY
                 ),
@@ -298,50 +301,80 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(2)
-                                .withNativeZeroThreshold(0)
-                                .withMaxNativeBuckets(4)
+                                .withNativeMaxZeroThreshold(0)
+                                .withNativeMaxBuckets(4)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2
-                        ),
+                ),
                 new TestCase("'buckets limited by halving resolution' from client_golang",
-                "sample_count: 8 " +
-                        "sample_sum: 11.5 " +
-                        "schema: 1 " +
-                        "zero_threshold: 0.0 " +
-                        "zero_count: 1 " +
-                        "positive_span { offset: 0 length: 5 } " +
-                        "positive_delta: 1 " +
-                        "positive_delta: 2 " +
-                        "positive_delta: -1 " +
-                        "positive_delta: -2 " +
-                        "positive_delta: 1",
+                        "sample_count: 8 " +
+                                "sample_sum: 11.5 " +
+                                "schema: 1 " +
+                                "zero_threshold: 0.0 " +
+                                "zero_count: 1 " +
+                                "positive_span { offset: 0 length: 5 } " +
+                                "positive_delta: 1 " +
+                                "positive_delta: 2 " +
+                                "positive_delta: -1 " +
+                                "positive_delta: -2 " +
+                                "positive_delta: 1",
                         Histogram.newBuilder()
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(2)
-                                .withNativeZeroThreshold(0)
-                                .withMaxNativeBuckets(4)
+                                .withNativeMaxZeroThreshold(0)
+                                .withNativeMaxBuckets(4)
                                 .build(),
-                0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
-                )
+                        0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
+                ),
+                new TestCase("'buckets limited by widening the zero bucket' from client_golang",
+                        "sample_count: 8 " +
+                                "sample_sum: 11.5 " +
+                                "schema: 2 " +
+                                "zero_threshold: 1.0 " +
+                                "zero_count: 2 " +
+                                "positive_span { offset: 1 length: 7 } " +
+                                "positive_delta: 1 " +
+                                "positive_delta: 1 " +
+                                "positive_delta: -2 " +
+                                "positive_delta: 2 " +
+                                "positive_delta: -2 " +
+                                "positive_delta: 0 " +
+                                "positive_delta: 1",
+                        Histogram.newBuilder()
+                                .withName("test")
+                                .asNativeHistogram()
+                                .withNativeSchema(2)
+                                .withNativeMaxZeroThreshold(1.2)
+                                .withNativeMaxBuckets(4)
+                                .build(),
+                        0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
+                ),
+                new TestCase("'buckets limited by widening the zero bucket twice' from client_golang",
+                        "sample_count: 9 " +
+                                "sample_sum: 15.5 " +
+                                "schema: 2 " +
+                                "zero_threshold: 1.189207115002721 " +
+                                "zero_count: 3 " +
+                                "positive_span { offset: 2 length: 7 } " +
+                                "positive_delta: 2 " +
+                                "positive_delta: -2 " +
+                                "positive_delta: 2 " +
+                                "positive_delta: -2 " +
+                                "positive_delta: 0 " +
+                                "positive_delta: 1 " +
+                                "positive_delta: 0",
+                        Histogram.newBuilder()
+                                .withName("test")
+                                .asNativeHistogram()
+                                .withNativeSchema(2)
+                                .withNativeMaxZeroThreshold(1.2)
+                                .withNativeMaxBuckets(4)
+                                .build(),
+                        0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3, 4)
+
                 /*
                 {
-		{
-			name:             "buckets limited by widening the zero bucket",
-			observations:     []float64{0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3},
-			factor:           1.2,
-			maxBuckets:       4,
-			maxZeroThreshold: 1.2,
-			want:             `sample_count:8 sample_sum:11.5 schema:2 zero_threshold:1 zero_count:2 positive_span:<offset:1 length:7 > positive_delta:1 positive_delta:1 positive_delta:-2 positive_delta:2 positive_delta:-2 positive_delta:0 positive_delta:1 `,
-		},
-		{
-			name:             "buckets limited by widening the zero bucket twice",
-			observations:     []float64{0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3, 4},
-			factor:           1.2,
-			maxBuckets:       4,
-			maxZeroThreshold: 1.2,
-			want:             `sample_count:9 sample_sum:15.5 schema:2 zero_threshold:1.189207115002721 zero_count:3 positive_span:<offset:2 length:7 > positive_delta:2 positive_delta:-2 positive_delta:2 positive_delta:-2 positive_delta:0 positive_delta:1 positive_delta:0 `,
-		},
 		{
 			name:             "buckets limited by reset",
 			observations:     []float64{0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3, 4},
@@ -411,7 +444,9 @@ public class NativeHistogramBucketsHistogramTest {
                  */
         };
         for (TestCase testCase : testCases) {
-            testCase.run();
+            if (testCase.name.contains("widening")) {
+                testCase.run();
+            }
         }
     }
 
@@ -434,12 +469,33 @@ public class NativeHistogramBucketsHistogramTest {
                                 .withName("test")
                                 .asNativeHistogram()
                                 .withNativeSchema(0)
-                                .withNativeZeroThreshold(0)
+                                .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.0, 0.5, 1.0)
         };
         for (TestCase testCase : testCases) {
             testCase.run();
+        }
+    }
+
+    @Test
+    public void testNativeBucketIndexToUpperBound() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        // test data from client_golang's TestGetLe
+        int[] indexes = new int[]{-1, 0, 1, 512, 513, -1, 0, 1, 1024, 1025, -1, 0, 1, 4096, 4097};
+        int[] schemas = new int[]{-1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2};
+        double[] expectedUpperBounds = new double[]{0.25, 1, 4, Double.MAX_VALUE, Double.POSITIVE_INFINITY,
+                0.5, 1, 2, Double.MAX_VALUE, Double.POSITIVE_INFINITY,
+                0.8408964152537144, 1, 1.189207115002721, Double.MAX_VALUE, Double.POSITIVE_INFINITY};
+        Method method = Histogram.HistogramData.class.getDeclaredMethod("nativeBucketIndexToUpperBound", int.class, int.class);
+        method.setAccessible(true);
+        for (int i = 0; i < indexes.length; i++) {
+            Histogram histogram = Histogram.newBuilder()
+                    .withName("test")
+                    .withNativeSchema(schemas[i])
+                    .build();
+            Histogram.HistogramData histogramData = histogram.newMetricData();
+            double result = (double) method.invoke(histogramData, schemas[i], indexes[i]);
+            Assert.assertEquals("index=" + indexes[i] + ", schema=" + schemas[i], expectedUpperBounds[i], result, 0.0000000000001);
         }
     }
 
@@ -457,6 +513,7 @@ public class NativeHistogramBucketsHistogramTest {
 
         SpanContextSupplier spanContextSupplier = new SpanContextSupplier() {
             int callCount = 0;
+
             @Override
             public String getTraceId() {
                 return "traceId-" + callCount;

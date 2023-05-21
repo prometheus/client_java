@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -100,7 +99,7 @@ public class FixedBucketsHistogramTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testIllegalLabelNameFixedBucketsHistogramBuilder() {
-    Histogram.newBuilder().withDefaultBuckets().withLabelNames("label", "le");
+    Histogram.newBuilder().withClassicDefaultBuckets().withLabelNames("label", "le");
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -122,7 +121,7 @@ public class FixedBucketsHistogramTest {
 
   @Test(expected = RuntimeException.class)
   public void testNoName() {
-    Histogram.newBuilder().withDefaultBuckets().build();
+    Histogram.newBuilder().withClassicDefaultBuckets().build();
   }
 
   @Test(expected = RuntimeException.class)
@@ -132,17 +131,17 @@ public class FixedBucketsHistogramTest {
 
   @Test(expected = RuntimeException.class)
   public void testIllegalNameFixedBucketsHistogramBuilder() {
-    Histogram.newBuilder().withBuckets(0, 1, 2).withName("server.durations");
+    Histogram.newBuilder().withClassicBuckets(0, 1, 2).withName("server.durations");
   }
 
   @Test(expected = RuntimeException.class)
   public void testNullName() {
-    Histogram.newBuilder().withDefaultBuckets().withName(null);
+    Histogram.newBuilder().withClassicDefaultBuckets().withName(null);
   }
 
   @Test
   public void testDuplicateBuckets() {
-    Histogram histogram = Histogram.newBuilder().withName("test").withBuckets(0, 3, 17, 3, 21).build();
+    Histogram histogram = Histogram.newBuilder().withName("test").withClassicBuckets(0, 3, 17, 3, 21).build();
     List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
@@ -151,7 +150,7 @@ public class FixedBucketsHistogramTest {
 
   @Test
   public void testUnsortedBuckets() {
-    Histogram histogram = Histogram.newBuilder().withBuckets(0.2, 0.1).withName("test").build();
+    Histogram histogram = Histogram.newBuilder().withClassicBuckets(0.2, 0.1).withName("test").build();
     List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
@@ -160,7 +159,7 @@ public class FixedBucketsHistogramTest {
 
   @Test
   public void testEmptyBuckets() {
-    Histogram histogram = Histogram.newBuilder().withBuckets().withName("test").build();
+    Histogram histogram = Histogram.newBuilder().withClassicBuckets().withName("test").build();
     List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
@@ -169,7 +168,7 @@ public class FixedBucketsHistogramTest {
 
   @Test
   public void testBucketsIncludePositiveInfinity() {
-    Histogram histogram = Histogram.newBuilder().withBuckets(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY).withName("test").build();
+    Histogram histogram = Histogram.newBuilder().withClassicBuckets(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY).withName("test").build();
     List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
@@ -180,7 +179,7 @@ public class FixedBucketsHistogramTest {
   public void testLinearBuckets() {
     Histogram histogram = Histogram.newBuilder()
             .withName("test")
-            .withLinearBuckets(0.1, 0.1, 10)
+            .withClassicLinearBuckets(0.1, 0.1, 10)
             .build();
     List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
@@ -191,7 +190,7 @@ public class FixedBucketsHistogramTest {
   @Test
   public void testExponentialBuckets() {
     Histogram histogram = Histogram.newBuilder()
-            .withExponentialBuckets(2, 2.5, 3)
+            .withClassicExponentialBuckets(2, 2.5, 3)
             .withName("test")
             .build();
     List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
@@ -202,12 +201,12 @@ public class FixedBucketsHistogramTest {
 
   @Test(expected = RuntimeException.class)
   public void testBucketsIncludeNaN() {
-    Histogram.newBuilder().withBuckets(0.01, 0.1, 1.0, Double.NaN);
+    Histogram.newBuilder().withClassicBuckets(0.01, 0.1, 1.0, Double.NaN);
   }
 
   @Test
   public void testNoLabelsDefaultZeroValue() {
-    Histogram noLabels = Histogram.newBuilder().withName("test").withDefaultBuckets().build();
+    Histogram noLabels = Histogram.newBuilder().withName("test").withClassicDefaultBuckets().build();
     assertEquals(0.0, getBucket(noLabels, 0.005).getCount(), 0.000001);
     assertEquals(0, getData(noLabels).getCount());
     assertEquals(0.0, getData(noLabels).getSum(), 0.000001);
@@ -217,7 +216,7 @@ public class FixedBucketsHistogramTest {
   public void testObserve() {
     Histogram noLabels = Histogram.newBuilder()
             .withName("test")
-            .withDefaultBuckets()
+            .withClassicDefaultBuckets()
             .build();
     noLabels.observe(2);
     assertEquals(1, getData(noLabels).getCount());
@@ -241,7 +240,7 @@ public class FixedBucketsHistogramTest {
     Histogram histogram = Histogram.newBuilder()
         .withName("histogram")
         .withHelp("test histogram for negative values")
-        .withBuckets(-10, -5, 0, 5, 10)
+        .withClassicBuckets(-10, -5, 0, 5, 10)
         .build();
     double expectedCount = 0;
     double expectedSum = 0;
@@ -263,7 +262,7 @@ public class FixedBucketsHistogramTest {
   public void testBoundaryConditions() {
     Histogram histogram = Histogram.newBuilder()
             .withName("test")
-            .withDefaultBuckets()
+            .withClassicDefaultBuckets()
             .build();
     histogram.observe(2.5);
     assertEquals(0, getBucket(histogram, 1).getCount());
@@ -281,7 +280,7 @@ public class FixedBucketsHistogramTest {
   @Test
   public void testObserveWithLabels() {
     Histogram histogram = Histogram.newBuilder()
-            .withDefaultBuckets()
+            .withClassicDefaultBuckets()
             .withName("test")
             .withConstLabels(Labels.of("env", "prod"))
             .withLabelNames("path", "status")
@@ -308,7 +307,7 @@ public class FixedBucketsHistogramTest {
   public void testObserveMultithreaded() throws InterruptedException, ExecutionException, TimeoutException {
     // Hard to test concurrency, but let's run a couple of observations in parallel and assert none gets lost.
     Histogram histogram = Histogram.newBuilder()
-            .withDefaultBuckets()
+            .withClassicDefaultBuckets()
             .withName("test")
             .withLabelNames("status")
             .build();
@@ -377,7 +376,7 @@ public class FixedBucketsHistogramTest {
             .withName("test")
             // The default number of Exemplars for an exponential histogram is 4.
             // Use 5 buckets to verify that the exemplar sample is configured with the buckets.
-            .withBuckets(1.0, 2.0, 3.0, 4.0, Double.POSITIVE_INFINITY)
+            .withClassicBuckets(1.0, 2.0, 3.0, 4.0, Double.POSITIVE_INFINITY)
             .withExemplarConfig(ExemplarConfig.newBuilder()
                     .withSpanContextSupplier(spanContextSupplier)
                     .withSampleIntervalMillis(sampleIntervalMillis)
