@@ -329,16 +329,21 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         private double calcUpperBound(int schema, int index) {
-            // The while loop reduces the numerical rounding error for even indexes.
-            // If there were no numerical errors, we could remove the while loop and get the same result.
+            // The following reduces the numerical error for index > 0.
             // TODO: Refactor and use an algorithm as in client_golang's getLe()
-            while (schema > 0 && index > 0 && index % 2 == 0) {
-                index /= 2;
-                schema -= 1;
+            double factor = 1.0;
+            while (index > 0) {
+                if (index % 2 == 0) {
+                    index /= 2;
+                    schema -= 1;
+                } else {
+                    index -= 1;
+                    factor *= Math.pow(2, Math.pow(2, -schema));
+                }
             }
-            // The two lines below would yield the correct result if there were no numerical rounding errors.
-            double base = Math.pow(2, Math.pow(2, -schema));
-            return Math.pow(base, index);
+            // The following is the actual formula.
+            // Without numerical errors it would be sufficient to just use this line and remove the code above.
+            return factor * Math.pow(2, index * Math.pow(2, -schema));
         }
 
         private int findSmallestIndex(Map<Integer, LongAdder> nativeBuckets) {
