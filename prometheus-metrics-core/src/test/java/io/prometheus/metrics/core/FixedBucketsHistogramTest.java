@@ -229,7 +229,6 @@ public class FixedBucketsHistogramTest {
     assertEquals(0.0, getBucket(noLabels, 1).getCount(), .001);
     assertEquals(1.0, getBucket(noLabels, 2.5).getCount(), .001);
     assertEquals(1.0, getBucket(noLabels, 5).getCount(), .001);
-    assertEquals(0.0, getBucket(noLabels, 7.5).getCount(), .001);
     assertEquals(0.0, getBucket(noLabels, 10).getCount(), .001);
     assertEquals(0.0, getBucket(noLabels, Double.POSITIVE_INFINITY).getCount(), .001);
   }
@@ -272,9 +271,8 @@ public class FixedBucketsHistogramTest {
     assertEquals(0, getBucket(histogram, 1).getCount());
     assertEquals(1, getBucket(histogram, 2.5).getCount());
     assertEquals(0, getBucket(histogram, 5).getCount());
-    assertEquals(0, getBucket(histogram, 7.5).getCount());
     assertEquals(0, getBucket(histogram, 10).getCount());
-    assertEquals(0, getBucket(histogram, Double.POSITIVE_INFINITY).getCount());
+    assertEquals(1, getBucket(histogram, Double.POSITIVE_INFINITY).getCount());
   }
 
   @Test
