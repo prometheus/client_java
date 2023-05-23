@@ -24,7 +24,7 @@ import java.util.Optional;
 import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
 
-public class NativeHistogramBucketsHistogramTest {
+public class HistogramTest {
 
     private static final double RESET_DURATION_REACHED = -123.456; // just a random value indicating that we should simulate that the reset duration has been reached
 
