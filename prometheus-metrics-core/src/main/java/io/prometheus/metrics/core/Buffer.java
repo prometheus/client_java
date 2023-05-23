@@ -12,7 +12,9 @@ class Buffer<T extends io.prometheus.metrics.model.MetricData> {
     private final AtomicLong observationCount = new AtomicLong(0);
     private double[] observationBuffer = new double[0];
     private int bufferPos = 0;
-    private final Object writeLock = new Object();
+    private boolean reset = false;
+    private final Object appendLock = new Object();
+    private final Object runLock = new Object();
 
     boolean append(double amount) {
         long count = observationCount.incrementAndGet();
@@ -25,7 +27,7 @@ class Buffer<T extends io.prometheus.metrics.model.MetricData> {
     }
 
     private void doAppend(double amount) {
-        synchronized (writeLock) {
+        synchronized (appendLock) {
             if (bufferPos >= observationBuffer.length) {
                 observationBuffer = Arrays.copyOf(observationBuffer, observationBuffer.length + 128);
             }
@@ -34,17 +36,30 @@ class Buffer<T extends io.prometheus.metrics.model.MetricData> {
         }
     }
 
+    /**
+     * Must be called by the runnable in the run() method.
+     */
+    public void reset() {
+        reset = true;
+    }
+
     T run(Function<Long, Boolean> complete, Supplier<T> runnable, Consumer<Double> observeFunction) {
         double[] buffer;
         int bufferSize;
         T result;
-        synchronized (this) {
+        synchronized (runLock) {
             Long count = observationCount.getAndAdd(signBit);
             while (!complete.apply(count)) {
                 Thread.yield();
             }
             result = runnable.get();
-            int expectedBufferSize = (int) (observationCount.addAndGet(signBit) - count);
+            int expectedBufferSize;
+            if (reset) {
+                expectedBufferSize = (int) (observationCount.getAndSet(0) - count);
+                reset = false;
+            } else {
+                expectedBufferSize = (int) (observationCount.addAndGet(signBit) - count);
+            }
             while (bufferPos != expectedBufferSize) {
                 Thread.yield();
             }

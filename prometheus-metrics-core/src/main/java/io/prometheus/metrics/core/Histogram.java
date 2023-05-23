@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -27,7 +28,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS = new double[]{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10};
 
     private final double[] classicUpperBounds; // null or empty for native histograms?
-    private final int nativeSchema; // integer in [-4, 8]
+    private final int initialNativeSchema; // integer in [-4, 8]
     private final double nativeMaxZeroThreshold;
     private final double nativeMinZeroThreshold;
     private final int nativeMaxBuckets;
@@ -46,23 +47,24 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         for (double upperBound : upperBounds) {
             this.classicUpperBounds[i++] = upperBound;
         }
-        this.nativeSchema = builder.nativeSchema;
-        this.nativeMaxZeroThreshold = builder.nativeMaxZeroThreshold;
-        this.nativeMinZeroThreshold = builder.nativeMinZeroThreshold;
+        this.initialNativeSchema = builder.nativeSchema;
+        this.nativeMaxZeroThreshold = builder.nativeMaxZeroThreshold < 0 ? builder.DEFAULT_MAX_ZERO_THRESHOLD : builder.nativeMaxZeroThreshold;
+        this.nativeMinZeroThreshold = builder.nativeMinZeroThreshold < 0 ? builder.DEFAULT_MIN_ZERO_THRESHOLD : builder.nativeMinZeroThreshold;
         this.nativeMaxBuckets = builder.nativeMaxBuckets;
     }
 
     public class HistogramData extends MetricData<DistributionObserver> implements DistributionObserver {
-        private volatile int nativeSchema = Histogram.this.nativeSchema; // integer in [-4, 8]
+        private volatile int nativeSchema = initialNativeSchema; // integer in [-4, 8]
         private volatile double nativeCurrentZeroThreshold = Histogram.this.nativeMinZeroThreshold;
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForPositiveValues = new ConcurrentHashMap<>();
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForNegativeValues = new ConcurrentHashMap<>();
         private final LongAdder count = new LongAdder();
         private final DoubleAdder sum = new DoubleAdder();
         private final LongAdder nativeZeroCount = new LongAdder();
-        private final long createdTimeMillis = System.currentTimeMillis();
+        private volatile long createdTimeMillis = System.currentTimeMillis();
         private final Buffer<HistogramSnapshot.HistogramData> buffer = new Buffer<>();
         private final LongAdder[] classicBuckets;
+        private volatile boolean resetAllowed = false;
 
         private HistogramData() {
             classicBuckets = new LongAdder[classicUpperBounds.length];
@@ -116,7 +118,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                 }
             }
             boolean nativeBucketCreated = false;
-            if (Histogram.this.nativeSchema != CLASSIC_HISTOGRAM) {
+            if (Histogram.this.initialNativeSchema != CLASSIC_HISTOGRAM) {
                 if (value > nativeCurrentZeroThreshold) {
                     nativeBucketCreated = addToBucket(nativeBucketsForPositiveValues, value);
                 } else if (value < -nativeCurrentZeroThreshold) {
@@ -128,14 +130,23 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             sum.add(value);
             count.increment(); // must be the last step, because count is used to signal that the operation is complete.
             if (nativeBucketCreated) {
-                maybeScaleDown();
+                boolean wasReset = maybeScaleDown();
+                if (wasReset) {
+                    // We just discarded the newly observed value. Observe it again.
+                    if (!buffer.append(value)) {
+                        doObserve(value);
+                    }
+                }
             }
         }
 
         public HistogramSnapshot.HistogramData collect(Labels labels) {
             Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
             return buffer.run(
-                    expectedCount -> count.sum() == expectedCount,
+                    expectedCount -> {
+                        System.out.println("expectedCount=" + expectedCount + " currentCount=" + count.sum());
+                        return count.sum() == expectedCount;
+                    },
                     () -> {
                         if (classicUpperBounds == null || classicUpperBounds.length == 0) { // TODO: null or empty?
                             // native only
@@ -149,7 +160,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                                     labels,
                                     exemplars,
                                     createdTimeMillis);
-                        } else if (Histogram.this.nativeSchema == CLASSIC_HISTOGRAM) {
+                        } else if (Histogram.this.initialNativeSchema == CLASSIC_HISTOGRAM) {
                             // classic only
                             return new HistogramSnapshot.HistogramData(
                                     ClassicHistogramBuckets.of(classicUpperBounds, classicBuckets),
@@ -212,6 +223,9 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         // Double.isInfinite(value) is false;
         // value >= 0.0
         private int findBucketIndex(double value) {
+            if (value == 0.0) {
+                throw new IllegalArgumentException("Cannot find a bucket for a zero observation. This is a bug in the Prometheus metrics library.");
+            }
             // The following is a naive implementation of C's frexp() function.
             // Performance can be improved by using the internal Bit representation of floating point numbers.
             // More info on the Bit representation of floating point numbers:
@@ -259,11 +273,12 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return last + 1;
         }
 
-        private void maybeScaleDown() {
+        private boolean maybeScaleDown() {
             int numberOfBuckets = nativeBucketsForPositiveValues.size() + nativeBucketsForNegativeValues.size();
             if (numberOfBuckets <= nativeMaxBuckets || nativeSchema == -4) {
-                return;
+                return false;
             }
+            AtomicBoolean wasReset = new AtomicBoolean(false);
             buffer.run(
                     expectedCount -> count.sum() == expectedCount,
                     () -> {
@@ -274,6 +289,10 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                         if (nBuckets <= nativeMaxBuckets || nativeSchema == -4) {
                             return null;
                         }
+                        if (maybeReset()) {
+                            wasReset.set(true);
+                            return null;
+                        }
                         if (maybeWidenZeroBucket()) {
                             return null;
                         }
@@ -282,6 +301,31 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                     },
                     this::doObserve
             );
+            return wasReset.get();
+        }
+
+        private boolean maybeReset() {
+            if (!resetAllowed) {
+                return false;
+            }
+            resetAllowed = false;
+            buffer.reset();
+            nativeBucketsForPositiveValues.clear();
+            nativeBucketsForNegativeValues.clear();
+            nativeZeroCount.reset();
+            count.reset();
+            sum.reset();
+            for (int i = 0; i < classicBuckets.length; i++) {
+                classicBuckets[i].reset();
+            }
+            nativeCurrentZeroThreshold = nativeMinZeroThreshold;
+            nativeSchema = Histogram.this.initialNativeSchema;
+            createdTimeMillis = System.currentTimeMillis();
+            if (exemplarSampler != null) {
+                exemplarSampler.reset();
+            }
+            // TODO: Schedule next reset;
+            return true;
         }
 
         private boolean maybeWidenZeroBucket() {
@@ -320,7 +364,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                 // actual +Inf observations.
                 // However, MAX_VALUE is not a natural bucket boundary, so we introduce MAX_VALUE
                 // as an artificial boundary before +Inf.
-                double previousBucketBoundary = calcUpperBound(schema, index-1);
+                double previousBucketBoundary = calcUpperBound(schema, index - 1);
                 if (Double.isFinite(previousBucketBoundary) && previousBucketBoundary < Double.MAX_VALUE) {
                     return Double.MAX_VALUE;
                 }
@@ -329,8 +373,13 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         private double calcUpperBound(int schema, int index) {
-            // The following reduces the numerical error for index > 0.
-            // TODO: Refactor and use an algorithm as in client_golang's getLe()
+            // The actual formula is:
+            // ---
+            // base := 2^(2^-schema);
+            // upperBound := base^index;
+            // ---
+            // The following implementation reduces the numerical error for index > 0.
+            // It's not very efficient. We should refactor and use an algorithm as in client_golang's getLe()
             double factor = 1.0;
             while (index > 0) {
                 if (index % 2 == 0) {
@@ -341,8 +390,6 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                     factor *= Math.pow(2, Math.pow(2, -schema));
                 }
             }
-            // The following is the actual formula.
-            // Without numerical errors it would be sufficient to just use this line and remove the code above.
             return factor * Math.pow(2, index * Math.pow(2, -schema));
         }
 
@@ -452,11 +499,13 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     public static class Builder extends ObservingMetric.Builder<Histogram.Builder, Histogram> {
 
         private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
+        private final double DEFAULT_MIN_ZERO_THRESHOLD = Math.pow(2.0, -128);
+        private final double DEFAULT_MAX_ZERO_THRESHOLD = Math.pow(2.0, -128);
 
         private double[] classicUpperBounds = DEFAULT_CLASSIC_UPPER_BOUNDS;
         private int nativeSchema = 5;
         private double nativeMaxZeroThreshold = -1; // negative value means not set
-        private double nativeMinZeroThreshold = Math.pow(2.0, -128);
+        private double nativeMinZeroThreshold = -1; // negative value means not set
         private int nativeMaxBuckets = Integer.MAX_VALUE;
 
         private Builder() {
@@ -525,11 +574,22 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
 
         public Builder withNativeMaxZeroThreshold(double nativeMaxZeroThreshold) {
             if (nativeMaxZeroThreshold < 0) {
-                throw new IllegalArgumentException("Illegal native zero threshold " + nativeMaxZeroThreshold + ": must be >= 0");
+                throw new IllegalArgumentException("Illegal native max zero threshold " + nativeMaxZeroThreshold + ": must be >= 0");
             }
             this.nativeMaxZeroThreshold = nativeMaxZeroThreshold;
-            if (nativeMinZeroThreshold > nativeMaxZeroThreshold) {
+            if (nativeMinZeroThreshold == -1 && DEFAULT_MIN_ZERO_THRESHOLD > nativeMaxZeroThreshold) {
                 nativeMinZeroThreshold = nativeMaxZeroThreshold;
+            }
+            return this;
+        }
+
+        public Builder withNativeMinZeroThreshold(double nativeMinZeroThreshold) {
+            if (nativeMinZeroThreshold < 0) {
+                throw new IllegalArgumentException("Illegal native min zero threshold " + nativeMinZeroThreshold + ": must be >= 0");
+            }
+            this.nativeMinZeroThreshold = nativeMinZeroThreshold;
+            if (nativeMaxZeroThreshold == -1 && DEFAULT_MAX_ZERO_THRESHOLD < nativeMinZeroThreshold) {
+                nativeMaxZeroThreshold = nativeMinZeroThreshold;
             }
             return this;
         }

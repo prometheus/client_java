@@ -46,6 +46,14 @@ public class DefaultExemplarSampler implements ExemplarSampler {
     }
 
 
+    @Override
+    public void reset() {
+        for (int i=0; i<exemplars.length; i++) {
+            exemplars[i] = null;
+            customExemplars[i] = null;
+        }
+    }
+
     /**
      * Collect up to nExemplars exemplars, preferably custom exemplars.
      */

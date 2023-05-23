@@ -7,6 +7,7 @@ import io.prometheus.metrics.model.Labels;
 import java.util.Collection;
 
 public interface ExemplarSampler {
+    void reset();
     Exemplars collect();
     void observe(double value);
     void observeWithExemplar(double value, Labels labels);
