@@ -1,11 +1,12 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.model.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.HistogramSnapshot;
-import io.prometheus.metrics.model.NativeHistogramBuckets;
-import io.prometheus.metrics.model.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.NativeHistogramBuckets;
 import io.prometheus.metrics.observer.DistributionObserver;
+import io.prometheus.metrics.util.Scheduler;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,23 +16,69 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
-// TODO: The default should be a histogram with both, classic buckets and native buckets for transition.
+/**
+ * Prometheus supports two internal representations of histograms:
+ * <ol>
+ *     <li><i>Classic Histograms</i> have a fixed number of buckets with fixed bucket boundaries.</li>
+ *     <li><i>Native Histograms</i> have an infinite number of buckets with a dynamic resolution.
+ *         Prometheus native histograms are the same as OpenTelemetry's exponential histograms.</li>
+ * </ol>
+ * By default, a histogram maintains both representations. In Text format the classic histogram will be exposed,
+ * in Protobuf format both representations will be exposed. This is great for migrating from classic histograms
+ * to native histograms.
+ * <p>
+ * If you want the classic representation only, use {@link Histogram.Builder#classicHistogramOnly}.
+ * If you want the native representation only, use {@link Histogram.Builder#nativeHistogramOnly}.
+ */
 public class Histogram extends ObservingMetric<DistributionObserver, Histogram.HistogramData> implements DistributionObserver {
 
     private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
-
     private static final double[][] NATIVE_BOUNDS;
     public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS = new double[]{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10};
 
-    private final double[] classicUpperBounds; // null or empty for native histograms?
+    private final double[] classicUpperBounds; // empty for native histograms
+
+    // The schema defines the resolution of the native histogram.
+    // Schema is Prometheus terminology, in OpenTelemetry it's named "scale".
+    // The formula for the bucket boundaries at position "index" is:
+    //
+    // base := base = (2^(2^-scale))
+    // lowerBound := base^(index-1)
+    // upperBound := base^(index)
+    //
+    // Note that this is off-by-one compared to OpenTelemetry.
+    //
+    // Example: With schema 0 the bucket boundaries are ... 1/16, 1/8, 1/4, 1/2, 1, 2, 4, 8, 16, ...
+    // Each increment in schema doubles the number of buckets.
+    //
+    // The initialNativeSchema is the schema we start with. The histogram will automatically scale down
+    // if the number of native histogram buckets exceeds nativeMaxBuckets.
     private final int initialNativeSchema; // integer in [-4, 8]
-    private final double nativeMaxZeroThreshold;
+
+    // Native histogram buckets get smaller and smaller the closer they get to zero.
+    // To avoid wasting a lot of buckets for observations fluctuating around zero, we consider all
+    // values in [-zeroThreshold, +zeroThreshold] to be equal to zero.
+    //
+    // The zeroThreshold is initialized with minZeroThreshold, and will grow up to maxZeroThreshold if
+    // the number of native histogram buckets exceeds nativeMaxBuckets.
     private final double nativeMinZeroThreshold;
+    private final double nativeMaxZeroThreshold;
+
+    // When the number of native histogram buckets becomes larger than nativeMaxBuckets,
+    // an attempt is made to reduce the number of buckets:
+    // (1) Reset if the last reset is longer than the reset duration ago
+    // (2) Increase the zero bucket width if it's smaller than nativeMaxZeroThreshold
+    // (3) Decrease the nativeSchema, i.e. merge pairs of neighboring buckets into one
     private final int nativeMaxBuckets;
+
+    // If the number of native histogram buckets exceeds nativeMaxBuckets,
+    // the histogram may reset (all values set to zero) after nativeMinResetIntervalSeconds is expired.
+    private final long nativeResetIntervalSeconds; // 0 indicates no reset
 
     private Histogram(Histogram.Builder builder) {
         super(builder);
@@ -42,7 +89,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             }
             upperBounds.add(Double.POSITIVE_INFINITY);
         }
-        this.classicUpperBounds = new double[upperBounds.size()];
+        this.classicUpperBounds = new double[upperBounds.size()]; // empty if this is a pure native histogram
         int i = 0;
         for (double upperBound : upperBounds) {
             this.classicUpperBounds[i++] = upperBound;
@@ -51,38 +98,40 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         this.nativeMaxZeroThreshold = builder.nativeMaxZeroThreshold < 0 ? builder.DEFAULT_MAX_ZERO_THRESHOLD : builder.nativeMaxZeroThreshold;
         this.nativeMinZeroThreshold = builder.nativeMinZeroThreshold < 0 ? builder.DEFAULT_MIN_ZERO_THRESHOLD : builder.nativeMinZeroThreshold;
         this.nativeMaxBuckets = builder.nativeMaxBuckets;
+        this.nativeResetIntervalSeconds = builder.nativeResetIntervalSeconds;
     }
 
     public class HistogramData extends MetricData<DistributionObserver> implements DistributionObserver {
-        private volatile int nativeSchema = initialNativeSchema; // integer in [-4, 8]
-        private volatile double nativeCurrentZeroThreshold = Histogram.this.nativeMinZeroThreshold;
+        private final LongAdder[] classicBuckets;
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForPositiveValues = new ConcurrentHashMap<>();
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForNegativeValues = new ConcurrentHashMap<>();
+        private final LongAdder nativeZeroCount = new LongAdder();
         private final LongAdder count = new LongAdder();
         private final DoubleAdder sum = new DoubleAdder();
-        private final LongAdder nativeZeroCount = new LongAdder();
+        private volatile int nativeSchema = initialNativeSchema; // integer in [-4, 8] or CLASSIC_HISTOGRAM
+        private volatile double nativeZeroThreshold = Histogram.this.nativeMinZeroThreshold;
         private volatile long createdTimeMillis = System.currentTimeMillis();
         private final Buffer<HistogramSnapshot.HistogramData> buffer = new Buffer<>();
-        private final LongAdder[] classicBuckets;
-        private volatile boolean resetAllowed = false;
+        private volatile boolean resetIntervalExpired = false;
 
         private HistogramData() {
             classicBuckets = new LongAdder[classicUpperBounds.length];
             for (int i = 0; i < classicUpperBounds.length; i++) {
                 classicBuckets[i] = new LongAdder();
             }
+            maybeScheduleNextReset();
         }
 
         @Override
         public void observe(double amount) {
             if (Double.isNaN(amount)) {
+                // See https://github.com/prometheus/client_golang/issues/1275 on ignoring NaN observations.
                 return;
             }
             if (!buffer.append(amount)) {
                 doObserve(amount);
             }
             if (isExemplarsEnabled() && hasSpanContextSupplier()) {
-                // TODO: Does that work for both native and classic histograms?
                 lazyInitExemplarSampler(exemplarConfig, null, classicUpperBounds);
                 exemplarSampler.observe(amount);
             }
@@ -90,70 +139,54 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
 
         @Override
         public void observeWithExemplar(double amount, Labels labels) {
-            if (Double.isNaN(amount) || Double.isInfinite(amount)) {
+            if (Double.isNaN(amount)) {
+                // See https://github.com/prometheus/client_golang/issues/1275 on ignoring NaN observations.
                 return;
             }
             if (!buffer.append(amount)) {
                 doObserve(amount);
             }
             if (isExemplarsEnabled()) {
-                // TODO: Does that work for both native and classic histograms?
                 lazyInitExemplarSampler(exemplarConfig, null, classicUpperBounds);
                 exemplarSampler.observeWithExemplar(amount, labels);
             }
         }
 
         private void doObserve(double value) {
-            if (Double.isNaN(value)) {
-                // This cannot happen because the observe() methods don't pass NaN or infinite to doObserve()
-                throw new IllegalArgumentException("value must not be NaN or infinite.");
-            }
-            if (classicUpperBounds != null) {
-                for (int i = 0; i < classicUpperBounds.length; ++i) {
-                    // The last bucket is +Inf, so we always increment.
-                    if (value <= classicUpperBounds[i]) {
-                        classicBuckets[i].add(1);
-                        break;
-                    }
+            // classicUpperBounds is an empty array if this is a pure native histogram.
+            for (int i = 0; i < classicUpperBounds.length; ++i) {
+                // The last bucket is +Inf, so we always increment.
+                if (value <= classicUpperBounds[i]) {
+                    classicBuckets[i].add(1);
+                    break;
                 }
             }
             boolean nativeBucketCreated = false;
             if (Histogram.this.initialNativeSchema != CLASSIC_HISTOGRAM) {
-                if (value > nativeCurrentZeroThreshold) {
-                    nativeBucketCreated = addToBucket(nativeBucketsForPositiveValues, value);
-                } else if (value < -nativeCurrentZeroThreshold) {
-                    nativeBucketCreated = addToBucket(nativeBucketsForNegativeValues, -value);
+                if (value > nativeZeroThreshold) {
+                    nativeBucketCreated = addToNativeBucket(value, nativeBucketsForPositiveValues);
+                } else if (value < -nativeZeroThreshold) {
+                    nativeBucketCreated = addToNativeBucket(-value, nativeBucketsForNegativeValues);
                 } else {
                     nativeZeroCount.add(1);
                 }
             }
             sum.add(value);
             count.increment(); // must be the last step, because count is used to signal that the operation is complete.
-            if (nativeBucketCreated) {
-                boolean wasReset = maybeScaleDown();
-                if (wasReset) {
-                    // We just discarded the newly observed value. Observe it again.
-                    if (!buffer.append(value)) {
-                        doObserve(value);
-                    }
-                }
-            }
+            maybeResetOrScaleDown(value, nativeBucketCreated);
         }
 
         public HistogramSnapshot.HistogramData collect(Labels labels) {
             Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
             return buffer.run(
-                    expectedCount -> {
-                        System.out.println("expectedCount=" + expectedCount + " currentCount=" + count.sum());
-                        return count.sum() == expectedCount;
-                    },
+                    expectedCount -> count.sum() == expectedCount,
                     () -> {
-                        if (classicUpperBounds == null || classicUpperBounds.length == 0) { // TODO: null or empty?
+                        if (classicUpperBounds.length == 0) {
                             // native only
                             return new HistogramSnapshot.HistogramData(
                                     nativeSchema,
                                     nativeZeroCount.sum(),
-                                    nativeCurrentZeroThreshold,
+                                    nativeZeroThreshold,
                                     toBucketList(nativeBucketsForPositiveValues),
                                     toBucketList(nativeBucketsForNegativeValues),
                                     sum.sum(),
@@ -174,7 +207,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                                     ClassicHistogramBuckets.of(classicUpperBounds, classicBuckets),
                                     nativeSchema,
                                     nativeZeroCount.sum(),
-                                    nativeCurrentZeroThreshold,
+                                    nativeZeroThreshold,
                                     toBucketList(nativeBucketsForPositiveValues),
                                     toBucketList(nativeBucketsForNegativeValues),
                                     sum.sum(),
@@ -192,8 +225,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return this;
         }
 
-
-        private boolean addToBucket(ConcurrentHashMap<Integer, LongAdder> buckets, double value) {
+        private boolean addToNativeBucket(double value, ConcurrentHashMap<Integer, LongAdder> buckets) {
             boolean newBucketCreated = false;
             int bucketIndex;
             if (Double.isInfinite(value)) {
@@ -201,31 +233,27 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             } else {
                 bucketIndex = findBucketIndex(value);
             }
-            // debug: the IllegalStateException should never happen
-            // todo: remove and write a unit test for findBucketIndex() instead
-            double base = Math.pow(2, Math.pow(2, -nativeSchema));
-            if (!(Math.pow(base, bucketIndex - 1) < value && value <= (Math.pow(base, bucketIndex)) + 0.00000000001)) { // (2^(1/4))^4 should be 2, but is 1.9999999999999998
-                throw new IllegalStateException("Bucket index " + bucketIndex + ": Invariance violated: " + Math.pow(base, bucketIndex - 1) + " < " + value + " <= " + Math.pow(base, bucketIndex));
-            }
             LongAdder bucketCount = buckets.get(bucketIndex);
             if (bucketCount == null) {
                 LongAdder newBucketCount = new LongAdder();
                 LongAdder existingBucketCount = buckets.putIfAbsent(bucketIndex, newBucketCount);
-                bucketCount = existingBucketCount == null ? newBucketCount : existingBucketCount;
-                newBucketCreated = true;
+                if (existingBucketCount == null) {
+                    newBucketCreated = true;
+                    bucketCount = newBucketCount;
+                } else {
+                    bucketCount = existingBucketCount;
+                }
             }
             bucketCount.increment();
             return newBucketCreated;
         }
 
-        // Assumptions:
-        // Double.isNan(value) is false;
-        // Double.isInfinite(value) is false;
-        // value >= 0.0
         private int findBucketIndex(double value) {
-            if (value == 0.0) {
-                throw new IllegalArgumentException("Cannot find a bucket for a zero observation. This is a bug in the Prometheus metrics library.");
-            }
+            // Preconditions:
+            // Double.isNan(value) is false;
+            // Double.isInfinite(value) is false;
+            // value > 0
+            // ---
             // The following is a naive implementation of C's frexp() function.
             // Performance can be improved by using the internal Bit representation of floating point numbers.
             // More info on the Bit representation of floating point numbers:
@@ -246,12 +274,13 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             if (nativeSchema >= 1) {
                 return findIndex(NATIVE_BOUNDS[nativeSchema - 1], frac) + (exp - 1) * NATIVE_BOUNDS[nativeSchema - 1].length;
             } else {
-                int result = exp;
+                int bucketIndex = exp;
                 if (frac == 0.5) {
-                    result--;
+                    bucketIndex--;
                 }
-                int div = 1 << -nativeSchema;
-                return (result + div - 1) / div;
+                int offset = (1 << -nativeSchema) - 1;
+                bucketIndex = (bucketIndex + offset) >> -nativeSchema;
+                return bucketIndex;
             }
         }
 
@@ -273,12 +302,42 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return last + 1;
         }
 
-        private boolean maybeScaleDown() {
+        /**
+         * Make sure that the number of native buckets does not exceed nativeMaxBuckets.
+         * <ul>
+         *     <li>If the histogram has already been scaled down (nativeSchema < initialSchema)
+         *         reset after resetIntervalExpired to get back to the original schema.</li>
+         *     <li>If a new bucket was created and we now exceed nativeMaxBuckets
+         *         run maybeScaleDown() to scale down</li>
+         * </ul>
+         */
+        private void maybeResetOrScaleDown(double value, boolean nativeBucketCreated) {
+            AtomicBoolean wasReset = new AtomicBoolean(false);
+            if (resetIntervalExpired && nativeSchema < initialNativeSchema) {
+                buffer.run(expectedCount -> count.sum() == expectedCount,
+                        () -> {
+                            if (maybeReset()) {
+                                wasReset.set(true);
+                            }
+                            return null;
+                        },
+                        this::doObserve);
+            } else if (nativeBucketCreated) {
+                maybeScaleDown(wasReset);
+            }
+            if (wasReset.get()) {
+                // We just discarded the newly observed value. Observe it again.
+                if (!buffer.append(value)) {
+                    doObserve(value);
+                }
+            }
+        }
+
+        private void maybeScaleDown(AtomicBoolean wasReset) {
             int numberOfBuckets = nativeBucketsForPositiveValues.size() + nativeBucketsForNegativeValues.size();
             if (numberOfBuckets <= nativeMaxBuckets || nativeSchema == -4) {
-                return false;
+                return;
             }
-            AtomicBoolean wasReset = new AtomicBoolean(false);
             buffer.run(
                     expectedCount -> count.sum() == expectedCount,
                     () -> {
@@ -301,14 +360,13 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                     },
                     this::doObserve
             );
-            return wasReset.get();
         }
 
         private boolean maybeReset() {
-            if (!resetAllowed) {
+            if (!resetIntervalExpired) {
                 return false;
             }
-            resetAllowed = false;
+            resetIntervalExpired = false;
             buffer.reset();
             nativeBucketsForPositiveValues.clear();
             nativeBucketsForNegativeValues.clear();
@@ -318,18 +376,18 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             for (int i = 0; i < classicBuckets.length; i++) {
                 classicBuckets[i].reset();
             }
-            nativeCurrentZeroThreshold = nativeMinZeroThreshold;
+            nativeZeroThreshold = nativeMinZeroThreshold;
             nativeSchema = Histogram.this.initialNativeSchema;
             createdTimeMillis = System.currentTimeMillis();
             if (exemplarSampler != null) {
                 exemplarSampler.reset();
             }
-            // TODO: Schedule next reset;
+            maybeScheduleNextReset();
             return true;
         }
 
         private boolean maybeWidenZeroBucket() {
-            if (nativeCurrentZeroThreshold >= nativeMaxZeroThreshold) {
+            if (nativeZeroThreshold >= nativeMaxZeroThreshold) {
                 return false;
             }
             int smallestIndex = findSmallestIndex(nativeBucketsForPositiveValues);
@@ -346,7 +404,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             }
             mergeWithZeroBucket(smallestIndex, nativeBucketsForPositiveValues);
             mergeWithZeroBucket(smallestIndex, nativeBucketsForNegativeValues);
-            nativeCurrentZeroThreshold = newZeroThreshold;
+            nativeZeroThreshold = newZeroThreshold;
             return true;
         }
 
@@ -441,6 +499,12 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             }
             return NativeHistogramBuckets.of(bucketIndexes, counts);
         }
+
+        private void maybeScheduleNextReset() {
+            if (nativeResetIntervalSeconds > 0) {
+                Scheduler.schedule(() -> resetIntervalExpired = true, nativeResetIntervalSeconds, TimeUnit.SECONDS);
+            }
+        }
     }
 
     @Override
@@ -508,16 +572,32 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         private double nativeMinZeroThreshold = -1; // negative value means not set
         private int nativeMaxBuckets = Integer.MAX_VALUE;
 
+        private long nativeResetIntervalSeconds = 0L;
+
         private Builder() {
             super(Collections.singletonList("le"));
         }
 
-        public Builder asNativeHistogram() {
-            classicUpperBounds = null; // null or empty?
+        /**
+         * Use the native histogram representation only, i.e. don't maintain classic histogram buckets.
+         * See {@link Histogram} for more info.
+         */
+        public Builder nativeHistogramOnly() {
+            if (nativeSchema == CLASSIC_HISTOGRAM) {
+                throw new IllegalArgumentException("Cannot call nativeHistogramOnly() after calling classicHistogramOnly().");
+            }
+            classicUpperBounds = null;
             return this;
         }
 
-        public Builder asClassicHistogram() {
+        /**
+         * Use the classic histogram representation only, i.e. don't maintain native histogram buckets.
+         * See {@link Histogram} for more info.
+         */
+        public Builder classicHistogramOnly() {
+            if (classicUpperBounds == null) {
+                throw new IllegalArgumentException("Cannot call classicHistogramOnly() after calling nativeHistogramOnly().");
+            }
             nativeSchema = CLASSIC_HISTOGRAM;
             return this;
         }
@@ -527,7 +607,12 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return new Histogram(this);
         }
 
-
+        /**
+         * Set the upper bounds for the classic histogram buckets.
+         * Default is {@link Histogram#DEFAULT_CLASSIC_UPPER_BOUNDS}.
+         * If the +Inf bucket is missing it will be added.
+         * If upperBounds contains duplicates the duplicates will be removed.
+         */
         public Builder withClassicBuckets(double... upperBounds) {
             this.classicUpperBounds = upperBounds;
             for (double bound : upperBounds) {
@@ -538,6 +623,16 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return this;
         }
 
+        /**
+         * Create classic histogram buckets with linear bucket boundaries.
+         * <p>
+         * Example: {@code withClassicLinearBuckets(1.0, 0.5, 10)} creates bucket boundaries
+         * {@code [[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5]}.
+         *
+         * @param start is the first bucket boundary
+         * @param width is the width of each bucket
+         * @param count is the total number of buckets, including start
+         */
         public Builder withClassicLinearBuckets(double start, double width, int count) {
             this.classicUpperBounds = new double[count];
             // Use BigDecimal to avoid weird bucket boundaries like 0.7000000000000001.
@@ -549,13 +644,16 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return this;
         }
 
-        // TODO: Confusing because this enables classic buckets
-        public Builder withClassicDefaultBuckets() {
-            this.classicUpperBounds = DEFAULT_CLASSIC_UPPER_BOUNDS; // TODO copy
-            return this;
-        }
-
-        // TODO: This is confusing because it does not refer to OpenTelemetry's exponential histograms.
+        /**
+         * Create classic histogram bucxkets with exponential boundaries.
+         * <p>
+         * Example: {@code withClassicExponentialBuckets(1.0, 2.0, 10)} creates bucket bounaries
+         * {@code [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0]}
+         *
+         * @param start is the first bucket boundary
+         * @param factor growth factor
+         * @param count total number of buckets, including start
+         */
         public Builder withClassicExponentialBuckets(double start, double factor, int count) {
             classicUpperBounds = new double[count];
             for (int i = 0; i < count; i++) {
@@ -564,6 +662,65 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return this;
         }
 
+        /**
+         * The schema is a number in [-4, 8] defining the resolution of the native histogram. Default is 5.
+         * <p>
+         * The higher the schema, the finer the resolution.
+         * Schema is Prometheus terminology. In OpenTelemetry it's called "scale".
+         * <p>
+         * Note that the schema for a histogram may be automatically decreased at runtime if the number
+         * of native histogram buckets exceeds {@link #withNativeMaxBuckets(int)}.
+         * <p>
+         * The following table shows:
+         * <ul>
+         *     <li>factor: The growth factor for bucket boundaries, i.e. next bucket boundary = growth factor * previous bucket boundary.
+         *     <li>max quantile error: The maximum error for quantiles calculated using the Prometheus histogram_quantile() function, relative to the observed value, assuming harmonic mean.
+         * </ul>
+         * <table border>
+         *     <tr>
+         *         <td>schema</td><td>factor</td><td>max quantile error</td>
+         *     </tr>
+         *     <tr>
+         *         <td>-4</td><td>65.536</td>99%<td></td>
+         *     </tr>
+         *     <tr>
+         *         <td>-3</td><td>256</td>99%<td></td>
+         *     </tr>
+         *     <tr>
+         *         <td>-2</td><td>16</td><td>88%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>-1</td><td>4</td><td>60%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>0</td><td>2</td><td>33%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>1</td><td>1.4142...</td><td>17%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>2</td><td>1.1892...</td><td>9%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>3</td><td>1.1090...</td><td>4%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>4</td><td>1.0442...</td><td>2%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>5</td><td>1.0218...</td><td>1%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>6</td><td>1.0108...</td><td>0.5%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>7</td><td>1.0054...</td><td>0.3%</td>
+         *     </tr>
+         *     <tr>
+         *         <td>8</td><td>1.0027...</td><td>0.1%</td>
+         *     </tr>
+         * </table>
+         */
         public Builder withNativeSchema(int nativeSchema) {
             if (nativeSchema < -4 || nativeSchema > 8) {
                 throw new IllegalArgumentException("Unsupported native histogram schema " + nativeSchema + ": expecting -4 <= schema <= 8.");
@@ -572,6 +729,16 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return this;
         }
 
+        /**
+         * Native histogram buckets get smaller and smaller the closer they get to zero.
+         * To avoid wasting a lot of buckets for observations fluctuating around zero, we consider all
+         * values in [-zeroThreshold, +zeroThreshold] to be equal to zero.
+         * <p>
+         * The zeroThreshold is initialized with minZeroThreshold, and will grow up to maxZeroThreshold if
+         * the number of native histogram buckets exceeds nativeMaxBuckets.
+         * <p>
+         * Default is {@link #DEFAULT_MAX_ZERO_THRESHOLD}.
+         */
         public Builder withNativeMaxZeroThreshold(double nativeMaxZeroThreshold) {
             if (nativeMaxZeroThreshold < 0) {
                 throw new IllegalArgumentException("Illegal native max zero threshold " + nativeMaxZeroThreshold + ": must be >= 0");
@@ -583,6 +750,16 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return this;
         }
 
+        /**
+         * Native histogram buckets get smaller and smaller the closer they get to zero.
+         * To avoid wasting a lot of buckets for observations fluctuating around zero, we consider all
+         * values in [-zeroThreshold, +zeroThreshold] to be equal to zero.
+         * <p>
+         * The zeroThreshold is initialized with minZeroThreshold, and will grow up to maxZeroThreshold if
+         * the number of native histogram buckets exceeds nativeMaxBuckets.
+         * <p>
+         * Default is {@link #DEFAULT_MIN_ZERO_THRESHOLD}.
+         */
         public Builder withNativeMinZeroThreshold(double nativeMinZeroThreshold) {
             if (nativeMinZeroThreshold < 0) {
                 throw new IllegalArgumentException("Illegal native min zero threshold " + nativeMinZeroThreshold + ": must be >= 0");
@@ -594,6 +771,12 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return this;
         }
 
+        /**
+         * Limit the number of native buckets.
+         * <p>
+         * If the number of native buckets exceeds the maximum, the {@link #withNativeSchema(int)} is decreased,
+         * i.e. the resolution of the histogram is decreased to reduce the number of buckets.
+         */
         public Builder withNativeMaxBuckets(int nativeMaxBuckets) {
             this.nativeMaxBuckets = nativeMaxBuckets;
             return this;

@@ -99,7 +99,7 @@ public class FixedBucketsHistogramTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testIllegalLabelNameFixedBucketsHistogramBuilder() {
-    Histogram.newBuilder().withClassicDefaultBuckets().withLabelNames("label", "le");
+    Histogram.newBuilder().withName("hi").withLabelNames("label", "le");
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -121,7 +121,7 @@ public class FixedBucketsHistogramTest {
 
   @Test(expected = RuntimeException.class)
   public void testNoName() {
-    Histogram.newBuilder().withClassicDefaultBuckets().build();
+    Histogram.newBuilder().build();
   }
 
   @Test(expected = RuntimeException.class)
@@ -136,7 +136,7 @@ public class FixedBucketsHistogramTest {
 
   @Test(expected = RuntimeException.class)
   public void testNullName() {
-    Histogram.newBuilder().withClassicDefaultBuckets().withName(null);
+    Histogram.newBuilder().withName(null);
   }
 
   @Test
@@ -206,7 +206,7 @@ public class FixedBucketsHistogramTest {
 
   @Test
   public void testNoLabelsDefaultZeroValue() {
-    Histogram noLabels = Histogram.newBuilder().withName("test").withClassicDefaultBuckets().build();
+    Histogram noLabels = Histogram.newBuilder().withName("test").build();
     assertEquals(0.0, getBucket(noLabels, 0.005).getCount(), 0.000001);
     assertEquals(0, getData(noLabels).getCount());
     assertEquals(0.0, getData(noLabels).getSum(), 0.000001);
@@ -216,7 +216,6 @@ public class FixedBucketsHistogramTest {
   public void testObserve() {
     Histogram noLabels = Histogram.newBuilder()
             .withName("test")
-            .withClassicDefaultBuckets()
             .build();
     noLabels.observe(2);
     assertEquals(1, getData(noLabels).getCount());
@@ -261,7 +260,6 @@ public class FixedBucketsHistogramTest {
   public void testBoundaryConditions() {
     Histogram histogram = Histogram.newBuilder()
             .withName("test")
-            .withClassicDefaultBuckets()
             .build();
     histogram.observe(2.5);
     assertEquals(0, getBucket(histogram, 1).getCount());
@@ -278,7 +276,6 @@ public class FixedBucketsHistogramTest {
   @Test
   public void testObserveWithLabels() {
     Histogram histogram = Histogram.newBuilder()
-            .withClassicDefaultBuckets()
             .withName("test")
             .withConstLabels(Labels.of("env", "prod"))
             .withLabelNames("path", "status")
@@ -305,7 +302,6 @@ public class FixedBucketsHistogramTest {
   public void testObserveMultithreaded() throws InterruptedException, ExecutionException, TimeoutException {
     // Hard to test concurrency, but let's run a couple of observations in parallel and assert none gets lost.
     Histogram histogram = Histogram.newBuilder()
-            .withClassicDefaultBuckets()
             .withName("test")
             .withLabelNames("status")
             .build();

@@ -8,7 +8,6 @@ import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.HistogramSnapshot;
-import io.prometheus.metrics.model.NativeHistogramBucket;
 import io.prometheus.metrics.model.Labels;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,7 +18,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.Random;
 
 import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
@@ -28,13 +27,16 @@ public class HistogramTest {
 
     private static final double RESET_DURATION_REACHED = -123.456; // just a random value indicating that we should simulate that the reset duration has been reached
 
-    private static class TestCase {
+    /**
+     * Mimic the tests in client_golang.
+     */
+    private static class GolangTestCase {
         final String name;
         final String expected;
         final Histogram histogram;
         final double[] observations;
 
-        private TestCase(String name, String expected, Histogram histogram, double... observations) {
+        private GolangTestCase(String name, String expected, Histogram histogram, double... observations) {
             this.name = name;
             this.expected = expected;
             this.histogram = histogram;
@@ -45,7 +47,7 @@ public class HistogramTest {
             System.out.println("Running " + name + "...");
             for (double observation : observations) {
                 if (observation == RESET_DURATION_REACHED) {
-                    Field resetAllowed = Histogram.HistogramData.class.getDeclaredField("resetAllowed");
+                    Field resetAllowed = Histogram.HistogramData.class.getDeclaredField("resetIntervalExpired");
                     resetAllowed.setAccessible(true);
                     resetAllowed.set(histogram.getNoLabels(), true);
                 } else {
@@ -63,8 +65,8 @@ public class HistogramTest {
      */
     @Test
     public void testGolangTests() throws NoSuchFieldException, IllegalAccessException {
-        TestCase[] testCases = new TestCase[]{
-                new TestCase("'no sparse buckets' from client_golang",
+        GolangTestCase[] testCases = new GolangTestCase[]{
+                new GolangTestCase("'no sparse buckets' from client_golang",
                         "sample_count: 3 " +
                                 "sample_sum: 6.0 " +
                                 "bucket { cumulative_count: 0 upper_bound: 0.005 } " +
@@ -81,10 +83,10 @@ public class HistogramTest {
                                 "bucket { cumulative_count: 3 upper_bound: Infinity }",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asClassicHistogram()
+                                .classicHistogramOnly()
                                 .build(),
                         1.0, 2.0, 3.0),
-                new TestCase("'factor 1.1 results in schema 3' from client_golang",
+                new GolangTestCase("'factor 1.1 results in schema 3' from client_golang",
                         "sample_count: 4 " +
                                 "sample_sum: 6.0 " +
                                 "schema: 3 " +
@@ -98,12 +100,12 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(3)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.0, 1.0, 2.0, 3.0),
-                new TestCase("'factor 1.2 results in schema 2' from client_golang",
+                new GolangTestCase("'factor 1.2 results in schema 2' from client_golang",
                         "sample_count: 6 " +
                                 "sample_sum: 7.4 " +
                                 "schema: 2 " +
@@ -117,54 +119,60 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2),
-                new TestCase("'factor 4 results in schema -1' from client_golang",
-                        "sample_count: 10 " +
-                                "sample_sum: 62.83 " +
+                new GolangTestCase("'factor 4 results in schema -1' from client_golang",
+                        "sample_count: 14 " +
+                                "sample_sum: 63.2581251 " +
                                 "schema: -1 " +
                                 "zero_threshold: 0.0 " +
                                 "zero_count: 0 " +
-                                "positive_span { offset: 0 length: 4 } " +
+                                "positive_span { offset: -2 length: 6 } " +
                                 "positive_delta: 2 " +
+                                "positive_delta: 0 " +
+                                "positive_delta: 0 " +
                                 "positive_delta: 2 " +
                                 "positive_delta: -1 " +
                                 "positive_delta: -2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(-1)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
+                        0.0156251, 0.0625, // Bucket -2: (0.015625, 0.0625)
+                        0.1, 0.25, // Bucket -1: (0.0625, 0.25]
                         0.5, 1, // Bucket 0: (0.25, 1]
                         1.5, 2, 3, 3.5, // Bucket 1: (1, 4]
                         5, 6, 7, // Bucket 2: (4, 16]
                         33.33 // Bucket 3: (16, 64]
                 ),
-                new TestCase("'factor 17 results in schema -2' from client_golang",
-                        "sample_count: 10 " +
-                                "sample_sum: 62.83 " +
+                new GolangTestCase("'factor 17 results in schema -2' from client_golang",
+                        "sample_count: 14 " +
+                                "sample_sum: 63.2581251 " +
                                 "schema: -2 " +
                                 "zero_threshold: 0.0 " +
                                 "zero_count: 0 " +
-                                "positive_span { offset: 0 length: 3 } " +
+                                "positive_span { offset: -1 length: 4 } " +
                                 "positive_delta: 2 " +
-                                "positive_delta: 5 " +
+                                "positive_delta: 2 " +
+                                "positive_delta: 3 " +
                                 "positive_delta: -6",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(-2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
-                        0.5, 1, // Bucket 0: (0.0625, 1]
+                        0.0156251, 0.0625, // Bucket -1: (0.015625, 0.0625]
+                        0.1, 0.25, 0.5, 1, // Bucket 0: (0.0625, 1]
                         1.5, 2, 3, 3.5, 5, 6, 7, // Bucket 1: (1, 16]
                         33.33 // Bucket 2: (16, 256]
                 ),
-                new TestCase("'negative buckets' from client_golang",
+                new GolangTestCase("'negative buckets' from client_golang",
                         "sample_count: 6 " +
                                 "sample_sum: -7.4 " +
                                 "schema: 2 " +
@@ -178,13 +186,13 @@ public class HistogramTest {
                                 "negative_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2
                 ),
-                new TestCase("'negative and positive buckets' from client_golang",
+                new GolangTestCase("'negative and positive buckets' from client_golang",
                         "sample_count: 11 " +
                                 "sample_sum: 0.0 " +
                                 "schema: 2 " +
@@ -204,13 +212,13 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
                 ),
-                new TestCase("'wide zero bucket' from client_golang",
+                new GolangTestCase("'wide zero bucket' from client_golang",
                         "sample_count: 11 " +
                                 "sample_sum: 0.0 " +
                                 "schema: 2 " +
@@ -222,7 +230,7 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMinZeroThreshold(1.4)
                                 .build(),
@@ -251,7 +259,7 @@ public class HistogramTest {
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NaN
                 ),
                 */
-                new TestCase("'+Inf observation' from client_golang",
+                new GolangTestCase("'+Inf observation' from client_golang",
                         "sample_count: 7 " +
                                 "sample_sum: Infinity " +
                                 "schema: 2 " +
@@ -267,13 +275,13 @@ public class HistogramTest {
                                 "positive_delta: -1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.POSITIVE_INFINITY
                 ),
-                new TestCase("'-Inf observation' from client_golang",
+                new GolangTestCase("'-Inf observation' from client_golang",
                         "sample_count: 7 " +
                                 "sample_sum: -Infinity " +
                                 "schema: 2 " +
@@ -289,13 +297,13 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NEGATIVE_INFINITY
                 ),
-                new TestCase("'limited buckets but nothing triggered' from client_golang",
+                new GolangTestCase("'limited buckets but nothing triggered' from client_golang",
                         "sample_count: 6 " +
                                 "sample_sum: 7.4 " +
                                 "schema: 2 " +
@@ -309,14 +317,14 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2
                 ),
-                new TestCase("'buckets limited by halving resolution' from client_golang",
+                new GolangTestCase("'buckets limited by halving resolution' from client_golang",
                         "sample_count: 8 " +
                                 "sample_sum: 11.5 " +
                                 "schema: 1 " +
@@ -330,14 +338,14 @@ public class HistogramTest {
                                 "positive_delta: 1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
                 ),
-                new TestCase("'buckets limited by widening the zero bucket' from client_golang",
+                new GolangTestCase("'buckets limited by widening the zero bucket' from client_golang",
                         "sample_count: 8 " +
                                 "sample_sum: 11.5 " +
                                 "schema: 2 " +
@@ -353,14 +361,14 @@ public class HistogramTest {
                                 "positive_delta: 1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
                 ),
-                new TestCase("'buckets limited by widening the zero bucket twice' from client_golang",
+                new GolangTestCase("'buckets limited by widening the zero bucket twice' from client_golang",
                         "sample_count: 9 " +
                                 "sample_sum: 15.5 " +
                                 "schema: 2 " +
@@ -376,13 +384,13 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3, 4),
-                new TestCase("'buckets limited by reset' from client_golang",
+                new GolangTestCase("'buckets limited by reset' from client_golang",
                         "sample_count: 2 " +
                                 "sample_sum: 7.0 " +
                                 "schema: 2 " +
@@ -393,14 +401,14 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMinZeroThreshold(0)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, RESET_DURATION_REACHED, 3, 4),
-                new TestCase("'limited buckets but nothing triggered, negative observations' from client_golang",
+                new GolangTestCase("'limited buckets but nothing triggered, negative observations' from client_golang",
                         "sample_count: 6 " +
                                 "sample_sum: -7.4 " +
                                 "schema: 2 " +
@@ -414,13 +422,13 @@ public class HistogramTest {
                                 "negative_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2),
-                new TestCase("'buckets limited by halving resolution, negative observations' from client_golang",
+                new GolangTestCase("'buckets limited by halving resolution, negative observations' from client_golang",
                         "sample_count: 8 " +
                                 "sample_sum: -11.5 " +
                                 "schema: 1 " +
@@ -434,13 +442,13 @@ public class HistogramTest {
                                 "negative_delta: 1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3),
-                new TestCase("'buckets limited by widening the zero bucket, negative observations' from client_golang",
+                new GolangTestCase("'buckets limited by widening the zero bucket, negative observations' from client_golang",
                         "sample_count: 8 " +
                                 "sample_sum: -11.5 " +
                                 "schema: 2 " +
@@ -456,13 +464,13 @@ public class HistogramTest {
                                 "negative_delta: 1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3),
-                new TestCase("'buckets limited by widening the zero bucket twice, negative observations' from client_golang",
+                new GolangTestCase("'buckets limited by widening the zero bucket twice, negative observations' from client_golang",
                         "sample_count: 9 " +
                                 "sample_sum: -15.5 " +
                                 "schema: 2 " +
@@ -478,13 +486,13 @@ public class HistogramTest {
                                 "negative_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3, -4),
-                new TestCase("'buckets limited by reset, negative observations' from client_golang",
+                new GolangTestCase("'buckets limited by reset, negative observations' from client_golang",
                         "sample_count: 2 " +
                                 "sample_sum: -7.0 " +
                                 "schema: 2 " +
@@ -495,13 +503,13 @@ public class HistogramTest {
                                 "negative_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, RESET_DURATION_REACHED, -3, -4),
-                new TestCase("'buckets limited by halving resolution, then reset' from client_golang",
+                new GolangTestCase("'buckets limited by halving resolution, then reset' from client_golang",
                         "sample_count: 2 " +
                                 "sample_sum: 7.0 " +
                                 "schema: 2 " +
@@ -512,13 +520,13 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 5, 5.1, RESET_DURATION_REACHED, 3, 4),
-                new TestCase("'buckets limited by widening the zero bucket, then reset' from client_golang",
+                new GolangTestCase("'buckets limited by widening the zero bucket, then reset' from client_golang",
                         "sample_count: 2 " +
                                 "sample_sum: 7.0 " +
                                 "schema: 2 " +
@@ -529,14 +537,14 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 5, 5.1, RESET_DURATION_REACHED, 3, 4)
         };
-        for (TestCase testCase : testCases) {
+        for (GolangTestCase testCase : testCases) {
             testCase.run();
         }
     }
@@ -546,8 +554,8 @@ public class HistogramTest {
      */
     @Test
     public void testAdditional() throws NoSuchFieldException, IllegalAccessException {
-        TestCase[] testCases = new TestCase[]{
-                new TestCase("observed values are exactly at bucket boundaries",
+        GolangTestCase[] testCases = new GolangTestCase[]{
+                new GolangTestCase("observed values are exactly at bucket boundaries",
                         "sample_count: 3 " +
                                 "sample_sum: 1.5 " +
                                 "schema: 0 " +
@@ -558,20 +566,24 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .asNativeHistogram()
+                                .nativeHistogramOnly()
                                 .withNativeSchema(0)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.0, 0.5, 1.0)
         };
-        for (TestCase testCase : testCases) {
+        for (GolangTestCase testCase : testCases) {
             testCase.run();
         }
     }
 
+    /**
+     * Tests HistogramData.nativeBucketIndexToUpperBound(int, int).
+     * <p>
+     * This test is ported from client_golang's TestGetLe().
+     */
     @Test
     public void testNativeBucketIndexToUpperBound() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        // test data from client_golang's TestGetLe
         int[] indexes = new int[]{-1, 0, 1, 512, 513, -1, 0, 1, 1024, 1025, -1, 0, 1, 4096, 4097};
         int[] schemas = new int[]{-1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2};
         double[] expectedUpperBounds = new double[]{0.25, 1, 4, Double.MAX_VALUE, Double.POSITIVE_INFINITY,
@@ -590,13 +602,70 @@ public class HistogramTest {
         }
     }
 
+    /**
+     * Test if lowerBound < value <= upperBound is true for the bucket index returned by findBucketIndex()
+     */
     @Test
-    public void testI() {
-        System.out.println(valueToIndex(3.11, 5));
-        System.out.println(valueToIndex(2.11, 5));
-        System.out.println(valueToIndex(2.12, 5));
-        System.out.println(valueToIndex(3.12, 5));
-        System.out.println(valueToIndex(3.13, 5));
+    public void testFindBucketIndex() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Random rand = new Random();
+        Method findBucketIndex = Histogram.HistogramData.class.getDeclaredMethod("findBucketIndex", double.class);
+        Method nativeBucketIndexToUpperBound = Histogram.HistogramData.class.getDeclaredMethod("nativeBucketIndexToUpperBound", int.class, int.class);
+        findBucketIndex.setAccessible(true);
+        nativeBucketIndexToUpperBound.setAccessible(true);
+        for (int schema = -4; schema <= 8; schema++) {
+            Histogram histogram = Histogram.newBuilder()
+                    .nativeHistogramOnly()
+                    .withName("test")
+                    .withNativeSchema(schema)
+                    .build();
+            System.out.println("growth factor for schema " + schema + " is " + nativeBucketIndexToUpperBound.invoke(histogram.getNoLabels(), schema, 1));
+            for (int i = 0; i < 10_000; i++) {
+                for (int zeros = -5; zeros <= 10; zeros++) {
+                    double value = rand.nextDouble() * Math.pow(10, zeros);
+                    int bucketIndex = (int) findBucketIndex.invoke(histogram.getNoLabels(), value);
+                    double lowerBound = (double) nativeBucketIndexToUpperBound.invoke(histogram.getNoLabels(), schema, bucketIndex - 1);
+                    double upperBound = (double) nativeBucketIndexToUpperBound.invoke(histogram.getNoLabels(), schema, bucketIndex);
+                    Assert.assertTrue("Bucket index " + bucketIndex + " with schema " + schema + " has range [" + lowerBound + ", " + upperBound + "]. Value " + value + " is outside of that range.", lowerBound < value && upperBound >= value);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testDefaults() {
+        Histogram histogram = Histogram.newBuilder().withName("test").build();
+        histogram.observe(0.5);
+        Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(histogram.collect());
+        String expected = "" +
+                "name: \"test\" " +
+                "type: HISTOGRAM " +
+                "metric { " +
+                "histogram { " +
+                "sample_count: 1 " +
+                "sample_sum: 0.5 " +
+                // Default should have classic buckets as well as native buckets.
+                // Default classic bucket boundaries should be the same as in client_golang.
+                "bucket { cumulative_count: 0 upper_bound: 0.005 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.01 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.025 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.05 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.1 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.25 } " +
+                "bucket { cumulative_count: 1 upper_bound: 0.5 } " +
+                "bucket { cumulative_count: 1 upper_bound: 1.0 } " +
+                "bucket { cumulative_count: 1 upper_bound: 2.5 } " +
+                "bucket { cumulative_count: 1 upper_bound: 5.0 } " +
+                "bucket { cumulative_count: 1 upper_bound: 10.0 } " +
+                "bucket { cumulative_count: 1 upper_bound: Infinity } " +
+                // default native schema is 5
+                "schema: 5 " +
+                // default zero threshold is 2^-128
+                "zero_threshold: " + Math.pow(2.0, -128.0) + " " +
+                "zero_count: 0 " +
+                "positive_span { offset: -32 length: 1 } " +
+                "positive_delta: 1 " +
+                "} }";
+        Assert.assertEquals(expected, TextFormat.printer().shortDebugString(protobufData));
     }
 
     @Test
@@ -669,32 +738,9 @@ public class HistogramTest {
     }
 
     private HistogramSnapshot.HistogramData getData(Histogram histogram, String... labels) {
-        return ((HistogramSnapshot) histogram.collect()).getData().stream()
+        return histogram.collect().getData().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("histogram with labels " + labels + " not found"));
-    }
-
-    private Optional<NativeHistogramBucket> getBucket(Histogram histogram, int bucketIndex, String... labels) {
-        return getData(histogram, labels).getNativeBucketsForPositiveValues().stream()
-                .filter(b -> b.getBucketIndex() == bucketIndex)
-                .findAny();
-    }
-
-    private int valueToIndex(double value, int schema) {
-        double base = Math.pow(2, Math.pow(2, -schema));
-        return (int) Math.ceil(Math.log(value) / Math.log(base));
-    }
-
-    private double lowerBound(double value, int schema) {
-        double base = Math.pow(2, Math.pow(2, -schema));
-        int index = (int) Math.ceil(Math.log(value) / Math.log(base));
-        return Math.pow(base, index - 1);
-    }
-
-    private double upperBound(double value, int schema) {
-        double base = Math.pow(2, Math.pow(2, -schema));
-        int index = (int) Math.ceil(Math.log(value) / Math.log(base));
-        return Math.pow(base, index);
     }
 }
