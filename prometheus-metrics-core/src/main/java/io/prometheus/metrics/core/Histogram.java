@@ -77,8 +77,8 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     private final int nativeMaxBuckets;
 
     // If the number of native histogram buckets exceeds nativeMaxBuckets,
-    // the histogram may reset (all values set to zero) after nativeMinResetIntervalSeconds is expired.
-    private final long nativeResetIntervalSeconds; // 0 indicates no reset
+    // the histogram may reset (all values set to zero) after nativeResetDurationSeconds is expired.
+    private final long nativeResetDurationSeconds; // 0 indicates no reset
 
     private Histogram(Histogram.Builder builder) {
         super(builder);
@@ -98,7 +98,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         this.nativeMaxZeroThreshold = builder.nativeMaxZeroThreshold < 0 ? builder.DEFAULT_MAX_ZERO_THRESHOLD : builder.nativeMaxZeroThreshold;
         this.nativeMinZeroThreshold = builder.nativeMinZeroThreshold < 0 ? builder.DEFAULT_MIN_ZERO_THRESHOLD : builder.nativeMinZeroThreshold;
         this.nativeMaxBuckets = builder.nativeMaxBuckets;
-        this.nativeResetIntervalSeconds = builder.nativeResetIntervalSeconds;
+        this.nativeResetDurationSeconds = builder.nativeResetDurationSeconds;
     }
 
     public class HistogramData extends MetricData<DistributionObserver> implements DistributionObserver {
@@ -112,7 +112,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         private volatile double nativeZeroThreshold = Histogram.this.nativeMinZeroThreshold;
         private volatile long createdTimeMillis = System.currentTimeMillis();
         private final Buffer<HistogramSnapshot.HistogramData> buffer = new Buffer<>();
-        private volatile boolean resetIntervalExpired = false;
+        private volatile boolean resetDurationExpired = false;
 
         private HistogramData() {
             classicBuckets = new LongAdder[classicUpperBounds.length];
@@ -313,7 +313,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          */
         private void maybeResetOrScaleDown(double value, boolean nativeBucketCreated) {
             AtomicBoolean wasReset = new AtomicBoolean(false);
-            if (resetIntervalExpired && nativeSchema < initialNativeSchema) {
+            if (resetDurationExpired && nativeSchema < initialNativeSchema) {
                 buffer.run(expectedCount -> count.sum() == expectedCount,
                         () -> {
                             if (maybeReset()) {
@@ -363,10 +363,10 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         private boolean maybeReset() {
-            if (!resetIntervalExpired) {
+            if (!resetDurationExpired) {
                 return false;
             }
-            resetIntervalExpired = false;
+            resetDurationExpired = false;
             buffer.reset();
             nativeBucketsForPositiveValues.clear();
             nativeBucketsForNegativeValues.clear();
@@ -501,8 +501,8 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         private void maybeScheduleNextReset() {
-            if (nativeResetIntervalSeconds > 0) {
-                Scheduler.schedule(() -> resetIntervalExpired = true, nativeResetIntervalSeconds, TimeUnit.SECONDS);
+            if (nativeResetDurationSeconds > 0) {
+                Scheduler.schedule(() -> resetDurationExpired = true, nativeResetDurationSeconds, TimeUnit.SECONDS);
             }
         }
     }
@@ -570,9 +570,9 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         private int nativeSchema = 5;
         private double nativeMaxZeroThreshold = -1; // negative value means not set
         private double nativeMinZeroThreshold = -1; // negative value means not set
-        private int nativeMaxBuckets = Integer.MAX_VALUE;
+        private int nativeMaxBuckets = Integer.MAX_VALUE; // TODO: Default 160?
 
-        private long nativeResetIntervalSeconds = 0L;
+        private long nativeResetDurationSeconds = 0L;
 
         private Builder() {
             super(Collections.singletonList("le"));
@@ -779,6 +779,22 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          */
         public Builder withNativeMaxBuckets(int nativeMaxBuckets) {
             this.nativeMaxBuckets = nativeMaxBuckets;
+            return this;
+        }
+
+        /**
+         * If the histogram needed to be scaled down because {@link #withNativeMaxBuckets(int)} was exceeded,
+         * reset the histogram after a certain time interval to go back to the original {@link #withNativeSchema(int)}.
+         * <p>
+         * Reset means all values are set to zero. A good value might be 24h.
+         * <p>
+         * Default is no reset.
+         */
+        public Builder withNativeResetInterval(long duration, TimeUnit unit) {
+            if (duration <= 0) {
+                throw new IllegalArgumentException(duration + ": value > 0 expected");
+            }
+            nativeResetDurationSeconds = unit.toSeconds(duration);
             return this;
         }
 
