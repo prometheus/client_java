@@ -6,7 +6,7 @@ import io.prometheus.metrics.model.Label;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 public class ExemplarSamplerTest {
 
@@ -47,9 +47,9 @@ public class ExemplarSamplerTest {
         scs.isSampled = false;
         ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
-                .withMinAgeMillis(minAge)
-                .withMaxAgeMillis(maxAge)
-                .withSampleIntervalMillis(sampleInterval)
+                .withMinAge(minAge, TimeUnit.MILLISECONDS)
+                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
+                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
                 .build());
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.3); // no sampled, because isSampled() returns false
@@ -61,9 +61,9 @@ public class ExemplarSamplerTest {
         SpanContextSupplier scs = new SpanContextSupplier();
         ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
-                .withMinAgeMillis(minAge)
-                .withMaxAgeMillis(maxAge)
-                .withSampleIntervalMillis(sampleInterval)
+                .withMinAge(minAge, TimeUnit.MILLISECONDS)
+                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
+                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
                 .build());
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.3);
@@ -84,9 +84,9 @@ public class ExemplarSamplerTest {
         SpanContextSupplier scs = new SpanContextSupplier();
         ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
-                .withMinAgeMillis(minAge)
-                .withMaxAgeMillis(maxAge)
-                .withSampleIntervalMillis(sampleInterval)
+                .withMinAge(minAge, TimeUnit.MILLISECONDS)
+                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
+                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
                 .withBuckets()
                 .build());
         Thread.sleep(tick); // t = 1 tick
@@ -103,9 +103,9 @@ public class ExemplarSamplerTest {
         ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
                 .withBuckets(0.2, 0.4, 0.6, 0.8, 1.0)
-                .withMinAgeMillis(minAge)
-                .withMaxAgeMillis(maxAge)
-                .withSampleIntervalMillis(sampleInterval)
+                .withMinAge(minAge, TimeUnit.MILLISECONDS)
+                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
+                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
                 .build());
 
         ((DefaultExemplarSampler) sampler).awaitInitialization();
@@ -142,9 +142,9 @@ public class ExemplarSamplerTest {
         ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
                 .withSpanContextSupplier(scs)
                 .withNumberOfExemplars(4)
-                .withMinAgeMillis(minAge)
-                .withMaxAgeMillis(maxAge)
-                .withSampleIntervalMillis(sampleInterval)
+                .withMinAge(minAge, TimeUnit.MILLISECONDS)
+                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
+                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
                 .build());
         ((DefaultExemplarSampler) sampler).awaitInitialization();
         Thread.sleep(tick);           // t = 1 tick

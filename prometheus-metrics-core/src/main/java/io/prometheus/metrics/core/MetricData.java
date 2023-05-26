@@ -3,7 +3,6 @@ package io.prometheus.metrics.core;
 import io.prometheus.metrics.exemplars.DefaultExemplarSampler;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.exemplars.ExemplarSampler;
-import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.observer.Observer;
 
 // package private

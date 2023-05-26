@@ -791,6 +791,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          * Default is no reset.
          */
         public Builder withNativeResetInterval(long duration, TimeUnit unit) {
+            // TODO: reset interval isn't tested yet
             if (duration <= 0) {
                 throw new IllegalArgumentException(duration + ": value > 0 expected");
             }

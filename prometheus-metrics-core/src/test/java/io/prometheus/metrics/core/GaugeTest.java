@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core;
 
 import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
+import io.prometheus.metrics.exemplars.DefaultExemplarConfig;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.GaugeSnapshot;
@@ -10,6 +11,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
 
 import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
@@ -23,8 +26,8 @@ public class GaugeTest {
 
     @BeforeClass
     public static void beforeClass() {
-        ExemplarConfig.setDefaultSampleIntervalMillis(exemplarSampleIntervalMillis);
-        ExemplarConfig.setDefaultMinAgeMillis(exemplarMinAgeMillis);
+        DefaultExemplarConfig.setSampleInterval(exemplarSampleIntervalMillis, TimeUnit.MILLISECONDS);
+        DefaultExemplarConfig.setMinAge(exemplarMinAgeMillis, TimeUnit.MILLISECONDS);
     }
 
     @Before

@@ -6,7 +6,6 @@ import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.Labels;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -40,7 +39,7 @@ public class DefaultExemplarSampler implements ExemplarSampler {
     private DefaultExemplarSampler(ExemplarConfig config) {
         this.config = config;
         double[] upperBounds = config.getUpperBounds();
-        int numberOfExemplars = upperBounds.length > 1 ? upperBounds.length : config.getNumberOfExemplars();
+        int numberOfExemplars = upperBounds != null && upperBounds.length > 1 ? upperBounds.length : config.getNumberOfExemplars();
         this.exemplars = new Exemplar[numberOfExemplars];
         this.customExemplars = new Exemplar[numberOfExemplars];
     }

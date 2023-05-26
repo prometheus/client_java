@@ -4,6 +4,7 @@ import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 import io.prometheus.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.expositionformat.PrometheusProtobufWriter;
 import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
+import io.prometheus.metrics.exemplars.DefaultExemplarConfig;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
@@ -17,6 +18,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import static io.prometheus.metrics.core.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
@@ -34,8 +36,8 @@ public class CounterTest {
 
   @BeforeClass
   public static void beforeClass() {
-    ExemplarConfig.setDefaultSampleIntervalMillis(exemplarSampleIntervalMillis);
-    ExemplarConfig.setDefaultMinAgeMillis(exemplarMinAgeMillis);
+    DefaultExemplarConfig.setSampleInterval(exemplarSampleIntervalMillis, TimeUnit.MILLISECONDS);
+    DefaultExemplarConfig.setMinAge(exemplarMinAgeMillis, TimeUnit.MILLISECONDS);
   }
 
   @Before

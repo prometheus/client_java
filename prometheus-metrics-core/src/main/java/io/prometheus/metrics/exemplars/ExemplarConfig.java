@@ -1,29 +1,17 @@
 package io.prometheus.metrics.exemplars;
 
 import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
-import io.prometheus.client.exemplars.tracer.otel.OpenTelemetrySpanContextSupplier;
-import io.prometheus.client.exemplars.tracer.otel_agent.OpenTelemetryAgentSpanContextSupplier;
 
+import java.util.concurrent.TimeUnit;
 import java.util.stream.DoubleStream;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.DoubleStream.concat;
 
+
+/**
+ * {@link ExemplarConfig} can be used to overwrite the {@link DefaultExemplarConfig}.
+ */
 public class ExemplarConfig {
-
-    private static volatile boolean defaultExemplarsEnabled = true;
-    private static volatile Object defaultSpanContextSupplier = findSpanContextSupplier();
-    private static volatile long defaultMinAgeMillis = SECONDS.toMillis(7);
-    private static volatile long defaultMaxAgeMillis = SECONDS.toMillis(70);
-    private static volatile long defaultSampleIntervalMillis = 20;
-    private static final int defaultNumberOfExemplars = 4; // cannot be changed, because exemplar samplers cannot dynamically change the number of exemplars
-    public static void disableExemplars() {
-        defaultExemplarsEnabled = false;
-    }
-
-    public static void enableExemplars() {
-        defaultExemplarsEnabled = true;
-    }
 
     private final Object spanContextSupplier;
     private final Long minAgeMillis;
@@ -32,47 +20,8 @@ public class ExemplarConfig {
     private final Integer nExemplars;
     private final double[] upperBounds;
 
-    public static boolean isEnabled() {
-        // TODO: Allow disabling via system property or environment variable
-        return defaultExemplarsEnabled;
-    }
-
-    public boolean hasSpanContextSupplier() {
-        return spanContextSupplier != null || hasDefaultSpanContextSupplier();
-    }
-
-    public static boolean hasDefaultSpanContextSupplier() {
-        return defaultSpanContextSupplier != null;
-    }
-
-    // Avoid SpanContextSupplier in the method signature so that we can handle the NoClassDefFoundError
-    // even if the user excluded simpleclient_tracer_common from the classpath.
-    public static void setDefaultSpanContextSupplier(Object spanContextSupplier) {
-        if (!(spanContextSupplier instanceof SpanContextSupplier)) {
-            // This will throw a NullPointerException if spanContextSupplier is null.
-            throw new IllegalArgumentException(spanContextSupplier.getClass().getSimpleName() + " does not implement SpanContextSupplier");
-        }
-        defaultSpanContextSupplier = spanContextSupplier;
-    }
-
-    public static void setDefaultMinAgeMillis(long defaultMinAgeMillis) {
-        ExemplarConfig.defaultMinAgeMillis = defaultMinAgeMillis;
-    }
-
-    public static void setDefaultMaxAgeMillis(long defaultMaxAgeMillis) {
-        ExemplarConfig.defaultMaxAgeMillis = defaultMaxAgeMillis;
-    }
-
-    public static void setDefaultSampleIntervalMillis(long defaultSampleIntervalMillis) {
-        ExemplarConfig.defaultSampleIntervalMillis = defaultSampleIntervalMillis;
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
     private ExemplarConfig(Object spanContextSupplier, double[] upperBounds, Integer nExemplars,
-                                  Long minAgeMillis, Long maxAgeMillis, Long sampleIntervalMillis) {
+                           Long minAgeMillis, Long maxAgeMillis, Long sampleIntervalMillis) {
         this.spanContextSupplier = spanContextSupplier;
         this.upperBounds = upperBounds; // upperBounds is already a sorted copy including +Inf.
         this.nExemplars = nExemplars;
@@ -81,28 +30,37 @@ public class ExemplarConfig {
         this.sampleIntervalMillis = sampleIntervalMillis;
     }
 
+    public boolean hasSpanContextSupplier() {
+        return spanContextSupplier != null || DefaultExemplarConfig.hasSpanContextSupplier();
+    }
+
+
     public Object getSpanContextSupplier() {
-        return spanContextSupplier != null ? spanContextSupplier : defaultSpanContextSupplier;
+        return spanContextSupplier != null ? spanContextSupplier : DefaultExemplarConfig.getSpanContextSupplier();
     }
 
     public long getMinAgeMillis() {
-        return minAgeMillis != null ? minAgeMillis : defaultMinAgeMillis;
+        return minAgeMillis != null ? minAgeMillis : DefaultExemplarConfig.getMinAgeMillis();
     }
 
     public long getMaxAgeMillis() {
-        return maxAgeMillis != null ? maxAgeMillis : defaultMaxAgeMillis;
+        return maxAgeMillis != null ? maxAgeMillis : DefaultExemplarConfig.getMaxAgeMillis();
     }
 
     public long getSampleIntervalMillis() {
-        return sampleIntervalMillis != null ? sampleIntervalMillis : defaultSampleIntervalMillis;
+        return sampleIntervalMillis != null ? sampleIntervalMillis : DefaultExemplarConfig.getSampleIntervalMillis();
     }
 
     public Integer getNumberOfExemplars() {
-        return nExemplars != null ? nExemplars : defaultNumberOfExemplars;
+        return nExemplars != null ? nExemplars : DefaultExemplarConfig.getNumberOfExemplars();
     }
 
     public double[] getUpperBounds() {
         return upperBounds;
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     public Builder toBuilder() {
@@ -117,13 +75,13 @@ public class ExemplarConfig {
             result.withBuckets(upperBounds);
         }
         if (minAgeMillis != null) {
-            result.withMinAgeMillis(minAgeMillis);
+            result.withMinAge(minAgeMillis, TimeUnit.MILLISECONDS);
         }
         if (maxAgeMillis != null) {
-            result.withMaxAgeMillis(maxAgeMillis);
+            result.withMaxAge(maxAgeMillis, TimeUnit.MILLISECONDS);
         }
         if (sampleIntervalMillis != null) {
-            result.withSampleIntervalMillis(sampleIntervalMillis);
+            result.withSampleInterval(sampleIntervalMillis, TimeUnit.MILLISECONDS);
         }
         return result;
     }
@@ -144,7 +102,8 @@ public class ExemplarConfig {
          * Set a custom {@link SpanContextSupplier}. Default is {@link ExemplarConfig#getSpanContextSupplier()}.
          *
          * @param spanContextSupplier must be an instance of {@link SpanContextSupplier}. The reason why the
-         *                            type is {@link Object} is that users may remove the Exemplars dependencies from the classpath.
+         *                            type is {@link Object} is that users may remove the Exemplars dependencies
+         *                            from the classpath.
          */
         public Builder withSpanContextSupplier(Object spanContextSupplier) {
             if (!(spanContextSupplier instanceof SpanContextSupplier)) {
@@ -156,15 +115,13 @@ public class ExemplarConfig {
 
         /**
          * Number of Exemplars. Default is 4.
-         * <p/>
-         * You can either set the number of exemplars or buckets, but not both.
+         * <p>
+         * If {@link #withBuckets(double...)} is set the number of Exemplars will be the number of buckets,
+         * and {@link #withNumberOfExemplars(int)} will be ignored.
          */
         public Builder withNumberOfExemplars(int nExemplars) {
             if (nExemplars <= 0) {
-                throw new IllegalArgumentException(nExemplars + ": nExemplars should be > 0");
-            }
-            if (upperBounds != null) {
-                throw new IllegalArgumentException("Cannot set both nExemplars and buckets");
+                throw new IllegalArgumentException(nExemplars + ": nExemplars must be > 0");
             }
             this.nExemplars = nExemplars;
             return this;
@@ -174,10 +131,12 @@ public class ExemplarConfig {
             return nExemplars != null;
         }
 
+        /**
+         * In classic histograms there is one Exemplar per bucket.
+         * <p>
+         * Use {@code withBuckets(double...)} to create an {@link ExemplarConfig} for a classic histogram.
+         */
         public Builder withBuckets(double... upperBounds) {
-            if (nExemplars != null) {
-                throw new IllegalArgumentException("Cannot set both nExemplars and buckets");
-            }
             this.upperBounds = concat(DoubleStream.of(upperBounds), DoubleStream.of(Double.POSITIVE_INFINITY))
                             .distinct()
                             .sorted()
@@ -190,55 +149,51 @@ public class ExemplarConfig {
         }
 
         /**
-         * Minimum retention time for Exemplars.
+         * Minimum retention time for Exemplars, i.e. Exemplars will be kept at least until the reach minAge.
          * <p>
-         * Should be a bit less than the scrape interval. Default is 7000 milliseconds.
+         * Should be a bit less than the scrape interval. Default is 7 seconds.
          */
-        public Builder withMinAgeMillis(long minAgeMillis) {
-            if (minAgeMillis <= 0) {
-                throw new IllegalArgumentException(minAgeMillis + ": minAgeMillis should be >= 0");
+        public Builder withMinAge(long minAge, TimeUnit unit) {
+            if (minAge <= 0) {
+                throw new IllegalArgumentException(minAge + ": minAge must be >= 0");
             }
+            this.minAgeMillis = unit.toMillis(minAge);
             if (maxAgeMillis != null) {
                 if (maxAgeMillis < minAgeMillis) {
-                    throw new IllegalArgumentException(minAgeMillis + ": minAgeMillis must be <= maxAgeMillis");
+                    throw new IllegalArgumentException(minAge + ": minAge must be <= maxAge");
                 }
             }
-            this.minAgeMillis = minAgeMillis;
             return this;
         }
 
         /**
-         * Maximum retention time for Exemplars.
+         * Maximum retention time for Exemplars: After maxAge Exemplars will be discarded.
          * <p>
-         * The Exemplar with the smallest value is kept until a smaller one is observed or until maxAgeMillis is
-         * reached. Likewise, the Exemplar with the largest value is kept until a larger one is observed or until
-         * maxAgeMillis is reached. Default is 70_000 milliseconds.
+         * Default is 70 seconds.
          */
-        public Builder withMaxAgeMillis(long maxAgeMillis) {
-            if (maxAgeMillis <= 0) {
-                throw new IllegalArgumentException(maxAgeMillis + ": maxAgeMillis must be > 0");
+        public Builder withMaxAge(long maxAge, TimeUnit unit) {
+            if (maxAge <= 0) {
+                throw new IllegalArgumentException(maxAge + ": maxAge must be > 0");
             }
+            this.maxAgeMillis = unit.toMillis(maxAge);
             if (minAgeMillis != null) {
                 if (minAgeMillis > maxAgeMillis) {
-                    throw new IllegalArgumentException(maxAgeMillis + ": maxAgeMillis must be => minAgeMillis");
+                    throw new IllegalArgumentException(maxAge + ": maxAge must be => minAge");
                 }
             }
-            this.maxAgeMillis = maxAgeMillis;
             return this;
         }
 
         /**
-         * Sample interval.
+         * Sample interval. Default is 20 milliseconds.
          * <p>
          * The exemplar sampler is rate limited, i.e. Exemplars are updated at most every n milliseconds.
-         * This is done for performance: The Exemplar Sampler is called for each counter update, and
-         * you want this to be a NOOP for most of the calls.
          */
-        public Builder withSampleIntervalMillis(long sampleIntervalMillis) {
-            if (sampleIntervalMillis <= 0) {
-                throw new IllegalArgumentException(sampleIntervalMillis + ": sampleIntervalMillis must be > 0");
+        public Builder withSampleInterval(long sampleInterval, TimeUnit unit) {
+            if (sampleInterval <= 0) {
+                throw new IllegalArgumentException(sampleInterval + ": sampleInterval must be > 0");
             }
-            this.sampleIntervalMillis = sampleIntervalMillis;
+            this.sampleIntervalMillis = unit.toMillis(sampleInterval);
             return this;
         }
 
@@ -247,28 +202,5 @@ public class ExemplarConfig {
                     minAgeMillis, maxAgeMillis, sampleIntervalMillis);
         }
 
-    }
-
-
-    private static Object findSpanContextSupplier() {
-        try {
-            if (OpenTelemetrySpanContextSupplier.isAvailable()) {
-                return new OpenTelemetrySpanContextSupplier();
-            }
-        } catch (NoClassDefFoundError ignored) {
-            // tracer_otel dependency not found
-        } catch (UnsupportedClassVersionError ignored) {
-            // OpenTelemetry requires Java 8, but client_java might run on Java 6.
-        }
-        try {
-            if (OpenTelemetryAgentSpanContextSupplier.isAvailable()) {
-                return new OpenTelemetryAgentSpanContextSupplier();
-            }
-        } catch (NoClassDefFoundError ignored) {
-            // tracer_otel_agent dependency not found
-        } catch (UnsupportedClassVersionError ignored) {
-            // OpenTelemetry requires Java 8, but client_java might run on Java 6.
-        }
-        return null;
     }
 }

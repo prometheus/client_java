@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.exemplars.DefaultExemplarConfig;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricSnapshot;
@@ -82,12 +83,12 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         if (exemplarsEnabled != null) {
             return exemplarsEnabled;
         } else {
-            return ExemplarConfig.isEnabled();
+            return DefaultExemplarConfig.isEnabledByDefault();
         }
     }
 
     protected boolean hasSpanContextSupplier() {
-        return exemplarConfig != null ? exemplarConfig.hasSpanContextSupplier() : ExemplarConfig.hasDefaultSpanContextSupplier();
+        return exemplarConfig != null ? exemplarConfig.hasSpanContextSupplier() : DefaultExemplarConfig.hasSpanContextSupplier();
     }
 
     static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?,?>> extends Metric.Builder<B, M> {

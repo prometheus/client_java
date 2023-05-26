@@ -711,7 +711,7 @@ public class HistogramTest {
                 .withClassicBuckets(1.0, 2.0, 3.0, 4.0, Double.POSITIVE_INFINITY)
                 .withExemplarConfig(ExemplarConfig.newBuilder()
                         .withSpanContextSupplier(spanContextSupplier)
-                        .withSampleIntervalMillis(sampleIntervalMillis)
+                        .withSampleInterval(sampleIntervalMillis, TimeUnit.MILLISECONDS)
                         .build())
                 .withLabelNames("path")
                 .build();
@@ -856,8 +856,8 @@ public class HistogramTest {
                 .withName("test")
                 .withExemplars()
                 .withExemplarConfig(ExemplarConfig.newBuilder()
-                        .withSampleIntervalMillis(sampleIntervalMillis)
-                        .withMinAgeMillis(sampleIntervalMillis * 3)
+                        .withSampleInterval(sampleIntervalMillis, TimeUnit.MILLISECONDS)
+                        .withMinAge(sampleIntervalMillis * 3, TimeUnit.MILLISECONDS)
                         .build())
                 .build();
         Labels labels = Labels.of("mapKey1", "mapValue1", "mapKey2", "mapValue2");
@@ -940,7 +940,7 @@ public class HistogramTest {
                 .nativeHistogramOnly()
                 .withExemplarConfig(ExemplarConfig.newBuilder()
                         .withSpanContextSupplier(spanContextSupplier)
-                        .withSampleIntervalMillis(sampleIntervalMillis)
+                        .withSampleInterval(sampleIntervalMillis, TimeUnit.MILLISECONDS)
                         .build())
                 .withLabelNames("path")
                 .build();
