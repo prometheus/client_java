@@ -138,17 +138,17 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         @Override
-        public void observeWithExemplar(double amount, Labels labels) {
-            if (Double.isNaN(amount)) {
+        public void observeWithExemplar(double value, Labels labels) {
+            if (Double.isNaN(value)) {
                 // See https://github.com/prometheus/client_golang/issues/1275 on ignoring NaN observations.
                 return;
             }
-            if (!buffer.append(amount)) {
-                doObserve(amount);
+            if (!buffer.append(value)) {
+                doObserve(value);
             }
             if (isExemplarsEnabled()) {
                 lazyInitExemplarSampler(exemplarConfig, null, classicUpperBounds);
-                exemplarSampler.observeWithExemplar(amount, labels);
+                exemplarSampler.observeWithExemplar(value, labels);
             }
         }
 

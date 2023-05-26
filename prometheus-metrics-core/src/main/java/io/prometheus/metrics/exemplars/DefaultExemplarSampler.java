@@ -40,7 +40,7 @@ public class DefaultExemplarSampler implements ExemplarSampler {
     private DefaultExemplarSampler(ExemplarConfig config) {
         this.config = config;
         double[] upperBounds = config.getUpperBounds();
-        int numberOfExemplars = upperBounds != null ? upperBounds.length : config.getNumberOfExemplars();
+        int numberOfExemplars = upperBounds.length > 1 ? upperBounds.length : config.getNumberOfExemplars();
         this.exemplars = new Exemplar[numberOfExemplars];
         this.customExemplars = new Exemplar[numberOfExemplars];
     }
@@ -222,6 +222,7 @@ public class DefaultExemplarSampler implements ExemplarSampler {
                 }
             }
         }
+        // TODO will happen for +Inf observations
         return 0; // will never happen, as upperBounds contains +Inf
     }
 
@@ -254,7 +255,7 @@ public class DefaultExemplarSampler implements ExemplarSampler {
     }
 
     private void rateLimitedObserve(AtomicBoolean accepting, double value, Exemplar[] exemplars, LongSupplier observeFunc) {
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
+        if (Double.isNaN(value)) {
             return;
         }
         if (!accepting.compareAndSet(true, false)) {
