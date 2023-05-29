@@ -41,6 +41,7 @@
         <!-- By not including it, we force Maven to load the shaded version from the Maven repository. -->
         <!-- However, that means protobuf-shaded must be built and installed manually if there are any changes. -->
         <module>prometheus-metrics-core</module>
+        <module>prometheus-metrics-config</module>
         <module>prometheus-metrics-model</module>
         <module>prometheus-exposition-formats</module>
 

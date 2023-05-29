@@ -604,6 +604,11 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
 
         @Override
         public Histogram build() {
+            // TODO: load config / what takes precedence?
+            // prio 0: defaults hard-coded in builder
+            // prio 1: defaults from PrometheusConfigLoader
+            // prio 2: config set in builder API for this metric
+            // prio 3: metric specific config from PrometheusConfigLoader
             return new Histogram(this);
         }
 
