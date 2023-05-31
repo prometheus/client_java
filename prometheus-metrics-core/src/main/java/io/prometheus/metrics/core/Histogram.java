@@ -65,7 +65,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     //
     // The initialNativeSchema is the schema we start with. The histogram will automatically scale down
     // if the number of native histogram buckets exceeds nativeMaxBuckets.
-    private final int initialNativeSchema; // integer in [-4, 8]
+    private final int nativeInitialSchema; // integer in [-4, 8]
 
     // Native histogram buckets get smaller and smaller the closer they get to zero.
     // To avoid wasting a lot of buckets for observations fluctuating around zero, we consider all
@@ -105,19 +105,19 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                     builder.getDefaults() // fallback
             };
         }
-        initialNativeSchema = getConfigProperty(configs, config -> {
-            if (Boolean.TRUE.equals(config.getClassicHistogramOnly())) {
+        nativeInitialSchema = getConfigProperty(configs, config -> {
+            if (Boolean.TRUE.equals(config.getHistogramClassicOnly())) {
                 return CLASSIC_HISTOGRAM;
             }
-            return config.getNativeHistogramInitialSchema();
+            return config.getHistogramNativeInitialSchema();
         });
         classicUpperBounds = getConfigProperty(configs, config -> {
-            if (Boolean.TRUE.equals(config.getNativeHistogramOnly())) {
+            if (Boolean.TRUE.equals(config.getHistogramNativeOnly())) {
                 return new double[]{};
             }
-            if (config.getClassicHistogramUpperBounds() != null) {
+            if (config.getHistogramClassicUpperBounds() != null) {
                 SortedSet<Double> upperBounds = new TreeSet<>();
-                for (double upperBound : config.getClassicHistogramUpperBounds()) {
+                for (double upperBound : config.getHistogramClassicUpperBounds()) {
                     upperBounds.add(upperBound);
                 }
                 upperBounds.add(Double.POSITIVE_INFINITY);
@@ -130,12 +130,12 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             }
             return null;
         });
-        double max = getConfigProperty(configs, MetricsConfig::getNativeHistogramMaxZeroThreshold);
-        double min = getConfigProperty(configs, MetricsConfig::getNativeHistogramMinZeroThreshold);
+        double max = getConfigProperty(configs, MetricsConfig::getHistogramNativeMaxZeroThreshold);
+        double min = getConfigProperty(configs, MetricsConfig::getHistogramNativeMinZeroThreshold);
         nativeMaxZeroThreshold = max == builder.DEFAULT_NATIVE_MAX_ZERO_THRESHOLD && min > max ? min : max;
         nativeMinZeroThreshold = Math.min(min, nativeMaxZeroThreshold);
-        nativeMaxBuckets = getConfigProperty(configs, MetricsConfig::getNativeHistogramMaxNumberOfBuckets);
-        nativeResetDurationSeconds = getConfigProperty(configs, MetricsConfig::getNativeHistogramResetDurationSeconds);
+        nativeMaxBuckets = getConfigProperty(configs, MetricsConfig::getHistogramNativeMaxNumberOfBuckets);
+        nativeResetDurationSeconds = getConfigProperty(configs, MetricsConfig::getHistogramNativeResetDurationSeconds);
     }
 
     private <T> T getConfigProperty(MetricsConfig[] configs, Function<MetricsConfig, T> getter) {
@@ -156,7 +156,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         private final LongAdder nativeZeroCount = new LongAdder();
         private final LongAdder count = new LongAdder();
         private final DoubleAdder sum = new DoubleAdder();
-        private volatile int nativeSchema = initialNativeSchema; // integer in [-4, 8] or CLASSIC_HISTOGRAM
+        private volatile int nativeSchema = nativeInitialSchema; // integer in [-4, 8] or CLASSIC_HISTOGRAM
         private volatile double nativeZeroThreshold = Histogram.this.nativeMinZeroThreshold;
         private volatile long createdTimeMillis = System.currentTimeMillis();
         private final Buffer<HistogramSnapshot.HistogramData> buffer = new Buffer<>();
@@ -210,7 +210,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                 }
             }
             boolean nativeBucketCreated = false;
-            if (Histogram.this.initialNativeSchema != CLASSIC_HISTOGRAM) {
+            if (Histogram.this.nativeInitialSchema != CLASSIC_HISTOGRAM) {
                 if (value > nativeZeroThreshold) {
                     nativeBucketCreated = addToNativeBucket(value, nativeBucketsForPositiveValues);
                 } else if (value < -nativeZeroThreshold) {
@@ -241,7 +241,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                                     labels,
                                     exemplars,
                                     createdTimeMillis);
-                        } else if (Histogram.this.initialNativeSchema == CLASSIC_HISTOGRAM) {
+                        } else if (Histogram.this.nativeInitialSchema == CLASSIC_HISTOGRAM) {
                             // classic only
                             return new HistogramSnapshot.HistogramData(
                                     ClassicHistogramBuckets.of(classicUpperBounds, classicBuckets),
@@ -361,7 +361,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          */
         private void maybeResetOrScaleDown(double value, boolean nativeBucketCreated) {
             AtomicBoolean wasReset = new AtomicBoolean(false);
-            if (resetDurationExpired && nativeSchema < initialNativeSchema) {
+            if (resetDurationExpired && nativeSchema < nativeInitialSchema) {
                 // If nativeSchema < initialNativeSchema the histogram has been scaled down.
                 // So if resetDurationExpired we will reset it to restore the original native schema.
                 buffer.run(expectedCount -> count.sum() == expectedCount,
@@ -433,7 +433,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                 classicBuckets[i].reset();
             }
             nativeZeroThreshold = nativeMinZeroThreshold;
-            nativeSchema = Histogram.this.initialNativeSchema;
+            nativeSchema = Histogram.this.nativeInitialSchema;
             createdTimeMillis = System.currentTimeMillis();
             if (exemplarSampler != null) {
                 exemplarSampler.reset();
