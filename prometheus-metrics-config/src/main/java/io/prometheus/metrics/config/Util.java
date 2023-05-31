@@ -82,10 +82,9 @@ public class Util {
     }
 
     public static <T extends Number> void assertValue(T number, Predicate<T> predicate, String message, String prefix, String name) throws PrometheusConfigException {
-        if (number != null) {
-            if (! predicate.test(number)) {
-                throw new PrometheusConfigException(prefix + "." + name + ": " + message);
-            }
+        if (number != null && !predicate.test(number)) {
+            String fullMessage = prefix == null ? name + ": " + message : prefix + "." + name + ": " + message;
+            throw new PrometheusConfigException(fullMessage);
         }
     }
 }

@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.config.PrometheusConfig;
 import io.prometheus.metrics.exemplars.DefaultExemplarConfig;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Labels;
@@ -93,11 +94,11 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
 
     static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?,?>> extends Metric.Builder<B, M> {
         private String[] labelNames = new String[0];
-        private Boolean exemplarsEnabled;
+        protected Boolean exemplarsEnabled;
         private ExemplarConfig exemplarConfig;
 
-        protected Builder(List<String> illegalLabelNames) {
-            super(illegalLabelNames);
+        protected Builder(List<String> illegalLabelNames, PrometheusConfig config) {
+            super(illegalLabelNames, config);
         }
 
         public B withLabelNames(String... labelNames) {

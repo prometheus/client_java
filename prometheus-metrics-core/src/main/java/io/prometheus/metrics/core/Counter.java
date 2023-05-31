@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.config.PrometheusConfig;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Labels;
@@ -48,7 +49,11 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
     }
 
     public static Builder newBuilder() {
-        return new Builder();
+        return new Builder(PrometheusConfig.getInstance());
+    }
+
+    public static Builder newBuilder(PrometheusConfig config) {
+        return new Builder(config);
     }
 
     private static String normalizeName(String name) {
@@ -112,8 +117,8 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
     public static class Builder extends ObservingMetric.Builder<Builder, Counter> {
 
-        private Builder() {
-            super(Collections.emptyList());
+        private Builder(PrometheusConfig config) {
+            super(Collections.emptyList(), config);
         }
 
         @Override
@@ -157,8 +162,8 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
             private DoubleSupplier callback;
 
-            private Builder() {
-                super(Collections.emptyList());
+            private Builder(PrometheusConfig config) {
+                super(Collections.emptyList(), config);
             }
 
             public io.prometheus.metrics.core.Counter.FromCallback.Builder withCallback(DoubleSupplier callback) {

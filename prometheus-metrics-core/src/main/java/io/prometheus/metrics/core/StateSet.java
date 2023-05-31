@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.config.PrometheusConfig;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.observer.StateObserver;
@@ -91,8 +92,8 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
 
         private String[] names;
 
-        private Builder() {
-            super(Collections.emptyList());
+        private Builder(PrometheusConfig config) {
+            super(Collections.emptyList(), config);
         }
 
         public Builder withStates(Class<? extends Enum<?>> enumClass) {
@@ -125,6 +126,10 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
     }
 
     public static Builder newBuilder() {
-        return new Builder();
+        return new Builder(PrometheusConfig.getInstance());
+    }
+
+    public static Builder newBuilder(PrometheusConfig config) {
+        return new Builder(config);
     }
 }

@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.config.PrometheusConfig;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.Labels;
@@ -120,8 +121,8 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
 
     public static class Builder extends ObservingMetric.Builder<Builder, Gauge> {
 
-        private Builder() {
-            super(Collections.emptyList());
+        private Builder(PrometheusConfig config) {
+            super(Collections.emptyList(), config);
         }
 
         @Override
@@ -155,8 +156,8 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
 
             private DoubleSupplier callback;
 
-            private Builder() {
-                super(Collections.emptyList());
+            private Builder(PrometheusConfig config) {
+                super(Collections.emptyList(), config);
             }
 
             public Gauge.FromCallback.Builder withCallback(DoubleSupplier callback) {
@@ -177,6 +178,10 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     }
 
     public static Builder newBuilder() {
-        return new Builder();
+        return new Builder(PrometheusConfig.getInstance());
+    }
+
+    public static Builder newBuilder(PrometheusConfig config) {
+        return new Builder(config);
     }
 }

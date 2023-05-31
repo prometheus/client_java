@@ -1,5 +1,6 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.config.PrometheusConfig;
 import io.prometheus.metrics.model.InfoSnapshot;
 import io.prometheus.metrics.model.Label;
 import io.prometheus.metrics.model.Labels;
@@ -34,8 +35,8 @@ public class Info extends Metric {
 
     public static class Builder extends Metric.Builder<Builder, Info> {
 
-        private Builder() {
-            super(Collections.emptyList());
+        private Builder(PrometheusConfig config) {
+            super(Collections.emptyList(), config);
         }
 
         @Override
@@ -62,6 +63,10 @@ public class Info extends Metric {
     }
 
     public static Builder newBuilder() {
-        return new Builder();
+        return new Builder(PrometheusConfig.getInstance());
+    }
+
+    public static Builder newBuilder(PrometheusConfig config) {
+        return new Builder(config);
     }
 }

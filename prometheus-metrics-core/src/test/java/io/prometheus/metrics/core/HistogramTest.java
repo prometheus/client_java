@@ -116,7 +116,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(3)
+                                .withNativeInitialSchema(3)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.0, 1.0, 2.0, 3.0),
@@ -135,7 +135,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2),
@@ -155,7 +155,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(-1)
+                                .withNativeInitialSchema(-1)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.0156251, 0.0625, // Bucket -2: (0.015625, 0.0625)
@@ -179,7 +179,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(-2)
+                                .withNativeInitialSchema(-2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.0156251, 0.0625, // Bucket -1: (0.015625, 0.0625]
@@ -202,7 +202,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2
@@ -228,7 +228,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
@@ -246,7 +246,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMinZeroThreshold(1.4)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
@@ -291,7 +291,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.POSITIVE_INFINITY
@@ -313,7 +313,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NEGATIVE_INFINITY
@@ -333,9 +333,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2
                 ),
@@ -354,9 +354,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
                 ),
@@ -377,9 +377,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
                 ),
@@ -400,9 +400,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3, 4),
                 new GolangTestCase("'buckets limited by reset' from client_golang",
@@ -417,10 +417,10 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMinZeroThreshold(0)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, RESET_DURATION_REACHED, 3, 4),
                 new GolangTestCase("'limited buckets but nothing triggered, negative observations' from client_golang",
@@ -438,9 +438,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2),
                 new GolangTestCase("'buckets limited by halving resolution, negative observations' from client_golang",
@@ -458,9 +458,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3),
                 new GolangTestCase("'buckets limited by widening the zero bucket, negative observations' from client_golang",
@@ -480,9 +480,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3),
                 new GolangTestCase("'buckets limited by widening the zero bucket twice, negative observations' from client_golang",
@@ -502,9 +502,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3, -4),
                 new GolangTestCase("'buckets limited by reset, negative observations' from client_golang",
@@ -519,9 +519,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, RESET_DURATION_REACHED, -3, -4),
                 new GolangTestCase("'buckets limited by halving resolution, then reset' from client_golang",
@@ -536,9 +536,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 5, 5.1, RESET_DURATION_REACHED, 3, 4),
                 new GolangTestCase("'buckets limited by widening the zero bucket, then reset' from client_golang",
@@ -553,9 +553,9 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(2)
+                                .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxBuckets(4)
+                                .withNativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 5, 5.1, RESET_DURATION_REACHED, 3, 4)
         };
@@ -582,7 +582,7 @@ public class HistogramTest {
                         Histogram.newBuilder()
                                 .withName("test")
                                 .nativeHistogramOnly()
-                                .withNativeSchema(0)
+                                .withNativeInitialSchema(0)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
                         0.0, 0.5, 1.0)
@@ -609,7 +609,7 @@ public class HistogramTest {
         for (int i = 0; i < indexes.length; i++) {
             Histogram histogram = Histogram.newBuilder()
                     .withName("test")
-                    .withNativeSchema(schemas[i])
+                    .withNativeInitialSchema(schemas[i])
                     .build();
             Histogram.HistogramData histogramData = histogram.newMetricData();
             double result = (double) method.invoke(histogramData, schemas[i], indexes[i]);
@@ -631,7 +631,7 @@ public class HistogramTest {
             Histogram histogram = Histogram.newBuilder()
                     .nativeHistogramOnly()
                     .withName("test")
-                    .withNativeSchema(schema)
+                    .withNativeInitialSchema(schema)
                     .build();
             for (int i = 0; i < 10_000; i++) {
                 for (int zeros = -5; zeros <= 10; zeros++) {

@@ -1,5 +1,7 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.config.MetricsConfig;
+import io.prometheus.metrics.config.PrometheusConfig;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.HistogramSnapshot;
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Function;
 
 /**
  * Prometheus supports two internal representations of histograms:
@@ -28,8 +31,8 @@ import java.util.concurrent.atomic.LongAdder;
  *     <li><i>Native Histograms</i> have an infinite number of buckets with a dynamic resolution.
  *         Prometheus native histograms are the same as OpenTelemetry's exponential histograms.</li>
  * </ol>
- * By default, a histogram maintains both representations. In Text format the classic histogram will be exposed,
- * in Protobuf format both representations will be exposed. This is great for migrating from classic histograms
+ * By default, a histogram maintains both representations. Exposition format "Text" uses the classic histogram,
+ * exposition format "Protobuf" uses both representations. This is great for migrating from classic histograms
  * to native histograms.
  * <p>
  * If you want the classic representation only, use {@link Histogram.Builder#classicHistogramOnly}.
@@ -37,11 +40,15 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class Histogram extends ObservingMetric<DistributionObserver, Histogram.HistogramData> implements DistributionObserver {
 
+    // nativeSchema == CLASSIC_HISTOGRAM indicates that this is a classic histogram only.
     private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
-    private static final double[][] NATIVE_BOUNDS;
-    public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS = new double[]{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10};
 
-    private final double[] classicUpperBounds; // empty for native histograms
+    // NATIVE_BOUNDS is used to look up the native bucket index depending on the current schema.
+    private static final double[][] NATIVE_BOUNDS;
+
+    // Upper bounds for the classic histogram buckets. Contains at least +Inf.
+    // An empty array indicates that this is a native histogram only.
+    private final double[] classicUpperBounds;
 
     // The schema defines the resolution of the native histogram.
     // Schema is Prometheus terminology, in OpenTelemetry it's named "scale".
@@ -80,25 +87,66 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     // the histogram may reset (all values set to zero) after nativeResetDurationSeconds is expired.
     private final long nativeResetDurationSeconds; // 0 indicates no reset
 
-    private Histogram(Histogram.Builder builder) {
+    private Histogram(Histogram.Builder builder, PrometheusConfig prometheusConfig) {
         super(builder);
-        SortedSet<Double> upperBounds = new TreeSet<>();
-        if (builder.classicUpperBounds != null) {
-            for (double upperBound : builder.classicUpperBounds) {
-                upperBounds.add(upperBound);
+        String metricName = getMetadata().getName();
+        MetricsConfig[] configs;
+        if (prometheusConfig.getMetricsConfig(metricName) != null) {
+            configs = new MetricsConfig[]{
+                prometheusConfig.getMetricsConfig(metricName), // highest precedence
+                builder.toConfig(), // second-highest precedence
+                prometheusConfig.getDefaultMetricsConfig(), // third-highest precedence
+                builder.getDefaults() // fallback
+            };
+        } else {
+            configs = new MetricsConfig[]{
+                    builder.toConfig(), // highest precedence
+                    prometheusConfig.getDefaultMetricsConfig(), // second-highest precedence
+                    builder.getDefaults() // fallback
+            };
+        }
+        initialNativeSchema = getConfigProperty(configs, config -> {
+            if (Boolean.TRUE.equals(config.getClassicHistogramOnly())) {
+                return CLASSIC_HISTOGRAM;
             }
-            upperBounds.add(Double.POSITIVE_INFINITY);
+            return config.getNativeHistogramInitialSchema();
+        });
+        classicUpperBounds = getConfigProperty(configs, config -> {
+            if (Boolean.TRUE.equals(config.getNativeHistogramOnly())) {
+                return new double[]{};
+            }
+            if (config.getClassicHistogramUpperBounds() != null) {
+                SortedSet<Double> upperBounds = new TreeSet<>();
+                for (double upperBound : config.getClassicHistogramUpperBounds()) {
+                    upperBounds.add(upperBound);
+                }
+                upperBounds.add(Double.POSITIVE_INFINITY);
+                double[] result = new double[upperBounds.size()];
+                int i = 0;
+                for (double upperBound : upperBounds) {
+                    result[i++] = upperBound;
+                }
+                return result;
+            }
+            return null;
+        });
+        double max = getConfigProperty(configs, MetricsConfig::getNativeHistogramMaxZeroThreshold);
+        double min = getConfigProperty(configs, MetricsConfig::getNativeHistogramMinZeroThreshold);
+        nativeMaxZeroThreshold = max == builder.DEFAULT_NATIVE_MAX_ZERO_THRESHOLD && min > max ? min : max;
+        nativeMinZeroThreshold = Math.min(min, nativeMaxZeroThreshold);
+        nativeMaxBuckets = getConfigProperty(configs, MetricsConfig::getNativeHistogramMaxNumberOfBuckets);
+        nativeResetDurationSeconds = getConfigProperty(configs, MetricsConfig::getNativeHistogramResetDurationSeconds);
+    }
+
+    private <T> T getConfigProperty(MetricsConfig[] configs, Function<MetricsConfig, T> getter) {
+        T result;
+        for (MetricsConfig config : configs) {
+            result = getter.apply(config);
+            if (result != null) {
+                return result;
+            }
         }
-        this.classicUpperBounds = new double[upperBounds.size()]; // empty if this is a pure native histogram
-        int i = 0;
-        for (double upperBound : upperBounds) {
-            this.classicUpperBounds[i++] = upperBound;
-        }
-        this.initialNativeSchema = builder.nativeSchema;
-        this.nativeMaxZeroThreshold = builder.nativeMaxZeroThreshold < 0 ? builder.DEFAULT_MAX_ZERO_THRESHOLD : builder.nativeMaxZeroThreshold;
-        this.nativeMinZeroThreshold = builder.nativeMinZeroThreshold < 0 ? builder.DEFAULT_MIN_ZERO_THRESHOLD : builder.nativeMinZeroThreshold;
-        this.nativeMaxBuckets = builder.nativeMaxBuckets;
-        this.nativeResetDurationSeconds = builder.nativeResetDurationSeconds;
+        throw new IllegalStateException("Missing default config. This is a bug in the Prometheus metrics core library.");
     }
 
     public class HistogramData extends MetricData<DistributionObserver> implements DistributionObserver {
@@ -153,7 +201,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         private void doObserve(double value) {
-            // classicUpperBounds is an empty array if this is a pure native histogram.
+            // classicUpperBounds is an empty array if this is a native histogram only.
             for (int i = 0; i < classicUpperBounds.length; ++i) {
                 // The last bucket is +Inf, so we always increment.
                 if (value <= classicUpperBounds[i]) {
@@ -303,7 +351,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         /**
-         * Make sure that the number of native buckets does not exceed nativeMaxBuckets.
+         * Makes sure that the number of native buckets does not exceed nativeMaxBuckets.
          * <ul>
          *     <li>If the histogram has already been scaled down (nativeSchema < initialSchema)
          *         reset after resetIntervalExpired to get back to the original schema.</li>
@@ -314,6 +362,8 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         private void maybeResetOrScaleDown(double value, boolean nativeBucketCreated) {
             AtomicBoolean wasReset = new AtomicBoolean(false);
             if (resetDurationExpired && nativeSchema < initialNativeSchema) {
+                // If nativeSchema < initialNativeSchema the histogram has been scaled down.
+                // So if resetDurationExpired we will reset it to restore the original native schema.
                 buffer.run(expectedCount -> count.sum() == expectedCount,
                         () -> {
                             if (maybeReset()) {
@@ -323,6 +373,8 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                         },
                         this::doObserve);
             } else if (nativeBucketCreated) {
+                // If a new bucket was created we need to check if nativeMaxBuckets is exceeded
+                // and scale down if so.
                 maybeScaleDown(wasReset);
             }
             if (wasReset.get()) {
@@ -334,8 +386,11 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         private void maybeScaleDown(AtomicBoolean wasReset) {
+            if (nativeMaxBuckets == 0 || nativeSchema == -4) {
+                return;
+            }
             int numberOfBuckets = nativeBucketsForPositiveValues.size() + nativeBucketsForNegativeValues.size();
-            if (numberOfBuckets <= nativeMaxBuckets || nativeSchema == -4) {
+            if (numberOfBuckets <= nativeMaxBuckets) {
                 return;
             }
             buffer.run(
@@ -362,6 +417,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             );
         }
 
+        // maybeReset is called in the synchronized block while new observations go into the buffer.
         private boolean maybeReset() {
             if (!resetDurationExpired) {
                 return false;
@@ -386,6 +442,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return true;
         }
 
+        // maybeWidenZeroBucket is called in the synchronized block while new observations go into the buffer.
         private boolean maybeWidenZeroBucket() {
             if (nativeZeroThreshold >= nativeMaxZeroThreshold) {
                 return false;
@@ -461,6 +518,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             return result;
         }
 
+        // doubleBucketWidth is called in the synchronized block while new observations go into the buffer.
         private void doubleBucketWidth() {
             doubleBucketWidth(nativeBucketsForPositiveValues);
             doubleBucketWidth(nativeBucketsForNegativeValues);
@@ -557,25 +615,73 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     }
 
     public static Builder newBuilder() {
-        return new Builder();
+        return new Builder(PrometheusConfig.getInstance());
+    }
+
+    public static Builder newBuilder(PrometheusConfig config) {
+        return new Builder(config);
     }
 
     public static class Builder extends ObservingMetric.Builder<Histogram.Builder, Histogram> {
 
         private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
-        private final double DEFAULT_MIN_ZERO_THRESHOLD = Math.pow(2.0, -128);
-        private final double DEFAULT_MAX_ZERO_THRESHOLD = Math.pow(2.0, -128);
+        public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS = new double[]{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10};
+        private final double DEFAULT_NATIVE_MIN_ZERO_THRESHOLD = Math.pow(2.0, -128);
+        private final double DEFAULT_NATIVE_MAX_ZERO_THRESHOLD = Math.pow(2.0, -128);
+        private final int DEFAULT_NATIVE_INITIAL_SCHEMA = 5;
+        private final int DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS = 160;
+        private final long DEFAULT_NATIVE_RESET_DURATION_SECONDS = 0; // 0 means no reset
 
-        private double[] classicUpperBounds = DEFAULT_CLASSIC_UPPER_BOUNDS;
-        private int nativeSchema = 5;
-        private double nativeMaxZeroThreshold = -1; // negative value means not set
-        private double nativeMinZeroThreshold = -1; // negative value means not set
-        private int nativeMaxBuckets = Integer.MAX_VALUE; // TODO: Default 160?
+        private Boolean nativeHistogramOnly;
+        private Boolean classicHistogramOnly;
+        private double[] classicUpperBounds;
+        private Integer nativeInitialSchema;
+        private Double nativeMaxZeroThreshold;
+        private Double nativeMinZeroThreshold;
+        private Integer nativeMaxNumberOfBuckets;
+        private Long nativeResetDurationSeconds;
 
-        private long nativeResetDurationSeconds = 0L;
+        @Override
+        public Histogram build() {
+            return new Histogram(this, config);
+        }
 
-        private Builder() {
-            super(Collections.singletonList("le"));
+        private MetricsConfig toConfig() {
+            return new MetricsConfig(
+                    exemplarsEnabled,
+                    nativeHistogramOnly,
+                    classicHistogramOnly,
+                    classicUpperBounds,
+                    nativeInitialSchema,
+                    nativeMinZeroThreshold,
+                    nativeMaxZeroThreshold,
+                    nativeMaxNumberOfBuckets,
+                    nativeResetDurationSeconds,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+        private MetricsConfig getDefaults() {
+            return new MetricsConfig(
+                    true,
+                    false,
+                    false,
+                    DEFAULT_CLASSIC_UPPER_BOUNDS,
+                    DEFAULT_NATIVE_INITIAL_SCHEMA,
+                    DEFAULT_NATIVE_MIN_ZERO_THRESHOLD,
+                    DEFAULT_NATIVE_MAX_ZERO_THRESHOLD,
+                    DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS,
+                    DEFAULT_NATIVE_RESET_DURATION_SECONDS,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+        private Builder(PrometheusConfig config) {
+            super(Collections.singletonList("le"), config);
         }
 
         /**
@@ -583,10 +689,10 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          * See {@link Histogram} for more info.
          */
         public Builder nativeHistogramOnly() {
-            if (nativeSchema == CLASSIC_HISTOGRAM) {
+            if (Boolean.TRUE.equals(classicHistogramOnly)) {
                 throw new IllegalArgumentException("Cannot call nativeHistogramOnly() after calling classicHistogramOnly().");
             }
-            classicUpperBounds = null;
+            nativeHistogramOnly = true;
             return this;
         }
 
@@ -595,26 +701,17 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          * See {@link Histogram} for more info.
          */
         public Builder classicHistogramOnly() {
-            if (classicUpperBounds == null) {
+            if (Boolean.TRUE.equals(nativeHistogramOnly)) {
                 throw new IllegalArgumentException("Cannot call classicHistogramOnly() after calling nativeHistogramOnly().");
             }
-            nativeSchema = CLASSIC_HISTOGRAM;
+            classicHistogramOnly = true;
             return this;
         }
 
-        @Override
-        public Histogram build() {
-            // TODO: load config / what takes precedence?
-            // prio 0: defaults hard-coded in builder
-            // prio 1: defaults from PrometheusConfigLoader
-            // prio 2: config set in builder API for this metric
-            // prio 3: metric specific config from PrometheusConfigLoader
-            return new Histogram(this);
-        }
 
         /**
          * Set the upper bounds for the classic histogram buckets.
-         * Default is {@link Histogram#DEFAULT_CLASSIC_UPPER_BOUNDS}.
+         * Default is {@link Builder#DEFAULT_CLASSIC_UPPER_BOUNDS}.
          * If the +Inf bucket is missing it will be added.
          * If upperBounds contains duplicates the duplicates will be removed.
          */
@@ -655,9 +752,9 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          * Example: {@code withClassicExponentialBuckets(1.0, 2.0, 10)} creates bucket bounaries
          * {@code [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0]}
          *
-         * @param start is the first bucket boundary
+         * @param start  is the first bucket boundary
          * @param factor growth factor
-         * @param count total number of buckets, including start
+         * @param count  total number of buckets, including start
          */
         public Builder withClassicExponentialBuckets(double start, double factor, int count) {
             classicUpperBounds = new double[count];
@@ -668,13 +765,14 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         /**
-         * The schema is a number in [-4, 8] defining the resolution of the native histogram. Default is 5.
+         * The schema is a number in [-4, 8] defining the resolution of the native histogram.
+         * Default is {@link Builder#DEFAULT_NATIVE_INITIAL_SCHEMA}.
          * <p>
          * The higher the schema, the finer the resolution.
          * Schema is Prometheus terminology. In OpenTelemetry it's called "scale".
          * <p>
          * Note that the schema for a histogram may be automatically decreased at runtime if the number
-         * of native histogram buckets exceeds {@link #withNativeMaxBuckets(int)}.
+         * of native histogram buckets exceeds {@link #withNativeMaxNumberOfBuckets(int)}.
          * <p>
          * The following table shows:
          * <ul>
@@ -726,11 +824,11 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          *     </tr>
          * </table>
          */
-        public Builder withNativeSchema(int nativeSchema) {
+        public Builder withNativeInitialSchema(int nativeSchema) {
             if (nativeSchema < -4 || nativeSchema > 8) {
                 throw new IllegalArgumentException("Unsupported native histogram schema " + nativeSchema + ": expecting -4 <= schema <= 8.");
             }
-            this.nativeSchema = nativeSchema;
+            this.nativeInitialSchema = nativeSchema;
             return this;
         }
 
@@ -742,16 +840,13 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          * The zeroThreshold is initialized with minZeroThreshold, and will grow up to maxZeroThreshold if
          * the number of native histogram buckets exceeds nativeMaxBuckets.
          * <p>
-         * Default is {@link #DEFAULT_MAX_ZERO_THRESHOLD}.
+         * Default is {@link Builder#DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS}.
          */
         public Builder withNativeMaxZeroThreshold(double nativeMaxZeroThreshold) {
             if (nativeMaxZeroThreshold < 0) {
                 throw new IllegalArgumentException("Illegal native max zero threshold " + nativeMaxZeroThreshold + ": must be >= 0");
             }
             this.nativeMaxZeroThreshold = nativeMaxZeroThreshold;
-            if (nativeMinZeroThreshold == -1 && DEFAULT_MIN_ZERO_THRESHOLD > nativeMaxZeroThreshold) {
-                nativeMinZeroThreshold = nativeMaxZeroThreshold;
-            }
             return this;
         }
 
@@ -763,39 +858,36 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          * The zeroThreshold is initialized with minZeroThreshold, and will grow up to maxZeroThreshold if
          * the number of native histogram buckets exceeds nativeMaxBuckets.
          * <p>
-         * Default is {@link #DEFAULT_MIN_ZERO_THRESHOLD}.
+         * Default is {@link Builder#DEFAULT_NATIVE_MIN_ZERO_THRESHOLD}.
          */
         public Builder withNativeMinZeroThreshold(double nativeMinZeroThreshold) {
             if (nativeMinZeroThreshold < 0) {
                 throw new IllegalArgumentException("Illegal native min zero threshold " + nativeMinZeroThreshold + ": must be >= 0");
             }
             this.nativeMinZeroThreshold = nativeMinZeroThreshold;
-            if (nativeMaxZeroThreshold == -1 && DEFAULT_MAX_ZERO_THRESHOLD < nativeMinZeroThreshold) {
-                nativeMaxZeroThreshold = nativeMinZeroThreshold;
-            }
             return this;
         }
 
         /**
          * Limit the number of native buckets.
          * <p>
-         * If the number of native buckets exceeds the maximum, the {@link #withNativeSchema(int)} is decreased,
+         * If the number of native buckets exceeds the maximum, the {@link #withNativeInitialSchema(int)} is decreased,
          * i.e. the resolution of the histogram is decreased to reduce the number of buckets.
          */
-        public Builder withNativeMaxBuckets(int nativeMaxBuckets) {
-            this.nativeMaxBuckets = nativeMaxBuckets;
+        public Builder withNativeMaxNumberOfBuckets(int nativeMaxBuckets) {
+            this.nativeMaxNumberOfBuckets = nativeMaxBuckets;
             return this;
         }
 
         /**
-         * If the histogram needed to be scaled down because {@link #withNativeMaxBuckets(int)} was exceeded,
-         * reset the histogram after a certain time interval to go back to the original {@link #withNativeSchema(int)}.
+         * If the histogram needed to be scaled down because {@link #withNativeMaxNumberOfBuckets(int)} was exceeded,
+         * reset the histogram after a certain time interval to go back to the original {@link #withNativeInitialSchema(int)}.
          * <p>
-         * Reset means all values are set to zero. A good value might be 24h.
+         * Reset means all values are set to zero. A good value might be 24h or 7d.
          * <p>
          * Default is no reset.
          */
-        public Builder withNativeResetInterval(long duration, TimeUnit unit) {
+        public Builder withNativeResetDuration(long duration, TimeUnit unit) {
             // TODO: reset interval isn't tested yet
             if (duration <= 0) {
                 throw new IllegalArgumentException(duration + ": value > 0 expected");

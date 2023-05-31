@@ -1,10 +1,14 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.model.*;
+import io.prometheus.metrics.config.PrometheusConfig;
+import io.prometheus.metrics.model.Exemplars;
+import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.Quantile;
+import io.prometheus.metrics.model.Quantiles;
+import io.prometheus.metrics.model.SummarySnapshot;
 import io.prometheus.metrics.observer.DistributionObserver;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -129,8 +133,8 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         private long maxAgeSeconds = TimeUnit.MINUTES.toSeconds(10);
         private int ageBuckets = 5;
 
-        private Builder() {
-            super(Collections.singletonList("quantile"));
+        private Builder(PrometheusConfig config) {
+            super(Collections.singletonList("quantile"), config);
         }
 
         public Builder quantile(double quantile, double error) {
@@ -169,5 +173,13 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         protected Builder self() {
             return this;
         }
+    }
+
+    public static Summary.Builder newBuilder() {
+        return new Builder(PrometheusConfig.getInstance());
+    }
+
+    public static Summary.Builder newBuilder(PrometheusConfig config) {
+        return new Builder(config);
     }
 }
