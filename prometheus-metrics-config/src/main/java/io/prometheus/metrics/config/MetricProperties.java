@@ -145,7 +145,7 @@ public class MetricProperties {
         }
 
         if (summaryQuantileErrors != null) {
-            if (summaryQuantiles != null) {
+            if (summaryQuantiles == null) {
                 throw new PrometheusPropertiesException(prefix + "." + SUMMARY_QUANTILE_ERRORS + ": Can't configure " + SUMMARY_QUANTILE_ERRORS + " without configuring " + SUMMARY_QUANTILES);
             }
             if (summaryQuantileErrors.length != summaryQuantiles.length) {
