@@ -16,7 +16,7 @@ public class PrometheusPropertiesTest {
         Assert.assertEquals(4, result.getMetricProperties("http_duration_seconds").getHistogramClassicUpperBounds().length);
     }
 
-    @Test(expected=PrometheusPropertiesException.class) // can't configure empty histogram classic bounds
+    @Test
     public void testEmptyUpperBounds() throws IOException {
         Properties properties = new Properties();
         try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("emptyUpperBounds.properties")) {
@@ -24,5 +24,6 @@ public class PrometheusPropertiesTest {
         }
         Assert.assertEquals(1, properties.size());
         MetricProperties.load("io.prometheus.metrics", properties);
+        Assert.assertEquals(0, properties.size());
     }
 }
