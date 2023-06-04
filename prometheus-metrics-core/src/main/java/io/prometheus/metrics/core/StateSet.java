@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.config.PrometheusConfig;
+import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.StateSetSnapshot;
 import io.prometheus.metrics.observer.StateObserver;
@@ -13,10 +14,13 @@ import java.util.stream.Stream;
 // experimental
 public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetData> implements StateObserver {
 
+    private final boolean exemplarsEnabled;
     private final String[] names;
 
-    private StateSet(Builder builder) {
+    private StateSet(Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
+        MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
         this.names = builder.names; // builder.names is already a validated copy
         for (String name : names) {
             if (this.getMetadata().getName().equals(name)) {
@@ -42,6 +46,11 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
     @Override
     protected StateSetData newMetricData() {
         return new StateSetData();
+    }
+
+    @Override
+    protected boolean isExemplarsEnabled() {
+        return exemplarsEnabled;
     }
 
     @Override
@@ -92,7 +101,7 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
 
         private String[] names;
 
-        private Builder(PrometheusConfig config) {
+        private Builder(PrometheusProperties config) {
             super(Collections.emptyList(), config);
         }
 
@@ -116,7 +125,7 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
             if (names == null) {
                 throw new IllegalStateException("State names are required when building a StateSet.");
             }
-            return new StateSet(this);
+            return new StateSet(this, properties);
         }
 
         @Override
@@ -126,10 +135,10 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
     }
 
     public static Builder newBuilder() {
-        return new Builder(PrometheusConfig.getInstance());
+        return new Builder(PrometheusProperties.getInstance());
     }
 
-    public static Builder newBuilder(PrometheusConfig config) {
+    public static Builder newBuilder(PrometheusProperties config) {
         return new Builder(config);
     }
 }

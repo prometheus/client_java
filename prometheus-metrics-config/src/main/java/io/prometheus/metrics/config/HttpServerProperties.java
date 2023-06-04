@@ -5,11 +5,11 @@ import java.util.Map;
 /**
  * Properties starting with io.prometheus.httpServer
  */
-public class HttpServerConfig {
+public class HttpServerProperties {
     private static final String PORT = "port";
     private final Integer port;
 
-    public HttpServerConfig(Integer port) {
+    public HttpServerProperties(Integer port) {
         this.port = port;
     }
 
@@ -17,9 +17,9 @@ public class HttpServerConfig {
         return port;
     }
 
-    static HttpServerConfig load(String prefix, Map<Object, Object> properties) throws PrometheusConfigException {
+    static HttpServerProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
         Integer port = Util.loadInteger(prefix + "." + PORT, properties);
         Util.assertValue(port, t -> t > 0, "Expecting value > 0", prefix, PORT);
-        return new HttpServerConfig(port);
+        return new HttpServerProperties(port);
     }
 }

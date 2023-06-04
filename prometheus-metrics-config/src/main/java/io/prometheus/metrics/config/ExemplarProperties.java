@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * Properties starting with io.prometheus.exemplars
  */
-public class ExemplarConfig {
+public class ExemplarProperties {
 
     private static final String MIN_RETENTION_PERIOD_SECONDS = "minRetentionPeriodSeconds";
     private static final String MAX_RETENTION_PERIOD_SECONDS = "maxRetentionPeriodSeconds";
@@ -17,7 +17,7 @@ public class ExemplarConfig {
     private final Integer sampleIntervalMilliseconds;
     private final Integer numberOfExemplars;
 
-    public ExemplarConfig(
+    public ExemplarProperties(
             Integer minRetentionPeriodSeconds,
             Integer maxRetentionPeriodSeconds,
             Integer sampleIntervalMilliseconds,
@@ -44,7 +44,7 @@ public class ExemplarConfig {
         return numberOfExemplars;
     }
 
-    static ExemplarConfig load(String prefix, Map<Object, Object> properties) throws PrometheusConfigException {
+    static ExemplarProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
         Integer minRetentionPeriodSeconds = Util.loadInteger(prefix + "." + MIN_RETENTION_PERIOD_SECONDS, properties);
         Integer maxRetentionPeriodSeconds = Util.loadInteger(prefix + "." + MAX_RETENTION_PERIOD_SECONDS, properties);
         Integer sampleIntervalMilliseconds = Util.loadInteger(prefix + "." + SAMPLE_INTERVAL_MILLISECONDS, properties);
@@ -57,11 +57,11 @@ public class ExemplarConfig {
 
         if (minRetentionPeriodSeconds != null && maxRetentionPeriodSeconds != null) {
             if (minRetentionPeriodSeconds > maxRetentionPeriodSeconds) {
-                throw new PrometheusConfigException(prefix + "." + MIN_RETENTION_PERIOD_SECONDS + " must not be greater than " + prefix + "." + MAX_RETENTION_PERIOD_SECONDS + ".");
+                throw new PrometheusPropertiesException(prefix + "." + MIN_RETENTION_PERIOD_SECONDS + " must not be greater than " + prefix + "." + MAX_RETENTION_PERIOD_SECONDS + ".");
             }
         }
 
-        return new ExemplarConfig(
+        return new ExemplarProperties(
                 minRetentionPeriodSeconds,
                 maxRetentionPeriodSeconds,
                 sampleIntervalMilliseconds,

@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.config.PrometheusConfig;
+import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.Quantile;
@@ -17,15 +18,35 @@ import java.util.concurrent.atomic.LongAdder;
 
 public class Summary extends ObservingMetric<DistributionObserver, Summary.SummaryData> implements DistributionObserver {
 
-    final List<CKMSQuantiles.Quantile> quantiles; // Can be empty, but can never be null.
-    final long maxAgeSeconds;
-    final int ageBuckets;
+    private final boolean exemplarsEnabled;
+    private final List<CKMSQuantiles.Quantile> quantiles; // Can be empty, but can never be null.
+    private final long maxAgeSeconds;
+    private final int ageBuckets;
 
-    private Summary(Builder builder) {
+    private Summary(Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
-        this.quantiles = Collections.unmodifiableList(new ArrayList<>(builder.quantiles));
-        this.maxAgeSeconds = builder.maxAgeSeconds;
-        this.ageBuckets = builder.ageBuckets;
+        MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        this.exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
+        this.quantiles = Collections.unmodifiableList(makeQuantiles(properties));
+        this.maxAgeSeconds = getConfigProperty(properties, MetricProperties::getSummaryMaxAgeSeconds);
+        this.ageBuckets = getConfigProperty(properties, MetricProperties::getSummaryNumberOfAgeBuckets);
+    }
+
+    private List<CKMSQuantiles.Quantile> makeQuantiles(MetricProperties[] properties) {
+        List<CKMSQuantiles.Quantile> result = new ArrayList<>();
+        double[] quantiles = getConfigProperty(properties, MetricProperties::getSummaryQuantiles);
+        double[] errors = getConfigProperty(properties, MetricProperties::getSummaryQuantileErrors);
+        if (quantiles != null) {
+            for (int i=0; i<quantiles.length; i++) {
+                result.add(new CKMSQuantiles.Quantile(quantiles[i], errors[i]));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    protected boolean isExemplarsEnabled() {
+        return exemplarsEnabled;
     }
 
     @Override
@@ -36,7 +57,7 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
     @Override
     protected SummarySnapshot collect(List<Labels> labels, List<SummaryData> metricData) {
         List<SummarySnapshot.SummaryData> data = new ArrayList<>(labels.size());
-        for (int i=0; i<labels.size(); i++) {
+        for (int i = 0; i < labels.size(); i++) {
             data.add(metricData.get(i).collect(labels.get(i)));
         }
         return new SummarySnapshot(getMetadata(), data);
@@ -129,12 +150,14 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
 
     public static class Builder extends ObservingMetric.Builder<Summary.Builder, Summary> {
 
+        public static final long DEFAULT_MAX_AGE_SECONDS = TimeUnit.MINUTES.toSeconds(5);
+        public static final int DEFAULT_AGE_BUCKETS = 5;
         private final List<CKMSQuantiles.Quantile> quantiles = new ArrayList<>();
-        private long maxAgeSeconds = TimeUnit.MINUTES.toSeconds(10);
-        private int ageBuckets = 5;
+        private Long maxAgeSeconds;
+        private Integer ageBuckets;
 
-        private Builder(PrometheusConfig config) {
-            super(Collections.singletonList("quantile"), config);
+        private Builder(PrometheusProperties properties) {
+            super(Collections.singletonList("quantile"), properties);
         }
 
         public Builder quantile(double quantile, double error) {
@@ -165,8 +188,38 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         }
 
         @Override
+        protected MetricProperties toProperties() {
+            double[] quantiles = null;
+            double[] quantileErrors = null;
+            if (!this.quantiles.isEmpty()) {
+                quantiles = new double[this.quantiles.size()];
+                quantileErrors = new double[this.quantiles.size()];
+                for (int i = 0; i < this.quantiles.size(); i++) {
+                    quantiles[i] = this.quantiles.get(i).quantile;
+                    quantileErrors[i] = this.quantiles.get(i).epsilon;
+                }
+            }
+            return MetricProperties.newBuilder()
+                    .withExemplarsEnabled(exemplarsEnabled)
+                    .withSummaryQuantiles(quantiles)
+                    .withSummaryQuantileErrors(quantileErrors)
+                    .withSummaryNumberOfAgeBuckets(ageBuckets)
+                    .withSummaryMaxAgeSeconds(maxAgeSeconds)
+                    .build();
+        }
+
+        @Override
+        public MetricProperties getDefaultProperties() {
+            return MetricProperties.newBuilder()
+                    .withExemplarsEnabled(true)
+                    .withSummaryNumberOfAgeBuckets(DEFAULT_AGE_BUCKETS)
+                    .withSummaryMaxAgeSeconds(DEFAULT_MAX_AGE_SECONDS)
+                    .build();
+        }
+
+        @Override
         public Summary build() {
-            return new Summary(this);
+            return new Summary(this, properties);
         }
 
         @Override
@@ -176,10 +229,10 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
     }
 
     public static Summary.Builder newBuilder() {
-        return new Builder(PrometheusConfig.getInstance());
+        return new Builder(PrometheusProperties.getInstance());
     }
 
-    public static Summary.Builder newBuilder(PrometheusConfig config) {
+    public static Summary.Builder newBuilder(PrometheusProperties config) {
         return new Builder(config);
     }
 }

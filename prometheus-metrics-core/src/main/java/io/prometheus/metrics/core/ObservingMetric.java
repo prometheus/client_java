@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.config.PrometheusConfig;
+import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.exemplars.DefaultExemplarConfig;
 import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Labels;
@@ -12,13 +13,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
 public abstract class ObservingMetric<O extends Observer, V extends MetricData<O>> extends Metric {
     private final String[] labelNames;
-    private final Boolean exemplarsEnabled;
+    //private final Boolean exemplarsEnabled;
     protected final ExemplarConfig exemplarConfig;
 
     /**
@@ -34,7 +36,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     protected ObservingMetric(Builder<?, ?> builder) {
         super(builder);
         this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
-        this.exemplarsEnabled = builder.exemplarsEnabled;
+        //this.exemplarsEnabled = builder.exemplarsEnabled;
         this.exemplarConfig = builder.exemplarConfig;
     }
 
@@ -80,6 +82,37 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         return noLabels;
     }
 
+    protected MetricProperties[] getMetricProperties(Builder builder, PrometheusProperties prometheusProperties) {
+        String metricName = getMetadata().getName();
+        if (prometheusProperties.getMetricProperties(metricName) != null) {
+            return new MetricProperties[]{
+                    prometheusProperties.getMetricProperties(metricName), // highest precedence
+                    builder.toProperties(), // second-highest precedence
+                    prometheusProperties.getDefaultMetricProperties(), // third-highest precedence
+                    builder.getDefaultProperties() // fallback
+            };
+        } else {
+            return new MetricProperties[]{
+                    builder.toProperties(), // highest precedence
+                    prometheusProperties.getDefaultMetricProperties(), // second-highest precedence
+                    builder.getDefaultProperties() // fallback
+            };
+        }
+    }
+
+    protected <T> T getConfigProperty(MetricProperties[] properties, Function<MetricProperties, T> getter) {
+        T result;
+        for (MetricProperties props : properties) {
+            result = getter.apply(props);
+            if (result != null) {
+                return result;
+            }
+        }
+        throw new IllegalStateException("Missing default config. This is a bug in the Prometheus metrics core library.");
+    }
+    protected abstract boolean isExemplarsEnabled();
+
+    /*
     protected boolean isExemplarsEnabled() {
         if (exemplarsEnabled != null) {
             return exemplarsEnabled;
@@ -87,6 +120,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
             return DefaultExemplarConfig.isEnabledByDefault();
         }
     }
+     */
 
     protected boolean hasSpanContextSupplier() {
         return exemplarConfig != null ? exemplarConfig.hasSpanContextSupplier() : DefaultExemplarConfig.hasSpanContextSupplier();
@@ -97,7 +131,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         protected Boolean exemplarsEnabled;
         private ExemplarConfig exemplarConfig;
 
-        protected Builder(List<String> illegalLabelNames, PrometheusConfig config) {
+        protected Builder(List<String> illegalLabelNames, PrometheusProperties config) {
             super(illegalLabelNames, config);
         }
 
@@ -122,6 +156,18 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         public B withoutExemplars() {
             this.exemplarsEnabled = FALSE;
             return self();
+        }
+
+        protected MetricProperties toProperties() {
+            return MetricProperties.newBuilder()
+                    .withExemplarsEnabled(exemplarsEnabled)
+                    .build();
+        }
+
+        public MetricProperties getDefaultProperties() {
+            return MetricProperties.newBuilder()
+                    .withExemplarsEnabled(true)
+                    .build();
         }
 
         /**

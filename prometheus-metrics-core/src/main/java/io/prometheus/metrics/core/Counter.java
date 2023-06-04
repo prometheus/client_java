@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.config.PrometheusConfig;
+import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Labels;
@@ -14,8 +15,17 @@ import java.util.function.DoubleSupplier;
 
 public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.CounterData> implements DiscreteEventObserver {
 
-    private Counter(Builder builder) {
+    private final boolean exemplarsEnabled;
+
+    private Counter(Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
+        MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
+    }
+
+    @Override
+    protected boolean isExemplarsEnabled() {
+        return exemplarsEnabled;
     }
 
     @Override
@@ -49,10 +59,10 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
     }
 
     public static Builder newBuilder() {
-        return new Builder(PrometheusConfig.getInstance());
+        return new Builder(PrometheusProperties.getInstance());
     }
 
-    public static Builder newBuilder(PrometheusConfig config) {
+    public static Builder newBuilder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -117,8 +127,8 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
     public static class Builder extends ObservingMetric.Builder<Builder, Counter> {
 
-        private Builder(PrometheusConfig config) {
-            super(Collections.emptyList(), config);
+        private Builder(PrometheusProperties properties) {
+            super(Collections.emptyList(), properties);
         }
 
         @Override
@@ -128,8 +138,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
         @Override
         public Counter build() {
-            // TODO we are normalizing the name twice.
-            return new Counter(withName(normalizeName(name)));
+            return new Counter(this, properties);
         }
 
         @Override
@@ -162,7 +171,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
             private DoubleSupplier callback;
 
-            private Builder(PrometheusConfig config) {
+            private Builder(PrometheusProperties config) {
                 super(Collections.emptyList(), config);
             }
 

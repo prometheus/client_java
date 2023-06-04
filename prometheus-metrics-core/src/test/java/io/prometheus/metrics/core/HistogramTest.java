@@ -98,7 +98,7 @@ public class HistogramTest {
                                 "bucket { cumulative_count: 3 upper_bound: Infinity }",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .classicHistogramOnly()
+                                .classicOnly()
                                 .build(),
                         1.0, 2.0, 3.0),
                 new GolangTestCase("'factor 1.1 results in schema 3' from client_golang",
@@ -115,7 +115,7 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(3)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
@@ -134,7 +134,7 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
@@ -154,7 +154,7 @@ public class HistogramTest {
                                 "positive_delta: -2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(-1)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
@@ -178,7 +178,7 @@ public class HistogramTest {
                                 "positive_delta: -6",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(-2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
@@ -201,7 +201,7 @@ public class HistogramTest {
                                 "negative_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
@@ -227,7 +227,7 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
@@ -245,7 +245,7 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMinZeroThreshold(1.4)
                                 .build(),
@@ -290,7 +290,7 @@ public class HistogramTest {
                                 "positive_delta: -1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
@@ -312,7 +312,7 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
@@ -332,7 +332,7 @@ public class HistogramTest {
                                 "positive_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -353,7 +353,7 @@ public class HistogramTest {
                                 "positive_delta: 1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -376,7 +376,7 @@ public class HistogramTest {
                                 "positive_delta: 1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -399,7 +399,7 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -416,7 +416,7 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMinZeroThreshold(0)
@@ -437,7 +437,7 @@ public class HistogramTest {
                                 "negative_delta: 2",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -457,7 +457,7 @@ public class HistogramTest {
                                 "negative_delta: 1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -479,7 +479,7 @@ public class HistogramTest {
                                 "negative_delta: 1",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -501,7 +501,7 @@ public class HistogramTest {
                                 "negative_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -518,7 +518,7 @@ public class HistogramTest {
                                 "negative_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -535,7 +535,7 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(0)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -552,7 +552,7 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(2)
                                 .withNativeMaxZeroThreshold(1.2)
                                 .withNativeMaxNumberOfBuckets(4)
@@ -581,7 +581,7 @@ public class HistogramTest {
                                 "positive_delta: 0",
                         Histogram.newBuilder()
                                 .withName("test")
-                                .nativeHistogramOnly()
+                                .nativeOnly()
                                 .withNativeInitialSchema(0)
                                 .withNativeMaxZeroThreshold(0)
                                 .build(),
@@ -629,7 +629,7 @@ public class HistogramTest {
         nativeBucketIndexToUpperBound.setAccessible(true);
         for (int schema = -4; schema <= 8; schema++) {
             Histogram histogram = Histogram.newBuilder()
-                    .nativeHistogramOnly()
+                    .nativeOnly()
                     .withName("test")
                     .withNativeInitialSchema(schema)
                     .build();
@@ -937,7 +937,7 @@ public class HistogramTest {
         long sampleIntervalMillis = 10;
         Histogram histogram = Histogram.newBuilder()
                 .withName("test")
-                .nativeHistogramOnly()
+                .nativeOnly()
                 .withExemplarConfig(ExemplarConfig.newBuilder()
                         .withSpanContextSupplier(spanContextSupplier)
                         .withSampleInterval(sampleIntervalMillis, TimeUnit.MILLISECONDS)

@@ -13,18 +13,18 @@ public class Util {
         return null;
     }
 
-    public static Boolean loadBoolean(String name, Map<Object, Object> properties) throws PrometheusConfigException {
+    public static Boolean loadBoolean(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
         String property = getProperty(name, properties);
         if (property != null) {
             if (!"true".equalsIgnoreCase(property) && !"false".equalsIgnoreCase(property)) {
-                throw new PrometheusConfigException(name + "=" + property + ": Expecting 'true' or 'false'");
+                throw new PrometheusPropertiesException(name + "=" + property + ": Expecting 'true' or 'false'");
             }
             return Boolean.parseBoolean(property);
         }
         return null;
     }
 
-    public static double[] loadDoubleArray(String name, Map<Object, Object> properties) throws PrometheusConfigException {
+    public static double[] loadDoubleArray(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
         String property = getProperty(name, properties);
         if (property != null) {
             String[] numbers = property.split(",");
@@ -37,7 +37,7 @@ public class Util {
                         result[i] = Double.parseDouble(numbers[i].trim());
                     }
                 } catch (NumberFormatException e) {
-                    throw new PrometheusConfigException(name + "=" + property + ": Expecting comma separated list of double values");
+                    throw new PrometheusPropertiesException(name + "=" + property + ": Expecting comma separated list of double values");
                 }
             }
             return result;
@@ -45,46 +45,46 @@ public class Util {
         return null;
     }
 
-    public static Integer loadInteger(String name, Map<Object, Object> properties) throws PrometheusConfigException {
+    public static Integer loadInteger(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
         String property = getProperty(name, properties);
         if (property != null) {
             try {
                 return Integer.parseInt(property);
             } catch (NumberFormatException e) {
-                throw new PrometheusConfigException(name + "=" + property + ": Expecting integer value");
+                throw new PrometheusPropertiesException(name + "=" + property + ": Expecting integer value");
             }
         }
         return null;
     }
 
-    public static Double loadDouble(String name, Map<Object, Object> properties) throws PrometheusConfigException {
+    public static Double loadDouble(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
         String property = getProperty(name, properties);
         if (property != null) {
             try {
                 return Double.parseDouble(property);
             } catch (NumberFormatException e) {
-                throw new PrometheusConfigException(name + "=" + property + ": Expecting double value");
+                throw new PrometheusPropertiesException(name + "=" + property + ": Expecting double value");
             }
         }
         return null;
     }
 
-    public static Long loadLong(String name, Map<Object, Object> properties) throws PrometheusConfigException {
+    public static Long loadLong(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
         String property = getProperty(name, properties);
         if (property != null) {
             try {
                 return Long.parseLong(property);
             } catch (NumberFormatException e) {
-                throw new PrometheusConfigException(name + "=" + property + ": Expecting long value");
+                throw new PrometheusPropertiesException(name + "=" + property + ": Expecting long value");
             }
         }
         return null;
     }
 
-    public static <T extends Number> void assertValue(T number, Predicate<T> predicate, String message, String prefix, String name) throws PrometheusConfigException {
+    public static <T extends Number> void assertValue(T number, Predicate<T> predicate, String message, String prefix, String name) throws PrometheusPropertiesException {
         if (number != null && !predicate.test(number)) {
             String fullMessage = prefix == null ? name + ": " + message : prefix + "." + name + ": " + message;
-            throw new PrometheusConfigException(fullMessage);
+            throw new PrometheusPropertiesException(fullMessage);
         }
     }
 }

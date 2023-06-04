@@ -12,22 +12,22 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PrometheusConfigLoader {
+public class PrometheusPropertiesLoader {
 
-    public static PrometheusConfig load() throws PrometheusConfigException {
+    public static PrometheusProperties load() throws PrometheusPropertiesException {
         Map<Object, Object> properties = loadProperties();
-        Map<String, MetricsConfig> metricsConfigs = loadMetricsConfigs(properties);
-        MetricsConfig defaultMetricsConfig = MetricsConfig.load("io.prometheus.metrics", properties);
-        ExemplarConfig exemplarConfig = ExemplarConfig.load("io.prometheus.exemplars", properties);
-        ExpositionFormatConfig expositionFormatConfig = ExpositionFormatConfig.load("io.prometheus.expositionFormat", properties);
-        HttpServerConfig httpServerConfig = HttpServerConfig.load("io.prometheus.httpServer", properties);
+        Map<String, MetricProperties> metricsConfigs = loadMetricsConfigs(properties);
+        MetricProperties defaultMetricProperties = MetricProperties.load("io.prometheus.metrics", properties);
+        ExemplarProperties exemplarConfig = ExemplarProperties.load("io.prometheus.exemplars", properties);
+        ExpositionFormatProperties expositionFormatProperties = ExpositionFormatProperties.load("io.prometheus.expositionFormat", properties);
+        HttpServerProperties httpServerConfig = HttpServerProperties.load("io.prometheus.httpServer", properties);
         validateAllPropertiesProcessed(properties);
-        return new PrometheusConfig(defaultMetricsConfig, metricsConfigs, exemplarConfig, expositionFormatConfig, httpServerConfig);
+        return new PrometheusProperties(defaultMetricProperties, metricsConfigs, exemplarConfig, expositionFormatProperties, httpServerConfig);
     }
 
     // This will remove entries from properties when they are processed.
-    private static Map<String, MetricsConfig> loadMetricsConfigs(Map<Object, Object> properties) {
-        Map<String, MetricsConfig> result = new HashMap<>();
+    private static Map<String, MetricProperties> loadMetricsConfigs(Map<Object, Object> properties) {
+        Map<String, MetricProperties> result = new HashMap<>();
         Pattern pattern = Pattern.compile("io\\.prometheus\\.metrics\\.([^.]+)\\.");
         // Create a copy of the keySet() for iterating. We cannot iterate directly over keySet()
         // because entries are removed when MetricsConfig.load(...) is called.
@@ -40,7 +40,7 @@ public class PrometheusConfigLoader {
             if (matcher.find()) {
                 String metricName = matcher.group(1);
                 if (!result.containsKey(metricName)) {
-                    result.put(metricName, MetricsConfig.load("io.prometheus.metrics." + metricName, properties));
+                    result.put(metricName, MetricProperties.load("io.prometheus.metrics." + metricName, properties));
                 }
             }
         }
@@ -53,7 +53,7 @@ public class PrometheusConfigLoader {
     private static void validateAllPropertiesProcessed(Map<Object, Object> properties) {
         for (Object key : properties.keySet()) {
             if (key.toString().startsWith("io.prometheus")) {
-                throw new PrometheusConfigException(key + ": Unknown property");
+                throw new PrometheusPropertiesException(key + ": Unknown property");
             }
         }
     }
@@ -76,7 +76,7 @@ public class PrometheusConfigLoader {
         return properties;
     }
 
-    private static Properties loadPropertiesFromFile() throws PrometheusConfigException {
+    private static Properties loadPropertiesFromFile() throws PrometheusPropertiesException {
         Properties properties = new Properties();
         String path = System.getProperty("prometheus.config");
         if (System.getenv("PROMETHEUS_CONFIG") != null) {
@@ -86,7 +86,7 @@ public class PrometheusConfigLoader {
             try (InputStream stream = Files.newInputStream(Paths.get(path))) {
                 properties.load(stream);
             } catch (IOException e) {
-                throw new PrometheusConfigException("Failed to read Prometheus properties from " + path + ": " + e.getMessage(), e);
+                throw new PrometheusPropertiesException("Failed to read Prometheus properties from " + path + ": " + e.getMessage(), e);
             }
         }
         return properties;

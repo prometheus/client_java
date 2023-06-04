@@ -1,10 +1,12 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.config.PrometheusConfig;
+import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public abstract class Metric {
 
@@ -34,15 +36,15 @@ public abstract class Metric {
 
     static abstract class Builder<B extends Builder<B, M>, M extends Metric> {
         protected final List<String> illegalLabelNames;
-        protected final PrometheusConfig config;
+        protected final PrometheusProperties properties;
         protected String name;
         private Unit unit;
         private String help;
         private Labels constLabels = Labels.EMPTY;
 
-        protected Builder(List<String> illegalLabelNames, PrometheusConfig config) {
+        protected Builder(List<String> illegalLabelNames, PrometheusProperties properties) {
             this.illegalLabelNames = new ArrayList<>(illegalLabelNames);
-            this.config = config;
+            this.properties = properties;
         }
 
         public B withName(String name) {

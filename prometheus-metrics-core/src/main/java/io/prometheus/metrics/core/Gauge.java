@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.config.PrometheusConfig;
+import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.Labels;
@@ -14,8 +15,12 @@ import java.util.function.DoubleSupplier;
 
 public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> implements GaugingObserver {
 
-    private Gauge(Builder builder) {
+    private final boolean exemplarsEnabled;
+
+    private Gauge(Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
+        MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
     }
 
     @Override
@@ -55,6 +60,11 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     @Override
     protected GaugeData newMetricData() {
         return new GaugeData();
+    }
+
+    @Override
+    protected boolean isExemplarsEnabled() {
+        return exemplarsEnabled;
     }
 
     class GaugeData extends MetricData<GaugingObserver> implements GaugingObserver {
@@ -121,13 +131,13 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
 
     public static class Builder extends ObservingMetric.Builder<Builder, Gauge> {
 
-        private Builder(PrometheusConfig config) {
+        private Builder(PrometheusProperties config) {
             super(Collections.emptyList(), config);
         }
 
         @Override
         public Gauge build() {
-            return new Gauge(this);
+            return new Gauge(this, properties);
         }
 
         @Override
@@ -156,7 +166,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
 
             private DoubleSupplier callback;
 
-            private Builder(PrometheusConfig config) {
+            private Builder(PrometheusProperties config) {
                 super(Collections.emptyList(), config);
             }
 
@@ -178,10 +188,10 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
     }
 
     public static Builder newBuilder() {
-        return new Builder(PrometheusConfig.getInstance());
+        return new Builder(PrometheusProperties.getInstance());
     }
 
-    public static Builder newBuilder(PrometheusConfig config) {
+    public static Builder newBuilder(PrometheusProperties config) {
         return new Builder(config);
     }
 }

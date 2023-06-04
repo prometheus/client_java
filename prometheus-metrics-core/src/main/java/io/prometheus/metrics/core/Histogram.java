@@ -1,7 +1,7 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.metrics.config.MetricsConfig;
-import io.prometheus.metrics.config.PrometheusConfig;
+import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.HistogramSnapshot;
@@ -35,8 +35,8 @@ import java.util.function.Function;
  * exposition format "Protobuf" uses both representations. This is great for migrating from classic histograms
  * to native histograms.
  * <p>
- * If you want the classic representation only, use {@link Histogram.Builder#classicHistogramOnly}.
- * If you want the native representation only, use {@link Histogram.Builder#nativeHistogramOnly}.
+ * If you want the classic representation only, use {@link Histogram.Builder#classicOnly}.
+ * If you want the native representation only, use {@link Histogram.Builder#nativeOnly}.
  */
 public class Histogram extends ObservingMetric<DistributionObserver, Histogram.HistogramData> implements DistributionObserver {
 
@@ -45,6 +45,8 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
 
     // NATIVE_BOUNDS is used to look up the native bucket index depending on the current schema.
     private static final double[][] NATIVE_BOUNDS;
+
+    private final boolean exemplarsEnabled;
 
     // Upper bounds for the classic histogram buckets. Contains at least +Inf.
     // An empty array indicates that this is a native histogram only.
@@ -87,37 +89,23 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     // the histogram may reset (all values set to zero) after nativeResetDurationSeconds is expired.
     private final long nativeResetDurationSeconds; // 0 indicates no reset
 
-    private Histogram(Histogram.Builder builder, PrometheusConfig prometheusConfig) {
+    private Histogram(Histogram.Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
-        String metricName = getMetadata().getName();
-        MetricsConfig[] configs;
-        if (prometheusConfig.getMetricsConfig(metricName) != null) {
-            configs = new MetricsConfig[]{
-                prometheusConfig.getMetricsConfig(metricName), // highest precedence
-                builder.toConfig(), // second-highest precedence
-                prometheusConfig.getDefaultMetricsConfig(), // third-highest precedence
-                builder.getDefaults() // fallback
-            };
-        } else {
-            configs = new MetricsConfig[]{
-                    builder.toConfig(), // highest precedence
-                    prometheusConfig.getDefaultMetricsConfig(), // second-highest precedence
-                    builder.getDefaults() // fallback
-            };
-        }
-        nativeInitialSchema = getConfigProperty(configs, config -> {
-            if (Boolean.TRUE.equals(config.getHistogramClassicOnly())) {
+        MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
+        nativeInitialSchema = getConfigProperty(properties, props -> {
+            if (Boolean.TRUE.equals(props.getHistogramClassicOnly())) {
                 return CLASSIC_HISTOGRAM;
+            } else {
+                return props.getHistogramNativeInitialSchema();
             }
-            return config.getHistogramNativeInitialSchema();
         });
-        classicUpperBounds = getConfigProperty(configs, config -> {
-            if (Boolean.TRUE.equals(config.getHistogramNativeOnly())) {
+        classicUpperBounds = getConfigProperty(properties, props -> {
+            if (Boolean.TRUE.equals(props.getHistogramNativeOnly())) {
                 return new double[]{};
-            }
-            if (config.getHistogramClassicUpperBounds() != null) {
+            } else if (props.getHistogramClassicUpperBounds() != null) {
                 SortedSet<Double> upperBounds = new TreeSet<>();
-                for (double upperBound : config.getHistogramClassicUpperBounds()) {
+                for (double upperBound : props.getHistogramClassicUpperBounds()) {
                     upperBounds.add(upperBound);
                 }
                 upperBounds.add(Double.POSITIVE_INFINITY);
@@ -127,26 +115,21 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                     result[i++] = upperBound;
                 }
                 return result;
+            } else {
+                return null;
             }
-            return null;
         });
-        double max = getConfigProperty(configs, MetricsConfig::getHistogramNativeMaxZeroThreshold);
-        double min = getConfigProperty(configs, MetricsConfig::getHistogramNativeMinZeroThreshold);
+        double max = getConfigProperty(properties, MetricProperties::getHistogramNativeMaxZeroThreshold);
+        double min = getConfigProperty(properties, MetricProperties::getHistogramNativeMinZeroThreshold);
         nativeMaxZeroThreshold = max == builder.DEFAULT_NATIVE_MAX_ZERO_THRESHOLD && min > max ? min : max;
         nativeMinZeroThreshold = Math.min(min, nativeMaxZeroThreshold);
-        nativeMaxBuckets = getConfigProperty(configs, MetricsConfig::getHistogramNativeMaxNumberOfBuckets);
-        nativeResetDurationSeconds = getConfigProperty(configs, MetricsConfig::getHistogramNativeResetDurationSeconds);
+        nativeMaxBuckets = getConfigProperty(properties, MetricProperties::getHistogramNativeMaxNumberOfBuckets);
+        nativeResetDurationSeconds = getConfigProperty(properties, MetricProperties::getHistogramNativeResetDurationSeconds);
     }
 
-    private <T> T getConfigProperty(MetricsConfig[] configs, Function<MetricsConfig, T> getter) {
-        T result;
-        for (MetricsConfig config : configs) {
-            result = getter.apply(config);
-            if (result != null) {
-                return result;
-            }
-        }
-        throw new IllegalStateException("Missing default config. This is a bug in the Prometheus metrics core library.");
+    @Override
+    protected boolean isExemplarsEnabled() {
+        return exemplarsEnabled;
     }
 
     public class HistogramData extends MetricData<DistributionObserver> implements DistributionObserver {
@@ -615,10 +598,10 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     }
 
     public static Builder newBuilder() {
-        return new Builder(PrometheusConfig.getInstance());
+        return new Builder(PrometheusProperties.getInstance());
     }
 
-    public static Builder newBuilder(PrometheusConfig config) {
+    public static Builder newBuilder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -632,8 +615,8 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         private final int DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS = 160;
         private final long DEFAULT_NATIVE_RESET_DURATION_SECONDS = 0; // 0 means no reset
 
-        private Boolean nativeHistogramOnly;
-        private Boolean classicHistogramOnly;
+        private Boolean nativeOnly;
+        private Boolean classicOnly;
         private double[] classicUpperBounds;
         private Integer nativeInitialSchema;
         private Double nativeMaxZeroThreshold;
@@ -643,44 +626,40 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
 
         @Override
         public Histogram build() {
-            return new Histogram(this, config);
+            return new Histogram(this, properties);
         }
 
-        private MetricsConfig toConfig() {
-            return new MetricsConfig(
-                    exemplarsEnabled,
-                    nativeHistogramOnly,
-                    classicHistogramOnly,
-                    classicUpperBounds,
-                    nativeInitialSchema,
-                    nativeMinZeroThreshold,
-                    nativeMaxZeroThreshold,
-                    nativeMaxNumberOfBuckets,
-                    nativeResetDurationSeconds,
-                    null,
-                    null,
-                    null
-            );
+        @Override
+        protected MetricProperties toProperties() {
+            return MetricProperties.newBuilder()
+                    .withExemplarsEnabled(exemplarsEnabled)
+                    .withHistogramNativeOnly(nativeOnly)
+                    .withHistogramClassicOnly(classicOnly)
+                    .withHistogramClassicUpperBounds(classicUpperBounds)
+                    .withHistogramNativeInitialSchema(nativeInitialSchema)
+                    .withHistogramNativeMinZeroThreshold(nativeMinZeroThreshold)
+                    .withHistogramNativeMaxZeroThreshold(nativeMaxZeroThreshold)
+                    .withHistogramNativeMaxNumberOfBuckets(nativeMaxNumberOfBuckets)
+                    .withHistogramNativeResetDurationSeconds(nativeResetDurationSeconds)
+                    .build();
         }
 
-        private MetricsConfig getDefaults() {
-            return new MetricsConfig(
-                    true,
-                    false,
-                    false,
-                    DEFAULT_CLASSIC_UPPER_BOUNDS,
-                    DEFAULT_NATIVE_INITIAL_SCHEMA,
-                    DEFAULT_NATIVE_MIN_ZERO_THRESHOLD,
-                    DEFAULT_NATIVE_MAX_ZERO_THRESHOLD,
-                    DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS,
-                    DEFAULT_NATIVE_RESET_DURATION_SECONDS,
-                    null,
-                    null,
-                    null
-            );
+        @Override
+        public MetricProperties getDefaultProperties() {
+            return MetricProperties.newBuilder()
+                    .withExemplarsEnabled(true)
+                    .withHistogramNativeOnly(false)
+                    .withHistogramClassicOnly(false)
+                    .withHistogramClassicUpperBounds(DEFAULT_CLASSIC_UPPER_BOUNDS)
+                    .withHistogramNativeInitialSchema(DEFAULT_NATIVE_INITIAL_SCHEMA)
+                    .withHistogramNativeMinZeroThreshold(DEFAULT_NATIVE_MIN_ZERO_THRESHOLD)
+                    .withHistogramNativeMaxZeroThreshold(DEFAULT_NATIVE_MAX_ZERO_THRESHOLD)
+                    .withHistogramNativeMaxNumberOfBuckets(DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS)
+                    .withHistogramNativeResetDurationSeconds(DEFAULT_NATIVE_RESET_DURATION_SECONDS)
+                    .build();
         }
 
-        private Builder(PrometheusConfig config) {
+        private Builder(PrometheusProperties config) {
             super(Collections.singletonList("le"), config);
         }
 
@@ -688,11 +667,11 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          * Use the native histogram representation only, i.e. don't maintain classic histogram buckets.
          * See {@link Histogram} for more info.
          */
-        public Builder nativeHistogramOnly() {
-            if (Boolean.TRUE.equals(classicHistogramOnly)) {
-                throw new IllegalArgumentException("Cannot call nativeHistogramOnly() after calling classicHistogramOnly().");
+        public Builder nativeOnly() {
+            if (Boolean.TRUE.equals(classicOnly)) {
+                throw new IllegalArgumentException("Cannot call nativeOnly() after calling classicOnly().");
             }
-            nativeHistogramOnly = true;
+            nativeOnly = true;
             return this;
         }
 
@@ -700,11 +679,11 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
          * Use the classic histogram representation only, i.e. don't maintain native histogram buckets.
          * See {@link Histogram} for more info.
          */
-        public Builder classicHistogramOnly() {
-            if (Boolean.TRUE.equals(nativeHistogramOnly)) {
-                throw new IllegalArgumentException("Cannot call classicHistogramOnly() after calling nativeHistogramOnly().");
+        public Builder classicOnly() {
+            if (Boolean.TRUE.equals(nativeOnly)) {
+                throw new IllegalArgumentException("Cannot call classicOnly() after calling nativeOnly().");
             }
-            classicHistogramOnly = true;
+            classicOnly = true;
             return this;
         }
 
