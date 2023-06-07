@@ -1,17 +1,20 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
 import io.prometheus.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.expositionformat.PrometheusProtobufWriter;
 import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
-import io.prometheus.metrics.exemplars.ExemplarConfig;
+import io.prometheus.metrics.exemplars.ExemplarSamplerConfigTestUtil;
+import io.prometheus.metrics.exemplars.tracer.common.SpanContext;
+import io.prometheus.metrics.exemplars.tracer.initializer.SpanContextSupplier;
 import io.prometheus.metrics.model.ClassicHistogramBucket;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.HistogramSnapshot;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.observer.DistributionObserver;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -41,6 +44,18 @@ import static org.junit.Assert.assertNull;
 public class HistogramTest {
 
     private static final double RESET_DURATION_REACHED = -123.456; // just a random value indicating that we should simulate that the reset duration has been reached
+
+    private SpanContext origSpanContext;
+
+    @Before
+    public void setUp() {
+        origSpanContext = SpanContextSupplier.getSpanContext();
+    }
+
+    @After
+    public void tearDown() {
+        SpanContextSupplier.setSpanContext(origSpanContext);
+    }
 
     /**
      * Mimic the tests in client_golang.
@@ -684,37 +699,40 @@ public class HistogramTest {
 
     @Test
     public void testExemplarsClassicHistogram() throws Exception {
-        SpanContextSupplier spanContextSupplier = new SpanContextSupplier() {
+        SpanContext spanContext = new SpanContext() {
             int callCount = 0;
 
             @Override
-            public String getTraceId() {
+            public String getCurrentTraceId() {
                 return "traceId-" + callCount;
             }
 
             @Override
-            public String getSpanId() {
+            public String getCurrentSpanId() {
                 return "spanId-" + callCount;
             }
 
             @Override
-            public boolean isSampled() {
+            public boolean isCurrentSpanSampled() {
                 callCount++;
                 return true;
             }
+
+            @Override
+            public void markCurrentSpanAsExemplar() {
+            }
         };
-        long sampleIntervalMillis = 10;
         Histogram histogram = Histogram.newBuilder()
                 .withName("test")
                 // The default number of Exemplars is 4.
                 // Use 5 buckets to verify that the exemplar sample is configured with the buckets.
                 .withClassicBuckets(1.0, 2.0, 3.0, 4.0, Double.POSITIVE_INFINITY)
-                .withExemplarConfig(ExemplarConfig.newBuilder()
-                        .withSpanContextSupplier(spanContextSupplier)
-                        .withSampleInterval(sampleIntervalMillis, TimeUnit.MILLISECONDS)
-                        .build())
                 .withLabelNames("path")
                 .build();
+
+        long sampleIntervalMillis = 10;
+        ExemplarSamplerConfigTestUtil.setSampleIntervalMillis(histogram, sampleIntervalMillis);
+        SpanContextSupplier.setSpanContext(spanContext);
 
         Exemplar ex1a = Exemplar.newBuilder()
                 .withValue(0.5)
@@ -847,19 +865,19 @@ public class HistogramTest {
     }
 
     @Test
-    public void testCustomExemplarsClassicHistogram() throws InterruptedException {
+    public void testCustomExemplarsClassicHistogram() throws InterruptedException, NoSuchFieldException, IllegalAccessException {
 
         // TODO: This was copied from the old simpleclient, can probably be refactored.
 
-        long sampleIntervalMillis = 10;
         Histogram histogram = Histogram.newBuilder()
                 .withName("test")
                 .withExemplars()
-                .withExemplarConfig(ExemplarConfig.newBuilder()
-                        .withSampleInterval(sampleIntervalMillis, TimeUnit.MILLISECONDS)
-                        .withMinAge(sampleIntervalMillis * 3, TimeUnit.MILLISECONDS)
-                        .build())
                 .build();
+
+        long sampleIntervalMillis = 10;
+        ExemplarSamplerConfigTestUtil.setSampleIntervalMillis(histogram, sampleIntervalMillis);
+        ExemplarSamplerConfigTestUtil.setMinRetentionPeriodMillis(histogram, 3 * sampleIntervalMillis);
+
         Labels labels = Labels.of("mapKey1", "mapValue1", "mapKey2", "mapValue2");
 
         histogram.observeWithExemplar(0.5, Labels.of("key", "value"));
@@ -913,37 +931,40 @@ public class HistogramTest {
 
 
     @Test
-    public void testExemplarsNativeHistogram() {
+    public void testExemplarsNativeHistogram() throws NoSuchFieldException, IllegalAccessException {
 
-        SpanContextSupplier spanContextSupplier = new SpanContextSupplier() {
+        SpanContext spanContext = new SpanContext() {
             int callCount = 0;
 
             @Override
-            public String getTraceId() {
+            public String getCurrentTraceId() {
                 return "traceId-" + callCount;
             }
 
             @Override
-            public String getSpanId() {
+            public String getCurrentSpanId() {
                 return "spanId-" + callCount;
             }
 
             @Override
-            public boolean isSampled() {
+            public boolean isCurrentSpanSampled() {
                 callCount++;
                 return true;
             }
+
+            @Override
+            public void markCurrentSpanAsExemplar() {
+            }
         };
-        long sampleIntervalMillis = 10;
         Histogram histogram = Histogram.newBuilder()
                 .withName("test")
                 .nativeOnly()
-                .withExemplarConfig(ExemplarConfig.newBuilder()
-                        .withSpanContextSupplier(spanContextSupplier)
-                        .withSampleInterval(sampleIntervalMillis, TimeUnit.MILLISECONDS)
-                        .build())
                 .withLabelNames("path")
                 .build();
+
+        long sampleIntervalMillis = 10;
+        ExemplarSamplerConfigTestUtil.setSampleIntervalMillis(histogram, sampleIntervalMillis);
+        SpanContextSupplier.setSpanContext(spanContext);
 
         Exemplar ex1 = Exemplar.newBuilder()
                 .withValue(3.11)

@@ -2,8 +2,6 @@ package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.exemplars.DefaultExemplarConfig;
-import io.prometheus.metrics.exemplars.ExemplarConfig;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.model.MetricSnapshot;
 import io.prometheus.metrics.observer.Observer;
@@ -21,7 +19,6 @@ import static java.lang.Boolean.TRUE;
 public abstract class ObservingMetric<O extends Observer, V extends MetricData<O>> extends Metric {
     private final String[] labelNames;
     //private final Boolean exemplarsEnabled;
-    protected final ExemplarConfig exemplarConfig;
 
     /**
      * Map from variableLabelValues to MetricData.
@@ -37,7 +34,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         super(builder);
         this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
         //this.exemplarsEnabled = builder.exemplarsEnabled;
-        this.exemplarConfig = builder.exemplarConfig;
+        //this.exemplarConfig = builder.exemplarConfig;
     }
 
     /**
@@ -122,14 +119,15 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     }
      */
 
+    /*
     protected boolean hasSpanContextSupplier() {
         return exemplarConfig != null ? exemplarConfig.hasSpanContextSupplier() : DefaultExemplarConfig.hasSpanContextSupplier();
     }
+     */
 
     static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?,?>> extends Metric.Builder<B, M> {
         private String[] labelNames = new String[0];
         protected Boolean exemplarsEnabled;
-        private ExemplarConfig exemplarConfig;
 
         protected Builder(List<String> illegalLabelNames, PrometheusProperties config) {
             super(illegalLabelNames, config);
@@ -168,14 +166,6 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
             return MetricProperties.newBuilder()
                     .withExemplarsEnabled(true)
                     .build();
-        }
-
-        /**
-         * Enable exemplars and provide an {@link ExemplarConfig}.
-         */
-        public B withExemplarConfig(ExemplarConfig exemplarConfig) {
-            this.exemplarConfig = exemplarConfig;
-            return withExemplars();
         }
     }
 }

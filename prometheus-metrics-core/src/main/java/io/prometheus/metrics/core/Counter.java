@@ -2,6 +2,8 @@ package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.exemplars.ExemplarSampler;
+import io.prometheus.metrics.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Labels;
@@ -16,11 +18,17 @@ import java.util.function.DoubleSupplier;
 public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.CounterData> implements DiscreteEventObserver {
 
     private final boolean exemplarsEnabled;
+    private final ExemplarSamplerConfig exemplarSamplerConfig;
 
     private Counter(Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
         MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
         exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
+        if (exemplarsEnabled) {
+            exemplarSamplerConfig = new ExemplarSamplerConfig(prometheusProperties.getExemplarConfig(), 1);
+        } else {
+            exemplarSamplerConfig = null;
+        }
     }
 
     @Override
@@ -41,13 +49,17 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
     @Override
     protected CounterData newMetricData() {
-        return new CounterData();
+        if (isExemplarsEnabled()) {
+            return new CounterData(new ExemplarSampler(exemplarSamplerConfig));
+        } else {
+            return new CounterData(null);
+        }
     }
 
     @Override
     protected CounterSnapshot collect(List<Labels> labels, List<CounterData> metricData) {
         List<CounterSnapshot.CounterData> data = new ArrayList<>(labels.size());
-        for (int i=0; i<labels.size(); i++) {
+        for (int i = 0; i < labels.size(); i++) {
             data.add(metricData.get(i).collect(labels.get(i)));
         }
         return new CounterSnapshot(getMetadata(), data);
@@ -77,12 +89,16 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
         private final DoubleAdder value = new DoubleAdder();
         private final long createdTimeMillis = System.currentTimeMillis();
+        private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
+
+        private CounterData(ExemplarSampler exemplarSampler) {
+            this.exemplarSampler = exemplarSampler;
+        }
 
         @Override
         public void inc(double amount) {
             validateAndAdd(amount);
-            if (isExemplarsEnabled() && hasSpanContextSupplier()) {
-                lazyInitExemplarSampler(exemplarConfig, 1, null);
+            if (isExemplarsEnabled()) {
                 exemplarSampler.observe(amount);
             }
         }
@@ -91,7 +107,6 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         public void incWithExemplar(double amount, Labels labels) {
             validateAndAdd(amount);
             if (isExemplarsEnabled()) {
-                lazyInitExemplarSampler(exemplarConfig, 1, null);
                 exemplarSampler.observeWithExemplar(amount, labels);
             }
         }
@@ -167,7 +182,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
             )));
         }
 
-       public static class Builder extends Metric.Builder<io.prometheus.metrics.core.Counter.FromCallback.Builder, io.prometheus.metrics.core.Counter.FromCallback> {
+        public static class Builder extends Metric.Builder<io.prometheus.metrics.core.Counter.FromCallback.Builder, io.prometheus.metrics.core.Counter.FromCallback> {
 
             private DoubleSupplier callback;
 

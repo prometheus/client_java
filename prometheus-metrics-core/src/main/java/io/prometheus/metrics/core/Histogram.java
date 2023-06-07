@@ -1,7 +1,10 @@
 package io.prometheus.metrics.core;
 
+import io.prometheus.metrics.config.ExemplarProperties;
 import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.exemplars.ExemplarSampler;
+import io.prometheus.metrics.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.HistogramSnapshot;
@@ -47,6 +50,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
     private static final double[][] NATIVE_BOUNDS;
 
     private final boolean exemplarsEnabled;
+    private final ExemplarSamplerConfig exemplarSamplerConfig;
 
     // Upper bounds for the classic histogram buckets. Contains at least +Inf.
     // An empty array indicates that this is a native histogram only.
@@ -125,6 +129,10 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         nativeMinZeroThreshold = Math.min(min, nativeMaxZeroThreshold);
         nativeMaxBuckets = getConfigProperty(properties, MetricProperties::getHistogramNativeMaxNumberOfBuckets);
         nativeResetDurationSeconds = getConfigProperty(properties, MetricProperties::getHistogramNativeResetDurationSeconds);
+        ExemplarProperties exemplarProperties = prometheusProperties.getExemplarConfig();
+        exemplarSamplerConfig = classicUpperBounds.length == 0 ?
+                new ExemplarSamplerConfig(exemplarProperties, 4) :
+                new ExemplarSamplerConfig(exemplarProperties, classicUpperBounds);
     }
 
     @Override
@@ -144,8 +152,14 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         private volatile long createdTimeMillis = System.currentTimeMillis();
         private final Buffer<HistogramSnapshot.HistogramData> buffer = new Buffer<>();
         private volatile boolean resetDurationExpired = false;
+        private final ExemplarSampler exemplarSampler;
 
         private HistogramData() {
+            if (exemplarsEnabled) {
+                exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
+            } else {
+                exemplarSampler = null;
+            }
             classicBuckets = new LongAdder[classicUpperBounds.length];
             for (int i = 0; i < classicUpperBounds.length; i++) {
                 classicBuckets[i] = new LongAdder();
@@ -162,8 +176,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
             if (!buffer.append(amount)) {
                 doObserve(amount);
             }
-            if (isExemplarsEnabled() && hasSpanContextSupplier()) {
-                lazyInitExemplarSampler(exemplarConfig, null, classicUpperBounds);
+            if (isExemplarsEnabled()) {
                 exemplarSampler.observe(amount);
             }
         }
@@ -178,7 +191,6 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
                 doObserve(value);
             }
             if (isExemplarsEnabled()) {
-                lazyInitExemplarSampler(exemplarConfig, null, classicUpperBounds);
                 exemplarSampler.observeWithExemplar(value, labels);
             }
         }

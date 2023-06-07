@@ -2,6 +2,8 @@ package io.prometheus.metrics.core;
 
 import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.exemplars.ExemplarSampler;
+import io.prometheus.metrics.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.Labels;
@@ -16,11 +18,17 @@ import java.util.function.DoubleSupplier;
 public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> implements GaugingObserver {
 
     private final boolean exemplarsEnabled;
+    private final ExemplarSamplerConfig exemplarSamplerConfig;
 
     private Gauge(Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
         MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
         exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
+        if (exemplarsEnabled) {
+            exemplarSamplerConfig = new ExemplarSamplerConfig(prometheusProperties.getExemplarConfig(), 1);
+        } else {
+            exemplarSamplerConfig = null;
+        }
     }
 
     @Override
@@ -50,16 +58,20 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
 
     @Override
     protected GaugeSnapshot collect(List<Labels> labels, List<GaugeData> metricData) {
-            List<GaugeSnapshot.GaugeData> data = new ArrayList<>(labels.size());
-            for (int i=0; i<labels.size(); i++) {
-                data.add(metricData.get(i).collect(labels.get(i)));
-            }
-            return new GaugeSnapshot(getMetadata(), data);
+        List<GaugeSnapshot.GaugeData> data = new ArrayList<>(labels.size());
+        for (int i = 0; i < labels.size(); i++) {
+            data.add(metricData.get(i).collect(labels.get(i)));
         }
+        return new GaugeSnapshot(getMetadata(), data);
+    }
 
     @Override
     protected GaugeData newMetricData() {
-        return new GaugeData();
+        if (isExemplarsEnabled()) {
+            return new GaugeData(new ExemplarSampler(exemplarSamplerConfig));
+        } else {
+            return new GaugeData(null);
+        }
     }
 
     @Override
@@ -69,13 +81,18 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
 
     class GaugeData extends MetricData<GaugingObserver> implements GaugingObserver {
 
+        private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
+
+        private GaugeData(ExemplarSampler exemplarSampler) {
+            this.exemplarSampler = exemplarSampler;
+        }
+
         private final AtomicLong value = new AtomicLong(Double.doubleToRawLongBits(0));
 
         @Override
         public void inc(double amount) {
             long next = value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
-            if (isExemplarsEnabled() && hasSpanContextSupplier()) {
-                lazyInitExemplarSampler(exemplarConfig, 1, null);
+            if (isExemplarsEnabled()) {
                 exemplarSampler.observe(Double.longBitsToDouble(next));
             }
         }
@@ -84,7 +101,6 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         public void incWithExemplar(double amount, Labels labels) {
             long next = value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
             if (isExemplarsEnabled()) {
-                lazyInitExemplarSampler(exemplarConfig, 1, null);
                 exemplarSampler.observeWithExemplar(Double.longBitsToDouble(next), labels);
             }
         }
@@ -92,8 +108,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         @Override
         public void set(double value) {
             this.value.set(Double.doubleToRawLongBits(value));
-            if (isExemplarsEnabled() && hasSpanContextSupplier()) {
-                lazyInitExemplarSampler(exemplarConfig, 1, null);
+            if (isExemplarsEnabled()) {
                 exemplarSampler.observe(value);
             }
         }
@@ -102,7 +117,6 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         public void setWithExemplar(double value, Labels labels) {
             this.value.set(Double.doubleToRawLongBits(value));
             if (isExemplarsEnabled()) {
-                lazyInitExemplarSampler(exemplarConfig, 1, null);
                 exemplarSampler.observeWithExemplar(value, labels);
             }
         }
@@ -113,7 +127,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
             // If there are multiple Exemplars (by default it's just one), use the oldest
             // so that we don't violate min age.
             Exemplar oldest = null;
-            if (exemplarSampler != null) {
+            if (isExemplarsEnabled()) {
                 for (Exemplar exemplar : exemplarSampler.collect()) {
                     if (oldest == null || exemplar.getTimestampMillis() < oldest.getTimestampMillis()) {
                         oldest = exemplar;

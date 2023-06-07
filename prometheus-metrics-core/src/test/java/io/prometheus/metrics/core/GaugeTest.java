@@ -1,12 +1,14 @@
 package io.prometheus.metrics.core;
 
-import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
-import io.prometheus.metrics.exemplars.DefaultExemplarConfig;
-import io.prometheus.metrics.exemplars.ExemplarConfig;
+import io.prometheus.metrics.exemplars.ExemplarSamplerConfig;
+import io.prometheus.metrics.exemplars.ExemplarSamplerConfigTestUtil;
+import io.prometheus.metrics.exemplars.tracer.common.SpanContext;
+import io.prometheus.metrics.exemplars.tracer.initializer.SpanContextSupplier;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.GaugeSnapshot;
 import io.prometheus.metrics.model.Labels;
 import io.prometheus.metrics.observer.Timer;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -24,16 +26,18 @@ public class GaugeTest {
 
     private Gauge noLabels, labels;
 
-    @BeforeClass
-    public static void beforeClass() {
-        DefaultExemplarConfig.setSampleInterval(exemplarSampleIntervalMillis, TimeUnit.MILLISECONDS);
-        DefaultExemplarConfig.setMinAge(exemplarMinAgeMillis, TimeUnit.MILLISECONDS);
-    }
+    private SpanContext origSpanContext;
 
     @Before
     public void setUp() {
         noLabels = Gauge.newBuilder().withName("nolabels").build();
         labels = Gauge.newBuilder().withName("labels").withLabelNames("l").build();
+        origSpanContext = SpanContextSupplier.getSpanContext();
+    }
+
+    @After
+    public void tearDown() {
+        SpanContextSupplier.setSpanContext(origSpanContext);
     }
 
     private GaugeSnapshot.GaugeData getData(Gauge gauge, String... labels) {
@@ -123,11 +127,11 @@ public class GaugeTest {
                 .withSpanId("cdc")
                 .withLabels(Labels.of("test", "test"))
                 .build();
-        SpanContextSupplier scs = new SpanContextSupplier() {
+        SpanContext spanContext = new SpanContext() {
             private int callNumber = 0;
 
             @Override
-            public String getTraceId() {
+            public String getCurrentTraceId() {
                 switch (callNumber) {
                     case 1:
                         return "abc";
@@ -143,7 +147,7 @@ public class GaugeTest {
             }
 
             @Override
-            public String getSpanId() {
+            public String getCurrentSpanId() {
                 switch (callNumber) {
                     case 1:
                         return "123";
@@ -159,18 +163,25 @@ public class GaugeTest {
             }
 
             @Override
-            public boolean isSampled() {
+            public boolean isCurrentSpanSampled() {
                 callNumber++;
                 if (callNumber == 2) {
                     return false;
                 }
                 return true;
             }
+
+            @Override
+            public void markCurrentSpanAsExemplar() {
+            }
         };
         Gauge gauge = Gauge.newBuilder()
-                .withExemplarConfig(ExemplarConfig.newBuilder().withSpanContextSupplier(scs).build())
                 .withName("my_gauge")
                 .build();
+
+        ExemplarSamplerConfigTestUtil.setMinRetentionPeriodMillis(gauge, exemplarMinAgeMillis);
+        ExemplarSamplerConfigTestUtil.setSampleIntervalMillis(gauge, exemplarSampleIntervalMillis);
+        SpanContextSupplier.setSpanContext(spanContext);
 
         gauge.inc(2.0);
         assertExemplarEquals(exemplar1, getData(gauge).getExemplar());

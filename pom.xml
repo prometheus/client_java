@@ -43,7 +43,8 @@
         <module>prometheus-metrics-core</module>
         <module>prometheus-metrics-config</module>
         <module>prometheus-metrics-model</module>
-        <module>prometheus-exposition-formats</module>
+        <module>prometheus-metrics-tracer</module>
+        <module>prometheus-metrics-exposition-formats</module>
 
         <module>simpleclient</module>
         <module>simpleclient_common</module>

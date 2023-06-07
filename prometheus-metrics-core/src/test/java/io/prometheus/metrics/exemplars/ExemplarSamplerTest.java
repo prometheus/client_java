@@ -1,12 +1,14 @@
 package io.prometheus.metrics.exemplars;
 
+import io.prometheus.metrics.exemplars.tracer.initializer.SpanContextSupplier;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.Label;
+import io.prometheus.metrics.util.Scheduler;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-
-import java.util.concurrent.TimeUnit;
 
 public class ExemplarSamplerTest {
 
@@ -15,24 +17,41 @@ public class ExemplarSamplerTest {
     private final int minAge = 50 * tick; // do not change this
     private final int maxAge = 200 * tick; // do not change this
 
-    private static class SpanContextSupplier implements io.prometheus.client.exemplars.tracer.common.SpanContextSupplier {
+    private ExemplarSamplerConfig makeConfig(double... buckets) {
+        return new ExemplarSamplerConfig(
+                minAge,
+                maxAge,
+                sampleInterval,
+                buckets.length == 0 ? 4 : buckets.length, // number of exemplars
+                buckets.length == 0 ? null : buckets
+        );
+    }
+
+
+    private static class SpanContext implements io.prometheus.metrics.exemplars.tracer.common.SpanContext {
 
         int callCount = 0;
         boolean isSampled = true;
+        boolean isExemplar = false;
 
         @Override
-        public String getTraceId() {
+        public String getCurrentTraceId() {
             return "" + (callCount++);
         }
 
         @Override
-        public String getSpanId() {
+        public String getCurrentSpanId() {
             return "" + callCount;
         }
 
         @Override
-        public boolean isSampled() {
+        public boolean isCurrentSpanSampled() {
             return isSampled;
+        }
+
+        @Override
+        public void markCurrentSpanAsExemplar() {
+            isExemplar = true;
         }
     }
 
@@ -41,16 +60,24 @@ public class ExemplarSamplerTest {
         // TODO
     }
 
+    private io.prometheus.metrics.exemplars.tracer.common.SpanContext origContext;
+
+    @Before
+    public void setUp() {
+        origContext = SpanContextSupplier.getSpanContext();
+    }
+
+    @After
+    public void tearDown() {
+        SpanContextSupplier.setSpanContext(origContext);
+    }
+
     @Test
     public void testIsSampled() throws Exception {
-        SpanContextSupplier scs = new SpanContextSupplier();
-        scs.isSampled = false;
-        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
-                .withSpanContextSupplier(scs)
-                .withMinAge(minAge, TimeUnit.MILLISECONDS)
-                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
-                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
-                .build());
+        SpanContext context = new SpanContext();
+        context.isSampled = false;
+        SpanContextSupplier.setSpanContext(context);
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig());
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.3); // no sampled, because isSampled() returns false
         assertExemplars(sampler); // empty
@@ -58,13 +85,9 @@ public class ExemplarSamplerTest {
 
     @Test
     public void testDefaultConfigHasFourExemplars() throws Exception {
-        SpanContextSupplier scs = new SpanContextSupplier();
-        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
-                .withSpanContextSupplier(scs)
-                .withMinAge(minAge, TimeUnit.MILLISECONDS)
-                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
-                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
-                .build());
+        SpanContext context = new SpanContext();
+        SpanContextSupplier.setSpanContext(context);
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig());
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.3);
         Thread.sleep(sampleInterval + tick); // t = 12 tick
@@ -81,14 +104,9 @@ public class ExemplarSamplerTest {
 
     @Test
     public void testEmptyBuckets() throws Exception {
-        SpanContextSupplier scs = new SpanContextSupplier();
-        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
-                .withSpanContextSupplier(scs)
-                .withMinAge(minAge, TimeUnit.MILLISECONDS)
-                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
-                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
-                .withBuckets()
-                .build());
+        SpanContext context = new SpanContext();
+        SpanContextSupplier.setSpanContext(context);
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig(Double.POSITIVE_INFINITY));
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.8); // observed in the +Inf bucket
         Thread.sleep(sampleInterval + tick); // t = 12 tick
@@ -99,16 +117,10 @@ public class ExemplarSamplerTest {
 
     @Test
     public void testDefaultExemplarsBuckets() throws Exception {
-        SpanContextSupplier scs = new SpanContextSupplier();
-        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
-                .withSpanContextSupplier(scs)
-                .withBuckets(0.2, 0.4, 0.6, 0.8, 1.0)
-                .withMinAge(minAge, TimeUnit.MILLISECONDS)
-                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
-                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
-                .build());
-
-        ((DefaultExemplarSampler) sampler).awaitInitialization();
+        SpanContext context = new SpanContext();
+        SpanContextSupplier.setSpanContext(context);
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig(0.2, 0.4, 0.6, 0.8, 1.0, Double.POSITIVE_INFINITY));
+        Scheduler.awaitInitialization();
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.3);
         sampler.observe(0.5); // not observed, previous observation is less than sample interval ms ago
@@ -138,15 +150,10 @@ public class ExemplarSamplerTest {
 
     @Test
     public void testDefaultExemplarsNoBuckets() throws Exception {
-        SpanContextSupplier scs = new SpanContextSupplier();
-        ExemplarSampler sampler = DefaultExemplarSampler.newInstance(ExemplarConfig.newBuilder()
-                .withSpanContextSupplier(scs)
-                .withNumberOfExemplars(4)
-                .withMinAge(minAge, TimeUnit.MILLISECONDS)
-                .withMaxAge(maxAge, TimeUnit.MILLISECONDS)
-                .withSampleInterval(sampleInterval, TimeUnit.MILLISECONDS)
-                .build());
-        ((DefaultExemplarSampler) sampler).awaitInitialization();
+        SpanContext context = new SpanContext();
+        SpanContextSupplier.setSpanContext(context);
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig());
+        Scheduler.awaitInitialization();
         Thread.sleep(tick);           // t = 1 tick
         sampler.observe(1);    // observed
         assertExemplars(sampler, 1);
@@ -154,7 +161,7 @@ public class ExemplarSamplerTest {
         Thread.sleep(sampleInterval + tick); // t = 12 ticks
         sampler.observe(3);    // observed
         assertExemplars(sampler, 1, 3);
-        Thread.sleep(2*tick);    // t = 14 ticks
+        Thread.sleep(2 * tick);    // t = 14 ticks
         sampler.observe(4);    // not observed, previous observation is less than sample interval ms ago
         Thread.sleep(sampleInterval + tick); // t = 25 ticks
         sampler.observe(5);    // observed

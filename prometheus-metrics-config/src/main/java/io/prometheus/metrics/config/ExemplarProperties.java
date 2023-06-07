@@ -10,22 +10,18 @@ public class ExemplarProperties {
     private static final String MIN_RETENTION_PERIOD_SECONDS = "minRetentionPeriodSeconds";
     private static final String MAX_RETENTION_PERIOD_SECONDS = "maxRetentionPeriodSeconds";
     private static final String SAMPLE_INTERVAL_MILLISECONDS = "sampleIntervalMilliseconds";
-    private static final String NUMBER_OF_EXEMPLARS = "numberOfExemplars";
 
     private final Integer minRetentionPeriodSeconds;
     private final Integer maxRetentionPeriodSeconds;
     private final Integer sampleIntervalMilliseconds;
-    private final Integer numberOfExemplars;
 
     public ExemplarProperties(
             Integer minRetentionPeriodSeconds,
             Integer maxRetentionPeriodSeconds,
-            Integer sampleIntervalMilliseconds,
-            Integer numberOfExemplars) {
+            Integer sampleIntervalMilliseconds) {
         this.minRetentionPeriodSeconds = minRetentionPeriodSeconds;
         this.maxRetentionPeriodSeconds = maxRetentionPeriodSeconds;
         this.sampleIntervalMilliseconds = sampleIntervalMilliseconds;
-        this.numberOfExemplars = numberOfExemplars;
     }
 
     public Integer getMinRetentionPeriodSeconds() {
@@ -40,20 +36,14 @@ public class ExemplarProperties {
         return sampleIntervalMilliseconds;
     }
 
-    public Integer getNumberOfExemplars() {
-        return numberOfExemplars;
-    }
-
     static ExemplarProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
         Integer minRetentionPeriodSeconds = Util.loadInteger(prefix + "." + MIN_RETENTION_PERIOD_SECONDS, properties);
         Integer maxRetentionPeriodSeconds = Util.loadInteger(prefix + "." + MAX_RETENTION_PERIOD_SECONDS, properties);
         Integer sampleIntervalMilliseconds = Util.loadInteger(prefix + "." + SAMPLE_INTERVAL_MILLISECONDS, properties);
-        Integer numberOfExemplars = Util.loadInteger(prefix + "." + NUMBER_OF_EXEMPLARS, properties);
 
         Util.assertValue(minRetentionPeriodSeconds, t -> t > 0, "Expecting value > 0.", prefix, MIN_RETENTION_PERIOD_SECONDS);
         Util.assertValue(minRetentionPeriodSeconds, t -> t > 0, "Expecting value > 0.", prefix, MAX_RETENTION_PERIOD_SECONDS);
         Util.assertValue(sampleIntervalMilliseconds, t -> t > 0, "Expecting value > 0.", prefix, SAMPLE_INTERVAL_MILLISECONDS);
-        Util.assertValue(numberOfExemplars, n -> n > 0, "Expecting value > 0.", prefix, NUMBER_OF_EXEMPLARS);
 
         if (minRetentionPeriodSeconds != null && maxRetentionPeriodSeconds != null) {
             if (minRetentionPeriodSeconds > maxRetentionPeriodSeconds) {
@@ -64,8 +54,7 @@ public class ExemplarProperties {
         return new ExemplarProperties(
                 minRetentionPeriodSeconds,
                 maxRetentionPeriodSeconds,
-                sampleIntervalMilliseconds,
-                numberOfExemplars
+                sampleIntervalMilliseconds
         );
     }
 }
