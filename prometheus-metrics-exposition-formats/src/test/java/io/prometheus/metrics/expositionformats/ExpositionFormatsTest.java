@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat.text;
+package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
