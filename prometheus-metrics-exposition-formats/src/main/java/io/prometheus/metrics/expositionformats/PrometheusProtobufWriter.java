@@ -1,6 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.CounterSnapshot.CounterData;
