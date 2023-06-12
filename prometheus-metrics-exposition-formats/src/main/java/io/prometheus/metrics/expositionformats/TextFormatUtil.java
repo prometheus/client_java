@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat;
+package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.model.Labels;
 

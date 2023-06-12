@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat;
+package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.CounterSnapshot;
@@ -24,11 +24,11 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static io.prometheus.expositionformat.TextFormatUtil.writeDouble;
-import static io.prometheus.expositionformat.TextFormatUtil.writeEscapedLabelValue;
-import static io.prometheus.expositionformat.TextFormatUtil.writeLabels;
-import static io.prometheus.expositionformat.TextFormatUtil.writeLong;
-import static io.prometheus.expositionformat.TextFormatUtil.writeTimestamp;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeDouble;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscapedLabelValue;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimestamp;
 
 /**
  * Write the OpenMetrics text format as defined on <a href="https://openmetrics.io/">https://openmetrics.io</a>.

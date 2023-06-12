@@ -1,7 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.com_google_protobuf_3_21_7.TextFormat;
-import io.prometheus.expositionformat.PrometheusProtobufWriter;
+import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.exemplars.tracer.common.SpanContext;

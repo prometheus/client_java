@@ -1,9 +1,9 @@
 package io.prometheus.expositionformat.text;
 
 import io.prometheus.com_google_protobuf_3_21_7.TextFormat;
-import io.prometheus.expositionformat.OpenMetricsTextFormatWriter;
-import io.prometheus.expositionformat.PrometheusProtobufWriter;
-import io.prometheus.expositionformat.PrometheusTextFormatWriter;
+import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
+import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
+import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
 import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.CounterSnapshot.CounterData;

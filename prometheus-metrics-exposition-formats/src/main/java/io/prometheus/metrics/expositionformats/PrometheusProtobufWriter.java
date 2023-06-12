@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat;
+package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.expositionformat.protobuf.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
@@ -22,7 +22,7 @@ import io.prometheus.metrics.model.UnknownSnapshot;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static io.prometheus.expositionformat.ProtobufUtil.timestampFromMillis;
+import static io.prometheus.metrics.expositionformats.ProtobufUtil.timestampFromMillis;
 
 /**
  * Write the Prometheus protobuf format as defined in

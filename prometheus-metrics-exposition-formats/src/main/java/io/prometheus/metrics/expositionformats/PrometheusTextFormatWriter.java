@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat;
+package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.model.CounterSnapshot;
 import io.prometheus.metrics.model.ClassicHistogramBuckets;
@@ -21,11 +21,11 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
-import static io.prometheus.expositionformat.TextFormatUtil.writeDouble;
-import static io.prometheus.expositionformat.TextFormatUtil.writeEscapedLabelValue;
-import static io.prometheus.expositionformat.TextFormatUtil.writeLabels;
-import static io.prometheus.expositionformat.TextFormatUtil.writeLong;
-import static io.prometheus.expositionformat.TextFormatUtil.writeTimestamp;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeDouble;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscapedLabelValue;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimestamp;
 
 /**
  * Write the Prometheus text format. This is the default if you view a Prometheus endpoint with your Web browser.

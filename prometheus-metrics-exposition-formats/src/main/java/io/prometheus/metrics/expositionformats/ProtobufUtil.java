@@ -1,4 +1,4 @@
-package io.prometheus.expositionformat;
+package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.com_google_protobuf_3_21_7.Timestamp;
 
