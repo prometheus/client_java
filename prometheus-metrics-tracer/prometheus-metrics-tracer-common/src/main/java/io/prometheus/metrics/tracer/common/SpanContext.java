@@ -1,4 +1,4 @@
-package io.prometheus.metrics.exemplars.tracer.common;
+package io.prometheus.metrics.tracer.common;
 
 public interface SpanContext {
 

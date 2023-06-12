@@ -1,9 +1,9 @@
-package io.prometheus.metrics.exemplars.tracer.otel;
+package io.prometheus.metrics.tracer.otel;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanId;
 import io.opentelemetry.api.trace.TraceId;
-import io.prometheus.metrics.exemplars.tracer.common.SpanContext;
+import io.prometheus.metrics.tracer.common.SpanContext;
 
 public class OpenTelemetrySpanContext implements SpanContext {
 

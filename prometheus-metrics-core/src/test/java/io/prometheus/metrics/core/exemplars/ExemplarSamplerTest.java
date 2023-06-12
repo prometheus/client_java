@@ -1,8 +1,6 @@
 package io.prometheus.metrics.core.exemplars;
 
-import io.prometheus.metrics.core.exemplars.ExemplarSampler;
-import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
-import io.prometheus.metrics.exemplars.tracer.initializer.SpanContextSupplier;
+import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import io.prometheus.metrics.model.Exemplar;
 import io.prometheus.metrics.model.Exemplars;
 import io.prometheus.metrics.model.Label;
@@ -30,7 +28,7 @@ public class ExemplarSamplerTest {
     }
 
 
-    private static class SpanContext implements io.prometheus.metrics.exemplars.tracer.common.SpanContext {
+    private static class SpanContext implements io.prometheus.metrics.tracer.common.SpanContext {
 
         int callCount = 0;
         boolean isSampled = true;
@@ -62,7 +60,7 @@ public class ExemplarSamplerTest {
         // TODO
     }
 
-    private io.prometheus.metrics.exemplars.tracer.common.SpanContext origContext;
+    private io.prometheus.metrics.tracer.common.SpanContext origContext;
 
     @Before
     public void setUp() {

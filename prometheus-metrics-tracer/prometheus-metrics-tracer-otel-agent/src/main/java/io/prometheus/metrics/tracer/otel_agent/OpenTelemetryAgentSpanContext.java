@@ -1,9 +1,9 @@
-package io.prometheus.metrics.exemplars.tracer.otel_agent;
+package io.prometheus.metrics.tracer.otel_agent;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanId;
 import io.opentelemetry.api.trace.TraceId;
-import io.prometheus.metrics.exemplars.tracer.common.SpanContext;
+import io.prometheus.metrics.tracer.common.SpanContext;
 
 /**
  * This is exactly the same as the {@code OpenTelemetrySpanContextSupplier}.
