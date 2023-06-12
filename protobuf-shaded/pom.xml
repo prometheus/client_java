@@ -136,7 +136,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.google.protobuf</pattern>
-                                    <shadedPattern>io.prometheus.com_google_protobuf_${protobuf.version.string}</shadedPattern>
+                                    <shadedPattern>io.prometheus.metrics.com_google_protobuf_${protobuf.version.string}</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

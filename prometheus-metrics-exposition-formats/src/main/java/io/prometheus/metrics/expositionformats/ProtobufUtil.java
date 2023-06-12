@@ -1,6 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.com_google_protobuf_3_21_7.Timestamp;
+import io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp;
 
 public class ProtobufUtil {
 

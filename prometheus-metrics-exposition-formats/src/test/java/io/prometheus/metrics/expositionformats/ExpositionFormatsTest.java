@@ -1,6 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.com_google_protobuf_3_21_7.TextFormat;
+import io.prometheus.metrics.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
