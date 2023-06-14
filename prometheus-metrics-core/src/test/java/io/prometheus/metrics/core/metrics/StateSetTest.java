@@ -1,8 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.core.metrics.StateSet;
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.StateSetSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import org.junit.Assert;
 import org.junit.Test;
 

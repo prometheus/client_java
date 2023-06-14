@@ -6,10 +6,10 @@ import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_2
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import io.prometheus.metrics.model.CounterSnapshot;
-import io.prometheus.metrics.model.Exemplar;
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.Unit;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Unit;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

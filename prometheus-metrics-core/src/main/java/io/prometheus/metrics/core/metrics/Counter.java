@@ -4,9 +4,9 @@ import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
-import io.prometheus.metrics.model.CounterSnapshot;
-import io.prometheus.metrics.model.Exemplar;
-import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.core.observer.DiscreteEventObserver;
 
 import java.util.ArrayList;
@@ -162,7 +162,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         }
     }
 
-    public static class FromCallback extends Metric {
+    public static class FromCallback extends MetricWithFixedMetadata {
 
         private final DoubleSupplier callback;
         private final long createdTimeMillis = System.currentTimeMillis();
@@ -182,7 +182,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
             )));
         }
 
-        public static class Builder extends Metric.Builder<Counter.FromCallback.Builder, Counter.FromCallback> {
+        public static class Builder extends MetricWithFixedMetadata.Builder<Counter.FromCallback.Builder, Counter.FromCallback> {
 
             private DoubleSupplier callback;
 

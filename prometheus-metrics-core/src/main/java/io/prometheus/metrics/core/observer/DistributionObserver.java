@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.observer;
 
-import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.snapshots.Labels;
 
 import java.util.concurrent.Callable;
 

@@ -2,9 +2,9 @@ package io.prometheus.metrics.core.exemplars;
 
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import io.prometheus.metrics.model.Exemplar;
-import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Exemplars;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.core.util.Scheduler;
 
 import java.util.ArrayList;

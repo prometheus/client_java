@@ -4,9 +4,9 @@ import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
-import io.prometheus.metrics.model.Exemplar;
-import io.prometheus.metrics.model.GaugeSnapshot;
-import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.core.observer.GaugingObserver;
 
 import java.util.ArrayList;
@@ -160,7 +160,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         }
     }
 
-    public static class FromCallback extends Metric {
+    public static class FromCallback extends MetricWithFixedMetadata {
 
         private final DoubleSupplier callback;
 
@@ -176,7 +176,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
             ));
         }
 
-        public static class Builder extends Metric.Builder<Gauge.FromCallback.Builder, Gauge.FromCallback> {
+        public static class Builder extends MetricWithFixedMetadata.Builder<Gauge.FromCallback.Builder, Gauge.FromCallback> {
 
             private DoubleSupplier callback;
 

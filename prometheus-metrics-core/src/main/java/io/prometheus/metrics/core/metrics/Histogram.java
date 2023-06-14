@@ -5,11 +5,11 @@ import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
-import io.prometheus.metrics.model.ClassicHistogramBuckets;
-import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.HistogramSnapshot;
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.NativeHistogramBuckets;
+import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
+import io.prometheus.metrics.model.snapshots.Exemplars;
+import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import io.prometheus.metrics.core.observer.DistributionObserver;
 import io.prometheus.metrics.core.util.Scheduler;
 

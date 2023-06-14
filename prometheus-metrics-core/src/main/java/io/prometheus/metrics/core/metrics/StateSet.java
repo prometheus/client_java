@@ -2,8 +2,8 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.StateSetSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.core.observer.StateObserver;
 
 import java.util.ArrayList;

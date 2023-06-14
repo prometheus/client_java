@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.model.Exemplar;
+import io.prometheus.metrics.model.snapshots.Exemplar;
 import org.junit.Assert;
 
 public class TestUtil {

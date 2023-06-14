@@ -1,14 +1,14 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.InfoSnapshot;
-import io.prometheus.metrics.model.Label;
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.Unit;
+import io.prometheus.metrics.model.snapshots.InfoSnapshot;
+import io.prometheus.metrics.model.snapshots.Label;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Unit;
 
 import java.util.Collections;
 
-public class Info extends Metric {
+public class Info extends MetricWithFixedMetadata {
 
     private volatile Labels labels = Labels.EMPTY;
 
@@ -33,10 +33,18 @@ public class Info extends Metric {
         return new InfoSnapshot(getMetadata(), Collections.singletonList(new InfoSnapshot.InfoData(labels.merge(constLabels))));
     }
 
-    public static class Builder extends Metric.Builder<Builder, Info> {
+    public static class Builder extends MetricWithFixedMetadata.Builder<Builder, Info> {
 
         private Builder(PrometheusProperties config) {
             super(Collections.emptyList(), config);
+        }
+
+        @Override
+        public Builder withName(String name) {
+            if (name != null && name.endsWith("_info")) {
+                name = name.substring(0, name.length() - 5);
+            }
+            return super.withName(name);
         }
 
         @Override

@@ -2,8 +2,8 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.core.observer.Observer;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
-public abstract class ObservingMetric<O extends Observer, V extends MetricData<O>> extends Metric {
+public abstract class ObservingMetric<O extends Observer, V extends MetricData<O>> extends MetricWithFixedMetadata {
     private final String[] labelNames;
     //private final Boolean exemplarsEnabled;
 
@@ -42,7 +42,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
      */
     protected abstract MetricSnapshot collect(List<Labels> labels, List<V> metricData);
 
-    public io.prometheus.metrics.model.MetricSnapshot collect() {
+    public MetricSnapshot collect() {
         if (labelNames.length == 0 && data.size() == 0) {
             // This is a metric without labels that has not been used yet. Initialize the data on the fly.
             withLabels();
@@ -125,7 +125,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     }
      */
 
-    static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?,?>> extends Metric.Builder<B, M> {
+    static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?,?>> extends MetricWithFixedMetadata.Builder<B, M> {
         private String[] labelNames = new String[0];
         protected Boolean exemplarsEnabled;
 

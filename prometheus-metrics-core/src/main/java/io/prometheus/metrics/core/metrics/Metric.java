@@ -1,69 +1,32 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.*;
+import io.prometheus.metrics.model.snapshots.Label;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Metric {
 
-    private final MetricMetadata metadata;
     protected final Labels constLabels;
 
     protected Metric(Builder<?, ?> builder) {
-        this.metadata = new MetricMetadata(makeName(builder.name, builder.unit), builder.help, builder.unit);
         this.constLabels = builder.constLabels;
-    }
-
-    private String makeName(String name, Unit unit) {
-        if (unit != null) {
-            String suffix = "_" + unit;
-            if (!name.endsWith(suffix)) {
-                name = name + suffix;
-            }
-        }
-        return name;
     }
 
     public abstract MetricSnapshot collect();
 
-    protected MetricMetadata getMetadata() {
-        return metadata;
-    }
+    protected static abstract class Builder<B extends Builder<B, M>, M extends Metric> {
 
-    static abstract class Builder<B extends Builder<B, M>, M extends Metric> {
         protected final List<String> illegalLabelNames;
         protected final PrometheusProperties properties;
-        protected String name;
-        private Unit unit;
-        private String help;
         private Labels constLabels = Labels.EMPTY;
 
         protected Builder(List<String> illegalLabelNames, PrometheusProperties properties) {
             this.illegalLabelNames = new ArrayList<>(illegalLabelNames);
             this.properties = properties;
-        }
-
-        public B withName(String name) {
-            if (name.endsWith("_info")) {
-                name = name.substring(0, name.length() - "_info".length());
-            }
-            if (!MetricMetadata.isValidMetricName(name)) {
-                throw new IllegalArgumentException("'" + name + "': Illegal metric name.");
-            }
-            this.name = name;
-            return self();
-        }
-
-        public B withUnit(Unit unit) {
-            this.unit = unit;
-            return self();
-        }
-
-        public B withHelp(String help) {
-            this.help = help;
-            return self();
         }
 
         // ConstLabels are only used rarely. In particular, do not use them to

@@ -2,11 +2,11 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.Exemplars;
-import io.prometheus.metrics.model.Labels;
-import io.prometheus.metrics.model.Quantile;
-import io.prometheus.metrics.model.Quantiles;
-import io.prometheus.metrics.model.SummarySnapshot;
+import io.prometheus.metrics.model.snapshots.Exemplars;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Quantile;
+import io.prometheus.metrics.model.snapshots.Quantiles;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.core.observer.DistributionObserver;
 
 import java.util.ArrayList;

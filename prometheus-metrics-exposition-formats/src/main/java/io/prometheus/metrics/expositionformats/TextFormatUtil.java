@@ -1,6 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.metrics.model.Labels;
+import io.prometheus.metrics.model.snapshots.Labels;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

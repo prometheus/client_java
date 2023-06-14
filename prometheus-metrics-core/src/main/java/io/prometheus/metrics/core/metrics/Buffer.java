@@ -1,12 +1,14 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.model.snapshots.MetricData;
+
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-class Buffer<T extends io.prometheus.metrics.model.MetricData> {
+class Buffer<T extends MetricData> {
 
     private static final long signBit = 1L << 63;
     private final AtomicLong observationCount = new AtomicLong(0);
