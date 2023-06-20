@@ -30,8 +30,8 @@ public class StateSetTest {
                 .withLabelNames("environment")
                 .withStates(MyFeatureFlag.class)
                 .build();
-        stateSet.withLabels("dev").setTrue(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
-        stateSet.withLabels("prod").setFalse(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
+        stateSet.withLabelValues("dev").setTrue(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
+        stateSet.withLabelValues("prod").setFalse(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
         StateSetSnapshot snapshot = stateSet.collect();
         Assert.assertEquals(2, snapshot.getData().size());
         Assert.assertEquals(2, getData(stateSet, "environment", "dev").size());

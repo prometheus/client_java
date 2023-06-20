@@ -2,30 +2,24 @@ package io.prometheus.metrics.exporter.httpserver;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Predicate;
-import io.prometheus.client.SampleNameFilter;
-import io.prometheus.client.Supplier;
-import io.prometheus.client.exporter.common.TextFormat;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.config.HttpServerProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
+import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
+import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
+import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,8 +28,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
-import java.util.zip.GZIPOutputStream;
+import java.util.function.Predicate;
 
 /**
  * Expose Prometheus metrics using a plain Java HttpServer.
@@ -58,109 +51,6 @@ public class HTTPServer implements Closeable {
             System.setProperty("sun.net.httpserver.maxRspTime", "600");
         }
     }
-
-    private static class LocalByteArray extends ThreadLocal<ByteArrayOutputStream> {
-        @Override
-        protected ByteArrayOutputStream initialValue()
-        {
-            return new ByteArrayOutputStream(1 << 20);
-        }
-    }
-
-    /**
-     * Handles Metrics collections from the given registry.
-     */
-    public static class HTTPMetricHandler implements HttpHandler {
-        private final Supplier<MetricSnapshots> registry;
-        private final LocalByteArray response = new LocalByteArray();
-        private final Supplier<Predicate<String>> sampleNameFilterSupplier;
-        private final static String HEALTHY_RESPONSE = "Exporter is Healthy.";
-
-        public HTTPMetricHandler(CollectorRegistry registry) {
-            this(registry, null);
-        }
-
-        public HTTPMetricHandler(CollectorRegistry registry, Supplier<Predicate<String>> sampleNameFilterSupplier) {
-            this.registry = registry;
-            this.sampleNameFilterSupplier = sampleNameFilterSupplier;
-        }
-
-        @Override
-        public void handle(HttpExchange t) throws IOException {
-            String query = t.getRequestURI().getRawQuery();
-            String contextPath = t.getHttpContext().getPath();
-            ByteArrayOutputStream response = this.response.get();
-            response.reset();
-            OutputStreamWriter osw = new OutputStreamWriter(response, Charset.forName("UTF-8"));
-            if ("/-/healthy".equals(contextPath)) {
-                osw.write(HEALTHY_RESPONSE);
-            } else {
-                String contentType = TextFormat.chooseContentType(t.getRequestHeaders().getFirst("Accept"));
-                t.getResponseHeaders().set("Content-Type", contentType);
-                Predicate<String> filter = sampleNameFilterSupplier == null ? null : sampleNameFilterSupplier.get();
-                filter = SampleNameFilter.restrictToNamesEqualTo(filter, parseQuery(query));
-                if (filter == null) {
-                    TextFormat.writeFormat(contentType, osw, registry.metricFamilySamples());
-                } else {
-                    TextFormat.writeFormat(contentType, osw, registry.filteredMetricFamilySamples(filter));
-                }
-            }
-
-            osw.close();
-
-            if (shouldUseCompression(t)) {
-                t.getResponseHeaders().set("Content-Encoding", "gzip");
-                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-                final GZIPOutputStream os = new GZIPOutputStream(t.getResponseBody());
-                try {
-                    response.writeTo(os);
-                } finally {
-                    os.close();
-                }
-            } else {
-                long contentLength = response.size();
-                if (contentLength > 0) {
-                    t.getResponseHeaders().set("Content-Length", String.valueOf(contentLength));
-                }
-                if (t.getRequestMethod().equals("HEAD")) {
-                    contentLength = -1;
-                }
-                t.sendResponseHeaders(HttpURLConnection.HTTP_OK, contentLength);
-                response.writeTo(t.getResponseBody());
-            }
-            t.close();
-        }
-    }
-
-    protected static boolean shouldUseCompression(HttpExchange exchange) {
-        List<String> encodingHeaders = exchange.getRequestHeaders().get("Accept-Encoding");
-        if (encodingHeaders == null) return false;
-
-        for (String encodingHeader : encodingHeaders) {
-            String[] encodings = encodingHeader.split(",");
-            for (String encoding : encodings) {
-                if (encoding.trim().equalsIgnoreCase("gzip")) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    protected static Set<String> parseQuery(String query) throws IOException {
-        Set<String> names = new HashSet<String>();
-        if (query != null) {
-            String[] pairs = query.split("&");
-            for (String pair : pairs) {
-                int idx = pair.indexOf("=");
-                if (idx != -1 && URLDecoder.decode(pair.substring(0, idx), "UTF-8").equals("name[]")) {
-                    names.add(URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
-                }
-            }
-        }
-        return names;
-    }
-
 
     static class NamedDaemonThreadFactory implements ThreadFactory {
         private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
@@ -191,24 +81,30 @@ public class HTTPServer implements Closeable {
     protected final HttpServer server;
     protected final ExecutorService executorService;
 
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
     /**
      * We keep the original constructors of {@link HTTPServer} for compatibility, but new configuration
      * parameters like {@code sampleNameFilter} must be configured using the Builder.
      */
     public static class Builder {
 
-        private int port = 0;
+        private Integer port = null;
         private String hostname = null;
         private InetAddress inetAddress = null;
         private InetSocketAddress inetSocketAddress = null;
         private HttpServer httpServer = null;
         private ExecutorService executorService = null;
-        private CollectorRegistry registry = CollectorRegistry.defaultRegistry;
+        private PrometheusRegistry registry = null;
+        private HttpServerProperties properties = null;
         private boolean daemon = false;
         private Predicate<String> sampleNameFilter;
-        private Supplier<Predicate<String>> sampleNameFilterSupplier;
-        private Authenticator authenticator;
-        private HttpsConfigurator httpsConfigurator;
+        private Authenticator authenticator = null;
+        private HttpsConfigurator httpsConfigurator = null;
+
+        private Builder() {}
 
         /**
          * Port to bind to. Must not be called together with {@link #withInetSocketAddress(InetSocketAddress)}
@@ -216,6 +112,11 @@ public class HTTPServer implements Closeable {
          */
         public Builder withPort(int port) {
             this.port = port;
+            return this;
+        }
+
+        public Builder withProperties(HttpServerProperties properties) {
+            this.properties = properties;
             return this;
         }
 
@@ -283,9 +184,6 @@ public class HTTPServer implements Closeable {
 
         /**
          * Optional: Only export time series where {@code sampleNameFilter.test(name)} returns true.
-         * <p>
-         * Use this if the sampleNameFilter remains the same throughout the lifetime of the HTTPServer.
-         * If the sampleNameFilter changes during runtime, use {@link #withSampleNameFilterSupplier(Supplier)}.
          */
         public Builder withSampleNameFilter(Predicate<String> sampleNameFilter) {
             this.sampleNameFilter = sampleNameFilter;
@@ -293,22 +191,9 @@ public class HTTPServer implements Closeable {
         }
 
         /**
-         * Optional: Only export time series where {@code sampleNameFilter.test(name)} returns true.
-         * <p>
-         * Use this if the sampleNameFilter may change during runtime, like for example if you have a
-         * hot reload mechanism for your filter config.
-         * If the sampleNameFilter remains the same throughout the lifetime of the HTTPServer,
-         * use {@link #withSampleNameFilter(Predicate)} instead.
+         * Optional: Default is {@link PrometheusRegistry#defaultRegistry}.
          */
-        public Builder withSampleNameFilterSupplier(Supplier<Predicate<String>> sampleNameFilterSupplier) {
-            this.sampleNameFilterSupplier = sampleNameFilterSupplier;
-            return this;
-        }
-
-        /**
-         * Optional: Default is {@link CollectorRegistry#defaultRegistry}.
-         */
-        public Builder withRegistry(CollectorRegistry registry) {
+        public Builder withRegistry(PrometheusRegistry registry) {
             this.registry = registry;
             return this;
         }
@@ -329,14 +214,27 @@ public class HTTPServer implements Closeable {
             return this;
         }
 
+        private int findPort() {
+            if (properties != null && properties.getPort() != null) {
+                return properties.getPort();
+            }
+            if (port != null) {
+                return port;
+            }
+            HttpServerProperties defaultProperties = PrometheusProperties.getInstance().getHttpServerConfig();
+            if (defaultProperties != null && defaultProperties.getPort() != null) {
+                return defaultProperties.getPort();
+            }
+            return 0; // random port will be selected
+        }
+
         /**
          * Build the HTTPServer
          * @throws IOException
          */
         public HTTPServer build() throws IOException {
-            if (sampleNameFilter != null) {
-                assertNull(sampleNameFilterSupplier, "cannot configure 'sampleNameFilter' and 'sampleNameFilterSupplier' at the same time");
-                sampleNameFilterSupplier = SampleNameFilterSupplier.of(sampleNameFilter);
+            if (registry == null) {
+                registry = PrometheusRegistry.defaultRegistry;
             }
 
             if (httpServer != null) {
@@ -346,18 +244,18 @@ public class HTTPServer implements Closeable {
                 assertNull(inetAddress, "cannot configure 'httpServer' and 'inetAddress' at the same time");
                 assertNull(inetSocketAddress, "cannot configure 'httpServer' and 'inetSocketAddress' at the same time");
                 assertNull(httpsConfigurator, "cannot configure 'httpServer' and 'httpsConfigurator' at the same time");
-                return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
+                return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilter, authenticator);
             } else if (inetSocketAddress != null) {
                 assertZero(port, "cannot configure 'inetSocketAddress' and 'port' at the same time");
                 assertNull(hostname, "cannot configure 'inetSocketAddress' and 'hostname' at the same time");
                 assertNull(inetAddress, "cannot configure 'inetSocketAddress' and 'inetAddress' at the same time");
             } else if (inetAddress != null) {
                 assertNull(hostname, "cannot configure 'inetAddress' and 'hostname' at the same time");
-                inetSocketAddress = new InetSocketAddress(inetAddress, port);
+                inetSocketAddress = new InetSocketAddress(inetAddress, findPort());
             } else if (hostname != null) {
-                inetSocketAddress = new InetSocketAddress(hostname, port);
+                inetSocketAddress = new InetSocketAddress(hostname, findPort());
             } else {
-                inetSocketAddress = new InetSocketAddress(port);
+                inetSocketAddress = new InetSocketAddress(findPort());
             }
 
             HttpServer httpServer = null;
@@ -368,7 +266,7 @@ public class HTTPServer implements Closeable {
                 httpServer = HttpServer.create(inetSocketAddress, 3);
             }
 
-            return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilterSupplier, authenticator);
+            return new HTTPServer(executorService, httpServer, registry, daemon, sampleNameFilter, authenticator);
         }
 
         private void assertNull(Object o, String msg) {
@@ -384,62 +282,19 @@ public class HTTPServer implements Closeable {
         }
     }
 
-    /**
-     * Start an HTTP server serving Prometheus metrics from the given registry using the given {@link HttpServer}.
-     * The {@code httpServer} is expected to already be bound to an address
-     */
-    public HTTPServer(HttpServer httpServer, CollectorRegistry registry, boolean daemon) throws IOException {
-        this(null, httpServer, registry, daemon, null, null);
-    }
 
-    /**
-     * Start an HTTP server serving Prometheus metrics from the given registry.
-     */
-    public HTTPServer(InetSocketAddress addr, CollectorRegistry registry, boolean daemon) throws IOException {
-        this(HttpServer.create(addr, 3), registry, daemon);
-    }
 
-    /**
-     * Start an HTTP server serving Prometheus metrics from the given registry using non-daemon threads.
-     */
-    public HTTPServer(InetSocketAddress addr, CollectorRegistry registry) throws IOException {
-        this(addr, registry, false);
-    }
-
-    /**
-     * Start an HTTP server serving the default Prometheus registry.
-     */
-    public HTTPServer(int port, boolean daemon) throws IOException {
-        this(new InetSocketAddress(port), CollectorRegistry.defaultRegistry, daemon);
-    }
-
-    /**
-     * Start an HTTP server serving the default Prometheus registry using non-daemon threads.
-     */
-    public HTTPServer(int port) throws IOException {
-        this(port, false);
-    }
-
-    /**
-     * Start an HTTP server serving the default Prometheus registry.
-     */
-    public HTTPServer(String host, int port, boolean daemon) throws IOException {
-        this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, daemon);
-    }
-
-    /**
-     * Start an HTTP server serving the default Prometheus registry using non-daemon threads.
-     */
-    public HTTPServer(String host, int port) throws IOException {
-        this(new InetSocketAddress(host, port), CollectorRegistry.defaultRegistry, false);
-    }
-
-    private HTTPServer(ExecutorService executorService, HttpServer httpServer, CollectorRegistry registry, boolean daemon, Supplier<Predicate<String>> sampleNameFilterSupplier, Authenticator authenticator) {
+    private HTTPServer(ExecutorService executorService, HttpServer httpServer, PrometheusRegistry registry, boolean daemon, Predicate<String> sampleNameFilter, Authenticator authenticator) {
         if (httpServer.getAddress() == null)
             throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
 
         server = httpServer;
-        HttpHandler mHandler = new HTTPMetricHandler(registry, sampleNameFilterSupplier);
+        List<ExpositionFormatWriter> expositionFormatWriters = Arrays.asList(
+                new PrometheusTextFormatWriter(true),
+                new OpenMetricsTextFormatWriter(true),
+                new PrometheusProtobufWriter());
+        HttpHandler mHandler = new MetricsHandler(registry, expositionFormatWriters, sampleNameFilter);
+        HttpHandler hHandler = new HealthyHandler();
         HttpContext mContext = server.createContext("/", mHandler);
         if (authenticator != null) {
             mContext.setAuthenticator(authenticator);
@@ -448,7 +303,7 @@ public class HTTPServer implements Closeable {
         if (authenticator != null) {
             mContext.setAuthenticator(authenticator);
         }
-        mContext = server.createContext("/-/healthy", mHandler);
+        mContext = server.createContext("/-/healthy", hHandler);
         if (authenticator != null) {
             mContext.setAuthenticator(authenticator);
         }

@@ -30,7 +30,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimest
 /**
  * Write the Prometheus text format. This is the default if you view a Prometheus endpoint with your Web browser.
  */
-public class PrometheusTextFormatWriter {
+public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
 
     public final static String CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8";
 
@@ -38,6 +38,20 @@ public class PrometheusTextFormatWriter {
 
     public PrometheusTextFormatWriter(boolean writeCreatedTimestamps) {
         this.writeCreatedTimestamps = writeCreatedTimestamps;
+    }
+
+    @Override
+    public boolean accepts(String acceptHeader) {
+        if (acceptHeader == null) {
+            return false;
+        } else {
+        return acceptHeader.contains("text/plain");
+        }
+    }
+
+    @Override
+    public String getContentType() {
+        return CONTENT_TYPE;
     }
 
     public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {

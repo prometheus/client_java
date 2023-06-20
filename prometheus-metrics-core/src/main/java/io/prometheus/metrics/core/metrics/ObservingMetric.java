@@ -45,7 +45,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     public MetricSnapshot collect() {
         if (labelNames.length == 0 && data.size() == 0) {
             // This is a metric without labels that has not been used yet. Initialize the data on the fly.
-            withLabels();
+            withLabelValues();
         }
         List<Labels> labels = new ArrayList<>(data.size());
         List<V> metricData = new ArrayList<>(data.size());
@@ -57,7 +57,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         return collect(labels, metricData);
     }
 
-    public O withLabels(String... labelValues) {
+    public O withLabelValues(String... labelValues) {
         if (labelValues.length != labelNames.length) {
             throw new IllegalArgumentException("Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
         }
@@ -74,7 +74,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     protected V getNoLabels() {
         if (noLabels == null) {
             // Note that this will throw an IllegalArgumentException if labelNames is not empty.
-            noLabels = (V) withLabels();
+            noLabels = (V) withLabelValues();
         }
         return noLabels;
     }

@@ -94,8 +94,8 @@ public class GaugeTest {
 
     @Test
     public void testLabels() {
-        labels.withLabels("a").inc();
-        labels.withLabels("b").inc(3);
+        labels.withLabelValues("a").inc();
+        labels.withLabelValues("b").inc(3);
         assertEquals(1.0, getValue(labels, "l", "a"), .001);
         assertEquals(3.0, getValue(labels, "l", "b"), .001);
     }

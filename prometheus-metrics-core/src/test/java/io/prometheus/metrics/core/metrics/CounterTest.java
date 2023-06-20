@@ -76,9 +76,9 @@ public class CounterTest {
         assertEquals(1.0, getValue(noLabels), .001);
         noLabels.inc(2);
         assertEquals(3.0, getValue(noLabels), .001);
-        noLabels.withLabels().inc(4);
+        noLabels.withLabelValues().inc(4);
         assertEquals(7.0, getValue(noLabels), .001);
-        noLabels.withLabels().inc();
+        noLabels.withLabelValues().inc();
         assertEquals(8.0, getValue(noLabels), .001);
     }
 
@@ -98,10 +98,10 @@ public class CounterTest {
     @Test
     public void testLabels() {
         assertEquals(0, getNumberOfLabels(labels));
-        labels.withLabels("a").inc();
+        labels.withLabelValues("a").inc();
         assertEquals(1, getNumberOfLabels(labels));
         assertEquals(1.0, getValue(labels, "l", "a"), .001);
-        labels.withLabels("b").inc(3);
+        labels.withLabelValues("b").inc(3);
         assertEquals(2, getNumberOfLabels(labels));
         assertEquals(1.0, getValue(labels, "l", "a"), .001);
         assertEquals(3.0, getValue(labels, "l", "b"), .001);
@@ -133,8 +133,8 @@ public class CounterTest {
                 .withConstLabels(Labels.of("const1name", "const1value", "const2name", "const2value"))
                 .withLabelNames("path", "status")
                 .build();
-        counter.withLabels("/", "200").inc(2);
-        counter.withLabels("/", "500").inc();
+        counter.withLabelValues("/", "200").inc(2);
+        counter.withLabelValues("/", "500").inc();
         CounterSnapshot snapshot = (CounterSnapshot) counter.collect();
         Assert.assertEquals("test_seconds", snapshot.getMetadata().getName());
         Assert.assertEquals("seconds", snapshot.getMetadata().getUnit().toString());

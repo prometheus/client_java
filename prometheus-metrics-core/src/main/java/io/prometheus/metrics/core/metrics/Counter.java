@@ -4,6 +4,7 @@ import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
+import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.DoubleSupplier;
 
-public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.CounterData> implements DiscreteEventObserver {
+public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.CounterData> implements DiscreteEventObserver, Collector {
 
     private final boolean exemplarsEnabled;
     private final ExemplarSamplerConfig exemplarSamplerConfig;

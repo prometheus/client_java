@@ -784,8 +784,8 @@ public class HistogramTest {
                 .withSpanId("spanId-10")
                 .withTraceId("traceId-10")
                 .build();
-        histogram.withLabels("/hello").observe(0.5);
-        histogram.withLabels("/world").observe(0.5); // different labels are tracked independently, i.e. we don't need to wait for sampleIntervalMillis
+        histogram.withLabelValues("/hello").observe(0.5);
+        histogram.withLabelValues("/world").observe(0.5); // different labels are tracked independently, i.e. we don't need to wait for sampleIntervalMillis
 
         HistogramSnapshot snapshot = histogram.collect();
         assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
@@ -800,8 +800,8 @@ public class HistogramTest {
         assertNull(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabels("/hello").observe(4.5);
-        histogram.withLabels("/world").observe(4.5);
+        histogram.withLabelValues("/hello").observe(4.5);
+        histogram.withLabelValues("/world").observe(4.5);
 
         snapshot = histogram.collect();
         assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
@@ -816,14 +816,14 @@ public class HistogramTest {
         assertExemplarEquals(ex2b, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabels("/hello").observe(1.5);
-        histogram.withLabels("/world").observe(1.5);
+        histogram.withLabelValues("/hello").observe(1.5);
+        histogram.withLabelValues("/world").observe(1.5);
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabels("/hello").observe(2.5);
-        histogram.withLabels("/world").observe(2.5);
+        histogram.withLabelValues("/hello").observe(2.5);
+        histogram.withLabelValues("/world").observe(2.5);
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabels("/hello").observe(3.5);
-        histogram.withLabels("/world").observe(3.5);
+        histogram.withLabelValues("/hello").observe(3.5);
+        histogram.withLabelValues("/world").observe(3.5);
 
         snapshot = histogram.collect();
         assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
@@ -842,7 +842,7 @@ public class HistogramTest {
                 .withLabels(Labels.of("key2", "value2", "key1", "value1", "trace_id", "traceId-11", "span_id", "spanId-11"))
                 .build();
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabels("/hello").observeWithExemplar(3.4, Labels.of("key1", "value1", "key2", "value2"));
+        histogram.withLabelValues("/hello").observeWithExemplar(3.4, Labels.of("key1", "value1", "key2", "value2"));
         snapshot = histogram.collect();
         // custom exemplars have preference, so the automatic exemplar is replaced
         assertExemplarEquals(custom, getExemplar(snapshot, 4.0, "path", "/hello"));
@@ -983,14 +983,14 @@ public class HistogramTest {
                 .withLabels(Labels.of("key1", "value1", "key2", "value2"))
                 .build();
 
-        histogram.withLabels("/hello").observe(3.11);
-        histogram.withLabels("/world").observe(3.12);
+        histogram.withLabelValues("/hello").observe(3.11);
+        histogram.withLabelValues("/world").observe(3.12);
         assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
         assertExemplarEquals(ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
         assertEquals(1, getData(histogram, "path", "/world").getExemplars().size());
         assertExemplarEquals(ex2, getData(histogram, "path", "/world").getExemplars().iterator().next());
 
-        histogram.withLabels("/world").observeWithExemplar(3.13, Labels.of("key1", "value1", "key2", "value2"));
+        histogram.withLabelValues("/world").observeWithExemplar(3.13, Labels.of("key1", "value1", "key2", "value2"));
         assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
         assertExemplarEquals(ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
         assertEquals(2, getData(histogram, "path", "/world").getExemplars().size());
@@ -1214,16 +1214,16 @@ public class HistogramTest {
                 .withConstLabels(Labels.of("env", "prod"))
                 .withLabelNames("path", "status")
                 .build();
-        histogram.withLabels("/hello", "200").observe(0.11);
-        histogram.withLabels("/hello", "200").observe(0.2);
-        histogram.withLabels("/hello", "500").observe(0.19);
+        histogram.withLabelValues("/hello", "200").observe(0.11);
+        histogram.withLabelValues("/hello", "200").observe(0.2);
+        histogram.withLabelValues("/hello", "500").observe(0.19);
         HistogramSnapshot.HistogramData data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
         HistogramSnapshot.HistogramData data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
         assertEquals(2, data200.getCount());
         assertEquals(0.31, data200.getSum(), 0.0000001);
         assertEquals(1, data500.getCount());
         assertEquals(0.19, data500.getSum(), 0.0000001);
-        histogram.withLabels("/hello", "200").observe(0.13);
+        histogram.withLabelValues("/hello", "200").observe(0.13);
         data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
         data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
         assertEquals(3, data200.getCount());
@@ -1240,7 +1240,7 @@ public class HistogramTest {
                 .withLabelNames("status")
                 .build();
         int nThreads = 8;
-        DistributionObserver obs = histogram.withLabels("200");
+        DistributionObserver obs = histogram.withLabelValues("200");
         ExecutorService executor = Executors.newFixedThreadPool(nThreads);
         CompletionService<List<HistogramSnapshot>> completionService = new ExecutorCompletionService<>(executor);
         CountDownLatch startSignal = new CountDownLatch(nThreads);

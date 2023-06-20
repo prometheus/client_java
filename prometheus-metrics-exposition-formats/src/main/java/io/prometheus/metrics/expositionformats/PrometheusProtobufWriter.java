@@ -30,10 +30,26 @@ import static io.prometheus.metrics.expositionformats.ProtobufUtil.timestampFrom
  * <p>
  * As of today, this is the only exposition format that supports native histograms.
  */
-public class PrometheusProtobufWriter {
+public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
     public final String CONTENT_TYPE = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
 
+    @Override
+    public boolean accepts(String acceptHeader) {
+        if (acceptHeader == null) {
+            return false;
+        } else {
+            return acceptHeader.contains("application/vnd.google.protobuf")
+                    && acceptHeader.contains("proto=io.prometheus.client.MetricFamily");
+        }
+    }
+
+    @Override
+    public String getContentType() {
+        return CONTENT_TYPE;
+    }
+
+    @Override
     public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
         for (MetricSnapshot snapshot : metricSnapshots) {
             if (snapshot.getData().size() > 0) {

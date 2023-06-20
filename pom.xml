@@ -45,7 +45,7 @@
         <module>prometheus-metrics-model</module>
         <module>prometheus-metrics-tracer</module>
         <module>prometheus-metrics-exposition-formats</module>
-        <module>prometheus-metrics-exporter-httpserver</module>
+        <module>tmp_example</module>
 
         <module>simpleclient</module>
         <module>simpleclient_common</module>

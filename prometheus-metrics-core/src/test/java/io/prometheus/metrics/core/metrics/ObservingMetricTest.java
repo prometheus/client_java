@@ -1,6 +1,5 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.core.metrics.Counter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,9 +14,9 @@ public class ObservingMetricTest {
         Field data = counter.getClass().getSuperclass().getDeclaredField("data");
         data.setAccessible(true);
 
-        counter.withLabels("a", "b").inc(1.0);
-        counter.withLabels("c", "d").inc(3.0);
-        counter.withLabels("e", "f").inc(7.0);
+        counter.withLabelValues("a", "b").inc(1.0);
+        counter.withLabelValues("c", "d").inc(3.0);
+        counter.withLabelValues("e", "f").inc(7.0);
 
         // collect() iterates over data.entrySet().
         // remove() removes entries from data.

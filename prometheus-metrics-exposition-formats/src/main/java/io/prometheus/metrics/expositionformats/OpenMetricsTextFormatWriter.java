@@ -33,7 +33,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimest
 /**
  * Write the OpenMetrics text format as defined on <a href="https://openmetrics.io/">https://openmetrics.io</a>.
  */
-public class OpenMetricsTextFormatWriter {
+public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
     public final static String CONTENT_TYPE = "application/openmetrics-text; version=1.0.0; charset=utf-8";
     private final boolean createdTimestampsEnabled;
@@ -43,6 +43,19 @@ public class OpenMetricsTextFormatWriter {
      */
     public OpenMetricsTextFormatWriter(boolean createdTimestampsEnabled) {
         this.createdTimestampsEnabled = createdTimestampsEnabled;
+    }
+
+    @Override
+    public boolean accepts(String acceptHeader) {
+        if (acceptHeader == null) {
+            return false;
+        }
+        return acceptHeader.contains("application/openmetrics-text");
+    }
+
+    @Override
+    public String getContentType() {
+        return CONTENT_TYPE;
     }
 
     public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
