@@ -59,7 +59,11 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
 
     public O withLabelValues(String... labelValues) {
         if (labelValues.length != labelNames.length) {
-            throw new IllegalArgumentException("Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
+            if (labelValues.length == 0) {
+                throw new IllegalArgumentException("The " + getClass().getSimpleName() + " was created with label names, so you must call withLabelValues() when using it.");
+            } else {
+                throw new IllegalArgumentException("Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
+            }
         }
         return data.computeIfAbsent(Arrays.asList(labelValues), l -> newMetricData()).toObserver();
     }
@@ -107,6 +111,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
         }
         throw new IllegalStateException("Missing default config. This is a bug in the Prometheus metrics core library.");
     }
+
     protected abstract boolean isExemplarsEnabled();
 
     /*
@@ -125,7 +130,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     }
      */
 
-    static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?,?>> extends MetricWithFixedMetadata.Builder<B, M> {
+    static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?, ?>> extends MetricWithFixedMetadata.Builder<B, M> {
         private String[] labelNames = new String[0];
         protected Boolean exemplarsEnabled;
 

@@ -63,9 +63,7 @@ public class ExemplarSampler {
     }
 
     public void observe(double value) {
-        System.nanoTime();
         if (!acceptingNewExemplars.get()) {
-            // This is the hot path. This should be as efficient as possible.
             return;
         }
         rateLimitedObserve(acceptingNewExemplars, value, exemplars, () -> doObserve(value));

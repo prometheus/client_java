@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.DoubleSupplier;
 
 public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.CounterData> implements DiscreteEventObserver, Collector {
@@ -88,12 +89,24 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
 
     class CounterData extends MetricData<DiscreteEventObserver> implements DiscreteEventObserver {
 
-        private final DoubleAdder value = new DoubleAdder();
+        private final DoubleAdder doubleValue = new DoubleAdder();
+        // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
+        // and DoubleAdder for double observations. If the user doesn't observe any double at all,
+        // we will just use the LongAdder and get the best performance.
+        private final LongAdder longValue = new LongAdder();
         private final long createdTimeMillis = System.currentTimeMillis();
         private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
         private CounterData(ExemplarSampler exemplarSampler) {
             this.exemplarSampler = exemplarSampler;
+        }
+
+        @Override
+        public void inc(long amount) {
+            validateAndAdd(amount);
+            if (isExemplarsEnabled()) {
+                exemplarSampler.observe(amount);
+            }
         }
 
         @Override
@@ -105,6 +118,14 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         }
 
         @Override
+        public void incWithExemplar(long amount, Labels labels) {
+            validateAndAdd(amount);
+            if (isExemplarsEnabled()) {
+                exemplarSampler.observeWithExemplar(amount, labels);
+            }
+        }
+
+        @Override
         public void incWithExemplar(double amount, Labels labels) {
             validateAndAdd(amount);
             if (isExemplarsEnabled()) {
@@ -112,11 +133,18 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
             }
         }
 
+        private void validateAndAdd(long amount) {
+            if (amount < 0) {
+                throw new IllegalArgumentException("Negative increment " + amount + " is illegal for Counter metrics.");
+            }
+            longValue.add(amount);
+        }
+
         private void validateAndAdd(double amount) {
             if (amount < 0) {
                 throw new IllegalArgumentException("Negative increment " + amount + " is illegal for Counter metrics.");
             }
-            value.add(amount);
+            doubleValue.add(amount);
         }
 
         private CounterSnapshot.CounterData collect(Labels labels) {
@@ -132,7 +160,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
                     }
                 }
             }
-            return new CounterSnapshot.CounterData(value.sum(), labels, oldest, createdTimeMillis);
+            return new CounterSnapshot.CounterData(longValue.sum() + doubleValue.sum(), labels, oldest, createdTimeMillis);
         }
 
         @Override

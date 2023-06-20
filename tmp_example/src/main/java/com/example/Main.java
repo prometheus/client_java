@@ -11,12 +11,13 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         Counter counter = Counter.newBuilder()
-                .withLabelNames("path")
+                .withLabelNames("path", "status")
                 .withName("events_total")
-                .build();
-        DiscreteEventObserver goodCase = counter.withLabelValues("/get");
-        PrometheusRegistry.defaultRegistry.register(counter);
-        counter.inc(1.0);
-        HTTPServer server = HTTPServer.newBuilder().withPort(9000).build();
+                .register();
+        DiscreteEventObserver goodCase = counter.withLabelValues("/get", "200");
+        DiscreteEventObserver errorCase = counter.withLabelValues("/get", "500");
+        goodCase.inc();
+        errorCase.inc();
+        HTTPServer.newBuilder().withPort(9000).build();
     }
 }

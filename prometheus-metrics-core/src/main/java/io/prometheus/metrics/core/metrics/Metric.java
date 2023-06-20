@@ -1,6 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.registry.Collector;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
@@ -8,7 +10,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Metric {
+public abstract class Metric implements Collector {
 
     protected final Labels constLabels;
 
@@ -16,6 +18,7 @@ public abstract class Metric {
         this.constLabels = builder.constLabels;
     }
 
+    @Override
     public abstract MetricSnapshot collect();
 
     protected static abstract class Builder<B extends Builder<B, M>, M extends Metric> {
@@ -43,6 +46,12 @@ public abstract class Metric {
             }
             this.constLabels = constLabels;
             return self();
+        }
+
+        public M register() {
+            M metric = build();
+            PrometheusRegistry.defaultRegistry.register(metric);
+            return metric;
         }
 
         public abstract M build();
