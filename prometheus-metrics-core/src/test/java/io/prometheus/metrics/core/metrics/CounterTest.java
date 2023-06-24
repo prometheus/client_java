@@ -85,7 +85,7 @@ public class CounterTest {
     @Test
     public void testNegativeIncrementFails() {
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("Negative increment -1.0 is illegal for Counter metrics.");
+        thrown.expectMessage("Negative increment -1 is illegal for Counter metrics.");
         noLabels.inc(-1);
     }
 

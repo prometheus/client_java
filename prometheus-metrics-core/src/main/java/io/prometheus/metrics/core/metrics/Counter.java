@@ -39,8 +39,18 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
     }
 
     @Override
+    public void inc(long amount) {
+        getNoLabels().inc(amount);
+    }
+
+    @Override
     public void inc(double amount) {
         getNoLabels().inc(amount);
+    }
+
+    @Override
+    public void incWithExemplar(long amount, Labels labels) {
+        getNoLabels().incWithExemplar(amount, labels);
     }
 
     @Override

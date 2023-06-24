@@ -25,29 +25,40 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.Threads;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
-@State(Scope.Benchmark)
+//@State(Scope.Benchmark)
 public class BenchmarkRunner {
 
+    static double[] random = new double[10*1024*1024];
+    private static void initRandom() {
+        Random rand = new Random(0);
+        for (int i=0; i<random.length; i++) {
+            random[i] = Math.abs(rand.nextGaussian());
+        }
+        System.out.println("random init done");
+    }
     public static void main(String[] args) throws Exception {
-       org.openjdk.jmh.Main.main(args);
+        //org.openjdk.jmh.Main.main(args);
         /*
         BenchmarkRunner r = new BenchmarkRunner();
         r.setUp();
-        for (int i=0; i<100*100*100*10; i++) {
+        for (int i=0; i<10; i++) {
             //r.benchmarkOtelCounter();
             //r.benchmarkPrometheusCounter();
             r.benchmarkOtelHistogram();
+            r.benchmarkPrometheusHistogram();
         }
 
          */
     }
 
+    /*
     private DiscreteEventObserver goodCases;
     private DiscreteEventObserver errorCases;
 
@@ -63,7 +74,7 @@ public class BenchmarkRunner {
     DoubleHistogram otelHist;
 
     private AtomicBoolean atomicBoolean = new AtomicBoolean();
-    @Setup
+    //@Setup
     public void setUp() {
         Counter counter = Counter.newBuilder()
                 .withLabelNames("path", "status")
@@ -80,12 +91,10 @@ public class BenchmarkRunner {
         Resource resource = Resource.getDefault()
                 .merge(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "logical-service-name")));
 
-        /*
-        SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder().build()).build())
+        //SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
+        //        .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder().build()).build())
                 .setResource(resource)
-                .build();
-         */
+         //       .build();
 
         InMemoryMetricReader reader = InMemoryMetricReader.create();
 
@@ -96,17 +105,16 @@ public class BenchmarkRunner {
                                 .setName("lksd")
                                 .build(),
                         View.builder()
-                                .setAggregation(Aggregation.base2ExponentialBucketHistogram())
+                                .setAggregation(Aggregation.base2ExponentialBucketHistogram(160, 5))
                                 .build()
                         )
                 .build();
 
-        /*
-        SdkLoggerProvider sdkLoggerProvider = SdkLoggerProvider.builder()
-                .addLogRecordProcessor(BatchLogRecordProcessor.builder(OtlpGrpcLogRecordExporter.builder().build()).build())
-                .setResource(resource)
-                .build();
-         */
+
+       // SdkLoggerProvider sdkLoggerProvider = SdkLoggerProvider.builder()
+       //         .addLogRecordProcessor(BatchLogRecordProcessor.builder(OtlpGrpcLogRecordExporter.builder().build()).build())
+        //        .setResource(resource)
+         //       .build();
 
         OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
                 //.setTracerProvider(sdkTracerProvider)
@@ -138,6 +146,8 @@ public class BenchmarkRunner {
 
         doubleAdder = new DoubleAdder();
         longAdder = new LongAdder();
+
+        initRandom();
     }
 
     //@Benchmark
@@ -170,23 +180,21 @@ public class BenchmarkRunner {
         longAdder.add(1);
     }
 
-    @Benchmark
+    //@Benchmak
+    @Threads(4)
     @Fork(value = 1, warmups = 1)
     public void benchmarkPrometheusHistogram() {
-        Random random = new Random(0);
-        for (int i = 100; i > 0; i--) {
-            double d = Math.abs(random.nextGaussian());
-            histogram.observe(d);
+        for (double observation : random) {
+            histogram.observe(observation);
         }
     }
 
-    @Benchmark
+    //@Benchmark
+    @Threads(4)
     @Fork(value = 1, warmups = 1)
     public void benchmarkOtelHistogram() {
-        Random random = new Random(0);
-        for (int i = 100; i > 0; i--) {
-            double d = Math.abs(random.nextGaussian());
-            otelHist.record(d);
+        for (double observation : random) {
+            otelHist.record(observation);
         }
     }
 
@@ -213,4 +221,5 @@ public class BenchmarkRunner {
             }
         }
     }
+    */
 }
