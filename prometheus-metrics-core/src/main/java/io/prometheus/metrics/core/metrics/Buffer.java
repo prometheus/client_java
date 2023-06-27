@@ -57,7 +57,7 @@ class Buffer<T extends MetricData> {
             result = runnable.get();
             int expectedBufferSize;
             if (reset) {
-                expectedBufferSize = (int) (observationCount.getAndSet(0) - count);
+                expectedBufferSize = (int) ((observationCount.getAndSet(0) & ~signBit) - count);
                 reset = false;
             } else {
                 expectedBufferSize = (int) (observationCount.addAndGet(signBit) - count);
