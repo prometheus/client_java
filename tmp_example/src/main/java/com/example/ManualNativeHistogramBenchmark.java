@@ -34,6 +34,9 @@ public class ManualNativeHistogramBenchmark {
         ManualNativeHistogramBenchmark benchmark = new ManualNativeHistogramBenchmark();
         benchmark.setUp();
         for (int threads = 1; threads <= 48; threads++) {
+            System.out.println();
+            System.out.println("# " + threads + " Threads");
+            System.out.println();
             benchmark.run(threads);
         }
     }
