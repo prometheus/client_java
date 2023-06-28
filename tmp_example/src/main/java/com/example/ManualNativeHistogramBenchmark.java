@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 public class ManualNativeHistogramBenchmark {
 
 
-    private final int MAX_THREADS = 32;
+    private final int MAX_THREADS = 48;
     private final double[][] randoms = new double[MAX_THREADS][10 * 1024 * 1024];
     private Meter meter;
     private Histogram prometheusHistogram;
