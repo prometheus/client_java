@@ -73,12 +73,17 @@ public class LongRunningNativeHistogramLoadTest {
             producers.submit(() -> {
                 double[] random = randoms[finalThread];
                 while (true) {
-                    long start = System.nanoTime();
-                    for (int i = 0; i < random.length; i++) {
-                        prometheusHistogram.observe(i);
+                    try {
+                        long start = System.nanoTime();
+                        for (int i = 0; i < random.length; i++) {
+                            prometheusHistogram.observe(i);
+                        }
+                        long duration = System.nanoTime() - start;
+                        System.out.println("[" + Thread.currentThread().getName() + "] observing took " + String.format("%.6f", ((double) duration) / (double) TimeUnit.SECONDS.toNanos(1)) + " s");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.exit(-1);
                     }
-                    long duration = System.nanoTime() - start;
-                    System.out.println("[" + Thread.currentThread().getName() + "] observing took " + String.format("%.6f", ((double) duration) / (double) TimeUnit.SECONDS.toNanos(1)) + " s");
                 }
             });
         }
