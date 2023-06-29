@@ -54,7 +54,7 @@ public class CounterTest {
         SpanContextSupplier.setSpanContext(origSpanContext);
     }
 
-    private CounterSnapshot.CounterData getData(Counter counter, String... labels) {
+    private CounterSnapshot.CounterDataPointSnapshot getData(Counter counter, String... labels) {
         return counter.collect().getData().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findAny()
@@ -140,9 +140,9 @@ public class CounterTest {
         Assert.assertEquals("seconds", snapshot.getMetadata().getUnit().toString());
         Assert.assertEquals("help message", snapshot.getMetadata().getHelp());
         Assert.assertEquals(2, snapshot.getData().size());
-        Iterator<CounterSnapshot.CounterData> iter = snapshot.getData().iterator();
+        Iterator<CounterSnapshot.CounterDataPointSnapshot> iter = snapshot.getData().iterator();
         // data is ordered by labels, so 200 comes before 500
-        CounterSnapshot.CounterData data = iter.next();
+        CounterSnapshot.CounterDataPointSnapshot data = iter.next();
         Assert.assertEquals(Labels.of("const1name", "const1value", "const2name", "const2value", "path", "/", "status", "200"), data.getLabels());
         Assert.assertEquals(2, data.getValue(), 0.0001);
         Assert.assertTrue(data.getCreatedTimestampMillis() >= before);

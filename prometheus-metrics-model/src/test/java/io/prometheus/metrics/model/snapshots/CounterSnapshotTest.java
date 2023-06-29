@@ -1,6 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterData;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class CounterSnapshotTest {
                 .withName("http_server_requests_seconds")
                 .withHelp("total time spent serving requests")
                 .withUnit(Unit.SECONDS)
-                .addCounterData(CounterData.newBuilder()
+                .addDataPoint(CounterDataPointSnapshot.newBuilder()
                         .withValue(1.0)
                         .withExemplar(Exemplar.newBuilder()
                                 .withValue(3.0)
@@ -31,7 +31,7 @@ public class CounterSnapshotTest {
                                 .build())
                         .withCreatedTimestampMillis(createdTimestamp1)
                         .build()
-                ).addCounterData(CounterData.newBuilder()
+                ).addDataPoint(CounterDataPointSnapshot.newBuilder()
                         .withValue(2.0)
                         .withExemplar(Exemplar.newBuilder()
                                 .withValue(4.0)
@@ -48,7 +48,7 @@ public class CounterSnapshotTest {
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "http_server_requests_seconds", "total time spent serving requests", "seconds");
         Assert.assertEquals(2, snapshot.getData().size());
-        CounterData data = snapshot.getData().get(0); // data is sorted by labels, so the first one should be path="/hello"
+        CounterDataPointSnapshot data = snapshot.getData().get(0); // data is sorted by labels, so the first one should be path="/hello"
         Assert.assertEquals(Labels.of("path", "/hello"), data.getLabels());
         Assert.assertEquals(2.0, data.getValue(), 0.0);
         Assert.assertEquals(4.0, data.getExemplar().getValue(), 0.0);
@@ -66,11 +66,11 @@ public class CounterSnapshotTest {
     public void testMinimalGoodCase() {
         CounterSnapshot snapshot = CounterSnapshot.newBuilder()
                 .withName("events")
-                .addCounterData(CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "events", null, null);
         Assert.assertEquals(1, snapshot.getData().size());
-        CounterData data = snapshot.getData().get(0);
+        CounterDataPointSnapshot data = snapshot.getData().get(0);
         Assert.assertEquals(Labels.EMPTY, data.getLabels());
         Assert.assertEquals(1.0, data.getValue(), 0.0);
         Assert.assertNull(data.getExemplar());
@@ -91,17 +91,17 @@ public class CounterSnapshotTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testValueMissing() {
-        CounterData.newBuilder().build();
+        CounterDataPointSnapshot.newBuilder().build();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testDataImmutable() {
         CounterSnapshot snapshot = CounterSnapshot.newBuilder()
                 .withName("events")
-                .addCounterData(CounterData.newBuilder().withLabels(Labels.of("a", "a")).withValue(1.0).build())
-                .addCounterData(CounterData.newBuilder().withLabels(Labels.of("a", "b")).withValue(2.0).build())
+                .addDataPoint(CounterDataPointSnapshot.newBuilder().withLabels(Labels.of("a", "a")).withValue(1.0).build())
+                .addDataPoint(CounterDataPointSnapshot.newBuilder().withLabels(Labels.of("a", "b")).withValue(2.0).build())
                 .build();
-        Iterator<CounterSnapshot.CounterData> iterator = snapshot.getData().iterator();
+        Iterator<CounterDataPointSnapshot> iterator = snapshot.getData().iterator();
         iterator.next();
         iterator.remove();
     }

@@ -30,7 +30,7 @@ public class Info extends MetricWithFixedMetadata {
 
     @Override
     public InfoSnapshot collect() {
-        return new InfoSnapshot(getMetadata(), Collections.singletonList(new InfoSnapshot.InfoData(labels.merge(constLabels))));
+        return new InfoSnapshot(getMetadata(), Collections.singletonList(new InfoSnapshot.InfoDataPointSnapshot(labels.merge(constLabels))));
     }
 
     public static class Builder extends MetricWithFixedMetadata.Builder<Builder, Info> {

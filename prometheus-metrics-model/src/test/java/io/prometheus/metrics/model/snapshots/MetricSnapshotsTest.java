@@ -1,9 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,15 +17,15 @@ public class MetricSnapshotsTest {
     public void testSort() {
         CounterSnapshot c1 = CounterSnapshot.newBuilder()
                 .withName("counter1")
-                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         CounterSnapshot c2 = CounterSnapshot.newBuilder()
                 .withName("counter2")
-                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         CounterSnapshot c3 = CounterSnapshot.newBuilder()
                 .withName("counter3")
-                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         MetricSnapshots snapshots = new MetricSnapshots(c2, c3, c1);
         Assert.assertEquals(3, snapshots.size());
@@ -47,11 +43,11 @@ public class MetricSnapshotsTest {
         //    and that is the conflict. Therefore, you cannot have a counter named "foo" and a gauge named "foo".
         CounterSnapshot c = CounterSnapshot.newBuilder()
                 .withName("my_metric")
-                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         GaugeSnapshot g = GaugeSnapshot.newBuilder()
                 .withName("my_metric")
-                .addGaugeData(GaugeSnapshot.GaugeData.newBuilder().withValue(1.0).build())
+                .addDataPoint(GaugeSnapshot.GaugeDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         new MetricSnapshots(c, g);
     }
@@ -60,7 +56,7 @@ public class MetricSnapshotsTest {
     public void testBuilder() {
         CounterSnapshot counter = CounterSnapshot.newBuilder()
                 .withName("my_metric")
-                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         MetricSnapshots.Builder builder = MetricSnapshots.newBuilder();
         Assert.assertFalse(builder.containsMetricName("my_metric"));
@@ -72,15 +68,15 @@ public class MetricSnapshotsTest {
     public void testImmutable() {
         CounterSnapshot c1 = CounterSnapshot.newBuilder()
                 .withName("counter1")
-                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         CounterSnapshot c2 = CounterSnapshot.newBuilder()
                 .withName("counter2")
-                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         CounterSnapshot c3 = CounterSnapshot.newBuilder()
                 .withName("counter3")
-                .addCounterData(CounterSnapshot.CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         MetricSnapshots snapshots = new MetricSnapshots(c2, c3, c1);
         Iterator<MetricSnapshot> iterator = snapshots.iterator();

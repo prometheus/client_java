@@ -1,7 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.InfoSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,7 +12,7 @@ public class InfoSnapshotTest {
         InfoSnapshot snapshot = InfoSnapshot.newBuilder()
                 .withName("target")
                 .withHelp("Target info")
-                .addInfoData(InfoSnapshot.InfoData.newBuilder()
+                .addDataPoint(InfoSnapshot.InfoDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("instance_id", "127.0.0.1:9100", "service_name", "gateway"))
                         .build())
                 .build();
@@ -34,14 +32,14 @@ public class InfoSnapshotTest {
     public void testDataImmutable() {
         InfoSnapshot snapshot = InfoSnapshot.newBuilder()
                 .withName("target")
-                .addInfoData(InfoSnapshot.InfoData.newBuilder()
+                .addDataPoint(InfoSnapshot.InfoDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("instance_id", "127.0.0.1:9100", "service_name", "gateway.v1"))
                         .build())
-                .addInfoData(InfoSnapshot.InfoData.newBuilder()
+                .addDataPoint(InfoSnapshot.InfoDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("instance_id", "127.0.0.1:9200", "service_name", "gateway.v2"))
                         .build())
                 .build();
-        Iterator<InfoSnapshot.InfoData> iterator = snapshot.getData().iterator();
+        Iterator<InfoSnapshot.InfoDataPointSnapshot> iterator = snapshot.getData().iterator();
         iterator.next();
         iterator.remove();
     }

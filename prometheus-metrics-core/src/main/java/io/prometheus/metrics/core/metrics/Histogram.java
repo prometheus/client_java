@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.LongAdder;
  * If you want the classic representation only, use {@link Histogram.Builder#classicOnly}.
  * If you want the native representation only, use {@link Histogram.Builder#nativeOnly}.
  */
-public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.HistogramData> implements DistributionDataPoint {
+public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.DataPoint> implements DistributionDataPoint {
 
     // nativeSchema == CLASSIC_HISTOGRAM indicates that this is a classic histogram only.
     private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
@@ -139,7 +139,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.H
         return exemplarsEnabled;
     }
 
-    public class HistogramData implements DistributionDataPoint {
+    public class DataPoint implements DistributionDataPoint {
         private final LongAdder[] classicBuckets;
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForPositiveValues = new ConcurrentHashMap<>();
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForNegativeValues = new ConcurrentHashMap<>();
@@ -149,11 +149,11 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.H
         private volatile int nativeSchema = nativeInitialSchema; // integer in [-4, 8] or CLASSIC_HISTOGRAM
         private volatile double nativeZeroThreshold = Histogram.this.nativeMinZeroThreshold;
         private volatile long createdTimeMillis = System.currentTimeMillis();
-        private final Buffer<HistogramSnapshot.HistogramData> buffer = new Buffer<>();
+        private final Buffer buffer = new Buffer();
         private volatile boolean resetDurationExpired = false;
         private final ExemplarSampler exemplarSampler;
 
-        private HistogramData() {
+        private DataPoint() {
             if (exemplarsEnabled) {
                 exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
             } else {
@@ -225,14 +225,14 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.H
             }
         }
 
-        public HistogramSnapshot.HistogramData collect(Labels labels) {
+        public HistogramSnapshot.HistogramDataPointSnapshot collect(Labels labels) {
             Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
             return buffer.run(
                     expectedCount -> count.sum() == expectedCount,
                     () -> {
                         if (classicUpperBounds.length == 0) {
                             // native only
-                            return new HistogramSnapshot.HistogramData(
+                            return new HistogramSnapshot.HistogramDataPointSnapshot(
                                     nativeSchema,
                                     nativeZeroCount.sum(),
                                     nativeZeroThreshold,
@@ -244,7 +244,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.H
                                     createdTimeMillis);
                         } else if (Histogram.this.nativeInitialSchema == CLASSIC_HISTOGRAM) {
                             // classic only
-                            return new HistogramSnapshot.HistogramData(
+                            return new HistogramSnapshot.HistogramDataPointSnapshot(
                                     ClassicHistogramBuckets.of(classicUpperBounds, classicBuckets),
                                     sum.sum(),
                                     labels,
@@ -252,7 +252,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.H
                                     createdTimeMillis);
                         } else {
                             // hybrid: classic and native
-                            return new HistogramSnapshot.HistogramData(
+                            return new HistogramSnapshot.HistogramDataPointSnapshot(
                                     ClassicHistogramBuckets.of(classicUpperBounds, classicBuckets),
                                     nativeSchema,
                                     nativeZeroCount.sum(),
@@ -567,8 +567,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.H
     }
 
     @Override
-    protected HistogramSnapshot collect(List<Labels> labels, List<HistogramData> metricData) {
-        List<HistogramSnapshot.HistogramData> data = new ArrayList<>(labels.size());
+    protected HistogramSnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
+        List<HistogramSnapshot.HistogramDataPointSnapshot> data = new ArrayList<>(labels.size());
         for (int i = 0; i < labels.size(); i++) {
             data.add(metricData.get(i).collect(labels.get(i)));
         }
@@ -587,8 +587,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.H
     }
 
     @Override
-    protected HistogramData newMetricData() {
-        return new HistogramData();
+    protected DataPoint newDataPoint() {
+        return new DataPoint();
     }
 
     static {

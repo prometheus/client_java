@@ -5,7 +5,7 @@ package io.prometheus.metrics.model.snapshots;
  * Histograms and Summaries represent distributions, like a latency distribution or a distribution
  * of request sizes in Bytes.
  */
-public abstract class DistributionData extends MetricData {
+public abstract class DistributionDataPointSnapshot extends DataPointSnapshot {
     private final long count; // optional, negative value means no count.
     private final double sum; // optional, Double.NaN means no sum.
     private final Exemplars exemplars; // optional, Exemplars.EMPTY means no Exemplars.
@@ -13,7 +13,7 @@ public abstract class DistributionData extends MetricData {
     /**
      * See JavaDoc of the child classes.
      */
-    protected DistributionData(long count, double sum, Exemplars exemplars, Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
+    protected DistributionDataPointSnapshot(long count, double sum, Exemplars exemplars, Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
         super(labels, createdTimestampMillis, scrapeTimestampMillis);
         this.count = count;
         this.sum = sum;
@@ -58,7 +58,7 @@ public abstract class DistributionData extends MetricData {
         return exemplars;
     }
 
-    public static abstract class Builder<T extends Builder<T>> extends MetricData.Builder<T> {
+    static abstract class Builder<T extends Builder<T>> extends DataPointSnapshot.Builder<T> {
 
         protected long count = -1;
         protected double sum = Double.NaN;

@@ -1,11 +1,11 @@
 package io.prometheus.metrics.model.snapshots;
 
-public abstract class MetricData {
+public abstract class DataPointSnapshot {
     private final Labels labels;
     private final long createdTimestampMillis;
     private final long scrapeTimestampMillis;
 
-    protected MetricData(Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
+    protected DataPointSnapshot(Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
         this.labels = labels;
         this.createdTimestampMillis = createdTimestampMillis;
         this.scrapeTimestampMillis = scrapeTimestampMillis;

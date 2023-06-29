@@ -13,19 +13,19 @@ import java.util.List;
 public abstract class MetricSnapshot {
 
     private final MetricMetadata metadata;
-    protected final List<? extends MetricData> data;
+    protected final List<? extends DataPointSnapshot> data;
 
-    protected MetricSnapshot(MetricMetadata metadata, MetricData... data) {
+    protected MetricSnapshot(MetricMetadata metadata, DataPointSnapshot... data) {
         this(metadata, Arrays.asList(data));
     }
 
-    protected MetricSnapshot(MetricMetadata metadata, Collection<? extends MetricData> data) {
+    protected MetricSnapshot(MetricMetadata metadata, Collection<? extends DataPointSnapshot> data) {
         this.metadata = metadata;
         if (data == null) {
             throw new NullPointerException();
         }
-        List<? extends MetricData> dataCopy = new ArrayList<>(data);
-        dataCopy.sort(Comparator.comparing(MetricData::getLabels));
+        List<? extends DataPointSnapshot> dataCopy = new ArrayList<>(data);
+        dataCopy.sort(Comparator.comparing(DataPointSnapshot::getLabels));
         this.data = Collections.unmodifiableList(dataCopy);
         validateLabels();
     }
@@ -34,7 +34,7 @@ public abstract class MetricSnapshot {
         return metadata;
     }
 
-    public abstract List<? extends MetricData> getData();
+    public abstract List<? extends DataPointSnapshot> getData();
 
     protected void validateLabels() {
         // Verify that labels are unique (the same set of names/values must not be used multiple times for the same metric).

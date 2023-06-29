@@ -3,12 +3,12 @@ package io.prometheus.metrics.expositionformats;
 import io.prometheus.metrics.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterData;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
-import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeData;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -18,10 +18,10 @@ import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
-import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryData;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
-import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownData;
+import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -133,7 +133,7 @@ public class ExpositionFormatsTest {
                 .withName("service_time_seconds")
                 .withHelp("total time spent serving")
                 .withUnit(Unit.SECONDS)
-                .addCounterData(CounterData.newBuilder()
+                .addDataPoint(CounterDataPointSnapshot.newBuilder()
                         .withValue(0.8)
                         .withLabels(Labels.newBuilder()
                                 .addLabel("path", "/hello")
@@ -143,7 +143,7 @@ public class ExpositionFormatsTest {
                         .withCreatedTimestampMillis(createdTimestamp1)
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
-                .addCounterData(CounterData.newBuilder()
+                .addDataPoint(CounterDataPointSnapshot.newBuilder()
                         .withValue(0.9)
                         .withLabels(Labels.newBuilder()
                                 .addLabel("path", "/hello")
@@ -174,7 +174,7 @@ public class ExpositionFormatsTest {
                 "name: \"my_counter_total\" type: COUNTER metric { counter { value: 1.1 } }";
         CounterSnapshot counter = CounterSnapshot.newBuilder()
                 .withName("my_counter")
-                .addCounterData(CounterData.newBuilder().withValue(1.1).build())
+                .addDataPoint(CounterDataPointSnapshot.newBuilder().withValue(1.1).build())
                 .build();
         assertOpenMetricsText(openMetricsText, counter);
         assertPrometheusText(prometheusText, counter);
@@ -216,7 +216,7 @@ public class ExpositionFormatsTest {
                 .withName("disk_usage_ratio")
                 .withHelp("percentage used")
                 .withUnit(new Unit("ratio"))
-                .addGaugeData(GaugeData.newBuilder()
+                .addDataPoint(GaugeDataPointSnapshot.newBuilder()
                         .withValue(0.7)
                         .withLabels(Labels.newBuilder()
                                 .addLabel("device", "/dev/sda2")
@@ -224,7 +224,7 @@ public class ExpositionFormatsTest {
                         .withExemplar(exemplar2)
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
-                .addGaugeData(GaugeData.newBuilder()
+                .addDataPoint(GaugeDataPointSnapshot.newBuilder()
                         .withValue(0.2)
                         .withLabels(Labels.newBuilder()
                                 .addLabel("device", "/dev/sda1")
@@ -253,7 +253,7 @@ public class ExpositionFormatsTest {
                 "name: \"temperature_centigrade\" type: GAUGE metric { gauge { value: 22.3 } }";
         GaugeSnapshot gauge = GaugeSnapshot.newBuilder()
                 .withName("temperature_centigrade")
-                .addGaugeData(GaugeData.newBuilder()
+                .addDataPoint(GaugeDataPointSnapshot.newBuilder()
                         .withValue(22.3)
                         .build())
                 .build();
@@ -359,7 +359,7 @@ public class ExpositionFormatsTest {
                 .withName("http_request_duration_seconds")
                 .withHelp("request duration")
                 .withUnit(Unit.SECONDS)
-                .addSummaryData(SummaryData.newBuilder()
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
                         .withCount(7)
                         .withSum(2.2)
                         .withQuantiles(Quantiles.newBuilder()
@@ -374,7 +374,7 @@ public class ExpositionFormatsTest {
                         .withCreatedTimestampMillis(createdTimestamp2)
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
-                .addSummaryData(SummaryData.newBuilder()
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
                         .withCount(3)
                         .withSum(1.2)
                         .withQuantiles(Quantiles.newBuilder()
@@ -427,7 +427,7 @@ public class ExpositionFormatsTest {
                 .withName("latency_seconds")
                 .withHelp("latency")
                 .withUnit(Unit.SECONDS)
-                .addSummaryData(SummaryData.newBuilder()
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
                         .withCount(3)
                         .withSum(1.2)
                         .build())
@@ -460,7 +460,7 @@ public class ExpositionFormatsTest {
                 //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
-                .addSummaryData(SummaryData.newBuilder()
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
                         .withQuantiles(Quantiles.newBuilder().addQuantile(0.95, 200.0).build())
                         .build())
                 .build();
@@ -492,7 +492,7 @@ public class ExpositionFormatsTest {
         //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
-                .addSummaryData(SummaryData.newBuilder()
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
                         .withCount(1)
                         .build())
                 .build();
@@ -524,7 +524,7 @@ public class ExpositionFormatsTest {
                 //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
-                .addSummaryData(SummaryData.newBuilder()
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
                         .withSum(12.3)
                         .build())
                 .build();
@@ -543,7 +543,7 @@ public class ExpositionFormatsTest {
                 .withName("latency_seconds")
                 .withHelp("latency")
                 .withUnit(Unit.SECONDS)
-                .addSummaryData(SummaryData.newBuilder().build())
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder().build())
                 .build();
         assertOpenMetricsText("# EOF\n", summary);
         assertPrometheusText("", summary);
@@ -577,15 +577,15 @@ public class ExpositionFormatsTest {
                 //@formatter:on
         SummarySnapshot summary = SummarySnapshot.newBuilder()
                 .withName("latency_seconds")
-                .addSummaryData(SummaryData.newBuilder()
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("path", "/v1"))
                         .build())
-                .addSummaryData(SummaryData.newBuilder()
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("path", "/v2"))
                         .withCount(2)
                         .withSum(10.7)
                         .build())
-                .addSummaryData(SummaryData.newBuilder()
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("path", "/v3"))
                         .build())
                 .build();
@@ -702,7 +702,7 @@ public class ExpositionFormatsTest {
                 .withName("response_size_bytes")
                 .withHelp("help")
                 .withUnit(Unit.BYTES)
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withSum(3.2)
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(0.0, 3)
@@ -714,7 +714,7 @@ public class ExpositionFormatsTest {
                         .withCreatedTimestampMillis(createdTimestamp2)
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withSum(4.1)
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.2, 2)
@@ -761,7 +761,7 @@ public class ExpositionFormatsTest {
                 //@formatter:on
         HistogramSnapshot histogram = HistogramSnapshot.newBuilder()
                 .withName("request_latency_seconds")
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 2)
                                 .build())
@@ -804,7 +804,7 @@ public class ExpositionFormatsTest {
                 //@formatter:on
         HistogramSnapshot histogram = HistogramSnapshot.newBuilder()
                 .withName("request_latency_seconds")
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withSum(3.2)
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 2)
@@ -926,7 +926,7 @@ public class ExpositionFormatsTest {
                 .withName("cache_size_bytes")
                 .withHelp("number of bytes in the cache")
                 .withUnit(Unit.BYTES)
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withSum(17)
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 3)
@@ -937,7 +937,7 @@ public class ExpositionFormatsTest {
                         .withCreatedTimestampMillis(createdTimestamp1)
                         .withScrapeTimestampMillis(scrapeTimestamp1)
                         .build())
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withSum(18)
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(2.0, 4)
@@ -987,7 +987,7 @@ public class ExpositionFormatsTest {
         HistogramSnapshot gaugeHistogram = HistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("queue_size_bytes")
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 130)
                                 .build())
@@ -1033,7 +1033,7 @@ public class ExpositionFormatsTest {
         HistogramSnapshot gaugeHistogram = HistogramSnapshot.newBuilder()
                 .asGaugeHistogram()
                 .withName("queue_size_bytes")
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withSum(27000)
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(Double.POSITIVE_INFINITY, 130)
@@ -1155,7 +1155,7 @@ public class ExpositionFormatsTest {
                 .withName("response_size_bytes")
                 .withHelp("help")
                 .withUnit(Unit.BYTES)
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withSum(3.2)
                         .withNativeSchema(5)
                         .withNativeZeroCount(1)
@@ -1189,7 +1189,7 @@ public class ExpositionFormatsTest {
                         .withCreatedTimestampMillis(createdTimestamp2)
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withSum(4.2)
                         .withNativeSchema(5)
                         .withNativeBucketsForPositiveValues(NativeHistogramBuckets.newBuilder()
@@ -1233,7 +1233,7 @@ public class ExpositionFormatsTest {
                 //@formatter:on
         HistogramSnapshot nativeHistogram = HistogramSnapshot.newBuilder()
                 .withName("latency_seconds")
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withNativeSchema(5)
                         .build())
                 .build();
@@ -1258,7 +1258,7 @@ public class ExpositionFormatsTest {
         InfoSnapshot info = InfoSnapshot.newBuilder()
                 .withName("version")
                 .withHelp("version information")
-                .addInfoData(InfoSnapshot.InfoData.newBuilder()
+                .addDataPoint(InfoSnapshot.InfoDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("version", "1.2.3"))
                         .build())
                 .build();
@@ -1288,13 +1288,13 @@ public class ExpositionFormatsTest {
         StateSetSnapshot stateSet = StateSetSnapshot.newBuilder()
                 .withName("state")
                 .withHelp("complete state set example")
-                .addStateSetData(StateSetSnapshot.StateSetData.newBuilder()
+                .addDataPoint(StateSetSnapshot.StateSetDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("env", "prod"))
                         .addState("state1", false)
                         .addState("state2", true)
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
-                .addStateSetData(StateSetSnapshot.StateSetData.newBuilder()
+                .addDataPoint(StateSetSnapshot.StateSetDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("env", "dev"))
                         .addState("state2", false)
                         .addState("state1", true)
@@ -1320,7 +1320,7 @@ public class ExpositionFormatsTest {
                 "state{state=\"bb\"} 0\n";
         StateSetSnapshot stateSet = StateSetSnapshot.newBuilder()
                 .withName("state")
-                .addStateSetData(StateSetSnapshot.StateSetData.newBuilder()
+                .addDataPoint(StateSetSnapshot.StateSetDataPointSnapshot.newBuilder()
                         .addState("a", true)
                         .addState("bb", false)
                         .build())
@@ -1349,13 +1349,13 @@ public class ExpositionFormatsTest {
                 .withName("my_special_thing_bytes")
                 .withHelp("help message")
                 .withUnit(Unit.BYTES)
-                .addUnknownData(UnknownData.newBuilder()
+                .addDataPoint(UnknownDataPointSnapshot.newBuilder()
                         .withValue(0.7)
                         .withLabels(Labels.of("env", "prod"))
                         .withExemplar(exemplar2)
                         .withScrapeTimestampMillis(scrapeTimestamp2)
                         .build())
-                .addUnknownData(UnknownData.newBuilder()
+                .addDataPoint(UnknownDataPointSnapshot.newBuilder()
                         .withValue(0.2)
                         .withLabels(Labels.of("env", "dev"))
                         .withExemplar(exemplar1)
@@ -1379,7 +1379,7 @@ public class ExpositionFormatsTest {
                 "other 22.3\n";
         UnknownSnapshot unknown = UnknownSnapshot.newBuilder()
                 .withName("other")
-                .addUnknownData(UnknownData.newBuilder()
+                .addDataPoint(UnknownDataPointSnapshot.newBuilder()
                         .withValue(22.3)
                         .build())
                 .build();
@@ -1403,7 +1403,7 @@ public class ExpositionFormatsTest {
         CounterSnapshot counter = CounterSnapshot.newBuilder()
                 .withName("test")
                 .withHelp("Some text and \n some \" escaping") // example from https://openMetrics.io
-                .addCounterData(CounterData.newBuilder().withValue(1.0).build())
+                .addDataPoint(CounterDataPointSnapshot.newBuilder().withValue(1.0).build())
                 .build();
         assertOpenMetricsText(openMetrics, counter);
         assertPrometheusText(prometheus, counter);
@@ -1422,7 +1422,7 @@ public class ExpositionFormatsTest {
                 "test_total{a=\"x\",b=\"escaping\\\" example \\n \"} 1.0\n";
         CounterSnapshot counter = CounterSnapshot.newBuilder()
                 .withName("test")
-                .addCounterData(CounterData.newBuilder()
+                .addDataPoint(CounterDataPointSnapshot.newBuilder()
                         // example from https://openMetrics.io
                         .withLabels(Labels.of("a", "x", "b", "escaping\" example \n "))
                         .withValue(1.0)

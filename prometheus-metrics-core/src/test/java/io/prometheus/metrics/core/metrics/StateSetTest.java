@@ -61,7 +61,7 @@ public class StateSetTest {
         Assert.assertFalse(getData(stateSet).isTrue(2));
     }
 
-    private StateSetSnapshot.StateSetData getData(StateSet stateSet, String... labels) {
+    private StateSetSnapshot.StateSetDataPointSnapshot getData(StateSet stateSet, String... labels) {
         return stateSet.collect().getData().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findAny()

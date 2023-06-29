@@ -27,19 +27,19 @@ import static java.lang.Boolean.TRUE;
  * We are using our own terminology here because in Java <i>synchronous</i> and <i>asynchronous</i> usually refers to multi-threading,
  * but this has nothing to do with multi-threading.
  */
-abstract class StatefulMetric<O extends DataPoint, V extends O> extends MetricWithFixedMetadata {
+abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWithFixedMetadata {
     private final String[] labelNames;
     //private final Boolean exemplarsEnabled;
 
     /**
      * Map from variableLabelValues to MetricData.
      */
-    private final ConcurrentHashMap<List<String>, V> data = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<List<String>, T> data = new ConcurrentHashMap<>();
 
     /**
      * Shortcut to data.get(Collections.emptyList())
      */
-    private volatile V noLabels;
+    private volatile T noLabels;
 
     protected StatefulMetric(Builder<?, ?> builder) {
         super(builder);
@@ -51,7 +51,7 @@ abstract class StatefulMetric<O extends DataPoint, V extends O> extends MetricWi
     /**
      * labels and metricData have the same size. labels.get(i) are the labels for metricData.get(i).
      */
-    protected abstract MetricSnapshot collect(List<Labels> labels, List<V> metricData);
+    protected abstract MetricSnapshot collect(List<Labels> labels, List<T> metricData);
 
     public MetricSnapshot collect() {
         if (labelNames.length == 0 && data.size() == 0) {
@@ -59,8 +59,8 @@ abstract class StatefulMetric<O extends DataPoint, V extends O> extends MetricWi
             withLabelValues();
         }
         List<Labels> labels = new ArrayList<>(data.size());
-        List<V> metricData = new ArrayList<>(data.size());
-        for (Map.Entry<List<String>, V> entry : data.entrySet()) {
+        List<T> metricData = new ArrayList<>(data.size());
+        for (Map.Entry<List<String>, T> entry : data.entrySet()) {
             String[] variableLabelValues = entry.getKey().toArray(new String[labelNames.length]);
             labels.add(constLabels.merge(labelNames, variableLabelValues));
             metricData.add(entry.getValue());
@@ -68,7 +68,7 @@ abstract class StatefulMetric<O extends DataPoint, V extends O> extends MetricWi
         return collect(labels, metricData);
     }
 
-    public O withLabelValues(String... labelValues) {
+    public D withLabelValues(String... labelValues) {
         if (labelValues.length != labelNames.length) {
             if (labelValues.length == 0) {
                 throw new IllegalArgumentException("The " + getClass().getSimpleName() + " was created with label names, so you must call withLabelValues() when using it.");
@@ -76,7 +76,7 @@ abstract class StatefulMetric<O extends DataPoint, V extends O> extends MetricWi
                 throw new IllegalArgumentException("Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
             }
         }
-        return data.computeIfAbsent(Arrays.asList(labelValues), l -> newMetricData());
+        return data.computeIfAbsent(Arrays.asList(labelValues), l -> newDataPoint());
     }
 
     // TODO: Remove automatically if label values have not been used in a while?
@@ -84,12 +84,12 @@ abstract class StatefulMetric<O extends DataPoint, V extends O> extends MetricWi
         data.remove(Arrays.asList(labelValues));
     }
 
-    protected abstract V newMetricData();
+    protected abstract T newDataPoint();
 
-    protected V getNoLabels() {
+    protected T getNoLabels() {
         if (noLabels == null) {
             // Note that this will throw an IllegalArgumentException if labelNames is not empty.
-            noLabels = (V) withLabelValues();
+            noLabels = (T) withLabelValues();
         }
         return noLabels;
     }
@@ -124,22 +124,6 @@ abstract class StatefulMetric<O extends DataPoint, V extends O> extends MetricWi
     }
 
     protected abstract boolean isExemplarsEnabled();
-
-    /*
-    protected boolean isExemplarsEnabled() {
-        if (exemplarsEnabled != null) {
-            return exemplarsEnabled;
-        } else {
-            return DefaultExemplarConfig.isEnabledByDefault();
-        }
-    }
-     */
-
-    /*
-    protected boolean hasSpanContextSupplier() {
-        return exemplarConfig != null ? exemplarConfig.hasSpanContextSupplier() : DefaultExemplarConfig.hasSpanContextSupplier();
-    }
-     */
 
     static abstract class Builder<B extends Builder<B, M>, M extends StatefulMetric<?, ?>> extends MetricWithFixedMetadata.Builder<B, M> {
         private String[] labelNames = new String[0];

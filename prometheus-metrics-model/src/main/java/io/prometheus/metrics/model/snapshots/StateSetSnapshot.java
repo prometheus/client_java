@@ -20,7 +20,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
      * @param metadata See {@link MetricMetadata} for more naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
      */
-    public StateSetSnapshot(MetricMetadata metadata, Collection<StateSetData> data) {
+    public StateSetSnapshot(MetricMetadata metadata, Collection<StateSetDataPointSnapshot> data) {
         super(metadata, data);
         validate();
     }
@@ -29,7 +29,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
         if (getMetadata().hasUnit()) {
             throw new IllegalArgumentException("An state set metric cannot have a unit.");
         }
-        for (StateSetData entry : getData()) {
+        for (StateSetDataPointSnapshot entry : getData()) {
             if (entry.getLabels().contains(getMetadata().getName())) {
                 throw new IllegalArgumentException("Label name " + getMetadata().getName() + " is reserved.");
             }
@@ -37,18 +37,18 @@ public final class StateSetSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<StateSetData> getData() {
-        return (List<StateSetData>) data;
+    public List<StateSetDataPointSnapshot> getData() {
+        return (List<StateSetDataPointSnapshot>) data;
     }
 
 
-    public static class StateSetData extends MetricData implements Iterable<State> {
+    public static class StateSetDataPointSnapshot extends DataPointSnapshot implements Iterable<State> {
         private final String[] names;
         private final boolean[] values;
 
         /**
-         * To create a new {@link StateSetData}, you can either call the constructor directly or use the
-         * Builder with {@link StateSetData#newBuilder()}.
+         * To create a new {@link StateSetDataPointSnapshot}, you can either call the constructor directly or use the
+         * Builder with {@link StateSetDataPointSnapshot#newBuilder()}.
          *
          * @param names  state names. Must have at least 1 entry.
          *               The constructor will create a copy of the array.
@@ -56,7 +56,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
          *               The constructor will create a copy of the array.
          * @param labels must not be null. Use {@link Labels#EMPTY} if there are no labels.
          */
-        public StateSetData(String[] names, boolean[] values, Labels labels) {
+        public StateSetDataPointSnapshot(String[] names, boolean[] values, Labels labels) {
             this(names, values, labels, 0L);
         }
 
@@ -65,7 +65,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
          * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
          * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public StateSetData(String[] names, boolean[] values, Labels labels, long scrapeTimestampMillis) {
+        public StateSetDataPointSnapshot(String[] names, boolean[] values, Labels labels, long scrapeTimestampMillis) {
             super(labels, 0L, scrapeTimestampMillis);
             if (names.length == 0) {
                 throw new IllegalArgumentException("StateSet must have at least one state.");
@@ -142,7 +142,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
             values[i] = tmpValue;
         }
 
-        public static class Builder extends MetricData.Builder<Builder> {
+        public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
             private final ArrayList<String> names = new ArrayList<>();
             private final ArrayList<Boolean> values = new ArrayList<>();
@@ -160,12 +160,12 @@ public final class StateSetSnapshot extends MetricSnapshot {
                 return this;
             }
 
-            public StateSetData build() {
+            public StateSetDataPointSnapshot build() {
                 boolean[] valuesArray = new boolean[values.size()];
                 for (int i = 0; i < values.size(); i++) {
                     valuesArray[i] = values.get(i);
                 }
-                return new StateSetData(names.toArray(new String[]{}), valuesArray, labels, scrapeTimestampMillis);
+                return new StateSetDataPointSnapshot(names.toArray(new String[]{}), valuesArray, labels, scrapeTimestampMillis);
             }
         }
 
@@ -194,13 +194,13 @@ public final class StateSetSnapshot extends MetricSnapshot {
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
 
-        private final List<StateSetData> stateSetData = new ArrayList<>();
+        private final List<StateSetDataPointSnapshot> dataPoints = new ArrayList<>();
 
         private Builder() {
         }
 
-        public Builder addStateSetData(StateSetData data) {
-            stateSetData.add(data);
+        public Builder addDataPoint(StateSetDataPointSnapshot data) {
+            dataPoints.add(data);
             return this;
         }
 
@@ -210,7 +210,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
         }
 
         public StateSetSnapshot build() {
-            return new StateSetSnapshot(buildMetadata(), stateSetData);
+            return new StateSetSnapshot(buildMetadata(), dataPoints);
         }
 
         @Override

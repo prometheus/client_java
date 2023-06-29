@@ -11,7 +11,7 @@ import java.util.stream.Stream;
  * Immutable representation of native histogram buckets.
  * <p>
  * The bucket index defines the boundaries of the bucket,
- * depending on the histogram's {@link HistogramSnapshot.HistogramData#getNativeSchema() schema}.
+ * depending on the histogram's {@link HistogramSnapshot.HistogramDataPointSnapshot#getNativeSchema() schema}.
  * <pre>
  *     base = 2^(2^-schema)
  *     lower bound = base^(index - 1)

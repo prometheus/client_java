@@ -36,7 +36,7 @@ public class GaugeTest {
         SpanContextSupplier.setSpanContext(origSpanContext);
     }
 
-    private GaugeSnapshot.GaugeData getData(Gauge gauge, String... labels) {
+    private GaugeSnapshot.GaugeDataPointSnapshot getData(Gauge gauge, String... labels) {
         return ((GaugeSnapshot) gauge.collect()).getData().stream()
                 .filter(data -> data.getLabels().equals(Labels.of(labels)))
                 .findAny()

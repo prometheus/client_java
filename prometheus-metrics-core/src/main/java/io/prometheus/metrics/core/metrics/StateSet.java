@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 // experimental
-public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.StateSetData> implements StateSetDataPoint {
+public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoint> implements StateSetDataPoint {
 
     private final boolean exemplarsEnabled;
     private final String[] names;
@@ -35,17 +35,17 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.StateSe
     }
 
     @Override
-    protected StateSetSnapshot collect(List<Labels> labels, List<StateSetData> metricDataList) {
-        List<StateSetSnapshot.StateSetData> data = new ArrayList<>(labels.size());
+    protected StateSetSnapshot collect(List<Labels> labels, List<DataPoint> metricDataList) {
+        List<StateSetSnapshot.StateSetDataPointSnapshot> data = new ArrayList<>(labels.size());
         for (int i = 0; i < labels.size(); i++) {
-            data.add(new StateSetSnapshot.StateSetData(names, metricDataList.get(i).values, labels.get(i)));
+            data.add(new StateSetSnapshot.StateSetDataPointSnapshot(names, metricDataList.get(i).values, labels.get(i)));
         }
         return new StateSetSnapshot(getMetadata(), data);
     }
 
     @Override
-    protected StateSetData newMetricData() {
-        return new StateSetData();
+    protected DataPoint newDataPoint() {
+        return new DataPoint();
     }
 
     @Override
@@ -63,11 +63,11 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.StateSe
         getNoLabels().setFalse(state);
     }
 
-    class StateSetData implements StateSetDataPoint {
+    class DataPoint implements StateSetDataPoint {
 
         private final boolean[] values = new boolean[names.length];
 
-        private StateSetData() {
+        private DataPoint() {
         }
 
         @Override

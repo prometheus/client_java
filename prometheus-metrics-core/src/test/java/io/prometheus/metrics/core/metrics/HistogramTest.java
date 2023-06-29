@@ -77,7 +77,7 @@ public class HistogramTest {
             System.out.println("Running " + name + "...");
             for (double observation : observations) {
                 if (observation == RESET_DURATION_REACHED) {
-                    Field resetAllowed = Histogram.HistogramData.class.getDeclaredField("resetDurationExpired");
+                    Field resetAllowed = Histogram.DataPoint.class.getDeclaredField("resetDurationExpired");
                     resetAllowed.setAccessible(true);
                     resetAllowed.set(histogram.getNoLabels(), true);
                 } else {
@@ -619,14 +619,14 @@ public class HistogramTest {
         double[] expectedUpperBounds = new double[]{0.25, 1, 4, Double.MAX_VALUE, Double.POSITIVE_INFINITY,
                 0.5, 1, 2, Double.MAX_VALUE, Double.POSITIVE_INFINITY,
                 0.8408964152537144, 1, 1.189207115002721, Double.MAX_VALUE, Double.POSITIVE_INFINITY};
-        Method method = Histogram.HistogramData.class.getDeclaredMethod("nativeBucketIndexToUpperBound", int.class, int.class);
+        Method method = Histogram.DataPoint.class.getDeclaredMethod("nativeBucketIndexToUpperBound", int.class, int.class);
         method.setAccessible(true);
         for (int i = 0; i < indexes.length; i++) {
             Histogram histogram = Histogram.newBuilder()
                     .withName("test")
                     .withNativeInitialSchema(schemas[i])
                     .build();
-            Histogram.HistogramData histogramData = histogram.newMetricData();
+            Histogram.DataPoint histogramData = histogram.newDataPoint();
             double result = (double) method.invoke(histogramData, schemas[i], indexes[i]);
             Assert.assertEquals("index=" + indexes[i] + ", schema=" + schemas[i], expectedUpperBounds[i], result, 0.0000000000001);
         }
@@ -638,8 +638,8 @@ public class HistogramTest {
     @Test
     public void testFindBucketIndex() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Random rand = new Random();
-        Method findBucketIndex = Histogram.HistogramData.class.getDeclaredMethod("findBucketIndex", double.class);
-        Method nativeBucketIndexToUpperBound = Histogram.HistogramData.class.getDeclaredMethod("nativeBucketIndexToUpperBound", int.class, int.class);
+        Method findBucketIndex = Histogram.DataPoint.class.getDeclaredMethod("findBucketIndex", double.class);
+        Method nativeBucketIndexToUpperBound = Histogram.DataPoint.class.getDeclaredMethod("nativeBucketIndexToUpperBound", int.class, int.class);
         findBucketIndex.setAccessible(true);
         nativeBucketIndexToUpperBound.setAccessible(true);
         for (int schema = -4; schema <= 8; schema++) {
@@ -849,7 +849,7 @@ public class HistogramTest {
     }
 
     private Exemplar getExemplar(HistogramSnapshot snapshot, double le, String... labels) {
-        HistogramSnapshot.HistogramData data = snapshot.getData().stream()
+        HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getData().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Labels not found"));
@@ -907,7 +907,7 @@ public class HistogramTest {
         double lowerBound = Double.NEGATIVE_INFINITY;
         double upperBound = Double.POSITIVE_INFINITY;
         HistogramSnapshot snapshot = histogram.collect();
-        HistogramSnapshot.HistogramData data = snapshot.getData().stream()
+        HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getData().stream()
                 .filter(d -> d.getLabels().isEmpty())
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No data without labels found"));
@@ -1217,8 +1217,8 @@ public class HistogramTest {
         histogram.withLabelValues("/hello", "200").observe(0.11);
         histogram.withLabelValues("/hello", "200").observe(0.2);
         histogram.withLabelValues("/hello", "500").observe(0.19);
-        HistogramSnapshot.HistogramData data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
-        HistogramSnapshot.HistogramData data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
+        HistogramSnapshot.HistogramDataPointSnapshot data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
+        HistogramSnapshot.HistogramDataPointSnapshot data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
         assertEquals(2, data200.getCount());
         assertEquals(0.31, data200.getSum(), 0.0000001);
         assertEquals(1, data500.getCount());
@@ -1265,7 +1265,7 @@ public class HistogramTest {
             long count = 0;
             for (HistogramSnapshot snapshot : snapshots) {
                 Assert.assertEquals(1, snapshot.getData().size());
-                HistogramSnapshot.HistogramData data = snapshot.getData().stream().findFirst().orElseThrow(RuntimeException::new);
+                HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getData().stream().findFirst().orElseThrow(RuntimeException::new);
                 Assert.assertTrue(data.getCount() >= (count + 1000)); // 1000 own observations plus the ones from other threads
                 count = data.getCount();
             }
@@ -1280,7 +1280,7 @@ public class HistogramTest {
     }
 
 
-    private HistogramSnapshot.HistogramData getData(Histogram histogram, String... labels) {
+    private HistogramSnapshot.HistogramDataPointSnapshot getData(Histogram histogram, String... labels) {
         return histogram.collect().getData().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findAny()

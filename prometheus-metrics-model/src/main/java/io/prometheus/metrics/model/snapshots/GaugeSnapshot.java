@@ -16,29 +16,29 @@ public final class GaugeSnapshot extends MetricSnapshot {
      * @param metadata see {@link MetricMetadata} for naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
      */
-    public GaugeSnapshot(MetricMetadata metadata, Collection<GaugeData> data) {
+    public GaugeSnapshot(MetricMetadata metadata, Collection<GaugeDataPointSnapshot> data) {
         super(metadata, data);
     }
 
     @Override
-    public List<GaugeData> getData() {
-        return (List<GaugeData>) data;
+    public List<GaugeDataPointSnapshot> getData() {
+        return (List<GaugeDataPointSnapshot>) data;
     }
 
-    public static final class GaugeData extends MetricData {
+    public static final class GaugeDataPointSnapshot extends DataPointSnapshot {
 
         private final double value;
         private final Exemplar exemplar; // may be null
 
         /**
-         * To create a new {@link GaugeData}, you can either call the constructor directly or use the
-         * Builder with {@link GaugeData#newBuilder()}.
+         * To create a new {@link GaugeDataPointSnapshot}, you can either call the constructor directly or use the
+         * Builder with {@link GaugeDataPointSnapshot#newBuilder()}.
          *
          * @param value    the gauge value.
          * @param labels   must not be null. Use {@link Labels#EMPTY} if there are no labels.
          * @param exemplar may be null.
          */
-        public GaugeData(double value, Labels labels, Exemplar exemplar) {
+        public GaugeDataPointSnapshot(double value, Labels labels, Exemplar exemplar) {
             this(value, labels, exemplar, 0);
         }
 
@@ -47,7 +47,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
          * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
          * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public GaugeData(double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
+        public GaugeDataPointSnapshot(double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
             super(labels, 0L, scrapeTimestampMillis);
             this.value = value;
             this.exemplar = exemplar;
@@ -64,7 +64,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
             return exemplar;
         }
 
-        public static class Builder extends MetricData.Builder<Builder> {
+        public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
             private Exemplar exemplar = null;
             private Double value = null;
@@ -88,11 +88,11 @@ public final class GaugeSnapshot extends MetricSnapshot {
                 return this;
             }
 
-            public GaugeData build() {
+            public GaugeDataPointSnapshot build() {
                 if (value == null) {
                     throw new IllegalArgumentException("Missing required field: value is null.");
                 }
-                return new GaugeData(value, labels, exemplar, scrapeTimestampMillis);
+                return new GaugeDataPointSnapshot(value, labels, exemplar, scrapeTimestampMillis);
             }
 
             @Override
@@ -108,18 +108,18 @@ public final class GaugeSnapshot extends MetricSnapshot {
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
 
-        private final List<GaugeData> gaugeData = new ArrayList<>();
+        private final List<GaugeDataPointSnapshot> dataPoints = new ArrayList<>();
 
         private Builder() {
         }
 
-        public Builder addGaugeData(GaugeData data) {
-            gaugeData.add(data);
+        public Builder addDataPoint(GaugeDataPointSnapshot data) {
+            dataPoints.add(data);
             return this;
         }
 
         public GaugeSnapshot build() {
-            return new GaugeSnapshot(buildMetadata(), gaugeData);
+            return new GaugeSnapshot(buildMetadata(), dataPoints);
         }
 
         @Override

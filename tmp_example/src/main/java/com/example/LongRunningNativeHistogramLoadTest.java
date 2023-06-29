@@ -49,7 +49,7 @@ public class LongRunningNativeHistogramLoadTest {
                 System.out.println("# ---------------------------------");
                 textWriter.write(System.out, snapshots);
                 System.out.println(TextFormat.printer().shortDebugString(protobufData));
-                HistogramSnapshot.HistogramData data = ((HistogramSnapshot) snapshots.get(0)).getData().iterator().next();
+                HistogramSnapshot.HistogramDataPointSnapshot data = ((HistogramSnapshot) snapshots.get(0)).getData().iterator().next();
                 System.out.println("Schema: " + data.getNativeSchema());
                 System.out.println("Number of buckets: " + data.getNativeBucketsForPositiveValues().size());
                 long duration = System.nanoTime() - start;

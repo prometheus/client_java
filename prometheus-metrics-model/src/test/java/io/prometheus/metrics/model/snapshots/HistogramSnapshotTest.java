@@ -1,6 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.HistogramSnapshot.HistogramData;
+import io.prometheus.metrics.model.snapshots.HistogramSnapshot.HistogramDataPointSnapshot;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,8 +25,8 @@ public class HistogramSnapshotTest {
                 .withName("request_size_bytes")
                 .withHelp("request sizes in bytes")
                 .withUnit(Unit.BYTES)
-                .addData(
-                        HistogramData.newBuilder()
+                .addDataPoint(
+                        HistogramDataPointSnapshot.newBuilder()
                                 .withSum(27000.0)
                                 .withNativeSchema(5)
                                 .withNativeZeroCount(2)
@@ -54,7 +54,7 @@ public class HistogramSnapshotTest {
                                 .withCreatedTimestampMillis(createdTimestamp)
                                 .withScrapeTimestampMillis(scrapeTimestamp)
                                 .build())
-                .addData(HistogramData.newBuilder()
+                .addDataPoint(HistogramDataPointSnapshot.newBuilder()
                         .withCount(3) // TODO how is that not a compile error? This is a protected method!
                                 .withSum(400.2)
                         .withNativeSchema(5)
@@ -77,7 +77,7 @@ public class HistogramSnapshotTest {
         SnapshotTestUtil.assertMetadata(snapshot, "request_size_bytes", "request sizes in bytes", "bytes");
 
         Assert.assertEquals(2, snapshot.getData().size());
-        HistogramData data = snapshot.getData().get(0); // data is sorted by labels, so the first one should be path="/"
+        HistogramDataPointSnapshot data = snapshot.getData().get(0); // data is sorted by labels, so the first one should be path="/"
         Assert.assertTrue(data.hasSum());
         Assert.assertTrue(data.hasCount());
         Assert.assertTrue(data.hasCreatedTimestamp());
@@ -166,11 +166,11 @@ public class HistogramSnapshotTest {
     public void testMinimalClassicHistogram() {
         HistogramSnapshot snapshot = HistogramSnapshot.newBuilder()
                 .withName("minimal_histogram")
-                .addData(HistogramData.newBuilder()
+                .addDataPoint(HistogramDataPointSnapshot.newBuilder()
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
                         .build())
                 .build();
-        HistogramData data = snapshot.getData().get(0);
+        HistogramDataPointSnapshot data = snapshot.getData().get(0);
         Assert.assertFalse(data.hasSum());
         Assert.assertEquals(1, snapshot.getData().get(0).getClassicBuckets().size());
     }
@@ -179,14 +179,14 @@ public class HistogramSnapshotTest {
     public void testMinimalNativeHistogram() {
         HistogramSnapshot snapshot = HistogramSnapshot.newBuilder()
                 .withName("hist")
-                .addData(HistogramSnapshot.HistogramData.newBuilder()
+                .addDataPoint(HistogramDataPointSnapshot.newBuilder()
                         .withNativeSchema(5)
                         .build())
                 .build();
         Assert.assertEquals("hist", snapshot.getMetadata().getName());
         Assert.assertFalse(snapshot.getMetadata().hasUnit());
         Assert.assertEquals(1, snapshot.getData().size());
-        HistogramSnapshot.HistogramData data = snapshot.getData().get(0);
+        HistogramDataPointSnapshot data = snapshot.getData().get(0);
         Assert.assertFalse(data.hasCreatedTimestamp());
         Assert.assertFalse(data.hasScrapeTimestamp());
         Assert.assertTrue(data.hasCount());
@@ -200,7 +200,7 @@ public class HistogramSnapshotTest {
     public void testClassicCount() {
         HistogramSnapshot snapshot = HistogramSnapshot.newBuilder()
                 .withName("test_histogram")
-                .addData(HistogramData.newBuilder()
+                .addDataPoint(HistogramDataPointSnapshot.newBuilder()
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
                                 .addBucket(1.0, 3)
                                 .addBucket(2.0, 2)
@@ -208,7 +208,7 @@ public class HistogramSnapshotTest {
                                 .build())
                         .build())
                 .build();
-        HistogramData data = snapshot.getData().get(0);
+        HistogramDataPointSnapshot data = snapshot.getData().get(0);
         Assert.assertFalse(data.hasSum());
         Assert.assertTrue(data.hasCount());
         Assert.assertEquals(5, data.getCount());
@@ -217,12 +217,12 @@ public class HistogramSnapshotTest {
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyData() {
         // This will fail because one of nativeSchema and classicHistogramBuckets is required
-        HistogramData.newBuilder().build();
+        HistogramDataPointSnapshot.newBuilder().build();
     }
 
     @Test
     public void testEmptyNativeData() {
-        HistogramSnapshot.HistogramData data = HistogramSnapshot.HistogramData.newBuilder()
+        HistogramDataPointSnapshot data = HistogramDataPointSnapshot.newBuilder()
                 .withNativeSchema(5)
                 .build();
         Assert.assertEquals(0, data.getNativeBucketsForNegativeValues().size());
@@ -233,28 +233,28 @@ public class HistogramSnapshotTest {
     public void testDataImmutable() {
         HistogramSnapshot snapshot = HistogramSnapshot.newBuilder()
                 .withName("test_histogram")
-                .addData(HistogramData.newBuilder()
+                .addDataPoint(HistogramDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("a", "a"))
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{0}))
                         .build())
-                .addData(HistogramData.newBuilder()
+                .addDataPoint(HistogramDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("a", "b"))
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.of(new double[]{Double.POSITIVE_INFINITY}, new long[]{2}))
                         .build())
                 .build();
-        Iterator<HistogramData> iterator = snapshot.getData().iterator();
+        Iterator<HistogramDataPointSnapshot> iterator = snapshot.getData().iterator();
         iterator.next();
         iterator.remove();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyClassicBuckets() {
-        new HistogramData(ClassicHistogramBuckets.EMPTY, Double.NaN, Labels.EMPTY, Exemplars.EMPTY, 0L);
+        new HistogramDataPointSnapshot(ClassicHistogramBuckets.EMPTY, Double.NaN, Labels.EMPTY, Exemplars.EMPTY, 0L);
     }
 
     @Test
     public void testMinimalNativeData() {
-        new HistogramData(ClassicHistogramBuckets.EMPTY, 0, 0, 0.0,
+        new HistogramDataPointSnapshot(ClassicHistogramBuckets.EMPTY, 0, 0, 0.0,
                 NativeHistogramBuckets.EMPTY, NativeHistogramBuckets.EMPTY, Double.NaN, Labels.EMPTY, Exemplars.EMPTY, 0L);
     }
 
@@ -263,7 +263,7 @@ public class HistogramSnapshotTest {
         ClassicHistogramBuckets buckets = ClassicHistogramBuckets.newBuilder()
                 .addBucket(Double.POSITIVE_INFINITY, 0)
                 .build();
-        new HistogramData(buckets, HistogramSnapshot.CLASSIC_HISTOGRAM, 0, 0.0,
+        new HistogramDataPointSnapshot(buckets, HistogramSnapshot.CLASSIC_HISTOGRAM, 0, 0.0,
                 NativeHistogramBuckets.EMPTY, NativeHistogramBuckets.EMPTY, Double.NaN, Labels.EMPTY, Exemplars.EMPTY, 0L);
     }
 }

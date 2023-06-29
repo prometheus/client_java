@@ -14,7 +14,7 @@ public class InfoTest {
         InfoSnapshot snapshot = info.collect();
         Assert.assertEquals("target", snapshot.getMetadata().getName());
         Assert.assertEquals(1, snapshot.getData().size());
-        InfoSnapshot.InfoData data = snapshot.getData().stream().findAny().orElseThrow(RuntimeException::new);
+        InfoSnapshot.InfoDataPointSnapshot data = snapshot.getData().stream().findAny().orElseThrow(RuntimeException::new);
         Assert.assertEquals(Labels.of("key", "value"), data.getLabels());
     }
 }

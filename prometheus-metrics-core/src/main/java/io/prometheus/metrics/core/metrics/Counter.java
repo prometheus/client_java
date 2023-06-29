@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.DoubleSupplier;
 
-public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterData> implements CounterDataPoint, Collector {
+public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint> implements CounterDataPoint, Collector {
 
     private final boolean exemplarsEnabled;
     private final ExemplarSamplerConfig exemplarSamplerConfig;
@@ -60,17 +60,17 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterDat
 
 
     @Override
-    protected CounterData newMetricData() {
+    protected DataPoint newDataPoint() {
         if (isExemplarsEnabled()) {
-            return new CounterData(new ExemplarSampler(exemplarSamplerConfig));
+            return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
         } else {
-            return new CounterData(null);
+            return new DataPoint(null);
         }
     }
 
     @Override
-    protected CounterSnapshot collect(List<Labels> labels, List<CounterData> metricData) {
-        List<CounterSnapshot.CounterData> data = new ArrayList<>(labels.size());
+    protected CounterSnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
+        List<CounterSnapshot.CounterDataPointSnapshot> data = new ArrayList<>(labels.size());
         for (int i = 0; i < labels.size(); i++) {
             data.add(metricData.get(i).collect(labels.get(i)));
         }
@@ -97,7 +97,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterDat
         return name;
     }
 
-    class CounterData implements CounterDataPoint {
+    class DataPoint implements CounterDataPoint {
 
         private final DoubleAdder doubleValue = new DoubleAdder();
         // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
@@ -107,7 +107,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterDat
         private final long createdTimeMillis = System.currentTimeMillis();
         private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
-        private CounterData(ExemplarSampler exemplarSampler) {
+        private DataPoint(ExemplarSampler exemplarSampler) {
             this.exemplarSampler = exemplarSampler;
         }
 
@@ -157,7 +157,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterDat
             doubleValue.add(amount);
         }
 
-        private CounterSnapshot.CounterData collect(Labels labels) {
+        private CounterSnapshot.CounterDataPointSnapshot collect(Labels labels) {
             // Read the exemplar first. Otherwise, there is a race condition where you might
             // see an Exemplar for a value that's not represented in getValue() yet.
             // If there are multiple Exemplars (by default it's just one), use the oldest
@@ -170,7 +170,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterDat
                     }
                 }
             }
-            return new CounterSnapshot.CounterData(longValue.sum() + doubleValue.sum(), labels, oldest, createdTimeMillis);
+            return new CounterSnapshot.CounterDataPointSnapshot(longValue.sum() + doubleValue.sum(), labels, oldest, createdTimeMillis);
         }
     }
 
@@ -208,7 +208,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterDat
 
         @Override
         public CounterSnapshot collect() {
-            return new CounterSnapshot(getMetadata(), Collections.singletonList(new CounterSnapshot.CounterData(
+            return new CounterSnapshot(getMetadata(), Collections.singletonList(new CounterSnapshot.CounterDataPointSnapshot(
                     callback.getAsDouble(),
                     constLabels,
                     null,

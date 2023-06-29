@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
-public class Summary extends StatefulMetric<DistributionDataPoint, Summary.SummaryData> implements DistributionDataPoint {
+public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataPoint> implements DistributionDataPoint {
 
     private final boolean exemplarsEnabled;
     private final List<CKMSQuantiles.Quantile> quantiles; // Can be empty, but can never be null.
@@ -55,8 +55,8 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.Summa
     }
 
     @Override
-    protected SummarySnapshot collect(List<Labels> labels, List<SummaryData> metricData) {
-        List<SummarySnapshot.SummaryData> data = new ArrayList<>(labels.size());
+    protected SummarySnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
+        List<SummarySnapshot.SummaryDataPointSnapshot> data = new ArrayList<>(labels.size());
         for (int i = 0; i < labels.size(); i++) {
             data.add(metricData.get(i).collect(labels.get(i)));
         }
@@ -64,8 +64,8 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.Summa
     }
 
     @Override
-    protected SummaryData newMetricData() {
-        return new SummaryData();
+    protected DataPoint newDataPoint() {
+        return new DataPoint();
     }
 
     @Override
@@ -79,16 +79,16 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.Summa
     }
 
 
-    public class SummaryData implements DistributionDataPoint {
+    public class DataPoint implements DistributionDataPoint {
 
         private final LongAdder count = new LongAdder();
         private final DoubleAdder sum = new DoubleAdder();
         private final TimeWindowQuantiles quantileValues;
-        private final Buffer<SummarySnapshot.SummaryData> buffer = new Buffer<>();
+        private final Buffer buffer = new Buffer();
 
         private final long createdTimeMillis = System.currentTimeMillis();
 
-        private SummaryData() {
+        private DataPoint() {
             if (quantiles.size() > 0) {
                 quantileValues = new TimeWindowQuantiles(quantiles.toArray(new CKMSQuantiles.Quantile[]{}), maxAgeSeconds, ageBuckets);
             } else {
@@ -119,11 +119,11 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.Summa
             count.increment();
         }
 
-        public SummarySnapshot.SummaryData collect(Labels labels) {
+        public SummarySnapshot.SummaryDataPointSnapshot collect(Labels labels) {
             return buffer.run(
                     expectedCount -> count.sum() == expectedCount,
                     // TODO Exemplars (are hard-coded as empty in the line below)
-                    () -> new SummarySnapshot.SummaryData(count.sum(), sum.sum(), makeQuantiles(), labels, Exemplars.EMPTY, createdTimeMillis),
+                    () -> new SummarySnapshot.SummaryDataPointSnapshot(count.sum(), sum.sum(), makeQuantiles(), labels, Exemplars.EMPTY, createdTimeMillis),
                     this::doObserve
             );
         }

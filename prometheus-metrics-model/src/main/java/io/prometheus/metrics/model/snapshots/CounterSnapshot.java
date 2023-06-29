@@ -17,23 +17,23 @@ public class CounterSnapshot extends MetricSnapshot {
      *                 See {@link MetricMetadata} for more naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
      */
-    public CounterSnapshot(MetricMetadata metadata, Collection<CounterData> data) {
+    public CounterSnapshot(MetricMetadata metadata, Collection<CounterDataPointSnapshot> data) {
         super(metadata, data);
     }
 
     @Override
-    public List<CounterData> getData() {
-        return (List<CounterData>) data;
+    public List<CounterDataPointSnapshot> getData() {
+        return (List<CounterDataPointSnapshot>) data;
     }
 
-    public static class CounterData extends MetricData {
+    public static class CounterDataPointSnapshot extends DataPointSnapshot {
 
         private final double value;
         private final Exemplar exemplar; // may be null
 
         /**
-         * To create a new {@link CounterData}, you can either call the constructor directly or use the
-         * Builder with {@link CounterData#newBuilder()}.
+         * To create a new {@link CounterDataPointSnapshot}, you can either call the constructor directly or use the
+         * Builder with {@link CounterDataPointSnapshot#newBuilder()}.
          *
          * @param value                  the counter value. Must not be negative.
          * @param labels                 must not be null. Use {@link Labels#EMPTY} if there are no labels.
@@ -42,7 +42,7 @@ public class CounterSnapshot extends MetricSnapshot {
          *                               (this specific set of labels) was created (or reset to zero).
          *                               It's optional. Use {@code 0L} if there is no created timestamp.
          */
-        public CounterData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis) {
+        public CounterDataPointSnapshot(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis) {
             this(value, labels, exemplar, createdTimestampMillis, 0);
         }
 
@@ -51,7 +51,7 @@ public class CounterSnapshot extends MetricSnapshot {
          * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
          * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public CounterData(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis, long scrapeTimestampMillis) {
+        public CounterDataPointSnapshot(double value, Labels labels, Exemplar exemplar, long createdTimestampMillis, long scrapeTimestampMillis) {
             super(labels, createdTimestampMillis, scrapeTimestampMillis);
             this.value = value;
             this.exemplar = exemplar;
@@ -75,7 +75,7 @@ public class CounterSnapshot extends MetricSnapshot {
             }
         }
 
-        public static class Builder extends MetricData.Builder<Builder> {
+        public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
             private Exemplar exemplar = null;
             private Double value = null;
@@ -102,11 +102,11 @@ public class CounterSnapshot extends MetricSnapshot {
                 return this;
             }
 
-            public CounterData build() {
+            public CounterDataPointSnapshot build() {
                 if (value == null) {
                     throw new IllegalArgumentException("Missing required field: value is null.");
                 }
-                return new CounterData(value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis);
+                return new CounterDataPointSnapshot(value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis);
             }
 
             @Override
@@ -122,18 +122,18 @@ public class CounterSnapshot extends MetricSnapshot {
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
 
-        private final List<CounterData> counterData = new ArrayList<>();
+        private final List<CounterDataPointSnapshot> dataPoints = new ArrayList<>();
 
         private Builder() {
         }
 
-        public Builder addCounterData(CounterData data) {
-            counterData.add(data);
+        public Builder addDataPoint(CounterDataPointSnapshot data) {
+            dataPoints.add(data);
             return this;
         }
 
         public CounterSnapshot build() {
-            return new CounterSnapshot(buildMetadata(), counterData);
+            return new CounterSnapshot(buildMetadata(), dataPoints);
         }
 
         @Override

@@ -3,13 +3,13 @@ package io.prometheus.metrics.expositionformats;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterData;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricData;
+import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -61,43 +61,43 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     public Metrics.MetricFamily convert(MetricSnapshot snapshot) {
         Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
         if (snapshot instanceof CounterSnapshot) {
-            for (CounterData data : ((CounterSnapshot) snapshot).getData()) {
+            for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getData()) {
                 builder.addMetric(convert(data));
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), "_total", Metrics.MetricType.COUNTER);
         } else if (snapshot instanceof GaugeSnapshot) {
-            for (GaugeSnapshot.GaugeData data : ((GaugeSnapshot) snapshot).getData()) {
+            for (GaugeSnapshot.GaugeDataPointSnapshot data : ((GaugeSnapshot) snapshot).getData()) {
                 builder.addMetric(convert(data));
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof HistogramSnapshot) {
             HistogramSnapshot histogram = (HistogramSnapshot) snapshot;
-            for (HistogramSnapshot.HistogramData data : histogram.getData()) {
+            for (HistogramSnapshot.HistogramDataPointSnapshot data : histogram.getData()) {
                 builder.addMetric(convert(data));
             }
             Metrics.MetricType type = histogram.isGaugeHistogram() ? Metrics.MetricType.GAUGE_HISTOGRAM : Metrics.MetricType.HISTOGRAM;
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, type);
         } else if (snapshot instanceof SummarySnapshot) {
-            for (SummarySnapshot.SummaryData data : ((SummarySnapshot) snapshot).getData()) {
+            for (SummarySnapshot.SummaryDataPointSnapshot data : ((SummarySnapshot) snapshot).getData()) {
                 if (data.hasCount() || data.hasSum() || data.getQuantiles().size() > 0) {
                     builder.addMetric(convert(data));
                 }
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.SUMMARY);
         } else if (snapshot instanceof InfoSnapshot) {
-            for (InfoSnapshot.InfoData data : ((InfoSnapshot) snapshot).getData()) {
+            for (InfoSnapshot.InfoDataPointSnapshot data : ((InfoSnapshot) snapshot).getData()) {
                 builder.addMetric(convert(data));
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), "_info", Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof StateSetSnapshot) {
-            for (StateSetSnapshot.StateSetData data : ((StateSetSnapshot) snapshot).getData()) {
+            for (StateSetSnapshot.StateSetDataPointSnapshot data : ((StateSetSnapshot) snapshot).getData()) {
                 for (int i = 0; i < data.size(); i++) {
                     builder.addMetric(convert(data, snapshot.getMetadata().getName(), i));
                 }
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof UnknownSnapshot) {
-            for (UnknownSnapshot.UnknownData data : ((UnknownSnapshot) snapshot).getData()) {
+            for (UnknownSnapshot.UnknownDataPointSnapshot data : ((UnknownSnapshot) snapshot).getData()) {
                 builder.addMetric(convert(data));
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.UNTYPED);
@@ -120,7 +120,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         builder.setType(type);
     }
 
-    private Metrics.Metric.Builder convert(CounterData data) {
+    private Metrics.Metric.Builder convert(CounterDataPointSnapshot data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Counter.Builder counterBuilder = Metrics.Counter.newBuilder();
         counterBuilder.setValue(data.getValue());
@@ -133,7 +133,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         return metricBuilder;
     }
 
-    private Metrics.Metric.Builder convert(GaugeSnapshot.GaugeData data) {
+    private Metrics.Metric.Builder convert(GaugeSnapshot.GaugeDataPointSnapshot data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
         gaugeBuilder.setValue(data.getValue());
@@ -143,7 +143,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         return metricBuilder;
     }
 
-    private Metrics.Metric.Builder convert(HistogramSnapshot.HistogramData data) {
+    private Metrics.Metric.Builder convert(HistogramSnapshot.HistogramDataPointSnapshot data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
         if (data.hasClassicHistogramData()) {
@@ -232,7 +232,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         }
     }
 
-    private Metrics.Metric.Builder convert(SummarySnapshot.SummaryData data) {
+    private Metrics.Metric.Builder convert(SummarySnapshot.SummaryDataPointSnapshot data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Summary.Builder summaryBuilder = Metrics.Summary.newBuilder();
         if (data.hasCount()) {
@@ -254,7 +254,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         return metricBuilder;
     }
 
-    private Metrics.Metric.Builder convert(InfoSnapshot.InfoData data) {
+    private Metrics.Metric.Builder convert(InfoSnapshot.InfoDataPointSnapshot data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
         gaugeBuilder.setValue(1);
@@ -264,7 +264,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         return metricBuilder;
     }
 
-    private Metrics.Metric.Builder convert(StateSetSnapshot.StateSetData data, String name, int i) {
+    private Metrics.Metric.Builder convert(StateSetSnapshot.StateSetDataPointSnapshot data, String name, int i) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
         addLabels(metricBuilder, data.getLabels());
@@ -282,7 +282,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         return metricBuilder;
     }
 
-    private Metrics.Metric.Builder convert(UnknownSnapshot.UnknownData data) {
+    private Metrics.Metric.Builder convert(UnknownSnapshot.UnknownDataPointSnapshot data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Untyped.Builder untypedBuilder = Metrics.Untyped.newBuilder();
         untypedBuilder.setValue(data.getValue());
@@ -319,7 +319,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         return builder;
     }
 
-    private void setScrapeTimestamp(Metrics.Metric.Builder metricBuilder, MetricData data) {
+    private void setScrapeTimestamp(Metrics.Metric.Builder metricBuilder, DataPointSnapshot data) {
         if (data.hasScrapeTimestamp()) {
             metricBuilder.setTimestampMs(data.getScrapeTimestampMillis());
         }

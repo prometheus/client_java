@@ -17,29 +17,29 @@ public final class UnknownSnapshot extends MetricSnapshot {
      *                 See {@link MetricMetadata} for naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
      */
-    public UnknownSnapshot(MetricMetadata metadata, Collection<UnknownData> data) {
+    public UnknownSnapshot(MetricMetadata metadata, Collection<UnknownDataPointSnapshot> data) {
         super(metadata, data);
     }
 
     @Override
-    public List<UnknownData> getData() {
-        return (List<UnknownData>) data;
+    public List<UnknownDataPointSnapshot> getData() {
+        return (List<UnknownDataPointSnapshot>) data;
     }
 
-    public static final class UnknownData extends MetricData {
+    public static final class UnknownDataPointSnapshot extends DataPointSnapshot {
 
         private final double value;
         private final Exemplar exemplar; // may be null
 
         /**
-         * To create a new {@link UnknownData}, you can either call the constructor directly or use the
-         * Builder with {@link UnknownData#newBuilder()}.
+         * To create a new {@link UnknownDataPointSnapshot}, you can either call the constructor directly or use the
+         * Builder with {@link UnknownDataPointSnapshot#newBuilder()}.
          *
          * @param value    the value.
          * @param labels   must not be null. Use {@link Labels#EMPTY} if there are no labels.
          * @param exemplar may be null.
          */
-        public UnknownData(double value, Labels labels, Exemplar exemplar) {
+        public UnknownDataPointSnapshot(double value, Labels labels, Exemplar exemplar) {
             this(value, Labels.EMPTY, exemplar, 0);
         }
 
@@ -48,7 +48,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
          * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
          * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public UnknownData(double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
+        public UnknownDataPointSnapshot(double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
             super(labels, 0L, scrapeTimestampMillis);
             this.value = value;
             this.exemplar = exemplar;
@@ -65,7 +65,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
             return exemplar;
         }
 
-        public static class Builder extends MetricData.Builder<Builder> {
+        public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
             private Exemplar exemplar = null;
             private Double value = null;
@@ -89,11 +89,11 @@ public final class UnknownSnapshot extends MetricSnapshot {
                 return this;
             }
 
-            public UnknownData build() {
+            public UnknownDataPointSnapshot build() {
                 if (value == null) {
                     throw new IllegalArgumentException("Missing required field: value is null.");
                 }
-                return new UnknownData(value, labels, exemplar, scrapeTimestampMillis);
+                return new UnknownDataPointSnapshot(value, labels, exemplar, scrapeTimestampMillis);
             }
 
             @Override
@@ -109,18 +109,18 @@ public final class UnknownSnapshot extends MetricSnapshot {
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
 
-        private final List<UnknownData> unknownData = new ArrayList<>();
+        private final List<UnknownDataPointSnapshot> dataPoints = new ArrayList<>();
 
         private Builder() {
         }
 
-        public Builder addUnknownData(UnknownData data) {
-            unknownData.add(data);
+        public Builder addDataPoint(UnknownDataPointSnapshot data) {
+            dataPoints.add(data);
             return this;
         }
 
         public UnknownSnapshot build() {
-            return new UnknownSnapshot(buildMetadata(), unknownData);
+            return new UnknownSnapshot(buildMetadata(), dataPoints);
         }
 
         @Override

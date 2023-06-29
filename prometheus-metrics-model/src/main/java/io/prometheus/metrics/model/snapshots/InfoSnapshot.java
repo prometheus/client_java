@@ -18,7 +18,7 @@ public final class InfoSnapshot extends MetricSnapshot {
      *                 The metadata must not have a unit.
      * @param data     the constructor will create a sorted copy of the collection.
      */
-    public InfoSnapshot(MetricMetadata metadata, Collection<InfoData> data) {
+    public InfoSnapshot(MetricMetadata metadata, Collection<InfoDataPointSnapshot> data) {
         super(metadata, data);
         if (metadata.getName().endsWith("_info")) {
             throw new IllegalArgumentException("The name of an info snapshot must not include the _info suffix");
@@ -29,19 +29,19 @@ public final class InfoSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<InfoData> getData() {
-        return (List<InfoData>) data;
+    public List<InfoDataPointSnapshot> getData() {
+        return (List<InfoDataPointSnapshot>) data;
     }
 
-    public static class InfoData extends MetricData {
+    public static class InfoDataPointSnapshot extends DataPointSnapshot {
 
         /**
-         * To create a new {@link InfoData}, you can either call the constructor directly or use the
-         * Builder with {@link InfoData#newBuilder()}.
+         * To create a new {@link InfoDataPointSnapshot}, you can either call the constructor directly or use the
+         * Builder with {@link InfoDataPointSnapshot#newBuilder()}.
          *
          * @param labels must not be null. Use {@link Labels#EMPTY} if there are no labels.
          */
-        public InfoData(Labels labels) {
+        public InfoDataPointSnapshot(Labels labels) {
             this(labels, 0L);
         }
 
@@ -50,14 +50,14 @@ public final class InfoSnapshot extends MetricSnapshot {
          * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
          * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public InfoData(Labels labels, long scrapeTimestampMillis) {
+        public InfoDataPointSnapshot(Labels labels, long scrapeTimestampMillis) {
             super(labels, 0L, scrapeTimestampMillis);
         }
 
-        public static class Builder extends MetricData.Builder<Builder> {
+        public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
-            public InfoData build() {
-                return new InfoData(labels, scrapeTimestampMillis);
+            public InfoDataPointSnapshot build() {
+                return new InfoDataPointSnapshot(labels, scrapeTimestampMillis);
             }
 
             @Override
@@ -73,13 +73,13 @@ public final class InfoSnapshot extends MetricSnapshot {
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
 
-        private final List<InfoData> infoData = new ArrayList<>();
+        private final List<InfoDataPointSnapshot> dataPoints = new ArrayList<>();
 
         private Builder() {
         }
 
-        public Builder addInfoData(InfoData data) {
-            infoData.add(data);
+        public Builder addDataPoint(InfoDataPointSnapshot data) {
+            dataPoints.add(data);
             return this;
         }
 
@@ -89,7 +89,7 @@ public final class InfoSnapshot extends MetricSnapshot {
         }
 
         public InfoSnapshot build() {
-            return new InfoSnapshot(buildMetadata(), infoData);
+            return new InfoSnapshot(buildMetadata(), dataPoints);
         }
 
         @Override

@@ -12,7 +12,7 @@ public class UnknownSnapshotTest {
                 .withName("my_unknown_seconds")
                 .withHelp("something in seconds")
                 .withUnit(Unit.SECONDS)
-                .addUnknownData(UnknownSnapshot.UnknownData.newBuilder()
+                .addDataPoint(UnknownSnapshot.UnknownDataPointSnapshot.newBuilder()
                         .withValue(0.3)
                         .withExemplar(Exemplar.newBuilder()
                                 .withValue(0.12)
@@ -24,7 +24,7 @@ public class UnknownSnapshotTest {
                                 .addLabel("env", "prod")
                                 .build())
                         .build()
-                ).addUnknownData(UnknownSnapshot.UnknownData.newBuilder()
+                ).addDataPoint(UnknownSnapshot.UnknownDataPointSnapshot.newBuilder()
                         .withValue(0.29)
                         .withLabels(Labels.newBuilder()
                                 .addLabel("env", "dev")
@@ -34,7 +34,7 @@ public class UnknownSnapshotTest {
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "my_unknown_seconds", "something in seconds", "seconds");
         Assert.assertEquals(2, snapshot.getData().size());
-        UnknownSnapshot.UnknownData data = snapshot.getData().get(1); // env="prod"
+        UnknownSnapshot.UnknownDataPointSnapshot data = snapshot.getData().get(1); // env="prod"
         Assert.assertEquals(Labels.of("env", "prod"), data.getLabels());
         Assert.assertEquals(0.3, data.getValue(), 0.0);
         Assert.assertEquals(0.12, data.getExemplar().getValue(), 0.0);
@@ -46,7 +46,7 @@ public class UnknownSnapshotTest {
     public void testMinimal() {
         UnknownSnapshot snapshot = UnknownSnapshot.newBuilder()
                 .withName("test")
-                .addUnknownData(UnknownSnapshot.UnknownData.newBuilder()
+                .addDataPoint(UnknownSnapshot.UnknownDataPointSnapshot.newBuilder()
                         .withValue(1.0)
                         .build())
                 .build();
@@ -66,6 +66,6 @@ public class UnknownSnapshotTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testValueMissing() {
-        UnknownSnapshot.UnknownData.newBuilder().build();
+        UnknownSnapshot.UnknownDataPointSnapshot.newBuilder().build();
     }
 }

@@ -1,9 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricMetadata;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,15 +9,15 @@ public class MetricSnapshotTest {
     public void testDuplicateLabels() {
         CounterSnapshot.newBuilder()
                 .withName("events")
-                .addCounterData(CounterSnapshot.CounterData.newBuilder()
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("path", "/hello", "status", "200"))
                         .withValue(1.0)
                         .build())
-                .addCounterData(CounterSnapshot.CounterData.newBuilder()
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("path", "/world", "status", "200"))
                         .withValue(2.0)
                         .build())
-                .addCounterData(CounterSnapshot.CounterData.newBuilder()
+                .addDataPoint(CounterSnapshot.CounterDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("status", "200", "path", "/hello"))
                         .withValue(3.0)
                         .build())

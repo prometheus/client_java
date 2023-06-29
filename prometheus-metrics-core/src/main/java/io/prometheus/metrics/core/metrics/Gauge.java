@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleSupplier;
 
-public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.GaugeData> implements GaugeDataPoint {
+public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> implements GaugeDataPoint {
 
     private final boolean exemplarsEnabled;
     private final ExemplarSamplerConfig exemplarSamplerConfig;
@@ -57,20 +57,20 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.GaugeData> imple
     }
 
     @Override
-    protected GaugeSnapshot collect(List<Labels> labels, List<GaugeData> metricData) {
-        List<GaugeSnapshot.GaugeData> data = new ArrayList<>(labels.size());
+    protected GaugeSnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
+        List<GaugeSnapshot.GaugeDataPointSnapshot> dataPointSnapshots = new ArrayList<>(labels.size());
         for (int i = 0; i < labels.size(); i++) {
-            data.add(metricData.get(i).collect(labels.get(i)));
+            dataPointSnapshots.add(metricData.get(i).collect(labels.get(i)));
         }
-        return new GaugeSnapshot(getMetadata(), data);
+        return new GaugeSnapshot(getMetadata(), dataPointSnapshots);
     }
 
     @Override
-    protected GaugeData newMetricData() {
+    protected DataPoint newDataPoint() {
         if (isExemplarsEnabled()) {
-            return new GaugeData(new ExemplarSampler(exemplarSamplerConfig));
+            return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
         } else {
-            return new GaugeData(null);
+            return new DataPoint(null);
         }
     }
 
@@ -79,11 +79,11 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.GaugeData> imple
         return exemplarsEnabled;
     }
 
-    class GaugeData implements GaugeDataPoint {
+    class DataPoint implements GaugeDataPoint {
 
         private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
-        private GaugeData(ExemplarSampler exemplarSampler) {
+        private DataPoint(ExemplarSampler exemplarSampler) {
             this.exemplarSampler = exemplarSampler;
         }
 
@@ -121,7 +121,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.GaugeData> imple
             }
         }
 
-        private GaugeSnapshot.GaugeData collect(Labels labels) {
+        private GaugeSnapshot.GaugeDataPointSnapshot collect(Labels labels) {
             // Read the exemplar first. Otherwise, there is a race condition where you might
             // see an Exemplar for a value that's not represented in getValue() yet.
             // If there are multiple Exemplars (by default it's just one), use the oldest
@@ -134,7 +134,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.GaugeData> imple
                     }
                 }
             }
-            return new GaugeSnapshot.GaugeData(Double.longBitsToDouble(value.get()), labels, oldest);
+            return new GaugeSnapshot.GaugeDataPointSnapshot(Double.longBitsToDouble(value.get()), labels, oldest);
         }
     }
 
@@ -167,7 +167,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.GaugeData> imple
         @Override
         public GaugeSnapshot collect() {
             return new GaugeSnapshot(getMetadata(), Collections.singletonList(
-                    new GaugeSnapshot.GaugeData(callback.getAsDouble(), constLabels, null)
+                    new GaugeSnapshot.GaugeDataPointSnapshot(callback.getAsDouble(), constLabels, null)
             ));
         }
 

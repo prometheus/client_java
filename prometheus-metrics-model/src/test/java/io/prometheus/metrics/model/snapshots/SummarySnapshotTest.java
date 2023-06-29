@@ -16,7 +16,7 @@ public class SummarySnapshotTest {
                 .withName("latency_seconds")
                 .withHelp("latency in seconds")
                 .withUnit(Unit.SECONDS)
-                .addSummaryData(SummarySnapshot.SummaryData.newBuilder()
+                .addDataPoint(SummarySnapshot.SummaryDataPointSnapshot.newBuilder()
                         .withCreatedTimestampMillis(createdTimestamp)
                         .withScrapeTimestampMillis(scrapeTimestamp)
                         .withLabels(Labels.of("endpoint", "/"))
@@ -42,7 +42,7 @@ public class SummarySnapshotTest {
                         .withCount(1093)
                         .withSum(218.6)
                         .build())
-                .addSummaryData(SummarySnapshot.SummaryData.newBuilder()
+                .addDataPoint(SummarySnapshot.SummaryDataPointSnapshot.newBuilder()
                         .withLabels(Labels.of("endpoint", "/test"))
                         .withCount(1093)
                         .withSum(218.6)
@@ -50,7 +50,7 @@ public class SummarySnapshotTest {
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "latency_seconds", "latency in seconds", "seconds");
         Assert.assertEquals(2, snapshot.getData().size());
-        SummarySnapshot.SummaryData data = snapshot.getData().get(0);
+        SummarySnapshot.SummaryDataPointSnapshot data = snapshot.getData().get(0);
         Assert.assertEquals(Labels.of("endpoint", "/"), data.getLabels());
         Assert.assertTrue(data.hasCount());
         Assert.assertEquals(1093, data.getCount());
@@ -77,7 +77,7 @@ public class SummarySnapshotTest {
     public void testMinimal() {
         SummarySnapshot snapshot = SummarySnapshot.newBuilder()
                 .withName("size_bytes")
-                .addSummaryData(SummarySnapshot.SummaryData.newBuilder()
+                .addDataPoint(SummarySnapshot.SummaryDataPointSnapshot.newBuilder()
                         .withCount(10)
                         .withSum(12.0)
                         .build())
@@ -94,7 +94,7 @@ public class SummarySnapshotTest {
 
     @Test
     public void testEmptyData() {
-        SummarySnapshot.SummaryData data = SummarySnapshot.SummaryData.newBuilder().build();
+        SummarySnapshot.SummaryDataPointSnapshot data = SummarySnapshot.SummaryDataPointSnapshot.newBuilder().build();
         Assert.assertEquals(0, data.getQuantiles().size());
         Assert.assertFalse(data.hasCount());
         Assert.assertFalse(data.hasSum());

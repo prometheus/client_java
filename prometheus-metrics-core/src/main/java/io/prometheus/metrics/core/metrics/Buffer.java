@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.model.snapshots.MetricData;
+import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-class Buffer<T extends MetricData> {
+class Buffer {
 
     private static final long signBit = 1L << 63;
     private final AtomicLong observationCount = new AtomicLong(0);
@@ -41,11 +41,11 @@ class Buffer<T extends MetricData> {
     /**
      * Must be called by the runnable in the run() method.
      */
-    public void reset() {
+    void reset() {
         reset = true;
     }
 
-    T run(Function<Long, Boolean> complete, Supplier<T> runnable, Consumer<Double> observeFunction) {
+    <T extends DataPointSnapshot> T run(Function<Long, Boolean> complete, Supplier<T> runnable, Consumer<Double> observeFunction) {
         double[] buffer;
         int bufferSize;
         T result;

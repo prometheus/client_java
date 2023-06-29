@@ -19,7 +19,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
      * @param metadata see {@link MetricMetadata} for naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
      */
-    public HistogramSnapshot(MetricMetadata metadata, Collection<HistogramData> data) {
+    public HistogramSnapshot(MetricMetadata metadata, Collection<HistogramDataPointSnapshot> data) {
         this(false, metadata, data);
     }
 
@@ -29,7 +29,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
      * are semantically gauges and not counters.
      * See <a href="https://openmetrics.io">openmetrics.io</a> for more info on Gauge Histograms.
      */
-    public HistogramSnapshot(boolean isGaugeHistogram, MetricMetadata metadata, Collection<HistogramData> data) {
+    public HistogramSnapshot(boolean isGaugeHistogram, MetricMetadata metadata, Collection<HistogramDataPointSnapshot> data) {
         super(metadata, data);
         this.gaugeHistogram = isGaugeHistogram;
     }
@@ -39,11 +39,11 @@ public final class HistogramSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<HistogramData> getData() {
-        return (List<HistogramData>) data;
+    public List<HistogramDataPointSnapshot> getData() {
+        return (List<HistogramDataPointSnapshot>) data;
     }
 
-    public static final class HistogramData extends DistributionData {
+    public static final class HistogramDataPointSnapshot extends DistributionDataPointSnapshot {
 
         // There are two types of histograms: Classic histograms and native histograms.
         // Classic histograms have a fixed set of buckets.
@@ -68,7 +68,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
         /**
          * Constructor for classic histograms (as opposed to native histograms).
          * <p>
-         * To create a new {@link HistogramData}, you can either call the constructor directly or use the
+         * To create a new {@link HistogramDataPointSnapshot}, you can either call the constructor directly or use the
          * Builder with {@link HistogramSnapshot#newBuilder()}.
          *
          * @param classicBuckets         required. Must not be empty. Must at least contain the +Inf bucket.
@@ -79,7 +79,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
          *                               (this specific set of labels) was created (or reset to zero).
          *                               It's optional. Use {@code 0L} if there is no created timestamp.
          */
-        public HistogramData(
+        public HistogramDataPointSnapshot(
                 ClassicHistogramBuckets classicBuckets,
                 double sum,
                 Labels labels,
@@ -91,7 +91,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
         /**
          * Constructor for native histograms (as opposed to classic histograms).
          * <p>
-         * To create a new {@link HistogramData}, you can either call the constructor directly or use the
+         * To create a new {@link HistogramDataPointSnapshot}, you can either call the constructor directly or use the
          * Builder with {@link HistogramSnapshot#newBuilder()}.
          *
          * @param nativeSchema                   number in [-4, 8]. See <a href="https://github.com/prometheus/client_model/blob/7f720d22828060526c55ac83bceff08f43d4cdbc/io/prometheus/client/metrics.proto#L76-L80">Prometheus client_model metrics.proto</a>.
@@ -108,7 +108,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
          *                                       (this specific set of labels) was created (or reset to zero).
          *                                       It's optional. Use {@code 0L} if there is no created timestamp.
          */
-        public HistogramData(
+        public HistogramDataPointSnapshot(
                 int nativeSchema,
                 long nativeZeroCount,
                 double nativeZeroThreshold,
@@ -124,7 +124,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
         /**
          * Constructor for a histogram with both, classic and native data.
          * <p>
-         * To create a new {@link HistogramData}, you can either call the constructor directly or use the
+         * To create a new {@link HistogramDataPointSnapshot}, you can either call the constructor directly or use the
          * Builder with {@link HistogramSnapshot#newBuilder()}.
          *
          * @param classicBuckets                 required. Must not be empty. Must at least contain the +Inf bucket.
@@ -142,7 +142,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
          *                                       (this specific set of labels) was created (or reset to zero).
          *                                       It's optional. Use {@code 0L} if there is no created timestamp.
          */
-        public HistogramData(
+        public HistogramDataPointSnapshot(
                 ClassicHistogramBuckets classicBuckets,
                 int nativeSchema,
                 long nativeZeroCount,
@@ -161,7 +161,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
          * This is only useful in rare cases as the scrape timestamp is usually set by the Prometheus server
          * during scraping. Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public HistogramData(
+        public HistogramDataPointSnapshot(
                 ClassicHistogramBuckets classicBuckets,
                 int nativeSchema,
                 long nativeZeroCount,
@@ -298,7 +298,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
             }
         }
 
-        public static class Builder extends DistributionData.Builder<Builder> {
+        public static class Builder extends DistributionDataPointSnapshot.Builder<Builder> {
 
             private ClassicHistogramBuckets classicHistogramBuckets = ClassicHistogramBuckets.EMPTY;
             private int nativeSchema = CLASSIC_HISTOGRAM;
@@ -345,11 +345,11 @@ public final class HistogramSnapshot extends MetricSnapshot {
                 return this;
             }
 
-            public HistogramData build() {
+            public HistogramDataPointSnapshot build() {
                 if (nativeSchema == CLASSIC_HISTOGRAM && classicHistogramBuckets.isEmpty()) {
                     throw new IllegalArgumentException("One of nativeSchema and classicHistogramBuckets is required.");
                 }
-                return new HistogramData(classicHistogramBuckets, nativeSchema, nativeZeroCount, nativeZeroThreshold, nativeBucketsForPositiveValues, nativeBucketsForNegativeValues, sum, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
+                return new HistogramDataPointSnapshot(classicHistogramBuckets, nativeSchema, nativeZeroCount, nativeZeroThreshold, nativeBucketsForPositiveValues, nativeBucketsForNegativeValues, sum, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
 
@@ -360,14 +360,14 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
 
-        private final List<HistogramData> histogramData = new ArrayList<>();
+        private final List<HistogramDataPointSnapshot> dataPoints = new ArrayList<>();
         private boolean isGaugeHistogram = false;
 
         private Builder() {
         }
 
-        public Builder addData(HistogramData data) {
-            histogramData.add(data);
+        public Builder addDataPoint(HistogramDataPointSnapshot data) {
+            dataPoints.add(data);
             return this;
         }
 
@@ -382,7 +382,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
         }
 
         public HistogramSnapshot build() {
-            return new HistogramSnapshot(isGaugeHistogram, buildMetadata(), histogramData);
+            return new HistogramSnapshot(isGaugeHistogram, buildMetadata(), dataPoints);
         }
 
         @Override
