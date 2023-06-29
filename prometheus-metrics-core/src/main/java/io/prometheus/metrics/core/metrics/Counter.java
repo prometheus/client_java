@@ -8,7 +8,7 @@ import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.core.observer.DiscreteEventObserver;
+import io.prometheus.metrics.core.observer.CounterDataPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.DoubleSupplier;
 
-public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.CounterData> implements DiscreteEventObserver, Collector {
+public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterData> implements CounterDataPoint, Collector {
 
     private final boolean exemplarsEnabled;
     private final ExemplarSamplerConfig exemplarSamplerConfig;
@@ -97,7 +97,7 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         return name;
     }
 
-    class CounterData extends MetricData<DiscreteEventObserver> implements DiscreteEventObserver {
+    class CounterData extends MetricData<CounterDataPoint> implements CounterDataPoint {
 
         private final DoubleAdder doubleValue = new DoubleAdder();
         // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
@@ -174,12 +174,12 @@ public class Counter extends ObservingMetric<DiscreteEventObserver, Counter.Coun
         }
 
         @Override
-        public DiscreteEventObserver toObserver() {
+        public CounterDataPoint toObserver() {
             return this;
         }
     }
 
-    public static class Builder extends ObservingMetric.Builder<Builder, Counter> {
+    public static class Builder extends StatefulMetric.Builder<Builder, Counter> {
 
         private Builder(PrometheusProperties properties) {
             super(Collections.emptyList(), properties);

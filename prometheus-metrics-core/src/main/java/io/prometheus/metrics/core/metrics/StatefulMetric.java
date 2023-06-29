@@ -4,7 +4,7 @@ import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
-import io.prometheus.metrics.core.observer.Observer;
+import io.prometheus.metrics.core.observer.DataPoint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,18 @@ import java.util.function.Function;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
-public abstract class ObservingMetric<O extends Observer, V extends MetricData<O>> extends MetricWithFixedMetadata {
+/**
+ * There are two kinds of metrics:
+ * <ul>
+ *     <li>A {@code StatefulMetric} actively maintains its current value, e.g. a stateful counter actively stores its current count.</li>
+ *     <li>A {@code CallbackMetric} gets its value on demand when it is collected, e.g. a callback gauge representing the current heap size has
+ *     a callback for calling JMX when it's collected.</li>
+ * </ul>
+ * The OpenTelemetry terminology for <i>stateful</i> is <i>synchronous</i> and the OpenTelemetry terminology for <i>callback</i> is <i>asynchronous</i>.
+ * We are using our own terminology here because in Java <i>synchronous</i> and <i>asynchronous</i> usually refers to multi-threading,
+ * but this has nothing to do with multi-threading.
+ */
+abstract class StatefulMetric<O extends DataPoint, V extends MetricData<O>> extends MetricWithFixedMetadata {
     private final String[] labelNames;
     //private final Boolean exemplarsEnabled;
 
@@ -30,7 +41,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
      */
     private volatile V noLabels;
 
-    protected ObservingMetric(Builder<?, ?> builder) {
+    protected StatefulMetric(Builder<?, ?> builder) {
         super(builder);
         this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
         //this.exemplarsEnabled = builder.exemplarsEnabled;
@@ -130,7 +141,7 @@ public abstract class ObservingMetric<O extends Observer, V extends MetricData<O
     }
      */
 
-    static abstract class Builder<B extends Builder<B, M>, M extends ObservingMetric<?, ?>> extends MetricWithFixedMetadata.Builder<B, M> {
+    static abstract class Builder<B extends Builder<B, M>, M extends StatefulMetric<?, ?>> extends MetricWithFixedMetadata.Builder<B, M> {
         private String[] labelNames = new String[0];
         protected Boolean exemplarsEnabled;
 

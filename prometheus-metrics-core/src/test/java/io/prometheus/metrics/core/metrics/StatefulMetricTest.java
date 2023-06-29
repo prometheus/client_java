@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-public class ObservingMetricTest {
+public class StatefulMetricTest {
 
     @Test
     public void testLabelRemoveWhileCollecting() throws Exception {

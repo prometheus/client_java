@@ -2,7 +2,7 @@ package io.prometheus.metrics.core.observer;
 
 import io.prometheus.metrics.model.snapshots.Labels;
 
-public interface GaugingObserver extends Observer {
+public interface GaugeDataPoint extends DataPoint {
 
     default void inc() {
         inc(1.0);

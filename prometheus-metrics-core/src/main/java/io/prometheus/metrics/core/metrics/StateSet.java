@@ -4,7 +4,7 @@ import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
-import io.prometheus.metrics.core.observer.StateObserver;
+import io.prometheus.metrics.core.observer.StateSetDataPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 // experimental
-public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetData> implements StateObserver {
+public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.StateSetData> implements StateSetDataPoint {
 
     private final boolean exemplarsEnabled;
     private final String[] names;
@@ -63,7 +63,7 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
         getNoLabels().setFalse(state);
     }
 
-    class StateSetData extends MetricData<StateObserver> implements StateObserver {
+    class StateSetData extends MetricData<StateSetDataPoint> implements StateSetDataPoint {
 
         private final boolean[] values = new boolean[names.length];
 
@@ -71,7 +71,7 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
         }
 
         @Override
-        StateObserver toObserver() {
+        StateSetDataPoint toObserver() {
             return this;
         }
 
@@ -97,7 +97,7 @@ public class StateSet extends ObservingMetric<StateObserver, StateSet.StateSetDa
     }
 
 
-    public static class Builder extends ObservingMetric.Builder<Builder, StateSet> {
+    public static class Builder extends StatefulMetric.Builder<Builder, StateSet> {
 
         private String[] names;
 

@@ -7,7 +7,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Quantile;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
-import io.prometheus.metrics.core.observer.DistributionObserver;
+import io.prometheus.metrics.core.observer.DistributionDataPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
-public class Summary extends ObservingMetric<DistributionObserver, Summary.SummaryData> implements DistributionObserver {
+public class Summary extends StatefulMetric<DistributionDataPoint, Summary.SummaryData> implements DistributionDataPoint {
 
     private final boolean exemplarsEnabled;
     private final List<CKMSQuantiles.Quantile> quantiles; // Can be empty, but can never be null.
@@ -79,7 +79,7 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
     }
 
 
-    public class SummaryData extends MetricData<DistributionObserver> implements DistributionObserver {
+    public class SummaryData extends MetricData<DistributionDataPoint> implements DistributionDataPoint {
 
         private final LongAdder count = new LongAdder();
         private final DoubleAdder sum = new DoubleAdder();
@@ -129,7 +129,7 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
         }
 
         @Override
-        public DistributionObserver toObserver() {
+        public DistributionDataPoint toObserver() {
             return this;
         }
 
@@ -148,7 +148,7 @@ public class Summary extends ObservingMetric<DistributionObserver, Summary.Summa
     }
 
 
-    public static class Builder extends ObservingMetric.Builder<Summary.Builder, Summary> {
+    public static class Builder extends StatefulMetric.Builder<Summary.Builder, Summary> {
 
         public static final long DEFAULT_MAX_AGE_SECONDS = TimeUnit.MINUTES.toSeconds(5);
         public static final int DEFAULT_AGE_BUCKETS = 5;

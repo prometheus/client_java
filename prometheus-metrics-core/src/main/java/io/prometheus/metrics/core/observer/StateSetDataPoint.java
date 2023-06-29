@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.observer;
 
-public interface StateObserver extends Observer {
+public interface StateSetDataPoint extends DataPoint {
     void setTrue(String state);
     void setFalse(String state);
 

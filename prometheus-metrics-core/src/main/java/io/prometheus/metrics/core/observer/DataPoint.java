@@ -1,4 +1,4 @@
 package io.prometheus.metrics.core.observer;
 
-public interface Observer {
+public interface DataPoint {
 }

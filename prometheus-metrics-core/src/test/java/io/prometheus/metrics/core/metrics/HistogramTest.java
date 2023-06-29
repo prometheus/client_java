@@ -11,7 +11,7 @@ import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.core.observer.DistributionObserver;
+import io.prometheus.metrics.core.observer.DistributionDataPoint;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -1240,7 +1240,7 @@ public class HistogramTest {
                 .withLabelNames("status")
                 .build();
         int nThreads = 8;
-        DistributionObserver obs = histogram.withLabelValues("200");
+        DistributionDataPoint obs = histogram.withLabelValues("200");
         ExecutorService executor = Executors.newFixedThreadPool(nThreads);
         CompletionService<List<HistogramSnapshot>> completionService = new ExecutorCompletionService<>(executor);
         CountDownLatch startSignal = new CountDownLatch(nThreads);

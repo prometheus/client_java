@@ -7,7 +7,7 @@ import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.core.observer.GaugingObserver;
+import io.prometheus.metrics.core.observer.GaugeDataPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleSupplier;
 
-public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> implements GaugingObserver {
+public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.GaugeData> implements GaugeDataPoint {
 
     private final boolean exemplarsEnabled;
     private final ExemplarSamplerConfig exemplarSamplerConfig;
@@ -79,7 +79,7 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         return exemplarsEnabled;
     }
 
-    class GaugeData extends MetricData<GaugingObserver> implements GaugingObserver {
+    class GaugeData extends MetricData<GaugeDataPoint> implements GaugeDataPoint {
 
         private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
@@ -138,12 +138,12 @@ public class Gauge extends ObservingMetric<GaugingObserver, Gauge.GaugeData> imp
         }
 
         @Override
-        public GaugingObserver toObserver() {
+        public GaugeDataPoint toObserver() {
             return this;
         }
     }
 
-    public static class Builder extends ObservingMetric.Builder<Builder, Gauge> {
+    public static class Builder extends StatefulMetric.Builder<Builder, Gauge> {
 
         private Builder(PrometheusProperties config) {
             super(Collections.emptyList(), config);

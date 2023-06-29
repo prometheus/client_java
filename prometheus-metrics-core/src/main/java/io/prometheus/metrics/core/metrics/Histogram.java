@@ -10,7 +10,7 @@ import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
-import io.prometheus.metrics.core.observer.DistributionObserver;
+import io.prometheus.metrics.core.observer.DistributionDataPoint;
 import io.prometheus.metrics.core.util.Scheduler;
 
 import java.math.BigDecimal;
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.LongAdder;
  * If you want the classic representation only, use {@link Histogram.Builder#classicOnly}.
  * If you want the native representation only, use {@link Histogram.Builder#nativeOnly}.
  */
-public class Histogram extends ObservingMetric<DistributionObserver, Histogram.HistogramData> implements DistributionObserver {
+public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.HistogramData> implements DistributionDataPoint {
 
     // nativeSchema == CLASSIC_HISTOGRAM indicates that this is a classic histogram only.
     private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
@@ -139,7 +139,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         return exemplarsEnabled;
     }
 
-    public class HistogramData extends MetricData<DistributionObserver> implements DistributionObserver {
+    public class HistogramData extends MetricData<DistributionDataPoint> implements DistributionDataPoint {
         private final LongAdder[] classicBuckets;
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForPositiveValues = new ConcurrentHashMap<>();
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForNegativeValues = new ConcurrentHashMap<>();
@@ -270,7 +270,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         }
 
         @Override
-        public DistributionObserver toObserver() {
+        public DistributionDataPoint toObserver() {
             return this;
         }
 
@@ -623,7 +623,7 @@ public class Histogram extends ObservingMetric<DistributionObserver, Histogram.H
         return new Builder(config);
     }
 
-    public static class Builder extends ObservingMetric.Builder<Histogram.Builder, Histogram> {
+    public static class Builder extends StatefulMetric.Builder<Histogram.Builder, Histogram> {
 
         private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
         public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS = new double[]{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10};

@@ -4,7 +4,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 
 import java.util.concurrent.Callable;
 
-public interface DistributionObserver extends Observer {
+public interface DistributionDataPoint extends DataPoint {
     void observe(double amount);
     default void observeWithExemplar(double amount) {
         observeWithExemplar(amount, Labels.EMPTY);
