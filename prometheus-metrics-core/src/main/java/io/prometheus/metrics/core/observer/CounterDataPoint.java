@@ -1,10 +1,9 @@
 package io.prometheus.metrics.core.observer;
 
-import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.model.snapshots.Labels;
 
 /**
- * Represents a single counter time series, i.e. a single line in the Prometheus text format.
+ * Represents a single counter data point, i.e. a single line for a counter metric in Prometheus text format.
  * <p>
  * Example usage:
  * <pre>{@code
@@ -47,22 +46,42 @@ import io.prometheus.metrics.model.snapshots.Labels;
  */
 public interface CounterDataPoint extends DataPoint {
 
+    /**
+     * Add one.
+     */
     default void inc() {
         inc(1L);
     }
 
-    default void incWithExemplar(Labels labels) {
-        incWithExemplar(1.0, labels);
-    }
-
-    void inc(double amount);
-
+    /**
+     * Add {@code amount}. Throws an {@link IllegalArgumentException} if {@code amount} is negative.
+     */
     default void inc(long amount) {
         inc((double) amount);
     }
 
+    /**
+     * Add one, but also create a custom exemplar with the given labels.
+     */
+    default void incWithExemplar(Labels labels) {
+        incWithExemplar(1.0, labels);
+    }
+
+    /**
+     * Add {@code amount}. Throws an {@link IllegalArgumentException} if {@code amount} is negative.
+     */
+    void inc(double amount);
+
+    /**
+     * Add {@code amount}, but also create a custom exemplar with the given labels.
+     * Throws an {@link IllegalArgumentException} if {@code amount} is negative.
+     */
     void incWithExemplar(double amount, Labels labels);
 
+    /**
+     * Add {@code amount}, but also create a custom exemplar with the given labels.
+     * Throws an {@link IllegalArgumentException} if {@code amount} is negative.
+     */
     default void incWithExemplar(long amount, Labels labels) {
         inc((double) amount);
     }

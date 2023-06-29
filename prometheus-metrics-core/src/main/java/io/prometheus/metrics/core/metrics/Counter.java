@@ -17,6 +17,19 @@ import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.DoubleSupplier;
 
+/**
+ * Counter metric.
+ * <p>
+ * Example usage:
+ * <pre>{@code
+ * Counter requestCount = Counter.newBuilder()
+ *     .withName("requests_total")
+ *     .withLabelNames("path", "status")
+ *     .register();
+ * requestCount.withLabelValues("/hello-world", "200").inc();
+ * requestCount.withLabelValues("/hello-world", "500").inc();
+ * }</pre>
+ */
 public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint> implements CounterDataPoint, Collector {
 
     private final boolean exemplarsEnabled;
@@ -33,31 +46,50 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
         }
     }
 
-    @Override
-    protected boolean isExemplarsEnabled() {
-        return exemplarsEnabled;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void inc(long amount) {
         getNoLabels().inc(amount);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void inc(double amount) {
         getNoLabels().inc(amount);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void incWithExemplar(long amount, Labels labels) {
         getNoLabels().incWithExemplar(amount, labels);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void incWithExemplar(double amount, Labels labels) {
         getNoLabels().incWithExemplar(amount, labels);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CounterSnapshot collect() {
+        return (CounterSnapshot) super.collect();
+    }
+
+    @Override
+    protected boolean isExemplarsEnabled() {
+        return exemplarsEnabled;
+    }
 
     @Override
     protected DataPoint newDataPoint() {
@@ -75,11 +107,6 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
             data.add(metricData.get(i).collect(labels.get(i)));
         }
         return new CounterSnapshot(getMetadata(), data);
-    }
-
-    @Override
-    public CounterSnapshot collect() {
-        return (CounterSnapshot) super.collect();
     }
 
     public static Builder newBuilder() {
@@ -102,7 +129,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
         private final DoubleAdder doubleValue = new DoubleAdder();
         // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
         // and DoubleAdder for double observations. If the user doesn't observe any double at all,
-        // we will just use the LongAdder and get the best performance.
+        // we will be using the LongAdder and get the best performance.
         private final LongAdder longValue = new LongAdder();
         private final long createdTimeMillis = System.currentTimeMillis();
         private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
@@ -111,6 +138,9 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
             this.exemplarSampler = exemplarSampler;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void inc(long amount) {
             validateAndAdd(amount);
@@ -119,6 +149,9 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void inc(double amount) {
             validateAndAdd(amount);
@@ -127,6 +160,9 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void incWithExemplar(long amount, Labels labels) {
             validateAndAdd(amount);
@@ -135,6 +171,9 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void incWithExemplar(double amount, Labels labels) {
             validateAndAdd(amount);
@@ -159,18 +198,17 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
 
         private CounterSnapshot.CounterDataPointSnapshot collect(Labels labels) {
             // Read the exemplar first. Otherwise, there is a race condition where you might
-            // see an Exemplar for a value that's not represented in getValue() yet.
-            // If there are multiple Exemplars (by default it's just one), use the oldest
-            // so that we don't violate min age.
-            Exemplar oldest = null;
+            // see an Exemplar for a value that's not counted yet.
+            // If there are multiple Exemplars (by default it's just one), use the newest.
+            Exemplar latestExemplar = null;
             if (exemplarSampler != null) {
                 for (Exemplar exemplar : exemplarSampler.collect()) {
-                    if (oldest == null || exemplar.getTimestampMillis() < oldest.getTimestampMillis()) {
-                        oldest = exemplar;
+                    if (latestExemplar == null || exemplar.getTimestampMillis() > latestExemplar.getTimestampMillis()) {
+                        latestExemplar = exemplar;
                     }
                 }
             }
-            return new CounterSnapshot.CounterDataPointSnapshot(longValue.sum() + doubleValue.sum(), labels, oldest, createdTimeMillis);
+            return new CounterSnapshot.CounterDataPointSnapshot(longValue.sum() + doubleValue.sum(), labels, latestExemplar, createdTimeMillis);
         }
     }
 
@@ -180,6 +218,22 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
             super(Collections.emptyList(), properties);
         }
 
+        /**
+         * The {@code _total} suffix will automatically be appended if it's missing.
+         * <pre>{@code
+         * Counter c1 = Counter.newBuilder()
+         *     .withName("events_total")
+         *     .build();
+         * Counter c2 = Counter.newBuilder()
+         *     .withName("events")
+         *     .build();
+         * }</pre>
+         * In the example above both {@code c1} and {@code c2} would be named {@code "events_total"} in Prometheus.
+         * <p>
+         * Throws an {@link IllegalArgumentException} if
+         * {@link io.prometheus.metrics.model.snapshots.MetricMetadata#isValidMetricName(String) MetricMetadata.isValidMetricName(name)}
+         * is {@code false}.
+         */
         @Override
         public Builder withName(String name) {
             return super.withName(normalizeName(name));
