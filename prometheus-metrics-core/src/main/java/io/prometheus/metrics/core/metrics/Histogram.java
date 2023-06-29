@@ -139,7 +139,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.H
         return exemplarsEnabled;
     }
 
-    public class HistogramData extends MetricData<DistributionDataPoint> implements DistributionDataPoint {
+    public class HistogramData implements DistributionDataPoint {
         private final LongAdder[] classicBuckets;
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForPositiveValues = new ConcurrentHashMap<>();
         private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForNegativeValues = new ConcurrentHashMap<>();
@@ -267,11 +267,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.H
                     },
                     v -> doObserve(v, true)
             );
-        }
-
-        @Override
-        public DistributionDataPoint toObserver() {
-            return this;
         }
 
         private boolean addToNativeBucket(double value, ConcurrentHashMap<Integer, LongAdder> buckets) {

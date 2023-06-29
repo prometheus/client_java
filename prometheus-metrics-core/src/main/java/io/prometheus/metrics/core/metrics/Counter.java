@@ -97,7 +97,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterDat
         return name;
     }
 
-    class CounterData extends MetricData<CounterDataPoint> implements CounterDataPoint {
+    class CounterData implements CounterDataPoint {
 
         private final DoubleAdder doubleValue = new DoubleAdder();
         // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
@@ -171,11 +171,6 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.CounterDat
                 }
             }
             return new CounterSnapshot.CounterData(longValue.sum() + doubleValue.sum(), labels, oldest, createdTimeMillis);
-        }
-
-        @Override
-        public CounterDataPoint toObserver() {
-            return this;
         }
     }
 

@@ -63,16 +63,11 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.StateSe
         getNoLabels().setFalse(state);
     }
 
-    class StateSetData extends MetricData<StateSetDataPoint> implements StateSetDataPoint {
+    class StateSetData implements StateSetDataPoint {
 
         private final boolean[] values = new boolean[names.length];
 
         private StateSetData() {
-        }
-
-        @Override
-        StateSetDataPoint toObserver() {
-            return this;
         }
 
         @Override

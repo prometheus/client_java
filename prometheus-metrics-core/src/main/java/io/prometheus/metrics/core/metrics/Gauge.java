@@ -79,7 +79,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.GaugeData> imple
         return exemplarsEnabled;
     }
 
-    class GaugeData extends MetricData<GaugeDataPoint> implements GaugeDataPoint {
+    class GaugeData implements GaugeDataPoint {
 
         private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
@@ -135,11 +135,6 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.GaugeData> imple
                 }
             }
             return new GaugeSnapshot.GaugeData(Double.longBitsToDouble(value.get()), labels, oldest);
-        }
-
-        @Override
-        public GaugeDataPoint toObserver() {
-            return this;
         }
     }
 

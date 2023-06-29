@@ -27,7 +27,7 @@ import static java.lang.Boolean.TRUE;
  * We are using our own terminology here because in Java <i>synchronous</i> and <i>asynchronous</i> usually refers to multi-threading,
  * but this has nothing to do with multi-threading.
  */
-abstract class StatefulMetric<O extends DataPoint, V extends MetricData<O>> extends MetricWithFixedMetadata {
+abstract class StatefulMetric<O extends DataPoint, V extends O> extends MetricWithFixedMetadata {
     private final String[] labelNames;
     //private final Boolean exemplarsEnabled;
 
@@ -76,7 +76,7 @@ abstract class StatefulMetric<O extends DataPoint, V extends MetricData<O>> exte
                 throw new IllegalArgumentException("Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
             }
         }
-        return data.computeIfAbsent(Arrays.asList(labelValues), l -> newMetricData()).toObserver();
+        return data.computeIfAbsent(Arrays.asList(labelValues), l -> newMetricData());
     }
 
     // TODO: Remove automatically if label values have not been used in a while?

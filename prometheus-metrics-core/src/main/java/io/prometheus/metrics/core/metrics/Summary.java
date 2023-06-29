@@ -79,7 +79,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.Summa
     }
 
 
-    public class SummaryData extends MetricData<DistributionDataPoint> implements DistributionDataPoint {
+    public class SummaryData implements DistributionDataPoint {
 
         private final LongAdder count = new LongAdder();
         private final DoubleAdder sum = new DoubleAdder();
@@ -126,11 +126,6 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.Summa
                     () -> new SummarySnapshot.SummaryData(count.sum(), sum.sum(), makeQuantiles(), labels, Exemplars.EMPTY, createdTimeMillis),
                     this::doObserve
             );
-        }
-
-        @Override
-        public DistributionDataPoint toObserver() {
-            return this;
         }
 
         private List<CKMSQuantiles.Quantile> getQuantiles() {
