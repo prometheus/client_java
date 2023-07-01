@@ -10,7 +10,7 @@ import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
-import io.prometheus.metrics.core.observer.DistributionDataPoint;
+import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.util.Scheduler;
 
 import java.math.BigDecimal;
@@ -611,7 +611,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     }
 
     public static Builder newBuilder() {
-        return new Builder(PrometheusProperties.getInstance());
+        return new Builder(PrometheusProperties.get());
     }
 
     public static Builder newBuilder(PrometheusProperties config) {

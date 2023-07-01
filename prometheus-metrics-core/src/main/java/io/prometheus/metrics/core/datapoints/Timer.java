@@ -1,7 +1,6 @@
-package io.prometheus.metrics.core.observer;
+package io.prometheus.metrics.core.datapoints;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.function.DoubleConsumer;
 
 public class Timer implements Closeable {

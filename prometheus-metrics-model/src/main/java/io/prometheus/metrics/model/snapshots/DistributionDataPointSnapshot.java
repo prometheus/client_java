@@ -17,10 +17,7 @@ public abstract class DistributionDataPointSnapshot extends DataPointSnapshot {
         super(labels, createdTimestampMillis, scrapeTimestampMillis);
         this.count = count;
         this.sum = sum;
-        this.exemplars = exemplars;
-        if (exemplars == null) {
-            throw new NullPointerException("Exemplars cannot be null. Use Exemplars.EMPTY if there are no Exemplars.");
-        }
+        this.exemplars = exemplars == null ? Exemplars.EMPTY : exemplars;
         validate();
     }
 

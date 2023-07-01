@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class PrometheusProperties {
 
-    private static final PrometheusProperties instance = PrometheusPropertiesLoader.load();
+    private static final PrometheusProperties defaultInstance = PrometheusPropertiesLoader.load();
 
     private final MetricProperties defaultMetricProperties;
     private final Map<String, MetricProperties> metricProperties = new HashMap<>();
@@ -13,8 +13,8 @@ public class PrometheusProperties {
     private final ExpositionFormatProperties expositionFormatProperties;
     private final HttpServerProperties httpServerConfig;
 
-    public static PrometheusProperties getInstance() throws PrometheusPropertiesException {
-        return instance;
+    public static PrometheusProperties get() throws PrometheusPropertiesException {
+        return defaultInstance;
     }
 
     public PrometheusProperties(

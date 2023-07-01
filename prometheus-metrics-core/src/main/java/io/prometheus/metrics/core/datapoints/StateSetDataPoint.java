@@ -1,4 +1,4 @@
-package io.prometheus.metrics.core.observer;
+package io.prometheus.metrics.core.datapoints;
 
 public interface StateSetDataPoint extends DataPoint {
     void setTrue(String state);

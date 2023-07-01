@@ -4,7 +4,7 @@ import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
-import io.prometheus.metrics.core.observer.DataPoint;
+import io.prometheus.metrics.core.datapoints.DataPoint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,33 +19,27 @@ import static java.lang.Boolean.TRUE;
 /**
  * There are two kinds of metrics:
  * <ul>
- *     <li>A {@code StatefulMetric} actively maintains its current value, e.g. a stateful counter actively stores its current count.</li>
- *     <li>A {@code CallbackMetric} gets its value on demand when it is collected, e.g. a callback gauge representing the current heap size has
- *     a callback for calling JMX when it's collected.</li>
+ *     <li>A {@code StatefulMetric} actively maintains its current values, e.g. a stateful counter actively stores its current count.</li>
+ *     <li>A {@code CallbackMetric} gets its values on demand when it is collected, e.g. a callback gauge representing the current heap size.</li>
  * </ul>
  * The OpenTelemetry terminology for <i>stateful</i> is <i>synchronous</i> and the OpenTelemetry terminology for <i>callback</i> is <i>asynchronous</i>.
  * We are using our own terminology here because in Java <i>synchronous</i> and <i>asynchronous</i> usually refers to multi-threading,
  * but this has nothing to do with multi-threading.
  */
 abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWithFixedMetadata {
-    private final String[] labelNames;
-    //private final Boolean exemplarsEnabled;
 
     /**
-     * Map from variableLabelValues to MetricData.
+     * Map label values to data points.
      */
     private final ConcurrentHashMap<List<String>, T> data = new ConcurrentHashMap<>();
 
     /**
-     * Shortcut to data.get(Collections.emptyList())
+     * Shortcut for data.get(Collections.emptyList())
      */
     private volatile T noLabels;
 
     protected StatefulMetric(Builder<?, ?> builder) {
         super(builder);
-        this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
-        //this.exemplarsEnabled = builder.exemplarsEnabled;
-        //this.exemplarConfig = builder.exemplarConfig;
     }
 
     /**
@@ -61,8 +55,8 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
         List<Labels> labels = new ArrayList<>(data.size());
         List<T> metricData = new ArrayList<>(data.size());
         for (Map.Entry<List<String>, T> entry : data.entrySet()) {
-            String[] variableLabelValues = entry.getKey().toArray(new String[labelNames.length]);
-            labels.add(constLabels.merge(labelNames, variableLabelValues));
+            String[] labelValues = entry.getKey().toArray(new String[labelNames.length]);
+            labels.add(constLabels.merge(labelNames, labelValues));
             metricData.add(entry.getValue());
         }
         return collect(labels, metricData);
@@ -126,24 +120,11 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
     protected abstract boolean isExemplarsEnabled();
 
     static abstract class Builder<B extends Builder<B, M>, M extends StatefulMetric<?, ?>> extends MetricWithFixedMetadata.Builder<B, M> {
-        private String[] labelNames = new String[0];
+
         protected Boolean exemplarsEnabled;
 
         protected Builder(List<String> illegalLabelNames, PrometheusProperties config) {
             super(illegalLabelNames, config);
-        }
-
-        public B withLabelNames(String... labelNames) {
-            for (String labelName : labelNames) {
-                if (!Labels.isValidLabelName(labelName)) {
-                    throw new IllegalArgumentException(labelName + ": illegal label name");
-                }
-                if (illegalLabelNames.contains(labelName)) {
-                    throw new IllegalArgumentException(labelName + ": illegal label name for this metric type");
-                }
-            }
-            this.labelNames = labelNames;
-            return self();
         }
 
         public B withExemplars() {
@@ -156,12 +137,18 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
             return self();
         }
 
+        /**
+         * Override if there are more properties than just exemplars enabled.
+         */
         protected MetricProperties toProperties() {
             return MetricProperties.newBuilder()
                     .withExemplarsEnabled(exemplarsEnabled)
                     .build();
         }
 
+        /**
+         * Override if there are more properties than just exemplars enabled.
+         */
         public MetricProperties getDefaultProperties() {
             return MetricProperties.newBuilder()
                     .withExemplarsEnabled(true)

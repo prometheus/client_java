@@ -2,20 +2,19 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.datapoints.CounterDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.core.observer.CounterDataPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.DoubleSupplier;
 
 /**
  * Counter metric.
@@ -24,6 +23,7 @@ import java.util.function.DoubleSupplier;
  * <pre>{@code
  * Counter requestCount = Counter.newBuilder()
  *     .withName("requests_total")
+ *     .withHelp("Total number of requests")
  *     .withLabelNames("path", "status")
  *     .register();
  * requestCount.withLabelValues("/hello-world", "200").inc();
@@ -110,14 +110,14 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     }
 
     public static Builder newBuilder() {
-        return new Builder(PrometheusProperties.getInstance());
+        return new Builder(PrometheusProperties.get());
     }
 
     public static Builder newBuilder(PrometheusProperties config) {
         return new Builder(config);
     }
 
-    private static String normalizeName(String name) {
+    static String normalizeName(String name) {
         if (name != null && name.endsWith("_total")) {
             name = name.substring(0, name.length() - 6);
         }
@@ -247,51 +247,6 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
         @Override
         protected Builder self() {
             return this;
-        }
-    }
-
-    public static class FromCallback extends MetricWithFixedMetadata {
-
-        private final DoubleSupplier callback;
-        private final long createdTimeMillis = System.currentTimeMillis();
-
-        private FromCallback(Counter.FromCallback.Builder builder) {
-            super(builder);
-            this.callback = builder.callback;
-        }
-
-        @Override
-        public CounterSnapshot collect() {
-            return new CounterSnapshot(getMetadata(), Collections.singletonList(new CounterSnapshot.CounterDataPointSnapshot(
-                    callback.getAsDouble(),
-                    constLabels,
-                    null,
-                    createdTimeMillis
-            )));
-        }
-
-        public static class Builder extends MetricWithFixedMetadata.Builder<Counter.FromCallback.Builder, Counter.FromCallback> {
-
-            private DoubleSupplier callback;
-
-            private Builder(PrometheusProperties config) {
-                super(Collections.emptyList(), config);
-            }
-
-            public Counter.FromCallback.Builder withCallback(DoubleSupplier callback) {
-                this.callback = callback;
-                return this;
-            }
-
-            @Override
-            public Counter.FromCallback build() {
-                return new Counter.FromCallback(withName(normalizeName(name)));
-            }
-
-            @Override
-            protected Counter.FromCallback.Builder self() {
-                return this;
-            }
         }
     }
 }

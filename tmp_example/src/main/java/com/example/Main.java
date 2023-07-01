@@ -1,7 +1,7 @@
 package com.example;
 
 import io.prometheus.metrics.core.metrics.Counter;
-import io.prometheus.metrics.core.observer.CounterDataPoint;
+import io.prometheus.metrics.core.datapoints.CounterDataPoint;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 
 import java.io.IOException;

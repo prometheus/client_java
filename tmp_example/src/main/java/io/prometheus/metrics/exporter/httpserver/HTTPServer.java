@@ -221,7 +221,7 @@ public class HTTPServer implements Closeable {
             if (port != null) {
                 return port;
             }
-            HttpServerProperties defaultProperties = PrometheusProperties.getInstance().getHttpServerConfig();
+            HttpServerProperties defaultProperties = PrometheusProperties.get().getHttpServerConfig();
             if (defaultProperties != null && defaultProperties.getPort() != null) {
                 return defaultProperties.getPort();
             }

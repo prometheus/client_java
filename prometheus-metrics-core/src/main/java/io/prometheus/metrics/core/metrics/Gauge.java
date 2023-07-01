@@ -7,7 +7,7 @@ import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.core.observer.GaugeDataPoint;
+import io.prometheus.metrics.core.datapoints.GaugeDataPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -197,7 +197,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
     }
 
     public static Builder newBuilder() {
-        return new Builder(PrometheusProperties.getInstance());
+        return new Builder(PrometheusProperties.get());
     }
 
     public static Builder newBuilder(PrometheusProperties config) {

@@ -56,18 +56,6 @@ public abstract class Metric implements Collector {
 
         public abstract M build();
 
-        /*
-        public M register() {
-            return register(PrometheusRegistry.defaultRegistry);
-        }
-
-        public M register(PrometheusRegistry registry) {
-            M metric = build();
-            registry.register(metric);
-            return metric;
-        }
-         */
-
         protected abstract B self();
     }
 }

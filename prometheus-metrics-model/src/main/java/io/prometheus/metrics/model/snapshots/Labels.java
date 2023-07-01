@@ -213,7 +213,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
                 values[thisPos + otherPos] = other.values[otherPos];
                 otherPos++;
             } else {
-                throw new IllegalArgumentException("duplicate label name " + this.names[thisPos]);
+                throw new IllegalArgumentException("Duplicate label name: '" + this.names[thisPos] + "'.");
             }
         }
         return new Labels(names, values);

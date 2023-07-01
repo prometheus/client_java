@@ -7,7 +7,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Quantile;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
-import io.prometheus.metrics.core.observer.DistributionDataPoint;
+import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -224,7 +224,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
     }
 
     public static Summary.Builder newBuilder() {
-        return new Builder(PrometheusProperties.getInstance());
+        return new Builder(PrometheusProperties.get());
     }
 
     public static Summary.Builder newBuilder(PrometheusProperties config) {

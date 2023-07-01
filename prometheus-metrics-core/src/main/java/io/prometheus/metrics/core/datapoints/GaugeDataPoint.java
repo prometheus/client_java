@@ -1,4 +1,4 @@
-package io.prometheus.metrics.core.observer;
+package io.prometheus.metrics.core.datapoints;
 
 import io.prometheus.metrics.model.snapshots.Labels;
 

@@ -11,7 +11,7 @@ import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.core.observer.DistributionDataPoint;
+import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

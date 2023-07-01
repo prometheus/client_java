@@ -71,7 +71,7 @@ public class Info extends MetricWithFixedMetadata {
     }
 
     public static Builder newBuilder() {
-        return new Builder(PrometheusProperties.getInstance());
+        return new Builder(PrometheusProperties.get());
     }
 
     public static Builder newBuilder(PrometheusProperties config) {

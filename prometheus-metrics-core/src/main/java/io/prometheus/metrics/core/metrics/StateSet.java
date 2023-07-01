@@ -4,7 +4,7 @@ import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
-import io.prometheus.metrics.core.observer.StateSetDataPoint;
+import io.prometheus.metrics.core.datapoints.StateSetDataPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -130,7 +130,7 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
     }
 
     public static Builder newBuilder() {
-        return new Builder(PrometheusProperties.getInstance());
+        return new Builder(PrometheusProperties.get());
     }
 
     public static Builder newBuilder(PrometheusProperties config) {

@@ -1,18 +1,22 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.Unit;
 
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class MetricWithFixedMetadata extends Metric {
 
     private final MetricMetadata metadata;
+    protected final String[] labelNames;
 
     protected MetricWithFixedMetadata(Builder<?, ?> builder) {
         super(builder);
         this.metadata = new MetricMetadata(makeName(builder.name, builder.unit), builder.help, builder.unit);
+        this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
     }
 
     protected MetricMetadata getMetadata() {
@@ -34,6 +38,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
         protected String name;
         private Unit unit;
         private String help;
+        private String[] labelNames = new String[0];
 
         protected Builder(List<String> illegalLabelNames, PrometheusProperties properties) {
             super(illegalLabelNames, properties);
@@ -57,20 +62,23 @@ public abstract class MetricWithFixedMetadata extends Metric {
             return self();
         }
 
+        public B withLabelNames(String... labelNames) {
+            for (String labelName : labelNames) {
+                if (!Labels.isValidLabelName(labelName)) {
+                    throw new IllegalArgumentException(labelName + ": illegal label name");
+                }
+                if (illegalLabelNames.contains(labelName)) {
+                    throw new IllegalArgumentException(labelName + ": illegal label name for this metric type");
+                }
+            }
+            this.labelNames = labelNames;
+            return self();
+        }
+
+        @Override
         public abstract M build();
 
-        /*
-        public M register() {
-            return register(PrometheusRegistry.defaultRegistry);
-        }
-
-        public M register(PrometheusRegistry registry) {
-            M metric = build();
-            registry.register(metric);
-            return metric;
-        }
-         */
-
+        @Override
         protected abstract B self();
     }
 }

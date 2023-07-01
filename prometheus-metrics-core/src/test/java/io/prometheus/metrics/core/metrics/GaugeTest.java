@@ -6,7 +6,7 @@ import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.core.observer.Timer;
+import io.prometheus.metrics.core.datapoints.Timer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
