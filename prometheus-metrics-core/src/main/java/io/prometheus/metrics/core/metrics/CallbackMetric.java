@@ -6,14 +6,9 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import java.util.List;
 
 /**
- * There are two kinds of metrics:
- * <ul>
- *     <li>A {@code StatefulMetric} actively maintains its current values, e.g. a stateful counter actively stores its current count.</li>
- *     <li>A {@code CallbackMetric} gets its values on demand when it is collected, e.g. a callback gauge representing the current heap size.</li>
- * </ul>
- * The OpenTelemetry terminology for <i>stateful</i> is <i>synchronous</i> and the OpenTelemetry terminology for <i>callback</i> is <i>asynchronous</i>.
- * We are using our own terminology here because in Java <i>synchronous</i> and <i>asynchronous</i> usually refers to multi-threading,
- * but this has nothing to do with multi-threading.
+ * There are two kinds of metrics: {@code StatefulMetric} and {@code CallbackMetric}.
+ * <p>
+ * See JavaDoc on {@link StatefulMetric} for more info.
  */
 abstract class CallbackMetric extends MetricWithFixedMetadata {
 

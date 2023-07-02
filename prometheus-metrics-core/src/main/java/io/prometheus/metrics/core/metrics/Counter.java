@@ -109,14 +109,6 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
         return new CounterSnapshot(getMetadata(), data);
     }
 
-    public static Builder newBuilder() {
-        return new Builder(PrometheusProperties.get());
-    }
-
-    public static Builder newBuilder(PrometheusProperties config) {
-        return new Builder(config);
-    }
-
     static String normalizeName(String name) {
         if (name != null && name.endsWith("_total")) {
             name = name.substring(0, name.length() - 6);
@@ -210,6 +202,14 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
             }
             return new CounterSnapshot.CounterDataPointSnapshot(longValue.sum() + doubleValue.sum(), labels, latestExemplar, createdTimeMillis);
         }
+    }
+
+    public static Builder newBuilder() {
+        return new Builder(PrometheusProperties.get());
+    }
+
+    public static Builder newBuilder(PrometheusProperties config) {
+        return new Builder(config);
     }
 
     public static class Builder extends StatefulMetric.Builder<Builder, Counter> {

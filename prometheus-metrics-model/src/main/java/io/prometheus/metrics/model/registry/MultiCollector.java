@@ -8,9 +8,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * To be registered with the Prometheus collector registry.
- * See <i>Overall Structure</i> on
- * <a href="https://prometheus.io/docs/instrumenting/writing_clientlibs/">https://prometheus.io/docs/instrumenting/writing_clientlibs/</a>.
+ * Like {@link Collector}, but collecting multiple Snapshots at once.
  */
 @FunctionalInterface
 public interface MultiCollector {

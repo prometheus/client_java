@@ -2,19 +2,40 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.MetricProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.datapoints.GaugeDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.core.datapoints.GaugeDataPoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.DoubleSupplier;
 
+/**
+ * Gauge metric.
+ * <p>
+ * Example usage:
+ * <pre>{@code
+ * Gauge currentActiveUsers = Gauge.newBuilder()
+ *     .withName("current_active_users")
+ *     .withHelp("Number of users that are currently active")
+ *     .withLabelNames("region")
+ *     .register();
+ *
+ * public void login(String region) {
+ *     currentActiveUsers.withLabelValues(region).inc();
+ *     // perform login
+ * }
+ *
+ * public void logout(String region) {
+ *     currentActiveUsers.withLabelValues(region).dec();
+ *     // perform logout
+ * }
+ * }</pre>
+ */
 public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> implements GaugeDataPoint {
 
     private final boolean exemplarsEnabled;
@@ -31,26 +52,41 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void inc(double amount) {
         getNoLabels().inc(amount);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void incWithExemplar(double amount, Labels labels) {
         getNoLabels().incWithExemplar(amount, labels);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void set(double value) {
         getNoLabels().set(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setWithExemplar(double value, Labels labels) {
         getNoLabels().setWithExemplar(value, labels);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GaugeSnapshot collect() {
         return (GaugeSnapshot) super.collect();
@@ -89,6 +125,9 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
 
         private final AtomicLong value = new AtomicLong(Double.doubleToRawLongBits(0));
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void inc(double amount) {
             long next = value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
@@ -97,6 +136,9 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void incWithExemplar(double amount, Labels labels) {
             long next = value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
@@ -105,6 +147,9 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void set(double value) {
             this.value.set(Double.doubleToRawLongBits(value));
@@ -113,6 +158,9 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void setWithExemplar(double value, Labels labels) {
             this.value.set(Double.doubleToRawLongBits(value));
@@ -138,6 +186,14 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
         }
     }
 
+    public static Builder newBuilder() {
+        return new Builder(PrometheusProperties.get());
+    }
+
+    public static Builder newBuilder(PrometheusProperties config) {
+        return new Builder(config);
+    }
+
     public static class Builder extends StatefulMetric.Builder<Builder, Gauge> {
 
         private Builder(PrometheusProperties config) {
@@ -153,54 +209,5 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
         protected Builder self() {
             return this;
         }
-    }
-
-    public static class FromCallback extends MetricWithFixedMetadata {
-
-        private final DoubleSupplier callback;
-
-        private FromCallback(Gauge.FromCallback.Builder builder) {
-            super(builder);
-            this.callback = builder.callback;
-        }
-
-        @Override
-        public GaugeSnapshot collect() {
-            return new GaugeSnapshot(getMetadata(), Collections.singletonList(
-                    new GaugeSnapshot.GaugeDataPointSnapshot(callback.getAsDouble(), constLabels, null)
-            ));
-        }
-
-        public static class Builder extends MetricWithFixedMetadata.Builder<Gauge.FromCallback.Builder, Gauge.FromCallback> {
-
-            private DoubleSupplier callback;
-
-            private Builder(PrometheusProperties config) {
-                super(Collections.emptyList(), config);
-            }
-
-            public Gauge.FromCallback.Builder withCallback(DoubleSupplier callback) {
-                this.callback = callback;
-                return this;
-            }
-
-            @Override
-            public Gauge.FromCallback build() {
-                return new Gauge.FromCallback(this);
-            }
-
-            @Override
-            protected Gauge.FromCallback.Builder self() {
-                return this;
-            }
-        }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder(PrometheusProperties.get());
-    }
-
-    public static Builder newBuilder(PrometheusProperties config) {
-        return new Builder(config);
     }
 }

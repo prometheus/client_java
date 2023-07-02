@@ -1,8 +1,11 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.core.datapoints.Timer;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
@@ -31,8 +34,45 @@ public class TmpTest {
         return 8.0;
     }
 
-    public static void main(String[] args) {
+    static Gauge currentActiveUsers = Gauge.newBuilder()
+            .withName("current_active_users")
+            .withHelp("Number of users that are currently active")
+            .withLabelNames("region")
+            .register();
 
+    public static void login (String region){
+        currentActiveUsers.withLabelValues(region).inc();
+        // perform login
+    }
+
+    public static void logout (String region){
+        currentActiveUsers.withLabelValues(region).dec();
+        // perform logout
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        login("us");
+        login("us");
+        logout("us");
+
+        Gauge latestBatchJobDuration = Gauge.newBuilder()
+                .withName("latest_backup_duration_seconds")
+                .withHelp("Duration of the latest backup run in seconds.")
+                .withUnit(Unit.SECONDS)
+                .withLabelNames("env")
+                .register();
+        try (Timer timer = latestBatchJobDuration.withLabelValues("prod").startTimer()) {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        latestBatchJobDuration.time(() -> System.out.println("hi"));
+
+        latestBatchJobDuration.time(() -> {return 1 + 2;});
+
+        latestBatchJobDuration.timeChecked(() -> {return 1 + 2;});
         /*
 
         JVM_GC_COLLECTION_SECONDS,
@@ -41,7 +81,7 @@ public class TmpTest {
          */
         double MILLISECONDS_PER_SECOND = 1E3;
 
-        SummaryWithCallback gcSeconds = SummaryWithCallback.newBuilder()
+             SummaryWithCallback gcSeconds = SummaryWithCallback.newBuilder()
                 .withName("jvm_gc_collection_seconds")
                 .withHelp("Time spent in a given JVM garbage collector in seconds.")
                 .withUnit(Unit.SECONDS)
@@ -50,7 +90,7 @@ public class TmpTest {
                     for (GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
                         callback.call(
                                 gc.getCollectionCount(),
-                           gc.getCollectionTime() / MILLISECONDS_PER_SECOND,
+                                gc.getCollectionTime() / MILLISECONDS_PER_SECOND,
                                 Quantiles.EMPTY,
                                 gc.getName()
                         );
@@ -58,7 +98,7 @@ public class TmpTest {
                 })
                 .build();
 
-        Runtime.getRuntime().gc();
+             Runtime.getRuntime().gc();
         /*
         GaugeMetricFamily used = new GaugeMetricFamily(
                 JVM_MEMORY_BYTES_USED,
@@ -71,7 +111,7 @@ public class TmpTest {
 
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
 
-        GaugeWithCallback memoryBytesUsed = GaugeWithCallback.newBuilder()
+             GaugeWithCallback memoryBytesUsed = GaugeWithCallback.newBuilder()
                 .withName("jvm_memory_bytes_used")
                 .withHelp("Used bytes of a given JVM memory area.")
                 .withUnit(Unit.BYTES)
@@ -82,21 +122,23 @@ public class TmpTest {
                 })
                 .build();
 
-        CounterWithCallback messageCount = CounterWithCallback.newBuilder()
+             CounterWithCallback messageCount = CounterWithCallback.newBuilder()
                 .withName("messages_total")
                 .withLabelNames("status")
                 .withConstLabels(Labels.of("staus", "b"))
                 .withCallback(messageCountCallback)
                 .build();
 
-        ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
-        CounterWithCallback counter = CounterWithCallback.newBuilder()
+             ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
+             CounterWithCallback counter = CounterWithCallback.newBuilder()
                 .withName("classes_loaded_total")
                 .withCallback(callback -> callback.call(classLoadingMXBean.getLoadedClassCount()))
                 .build();
-        CounterSnapshot sn = messageCount.collect();
-        GaugeSnapshot sn2 = memoryBytesUsed.collect();
-        SummarySnapshot sn3 = gcSeconds.collect();
-        System.out.println(sn2);
+             CounterSnapshot sn = messageCount.collect();
+             GaugeSnapshot sn2 = memoryBytesUsed.collect();
+             SummarySnapshot sn3 = gcSeconds.collect();
+             PrometheusRegistry r = PrometheusRegistry.defaultRegistry;
+             MetricSnapshots s = r.scrape();
+             System.out.println(sn2);
     }
 }

@@ -61,28 +61,28 @@ public interface CounterDataPoint extends DataPoint {
     }
 
     /**
-     * Add one, but also create a custom exemplar with the given labels.
+     * Add {@code amount}. Throws an {@link IllegalArgumentException} if {@code amount} is negative.
+     */
+    void inc(double amount);
+
+    /**
+     * Add one, and create a custom exemplar with the given labels.
      */
     default void incWithExemplar(Labels labels) {
         incWithExemplar(1.0, labels);
     }
 
     /**
-     * Add {@code amount}. Throws an {@link IllegalArgumentException} if {@code amount} is negative.
-     */
-    void inc(double amount);
-
-    /**
-     * Add {@code amount}, but also create a custom exemplar with the given labels.
-     * Throws an {@link IllegalArgumentException} if {@code amount} is negative.
-     */
-    void incWithExemplar(double amount, Labels labels);
-
-    /**
-     * Add {@code amount}, but also create a custom exemplar with the given labels.
+     * Add {@code amount}, and create a custom exemplar with the given labels.
      * Throws an {@link IllegalArgumentException} if {@code amount} is negative.
      */
     default void incWithExemplar(long amount, Labels labels) {
         inc((double) amount);
     }
+
+    /**
+     * Add {@code amount}, and create a custom exemplar with the given labels.
+     * Throws an {@link IllegalArgumentException} if {@code amount} is negative.
+     */
+    void incWithExemplar(double amount, Labels labels);
 }
