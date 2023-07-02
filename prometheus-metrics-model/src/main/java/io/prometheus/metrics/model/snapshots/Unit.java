@@ -30,4 +30,12 @@ public class Unit {
     public String toString() {
         return name;
     }
+
+    public static double nanosToSeconds(long nanos) {
+        return nanos / 1E9;
+    }
+
+    public static double millisToSeconds(long nanos) {
+        return nanos / 1E3;
+    }
 }

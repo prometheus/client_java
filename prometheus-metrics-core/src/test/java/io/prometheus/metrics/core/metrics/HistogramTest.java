@@ -884,7 +884,7 @@ public class HistogramTest {
         assertExemplar(histogram, 0.5, "key", "value");
 
         Thread.sleep(sampleIntervalMillis * 3 + 1);
-        histogram.observeWithExemplar(0.5);
+        histogram.observeWithExemplar(0.5, Labels.EMPTY);
         assertExemplar(histogram, 0.5);
 
         Thread.sleep(sampleIntervalMillis * 3 + 1);

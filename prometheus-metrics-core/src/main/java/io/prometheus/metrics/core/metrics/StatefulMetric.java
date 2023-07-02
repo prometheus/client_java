@@ -65,7 +65,7 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
     public D withLabelValues(String... labelValues) {
         if (labelValues.length != labelNames.length) {
             if (labelValues.length == 0) {
-                throw new IllegalArgumentException("The " + getClass().getSimpleName() + " was created with label names, so you must call withLabelValues() when using it.");
+                throw new IllegalArgumentException(getClass().getSimpleName() + " " + getMetadata().getName() + " was created with label names, so you must call withLabelValues(...) when using it.");
             } else {
                 throw new IllegalArgumentException("Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
             }

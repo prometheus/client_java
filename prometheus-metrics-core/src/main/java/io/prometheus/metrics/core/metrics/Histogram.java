@@ -27,15 +27,30 @@ import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
+ * Histogram metric. Example usage:
+ * <pre>{@code
+ * Histogram histogram = Histogram.newBuilder()
+ *         .withName("http_request_duration_seconds")
+ *         .withHelp("HTTP request service time in seconds")
+ *         .withUnit(SECONDS)
+ *         .withLabelNames("method", "path", "status_code")
+ *         .register();
+ *
+ * long start = System.nanoTime();
+ * // do something
+ * histogram.withLabelValues("GET", "/", "200").observe(Unit.nanosToSeconds(System.nanoTime() - start));
+ * }</pre>
  * Prometheus supports two internal representations of histograms:
  * <ol>
  *     <li><i>Classic Histograms</i> have a fixed number of buckets with fixed bucket boundaries.</li>
  *     <li><i>Native Histograms</i> have an infinite number of buckets with a dynamic resolution.
  *         Prometheus native histograms are the same as OpenTelemetry's exponential histograms.</li>
  * </ol>
- * By default, a histogram maintains both representations. Exposition format "Text" uses the classic histogram,
- * exposition format "Protobuf" uses both representations. This is great for migrating from classic histograms
- * to native histograms.
+ * By default, a histogram maintains both representations, i.e. the example above will maintain a classic
+ * histogram representation with Prometheus' default bucket boundaries as well as native histogram representation.
+ * Which representation is used depends on the exposition format, i.e. which content type the Prometheus server
+ * accepts when scraping. Exposition format "Text" exposes the classic histogram, exposition format "Protobuf"
+ * exposes both representations. This is great for migrating from classic histograms to native histograms.
  * <p>
  * If you want the classic representation only, use {@link Histogram.Builder#classicOnly}.
  * If you want the native representation only, use {@link Histogram.Builder#nativeOnly}.
@@ -134,6 +149,22 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
                 new ExemplarSamplerConfig(exemplarProperties, classicUpperBounds);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void observe(double amount) {
+        getNoLabels().observe(amount);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void observeWithExemplar(double amount, Labels labels) {
+        getNoLabels().observeWithExemplar(amount, labels);
+    }
+
     @Override
     protected boolean isExemplarsEnabled() {
         return exemplarsEnabled;
@@ -166,20 +197,26 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
             maybeScheduleNextReset();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public void observe(double amount) {
-            if (Double.isNaN(amount)) {
+        public void observe(double value) {
+            if (Double.isNaN(value)) {
                 // See https://github.com/prometheus/client_golang/issues/1275 on ignoring NaN observations.
                 return;
             }
-            if (!buffer.append(amount)) {
-                doObserve(amount, false);
+            if (!buffer.append(value)) {
+                doObserve(value, false);
             }
             if (isExemplarsEnabled()) {
-                exemplarSampler.observe(amount);
+                exemplarSampler.observe(value);
             }
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void observeWithExemplar(double value, Labels labels) {
             if (Double.isNaN(value)) {
@@ -225,7 +262,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
             }
         }
 
-        public HistogramSnapshot.HistogramDataPointSnapshot collect(Labels labels) {
+        private HistogramSnapshot.HistogramDataPointSnapshot collect(Labels labels) {
             Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
             return buffer.run(
                     expectedCount -> count.sum() == expectedCount,
@@ -561,6 +598,9 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HistogramSnapshot collect() {
         return (HistogramSnapshot) super.collect();
@@ -573,17 +613,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
             data.add(metricData.get(i).collect(labels.get(i)));
         }
         return new HistogramSnapshot(getMetadata(), data);
-    }
-
-
-    @Override
-    public void observe(double amount) {
-        getNoLabels().observe(amount);
-    }
-
-    @Override
-    public void observeWithExemplar(double amount, Labels labels) {
-        getNoLabels().observeWithExemplar(amount, labels);
     }
 
     @Override
@@ -620,7 +649,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
     public static class Builder extends StatefulMetric.Builder<Histogram.Builder, Histogram> {
 
-        private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
         public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS = new double[]{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10};
         private final double DEFAULT_NATIVE_MIN_ZERO_THRESHOLD = Math.pow(2.0, -128);
         private final double DEFAULT_NATIVE_MAX_ZERO_THRESHOLD = Math.pow(2.0, -128);

@@ -18,12 +18,12 @@ class Buffer {
     private final Object appendLock = new Object();
     private final Object runLock = new Object();
 
-    boolean append(double amount) {
+    boolean append(double value) {
         long count = observationCount.incrementAndGet();
         if ((count & signBit) == 0) {
             return false; // sign bit not set -> buffer not active.
         } else {
-            doAppend(amount);
+            doAppend(value);
             return true;
         }
     }

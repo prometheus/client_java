@@ -1,5 +1,7 @@
 package io.prometheus.metrics.core.datapoints;
 
+import io.prometheus.metrics.model.snapshots.Unit;
+
 import java.io.Closeable;
 import java.util.function.DoubleConsumer;
 
@@ -8,7 +10,6 @@ import java.util.function.DoubleConsumer;
  */
 public class Timer implements Closeable {
 
-    private static final double NANOSECONDS_PER_SECOND = 1E9;
     private final DoubleConsumer observeFunction;
     private final long startTimeNanos = System.nanoTime();
 
@@ -21,10 +22,10 @@ public class Timer implements Closeable {
 
     /**
      * Records the observed duration in seconds since this {@code Timer} instance was created.
-     * @return the observed duration.
+     * @return the observed duration in seconds.
      */
     public double observeDuration() {
-        double elapsed = (System.nanoTime() - startTimeNanos) / NANOSECONDS_PER_SECOND;
+        double elapsed = Unit.nanosToSeconds(System.nanoTime() - startTimeNanos);
         observeFunction.accept(elapsed);
         return elapsed;
     }

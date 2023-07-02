@@ -4,26 +4,49 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
- * Convenience API for timing the duration of method calls.
+ * Convenience API for timing durations.
  * <p>
- * All times are recorded in seconds, as Prometheus mandates seconds as the base unit.
+ * Durations are recorded in seconds. The Prometheus instrumentation guidelines <a href="https://prometheus.io/docs/instrumenting/writing_exporters/#naming">say</a>:
+ * <i>"Metrics must use base units (e.g. seconds, bytes) and leave converting them to something more readable to graphing tools".</i>
  */
 public interface TimerApi {
 
     /**
      * Start a {@code Timer}. Example:
      * <pre>{@code
-     * try (Timer timer = dataPoint.startTimer) {
+     * Histogram histogram = Histogram.newBuilder()
+     *         .withName("http_request_duration_seconds")
+     *         .withHelp("HTTP request service time in seconds")
+     *         .withUnit(SECONDS)
+     *         .withLabelNames("method", "path")
+     *         .register();
+     *
+     * try (Timer timer = histogram.withLabelValues("GET", "/").startTimer()) {
      *     // duration of this code block will be observed.
      * }
      * }</pre>
-     * The duration is recorded in seconds, as Prometheus mandates seconds as the base unit.
+     * Durations are recorded in seconds. The Prometheus instrumentation guidelines <a href="https://prometheus.io/docs/instrumenting/writing_exporters/#naming">say</a>:
+     * <i>"Metrics must use base units (e.g. seconds, bytes) and leave converting them to something more readable to graphing tools".</i>
      */
     Timer startTimer();
 
     /**
-     * Observe the duration of the {@code func} call.
-     * The duration is recorded in seconds, as Prometheus mandates seconds as the base unit.
+     * Observe the duration of the {@code func} call. Example:
+     * <pre>{@code
+     * Histogram histogram = Histogram.newBuilder()
+     *         .withName("request_duration_seconds")
+     *         .withHelp("HTTP request service time in seconds")
+     *         .withUnit(SECONDS)
+     *         .withLabelNames("method", "path")
+     *         .register();
+     *
+     * histogram2.withLabelValues("GET", "/").time(() -> {
+     *     // duration of this code block will be observed.
+     * });
+     * }</pre>
+     * <p>
+     * Durations are recorded in seconds. The Prometheus instrumentation guidelines <a href="https://prometheus.io/docs/instrumenting/writing_exporters/#naming">say</a>:
+     * <i>"Metrics must use base units (e.g. seconds, bytes) and leave converting them to something more readable to graphing tools".</i>
      */
     default void time(Runnable func) {
         try (Timer timer = startTimer()) {
@@ -32,9 +55,7 @@ public interface TimerApi {
     }
 
     /**
-     * Observe the duration of the {@code func} call.
-     * The duration is recorded in seconds, as Prometheus mandates seconds as the base unit.
-     * @return the return value of {@code func}.
+     * Like {@link #time(Runnable)}, but returns the return value of {@code func}.
      */
     default <T> T time(Supplier<T> func) {
         try (Timer timer = startTimer()) {
