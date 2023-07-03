@@ -11,7 +11,42 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-// experimental
+/**
+ * StateSet metric. Example:
+ * <pre>{@code
+ * public enum Feature {
+ *
+ *     FEATURE_1("feature1"),
+ *     FEATURE_2("feature2");
+ *
+ *     private final String name;
+ *
+ *     Feature(String name) {
+ *         this.name = name;
+ *     }
+ *
+ *     @Override
+ *     public String toString() {
+ *         return name;
+ *     }
+ * }
+ *
+ * public static void main(String[] args) {
+ *
+ *     StateSet stateSet = StateSet.newBuilder()
+ *             .withName("feature_flags")
+ *             .withHelp("Feature flags")
+ *             .withLabelNames("env")
+ *             .withStates(Feature.class)
+ *             .register();
+ *
+ *     stateSet.withLabelValues("dev").setFalse(FEATURE_1);
+ *     stateSet.withLabelValues("dev").setTrue(FEATURE_2);
+ * }
+ * }</pre>
+ * The example above shows how to use a StateSet with an enum.
+ * You don't have to use enum, you can use regular strings as well.
+ */
 public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoint> implements StateSetDataPoint {
 
     private final boolean exemplarsEnabled;
@@ -29,9 +64,28 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public StateSetSnapshot collect() {
         return (StateSetSnapshot) super.collect();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setTrue(String state) {
+        getNoLabels().setTrue(state);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setFalse(String state) {
+        getNoLabels().setFalse(state);
     }
 
     @Override
@@ -53,16 +107,6 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
         return exemplarsEnabled;
     }
 
-    @Override
-    public void setTrue(String state) {
-        getNoLabels().setTrue(state);
-    }
-
-    @Override
-    public void setFalse(String state) {
-        getNoLabels().setFalse(state);
-    }
-
     class DataPoint implements StateSetDataPoint {
 
         private final boolean[] values = new boolean[names.length];
@@ -70,11 +114,17 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
         private DataPoint() {
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void setTrue(String state) {
             set(state, true);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void setFalse(String state) {
             set(state, false);
@@ -91,6 +141,13 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
         }
     }
 
+    public static Builder newBuilder() {
+        return new Builder(PrometheusProperties.get());
+    }
+
+    public static Builder newBuilder(PrometheusProperties config) {
+        return new Builder(config);
+    }
 
     public static class Builder extends StatefulMetric.Builder<Builder, StateSet> {
 
@@ -100,10 +157,16 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
             super(Collections.emptyList(), config);
         }
 
+        /**
+         * Declare the states that should be represented by this StateSet.
+         */
         public Builder withStates(Class<? extends Enum<?>> enumClass) {
             return withStates(Stream.of(enumClass.getEnumConstants()).map(Enum::toString).toArray(String[]::new));
         }
 
+        /**
+         * Declare the states that should be represented by this StateSet.
+         */
         public Builder withStates(String... stateNames) {
             if (stateNames.length == 0) {
                 throw new IllegalArgumentException("states cannot be empty");
@@ -127,13 +190,5 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
         protected Builder self() {
             return this;
         }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder(PrometheusProperties.get());
-    }
-
-    public static Builder newBuilder(PrometheusProperties config) {
-        return new Builder(config);
     }
 }

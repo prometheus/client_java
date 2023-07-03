@@ -13,6 +13,22 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongSupplier;
 
+/**
+ * The ExemplarSampler selects Spans as exemplars.
+ * <p>
+ * There are two types of Exemplars: Regular exemplars are sampled implicitly if a supported tracing
+ * library is detected. Custom exemplars are provided explicitly in code, for example if a developer
+ * wants to make sure an Exemplar is created for a specific code path.
+ * <p>
+ * Spans will be marked as being an Exemplar by calling {@link SpanContext#markCurrentSpanAsExemplar()}.
+ * The tracer implementation should set a Span attribute to mark the current Span as an Exemplar.
+ * This attribute can be used by a trace sampling algorithm to make sure traces with Exemplars are sampled.
+ * <p>
+ * The ExemplarSample is rate-limited, so only a small fraction of Spans will be marked as Exemplars in
+ * an application with a large number of requests.
+ * <p>
+ * See {@link ExemplarSamplerConfig} for configuration options.
+ */
 public class ExemplarSampler {
 
     private final ExemplarSamplerConfig config;
@@ -64,15 +80,14 @@ public class ExemplarSampler {
 
     public void observe(double value) {
         if (!acceptingNewExemplars.get()) {
-            return;
+            return; // This is the hot path in a high-throughput application and should be as efficient as possible.
         }
         rateLimitedObserve(acceptingNewExemplars, value, exemplars, () -> doObserve(value));
     }
 
     public void observeWithExemplar(double value, Labels labels) {
         if (!acceptingNewCustomExemplars.get()) {
-            // This is the hot path. This should be as efficient as possible.
-            return;
+            return; // This is the hot path in a high-throughput application and should be as efficient as possible.
         }
         rateLimitedObserve(acceptingNewCustomExemplars, value, customExemplars, () -> doObserveWithExemplar(value, labels));
     }
@@ -100,7 +115,7 @@ public class ExemplarSampler {
         long now = System.currentTimeMillis();
         double[] upperBounds = config.getHistogramClassicUpperBounds();
         for (int i = 0; i < upperBounds.length; i++) {
-            if (upperBounds[i] >= value) {
+            if (value <= upperBounds[i]) {
                 Exemplar previous = exemplars[i];
                 if (previous == null || now - previous.getTimestampMillis() > config.getMinRetentionPeriodMillis()) {
                     return updateExemplar(i, value, now);
@@ -188,7 +203,7 @@ public class ExemplarSampler {
         long now = System.currentTimeMillis();
         double[] upperBounds = config.getHistogramClassicUpperBounds();
         for (int i = 0; i < upperBounds.length; i++) {
-            if (upperBounds[i] > value) {
+            if (value <= upperBounds[i]) {
                 Exemplar previous = customExemplars[i];
                 if (previous == null || now - previous.getTimestampMillis() > config.getMinRetentionPeriodMillis()) {
                     return updateCustomExemplar(i, value, labels, now);
@@ -197,7 +212,6 @@ public class ExemplarSampler {
                 }
             }
         }
-        // TODO will happen for +Inf observations
         return 0; // will never happen, as upperBounds contains +Inf
     }
 
@@ -268,7 +282,7 @@ public class ExemplarSampler {
 
     private long updateCustomExemplar(int index, double value, Labels labels, long now) {
         if (!labels.contains(Exemplar.TRACE_ID) && !labels.contains(Exemplar.SPAN_ID)) {
-            labels = labels.merge(newTraceLabels());
+            labels = labels.merge(doSampleExemplar());
         }
         customExemplars[index] = Exemplar.newBuilder()
                 .withValue(value)
@@ -279,7 +293,7 @@ public class ExemplarSampler {
     }
 
     private long updateExemplar(int index, double value, long now) {
-        Labels traceLabels = newTraceLabels();
+        Labels traceLabels = doSampleExemplar();
         if (!traceLabels.isEmpty()) {
             exemplars[index] = Exemplar.newBuilder()
                     .withValue(value)
@@ -292,7 +306,7 @@ public class ExemplarSampler {
         }
     }
 
-    private Labels newTraceLabels() {
+    private Labels doSampleExemplar() {
         try {
             SpanContext spanContext = SpanContextSupplier.getSpanContext();
             if (spanContext != null) {
@@ -300,6 +314,7 @@ public class ExemplarSampler {
                     String spanId = spanContext.getCurrentSpanId();
                     String traceId = spanContext.getCurrentTraceId();
                     if (spanId != null && traceId != null) {
+                        spanContext.markCurrentSpanAsExemplar();
                         return Labels.of(Exemplar.TRACE_ID, traceId, Exemplar.SPAN_ID, spanId);
                     }
                 }

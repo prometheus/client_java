@@ -8,6 +8,12 @@ import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Almost all metrics have fixed metadata, i.e. the metric name is known when the metric is created.
+ * <p>
+ * An exception would be a metric that is a bridge to a 3rd party metric library, where the metric name
+ * has to be retrieved from the 3rd party metric library at scrape time.
+ */
 public abstract class MetricWithFixedMetadata extends Metric {
 
     private final MetricMetadata metadata;

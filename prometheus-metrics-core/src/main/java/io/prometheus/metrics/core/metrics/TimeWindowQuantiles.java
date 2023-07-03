@@ -5,8 +5,8 @@ import io.prometheus.metrics.core.metrics.CKMSQuantiles.Quantile;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Wrapper around CKMSQuantiles.
- *
+ * Wrapper around {@link CKMSQuantiles}.
+ * <p>
  * Maintains a ring buffer of CKMSQuantiles to provide quantiles over a sliding windows of time.
  */
 class TimeWindowQuantiles {

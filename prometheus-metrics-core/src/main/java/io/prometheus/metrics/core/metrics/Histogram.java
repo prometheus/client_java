@@ -685,6 +685,9 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
                     .build();
         }
 
+        /**
+         * Default properties for histogram metrics.
+         */
         @Override
         public MetricProperties getDefaultProperties() {
             return MetricProperties.newBuilder()

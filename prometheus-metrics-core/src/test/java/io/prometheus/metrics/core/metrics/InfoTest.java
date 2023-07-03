@@ -9,8 +9,11 @@ public class InfoTest {
 
     @Test
     public void testIncrement() {
-        Info info = Info.newBuilder().withName("target_info").build();
-        info.info(Labels.of("key", "value"));
+        Info info = Info.newBuilder()
+                .withName("target_info")
+                .withLabelNames("key")
+                .build();
+        info.infoLabelValues("value");
         InfoSnapshot snapshot = info.collect();
         Assert.assertEquals("target", snapshot.getMetadata().getName());
         Assert.assertEquals(1, snapshot.getData().size());

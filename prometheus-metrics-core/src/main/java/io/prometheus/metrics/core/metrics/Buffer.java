@@ -8,6 +8,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Metrics support concurrent write and scrape operations.
+ * <p>
+ * This is implemented by switching to a Buffer when the scrape starts,
+ * and applying the values from the buffer after the scrape ends.
+ */
 class Buffer {
 
     private static final long signBit = 1L << 63;

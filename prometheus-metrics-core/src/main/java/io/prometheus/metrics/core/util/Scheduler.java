@@ -7,6 +7,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Used for scheduling maintenance tasks like purging outdated Exemplars or resetting native histograms.
+ */
 public class Scheduler {
 
     private static class DaemonThreadFactory implements ThreadFactory {
@@ -17,8 +20,6 @@ public class Scheduler {
         }
     }
 
-    // TODO: Does this start a thread right away, or only after it is used for the first time?
-    // If we want this library to work in native mode we can't start a thread in a static initializer.
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory());
 
     public static ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {

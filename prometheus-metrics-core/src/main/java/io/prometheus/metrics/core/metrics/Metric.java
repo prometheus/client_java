@@ -10,6 +10,9 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Common base class for all metrics.
+ */
 public abstract class Metric implements Collector {
 
     protected final Labels constLabels;
