@@ -1436,14 +1436,14 @@ public class ExpositionFormatsTest {
 
     private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true);
+        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
         writer.write(out, MetricSnapshots.of(snapshot));
         Assert.assertEquals(expected, out.toString());
     }
 
     private void assertOpenMetricsTextWithoutCreated(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false);
+        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
         writer.write(out, MetricSnapshots.of(snapshot));
         Assert.assertEquals(expected, out.toString());
     }

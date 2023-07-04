@@ -7,20 +7,31 @@ import java.util.concurrent.TimeUnit;
 
 public class ExemplarSamplerConfig {
 
+    /**
+     * See {@link ExemplarProperties#getMinRetentionPeriodSeconds()}
+     */
     public static final int DEFAULT_MIN_RETENTION_PERIOD_SECONDS = 7;
+
+    /**
+     * See {@link ExemplarProperties#getMaxRetentionPeriodSeconds()}
+     */
     public static final int DEFAULT_MAX_RETENTION_PERIOD_SECONDS = 70;
+
+    /**
+     * See {@link ExemplarProperties#getSampleIntervalMilliseconds()}
+     */
     private static final int DEFAULT_SAMPLE_INTERVAL_MILLISECONDS = 90;
 
     private final long minRetentionPeriodMillis;
     private final long maxRetentionPeriodMillis;
     private final long sampleIntervalMillis;
-    private final double[] histogramClassicUpperBounds; // null unless used in a classic histogram
+    private final double[] histogramClassicUpperBounds; // null unless it's a classic histogram
     private final int numberOfExemplars; // if histogramClassicUpperBounds != null, then numberOfExemplars == histogramClassicUpperBounds.length
 
     /**
      * Constructor for all metric types except classic histograms.
      *
-     * @param properties        Coming from {@link PrometheusProperties#getExemplarConfig()}.
+     * @param properties        See {@link PrometheusProperties#getExemplarConfig()}.
      * @param numberOfExemplars Counters have 1 Exemplar, native histograms and summaries have 4 Exemplars by default.
      *                          For classic histogram use {@link #ExemplarSamplerConfig(ExemplarProperties, double[])}.
      */
@@ -31,7 +42,7 @@ public class ExemplarSamplerConfig {
     /**
      * Constructor for classic histogram metrics.
      *
-     * @param properties                  Coming from {@link PrometheusProperties#getExemplarConfig()}.
+     * @param properties                  See {@link PrometheusProperties#getExemplarConfig()}.
      * @param histogramClassicUpperBounds the ExemplarSampler will provide one Exemplar per histogram bucket.
      *                                    Must be sorted, and must include the +Inf bucket.
      */
@@ -94,18 +105,30 @@ public class ExemplarSamplerConfig {
         return histogramClassicUpperBounds;
     }
 
+    /**
+     * See {@link ExemplarProperties#getMinRetentionPeriodSeconds()}
+     */
     public long getMinRetentionPeriodMillis() {
         return minRetentionPeriodMillis;
     }
 
+    /**
+     * See {@link ExemplarProperties#getMaxRetentionPeriodSeconds()}
+     */
     public long getMaxRetentionPeriodMillis() {
         return maxRetentionPeriodMillis;
     }
 
+    /**
+     * See {@link ExemplarProperties#getSampleIntervalMilliseconds()}
+     */
     public long getSampleIntervalMillis() {
         return sampleIntervalMillis;
     }
 
+    /**
+     * Defaults: Counters have one Exemplar, native histograms and summaries have 4 Exemplars, classic histograms have one Exemplar per bucket.
+     */
     public int getNumberOfExemplars() {
         return numberOfExemplars;
     }

@@ -37,12 +37,14 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
     public final static String CONTENT_TYPE = "application/openmetrics-text; version=1.0.0; charset=utf-8";
     private final boolean createdTimestampsEnabled;
+    private final boolean exemplarsOnAllMetricTypesEnabled;
 
     /**
      * @param createdTimestampsEnabled defines if {@code _created} timestamps should be included in the output or not.
      */
-    public OpenMetricsTextFormatWriter(boolean createdTimestampsEnabled) {
+    public OpenMetricsTextFormatWriter(boolean createdTimestampsEnabled, boolean exemplarsOnAllMetricTypesEnabled) {
         this.createdTimestampsEnabled = createdTimestampsEnabled;
+        this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
     }
 
     @Override
@@ -100,7 +102,11 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getData()) {
             writeNameAndLabels(writer, metadata.getName(), null, data.getLabels());
             writeDouble(writer, data.getValue());
-            writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
+            if (exemplarsOnAllMetricTypesEnabled) {
+                writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
+            } else {
+                writeScrapeTimestampAndExemplar(writer, data, null);
+            }
         }
     }
 
@@ -172,7 +178,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
             for (Quantile quantile : data.getQuantiles()) {
                 writeNameAndLabels(writer, metadata.getName(), null, data.getLabels(), "quantile", quantile.getQuantile());
                 writeDouble(writer, quantile.getValue());
-                if (exemplars.size() > 0) {
+                if (exemplars.size() > 0 && exemplarsOnAllMetricTypesEnabled) {
                     exemplarIndex = (exemplarIndex + 1) % exemplars.size();
                     writeScrapeTimestampAndExemplar(writer, data, exemplars.get(exemplarIndex));
                 } else {
@@ -234,7 +240,11 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         for (UnknownSnapshot.UnknownDataPointSnapshot data : snapshot.getData()) {
             writeNameAndLabels(writer, metadata.getName(), null, data.getLabels());
             writeDouble(writer, data.getValue());
+            if (exemplarsOnAllMetricTypesEnabled) {
             writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
+            } else {
+                writeScrapeTimestampAndExemplar(writer, data, null);
+            }
         }
     }
 
@@ -328,6 +338,4 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
             writer.write('\n');
         }
     }
-
-
 }

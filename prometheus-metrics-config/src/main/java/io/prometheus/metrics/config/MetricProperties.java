@@ -159,46 +159,80 @@ public class MetricProperties {
         }
     }
 
+    /**
+     * This is the only configuration property that can be applied to all metric types.
+     * You can use it to turn Exemplar support off. Default is {@code true}.
+     */
     public Boolean getExemplarsEnabled() {
         return exemplarsEnabled;
     }
 
+    /**
+     * See {@code Histogram.Builder.nativeOnly()}
+     */
     public Boolean getHistogramNativeOnly() {
         return histogramNativeOnly;
     }
 
+    /**
+     * See {@code Histogram.Builder.classicOnly()}
+     */
     public Boolean getHistogramClassicOnly() {
         return histogramClassicOnly;
     }
 
+    /**
+     * See {@code Histogram.Builder.withClassicBuckets()}
+     */
     public double[] getHistogramClassicUpperBounds() {
         return histogramClassicUpperBounds;
     }
 
+    /**
+     * See {@code Histogram.Builder.withNativeInitialSchema()}
+     */
     public Integer getHistogramNativeInitialSchema() {
         return histogramNativeInitialSchema;
     }
 
+    /**
+     * See {@code Histogram.Builder.withNativeMinZeroThreshold()}
+     */
     public Double getHistogramNativeMinZeroThreshold() {
         return histogramNativeMinZeroThreshold;
     }
 
+    /**
+     * See {@code Histogram.Builder.withNativeMaxZeroThreshold()}
+     */
     public Double getHistogramNativeMaxZeroThreshold() {
         return histogramNativeMaxZeroThreshold;
     }
 
+    /**
+     * See {@code Histogram.Builder.withNativeMaxNumberOfBuckets()}
+     */
     public Integer getHistogramNativeMaxNumberOfBuckets() {
         return histogramNativeMaxNumberOfBuckets;
     }
 
+    /**
+     * See {@code Histogram.Builder.withNativeResetDuration()}
+     */
     public Long getHistogramNativeResetDurationSeconds() {
         return histogramNativeResetDurationSeconds;
     }
 
+    /**
+     * See {@code Summary.Builder.withQuantile()}
+     */
     public double[] getSummaryQuantiles() {
         return summaryQuantiles;
     }
 
+    /**
+     * See {@code Summary.Builder.withQuantile()}
+     */
     public double[] getSummaryQuantileErrors() {
         if (summaryQuantileErrors != null) {
             return summaryQuantileErrors;
@@ -217,16 +251,23 @@ public class MetricProperties {
         }
     }
 
+    /**
+     * See {@code Summary.Builder.withMaxAgeSeconds()}
+     */
     public Long getSummaryMaxAgeSeconds() {
         return summaryMaxAgeSeconds;
     }
 
+    /**
+     * See {@code Summary.Builder.withNumberOfAgeBuckets()}
+     */
     public Integer getSummaryNumberOfAgeBuckets() {
         return summaryNumberOfAgeBuckets;
     }
 
     /**
-     * Properties that are loaded will be removed from the map. The remaining properties are unused.
+     * Properties that are loaded will be removed from {@code properties}.
+     * The remaining entries in {@code properties} are unused.
      */
     static MetricProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
         return new MetricProperties(
@@ -284,66 +325,105 @@ public class MetricProperties {
                     summaryNumberOfAgeBuckets);
         }
 
+        /**
+         * See {@link MetricProperties#getExemplarsEnabled()}
+         */
         public Builder withExemplarsEnabled(Boolean exemplarsEnabled) {
             this.exemplarsEnabled = exemplarsEnabled;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getHistogramNativeOnly()}
+         */
         public Builder withHistogramNativeOnly(Boolean histogramNativeOnly) {
             this.histogramNativeOnly = histogramNativeOnly;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getHistogramClassicOnly()}
+         */
         public Builder withHistogramClassicOnly(Boolean histogramClassicOnly) {
             this.histogramClassicOnly = histogramClassicOnly;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getHistogramClassicUpperBounds()}
+         */
         public Builder withHistogramClassicUpperBounds(double... histogramClassicUpperBounds) {
             this.histogramClassicUpperBounds = histogramClassicUpperBounds;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getHistogramNativeInitialSchema()}
+         */
         public Builder withHistogramNativeInitialSchema(Integer histogramNativeInitialSchema) {
             this.histogramNativeInitialSchema = histogramNativeInitialSchema;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getHistogramNativeMinZeroThreshold()}
+         */
         public Builder withHistogramNativeMinZeroThreshold(Double histogramNativeMinZeroThreshold) {
             this.histogramNativeMinZeroThreshold = histogramNativeMinZeroThreshold;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getHistogramNativeMaxZeroThreshold()}
+         */
         public Builder withHistogramNativeMaxZeroThreshold(Double histogramNativeMaxZeroThreshold) {
             this.histogramNativeMaxZeroThreshold = histogramNativeMaxZeroThreshold;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getHistogramNativeMaxNumberOfBuckets()}
+         */
         public Builder withHistogramNativeMaxNumberOfBuckets(Integer histogramNativeMaxNumberOfBuckets) {
             this.histogramNativeMaxNumberOfBuckets = histogramNativeMaxNumberOfBuckets;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getHistogramNativeResetDurationSeconds()}
+         */
         public Builder withHistogramNativeResetDurationSeconds(Long histogramNativeResetDurationSeconds) {
             this.histogramNativeResetDurationSeconds = histogramNativeResetDurationSeconds;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getSummaryQuantiles()}
+         */
         public Builder withSummaryQuantiles(double... summaryQuantiles) {
             this.summaryQuantiles = summaryQuantiles;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getSummaryQuantileErrors()}
+         */
         public Builder withSummaryQuantileErrors(double... summaryQuantileErrors) {
             this.summaryQuantileErrors = summaryQuantileErrors;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getSummaryMaxAgeSeconds()}
+         */
         public Builder withSummaryMaxAgeSeconds(Long summaryMaxAgeSeconds) {
             this.summaryMaxAgeSeconds = summaryMaxAgeSeconds;
             return this;
         }
 
+        /**
+         * See {@link MetricProperties#getSummaryNumberOfAgeBuckets()}
+         */
         public Builder withSummaryNumberOfAgeBuckets(Integer summaryNumberOfAgeBuckets) {
             this.summaryNumberOfAgeBuckets = summaryNumberOfAgeBuckets;
             return this;

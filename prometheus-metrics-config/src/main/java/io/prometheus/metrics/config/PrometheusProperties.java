@@ -3,6 +3,9 @@ package io.prometheus.metrics.config;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Allow overriding configuration like histogram bucket boundaries at application startup time.
+ */
 public class PrometheusProperties {
 
     private static final PrometheusProperties defaultInstance = PrometheusPropertiesLoader.load();

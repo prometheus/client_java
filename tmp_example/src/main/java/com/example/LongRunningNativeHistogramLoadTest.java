@@ -37,7 +37,7 @@ public class LongRunningNativeHistogramLoadTest {
         ScheduledExecutorService scraper = Executors.newSingleThreadScheduledExecutor();
 
         PrometheusProtobufWriter protoWriter = new PrometheusProtobufWriter();
-        OpenMetricsTextFormatWriter textWriter = new OpenMetricsTextFormatWriter(false);
+        OpenMetricsTextFormatWriter textWriter = new OpenMetricsTextFormatWriter(false, true);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         scraper.scheduleAtFixedRate(() -> {
             try {

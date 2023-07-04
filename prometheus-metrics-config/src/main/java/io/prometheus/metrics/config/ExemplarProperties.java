@@ -24,14 +24,31 @@ public class ExemplarProperties {
         this.sampleIntervalMilliseconds = sampleIntervalMilliseconds;
     }
 
+    /**
+     * Minimum time how long Exemplars are kept before they may be replaced by new Exemplars.
+     * <p>
+     * Default see {@code ExemplarSamplerConfig.DEFAULT_MIN_RETENTION_PERIOD_SECONDS}
+     */
     public Integer getMinRetentionPeriodSeconds() {
         return minRetentionPeriodSeconds;
     }
 
+    /**
+     * Maximum time how long Exemplars are kept before they are evicted.
+     * <p>
+     * Default see {@code ExemplarSamplerConfig.DEFAULT_MAX_RETENTION_PERIOD_SECONDS}
+     */
     public Integer getMaxRetentionPeriodSeconds() {
         return maxRetentionPeriodSeconds;
     }
 
+    /**
+     * Time between attempts to sample new Exemplars. This is a performance improvement for high-frequency
+     * applications, because with the sample interval we make sure that the exemplar sampler is not called
+     * for every single request.
+     * <p>
+     * Default see {@code ExemplarSamplerConfig.DEFAULT_SAMPLE_INTERVAL_MILLISECONDS}
+     */
     public Integer getSampleIntervalMilliseconds() {
         return sampleIntervalMilliseconds;
     }

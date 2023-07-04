@@ -896,6 +896,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * <p>
          * If the number of native buckets exceeds the maximum, the {@link #withNativeInitialSchema(int)} is decreased,
          * i.e. the resolution of the histogram is decreased to reduce the number of buckets.
+         * <p>
+         * Default is {@link Builder#DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS}.
          */
         public Builder withNativeMaxNumberOfBuckets(int nativeMaxBuckets) {
             this.nativeMaxNumberOfBuckets = nativeMaxBuckets;

@@ -291,7 +291,7 @@ public class HTTPServer implements Closeable {
         server = httpServer;
         List<ExpositionFormatWriter> expositionFormatWriters = Arrays.asList(
                 new PrometheusTextFormatWriter(true),
-                new OpenMetricsTextFormatWriter(true),
+                new OpenMetricsTextFormatWriter(true, true),
                 new PrometheusProtobufWriter());
         HttpHandler mHandler = new MetricsHandler(registry, expositionFormatWriters, sampleNameFilter);
         HttpHandler hHandler = new HealthyHandler();

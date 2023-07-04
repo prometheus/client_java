@@ -709,7 +709,7 @@ public class HistogramTest {
 
         // text
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false);
+        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
         writer.write(out, MetricSnapshots.of(snapshot));
         Assert.assertEquals(expectedClassic, out.toString());
     }
