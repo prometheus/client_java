@@ -73,6 +73,33 @@ public class Exemplars implements Iterable<Exemplar> {
         return null;
     }
 
+    /**
+     * Find the Exemplar with the newest timestamp. May return {@code null}.
+     */
+    public Exemplar getLatest() {
+        Exemplar latest = null;
+        for (int i=0; i<exemplars.size(); i++) {
+            Exemplar candidate = exemplars.get(i);
+            if (candidate == null) {
+                continue;
+            }
+            if (latest == null) {
+                latest = candidate;
+                continue;
+            }
+            if (!latest.hasTimestamp()) {
+                latest = candidate;
+                continue;
+            }
+            if (candidate.hasTimestamp()) {
+                if (latest.getTimestampMillis() < candidate.getTimestampMillis()) {
+                    latest = candidate;
+                }
+            }
+        }
+        return latest;
+    }
+
     public static class Builder {
 
         private final ArrayList<Exemplar> exemplars = new ArrayList<>();

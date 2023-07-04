@@ -1,9 +1,11 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.com_google_protobuf_3_21_7.TextFormat;
+import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
@@ -17,6 +19,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -661,31 +665,17 @@ public class HistogramTest {
     }
 
     @Test
-    public void testDefaults() {
+    public void testDefaults() throws IOException {
         Histogram histogram = Histogram.newBuilder().withName("test").build();
         histogram.observe(0.5);
-        Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(histogram.collect());
-        String expected = "" +
+        HistogramSnapshot snapshot = histogram.collect();
+        String expectedNative = "" +
                 "name: \"test\" " +
                 "type: HISTOGRAM " +
                 "metric { " +
                 "histogram { " +
                 "sample_count: 1 " +
                 "sample_sum: 0.5 " +
-                // Default should have classic buckets as well as native buckets.
-                // Default classic bucket boundaries should be the same as in client_golang.
-                "bucket { cumulative_count: 0 upper_bound: 0.005 } " +
-                "bucket { cumulative_count: 0 upper_bound: 0.01 } " +
-                "bucket { cumulative_count: 0 upper_bound: 0.025 } " +
-                "bucket { cumulative_count: 0 upper_bound: 0.05 } " +
-                "bucket { cumulative_count: 0 upper_bound: 0.1 } " +
-                "bucket { cumulative_count: 0 upper_bound: 0.25 } " +
-                "bucket { cumulative_count: 1 upper_bound: 0.5 } " +
-                "bucket { cumulative_count: 1 upper_bound: 1.0 } " +
-                "bucket { cumulative_count: 1 upper_bound: 2.5 } " +
-                "bucket { cumulative_count: 1 upper_bound: 5.0 } " +
-                "bucket { cumulative_count: 1 upper_bound: 10.0 } " +
-                "bucket { cumulative_count: 1 upper_bound: Infinity } " +
                 // default native schema is 5
                 "schema: 5 " +
                 // default zero threshold is 2^-128
@@ -694,7 +684,34 @@ public class HistogramTest {
                 "positive_span { offset: -32 length: 1 } " +
                 "positive_delta: 1 " +
                 "} }";
-        Assert.assertEquals(expected, TextFormat.printer().shortDebugString(protobufData));
+        String expectedClassic = "" +
+                // default classic buckets
+                "# TYPE test histogram\n" +
+                "test_bucket{le=\"0.005\"} 0\n" +
+                "test_bucket{le=\"0.01\"} 0\n" +
+                "test_bucket{le=\"0.025\"} 0\n" +
+                "test_bucket{le=\"0.05\"} 0\n" +
+                "test_bucket{le=\"0.1\"} 0\n" +
+                "test_bucket{le=\"0.25\"} 0\n" +
+                "test_bucket{le=\"0.5\"} 1\n" +
+                "test_bucket{le=\"1.0\"} 1\n" +
+                "test_bucket{le=\"2.5\"} 1\n" +
+                "test_bucket{le=\"5.0\"} 1\n" +
+                "test_bucket{le=\"10.0\"} 1\n" +
+                "test_bucket{le=\"+Inf\"} 1\n" +
+                "test_count 1\n" +
+                "test_sum 0.5\n" +
+                "# EOF\n";
+
+        // protobuf
+        Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(snapshot);
+        Assert.assertEquals(expectedNative, TextFormat.printer().shortDebugString(protobufData));
+
+        // text
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false);
+        writer.write(out, MetricSnapshots.of(snapshot));
+        Assert.assertEquals(expectedClassic, out.toString());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -47,6 +48,16 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     @Override
     public String getContentType() {
         return CONTENT_TYPE;
+    }
+
+    public String toDebugString(MetricSnapshots metricSnapshots) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (MetricSnapshot snapshot : metricSnapshots) {
+            if (snapshot.getData().size() > 0) {
+                stringBuilder.append(TextFormat.printer().printToString(convert(snapshot)));
+            }
+        }
+        return stringBuilder.toString();
     }
 
     @Override
@@ -146,7 +157,29 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     private Metrics.Metric.Builder convert(HistogramSnapshot.HistogramDataPointSnapshot data) {
         Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
         Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
-        if (data.hasClassicHistogramData()) {
+        if (data.hasNativeHistogramData()) {
+            histogramBuilder.setSchema(data.getNativeSchema());
+            histogramBuilder.setZeroCount(data.getNativeZeroCount());
+            histogramBuilder.setZeroThreshold(data.getNativeZeroThreshold());
+            addBuckets(histogramBuilder, data.getNativeBucketsForPositiveValues(), +1);
+            addBuckets(histogramBuilder, data.getNativeBucketsForNegativeValues(), -1);
+
+            // Add a single +Inf bucket for the exemplar.
+            // It is currently not possible to have more than one exemplar in a native histogram,
+            // see https://cloud-native.slack.com/archives/C02KR205UMU/p1688414381799849
+            Exemplar exemplar = data.getExemplars().getLatest();
+            if (exemplar != null) {
+                Metrics.Bucket.Builder bucketBuilder = Metrics.Bucket.newBuilder()
+                        .setCumulativeCount(getNativeCount(data))
+                        .setUpperBound(Double.POSITIVE_INFINITY);
+                bucketBuilder.setExemplar(convert(exemplar));
+                histogramBuilder.addBucket(bucketBuilder);
+            }
+        } else if (data.hasClassicHistogramData()) {
+
+            // Once native histograms support multiple exemplars the above can be changed from "else if" to "if",
+            // so that we always add the complete classic buckets and exemplars.
+
             ClassicHistogramBuckets buckets = data.getClassicBuckets();
             double lowerBound = Double.NEGATIVE_INFINITY;
             long cumulativeCount = 0;
@@ -164,13 +197,6 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
                 lowerBound = upperBound;
             }
         }
-        if (data.hasNativeHistogramData()) {
-            histogramBuilder.setSchema(data.getNativeSchema());
-            histogramBuilder.setZeroCount(data.getNativeZeroCount());
-            histogramBuilder.setZeroThreshold(data.getNativeZeroThreshold());
-            addBuckets(histogramBuilder, data.getNativeBucketsForPositiveValues(), +1);
-            addBuckets(histogramBuilder, data.getNativeBucketsForNegativeValues(), -1);
-        }
         addLabels(metricBuilder, data.getLabels());
         setScrapeTimestamp(metricBuilder, data);
         if (data.hasCount()) {
@@ -181,6 +207,21 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         }
         metricBuilder.setHistogram(histogramBuilder.build());
         return metricBuilder;
+    }
+
+    private long getNativeCount(HistogramSnapshot.HistogramDataPointSnapshot data) {
+        if (data.hasCount()) {
+            return data.getCount();
+        } else {
+            long count = data.getNativeZeroCount();
+            for (int i = 0; i < data.getNativeBucketsForPositiveValues().size(); i++) {
+                count += data.getNativeBucketsForPositiveValues().getCount(i);
+            }
+            for (int i = 0; i < data.getNativeBucketsForNegativeValues().size(); i++) {
+                count += data.getNativeBucketsForNegativeValues().getCount(i);
+            }
+            return count;
+        }
     }
 
     private void addBuckets(Metrics.Histogram.Builder histogramBuilder, NativeHistogramBuckets buckets, int sgn) {

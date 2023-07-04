@@ -16,7 +16,7 @@ public class ExpositionFormatProperties {
     }
 
     public Boolean getIncludeCreatedTimestamps() {
-        return includeCreatedTimestamps;
+        return includeCreatedTimestamps != null && includeCreatedTimestamps;
     }
 
     static ExpositionFormatProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {

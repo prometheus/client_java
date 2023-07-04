@@ -1106,6 +1106,7 @@ public class ExpositionFormatsTest {
                     "histogram { " +
                         "sample_count: 2 " +
                         "sample_sum: 4.2 " +
+                        "bucket { cumulative_count: 2 upper_bound: Infinity " + exemplar2protoString + " } " +
                         "schema: 5 " +
                         "zero_threshold: 0.0 " +
                         "zero_count: 0 " +
@@ -1118,6 +1119,7 @@ public class ExpositionFormatsTest {
                     "histogram { " +
                         "sample_count: 55 " + // bucket counts + zero count
                         "sample_sum: 3.2 " +
+                        "bucket { cumulative_count: 55 upper_bound: Infinity " + exemplar2protoString + " } " +
                         "schema: 5 " +
                         "zero_threshold: 0.0 " +
                         "zero_count: 1 " +
