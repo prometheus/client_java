@@ -39,7 +39,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
         return name;
     }
 
-    protected static abstract class Builder<B extends Builder<B, M>, M extends MetricWithFixedMetadata> extends Metric.Builder<B, M> {
+    public static abstract class Builder<B extends Builder<B, M>, M extends MetricWithFixedMetadata> extends Metric.Builder<B, M> {
 
         protected String name;
         private Unit unit;

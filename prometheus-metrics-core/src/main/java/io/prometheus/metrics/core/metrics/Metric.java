@@ -52,8 +52,12 @@ public abstract class Metric implements Collector {
         }
 
         public M register() {
+            return register(PrometheusRegistry.defaultRegistry);
+        }
+
+        public M register(PrometheusRegistry registry) {
             M metric = build();
-            PrometheusRegistry.defaultRegistry.register(metric);
+            registry.register(metric);
             return metric;
         }
 
