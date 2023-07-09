@@ -12,8 +12,8 @@ public class PrometheusPropertiesTest {
     @Test
     public void testPrometheusConfig() {
         PrometheusProperties result = PrometheusProperties.get();
-        Assert.assertEquals(11, result.getDefaultMetricProperties().getHistogramClassicUpperBounds().length);
-        Assert.assertEquals(4, result.getMetricProperties("http_duration_seconds").getHistogramClassicUpperBounds().length);
+        Assert.assertEquals(11, result.getDefaultMetricProperties().getHistogramClassicUpperBounds().size());
+        Assert.assertEquals(4, result.getMetricProperties("http_duration_seconds").getHistogramClassicUpperBounds().size());
     }
 
     @Test
@@ -23,7 +23,7 @@ public class PrometheusPropertiesTest {
             properties.load(stream);
         }
         Assert.assertEquals(1, properties.size());
-        MetricProperties.load("io.prometheus.metrics", properties);
+        MetricsProperties.load("io.prometheus.metrics", properties);
         Assert.assertEquals(0, properties.size());
     }
 }

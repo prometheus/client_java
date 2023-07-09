@@ -35,7 +35,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimest
  */
 public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
-    public final static String CONTENT_TYPE = "application/openmetrics-text; version=1.0.0; charset=utf-8";
+    public static final String CONTENT_TYPE = "application/openmetrics-text; version=1.0.0; charset=utf-8";
     private final boolean createdTimestampsEnabled;
     private final boolean exemplarsOnAllMetricTypesEnabled;
 

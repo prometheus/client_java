@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * Properties starting with io.prometheus.exemplars
  */
-public class ExemplarProperties {
+public class ExemplarsProperties {
 
     private static final String MIN_RETENTION_PERIOD_SECONDS = "minRetentionPeriodSeconds";
     private static final String MAX_RETENTION_PERIOD_SECONDS = "maxRetentionPeriodSeconds";
@@ -15,7 +15,7 @@ public class ExemplarProperties {
     private final Integer maxRetentionPeriodSeconds;
     private final Integer sampleIntervalMilliseconds;
 
-    public ExemplarProperties(
+    public ExemplarsProperties(
             Integer minRetentionPeriodSeconds,
             Integer maxRetentionPeriodSeconds,
             Integer sampleIntervalMilliseconds) {
@@ -53,7 +53,7 @@ public class ExemplarProperties {
         return sampleIntervalMilliseconds;
     }
 
-    static ExemplarProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
+    static ExemplarsProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
         Integer minRetentionPeriodSeconds = Util.loadInteger(prefix + "." + MIN_RETENTION_PERIOD_SECONDS, properties);
         Integer maxRetentionPeriodSeconds = Util.loadInteger(prefix + "." + MAX_RETENTION_PERIOD_SECONDS, properties);
         Integer sampleIntervalMilliseconds = Util.loadInteger(prefix + "." + SAMPLE_INTERVAL_MILLISECONDS, properties);
@@ -68,7 +68,7 @@ public class ExemplarProperties {
             }
         }
 
-        return new ExemplarProperties(
+        return new ExemplarsProperties(
                 minRetentionPeriodSeconds,
                 maxRetentionPeriodSeconds,
                 sampleIntervalMilliseconds

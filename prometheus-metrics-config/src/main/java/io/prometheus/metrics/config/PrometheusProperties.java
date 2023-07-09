@@ -10,46 +10,53 @@ public class PrometheusProperties {
 
     private static final PrometheusProperties defaultInstance = PrometheusPropertiesLoader.load();
 
-    private final MetricProperties defaultMetricProperties;
-    private final Map<String, MetricProperties> metricProperties = new HashMap<>();
-    private final ExemplarProperties exemplarConfig;
-    private final ExpositionFormatProperties expositionFormatProperties;
-    private final HttpServerProperties httpServerConfig;
+    private final MetricsProperties defaultMetricsProperties;
+    private final Map<String, MetricsProperties> metricProperties = new HashMap<>();
+    private final ExemplarsProperties exemplarProperties;
+    private final ExporterProperties exporterProperties;
+    private final ExporterFilterProperties exporterFilterProperties;
+    private final ExporterHttpServerProperties httpServerConfig;
 
     public static PrometheusProperties get() throws PrometheusPropertiesException {
         return defaultInstance;
     }
 
     public PrometheusProperties(
-            MetricProperties defaultMetricProperties,
-            Map<String, MetricProperties> metricProperties,
-            ExemplarProperties exemplarConfig,
-            ExpositionFormatProperties expositionFormatProperties,
-            HttpServerProperties httpServerConfig) {
-        this.defaultMetricProperties = defaultMetricProperties;
+            MetricsProperties defaultMetricsProperties,
+            Map<String, MetricsProperties> metricProperties,
+            ExemplarsProperties exemplarProperties,
+            ExporterProperties exporterProperties,
+            ExporterFilterProperties exporterFilterProperties,
+            ExporterHttpServerProperties httpServerConfig) {
+        this.defaultMetricsProperties = defaultMetricsProperties;
         this.metricProperties.putAll(metricProperties);
-        this.exemplarConfig = exemplarConfig;
-        this.expositionFormatProperties = expositionFormatProperties;
+        this.exemplarProperties = exemplarProperties;
+        this.exporterProperties = exporterProperties;
+        this.exporterFilterProperties = exporterFilterProperties;
         this.httpServerConfig = httpServerConfig;
     }
 
-    public MetricProperties getDefaultMetricProperties() {
-        return defaultMetricProperties;
+    public MetricsProperties getDefaultMetricProperties() {
+        return defaultMetricsProperties;
     }
 
-    public MetricProperties getMetricProperties(String metricName) {
+    public MetricsProperties getMetricProperties(String metricName) {
         return metricProperties.get(metricName);
     }
 
-    public ExemplarProperties getExemplarConfig() {
-        return exemplarConfig;
+    public ExemplarsProperties getExemplarProperties() {
+        return exemplarProperties;
     }
 
-    public ExpositionFormatProperties getExpositionFormatConfig() {
-        return expositionFormatProperties;
+    public ExporterProperties getExporterProperties() {
+        return exporterProperties;
     }
 
-    public HttpServerProperties getHttpServerConfig() {
+    public ExporterFilterProperties getExporterFilterProperties() {
+        return exporterFilterProperties;
+    }
+
+    public ExporterHttpServerProperties getExporterHttpServerProperties() {
         return httpServerConfig;
     }
 }

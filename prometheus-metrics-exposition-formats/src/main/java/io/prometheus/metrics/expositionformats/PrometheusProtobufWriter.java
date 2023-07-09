@@ -33,7 +33,7 @@ import static io.prometheus.metrics.expositionformats.ProtobufUtil.timestampFrom
  */
 public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
-    public final String CONTENT_TYPE = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
+    public static final String CONTENT_TYPE = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
 
     @Override
     public boolean accepts(String acceptHeader) {

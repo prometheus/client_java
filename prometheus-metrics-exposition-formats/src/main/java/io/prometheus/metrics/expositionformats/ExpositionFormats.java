@@ -1,6 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.metrics.config.ExpositionFormatProperties;
+import io.prometheus.metrics.config.ExporterProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 
 public class ExpositionFormats {
@@ -18,10 +18,10 @@ public class ExpositionFormats {
     }
 
     public static ExpositionFormats init() {
-        return init(PrometheusProperties.get().getExpositionFormatConfig());
+        return init(PrometheusProperties.get().getExporterProperties());
     }
 
-    public static ExpositionFormats init(ExpositionFormatProperties properties) {
+    public static ExpositionFormats init(ExporterProperties properties) {
         return new ExpositionFormats(
                 new PrometheusProtobufWriter(),
                 new PrometheusTextFormatWriter(properties.getIncludeCreatedTimestamps()),

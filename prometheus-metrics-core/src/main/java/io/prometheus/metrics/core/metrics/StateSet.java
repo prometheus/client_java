@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
@@ -54,8 +54,8 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
 
     private StateSet(Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
-        MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
-        exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
+        MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
         this.names = builder.names; // builder.names is already a validated copy
         for (String name : names) {
             if (this.getMetadata().getName().equals(name)) {

@@ -1,7 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.config.ExemplarProperties;
-import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.ExemplarsProperties;
+import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
@@ -109,8 +109,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
     private Histogram(Histogram.Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
-        MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
-        exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
+        MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
         nativeInitialSchema = getConfigProperty(properties, props -> {
             if (Boolean.TRUE.equals(props.getHistogramClassicOnly())) {
                 return CLASSIC_HISTOGRAM;
@@ -122,10 +122,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
             if (Boolean.TRUE.equals(props.getHistogramNativeOnly())) {
                 return new double[]{};
             } else if (props.getHistogramClassicUpperBounds() != null) {
-                SortedSet<Double> upperBounds = new TreeSet<>();
-                for (double upperBound : props.getHistogramClassicUpperBounds()) {
-                    upperBounds.add(upperBound);
-                }
+                SortedSet<Double> upperBounds = new TreeSet<>(props.getHistogramClassicUpperBounds());
                 upperBounds.add(Double.POSITIVE_INFINITY);
                 double[] result = new double[upperBounds.size()];
                 int i = 0;
@@ -137,16 +134,16 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
                 return null;
             }
         });
-        double max = getConfigProperty(properties, MetricProperties::getHistogramNativeMaxZeroThreshold);
-        double min = getConfigProperty(properties, MetricProperties::getHistogramNativeMinZeroThreshold);
+        double max = getConfigProperty(properties, MetricsProperties::getHistogramNativeMaxZeroThreshold);
+        double min = getConfigProperty(properties, MetricsProperties::getHistogramNativeMinZeroThreshold);
         nativeMaxZeroThreshold = max == builder.DEFAULT_NATIVE_MAX_ZERO_THRESHOLD && min > max ? min : max;
         nativeMinZeroThreshold = Math.min(min, nativeMaxZeroThreshold);
-        nativeMaxBuckets = getConfigProperty(properties, MetricProperties::getHistogramNativeMaxNumberOfBuckets);
-        nativeResetDurationSeconds = getConfigProperty(properties, MetricProperties::getHistogramNativeResetDurationSeconds);
-        ExemplarProperties exemplarProperties = prometheusProperties.getExemplarConfig();
+        nativeMaxBuckets = getConfigProperty(properties, MetricsProperties::getHistogramNativeMaxNumberOfBuckets);
+        nativeResetDurationSeconds = getConfigProperty(properties, MetricsProperties::getHistogramNativeResetDurationSeconds);
+        ExemplarsProperties exemplarsProperties = prometheusProperties.getExemplarProperties();
         exemplarSamplerConfig = classicUpperBounds.length == 0 ?
-                new ExemplarSamplerConfig(exemplarProperties, 4) :
-                new ExemplarSamplerConfig(exemplarProperties, classicUpperBounds);
+                new ExemplarSamplerConfig(exemplarsProperties, 4) :
+                new ExemplarSamplerConfig(exemplarsProperties, classicUpperBounds);
     }
 
     /**
@@ -671,8 +668,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         }
 
         @Override
-        protected MetricProperties toProperties() {
-            return MetricProperties.newBuilder()
+        protected MetricsProperties toProperties() {
+            return MetricsProperties.newBuilder()
                     .withExemplarsEnabled(exemplarsEnabled)
                     .withHistogramNativeOnly(nativeOnly)
                     .withHistogramClassicOnly(classicOnly)
@@ -689,8 +686,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * Default properties for histogram metrics.
          */
         @Override
-        public MetricProperties getDefaultProperties() {
-            return MetricProperties.newBuilder()
+        public MetricsProperties getDefaultProperties() {
+            return MetricsProperties.newBuilder()
                     .withExemplarsEnabled(true)
                     .withHistogramNativeOnly(false)
                     .withHistogramClassicOnly(false)

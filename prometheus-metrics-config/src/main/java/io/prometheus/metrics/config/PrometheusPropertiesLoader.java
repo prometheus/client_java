@@ -12,22 +12,30 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The Properties Loader is early stages.
+ * <p>
+ * It would be great to implement a subset of
+ * <a href="https://docs.spring.io/spring-boot/docs/3.1.x/reference/html/features.html#features.external-config">Spring Boot's Externalized Configuration</a>,
+ * like support for YAML, Properties, and env vars, or support for Spring's naming conventions for properties.
+ */
 public class PrometheusPropertiesLoader {
 
     public static PrometheusProperties load() throws PrometheusPropertiesException {
         Map<Object, Object> properties = loadProperties();
-        Map<String, MetricProperties> metricsConfigs = loadMetricsConfigs(properties);
-        MetricProperties defaultMetricProperties = MetricProperties.load("io.prometheus.metrics", properties);
-        ExemplarProperties exemplarConfig = ExemplarProperties.load("io.prometheus.exemplars", properties);
-        ExpositionFormatProperties expositionFormatProperties = ExpositionFormatProperties.load("io.prometheus.expositionFormat", properties);
-        HttpServerProperties httpServerConfig = HttpServerProperties.load("io.prometheus.httpServer", properties);
+        Map<String, MetricsProperties> metricsConfigs = loadMetricsConfigs(properties);
+        MetricsProperties defaultMetricsProperties = MetricsProperties.load("io.prometheus.metrics", properties);
+        ExemplarsProperties exemplarConfig = ExemplarsProperties.load("io.prometheus.exemplars", properties);
+        ExporterProperties exporterProperties = ExporterProperties.load("io.prometheus.exporter", properties);
+        ExporterFilterProperties exporterFilterProperties = ExporterFilterProperties.load("io.prometheus.exporter.filter", properties);
+        ExporterHttpServerProperties exporterHttpServerProperties = ExporterHttpServerProperties.load("io.prometheus.exporter.httpServer", properties);
         validateAllPropertiesProcessed(properties);
-        return new PrometheusProperties(defaultMetricProperties, metricsConfigs, exemplarConfig, expositionFormatProperties, httpServerConfig);
+        return new PrometheusProperties(defaultMetricsProperties, metricsConfigs, exemplarConfig, exporterProperties, exporterFilterProperties, exporterHttpServerProperties);
     }
 
     // This will remove entries from properties when they are processed.
-    private static Map<String, MetricProperties> loadMetricsConfigs(Map<Object, Object> properties) {
-        Map<String, MetricProperties> result = new HashMap<>();
+    private static Map<String, MetricsProperties> loadMetricsConfigs(Map<Object, Object> properties) {
+        Map<String, MetricsProperties> result = new HashMap<>();
         Pattern pattern = Pattern.compile("io\\.prometheus\\.metrics\\.([^.]+)\\.");
         // Create a copy of the keySet() for iterating. We cannot iterate directly over keySet()
         // because entries are removed when MetricsConfig.load(...) is called.
@@ -40,7 +48,7 @@ public class PrometheusPropertiesLoader {
             if (matcher.find()) {
                 String metricName = matcher.group(1);
                 if (!result.containsKey(metricName)) {
-                    result.put(metricName, MetricProperties.load("io.prometheus.metrics." + metricName, properties));
+                    result.put(metricName, MetricsProperties.load("io.prometheus.metrics." + metricName, properties));
                 }
             }
         }

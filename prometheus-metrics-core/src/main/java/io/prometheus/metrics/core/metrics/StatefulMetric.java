@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
@@ -88,17 +88,17 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
         return noLabels;
     }
 
-    protected MetricProperties[] getMetricProperties(Builder builder, PrometheusProperties prometheusProperties) {
+    protected MetricsProperties[] getMetricProperties(Builder builder, PrometheusProperties prometheusProperties) {
         String metricName = getMetadata().getName();
         if (prometheusProperties.getMetricProperties(metricName) != null) {
-            return new MetricProperties[]{
+            return new MetricsProperties[]{
                     prometheusProperties.getMetricProperties(metricName), // highest precedence
                     builder.toProperties(), // second-highest precedence
                     prometheusProperties.getDefaultMetricProperties(), // third-highest precedence
                     builder.getDefaultProperties() // fallback
             };
         } else {
-            return new MetricProperties[]{
+            return new MetricsProperties[]{
                     builder.toProperties(), // highest precedence
                     prometheusProperties.getDefaultMetricProperties(), // second-highest precedence
                     builder.getDefaultProperties() // fallback
@@ -106,9 +106,9 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
         }
     }
 
-    protected <T> T getConfigProperty(MetricProperties[] properties, Function<MetricProperties, T> getter) {
+    protected <T> T getConfigProperty(MetricsProperties[] properties, Function<MetricsProperties, T> getter) {
         T result;
-        for (MetricProperties props : properties) {
+        for (MetricsProperties props : properties) {
             result = getter.apply(props);
             if (result != null) {
                 return result;
@@ -140,8 +140,8 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
         /**
          * Override if there are more properties than just exemplars enabled.
          */
-        protected MetricProperties toProperties() {
-            return MetricProperties.newBuilder()
+        protected MetricsProperties toProperties() {
+            return MetricsProperties.newBuilder()
                     .withExemplarsEnabled(exemplarsEnabled)
                     .build();
         }
@@ -149,8 +149,8 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
         /**
          * Override if there are more properties than just exemplars enabled.
          */
-        public MetricProperties getDefaultProperties() {
-            return MetricProperties.newBuilder()
+        public MetricsProperties getDefaultProperties() {
+            return MetricsProperties.newBuilder()
                     .withExemplarsEnabled(true)
                     .build();
         }

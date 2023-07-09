@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
@@ -47,21 +47,21 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
 
     private Summary(Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
-        MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
-        this.exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
+        MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        this.exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
         this.quantiles = Collections.unmodifiableList(makeQuantiles(properties));
-        this.maxAgeSeconds = getConfigProperty(properties, MetricProperties::getSummaryMaxAgeSeconds);
-        this.ageBuckets = getConfigProperty(properties, MetricProperties::getSummaryNumberOfAgeBuckets);
-        this.exemplarSamplerConfig = new ExemplarSamplerConfig(prometheusProperties.getExemplarConfig(), 4);
+        this.maxAgeSeconds = getConfigProperty(properties, MetricsProperties::getSummaryMaxAgeSeconds);
+        this.ageBuckets = getConfigProperty(properties, MetricsProperties::getSummaryNumberOfAgeBuckets);
+        this.exemplarSamplerConfig = new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 4);
     }
 
-    private List<CKMSQuantiles.Quantile> makeQuantiles(MetricProperties[] properties) {
+    private List<CKMSQuantiles.Quantile> makeQuantiles(MetricsProperties[] properties) {
         List<CKMSQuantiles.Quantile> result = new ArrayList<>();
-        double[] quantiles = getConfigProperty(properties, MetricProperties::getSummaryQuantiles);
-        double[] errors = getConfigProperty(properties, MetricProperties::getSummaryQuantileErrors);
+        List<Double> quantiles = getConfigProperty(properties, MetricsProperties::getSummaryQuantiles);
+        List<Double> quantileErrors = getConfigProperty(properties, MetricsProperties::getSummaryQuantileErrors);
         if (quantiles != null) {
-            for (int i=0; i<quantiles.length; i++) {
-                result.add(new CKMSQuantiles.Quantile(quantiles[i], errors[i]));
+            for (int i=0; i<quantiles.size(); i++) {
+                result.add(new CKMSQuantiles.Quantile(quantiles.get(i), quantileErrors.get(i)));
             }
         }
         return result;
@@ -280,7 +280,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
         }
 
         @Override
-        protected MetricProperties toProperties() {
+        protected MetricsProperties toProperties() {
             double[] quantiles = null;
             double[] quantileErrors = null;
             if (!this.quantiles.isEmpty()) {
@@ -291,7 +291,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
                     quantileErrors[i] = this.quantiles.get(i).epsilon;
                 }
             }
-            return MetricProperties.newBuilder()
+            return MetricsProperties.newBuilder()
                     .withExemplarsEnabled(exemplarsEnabled)
                     .withSummaryQuantiles(quantiles)
                     .withSummaryQuantileErrors(quantileErrors)
@@ -304,8 +304,8 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
          * Default properties for summary metrics.
          */
         @Override
-        public MetricProperties getDefaultProperties() {
-            return MetricProperties.newBuilder()
+        public MetricsProperties getDefaultProperties() {
+            return MetricsProperties.newBuilder()
                     .withExemplarsEnabled(true)
                     .withSummaryNumberOfAgeBuckets(DEFAULT_NUMBER_OF_AGE_BUCKETS)
                     .withSummaryMaxAgeSeconds(DEFAULT_MAX_AGE_SECONDS)

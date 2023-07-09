@@ -32,7 +32,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimest
  */
 public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
 
-    public final static String CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8";
+    public static final String CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8";
 
     private final boolean writeCreatedTimestamps;
 

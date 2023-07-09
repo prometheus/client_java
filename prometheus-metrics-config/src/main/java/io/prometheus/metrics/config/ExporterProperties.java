@@ -3,9 +3,9 @@ package io.prometheus.metrics.config;
 import java.util.Map;
 
 /**
- * Properties starting with io.prometheus.expositionFormat
+ * Properties starting with io.prometheus.exporter
  */
-public class ExpositionFormatProperties {
+public class ExporterProperties {
 
     private static final String INCLUDE_CREATED_TIMESTAMPS = "includeCreatedTimestamps";
     private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplarsOnAllMetricTypes";
@@ -13,7 +13,7 @@ public class ExpositionFormatProperties {
     private final Boolean includeCreatedTimestamps;
     private final Boolean exemplarsOnAllMetricTypes;
 
-    public ExpositionFormatProperties(Boolean includeCreatedTimestamps, Boolean exemplarsOnAllMetricTypes) {
+    public ExporterProperties(Boolean includeCreatedTimestamps, Boolean exemplarsOnAllMetricTypes) {
         this.includeCreatedTimestamps = includeCreatedTimestamps;
         this.exemplarsOnAllMetricTypes = exemplarsOnAllMetricTypes;
     }
@@ -33,9 +33,9 @@ public class ExpositionFormatProperties {
         return exemplarsOnAllMetricTypes != null && exemplarsOnAllMetricTypes;
     }
 
-    static ExpositionFormatProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
+    static ExporterProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
         Boolean includeCreatedTimestamps = Util.loadBoolean(prefix + "." + INCLUDE_CREATED_TIMESTAMPS, properties);
         Boolean exemplarsOnAllMetricTypes = Util.loadBoolean(prefix + "." + EXEMPLARS_ON_ALL_METRIC_TYPES, properties);
-        return new ExpositionFormatProperties(includeCreatedTimestamps, exemplarsOnAllMetricTypes);
+        return new ExporterProperties(includeCreatedTimestamps, exemplarsOnAllMetricTypes);
     }
 }

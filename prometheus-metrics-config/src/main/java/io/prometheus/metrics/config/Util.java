@@ -1,5 +1,8 @@
 package io.prometheus.metrics.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -24,23 +27,42 @@ public class Util {
         return null;
     }
 
-    public static double[] loadDoubleArray(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
+    public static List<Double> toList(double... values) {
+        if (values == null) {
+            return null;
+        }
+        List<Double> result = new ArrayList<>(values.length);
+        for (double value : values) {
+            result.add(value);
+        }
+        return result;
+    }
+
+    public static List<String> loadStringList(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
         String property = getProperty(name, properties);
         if (property != null) {
-            String[] numbers = property.split(",");
-            double[] result = new double[numbers.length];
+            return Arrays.asList(property.split("\\s*,\\s*"));
+        }
+        return null;
+    }
+
+    public static List<Double> loadDoubleList(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
+        String property = getProperty(name, properties);
+        if (property != null) {
+            String[] numbers = property.split("\\s*,\\s*");
+            Double[] result = new Double[numbers.length];
             for (int i = 0; i < numbers.length; i++) {
                 try {
                     if ("+Inf".equals(numbers[i].trim())) {
                         result[i] = Double.POSITIVE_INFINITY;
                     } else {
-                        result[i] = Double.parseDouble(numbers[i].trim());
+                        result[i] = Double.parseDouble(numbers[i]);
                     }
                 } catch (NumberFormatException e) {
                     throw new PrometheusPropertiesException(name + "=" + property + ": Expecting comma separated list of double values");
                 }
             }
-            return result;
+            return Arrays.asList(result);
         }
         return null;
     }

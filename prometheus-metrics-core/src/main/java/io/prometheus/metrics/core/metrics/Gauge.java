@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.config.MetricProperties;
+import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.GaugeDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
@@ -43,10 +43,10 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
 
     private Gauge(Builder builder, PrometheusProperties prometheusProperties) {
         super(builder);
-        MetricProperties[] properties = getMetricProperties(builder, prometheusProperties);
-        exemplarsEnabled = getConfigProperty(properties, MetricProperties::getExemplarsEnabled);
+        MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
         if (exemplarsEnabled) {
-            exemplarSamplerConfig = new ExemplarSamplerConfig(prometheusProperties.getExemplarConfig(), 1);
+            exemplarSamplerConfig = new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 1);
         } else {
             exemplarSamplerConfig = null;
         }

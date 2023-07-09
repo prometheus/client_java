@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
-import io.prometheus.metrics.config.HttpServerProperties;
+import io.prometheus.metrics.config.ExporterHttpServerProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
@@ -98,7 +98,7 @@ public class HTTPServer implements Closeable {
         private HttpServer httpServer = null;
         private ExecutorService executorService = null;
         private PrometheusRegistry registry = null;
-        private HttpServerProperties properties = null;
+        private ExporterHttpServerProperties properties = null;
         private boolean daemon = false;
         private Predicate<String> sampleNameFilter;
         private Authenticator authenticator = null;
@@ -115,7 +115,7 @@ public class HTTPServer implements Closeable {
             return this;
         }
 
-        public Builder withProperties(HttpServerProperties properties) {
+        public Builder withProperties(ExporterHttpServerProperties properties) {
             this.properties = properties;
             return this;
         }
@@ -221,7 +221,7 @@ public class HTTPServer implements Closeable {
             if (port != null) {
                 return port;
             }
-            HttpServerProperties defaultProperties = PrometheusProperties.get().getHttpServerConfig();
+            ExporterHttpServerProperties defaultProperties = PrometheusProperties.get().getExporterHttpServerProperties();
             if (defaultProperties != null && defaultProperties.getPort() != null) {
                 return defaultProperties.getPort();
             }

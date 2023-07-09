@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.exemplars;
 
-import io.prometheus.metrics.config.ExemplarProperties;
+import io.prometheus.metrics.config.ExemplarsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 
 import java.util.concurrent.TimeUnit;
@@ -8,17 +8,17 @@ import java.util.concurrent.TimeUnit;
 public class ExemplarSamplerConfig {
 
     /**
-     * See {@link ExemplarProperties#getMinRetentionPeriodSeconds()}
+     * See {@link ExemplarsProperties#getMinRetentionPeriodSeconds()}
      */
     public static final int DEFAULT_MIN_RETENTION_PERIOD_SECONDS = 7;
 
     /**
-     * See {@link ExemplarProperties#getMaxRetentionPeriodSeconds()}
+     * See {@link ExemplarsProperties#getMaxRetentionPeriodSeconds()}
      */
     public static final int DEFAULT_MAX_RETENTION_PERIOD_SECONDS = 70;
 
     /**
-     * See {@link ExemplarProperties#getSampleIntervalMilliseconds()}
+     * See {@link ExemplarsProperties#getSampleIntervalMilliseconds()}
      */
     private static final int DEFAULT_SAMPLE_INTERVAL_MILLISECONDS = 90;
 
@@ -31,26 +31,26 @@ public class ExemplarSamplerConfig {
     /**
      * Constructor for all metric types except classic histograms.
      *
-     * @param properties        See {@link PrometheusProperties#getExemplarConfig()}.
+     * @param properties        See {@link PrometheusProperties#getExemplarProperties()}.
      * @param numberOfExemplars Counters have 1 Exemplar, native histograms and summaries have 4 Exemplars by default.
-     *                          For classic histogram use {@link #ExemplarSamplerConfig(ExemplarProperties, double[])}.
+     *                          For classic histogram use {@link #ExemplarSamplerConfig(ExemplarsProperties, double[])}.
      */
-    public ExemplarSamplerConfig(ExemplarProperties properties, int numberOfExemplars) {
+    public ExemplarSamplerConfig(ExemplarsProperties properties, int numberOfExemplars) {
         this(properties, numberOfExemplars, null);
     }
 
     /**
      * Constructor for classic histogram metrics.
      *
-     * @param properties                  See {@link PrometheusProperties#getExemplarConfig()}.
+     * @param properties                  See {@link PrometheusProperties#getExemplarProperties()}.
      * @param histogramClassicUpperBounds the ExemplarSampler will provide one Exemplar per histogram bucket.
      *                                    Must be sorted, and must include the +Inf bucket.
      */
-    public ExemplarSamplerConfig(ExemplarProperties properties, double[] histogramClassicUpperBounds) {
+    public ExemplarSamplerConfig(ExemplarsProperties properties, double[] histogramClassicUpperBounds) {
         this(properties, histogramClassicUpperBounds.length, histogramClassicUpperBounds);
     }
 
-    private ExemplarSamplerConfig(ExemplarProperties properties, int numberOfExemplars, double[] histogramClassicUpperBounds) {
+    private ExemplarSamplerConfig(ExemplarsProperties properties, int numberOfExemplars, double[] histogramClassicUpperBounds) {
         this(
                 TimeUnit.SECONDS.toMillis(getOrDefault(properties.getMinRetentionPeriodSeconds(), DEFAULT_MIN_RETENTION_PERIOD_SECONDS)),
                 TimeUnit.SECONDS.toMillis(getOrDefault(properties.getMaxRetentionPeriodSeconds(), DEFAULT_MAX_RETENTION_PERIOD_SECONDS)),
@@ -106,21 +106,21 @@ public class ExemplarSamplerConfig {
     }
 
     /**
-     * See {@link ExemplarProperties#getMinRetentionPeriodSeconds()}
+     * See {@link ExemplarsProperties#getMinRetentionPeriodSeconds()}
      */
     public long getMinRetentionPeriodMillis() {
         return minRetentionPeriodMillis;
     }
 
     /**
-     * See {@link ExemplarProperties#getMaxRetentionPeriodSeconds()}
+     * See {@link ExemplarsProperties#getMaxRetentionPeriodSeconds()}
      */
     public long getMaxRetentionPeriodMillis() {
         return maxRetentionPeriodMillis;
     }
 
     /**
-     * See {@link ExemplarProperties#getSampleIntervalMilliseconds()}
+     * See {@link ExemplarsProperties#getSampleIntervalMilliseconds()}
      */
     public long getSampleIntervalMillis() {
         return sampleIntervalMillis;
