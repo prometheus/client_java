@@ -8,10 +8,10 @@
         <version>0.16.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>prometheus-metrics-exporter-servlet-javax</artifactId>
+    <artifactId>prometheus-metrics-exporter-servlet-jakarta</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Java Simpleclient Servlet - Javax</name>
+    <name>Prometheus Java Simpleclient Servlet - Jakarta</name>
     <description>
         HTTP servlet exporter for the simpleclient.
     </description>
@@ -40,9 +40,9 @@
             <version>0.16.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
