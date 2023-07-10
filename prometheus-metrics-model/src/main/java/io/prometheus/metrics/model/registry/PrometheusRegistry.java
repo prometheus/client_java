@@ -59,29 +59,29 @@ public class PrometheusRegistry {
         return result.build();
     }
 
-    public MetricSnapshots scrape(Predicate<String> excludedNames) {
+    public MetricSnapshots scrape(Predicate<String> includedNames) {
         MetricSnapshots.Builder result = MetricSnapshots.newBuilder();
         for (Collector collector : collectors) {
             String name = collector.getName();
-            if (name == null || !excludedNames.test(name)) {
-                MetricSnapshot snapshot = collector.collect();
-                if (!excludedNames.test(snapshot.getMetadata().getName())) {
+            if (name == null || includedNames.test(name)) {
+                MetricSnapshot snapshot = collector.collect(includedNames);
+                if (snapshot != null) {
                     result.addMetricSnapshot(snapshot);
                 }
             }
         }
         for (MultiCollector collector : multiCollectors) {
             List<String> names = collector.getNames();
-            boolean excluded = true;
+            boolean excluded = true; // the multi-collector is excluded unless at least one name matches
             for (String name : names) {
-                if (!excludedNames.test(name)) {
+                if (includedNames.test(name)) {
                     excluded = false;
                     break;
                 }
             }
             if (!excluded) {
-                for (MetricSnapshot snapshot : collector.collect()) {
-                    if (!excludedNames.test(snapshot.getMetadata().getName())) {
+                for (MetricSnapshot snapshot : collector.collect(includedNames)) {
+                    if (snapshot != null) {
                         result.addMetricSnapshot(snapshot);
                     }
                 }

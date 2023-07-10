@@ -20,16 +20,16 @@ public interface Collector {
     MetricSnapshot collect();
 
     /**
-     * Like {@link #collect()}, but returns {@code null} if {@code excludedNames.test(name)} is {@code true}.
+     * Like {@link #collect()}, but returns {@code null} if {@code includedNames.test(name)} is {@code false}.
      * <p>
      * Override this if there is a more efficient way than first collecting the snapshot and then discarding it.
      */
-    default MetricSnapshot collect(Predicate<String> excludedNames) {
+    default MetricSnapshot collect(Predicate<String> includedNames) {
         MetricSnapshot result = collect();
-        if (excludedNames.test(result.getMetadata().getName())) {
-            return null;
-        } else {
+        if (includedNames.test(result.getMetadata().getName())) {
             return result;
+        } else {
+            return null;
         }
     }
 

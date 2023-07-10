@@ -19,15 +19,15 @@ public interface MultiCollector {
     MetricSnapshots collect();
 
     /**
-     * Like {@link #collect()}, but returns only the snapshots where {@code excludedNames.test(name)} is {@code false}.
+     * Like {@link #collect()}, but returns only the snapshots where {@code includedNames.test(name)} is {@code true}.
      * <p>
      * Override this if there is a more efficient way than first collecting all snapshot and then discarding the excluded ones.
      */
-    default MetricSnapshots collect(Predicate<String> excludedNames) {
+    default MetricSnapshots collect(Predicate<String> includedNames) {
         MetricSnapshots allSnapshots = collect();
         MetricSnapshots.Builder result = MetricSnapshots.newBuilder();
         for (MetricSnapshot snapshot : allSnapshots) {
-            if (!excludedNames.test(snapshot.getMetadata().getName())) {
+            if (includedNames.test(snapshot.getMetadata().getName())) {
                 result.addMetricSnapshot(snapshot);
             }
         }
