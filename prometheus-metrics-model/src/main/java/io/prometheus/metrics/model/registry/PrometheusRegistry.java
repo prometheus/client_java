@@ -60,6 +60,9 @@ public class PrometheusRegistry {
     }
 
     public MetricSnapshots scrape(Predicate<String> includedNames) {
+        if (includedNames == null) {
+            return scrape();
+        }
         MetricSnapshots.Builder result = MetricSnapshots.newBuilder();
         for (Collector collector : collectors) {
             String name = collector.getName();
