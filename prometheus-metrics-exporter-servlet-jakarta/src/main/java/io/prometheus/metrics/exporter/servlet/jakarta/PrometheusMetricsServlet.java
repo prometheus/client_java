@@ -1,4 +1,4 @@
-package io.prometheus.metrics.exporter.servlet.javax;
+package io.prometheus.metrics.exporter.servlet.jakarta;
 
 import io.prometheus.metrics.config.ExporterFilterProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
