@@ -51,25 +51,27 @@ public class PrometheusMetricsServlet extends HttpServlet {
         if (allowedNames != null) {
             filter = filter.and(MetricNameFilter.newBuilder().nameMustBeEqualTo(allowedNames).build());
         }
-        switch (request.getParameter("debug")) {
-            case "openmetrics":
-                response.setContentType("text/plain");
-                expositionFormats.getOpenMetricsTextFormatWriter().write(response.getOutputStream(), registry.scrape(filter));
-                break;
-            case "text":
-                response.setContentType("text/plain");
-                expositionFormats.getPrometheusTextFormatWriter().write(response.getOutputStream(), registry.scrape(filter));
-                break;
-            case "prometheus-protobuf":
-                response.setContentType("text/plain");
-                String debugString = expositionFormats.getPrometheusProtobufWriter().toDebugString(registry.scrape(filter));
-                response.getWriter().write(debugString);
-                break;
-            default:
-                String acceptHeader = request.getHeader("Accept");
-                ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
-                response.setContentType(writer.getContentType());
-                writer.write(response.getOutputStream(), registry.scrape(filter));
+        String debugParam = request.getParameter("debug");
+        if (debugParam != null) {
+            switch (debugParam) {
+                case "openmetrics":
+                    response.setContentType("text/plain");
+                    expositionFormats.getOpenMetricsTextFormatWriter().write(response.getOutputStream(), registry.scrape(filter));
+                    return;
+                case "text":
+                    response.setContentType("text/plain");
+                    expositionFormats.getPrometheusTextFormatWriter().write(response.getOutputStream(), registry.scrape(filter));
+                    return;
+                case "prometheus-protobuf":
+                    response.setContentType("text/plain");
+                    String debugString = expositionFormats.getPrometheusProtobufWriter().toDebugString(registry.scrape(filter));
+                    response.getWriter().write(debugString);
+                    return;
+            }
         }
+        String acceptHeader = request.getHeader("Accept");
+        ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
+        response.setContentType(writer.getContentType());
+        writer.write(response.getOutputStream(), registry.scrape(filter));
     }
 }
