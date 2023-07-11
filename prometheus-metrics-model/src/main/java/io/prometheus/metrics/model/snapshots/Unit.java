@@ -24,6 +24,12 @@ public class Unit {
 
     public Unit(String name) {
         this.name = name;
+        if (name == null) {
+            throw new NullPointerException("Unit name cannot be null.");
+        }
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Unit name cannot be empty.");
+        }
     }
 
     @Override
