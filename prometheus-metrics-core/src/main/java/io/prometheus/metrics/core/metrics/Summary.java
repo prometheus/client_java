@@ -60,8 +60,12 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
         List<Double> quantiles = getConfigProperty(properties, MetricsProperties::getSummaryQuantiles);
         List<Double> quantileErrors = getConfigProperty(properties, MetricsProperties::getSummaryQuantileErrors);
         if (quantiles != null) {
-            for (int i=0; i<quantiles.size(); i++) {
-                result.add(new CKMSQuantiles.Quantile(quantiles.get(i), quantileErrors.get(i)));
+            for (int i = 0; i < quantiles.size(); i++) {
+                if (quantileErrors.size() > 0) {
+                    result.add(new CKMSQuantiles.Quantile(quantiles.get(i), quantileErrors.get(i)));
+                } else {
+                    result.add(new CKMSQuantiles.Quantile(quantiles.get(i), Builder.defaultError(quantiles.get(i))));
+                }
             }
         }
         return result;
@@ -115,7 +119,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
 
         private final LongAdder count = new LongAdder();
         private final DoubleAdder sum = new DoubleAdder();
-        private final TimeWindowQuantiles quantileValues;
+        private final SlidingWindow<CKMSQuantiles> quantileValues;
         private final Buffer buffer = new Buffer();
         private final ExemplarSampler exemplarSampler;
 
@@ -123,7 +127,8 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
 
         private DataPoint() {
             if (quantiles.size() > 0) {
-                quantileValues = new TimeWindowQuantiles(quantiles.toArray(new CKMSQuantiles.Quantile[]{}), maxAgeSeconds, ageBuckets);
+                CKMSQuantiles.Quantile[] quantilesArray = quantiles.toArray(new CKMSQuantiles.Quantile[0]);
+                quantileValues = new SlidingWindow<>(CKMSQuantiles.class, () -> new CKMSQuantiles(quantilesArray), CKMSQuantiles::insert, maxAgeSeconds, ageBuckets);
             } else {
                 quantileValues = null;
             }
@@ -169,7 +174,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
         private void doObserve(double amount) {
             sum.add(amount);
             if (quantileValues != null) {
-                quantileValues.insert(amount);
+                quantileValues.observe(amount);
             }
             // count must be incremented last, because in collect() the count
             // indicates the number of completed observations.
@@ -193,7 +198,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
             Quantile[] quantiles = new Quantile[getQuantiles().size()];
             for (int i = 0; i < getQuantiles().size(); i++) {
                 CKMSQuantiles.Quantile quantile = getQuantiles().get(i);
-                quantiles[i] = new Quantile(quantile.quantile, quantileValues.get(quantile.quantile));
+                quantiles[i] = new Quantile(quantile.quantile, quantileValues.current().get(quantile.quantile));
             }
             return Quantiles.of(quantiles);
         }
@@ -224,6 +229,30 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
 
         private Builder(PrometheusProperties properties) {
             super(Collections.singletonList("quantile"), properties);
+        }
+
+        private static double defaultError(double quantile) {
+            if (quantile <= 0.01 || quantile >= 0.99) {
+                return 0.001;
+            } else if (quantile <= 0.02 || quantile >= 0.98) {
+                return 0.005;
+            } else {
+                return 0.01;
+            }
+        }
+
+        /**
+         * See {@link #withQuantile(double, double)}.
+         * <p>
+         * Default errors are:
+         * <ul>
+         *     <li>error = 0.001 if quantile &lt;= 0.01 or quantile &gt;= 0.99</li>
+         *     <li>error = 0.005 if quantile &lt;= 0.02 or quantile &gt;= 0.98</li>
+         *     <li>error = 0.01 else.
+         * </ul>
+         */
+        public Builder withQuantile(double quantile) {
+            return withQuantile(quantile, defaultError(quantile));
         }
 
         /**

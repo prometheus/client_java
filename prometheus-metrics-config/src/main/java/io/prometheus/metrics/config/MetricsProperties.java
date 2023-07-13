@@ -237,23 +237,18 @@ public class MetricsProperties {
 
     /**
      * See {@code Summary.Builder.withQuantile()}
+     * <p>
+     * Returns {@code null} only if {@link #getSummaryQuantiles()} is also {@code null}.
+     * Returns an empty list if {@link #getSummaryQuantiles()} are specified without specifying errors.
+     * If the list is not empty, it has the same size as {@link #getSummaryQuantiles()}.
      */
     public List<Double> getSummaryQuantileErrors() {
-        if (summaryQuantileErrors != null) {
-            return summaryQuantileErrors;
-        } else {
-            List<Double> result = new ArrayList<>(summaryQuantiles.size());
-            for (int i = 0; i < result.size(); i++) {
-                if (summaryQuantiles.get(i) <= 0.01 || summaryQuantiles.get(i) >= 0.99) {
-                    result.set(i, 0.001);
-                } else if (summaryQuantiles.get(i) <= 0.02 || summaryQuantiles.get(i) >= 0.98) {
-                    result.set(i, 0.005);
-                } else {
-                    result.set(i, 0.01);
-                }
+        if (summaryQuantiles != null) {
+            if (summaryQuantileErrors == null) {
+                return Collections.emptyList();
             }
-            return result;
         }
+        return summaryQuantileErrors;
     }
 
     /**
