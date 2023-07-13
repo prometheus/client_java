@@ -6,11 +6,13 @@ import java.util.function.ObjDoubleConsumer;
 import java.util.function.Supplier;
 
 /**
- * Wrapper around {@link CKMSQuantiles}.
+ * Maintains a ring buffer of T to implement a sliding time window.
  * <p>
- * Maintains a ring buffer of CKMSQuantiles to provide quantiles over a sliding windows of time.
+ * This is used to maintain a sliding window of {@link CKMSQuantiles} for {@link Summary} metrics.
+ * <p>
+ * It is implemented in a generic way so that 3rd party libraries can use it for implementing sliding windows.
  */
-class SlidingWindow<T> {
+public class SlidingWindow<T> {
 
     private final Supplier<T> constructor;
     private final ObjDoubleConsumer<T> observeFunction;
@@ -19,6 +21,16 @@ class SlidingWindow<T> {
     private long lastRotateTimestampMillis;
     private final long durationBetweenRotatesMillis;
 
+    /**
+     * Example: If the {@code maxAgeSeconds} is 60 and {@code ageBuckets} is 3, then 3 instances of {@code T}
+     * are maintained and the sliding window moves to the next instance of T every 20 seconds.
+     *
+     * @param clazz type of T
+     * @param constructor create a new instance of T as the old one gets evicted
+     * @param observeFunction make T observe a value
+     * @param maxAgeSeconds after this amount of seconds an instance of T gets evicted.
+     * @param ageBuckets number of age buckets.
+     */
     public SlidingWindow(Class<T> clazz, Supplier<T> constructor, ObjDoubleConsumer<T> observeFunction, long maxAgeSeconds, int ageBuckets) {
         this.constructor = constructor;
         this.observeFunction = observeFunction;
@@ -31,10 +43,16 @@ class SlidingWindow<T> {
         this.durationBetweenRotatesMillis = TimeUnit.SECONDS.toMillis(maxAgeSeconds) / ageBuckets;
     }
 
+    /**
+     * Get the currently active instance of {@code T}.
+     */
     public synchronized T current() {
         return rotate();
     }
 
+    /**
+     * Observe a value.
+     */
     public synchronized void observe(double value) {
         observeFunction.accept(rotate(), value);
     }
