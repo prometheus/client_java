@@ -15,7 +15,7 @@ public class ExemplarsProperties {
     private final Integer maxRetentionPeriodSeconds;
     private final Integer sampleIntervalMilliseconds;
 
-    public ExemplarsProperties(
+    private ExemplarsProperties(
             Integer minRetentionPeriodSeconds,
             Integer maxRetentionPeriodSeconds,
             Integer sampleIntervalMilliseconds) {
@@ -53,6 +53,10 @@ public class ExemplarsProperties {
         return sampleIntervalMilliseconds;
     }
 
+    /**
+     * Note that this will remove entries from {@code properties}.
+     * This is because we want to know if there are unused properties remaining after all properties have been loaded.
+     */
     static ExemplarsProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
         Integer minRetentionPeriodSeconds = Util.loadInteger(prefix + "." + MIN_RETENTION_PERIOD_SECONDS, properties);
         Integer maxRetentionPeriodSeconds = Util.loadInteger(prefix + "." + MAX_RETENTION_PERIOD_SECONDS, properties);
@@ -73,5 +77,38 @@ public class ExemplarsProperties {
                 maxRetentionPeriodSeconds,
                 sampleIntervalMilliseconds
         );
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private Integer minRetentionPeriodSeconds;
+        private Integer maxRetentionPeriodSeconds;
+        private Integer sampleIntervalMilliseconds;
+
+        private Builder() {
+        }
+
+        public Builder withMinRetentionPeriodSeconds(int minRetentionPeriodSeconds) {
+            this.minRetentionPeriodSeconds = minRetentionPeriodSeconds;
+            return this;
+        }
+
+        public Builder withMaxRetentionPeriodSeconds(int maxRetentionPeriodSeconds) {
+            this.maxRetentionPeriodSeconds = maxRetentionPeriodSeconds;
+            return this;
+        }
+
+        public Builder withSampleIntervalMilliseconds(int sampleIntervalMilliseconds) {
+            this.sampleIntervalMilliseconds = sampleIntervalMilliseconds;
+            return this;
+        }
+
+        public ExemplarsProperties builder() {
+            return new ExemplarsProperties(minRetentionPeriodSeconds, maxRetentionPeriodSeconds, sampleIntervalMilliseconds);
+        }
     }
 }

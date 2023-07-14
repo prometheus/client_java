@@ -21,6 +21,9 @@ import java.util.regex.Pattern;
  */
 public class PrometheusPropertiesLoader {
 
+    /**
+     * See {@link PrometheusProperties#get()}.
+     */
     public static PrometheusProperties load() throws PrometheusPropertiesException {
         Map<Object, Object> properties = loadProperties();
         Map<String, MetricsProperties> metricsConfigs = loadMetricsConfigs(properties);

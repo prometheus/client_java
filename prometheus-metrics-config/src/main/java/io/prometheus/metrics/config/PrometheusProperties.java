@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Allow overriding configuration like histogram bucket boundaries at application startup time.
+ * The Prometheus Java client library can be configured at runtime (e.g. using a properties file).
+ * <p>
+ * This class represents the runtime configuration.
  */
 public class PrometheusProperties {
 
-    private static final PrometheusProperties defaultInstance = PrometheusPropertiesLoader.load();
+    private static final PrometheusProperties instance = PrometheusPropertiesLoader.load();
 
     private final MetricsProperties defaultMetricsProperties;
     private final Map<String, MetricsProperties> metricProperties = new HashMap<>();
@@ -17,8 +19,16 @@ public class PrometheusProperties {
     private final ExporterFilterProperties exporterFilterProperties;
     private final ExporterHttpServerProperties httpServerConfig;
 
+    /**
+     * Get the properties instance. When called for the first time, {@code get()} loads the properties from the following locations:
+     * <ul>
+     *     <li>{@code prometheus.properties} file found in the classpath.</li>
+     *     <li>Properties file specified in the {@code PROMETHEUS_CONFIG} environment variable or the {@code prometheus.config} system property.</li>
+     *     <li>Individual properties from system properties.</li>
+     * </ul>
+     */
     public static PrometheusProperties get() throws PrometheusPropertiesException {
-        return defaultInstance;
+        return instance;
     }
 
     public PrometheusProperties(
@@ -36,10 +46,17 @@ public class PrometheusProperties {
         this.httpServerConfig = httpServerConfig;
     }
 
+    /**
+     * The default metric properties apply for metrics where {@link #getMetricProperties(String)} is {@code null}.
+     */
     public MetricsProperties getDefaultMetricProperties() {
         return defaultMetricsProperties;
     }
 
+    /**
+     * Properties specific for one metric. Should be merged with {@link #getDefaultMetricProperties()}.
+     * May return {@code null} if no metric-specific properties are configured for a metric name.
+     */
     public MetricsProperties getMetricProperties(String metricName) {
         return metricProperties.get(metricName);
     }

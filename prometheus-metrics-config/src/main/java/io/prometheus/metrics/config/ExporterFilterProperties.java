@@ -21,7 +21,7 @@ public class ExporterFilterProperties {
     private final List<String> allowedPrefixes;
     private final List<String> excludedPrefixes;
 
-    public ExporterFilterProperties(List<String> allowedNames, List<String> excludedNames, List<String> allowedPrefixes, List<String> excludedPrefixes) {
+    private ExporterFilterProperties(List<String> allowedNames, List<String> excludedNames, List<String> allowedPrefixes, List<String> excludedPrefixes) {
         this(allowedNames, excludedNames, allowedPrefixes, excludedPrefixes, "");
     }
 
@@ -52,6 +52,18 @@ public class ExporterFilterProperties {
     private void validate(String prefix) throws PrometheusPropertiesException {
     }
 
+    /**
+     * Note that this will remove entries from {@code properties}.
+     * This is because we want to know if there are unused properties remaining after all properties have been loaded.
+     */
+    static ExporterFilterProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
+        List<String> allowedNames = Util.loadStringList(prefix + "." + NAME_MUST_BE_EQUAL_TO, properties);
+        List<String> excludedNames = Util.loadStringList(prefix + "." + NAME_MUST_NOT_BE_EQUAL_TO, properties);
+        List<String> allowedPrefixes = Util.loadStringList(prefix + "." + NAME_MUST_START_WITH, properties);
+        List<String> excludedPrefixes = Util.loadStringList(prefix + "." + NAME_MUST_NOT_START_WITH, properties);
+        return new ExporterFilterProperties(allowedNames, excludedNames, allowedPrefixes, excludedPrefixes, prefix);
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -66,21 +78,33 @@ public class ExporterFilterProperties {
         private Builder() {
         }
 
+        /**
+         * Only allowed metric names will be exposed.
+         */
         public Builder withAllowedNames(String... allowedNames) {
             this.allowedNames = Arrays.asList(allowedNames);
             return this;
         }
 
+        /**
+         * Excluded metric names will not be exposed.
+         */
         public Builder withExcludedNames(String... excludedNames) {
             this.excludedNames = Arrays.asList(excludedNames);
             return this;
         }
 
+        /**
+         * Only metrics with a name starting with an allowed prefix will be exposed.
+         */
         public Builder withAllowedPrefixes(String... allowedPrefixes) {
             this.allowedPrefixes = Arrays.asList(allowedPrefixes);
             return this;
         }
 
+        /**
+         * Metrics with a name starting with an excluded prefix will not be exposed.
+         */
         public Builder withExcludedPrefixes(String... excludedPrefixes) {
             this.excludedPrefixes = Arrays.asList(excludedPrefixes);
             return this;
@@ -89,13 +113,5 @@ public class ExporterFilterProperties {
         public ExporterFilterProperties build() {
             return new ExporterFilterProperties(allowedNames, excludedNames, allowedPrefixes, excludedPrefixes);
         }
-    }
-
-    static ExporterFilterProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
-        List<String> allowedNames = Util.loadStringList(prefix + "." + NAME_MUST_BE_EQUAL_TO, properties);
-        List<String> excludedNames = Util.loadStringList(prefix + "." + NAME_MUST_NOT_BE_EQUAL_TO, properties);
-        List<String> allowedPrefixes = Util.loadStringList(prefix + "." + NAME_MUST_START_WITH, properties);
-        List<String> excludedPrefixes = Util.loadStringList(prefix + "." + NAME_MUST_NOT_START_WITH, properties);
-        return new ExporterFilterProperties(allowedNames, excludedNames, allowedPrefixes, excludedPrefixes, prefix);
     }
 }

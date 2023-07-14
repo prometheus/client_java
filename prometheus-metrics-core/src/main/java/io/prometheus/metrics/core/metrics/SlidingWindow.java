@@ -11,6 +11,8 @@ import java.util.function.Supplier;
  * This is used to maintain a sliding window of {@link CKMSQuantiles} for {@link Summary} metrics.
  * <p>
  * It is implemented in a generic way so that 3rd party libraries can use it for implementing sliding windows.
+ * <p>
+ * TODO: The current implementation is {@code synchronized}. There is likely room for optimization.
  */
 public class SlidingWindow<T> {
 
@@ -26,9 +28,9 @@ public class SlidingWindow<T> {
      * are maintained and the sliding window moves to the next instance of T every 20 seconds.
      *
      * @param clazz type of T
-     * @param constructor create a new instance of T as the old one gets evicted
-     * @param observeFunction make T observe a value
-     * @param maxAgeSeconds after this amount of seconds an instance of T gets evicted.
+     * @param constructor for creating a new instance of T as the old one gets evicted
+     * @param observeFunction for observing a value (e.g. calling {@code t.observe(value)}
+     * @param maxAgeSeconds after this amount of time an instance of T gets evicted.
      * @param ageBuckets number of age buckets.
      */
     public SlidingWindow(Class<T> clazz, Supplier<T> constructor, ObjDoubleConsumer<T> observeFunction, long maxAgeSeconds, int ageBuckets) {

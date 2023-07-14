@@ -266,8 +266,8 @@ public class MetricsProperties {
     }
 
     /**
-     * Properties that are loaded will be removed from {@code properties}.
-     * The remaining entries in {@code properties} are unused.
+     * Note that this will remove entries from {@code properties}.
+     * This is because we want to know if there are unused properties remaining after all properties have been loaded.
      */
     static MetricsProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
         return new MetricsProperties(
