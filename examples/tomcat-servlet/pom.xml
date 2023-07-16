@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>examples</artifactId>
-        <version>0.16.1-SNAPSHOT</version>
+        <version>1.0.0-alpha-1-SNAPSHOT</version>
     </parent>
 
     <artifactId>tomcat-servlet</artifactId>

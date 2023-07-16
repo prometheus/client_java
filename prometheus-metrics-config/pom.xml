@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>client_java</artifactId>
-        <version>0.16.1-SNAPSHOT</version>
+        <version>1.0.0-alpha-1-SNAPSHOT</version>
     </parent>
 
     <artifactId>prometheus-metrics-config</artifactId>
@@ -24,6 +24,14 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <id>fstab</id>
+            <name>Fabian Stäber</name>
+            <email>fabian@prometheus.io</email>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
