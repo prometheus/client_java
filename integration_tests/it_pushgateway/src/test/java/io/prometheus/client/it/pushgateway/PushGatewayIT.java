@@ -34,8 +34,6 @@ public class PushGatewayIT {
     @Parameterized.Parameters(name = "{0}")
     public static String[] images() {
         return new String[] {
-                "azul/zulu-openjdk:6",
-                "openjdk:7",
                 "ibmjava:8-jre",
                 "openjdk:11-slim",
                 "openjdk:17"

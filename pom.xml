@@ -66,7 +66,7 @@
         <module>simpleclient_servlet_common</module>
         <module>simpleclient_servlet_jakarta</module>
         <module>simpleclient_spring_web</module>
-        <module>simpleclient_spring_boot</module>
+        <!-- <module>simpleclient_spring_boot</module> --> <!-- requires Java <= 11 to compile. removing to enable compilation with Java 17 -->
         <module>simpleclient_jetty</module>
         <module>simpleclient_jetty_jdk8</module>
         <module>simpleclient_tracer</module>
@@ -231,11 +231,10 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>

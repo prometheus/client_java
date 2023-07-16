@@ -36,9 +36,7 @@ public class JavaVersionsIT {
             "openjdk:8-jre",
             "openjdk:11-jre",
             "openjdk:17",
-            "ticketfly/java:6",
             "adoptopenjdk/openjdk16:ubi-minimal-jre",
-            "azul/zulu-openjdk:6",
 
             // OpenJ9
             "ibmjava:8-jre",

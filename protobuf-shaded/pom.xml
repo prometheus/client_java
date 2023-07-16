@@ -136,7 +136,9 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.google.protobuf</pattern>
-                                    <shadedPattern>io.prometheus.metrics.com_google_protobuf_${protobuf.version.string}</shadedPattern>
+                                    <shadedPattern>
+                                        io.prometheus.metrics.com_google_protobuf_${protobuf.version.string}
+                                    </shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -144,21 +146,13 @@
                 </executions>
             </plugin>
             <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <excludes>
                         <exclude>google/protobuf/*.proto</exclude>
                         <exclude>google/protobuf/compiler/*.proto</exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>
