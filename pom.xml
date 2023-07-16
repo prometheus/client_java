@@ -46,7 +46,8 @@
         <module>prometheus-metrics-tracer</module>
         <module>prometheus-metrics-exposition-formats</module>
         <module>prometheus-metrics-exporter-servlet-jakarta</module>
-        <module>tmp_example</module>
+        <module>examples</module>
+        <!-- <module>tmp_example</module> -->
 
         <module>simpleclient</module>
         <module>simpleclient_common</module>

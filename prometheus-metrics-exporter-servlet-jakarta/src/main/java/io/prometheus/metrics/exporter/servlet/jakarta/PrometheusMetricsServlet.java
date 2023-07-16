@@ -25,6 +25,18 @@ public class PrometheusMetricsServlet extends HttpServlet {
     private final ExpositionFormats expositionFormats;
     private final Predicate<String> nameFilter;
 
+    public PrometheusMetricsServlet() {
+        this(PrometheusProperties.get(), PrometheusRegistry.defaultRegistry);
+    }
+
+    public PrometheusMetricsServlet(PrometheusRegistry registry) {
+        this(PrometheusProperties.get(), registry);
+    }
+
+    public PrometheusMetricsServlet(PrometheusProperties config) {
+        this(config, PrometheusRegistry.defaultRegistry);
+    }
+
     public PrometheusMetricsServlet(PrometheusProperties config, PrometheusRegistry registry) {
         this.expositionFormats = ExpositionFormats.init(config.getExporterProperties());
         this.registry = registry;
