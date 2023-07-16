@@ -13,7 +13,9 @@
     <packaging>bundle</packaging>
 
     <name>Prometheus Metrics Model</name>
-    <description>Data model for read-only immutable Prometheus metrics snapshots.</description>
+    <description>
+        Data model for read-only immutable Prometheus metrics snapshots.
+    </description>
 
     <licenses>
         <license>
@@ -31,8 +33,8 @@
         </developer>
     </developers>
 
-
     <dependencies>
+        <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

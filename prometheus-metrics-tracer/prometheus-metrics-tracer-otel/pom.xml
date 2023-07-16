@@ -11,7 +11,26 @@
   <artifactId>prometheus-metrics-tracer-otel</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Prometheus Java Span Context Supplier - OpenTelemetry</name>
+  <name>Prometheus Metrics Tracer OpenTelemetry</name>
+  <description>
+    Prometheus integration with the OpenTelemetry distributed tracing library.
+  </description>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>fstab</id>
+      <name>Fabian Stäber</name>
+      <email>fabian@fstab.de</email>
+    </developer>
+  </developers>
 
   <dependencies>
     <dependency>
@@ -26,12 +45,4 @@
       <optional>true</optional>
     </dependency>
   </dependencies>
-
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
 </project>

@@ -11,17 +11,10 @@
   <artifactId>prometheus-metrics-tracer</artifactId>
   <packaging>pom</packaging>
 
-  <name>Prometheus Java Span Context Supplier - Parent</name>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-api</artifactId>
-        <version>1.15.0</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <name>Prometheus Metrics Tracer</name>
+  <description>
+    Parent for Prometheus integrations with distributed tracing libraries.
+  </description>
 
   <licenses>
     <license>
@@ -30,6 +23,24 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <developers>
+    <developer>
+      <id>fstab</id>
+      <name>Fabian Stäber</name>
+      <email>fabian@fstab.de</email>
+    </developer>
+  </developers>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-api</artifactId>
+        <version>1.28.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <modules>
     <module>prometheus-metrics-tracer-common</module>

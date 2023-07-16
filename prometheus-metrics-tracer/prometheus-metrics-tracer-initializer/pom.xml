@@ -11,7 +11,26 @@
   <artifactId>prometheus-metrics-tracer-initializer</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Prometheus Java Span Context Supplier - Common</name>
+  <name>Prometheus Metrics Tracer Initializer</name>
+  <description>
+    Initialize Prometheus integrations with distributed tracing libraries.
+  </description>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>fstab</id>
+      <name>Fabian Stäber</name>
+      <email>fabian@fstab.de</email>
+    </developer>
+  </developers>
 
   <dependencies>
     <dependency>
@@ -30,12 +49,4 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
 </project>

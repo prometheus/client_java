@@ -11,9 +11,9 @@
     <artifactId>prometheus-metrics-exporter-servlet-jakarta</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Java Simpleclient Servlet - Jakarta</name>
+    <name>Prometheus Metrics Exporter Servlet Jakarta</name>
     <description>
-        HTTP servlet exporter for the simpleclient.
+        Jakarta Servlet for exposing a Prometheus scrape endpoint.
     </description>
 
     <licenses>
@@ -24,9 +24,13 @@
         </license>
     </licenses>
 
-    <properties>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <developers>
+        <developer>
+            <id>fstab</id>
+            <name>Fabian Stäber</name>
+            <email>fabian@fstab.de</email>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>

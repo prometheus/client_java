@@ -29,11 +29,12 @@
         <developer>
             <id>fstab</id>
             <name>Fabian Stäber</name>
-            <email>fabian@prometheus.io</email>
+            <email>fabian@fstab.de</email>
         </developer>
     </developers>
 
     <dependencies>
+        <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

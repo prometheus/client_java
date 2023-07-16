@@ -9,9 +9,28 @@
         <version>1.0.0-alpha-1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>tomcat-servlet</artifactId>
+    <artifactId>tomcat-servlet-example</artifactId>
 
-    <name>Example with Embedded Tomcat and the Exporter Servlet</name>
+    <name>Tomcat Servlet Example</name>
+    <description>
+        Prometheus Metrics Example using Embedded Tomcat and the Exporter Servlet
+    </description>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>fstab</id>
+            <name>Fabian Stäber</name>
+            <email>fabian@fstab.de</email>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>

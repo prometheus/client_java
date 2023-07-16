@@ -11,7 +11,10 @@
     <artifactId>examples</artifactId>
     <packaging>pom</packaging>
 
-    <name>Prometheus Java Client - Examples</name>
+    <name>Prometheus Metrics Examples</name>
+    <description>
+        Example projects for the Prometheus Metrics Library.
+    </description>
 
     <licenses>
         <license>
@@ -21,28 +24,16 @@
         </license>
     </licenses>
 
+    <developers>
+        <developer>
+            <id>fstab</id>
+            <name>Fabian Stäber</name>
+            <email>fabian@fstab.de</email>
+        </developer>
+    </developers>
+
     <modules>
-        <module>tomcat-servlet</module>
+        <module>tomcat-servlet-example</module>
     </modules>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>integration-test</id>
-                            <phase>integration-test</phase>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>
