@@ -336,6 +336,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
         public MetricsProperties getDefaultProperties() {
             return MetricsProperties.newBuilder()
                     .withExemplarsEnabled(true)
+                    .withSummaryQuantiles()
                     .withSummaryNumberOfAgeBuckets(DEFAULT_NUMBER_OF_AGE_BUCKETS)
                     .withSummaryMaxAgeSeconds(DEFAULT_MAX_AGE_SECONDS)
                     .build();
