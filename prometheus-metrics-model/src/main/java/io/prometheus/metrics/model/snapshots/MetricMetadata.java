@@ -7,7 +7,13 @@ import java.util.regex.Pattern;
  */
 public final class MetricMetadata {
     private static final Pattern METRIC_NAME_RE = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]+$");
-    private static final String[] RESERVED_SUFFIXES = {"_total", "_created", "_count", "_sum", "_bucket", "_gcount", "gsum", "_info"};
+    // According to OpenMetrics _count and _sum (and _gcount, _gsum) should also be reserved suffixes.
+    // However, popular instrumentation libraries have many Gauges with a name ending in _count. Examples:
+    // * Micrometer: jvm_buffer_count
+    // * OpenTelemetry: process_runtime_jvm_buffer_count
+    // We allow the _count and _sum suffixes here so that these names are supported, even though this might
+    // conflict if there is a histogram or summary named "jvm_buffer" or "process_runtime_jvm_buffer".
+    private static final String[] RESERVED_SUFFIXES = {"_total", "_created", "_bucket", "_info"};
 
     /**
      * Name is the name without suffix.
