@@ -106,7 +106,10 @@ public class Info extends MetricWithFixedMetadata {
          */
         @Override
         public Builder withUnit(Unit unit) {
-            throw new UnsupportedOperationException("Info metrics cannot have a unit.");
+            if (unit != null) {
+                throw new UnsupportedOperationException("Info metrics cannot have a unit.");
+            }
+            return this;
         }
 
         private static String normalizeName(String name) {
