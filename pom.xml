@@ -7,10 +7,10 @@
     <artifactId>client_java</artifactId>
     <version>1.0.0-alpha-1-SNAPSHOT</version>
 
-    <name>Prometheus Java Suite</name>
+    <name>Prometheus Metrics Library</name>
     <url>http://github.com/prometheus/client_java</url>
     <description>
-        The Prometheus Java Suite: Client Metrics, Exposition, and Examples
+        The Prometheus Java Metrics Library
     </description>
 
     <licenses>
@@ -33,6 +33,16 @@
             <id>mtp</id>
             <name>Matt T. Proud</name>
             <email>matt.proud@gmail.com</email>
+        </developer>
+        <developer>
+            <id>brian-brazil</id>
+            <name>Brian Brazil</name>
+            <email>brian.brazil@boxever.com</email>
+        </developer>
+        <developer>
+            <id>fstab</id>
+            <name>Fabian Stäber</name>
+            <email>fabian@fstab.de</email>
         </developer>
     </developers>
 
@@ -193,6 +203,7 @@
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>release</releaseProfiles>
                     <goals>deploy</goals>
+                    <tagNameFormat>v${project.version}</tagNameFormat>
                 </configuration>
             </plugin>
             <plugin>
