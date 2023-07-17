@@ -57,7 +57,6 @@
         <module>prometheus-metrics-exposition-formats</module>
         <module>prometheus-metrics-exporter-servlet-jakarta</module>
         <module>examples</module>
-        <module>protobuf-shaded</module>
 
         <module>simpleclient</module>
         <module>simpleclient_common</module>
