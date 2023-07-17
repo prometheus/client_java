@@ -799,15 +799,16 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          *     <li>factor: The growth factor for bucket boundaries, i.e. next bucket boundary = growth factor * previous bucket boundary.
          *     <li>max quantile error: The maximum error for quantiles calculated using the Prometheus histogram_quantile() function, relative to the observed value, assuming harmonic mean.
          * </ul>
-         * <table border>
+         * <table border="1">
+         *     <caption>max quantile errors for different growth factors</caption>
          *     <tr>
          *         <td>schema</td><td>factor</td><td>max quantile error</td>
          *     </tr>
          *     <tr>
-         *         <td>-4</td><td>65.536</td>99%<td></td>
+         *         <td>-4</td><td>65.536</td><td>99%</td>
          *     </tr>
          *     <tr>
-         *         <td>-3</td><td>256</td>99%<td></td>
+         *         <td>-3</td><td>256</td><td>99%</td>
          *     </tr>
          *     <tr>
          *         <td>-2</td><td>16</td><td>88%</td>
