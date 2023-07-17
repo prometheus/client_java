@@ -155,6 +155,13 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <!-- The upstream protobuf classes have JavaDoc errors. Ignore them. -->
+                    <excludePackageNames>com.google.protobuf</excludePackageNames>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
