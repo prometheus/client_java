@@ -12,6 +12,9 @@ import java.util.Random;
 
 import static io.prometheus.metrics.model.snapshots.Unit.nanosToSeconds;
 
+/**
+ * Hello World REST servlet, with an example counter and an example histogram.
+ */
 public class HelloWorldServlet extends HttpServlet {
 
     private final Random random = new Random(0);

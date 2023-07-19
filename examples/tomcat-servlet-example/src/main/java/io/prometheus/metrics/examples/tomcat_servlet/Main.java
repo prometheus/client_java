@@ -1,8 +1,6 @@
 package io.prometheus.metrics.examples.tomcat_servlet;
 
-import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet;
-import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
@@ -10,7 +8,7 @@ import org.apache.catalina.startup.Tomcat;
 import java.io.File;
 
 /**
- * Simple example using embedded Tomcat an the {@link PrometheusMetricsServlet}.
+ * Simple example using embedded Tomcat and the {@link PrometheusMetricsServlet}.
  */
 public class Main {
 
