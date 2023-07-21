@@ -1,0 +1,22 @@
+apiVersion: 1
+
+datasources:
+
+  - name: Prometheus
+    type: prometheus
+    uid: prometheus
+    url: http://localhost:9090
+
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    url: http://localhost:3200
+
+  - name: Prometheus
+    type: prometheus
+    uid: prometheus
+    url: http://localhost:9090
+    jsonData:
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: tempo
