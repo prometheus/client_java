@@ -4,16 +4,16 @@
 
     <parent>
         <groupId>io.prometheus</groupId>
-        <artifactId>client_java</artifactId>
+        <artifactId>examples</artifactId>
         <version>1.0.0-alpha-2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>examples</artifactId>
+    <artifactId>example-exemplars-tail-sampling</artifactId>
     <packaging>pom</packaging>
 
-    <name>Examples</name>
+    <name>Example - Exemplars with OpenTelemetry's Tail Sampling</name>
     <description>
-        Example projects for the Prometheus Metrics Library.
+        Example project showing Examplars with OpenTelemetry's Tail Sampling.
     </description>
 
     <licenses>
@@ -33,8 +33,19 @@
     </developers>
 
     <modules>
-        <module>example-tomcat-servlet</module>
-        <module>example-exemplars-tail-sampling</module>
+        <module>example-greeting-service</module>
+        <module>example-hello-world-app</module>
     </modules>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

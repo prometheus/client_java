@@ -1,0 +1,34 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+  tail_sampling:
+    expected_new_traces_per_sec: 10
+    policies:
+      [
+        {
+          name: keep-exemplars,
+          type: string_attribute,
+          string_attribute: { key: "exemplar", values: [ "true" ] }
+        },
+        {
+          name: keep-10-percent,
+          type: probabilistic,
+          probabilistic: { sampling_percentage: 10 }
+        },
+      ]
+
+exporters:
+  otlphttp:
+    endpoint: http://localhost:4418
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [tail_sampling, batch]
+      exporters: [otlphttp]
