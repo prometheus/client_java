@@ -2,15 +2,15 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
-import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * Info metric. Example:
@@ -90,15 +90,12 @@ public class Info extends MetricWithFixedMetadata {
          * In the example above both {@code info1} and {@code info2} will be named {@code "runtime_info"} in Prometheus.
          * <p>
          * Throws an {@link IllegalArgumentException} if
-         * {@link io.prometheus.metrics.model.snapshots.MetricMetadata#isValidMetricName(String) MetricMetadata.isValidMetricName(name)}
+         * {@link io.prometheus.metrics.model.snapshots.PrometheusNaming#isValidMetricName(String) MetricMetadata.isValidMetricName(name)}
          * is {@code false}.
          */
         @Override
         public Builder withName(String name) {
-            if (name != null && name.endsWith("_info")) {
-                name = name.substring(0, name.length() - 5);
-            }
-            return super.withName(name);
+            return super.withName(stripInfoSuffix(name));
         }
 
         /**
@@ -112,8 +109,8 @@ public class Info extends MetricWithFixedMetadata {
             return this;
         }
 
-        private static String normalizeName(String name) {
-            if (name != null && name.endsWith("_info")) {
+        private static String stripInfoSuffix(String name) {
+            if (name != null && (name.endsWith("_info") || name.endsWith(".info"))) {
                 name = name.substring(0, name.length() - 5);
             }
             return name;
@@ -121,7 +118,7 @@ public class Info extends MetricWithFixedMetadata {
 
         @Override
         public Info build() {
-            return new Info(withName(normalizeName(name)));
+            return new Info(this);
         }
 
         @Override

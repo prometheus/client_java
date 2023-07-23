@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+
 /**
  * Like {@link Collector}, but collecting multiple Snapshots at once.
  */
@@ -27,7 +29,7 @@ public interface MultiCollector {
         MetricSnapshots allSnapshots = collect();
         MetricSnapshots.Builder result = MetricSnapshots.newBuilder();
         for (MetricSnapshot snapshot : allSnapshots) {
-            if (includedNames.test(snapshot.getMetadata().getName())) {
+            if (includedNames.test(snapshot.getMetadata().getPrometheusName())) {
                 result.addMetricSnapshot(snapshot);
             }
         }
@@ -38,7 +40,7 @@ public interface MultiCollector {
      * Override this and return an empty list if the MultiCollector does not return a constant list of names
      * (names may be added / removed between scrapes).
      */
-    default List<String> getNames() {
-        return collect().stream().map(snapshot -> snapshot.getMetadata().getName()).collect(Collectors.toList());
+    default List<String> getPrometheusNames() {
+        return collect().stream().map(snapshot -> snapshot.getMetadata().getPrometheusName()).collect(Collectors.toList());
     }
 }

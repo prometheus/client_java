@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import static io.prometheus.metrics.expositionformats.ProtobufUtil.timestampFromMillis;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * Write the Prometheus protobuf format as defined in
@@ -103,7 +104,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
         } else if (snapshot instanceof StateSetSnapshot) {
             for (StateSetSnapshot.StateSetDataPointSnapshot data : ((StateSetSnapshot) snapshot).getData()) {
                 for (int i = 0; i < data.size(); i++) {
-                    builder.addMetric(convert(data, snapshot.getMetadata().getName(), i));
+                    builder.addMetric(convert(data, snapshot.getMetadata().getPrometheusName(), i));
                 }
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
@@ -121,9 +122,9 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
             return;
         }
         if (nameSuffix == null) {
-            builder.setName(metadata.getName());
+            builder.setName(metadata.getPrometheusName());
         } else {
-            builder.setName(metadata.getName() + nameSuffix);
+            builder.setName(metadata.getPrometheusName() + nameSuffix);
         }
         if (metadata.getHelp() != null) {
             builder.setHelp(metadata.getHelp());
@@ -335,7 +336,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     private void addLabels(Metrics.Metric.Builder metricBuilder, Labels labels) {
         for (int i = 0; i < labels.size(); i++) {
             metricBuilder.addLabel(Metrics.LabelPair.newBuilder()
-                    .setName(labels.getName(i))
+                    .setName(labels.getPrometheusName(i))
                     .setValue(labels.getValue(i))
                     .build());
         }
@@ -344,7 +345,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     private void addLabels(Metrics.Exemplar.Builder metricBuilder, Labels labels) {
         for (int i = 0; i < labels.size(); i++) {
             metricBuilder.addLabel(Metrics.LabelPair.newBuilder()
-                    .setName(labels.getName(i))
+                    .setName(labels.getPrometheusName(i))
                     .setValue(labels.getValue(i))
                     .build());
         }

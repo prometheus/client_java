@@ -20,9 +20,6 @@ public final class InfoSnapshot extends MetricSnapshot {
      */
     public InfoSnapshot(MetricMetadata metadata, Collection<InfoDataPointSnapshot> data) {
         super(metadata, data);
-        if (metadata.getName().endsWith("_info")) {
-            throw new IllegalArgumentException("The name of an info snapshot must not include the _info suffix");
-        }
         if (metadata.hasUnit()) {
             throw new IllegalArgumentException("An Info metric cannot have a unit.");
         }

@@ -3,6 +3,7 @@ package io.prometheus.metrics.core.metrics;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.core.datapoints.StateSetDataPoint;
 
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * StateSet metric. Example:
@@ -58,7 +61,7 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
         exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
         this.names = builder.names; // builder.names is already a validated copy
         for (String name : names) {
-            if (this.getMetadata().getName().equals(name)) {
+            if (this.getMetadata().getPrometheusName().equals(prometheusName(name))) {
                 throw new IllegalArgumentException("Label name " + name + " is illegal (can't use the metric name as label name in state set metrics)");
             }
         }

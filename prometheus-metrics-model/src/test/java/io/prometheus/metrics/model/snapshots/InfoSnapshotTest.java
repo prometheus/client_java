@@ -43,4 +43,18 @@ public class InfoSnapshotTest {
         iterator.next();
         iterator.remove();
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNameMustNotIncludeSuffix() {
+        InfoSnapshot.newBuilder()
+                .withName("jvm_info")
+                .build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNameMustNotIncludeSuffixDot() {
+        InfoSnapshot.newBuilder()
+                .withName("jvm.info")
+                .build();
+    }
 }

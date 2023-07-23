@@ -32,6 +32,11 @@ public class HelloWorldServlet extends HttpServlet {
             .withLabelNames("http_status")
             .register();
 
+    public HelloWorldServlet() {
+        counter.initLabelValues("200");
+        histogram.initLabelValues("200");
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         long start = System.nanoTime();

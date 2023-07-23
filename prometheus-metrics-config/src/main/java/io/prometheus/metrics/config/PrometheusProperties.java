@@ -58,7 +58,7 @@ public class PrometheusProperties {
      * May return {@code null} if no metric-specific properties are configured for a metric name.
      */
     public MetricsProperties getMetricProperties(String metricName) {
-        return metricProperties.get(metricName);
+        return metricProperties.get(metricName.replace(".", "_"));
     }
 
     public ExemplarsProperties getExemplarProperties() {
