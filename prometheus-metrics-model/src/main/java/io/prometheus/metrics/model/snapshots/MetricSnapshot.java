@@ -20,10 +20,13 @@ public abstract class MetricSnapshot {
     }
 
     protected MetricSnapshot(MetricMetadata metadata, Collection<? extends DataPointSnapshot> data) {
-        this.metadata = metadata;
-        if (data == null) {
-            throw new NullPointerException();
+        if (metadata == null) {
+            throw new NullPointerException("metadata");
         }
+        if (data == null) {
+            throw new NullPointerException("data");
+        }
+        this.metadata = metadata;
         List<? extends DataPointSnapshot> dataCopy = new ArrayList<>(data);
         dataCopy.sort(Comparator.comparing(DataPointSnapshot::getLabels));
         this.data = Collections.unmodifiableList(dataCopy);
@@ -56,7 +59,7 @@ public abstract class MetricSnapshot {
         /**
          * The name is required.
          * If the name is missing or invalid, {@code build()} will throw an {@link IllegalArgumentException}.
-         * See {@link MetricMetadata#isValidMetricName(String)} for info on valid metric names.
+         * See {@link PrometheusNaming#isValidMetricName(String)} for info on valid metric names.
          */
         public T withName(String name) {
             this.name = name;

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+
 public class TextFormatUtil {
 
     static void writeLong(OutputStreamWriter writer, long value) throws IOException {
@@ -61,7 +63,7 @@ public class TextFormatUtil {
             if (i > 0) {
                 writer.write(",");
             }
-            writer.write(labels.getName(i));
+            writer.write(labels.getPrometheusName(i));
             writer.write("=\"");
             writeEscapedLabelValue(writer, labels.getValue(i));
             writer.write("\"");

@@ -34,7 +34,7 @@ public class HelloWorldServlet extends HttpServlet {
                 .withUnit(Unit.SECONDS)
                 .withLabelNames("http_status")
                 .register();
-        histogram.withLabelValues("200");
+        histogram.initLabelValues("200");
     }
 
     @Override

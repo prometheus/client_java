@@ -23,6 +23,7 @@ import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -32,6 +33,7 @@ public class ExpositionFormatsTest {
 
     private final String exemplar1String = "{env=\"prod\",span_id=\"12345\",trace_id=\"abcde\"} 1.7 1672850685.829";
     private final String exemplar2String = "{env=\"dev\",span_id=\"23456\",trace_id=\"bcdef\"} 2.4 1672850685.830";
+    private final String exemplarWithDotsString = "{some_exemplar_key=\"some value\"} 3.0 1690298864.383";
 
     private final String exemplar1protoString = "exemplar { " +
             "label { name: \"env\" value: \"prod\" } " +
@@ -46,6 +48,11 @@ public class ExpositionFormatsTest {
             "label { name: \"trace_id\" value: \"bcdef\" } " +
             "value: 2.4 " +
             "timestamp { seconds: 1672850685 nanos: 830000000 } }";
+
+    private final String exemplarWithDotsProtoString = "exemplar { " +
+            "label { name: \"some_exemplar_key\" value: \"some value\" } " +
+            "value: 3.0 " +
+            "timestamp { seconds: 1690298864 nanos: 383000000 } }";
 
     private final String createdTimestamp1s = "1672850385.800";
     private final long createdTimestamp1 = (long) (1000 * Double.parseDouble(createdTimestamp1s));
@@ -70,6 +77,12 @@ public class ExpositionFormatsTest {
             .withLabels(Labels.of("env", "dev"))
             .withValue(2.4)
             .withTimestampMillis(1672850685830L)
+            .build();
+
+    private final Exemplar exemplarWithDots = Exemplar.newBuilder()
+            .withLabels(Labels.of("some.exemplar.key", "some value"))
+            .withValue(3.0)
+            .withTimestampMillis(1690298864383L)
             .build();
 
     @Test
@@ -184,6 +197,42 @@ public class ExpositionFormatsTest {
     }
 
     @Test
+    public void testCounterWithDots() throws IOException {
+        String openMetricsText = "" +
+                "# TYPE my_request_count counter\n" +
+                "my_request_count_total{http_path=\"/hello\"} 3.0 # " + exemplarWithDotsString + "\n" +
+                "# EOF\n";
+        String prometheusText = "" +
+                "# TYPE my_request_count_total counter\n" +
+                "my_request_count_total{http_path=\"/hello\"} 3.0\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"my_request_count_total\" " +
+                "type: COUNTER " +
+                "metric { " +
+                    "label { name: \"http_path\" value: \"/hello\" } " +
+                    "counter { " +
+                        "value: 3.0 " + exemplarWithDotsProtoString + " " +
+                    "} " +
+                "}";
+                //@formatter:on
+
+        CounterSnapshot counter = CounterSnapshot.newBuilder()
+                .withName("my.request.count")
+                .addDataPoint(CounterDataPointSnapshot.newBuilder()
+                        .withValue(3.0)
+                        .withLabels(Labels.newBuilder()
+                                .addLabel("http.path", "/hello")
+                                .build())
+                        .withExemplar(exemplarWithDots)
+                        .build())
+                .build();
+        assertOpenMetricsText(openMetricsText, counter);
+        assertPrometheusText(prometheusText, counter);
+        assertPrometheusProtobuf(prometheusProtobuf, counter);
+    }
+
+    @Test
     public void testGaugeComplete() throws IOException {
         String openMetricsText = "" +
                 "# TYPE disk_usage_ratio gauge\n" +
@@ -261,6 +310,48 @@ public class ExpositionFormatsTest {
         assertPrometheusText(prometheusText, gauge);
         assertOpenMetricsTextWithoutCreated(openMetricsText, gauge);
         assertPrometheusTextWithoutCreated(prometheusText, gauge);
+        assertPrometheusProtobuf(prometheusProtobuf, gauge);
+    }
+
+    @Test
+    public void testGaugeWithDots() throws IOException {
+        String openMetricsText = "" +
+                "# TYPE my_temperature_celsius gauge\n" +
+                "# UNIT my_temperature_celsius celsius\n" +
+                "# HELP my_temperature_celsius Temperature\n" +
+                "my_temperature_celsius{location_id=\"data-center-1\"} 23.0 # " + exemplarWithDotsString + "\n" +
+                "# EOF\n";
+        String prometheusText = "" +
+                "# HELP my_temperature_celsius Temperature\n" +
+                "# TYPE my_temperature_celsius gauge\n" +
+                "my_temperature_celsius{location_id=\"data-center-1\"} 23.0\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"my_temperature_celsius\" " +
+                "help: \"Temperature\" " +
+                "type: GAUGE " +
+                "metric { " +
+                    "label { name: \"location_id\" value: \"data-center-1\" } " +
+                    "gauge { " +
+                        "value: 23.0 " +
+                    "} " +
+                "}";
+                //@formatter:on
+
+        GaugeSnapshot gauge = GaugeSnapshot.newBuilder()
+                .withName("my.temperature.celsius")
+                .withHelp("Temperature")
+                .withUnit(Unit.CELSIUS)
+                .addDataPoint(GaugeDataPointSnapshot.newBuilder()
+                        .withValue(23.0)
+                        .withLabels(Labels.newBuilder()
+                                .addLabel("location.id", "data-center-1")
+                                .build())
+                        .withExemplar(exemplarWithDots)
+                        .build())
+                .build();
+        assertOpenMetricsText(openMetricsText, gauge);
+        assertPrometheusText(prometheusText, gauge);
         assertPrometheusProtobuf(prometheusProtobuf, gauge);
     }
 
@@ -593,6 +684,49 @@ public class ExpositionFormatsTest {
         assertPrometheusText(prometheusText, summary);
         assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
         assertPrometheusTextWithoutCreated(prometheusText, summary);
+        assertPrometheusProtobuf(prometheusProtobuf, summary);
+    }
+
+    @Test
+    public void testSummaryWithDots() throws IOException {
+        String openMetricsText = "" +
+                "# TYPE my_request_duration_seconds summary\n" +
+                "# UNIT my_request_duration_seconds seconds\n" +
+                "# HELP my_request_duration_seconds Request duration in seconds\n" +
+                "my_request_duration_seconds_count{http_path=\"/hello\"} 1 # " + exemplarWithDotsString + "\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.03 # " + exemplarWithDotsString + "\n" +
+                "# EOF\n";
+        String prometheusText = "" +
+                "# HELP my_request_duration_seconds Request duration in seconds\n" +
+                "# TYPE my_request_duration_seconds summary\n" +
+                "my_request_duration_seconds_count{http_path=\"/hello\"} 1\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.03\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"my_request_duration_seconds\" " +
+                "help: \"Request duration in seconds\" " +
+                "type: SUMMARY " +
+                "metric { " +
+                    "label { name: \"http_path\" value: \"/hello\" } " +
+                    "summary { sample_count: 1 sample_sum: 0.03 } " +
+                "}";
+                //@formatter:on
+
+        SummarySnapshot summary = SummarySnapshot.newBuilder()
+                .withName("my.request.duration.seconds")
+                .withHelp("Request duration in seconds")
+                .withUnit(Unit.SECONDS)
+                .addDataPoint(SummaryDataPointSnapshot.newBuilder()
+                        .withCount(1)
+                        .withSum(0.03)
+                        .withLabels(Labels.newBuilder()
+                                .addLabel("http.path", "/hello")
+                                .build())
+                        .withExemplars(Exemplars.of(exemplarWithDots))
+                        .build())
+                .build();
+        assertOpenMetricsText(openMetricsText, summary);
+        assertPrometheusText(prometheusText, summary);
         assertPrometheusProtobuf(prometheusProtobuf, summary);
     }
 
@@ -1048,6 +1182,57 @@ public class ExpositionFormatsTest {
     }
 
     @Test
+    public void testClassicHistogramWithDots() throws IOException {
+        String openMetricsText = "" +
+                "# TYPE my_request_duration_seconds histogram\n" +
+                "# UNIT my_request_duration_seconds seconds\n" +
+                "# HELP my_request_duration_seconds Request duration in seconds\n" +
+                "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 130 # " + exemplarWithDotsString + "\n" +
+                "my_request_duration_seconds_count{http_path=\"/hello\"} 130\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.01\n" +
+                "# EOF\n";
+        String prometheusText = "" +
+                "# HELP my_request_duration_seconds Request duration in seconds\n" +
+                "# TYPE my_request_duration_seconds histogram\n" +
+                "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 130\n" +
+                "my_request_duration_seconds_count{http_path=\"/hello\"} 130\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.01\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"my_request_duration_seconds\" " +
+                "help: \"Request duration in seconds\" " +
+                "type: HISTOGRAM " +
+                "metric { " +
+                    "label { name: \"http_path\" value: \"/hello\" } " +
+                    "histogram { " +
+                        "sample_count: 130 " +
+                        "sample_sum: 0.01 " +
+                        "bucket { cumulative_count: 130 upper_bound: Infinity " + exemplarWithDotsProtoString + " } " +
+                    "} " +
+                "}";
+                //@formatter:on
+
+        HistogramSnapshot histogram = HistogramSnapshot.newBuilder()
+                .withName("my.request.duration.seconds")
+                .withHelp("Request duration in seconds")
+                .withUnit(Unit.SECONDS)
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
+                        .withSum(0.01)
+                        .withLabels(Labels.newBuilder()
+                                .addLabel("http.path", "/hello")
+                                .build())
+                        .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
+                                .addBucket(Double.POSITIVE_INFINITY, 130)
+                                .build())
+                        .withExemplars(Exemplars.of(exemplarWithDots))
+                        .build())
+                .build();
+        assertOpenMetricsText(openMetricsText, histogram);
+        assertPrometheusText(prometheusText, histogram);
+        assertPrometheusProtobuf(prometheusProtobuf, histogram);
+    }
+
+    @Test
     public void testNativeHistogramComplete() throws IOException {
         String openMetricsText = "" +
                 "# TYPE response_size_bytes histogram\n" +
@@ -1244,6 +1429,64 @@ public class ExpositionFormatsTest {
         assertPrometheusProtobuf(prometheusProtobuf, nativeHistogram);
     }
 
+    @Test
+    public void testNativeHistogramWithDots() throws IOException {
+        String openMetricsText = "" +
+                "# TYPE my_request_duration_seconds histogram\n" +
+                "# UNIT my_request_duration_seconds seconds\n" +
+                "# HELP my_request_duration_seconds Request duration in seconds\n" +
+                "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 4 # " + exemplarWithDotsString + "\n" +
+                "my_request_duration_seconds_count{http_path=\"/hello\"} 4\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 3.2\n" +
+                "# EOF\n";
+        String prometheusText = "" +
+                "# HELP my_request_duration_seconds Request duration in seconds\n" +
+                "# TYPE my_request_duration_seconds histogram\n" +
+                "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 4\n" +
+                "my_request_duration_seconds_count{http_path=\"/hello\"} 4\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 3.2\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"my_request_duration_seconds\" " +
+                "help: \"Request duration in seconds\" " +
+                "type: HISTOGRAM " +
+                "metric { " +
+                    "label { name: \"http_path\" value: \"/hello\" } " +
+                    "histogram { " +
+                        "sample_count: 4 " +
+                        "sample_sum: 3.2 " +
+                        "bucket { cumulative_count: 4 upper_bound: Infinity " + exemplarWithDotsProtoString + " } " +
+                        "schema: 5 " +
+                        "zero_threshold: 0.0 " +
+                        "zero_count: 1 " +
+                        "positive_span { offset: 2 length: 1 } " +
+                        "positive_delta: 3 " +
+                    "} " +
+                "}";
+                //@formatter:on
+
+        HistogramSnapshot histogram = HistogramSnapshot.newBuilder()
+                .withName("my.request.duration.seconds")
+                .withHelp("Request duration in seconds")
+                .withUnit(Unit.SECONDS)
+                .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
+                        .withLabels(Labels.newBuilder()
+                                .addLabel("http.path", "/hello")
+                                .build())
+                        .withSum(3.2)
+                        .withNativeSchema(5)
+                        .withNativeZeroCount(1)
+                        .withNativeBucketsForPositiveValues(NativeHistogramBuckets.newBuilder()
+                                .addBucket(2, 3)
+                                .build()
+                        )
+                        .withExemplars(Exemplars.of(exemplarWithDots))
+                        .build())
+                .build();
+        assertOpenMetricsText(openMetricsText, histogram);
+        assertPrometheusText(prometheusText, histogram);
+        assertPrometheusProtobuf(prometheusProtobuf, histogram);
+    }
     // TODO: Gauge Native Histogram
 
     @Test
@@ -1268,6 +1511,39 @@ public class ExpositionFormatsTest {
         assertPrometheusText(prometheus, info);
         assertOpenMetricsTextWithoutCreated(openMetrics, info);
         assertPrometheusTextWithoutCreated(prometheus, info);
+    }
+
+    @Test
+    public void testInfoWithDots() throws IOException {
+        String openMetricsText = "" +
+                "# TYPE jvm_status info\n" +
+                "# HELP jvm_status JVM status info\n" +
+                "jvm_status_info{jvm_version=\"1.2.3\"} 1\n" +
+                "# EOF\n";
+        String prometheusText = "" +
+                "# HELP jvm_status_info JVM status info\n" +
+                "# TYPE jvm_status_info gauge\n" +
+                "jvm_status_info{jvm_version=\"1.2.3\"} 1\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"jvm_status_info\" " +
+                "help: \"JVM status info\" " +
+                "type: GAUGE " +
+                "metric { " + "" +
+                    "label { name: \"jvm_version\" value: \"1.2.3\" } " +
+                    "gauge { value: 1.0 } " +
+                "}";
+                //@formatter:on
+        InfoSnapshot info = InfoSnapshot.newBuilder()
+                .withName("jvm.status")
+                .withHelp("JVM status info")
+                .addDataPoint(InfoSnapshot.InfoDataPointSnapshot.newBuilder()
+                        .withLabels(Labels.of("jvm.version", "1.2.3"))
+                        .build())
+                .build();
+        assertOpenMetricsText(openMetricsText, info);
+        assertPrometheusText(prometheusText, info);
+        assertPrometheusProtobuf(prometheusProtobuf, info);
     }
 
     @Test
@@ -1334,6 +1610,48 @@ public class ExpositionFormatsTest {
     }
 
     @Test
+    public void testStateSetWithDots() throws IOException {
+        String openMetricsText = "" +
+                "# TYPE my_application_state stateset\n" +
+                "# HELP my_application_state My application state\n" +
+                "my_application_state{data_center=\"us east\",my_application_state=\"feature.enabled\"} 1\n" +
+                "my_application_state{data_center=\"us east\",my_application_state=\"is.alpha.version\"} 0\n" +
+                "# EOF\n";
+        String prometheusText = "" +
+                "# HELP my_application_state My application state\n" +
+                "# TYPE my_application_state gauge\n" +
+                "my_application_state{data_center=\"us east\",my_application_state=\"feature.enabled\"} 1\n" +
+                "my_application_state{data_center=\"us east\",my_application_state=\"is.alpha.version\"} 0\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"my_application_state\" " +
+                "help: \"My application state\" " +
+                "type: GAUGE " +
+                "metric { " +
+                    "label { name: \"data_center\" value: \"us east\" } " +
+                    "label { name: \"my_application_state\" value: \"feature.enabled\" } " +
+                    "gauge { value: 1.0 } " +
+                "} metric { " +
+                    "label { name: \"data_center\" value: \"us east\" } " +
+                    "label { name: \"my_application_state\" value: \"is.alpha.version\" } " +
+                    "gauge { value: 0.0 } " +
+                "}";
+                //@formatter:on
+        StateSetSnapshot stateSet = StateSetSnapshot.newBuilder()
+                .withName("my.application.state")
+                .withHelp("My application state")
+                .addDataPoint(StateSetSnapshot.StateSetDataPointSnapshot.newBuilder()
+                        .withLabels(Labels.of("data.center", "us east"))
+                        .addState("feature.enabled", true)
+                        .addState("is.alpha.version", false)
+                        .build())
+                .build();
+        assertOpenMetricsText(openMetricsText, stateSet);
+        assertPrometheusText(prometheusText, stateSet);
+        assertPrometheusProtobuf(prometheusProtobuf, stateSet);
+    }
+
+    @Test
     public void testUnknownComplete() throws IOException {
         String openMetrics = "" +
                 "# TYPE my_special_thing_bytes unknown\n" +
@@ -1389,6 +1707,43 @@ public class ExpositionFormatsTest {
         assertPrometheusText(prometheus, unknown);
         assertOpenMetricsTextWithoutCreated(openMetrics, unknown);
         assertPrometheusTextWithoutCreated(prometheus, unknown);
+    }
+
+    @Test
+    public void testUnknownWithDots() throws IOException {
+        String openMetrics = "" +
+                "# TYPE some_unknown_metric unknown\n" +
+                "# UNIT some_unknown_metric bytes\n" +
+                "# HELP some_unknown_metric help message\n" +
+                "some_unknown_metric{test_env=\"7\"} 0.7 # " + exemplarWithDotsString + "\n" +
+                "# EOF\n";
+        String prometheus = "" +
+                "# HELP some_unknown_metric help message\n" +
+                "# TYPE some_unknown_metric untyped\n" +
+                "some_unknown_metric{test_env=\"7\"} 0.7\n";
+        String prometheusProtobuf = "" +
+                //@formatter:off
+                "name: \"some_unknown_metric\" " +
+                "help: \"help message\" " +
+                "type: UNTYPED " +
+                "metric { " +
+                    "label { name: \"test_env\" value: \"7\" } " +
+                    "untyped { value: 0.7 } " +
+                "}";
+                //@formatter:on
+        UnknownSnapshot unknown = UnknownSnapshot.newBuilder()
+                .withName("some.unknown.metric")
+                .withHelp("help message")
+                .withUnit(Unit.BYTES)
+                .addDataPoint(UnknownDataPointSnapshot.newBuilder()
+                        .withValue(0.7)
+                        .withLabels(Labels.of("test.env", "7"))
+                        .withExemplar(exemplarWithDots)
+                        .build())
+                .build();
+        assertOpenMetricsText(openMetrics, unknown);
+        assertPrometheusText(prometheus, unknown);
+        assertPrometheusProtobuf(prometheusProtobuf, unknown);
     }
 
     @Test

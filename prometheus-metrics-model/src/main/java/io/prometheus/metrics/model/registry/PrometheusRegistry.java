@@ -9,26 +9,30 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+
 public class PrometheusRegistry {
 
     public static final PrometheusRegistry defaultRegistry = new PrometheusRegistry();
 
-    private final Set<String> names = ConcurrentHashMap.newKeySet();
+    private final Set<String> prometheusNames = ConcurrentHashMap.newKeySet();
     private final List<Collector> collectors = new CopyOnWriteArrayList<>();
     private final List<MultiCollector> multiCollectors = new CopyOnWriteArrayList<>();
 
     public void register(Collector collector) {
-        String name = collector.getName();
-        if (!names.add(name)) {
-            throw new IllegalStateException("Can't register " + name + " because that name is already registered.");
+        String prometheusName = collector.getPrometheusName();
+        if (prometheusName != null) {
+            if (!prometheusNames.add(prometheusName)) {
+                throw new IllegalStateException("Can't register " + prometheusName + " because a metric with that name is already registered.");
+            }
         }
         collectors.add(collector);
     }
 
     public void register(MultiCollector collector) {
-        for (String name : collector.getNames()) {
-            if (!names.add(name)) {
-                throw new IllegalStateException("Can't register " + name + " because that name is already registered.");
+        for (String prometheusName : collector.getPrometheusNames()) {
+            if (!prometheusNames.add(prometheusName)) {
+                throw new IllegalStateException("Can't register " + prometheusName + " because that name is already registered.");
             }
         }
         multiCollectors.add(collector);
@@ -36,23 +40,32 @@ public class PrometheusRegistry {
 
     public void unregister(Collector collector) {
         collectors.remove(collector);
-        names.remove(collector.getName());
+        prometheusNames.remove(collector.getPrometheusName());
     }
 
     public void unregister(MultiCollector collector) {
         multiCollectors.remove(collector);
-        for (String name : collector.getNames()) {
-            names.remove(name);
+        for (String prometheusName : collector.getPrometheusNames()) {
+            prometheusNames.remove(prometheusName(prometheusName));
         }
     }
 
     public MetricSnapshots scrape() {
         MetricSnapshots.Builder result = MetricSnapshots.newBuilder();
         for (Collector collector : collectors) {
-            result.addMetricSnapshot(collector.collect());
+            MetricSnapshot snapshot = collector.collect();
+            if (snapshot != null) {
+                if (result.containsMetricName(snapshot.getMetadata().getName())) {
+                    throw new IllegalStateException(snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
+                }
+                result.addMetricSnapshot(snapshot);
+            }
         }
         for (MultiCollector collector : multiCollectors) {
             for (MetricSnapshot snapshot : collector.collect()) {
+                if (result.containsMetricName(snapshot.getMetadata().getName())) {
+                    throw new IllegalStateException(snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
+                }
                 result.addMetricSnapshot(snapshot);
             }
         }
@@ -65,8 +78,8 @@ public class PrometheusRegistry {
         }
         MetricSnapshots.Builder result = MetricSnapshots.newBuilder();
         for (Collector collector : collectors) {
-            String name = collector.getName();
-            if (name == null || includedNames.test(name)) {
+            String prometheusName = collector.getPrometheusName();
+            if (prometheusName == null || includedNames.test(prometheusName)) {
                 MetricSnapshot snapshot = collector.collect(includedNames);
                 if (snapshot != null) {
                     result.addMetricSnapshot(snapshot);
@@ -74,10 +87,10 @@ public class PrometheusRegistry {
             }
         }
         for (MultiCollector collector : multiCollectors) {
-            List<String> names = collector.getNames();
+            List<String> prometheusNames = collector.getPrometheusNames();
             boolean excluded = true; // the multi-collector is excluded unless at least one name matches
-            for (String name : names) {
-                if (includedNames.test(name)) {
+            for (String prometheusName : prometheusNames) {
+                if (includedNames.test(prometheusName)) {
                     excluded = false;
                     break;
                 }

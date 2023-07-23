@@ -88,6 +88,11 @@ public class GaugeSnapshotTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void testTotalSuffixPresentDot() {
+        CounterSnapshot.newBuilder().withName("test.total").build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void testValueMissing() {
         CounterDataPointSnapshot.newBuilder().build();
     }
