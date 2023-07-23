@@ -39,6 +39,8 @@ public class PrometheusPropertiesLoader {
     // This will remove entries from properties when they are processed.
     private static Map<String, MetricsProperties> loadMetricsConfigs(Map<Object, Object> properties) {
         Map<String, MetricsProperties> result = new HashMap<>();
+        // Note that the metric name in the properties file must be as exposed in the Prometheus exposition formats,
+        // i.e. all dots replaced with underscores.
         Pattern pattern = Pattern.compile("io\\.prometheus\\.metrics\\.([^.]+)\\.");
         // Create a copy of the keySet() for iterating. We cannot iterate directly over keySet()
         // because entries are removed when MetricsConfig.load(...) is called.
@@ -49,7 +51,7 @@ public class PrometheusPropertiesLoader {
         for (String propertyName : propertyNames) {
             Matcher matcher = pattern.matcher(propertyName);
             if (matcher.find()) {
-                String metricName = matcher.group(1);
+                String metricName = matcher.group(1).replace(".", "_");
                 if (!result.containsKey(metricName)) {
                     result.put(metricName, MetricsProperties.load("io.prometheus.metrics." + metricName, properties));
                 }

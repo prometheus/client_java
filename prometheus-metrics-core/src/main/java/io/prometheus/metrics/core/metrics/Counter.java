@@ -9,12 +9,15 @@ import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * Counter metric.
@@ -109,8 +112,8 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
         return new CounterSnapshot(getMetadata(), data);
     }
 
-    static String normalizeName(String name) {
-        if (name != null && name.endsWith("_total")) {
+    static String stripTotalSuffix(String name) {
+        if (name != null && (name.endsWith("_total") || name.endsWith(".total"))) {
             name = name.substring(0, name.length() - 6);
         }
         return name;
@@ -231,12 +234,12 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
          * In the example above both {@code c1} and {@code c2} would be named {@code "events_total"} in Prometheus.
          * <p>
          * Throws an {@link IllegalArgumentException} if
-         * {@link io.prometheus.metrics.model.snapshots.MetricMetadata#isValidMetricName(String) MetricMetadata.isValidMetricName(name)}
+         * {@link io.prometheus.metrics.model.snapshots.PrometheusNaming#isValidMetricName(String) MetricMetadata.isValidMetricName(name)}
          * is {@code false}.
          */
         @Override
         public Builder withName(String name) {
-            return super.withName(normalizeName(name));
+            return super.withName(stripTotalSuffix(name));
         }
 
         @Override

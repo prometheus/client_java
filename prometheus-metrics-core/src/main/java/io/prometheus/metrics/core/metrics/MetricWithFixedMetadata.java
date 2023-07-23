@@ -3,10 +3,13 @@ package io.prometheus.metrics.core.metrics;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Unit;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * Almost all metrics have fixed metadata, i.e. the metric name is known when the metric is created.
@@ -31,9 +34,8 @@ public abstract class MetricWithFixedMetadata extends Metric {
 
     private String makeName(String name, Unit unit) {
         if (unit != null) {
-            String suffix = "_" + unit;
-            if (!name.endsWith(suffix)) {
-                name = name + suffix;
+            if (!name.endsWith(unit.toString())) {
+                name = name + "_" + unit;
             }
         }
         return name;
@@ -51,7 +53,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
         }
 
         public B withName(String name) {
-            if (!MetricMetadata.isValidMetricName(name)) {
+            if (!PrometheusNaming.isValidMetricName(name)) {
                 throw new IllegalArgumentException("'" + name + "': Illegal metric name.");
             }
             this.name = name;
@@ -70,7 +72,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
 
         public B withLabelNames(String... labelNames) {
             for (String labelName : labelNames) {
-                if (!Labels.isValidLabelName(labelName)) {
+                if (!PrometheusNaming.isValidLabelName(labelName)) {
                     throw new IllegalArgumentException(labelName + ": illegal label name");
                 }
                 if (illegalLabelNames.contains(labelName)) {

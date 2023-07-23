@@ -30,8 +30,8 @@ public final class StateSetSnapshot extends MetricSnapshot {
             throw new IllegalArgumentException("An state set metric cannot have a unit.");
         }
         for (StateSetDataPointSnapshot entry : getData()) {
-            if (entry.getLabels().contains(getMetadata().getName())) {
-                throw new IllegalArgumentException("Label name " + getMetadata().getName() + " is reserved.");
+            if (entry.getLabels().contains(getMetadata().getPrometheusName())) {
+                throw new IllegalArgumentException("Label name " + getMetadata().getPrometheusName() + " is reserved.");
             }
         }
     }

@@ -5,23 +5,37 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.isValidLabelName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * Immutable set of name/value pairs, sorted by name.
  */
 public class Labels implements Comparable<Labels>, Iterable<Label> {
 
-    public static final Labels EMPTY = new Labels(new String[]{}, new String[]{});
-    private static final Pattern LABEL_NAME_RE = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
+    public static final Labels EMPTY;
 
-    private final String[] names; // sorted
+    static {
+        String[] names = new String[]{};
+        String[] values = new String[]{};
+        EMPTY = new Labels(names, names, values);
+    }
+
+    // prometheusNames is the same as names, but dots are replaced with underscores.
+    // Labels is sorted by prometheusNames.
+    // If names[i] does not contain a dot, prometheusNames[i] references the same String as names[i]
+    // so that we don't have unnecessary duplicates of strings.
+    // If none of the names contains a dot, then prometheusNames references the same array as names
+    // so that we don't have unnecessary duplicate arrays.
+    private final String[] prometheusNames;
+    private final String[] names;
     private final String[] values;
 
-    private Labels(String[] names, String[] values) {
-        // names and values are already sorted and validated
+    private Labels(String[] names, String[] prometheusNames, String[] values) {
         this.names = names;
+        this.prometheusNames = prometheusNames;
         this.values = values;
     }
 
@@ -35,9 +49,9 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
      * or you can use the {@link Labels#newBuilder()}.
      *
      * @param keyValuePairs as in {@code {name1, value1, name2, value2}}. Length must be even.
-     *                      {@link #isValidLabelName(String)} must be true for each name.
-     *                      Use {@link #sanitizeLabelName(String)} to convert arbitrary strings to valid
-     *                      label names. Label names must be unique (no duplicate label names).
+     *                      {@link PrometheusNaming#isValidLabelName(String)} must be true for each name.
+     *                      Use {@link PrometheusNaming#sanitizeLabelName(String)} to convert arbitrary strings
+     *                      to valid label names. Label names must be unique (no duplicate label names).
      */
     public static Labels of(String... keyValuePairs) {
         if (keyValuePairs.length % 2 != 0) {
@@ -52,7 +66,23 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
             names[i] = keyValuePairs[2 * i];
             values[i] = keyValuePairs[2 * i + 1];
         }
-        return Labels.of(names, values);
+        String[] prometheusNames = makePrometheusNames(names);
+        sortAndValidate(names, prometheusNames, values);
+        return new Labels(names, prometheusNames, values);
+    }
+
+    // package private for testing
+    static String[] makePrometheusNames(String[] names) {
+        String[] prometheusNames = names;
+        for (int i=0; i<names.length; i++) {
+            if (names[i].contains(".")) {
+                if (prometheusNames == names) {
+                    prometheusNames = Arrays.copyOf(names, names.length);
+                }
+                prometheusNames[i] = PrometheusNaming.prometheusName(names[i]);
+            }
+        }
+        return prometheusNames;
     }
 
     /**
@@ -60,10 +90,10 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
      * You can either create Labels with one of the static {@code Labels.of(...)} methods,
      * or you can use the {@link Labels#newBuilder()}.
      *
-     * @param names  label names. {@link #isValidLabelName(String)} must be true for each name.
-     *               Use {@link #sanitizeLabelName(String)} to convert arbitrary strings to valid label names.
-     *               Label names must be unique (no duplicate label names).
-     * @param values label values. names.size() must be equal to values.size().
+     * @param names  label names. {@link PrometheusNaming#isValidLabelName(String)} must be true for each name.
+     *               Use {@link PrometheusNaming#sanitizeLabelName(String)} to convert arbitrary strings
+     *               to valid label names. Label names must be unique (no duplicate label names).
+     * @param values label values. {@code names.size()} must be equal to {@code values.size()}.
      */
     public static Labels of(List<String> names, List<String> values) {
         if (names.size() != values.size()) {
@@ -74,8 +104,9 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         }
         String[] namesCopy = names.toArray(new String[0]);
         String[] valuesCopy = values.toArray(new String[0]);
-        sortAndValidate(namesCopy, valuesCopy);
-        return new Labels(namesCopy, valuesCopy);
+        String[] prometheusNames = makePrometheusNames(namesCopy);
+        sortAndValidate(namesCopy, prometheusNames, valuesCopy);
+        return new Labels(namesCopy, prometheusNames, valuesCopy);
     }
 
     /**
@@ -83,10 +114,10 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
      * You can either create Labels with one of the static {@code Labels.of(...)} methods,
      * or you can use the {@link Labels#newBuilder()}.
      *
-     * @param names  label names. {@link #isValidLabelName(String)} must be true for each name.
-     *               Use {@link #sanitizeLabelName(String)} to convert arbitrary strings to valid label names.
-     *               Label names must be unique (no duplicate label names).
-     * @param values label values. names.length must be equal to values.length.
+     * @param names  label names. {@link PrometheusNaming#isValidLabelName(String)} must be true for each name.
+     *               Use {@link PrometheusNaming#sanitizeLabelName(String)} to convert arbitrary strings
+     *               to valid label names. Label names must be unique (no duplicate label names).
+     * @param values label values. {@code names.length} must be equal to {@code values.length}.
      */
     public static Labels of(String[] names, String[] values) {
         if (names.length != values.length) {
@@ -97,15 +128,19 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         }
         String[] namesCopy = Arrays.copyOf(names, names.length);
         String[] valuesCopy = Arrays.copyOf(values, values.length);
-        sortAndValidate(namesCopy, valuesCopy);
-        return new Labels(namesCopy, valuesCopy);
+        String[] prometheusNames = makePrometheusNames(namesCopy);
+        sortAndValidate(namesCopy, prometheusNames, valuesCopy);
+        return new Labels(namesCopy, prometheusNames, valuesCopy);
     }
 
     /**
      * Test if these labels contain a specific label name.
+     * <p>
+     * Dots are treated as underscores, so {@code contains("my.label")} and {@code contains("my_label")} are the same.
      */
     public boolean contains(String labelName) {
-        for (String name : names) {
+        labelName = prometheusName(labelName);
+        for (String name : prometheusNames) {
             if (name.equals(labelName)) {
                 return true;
             }
@@ -113,56 +148,47 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return false;
     }
 
-    private static void sortAndValidate(String[] names, String[] values) {
-        sort(names, values);
-        validateNames(names);
+    private static void sortAndValidate(String[] names, String[] prometheusNames, String[] values) {
+        sort(names, prometheusNames, values);
+        validateNames(names, prometheusNames);
     }
 
-    private static void validateNames(String[] names) {
+    private static void validateNames(String[] names, String[] prometheusNames) {
         for (int i = 0; i < names.length; i++) {
             if (!isValidLabelName(names[i])) {
                 throw new IllegalArgumentException("'" + names[i] + "' is an illegal label name");
             }
-            if (i > 0 && names[i - 1].equals(names[i])) {
+            // The arrays are sorted, so duplicates are next to each other
+            if (i > 0 && prometheusNames[i - 1].equals(prometheusNames[i])) {
                 throw new IllegalArgumentException(names[i] + ": duplicate label name");
             }
         }
     }
 
-    private static void sort(String[] names, String[] values) {
-        // bubblesort :)
-        int n = names.length;
+    private static void sort(String[] names, String[] prometheusNames, String[] values) {
+        // bubblesort
+        int n = prometheusNames.length;
         for (int i = 0; i < n - 1; i++) {
             for (int j = 0; j < n - i - 1; j++) {
-                if (names[j].compareTo(names[j + 1]) > 0) {
-                    swap(j, j + 1, names, values);
+                if (prometheusNames[j].compareTo(prometheusNames[j + 1]) > 0) {
+                    swap(j, j + 1, names, prometheusNames, values);
                 }
             }
         }
     }
 
-    private static void swap(int i, int j, String[] names, String[] values) {
+    private static void swap(int i, int j, String[] names, String[] prometheusNames, String[] values) {
         String tmp = names[j];
         names[j] = names[i];
         names[i] = tmp;
         tmp = values[j];
         values[j] = values[i];
         values[i] = tmp;
-    }
-
-    public static boolean isValidLabelName(String name) {
-        return LABEL_NAME_RE.matcher(name).matches() && !name.startsWith("__");
-    }
-
-    /**
-     * Convert arbitrary label names to valid Prometheus label names.
-     */
-    public static String sanitizeLabelName(String labelName) {
-        String result = MetricMetadata.sanitizeMetricName(labelName);
-        while (result.startsWith("__")) {
-            result = result.substring(1);
+        if (prometheusNames != names) {
+            tmp = prometheusNames[j];
+            prometheusNames[j] = prometheusNames[i];
+            prometheusNames[i] = tmp;
         }
-        return result;
     }
 
     @Override
@@ -182,6 +208,15 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return names[i];
     }
 
+    /**
+     * Like {@link #getName(int)}, but dots are replaced with underscores.
+     * <p>
+     * This is used by Prometheus exposition formats.
+     */
+    public String getPrometheusName(int i) {
+        return prometheusNames[i];
+    }
+
     public String getValue(int i) {
         return values[i];
     }
@@ -191,7 +226,17 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
      * This and other must not contain the same label name.
      */
     public Labels merge(Labels other) {
+        if (this.isEmpty()) {
+            return other;
+        }
+        if (other.isEmpty()) {
+            return this;
+        }
         String[] names = new String[this.names.length + other.names.length];
+        String[] prometheusNames = names;
+        if (this.names != this.prometheusNames || other.names != other.prometheusNames) {
+            prometheusNames = new String[names.length];
+        }
         String[] values = new String[names.length];
         int thisPos = 0;
         int otherPos = 0;
@@ -199,24 +244,36 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
             if (thisPos >= this.names.length) {
                 names[thisPos + otherPos] = other.names[otherPos];
                 values[thisPos + otherPos] = other.values[otherPos];
+                if (prometheusNames != names) {
+                    prometheusNames[thisPos + otherPos] = other.prometheusNames[otherPos];
+                }
                 otherPos++;
             } else if (otherPos >= other.names.length) {
                 names[thisPos + otherPos] = this.names[thisPos];
                 values[thisPos + otherPos] = this.values[thisPos];
+                if (prometheusNames != names) {
+                    prometheusNames[thisPos + otherPos] = this.prometheusNames[thisPos];
+                }
                 thisPos++;
-            } else if (this.names[thisPos].compareTo(other.names[otherPos]) < 0) {
+            } else if (this.prometheusNames[thisPos].compareTo(other.prometheusNames[otherPos]) < 0) {
                 names[thisPos + otherPos] = this.names[thisPos];
                 values[thisPos + otherPos] = this.values[thisPos];
+                if (prometheusNames != names) {
+                    prometheusNames[thisPos + otherPos] = this.prometheusNames[thisPos];
+                }
                 thisPos++;
-            } else if (this.names[thisPos].compareTo(other.names[otherPos]) > 0) {
+            } else if (this.prometheusNames[thisPos].compareTo(other.prometheusNames[otherPos]) > 0) {
                 names[thisPos + otherPos] = other.names[otherPos];
                 values[thisPos + otherPos] = other.values[otherPos];
+                if (prometheusNames != names) {
+                    prometheusNames[thisPos + otherPos] = other.prometheusNames[otherPos];
+                }
                 otherPos++;
             } else {
                 throw new IllegalArgumentException("Duplicate label name: '" + this.names[thisPos] + "'.");
             }
         }
-        return new Labels(names, values);
+        return new Labels(names, prometheusNames, values);
     }
 
     /**
@@ -241,12 +298,13 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         System.arraycopy(this.values, 0, mergedValues, 0, this.values.length);
         System.arraycopy(names, 0, mergedNames, this.names.length, names.length);
         System.arraycopy(values, 0, mergedValues, this.values.length, values.length);
-        sortAndValidate(mergedNames, mergedValues);
-        return new Labels(mergedNames, mergedValues);
+        String[] prometheusNames = makePrometheusNames(mergedNames);
+        sortAndValidate(mergedNames, prometheusNames, mergedValues);
+        return new Labels(mergedNames, prometheusNames, mergedValues);
     }
 
     public boolean hasSameNames(Labels other) {
-        return Arrays.equals(names, other.names);
+        return Arrays.equals(prometheusNames, other.prometheusNames);
     }
 
     public boolean hasSameValues(Labels other) {
@@ -255,7 +313,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
 
     @Override
     public int compareTo(Labels other) {
-        int result = compare(names, other.names);
+        int result = compare(prometheusNames, other.prometheusNames);
         if (result != 0) {
             return result;
         }
@@ -288,6 +346,11 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return Collections.unmodifiableList(result);
     }
 
+    /**
+     * This must not be used in Prometheus exposition formats because names may contain dots.
+     * <p>
+     * However, for debugging it's better to show the original names rather than the Prometheus names.
+     */
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
@@ -324,18 +387,17 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         }
     }
 
-    // as labels are sorted by name, equals is insensitive to the order
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Labels labels = (Labels) o;
-        return Arrays.equals(names, labels.names) && Arrays.equals(values, labels.values);
+        return labels.hasSameNames(this) && labels.hasSameValues(this);
     }
 
     @Override
     public int hashCode() {
-        int result = Arrays.hashCode(names);
+        int result = Arrays.hashCode(prometheusNames);
         result = 31 * result + Arrays.hashCode(values);
         return result;
     }

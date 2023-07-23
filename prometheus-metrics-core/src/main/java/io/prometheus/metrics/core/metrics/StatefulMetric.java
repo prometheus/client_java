@@ -62,6 +62,34 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
         return collect(labels, metricData);
     }
 
+    /**
+     * Initialize label values.
+     * <p>
+     * Example: Imagine you have a counter for payments as follows
+     * <pre>
+     * payment_transactions_total{payment_type="credit card"} 7.0
+     * payment_transactions_total{payment_type="paypal"} 3.0
+     * </pre>
+     * Now, the data points for the {@code payment_type} label values get initialized when they are
+     * first used, i.e. the first time you call
+     * <pre>{@code
+     * counter.withLabelValues("paypal").inc();
+     * }</pre>
+     * the data point with label {@code payment_type="paypal"} will go from non-existent to having value {@code 1.0}.
+     * <p>
+     * In some cases this is confusing, and you want to have data points initialized on application start
+     * with an initial value of {@code 0.0}:
+     * <pre>
+     * payment_transactions_total{payment_type="credit card"} 0.0
+     * payment_transactions_total{payment_type="paypal"} 0.0
+     * </pre>
+     * {@code initLabelValues(...)} can be used to initialize label value, so that the data points
+     * show up in the exposition format with an initial value of zero.
+     */
+    public void initLabelValues(String... labelValues) {
+        withLabelValues(labelValues);
+    }
+
     public D withLabelValues(String... labelValues) {
         if (labelValues.length != labelNames.length) {
             if (labelValues.length == 0) {
@@ -73,7 +101,6 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
         return data.computeIfAbsent(Arrays.asList(labelValues), l -> newDataPoint());
     }
 
-    // TODO: Remove automatically if label values have not been used in a while?
     public void remove(String... labelValues) {
         data.remove(Arrays.asList(labelValues));
     }

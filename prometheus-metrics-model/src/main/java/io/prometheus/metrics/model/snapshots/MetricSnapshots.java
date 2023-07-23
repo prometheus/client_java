@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 
@@ -36,10 +37,10 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
      */
     public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
         List<MetricSnapshot> list = new ArrayList<>(snapshots);
-        list.sort(comparing(s -> s.getMetadata().getName()));
+        list.sort(comparing(s -> s.getMetadata().getPrometheusName()));
         for (int i = 0; i < snapshots.size() - 1; i++) {
-            if (list.get(i).getMetadata().getName().equals(list.get(i + 1).getMetadata().getName())) {
-                throw new IllegalArgumentException(list.get(i).getMetadata().getName() + ": duplicate metric name");
+            if (list.get(i).getMetadata().getPrometheusName().equals(list.get(i + 1).getMetadata().getPrometheusName())) {
+                throw new IllegalArgumentException(list.get(i).getMetadata().getPrometheusName() + ": duplicate metric name");
             }
         }
         this.snapshots = unmodifiableList(list);
@@ -79,7 +80,7 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
 
         public boolean containsMetricName(String name) {
             for (MetricSnapshot snapshot : snapshots) {
-                if (snapshot.getMetadata().getName().equals(name)) {
+                if (snapshot.getMetadata().getPrometheusName().equals(prometheusName(name))) {
                     return true;
                 }
             }

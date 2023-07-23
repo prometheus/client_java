@@ -80,12 +80,12 @@ public class CounterWithCallback extends CallbackMetric {
          * In the example above both {@code c1} and {@code c2} would be named {@code "events_total"} in Prometheus.
          * <p>
          * Throws an {@link IllegalArgumentException} if
-         * {@link io.prometheus.metrics.model.snapshots.MetricMetadata#isValidMetricName(String) MetricMetadata.isValidMetricName(name)}
+         * {@link io.prometheus.metrics.model.snapshots.PrometheusNaming#isValidMetricName(String) MetricMetadata.isValidMetricName(name)}
          * is {@code false}.
          */
         @Override
         public Builder withName(String name) {
-            return super.withName(Counter.normalizeName(name));
+            return super.withName(Counter.stripTotalSuffix(name));
         }
 
         @Override

@@ -1,10 +1,10 @@
 package io.prometheus.metrics.model.registry;
 
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 
-import java.util.List;
 import java.util.function.Predicate;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * To be registered with the Prometheus collector registry.
@@ -26,7 +26,7 @@ public interface Collector {
      */
     default MetricSnapshot collect(Predicate<String> includedNames) {
         MetricSnapshot result = collect();
-        if (includedNames.test(result.getMetadata().getName())) {
+        if (includedNames.test(result.getMetadata().getPrometheusName())) {
             return result;
         } else {
             return null;
@@ -36,7 +36,7 @@ public interface Collector {
     /**
      * Override this and return {@code null} if a collector does not have a constant name (name may change between scrapes).
      */
-    default String getName() {
-        return collect().getMetadata().getName();
+    default String getPrometheusName() {
+        return collect().getMetadata().getPrometheusName();
     }
 }

@@ -109,18 +109,18 @@ public class CounterTest {
 
     @Test
     public void testTotalStrippedFromName() {
-        Counter counter = Counter.newBuilder()
-                .withName("my_counter_total")
-                .withUnit(Unit.SECONDS)
-                .build();
-        Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(counter.collect());
-        assertEquals("name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }", TextFormat.printer().shortDebugString(protobufData));
-
-        counter = Counter.newBuilder()
-                .withName("my_counter")
-                .build();
-        protobufData = new PrometheusProtobufWriter().convert(counter.collect());
-        assertEquals("name: \"my_counter_total\" type: COUNTER metric { counter { value: 0.0 } }", TextFormat.printer().shortDebugString(protobufData));
+        for (String name : new String[]{
+                "my_counter_total", "my.counter.total",
+                "my_counter_seconds_total", "my.counter.seconds.total",
+                "my_counter", "my.counter",
+                "my_counter_seconds", "my.counter.seconds"}) {
+            Counter counter = Counter.newBuilder()
+                    .withName(name)
+                    .withUnit(Unit.SECONDS)
+                    .build();
+            Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(counter.collect());
+            assertEquals("name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }", TextFormat.printer().shortDebugString(protobufData));
+        }
     }
 
     @Test

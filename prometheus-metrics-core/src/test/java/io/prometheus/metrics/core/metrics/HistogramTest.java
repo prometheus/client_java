@@ -1,19 +1,19 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.com_google_protobuf_3_21_7.TextFormat;
+import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
+import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
-import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.tracer.common.SpanContext;
-import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.tracer.common.SpanContext;
+import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -1044,18 +1044,8 @@ public class HistogramTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testIllegalLabelNameDot() {
-        // The Prometheus team are investigating to allow dots in future Prometheus versions, but for now it's invalid.
-        // The reason is that you cannot use illegal label names in the Prometheus query language.
-        Histogram.newBuilder()
-                .withName("test")
-                .withLabelNames("http.status");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void testIllegalName() {
-        Histogram.newBuilder()
-                .withName("server.durations");
+        Histogram.newBuilder().withName("my_namespace/server.durations");
     }
 
     @Test(expected = IllegalArgumentException.class)

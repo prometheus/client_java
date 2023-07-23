@@ -29,6 +29,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscape
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimestamp;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * Write the OpenMetrics text format as defined on <a href="https://openmetrics.io/">https://openmetrics.io</a>.
@@ -89,7 +90,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         MetricMetadata metadata = snapshot.getMetadata();
         writeMetadata(writer, "counter", metadata);
         for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getData()) {
-            writeNameAndLabels(writer, metadata.getName(), "_total", data.getLabels());
+            writeNameAndLabels(writer, metadata.getPrometheusName(), "_total", data.getLabels());
             writeDouble(writer, data.getValue());
             writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
             writeCreated(writer, metadata, data);
@@ -100,7 +101,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         MetricMetadata metadata = snapshot.getMetadata();
         writeMetadata(writer, "gauge", metadata);
         for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getData()) {
-            writeNameAndLabels(writer, metadata.getName(), null, data.getLabels());
+            writeNameAndLabels(writer, metadata.getPrometheusName(), null, data.getLabels());
             writeDouble(writer, data.getValue());
             if (exemplarsOnAllMetricTypesEnabled) {
                 writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
@@ -128,7 +129,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
             long cumulativeCount = 0;
             for (int i = 0; i < buckets.size(); i++) {
                 cumulativeCount += buckets.getCount(i);
-                writeNameAndLabels(writer, metadata.getName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
+                writeNameAndLabels(writer, metadata.getPrometheusName(), "_bucket", data.getLabels(), "le", buckets.getUpperBound(i));
                 writeLong(writer, cumulativeCount);
                 Exemplar exemplar;
                 if (i == 0) {
@@ -176,7 +177,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
             // quantiles, all indexes modulo exemplars.length.
             int exemplarIndex = 1;
             for (Quantile quantile : data.getQuantiles()) {
-                writeNameAndLabels(writer, metadata.getName(), null, data.getLabels(), "quantile", quantile.getQuantile());
+                writeNameAndLabels(writer, metadata.getPrometheusName(), null, data.getLabels(), "quantile", quantile.getQuantile());
                 writeDouble(writer, quantile.getValue());
                 if (exemplars.size() > 0 && exemplarsOnAllMetricTypesEnabled) {
                     exemplarIndex = (exemplarIndex + 1) % exemplars.size();
@@ -195,7 +196,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         MetricMetadata metadata = snapshot.getMetadata();
         writeMetadata(writer, "info", metadata);
         for (InfoSnapshot.InfoDataPointSnapshot data : snapshot.getData()) {
-            writeNameAndLabels(writer, metadata.getName(), "_info", data.getLabels());
+            writeNameAndLabels(writer, metadata.getPrometheusName(), "_info", data.getLabels());
             writer.write("1");
             writeScrapeTimestampAndExemplar(writer, data, null);
         }
@@ -206,13 +207,13 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         writeMetadata(writer, "stateset", metadata);
         for (StateSetSnapshot.StateSetDataPointSnapshot data : snapshot.getData()) {
             for (int i = 0; i < data.size(); i++) {
-                writer.write(metadata.getName());
+                writer.write(metadata.getPrometheusName());
                 writer.write('{');
                 for (int j = 0; j < data.getLabels().size(); j++) {
                     if (j > 0) {
                         writer.write(",");
                     }
-                    writer.write(data.getLabels().getName(j));
+                    writer.write(data.getLabels().getPrometheusName(j));
                     writer.write("=\"");
                     writeEscapedLabelValue(writer, data.getLabels().getValue(j));
                     writer.write("\"");
@@ -220,7 +221,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
                 if (!data.getLabels().isEmpty()) {
                     writer.write(",");
                 }
-                writer.write(metadata.getName());
+                writer.write(metadata.getPrometheusName());
                 writer.write("=\"");
                 writeEscapedLabelValue(writer, data.getName(i));
                 writer.write("\"} ");
@@ -238,7 +239,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         MetricMetadata metadata = snapshot.getMetadata();
         writeMetadata(writer, "unknown", metadata);
         for (UnknownSnapshot.UnknownDataPointSnapshot data : snapshot.getData()) {
-            writeNameAndLabels(writer, metadata.getName(), null, data.getLabels());
+            writeNameAndLabels(writer, metadata.getPrometheusName(), null, data.getLabels());
             writeDouble(writer, data.getValue());
             if (exemplarsOnAllMetricTypesEnabled) {
             writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
@@ -251,7 +252,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     private void writeCountAndSum(OutputStreamWriter writer, MetricMetadata metadata, DistributionDataPointSnapshot data, String countSuffix, String sumSuffix, Exemplars exemplars) throws IOException {
         int exemplarIndex = 0;
         if (data.hasCount()) {
-            writeNameAndLabels(writer, metadata.getName(), countSuffix, data.getLabels());
+            writeNameAndLabels(writer, metadata.getPrometheusName(), countSuffix, data.getLabels());
             writeLong(writer, data.getCount());
             if (exemplars.size() > 0) {
                 writeScrapeTimestampAndExemplar(writer, data, exemplars.get(exemplarIndex));
@@ -261,7 +262,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
             }
         }
         if (data.hasSum()) {
-            writeNameAndLabels(writer, metadata.getName(), sumSuffix, data.getLabels());
+            writeNameAndLabels(writer, metadata.getPrometheusName(), sumSuffix, data.getLabels());
             writeDouble(writer, data.getSum());
             if (exemplars.size() > 0) {
                 writeScrapeTimestampAndExemplar(writer, data, exemplars.get(exemplarIndex));
@@ -273,7 +274,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
     private void writeCreated(OutputStreamWriter writer, MetricMetadata metadata, DataPointSnapshot data) throws IOException {
         if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
-            writeNameAndLabels(writer, metadata.getName(), "_created", data.getLabels());
+            writeNameAndLabels(writer, metadata.getPrometheusName(), "_created", data.getLabels());
             writeTimestamp(writer, data.getCreatedTimestampMillis());
             if (data.hasScrapeTimestamp()) {
                 writer.write(' ');
@@ -319,20 +320,20 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
     private void writeMetadata(OutputStreamWriter writer, String typeName, MetricMetadata metadata) throws IOException {
         writer.write("# TYPE ");
-        writer.write(metadata.getName());
+        writer.write(metadata.getPrometheusName());
         writer.write(' ');
         writer.write(typeName);
         writer.write('\n');
         if (metadata.getUnit() != null) {
             writer.write("# UNIT ");
-            writer.write(metadata.getName());
+            writer.write(metadata.getPrometheusName());
             writer.write(' ');
             writeEscapedLabelValue(writer, metadata.getUnit().toString());
             writer.write('\n');
         }
         if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
             writer.write("# HELP ");
-            writer.write(metadata.getName());
+            writer.write(metadata.getPrometheusName());
             writer.write(' ');
             writeEscapedLabelValue(writer, metadata.getHelp());
             writer.write('\n');
