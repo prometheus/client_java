@@ -55,8 +55,11 @@
         <module>prometheus-metrics-model</module>
         <module>prometheus-metrics-tracer</module>
         <module>prometheus-metrics-exposition-formats</module>
+        <module>prometheus-metrics-exporter-common</module>
         <module>prometheus-metrics-exporter-servlet-jakarta</module>
+        <module>prometheus-metrics-exporter-httpserver</module>
         <module>examples</module>
+        <module>integration-tests</module>
 
         <module>simpleclient</module>
         <module>simpleclient_common</module>

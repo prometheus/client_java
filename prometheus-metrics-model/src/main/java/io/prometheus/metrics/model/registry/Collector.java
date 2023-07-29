@@ -34,7 +34,8 @@ public interface Collector {
     }
 
     /**
-     * Override this and return {@code null} if a collector does not have a constant name (name may change between scrapes).
+     * Override this and return {@code null} if a collector does not have a constant name,
+     * or if you don't want this library to call {@link #collect()} during registration of this collector.
      */
     default String getPrometheusName() {
         return collect().getMetadata().getPrometheusName();
