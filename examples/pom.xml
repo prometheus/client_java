@@ -33,6 +33,7 @@
     </developers>
 
     <modules>
+        <module>example-httpserver</module>
         <module>example-tomcat-servlet</module>
         <module>example-exemplars-tail-sampling</module>
     </modules>
