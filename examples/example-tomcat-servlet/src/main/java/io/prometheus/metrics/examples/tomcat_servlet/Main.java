@@ -6,16 +6,20 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Simple example using embedded Tomcat and the {@link PrometheusMetricsServlet}.
  */
 public class Main {
 
-    public static void main(String[] args) throws LifecycleException {
+    public static void main(String[] args) throws LifecycleException, IOException {
 
         Tomcat tomcat = new Tomcat();
-        tomcat.setPort(8080);
+        Path tmpDir = Files.createTempDirectory("prometheus-tomcat-servlet-example-");
+        tomcat.setBaseDir(tmpDir.toFile().getAbsolutePath());
 
         Context ctx = tomcat.addContext("", new File(".").getAbsolutePath());
 
