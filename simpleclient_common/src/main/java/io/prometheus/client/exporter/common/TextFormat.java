@@ -137,8 +137,9 @@ public class TextFormat {
   }
 
   private static void writeEscapedHelp(Writer writer, String s) throws IOException {
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
+    char[] characters = s.toCharArray();
+    for (int i = 0; i < characters.length; i++) {
+      char c = characters[i];
       switch (c) {
         case '\\':
           writer.append("\\\\");
@@ -153,8 +154,9 @@ public class TextFormat {
   }
 
   private static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
+    char[] characters = s.toCharArray();
+    for (int i = 0; i < characters.length; i++) {
+      char c = characters[i];
       switch (c) {
         case '\\':
           writer.append("\\\\");
