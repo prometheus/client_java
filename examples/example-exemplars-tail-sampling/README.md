@@ -60,7 +60,7 @@ The example is built as part of the `client_java` parent project with
 ./mvnw package
 ```
 
-This should generate two Java services `.../example-greeting-service/target/example-greeting-service-[version].jar` and `.../example-hello-world-app/target/example-hello-world-app-[version].jar`.
+This should generate two Java services `.../example-greeting-service/target/example-greeting-service.jar` and `.../example-hello-world-app/target/example-hello-world-app.jar`.
 
 ## Run the Example
 

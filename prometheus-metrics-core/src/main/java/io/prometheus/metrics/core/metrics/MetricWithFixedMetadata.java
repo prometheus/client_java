@@ -78,9 +78,21 @@ public abstract class MetricWithFixedMetadata extends Metric {
                 if (illegalLabelNames.contains(labelName)) {
                     throw new IllegalArgumentException(labelName + ": illegal label name for this metric type");
                 }
+                if (constLabels.contains(labelName)) {
+                    throw new IllegalArgumentException(labelName + ": duplicate label name");
+                }
             }
             this.labelNames = labelNames;
             return self();
+        }
+
+        public B withConstLabels(Labels constLabels) {
+            for (String labelName : labelNames) {
+                if (constLabels.contains(labelName)) { // Labels.contains() treats dots like underscores
+                    throw new IllegalArgumentException(labelName + ": duplicate label name");
+                }
+            }
+            return super.withConstLabels(constLabels);
         }
 
         @Override

@@ -45,8 +45,8 @@
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>protobuf-shaded</artifactId>
-            <version>1.0.0-alpha-1</version>
+            <artifactId>prometheus-metrics-shaded-protobuf</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- test dependencies -->

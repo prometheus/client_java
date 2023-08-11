@@ -8,9 +8,9 @@
         <version>1.0.0-alpha-3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>example-httpserver</artifactId>
+    <artifactId>example-exporter-httpserver</artifactId>
 
-    <name>Example - HTTPServer</name>
+    <name>>Example - HTTPServer Exporter</name>
     <description>
         Prometheus Metrics Example using the HTTPServer for exposing the metrics endpoint
     </description>
@@ -45,6 +45,7 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

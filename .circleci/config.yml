@@ -3,20 +3,20 @@ machine: true
 jobs:
   build:
     machine:
-      image: ubuntu-2204:2023.04.2
+      image: ubuntu-2204:2023.07.2
     working_directory: ~/circleci-java
     steps:
       - run:
-          name: Install OpenJDK 11
+          name: Install OpenJDK 17
           command: |
-              sudo apt-get update && sudo apt-get install openjdk-11-jdk
-              sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
-              sudo update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
+              sudo apt-get update && sudo apt-get install -y openjdk-17-jdk
+              sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+              sudo update-alternatives --set javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
               java -version
       - checkout
       - restore_cache:
           key: maven-dependencies-{{ checksum "pom.xml" }}
-      # - run: cd protobuf-shaded && ../mvnw install && cd ..
+      - run: cd prometheus-metrics-shaded-dependencies && ../mvnw clean install && cd ..
       - run: ./mvnw clean install
       - run: ./mvnw javadoc:jar
       - save_cache:

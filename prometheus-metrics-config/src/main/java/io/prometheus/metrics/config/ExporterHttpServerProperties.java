@@ -38,6 +38,8 @@ public class ExporterHttpServerProperties {
 
         private Integer port;
 
+        private Builder() {}
+
         public Builder withPort(int port) {
             this.port = port;
             return this;

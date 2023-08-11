@@ -49,7 +49,7 @@ public class ExporterServletTomcatSample {
                 .withHelp("Info metric on this integration test")
                 .withLabelNames("test_name")
                 .register();
-        info.infoLabelValues("exporter-servlet-tomcat-sample");
+        info.addLabelValues("exporter-servlet-tomcat-sample");
 
         Gauge gauge = Gauge.newBuilder()
                 .withName("temperature_celsius")

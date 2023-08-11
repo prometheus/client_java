@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
 
     public static final NativeHistogramBuckets EMPTY = new NativeHistogramBuckets(new int[]{}, new long[]{});
-    private final int[] bucketIndexes;
+    private final int[] bucketIndexes; // sorted
     private final long[] counts;
 
     private NativeHistogramBuckets(int[] bucketIndexes, long[] counts) {
