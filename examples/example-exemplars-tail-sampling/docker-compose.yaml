@@ -12,7 +12,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./example-hello-world-app/target/example-hello-world-app-1.0.0-alpha-2-SNAPSHOT.jar:/hello-world-app.jar
+      - ./example-hello-world-app/target/example-hello-world-app.jar:/example-hello-world-app.jar
     environment:
       - OTEL_TRACES_EXPORTER=otlp
       - OTEL_METRICS_EXPORTER=none
@@ -21,7 +21,7 @@ services:
       - java
       - -javaagent:/opentelemetry-javaagent.jar
       - -jar
-      - /hello-world-app.jar
+      - /example-hello-world-app.jar
   greeting-service:
     # The opentelemetry-java-agent image is coming from the hello-world-up service above.
     image: opentelemetry-java-agent
@@ -29,7 +29,7 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - ./example-greeting-service/target/example-greeting-service-1.0.0-alpha-2-SNAPSHOT.jar:/greeting-service.jar
+      - ./example-greeting-service/target/example-greeting-service.jar:/example-greeting-service.jar
     environment:
       - OTEL_TRACES_EXPORTER=otlp
       - OTEL_METRICS_EXPORTER=none
@@ -38,7 +38,7 @@ services:
       - java
       - -javaagent:/opentelemetry-javaagent.jar
       - -jar
-      - /greeting-service.jar
+      - /example-greeting-service.jar
   collector:
     image: otel/opentelemetry-collector-contrib:0.79.0
     network_mode: host

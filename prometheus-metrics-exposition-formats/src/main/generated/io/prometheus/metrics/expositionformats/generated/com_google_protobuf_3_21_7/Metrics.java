@@ -6,19 +6,19 @@ package io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_
 public final class Metrics {
   private Metrics() {}
   public static void registerAllExtensions(
-      io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite registry) {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite registry) {
   }
 
   public static void registerAllExtensions(
-      io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistry registry) {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistry registry) {
     registerAllExtensions(
-        (io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite) registry);
+        (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite) registry);
   }
   /**
    * Protobuf enum {@code io.prometheus.client.MetricType}
    */
   public enum MetricType
-      implements io.prometheus.metrics.com_google_protobuf_3_21_7.ProtocolMessageEnum {
+      implements io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ProtocolMessageEnum {
     /**
      * <pre>
      * COUNTER must use the Metric field "counter".
@@ -149,27 +149,27 @@ public final class Metrics {
       }
     }
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.EnumLiteMap<MetricType>
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.EnumLiteMap<MetricType>
         internalGetValueMap() {
       return internalValueMap;
     }
-    private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.EnumLiteMap<
+    private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.EnumLiteMap<
         MetricType> internalValueMap =
-          new io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.EnumLiteMap<MetricType>() {
+          new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.EnumLiteMap<MetricType>() {
             public MetricType findValueByNumber(int number) {
               return MetricType.forNumber(number);
             }
           };
 
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.EnumValueDescriptor
+    public final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(ordinal());
     }
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.EnumDescriptor
+    public final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
     }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.EnumDescriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.EnumDescriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.getDescriptor().getEnumTypes().get(0);
     }
@@ -177,7 +177,7 @@ public final class Metrics {
     private static final MetricType[] VALUES = values();
 
     public static MetricType valueOf(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.EnumValueDescriptor desc) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.EnumValueDescriptor desc) {
       if (desc.getType() != getDescriptor()) {
         throw new java.lang.IllegalArgumentException(
           "EnumValueDescriptor is not for this type.");
@@ -196,7 +196,7 @@ public final class Metrics {
 
   public interface LabelPairOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.LabelPair)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>optional string name = 1;</code>
@@ -212,7 +212,7 @@ public final class Metrics {
      * <code>optional string name = 1;</code>
      * @return The bytes for name.
      */
-    io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
         getNameBytes();
 
     /**
@@ -229,19 +229,19 @@ public final class Metrics {
      * <code>optional string value = 2;</code>
      * @return The bytes for value.
      */
-    io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
         getValueBytes();
   }
   /**
    * Protobuf type {@code io.prometheus.client.LabelPair}
    */
   public static final class LabelPair extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.LabelPair)
       LabelPairOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use LabelPair.newBuilder() to construct.
-    private LabelPair(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private LabelPair(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private LabelPair() {
@@ -256,18 +256,13 @@ public final class Metrics {
       return new LabelPair();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_LabelPair_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_LabelPair_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -296,8 +291,8 @@ public final class Metrics {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString bs = 
-            (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString bs = 
+            (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           name_ = s;
@@ -310,17 +305,17 @@ public final class Metrics {
      * @return The bytes for name.
      */
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString b = 
-            io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString b = 
+            io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         name_ = b;
         return b;
       } else {
-        return (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+        return (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
       }
     }
 
@@ -345,8 +340,8 @@ public final class Metrics {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString bs = 
-            (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString bs = 
+            (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           value_ = s;
@@ -359,17 +354,17 @@ public final class Metrics {
      * @return The bytes for value.
      */
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
         getValueBytes() {
       java.lang.Object ref = value_;
       if (ref instanceof java.lang.String) {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString b = 
-            io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString b = 
+            io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         value_ = b;
         return b;
       } else {
-        return (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+        return (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
       }
     }
 
@@ -385,13 +380,13 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.writeString(output, 1, name_);
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.writeString(output, 1, name_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.writeString(output, 2, value_);
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.writeString(output, 2, value_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -403,10 +398,10 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.computeStringSize(1, name_);
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.computeStringSize(1, name_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.computeStringSize(2, value_);
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.computeStringSize(2, value_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -459,71 +454,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -543,7 +540,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -551,16 +548,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.LabelPair}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.LabelPair)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPairOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_LabelPair_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_LabelPair_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -573,7 +570,7 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
 
       }
@@ -587,7 +584,7 @@ public final class Metrics {
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_LabelPair_descriptor;
       }
@@ -634,34 +631,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair)other);
         } else {
@@ -694,8 +691,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -726,7 +723,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -750,8 +747,8 @@ public final class Metrics {
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString bs =
-              (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString bs =
+              (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             name_ = s;
@@ -765,17 +762,17 @@ public final class Metrics {
        * <code>optional string name = 1;</code>
        * @return The bytes for name.
        */
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
           getNameBytes() {
         java.lang.Object ref = name_;
         if (ref instanceof String) {
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString b = 
-              io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString b = 
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           name_ = b;
           return b;
         } else {
-          return (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+          return (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
         }
       }
       /**
@@ -807,7 +804,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setNameBytes(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString value) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         name_ = value;
         bitField0_ |= 0x00000001;
@@ -830,8 +827,8 @@ public final class Metrics {
       public java.lang.String getValue() {
         java.lang.Object ref = value_;
         if (!(ref instanceof java.lang.String)) {
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString bs =
-              (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString bs =
+              (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             value_ = s;
@@ -845,17 +842,17 @@ public final class Metrics {
        * <code>optional string value = 2;</code>
        * @return The bytes for value.
        */
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
           getValueBytes() {
         java.lang.Object ref = value_;
         if (ref instanceof String) {
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString b = 
-              io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString b = 
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           value_ = b;
           return b;
         } else {
-          return (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+          return (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
         }
       }
       /**
@@ -887,7 +884,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setValueBytes(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString value) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         value_ = value;
         bitField0_ |= 0x00000002;
@@ -896,13 +893,13 @@ public final class Metrics {
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -920,34 +917,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<LabelPair>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<LabelPair>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<LabelPair>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<LabelPair>() {
       @java.lang.Override
       public LabelPair parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<LabelPair> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<LabelPair> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<LabelPair> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<LabelPair> getParserForType() {
       return PARSER;
     }
 
@@ -960,7 +957,7 @@ public final class Metrics {
 
   public interface GaugeOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.Gauge)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>optional double value = 1;</code>
@@ -977,12 +974,12 @@ public final class Metrics {
    * Protobuf type {@code io.prometheus.client.Gauge}
    */
   public static final class Gauge extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.Gauge)
       GaugeOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Gauge.newBuilder() to construct.
-    private Gauge(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private Gauge(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private Gauge() {
@@ -995,18 +992,13 @@ public final class Metrics {
       return new Gauge();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Gauge_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Gauge_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -1045,7 +1037,7 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeDouble(1, value_);
@@ -1060,7 +1052,7 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(1, value_);
       }
       size += getUnknownFields().getSerializedSize();
@@ -1097,7 +1089,7 @@ public final class Metrics {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasValue()) {
         hash = (37 * hash) + VALUE_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getValue()));
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
@@ -1107,71 +1099,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -1191,7 +1185,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -1199,16 +1193,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.Gauge}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.Gauge)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.GaugeOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Gauge_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Gauge_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1221,7 +1215,7 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
 
       }
@@ -1234,7 +1228,7 @@ public final class Metrics {
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Gauge_descriptor;
       }
@@ -1277,34 +1271,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge)other);
         } else {
@@ -1330,8 +1324,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -1357,7 +1351,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -1389,7 +1383,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setValue(double value) {
-        
+
         value_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
@@ -1407,13 +1401,13 @@ public final class Metrics {
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -1431,34 +1425,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Gauge>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<Gauge>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Gauge>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<Gauge>() {
       @java.lang.Override
       public Gauge parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Gauge> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Gauge> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Gauge> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Gauge> getParserForType() {
       return PARSER;
     }
 
@@ -1471,7 +1465,7 @@ public final class Metrics {
 
   public interface CounterOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.Counter)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>optional double value = 1;</code>
@@ -1498,17 +1492,32 @@ public final class Metrics {
      * <code>optional .io.prometheus.client.Exemplar exemplar = 2;</code>
      */
     io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.ExemplarOrBuilder getExemplarOrBuilder();
+
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+     * @return Whether the createdTimestamp field is set.
+     */
+    boolean hasCreatedTimestamp();
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+     * @return The createdTimestamp.
+     */
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getCreatedTimestamp();
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+     */
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getCreatedTimestampOrBuilder();
   }
   /**
    * Protobuf type {@code io.prometheus.client.Counter}
    */
   public static final class Counter extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.Counter)
       CounterOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Counter.newBuilder() to construct.
-    private Counter(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private Counter(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private Counter() {
@@ -1521,18 +1530,13 @@ public final class Metrics {
       return new Counter();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Counter_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Counter_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -1585,6 +1589,32 @@ public final class Metrics {
       return exemplar_ == null ? io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar.getDefaultInstance() : exemplar_;
     }
 
+    public static final int CREATED_TIMESTAMP_FIELD_NUMBER = 3;
+    private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp createdTimestamp_;
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+     * @return Whether the createdTimestamp field is set.
+     */
+    @java.lang.Override
+    public boolean hasCreatedTimestamp() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+     * @return The createdTimestamp.
+     */
+    @java.lang.Override
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getCreatedTimestamp() {
+      return createdTimestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+    }
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+     */
+    @java.lang.Override
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getCreatedTimestampOrBuilder() {
+      return createdTimestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1597,13 +1627,16 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeDouble(1, value_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeMessage(2, getExemplar());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeMessage(3, getCreatedTimestamp());
       }
       getUnknownFields().writeTo(output);
     }
@@ -1615,12 +1648,16 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(1, value_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(2, getExemplar());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
+          .computeMessageSize(3, getCreatedTimestamp());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -1648,6 +1685,11 @@ public final class Metrics {
         if (!getExemplar()
             .equals(other.getExemplar())) return false;
       }
+      if (hasCreatedTimestamp() != other.hasCreatedTimestamp()) return false;
+      if (hasCreatedTimestamp()) {
+        if (!getCreatedTimestamp()
+            .equals(other.getCreatedTimestamp())) return false;
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -1661,12 +1703,16 @@ public final class Metrics {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasValue()) {
         hash = (37 * hash) + VALUE_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getValue()));
       }
       if (hasExemplar()) {
         hash = (37 * hash) + EXEMPLAR_FIELD_NUMBER;
         hash = (53 * hash) + getExemplar().hashCode();
+      }
+      if (hasCreatedTimestamp()) {
+        hash = (37 * hash) + CREATED_TIMESTAMP_FIELD_NUMBER;
+        hash = (53 * hash) + getCreatedTimestamp().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -1675,71 +1721,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -1759,7 +1807,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -1767,16 +1815,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.Counter}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.Counter)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.CounterOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Counter_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Counter_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -1789,14 +1837,15 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+        if (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
           getExemplarFieldBuilder();
+          getCreatedTimestampFieldBuilder();
         }
       }
       @java.lang.Override
@@ -1809,11 +1858,16 @@ public final class Metrics {
           exemplarBuilder_.dispose();
           exemplarBuilder_ = null;
         }
+        createdTimestamp_ = null;
+        if (createdTimestampBuilder_ != null) {
+          createdTimestampBuilder_.dispose();
+          createdTimestampBuilder_ = null;
+        }
         return this;
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Counter_descriptor;
       }
@@ -1853,6 +1907,12 @@ public final class Metrics {
               : exemplarBuilder_.build();
           to_bitField0_ |= 0x00000002;
         }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.createdTimestamp_ = createdTimestampBuilder_ == null
+              ? createdTimestamp_
+              : createdTimestampBuilder_.build();
+          to_bitField0_ |= 0x00000004;
+        }
         result.bitField0_ |= to_bitField0_;
       }
 
@@ -1862,34 +1922,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter)other);
         } else {
@@ -1906,6 +1966,9 @@ public final class Metrics {
         if (other.hasExemplar()) {
           mergeExemplar(other.getExemplar());
         }
+        if (other.hasCreatedTimestamp()) {
+          mergeCreatedTimestamp(other.getCreatedTimestamp());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -1918,8 +1981,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -1944,6 +2007,13 @@ public final class Metrics {
                 bitField0_ |= 0x00000002;
                 break;
               } // case 18
+              case 26: {
+                input.readMessage(
+                    getCreatedTimestampFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1952,7 +2022,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -1984,7 +2054,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setValue(double value) {
-        
+
         value_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
@@ -2002,7 +2072,7 @@ public final class Metrics {
       }
 
       private io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar exemplar_;
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.ExemplarOrBuilder> exemplarBuilder_;
       /**
        * <code>optional .io.prometheus.client.Exemplar exemplar = 2;</code>
@@ -2106,11 +2176,11 @@ public final class Metrics {
       /**
        * <code>optional .io.prometheus.client.Exemplar exemplar = 2;</code>
        */
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.ExemplarOrBuilder> 
           getExemplarFieldBuilder() {
         if (exemplarBuilder_ == null) {
-          exemplarBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          exemplarBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.ExemplarOrBuilder>(
                   getExemplar(),
                   getParentForChildren(),
@@ -2119,15 +2189,134 @@ public final class Metrics {
         }
         return exemplarBuilder_;
       }
+
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp createdTimestamp_;
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder> createdTimestampBuilder_;
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+       * @return Whether the createdTimestamp field is set.
+       */
+      public boolean hasCreatedTimestamp() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+       * @return The createdTimestamp.
+       */
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getCreatedTimestamp() {
+        if (createdTimestampBuilder_ == null) {
+          return createdTimestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+        } else {
+          return createdTimestampBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+       */
+      public Builder setCreatedTimestamp(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp value) {
+        if (createdTimestampBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          createdTimestamp_ = value;
+        } else {
+          createdTimestampBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+       */
+      public Builder setCreatedTimestamp(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder builderForValue) {
+        if (createdTimestampBuilder_ == null) {
+          createdTimestamp_ = builderForValue.build();
+        } else {
+          createdTimestampBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+       */
+      public Builder mergeCreatedTimestamp(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp value) {
+        if (createdTimestampBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0) &&
+            createdTimestamp_ != null &&
+            createdTimestamp_ != io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance()) {
+            getCreatedTimestampBuilder().mergeFrom(value);
+          } else {
+            createdTimestamp_ = value;
+          }
+        } else {
+          createdTimestampBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+       */
+      public Builder clearCreatedTimestamp() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        createdTimestamp_ = null;
+        if (createdTimestampBuilder_ != null) {
+          createdTimestampBuilder_.dispose();
+          createdTimestampBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+       */
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder getCreatedTimestampBuilder() {
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return getCreatedTimestampFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+       */
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getCreatedTimestampOrBuilder() {
+        if (createdTimestampBuilder_ != null) {
+          return createdTimestampBuilder_.getMessageOrBuilder();
+        } else {
+          return createdTimestamp_ == null ?
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+        }
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 3;</code>
+       */
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder> 
+          getCreatedTimestampFieldBuilder() {
+        if (createdTimestampBuilder_ == null) {
+          createdTimestampBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder>(
+                  getCreatedTimestamp(),
+                  getParentForChildren(),
+                  isClean());
+          createdTimestamp_ = null;
+        }
+        return createdTimestampBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -2145,34 +2334,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Counter>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<Counter>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Counter>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<Counter>() {
       @java.lang.Override
       public Counter parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Counter> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Counter> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Counter> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Counter> getParserForType() {
       return PARSER;
     }
 
@@ -2185,7 +2374,7 @@ public final class Metrics {
 
   public interface QuantileOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.Quantile)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>optional double quantile = 1;</code>
@@ -2213,12 +2402,12 @@ public final class Metrics {
    * Protobuf type {@code io.prometheus.client.Quantile}
    */
   public static final class Quantile extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.Quantile)
       QuantileOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Quantile.newBuilder() to construct.
-    private Quantile(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private Quantile(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private Quantile() {
@@ -2231,18 +2420,13 @@ public final class Metrics {
       return new Quantile();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Quantile_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Quantile_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -2300,7 +2484,7 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeDouble(1, quantile_);
@@ -2318,11 +2502,11 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(1, quantile_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(2, value_);
       }
       size += getUnknownFields().getSerializedSize();
@@ -2365,12 +2549,12 @@ public final class Metrics {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasQuantile()) {
         hash = (37 * hash) + QUANTILE_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getQuantile()));
       }
       if (hasValue()) {
         hash = (37 * hash) + VALUE_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getValue()));
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
@@ -2380,71 +2564,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -2464,7 +2650,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -2472,16 +2658,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.Quantile}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.Quantile)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.QuantileOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Quantile_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Quantile_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -2494,7 +2680,7 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
 
       }
@@ -2508,7 +2694,7 @@ public final class Metrics {
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Quantile_descriptor;
       }
@@ -2555,34 +2741,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile)other);
         } else {
@@ -2611,8 +2797,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -2643,7 +2829,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -2675,7 +2861,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setQuantile(double value) {
-        
+
         quantile_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
@@ -2715,7 +2901,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setValue(double value) {
-        
+
         value_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
@@ -2733,13 +2919,13 @@ public final class Metrics {
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -2757,34 +2943,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Quantile>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<Quantile>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Quantile>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<Quantile>() {
       @java.lang.Override
       public Quantile parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Quantile> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Quantile> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Quantile> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Quantile> getParserForType() {
       return PARSER;
     }
 
@@ -2797,7 +2983,7 @@ public final class Metrics {
 
   public interface SummaryOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.Summary)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>optional uint64 sample_count = 1;</code>
@@ -2844,17 +3030,32 @@ public final class Metrics {
      */
     io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.QuantileOrBuilder getQuantileOrBuilder(
         int index);
+
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+     * @return Whether the createdTimestamp field is set.
+     */
+    boolean hasCreatedTimestamp();
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+     * @return The createdTimestamp.
+     */
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getCreatedTimestamp();
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+     */
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getCreatedTimestampOrBuilder();
   }
   /**
    * Protobuf type {@code io.prometheus.client.Summary}
    */
   public static final class Summary extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.Summary)
       SummaryOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Summary.newBuilder() to construct.
-    private Summary(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private Summary(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private Summary() {
@@ -2868,18 +3069,13 @@ public final class Metrics {
       return new Summary();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Summary_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Summary_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -2966,6 +3162,32 @@ public final class Metrics {
       return quantile_.get(index);
     }
 
+    public static final int CREATED_TIMESTAMP_FIELD_NUMBER = 4;
+    private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp createdTimestamp_;
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+     * @return Whether the createdTimestamp field is set.
+     */
+    @java.lang.Override
+    public boolean hasCreatedTimestamp() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+     * @return The createdTimestamp.
+     */
+    @java.lang.Override
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getCreatedTimestamp() {
+      return createdTimestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+    }
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+     */
+    @java.lang.Override
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getCreatedTimestampOrBuilder() {
+      return createdTimestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2978,7 +3200,7 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeUInt64(1, sampleCount_);
@@ -2988,6 +3210,9 @@ public final class Metrics {
       }
       for (int i = 0; i < quantile_.size(); i++) {
         output.writeMessage(3, quantile_.get(i));
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeMessage(4, getCreatedTimestamp());
       }
       getUnknownFields().writeTo(output);
     }
@@ -2999,16 +3224,20 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeUInt64Size(1, sampleCount_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(2, sampleSum_);
       }
       for (int i = 0; i < quantile_.size(); i++) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(3, quantile_.get(i));
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
+          .computeMessageSize(4, getCreatedTimestamp());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -3038,6 +3267,11 @@ public final class Metrics {
       }
       if (!getQuantileList()
           .equals(other.getQuantileList())) return false;
+      if (hasCreatedTimestamp() != other.hasCreatedTimestamp()) return false;
+      if (hasCreatedTimestamp()) {
+        if (!getCreatedTimestamp()
+            .equals(other.getCreatedTimestamp())) return false;
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -3051,17 +3285,21 @@ public final class Metrics {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasSampleCount()) {
         hash = (37 * hash) + SAMPLE_COUNT_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             getSampleCount());
       }
       if (hasSampleSum()) {
         hash = (37 * hash) + SAMPLE_SUM_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getSampleSum()));
       }
       if (getQuantileCount() > 0) {
         hash = (37 * hash) + QUANTILE_FIELD_NUMBER;
         hash = (53 * hash) + getQuantileList().hashCode();
+      }
+      if (hasCreatedTimestamp()) {
+        hash = (37 * hash) + CREATED_TIMESTAMP_FIELD_NUMBER;
+        hash = (53 * hash) + getCreatedTimestamp().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -3070,71 +3308,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -3154,7 +3394,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -3162,16 +3402,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.Summary}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.Summary)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.SummaryOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Summary_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Summary_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -3180,13 +3420,20 @@ public final class Metrics {
 
       // Construct using io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary.newBuilder()
       private Builder() {
-
+        maybeForceBuilderInitialization();
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getQuantileFieldBuilder();
+          getCreatedTimestampFieldBuilder();
+        }
       }
       @java.lang.Override
       public Builder clear() {
@@ -3201,11 +3448,16 @@ public final class Metrics {
           quantileBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000004);
+        createdTimestamp_ = null;
+        if (createdTimestampBuilder_ != null) {
+          createdTimestampBuilder_.dispose();
+          createdTimestampBuilder_ = null;
+        }
         return this;
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Summary_descriptor;
       }
@@ -3256,6 +3508,12 @@ public final class Metrics {
           result.sampleSum_ = sampleSum_;
           to_bitField0_ |= 0x00000002;
         }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.createdTimestamp_ = createdTimestampBuilder_ == null
+              ? createdTimestamp_
+              : createdTimestampBuilder_.build();
+          to_bitField0_ |= 0x00000004;
+        }
         result.bitField0_ |= to_bitField0_;
       }
 
@@ -3265,34 +3523,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary)other);
         } else {
@@ -3328,12 +3586,15 @@ public final class Metrics {
               quantile_ = other.quantile_;
               bitField0_ = (bitField0_ & ~0x00000004);
               quantileBuilder_ = 
-                io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getQuantileFieldBuilder() : null;
             } else {
               quantileBuilder_.addAllMessages(other.quantile_);
             }
           }
+        }
+        if (other.hasCreatedTimestamp()) {
+          mergeCreatedTimestamp(other.getCreatedTimestamp());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -3347,8 +3608,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -3384,6 +3645,13 @@ public final class Metrics {
                 }
                 break;
               } // case 26
+              case 34: {
+                input.readMessage(
+                    getCreatedTimestampFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -3392,7 +3660,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -3424,7 +3692,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setSampleCount(long value) {
-        
+
         sampleCount_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
@@ -3464,7 +3732,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setSampleSum(double value) {
-        
+
         sampleSum_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
@@ -3490,7 +3758,7 @@ public final class Metrics {
          }
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.QuantileOrBuilder> quantileBuilder_;
 
       /**
@@ -3622,7 +3890,7 @@ public final class Metrics {
           java.lang.Iterable<? extends io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile> values) {
         if (quantileBuilder_ == null) {
           ensureQuantileIsMutable();
-          io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
               values, quantile_);
           onChanged();
         } else {
@@ -3706,11 +3974,11 @@ public final class Metrics {
            getQuantileBuilderList() {
         return getQuantileFieldBuilder().getBuilderList();
       }
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.QuantileOrBuilder> 
           getQuantileFieldBuilder() {
         if (quantileBuilder_ == null) {
-          quantileBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+          quantileBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Quantile.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.QuantileOrBuilder>(
                   quantile_,
                   ((bitField0_ & 0x00000004) != 0),
@@ -3720,15 +3988,134 @@ public final class Metrics {
         }
         return quantileBuilder_;
       }
+
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp createdTimestamp_;
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder> createdTimestampBuilder_;
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+       * @return Whether the createdTimestamp field is set.
+       */
+      public boolean hasCreatedTimestamp() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+       * @return The createdTimestamp.
+       */
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getCreatedTimestamp() {
+        if (createdTimestampBuilder_ == null) {
+          return createdTimestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+        } else {
+          return createdTimestampBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+       */
+      public Builder setCreatedTimestamp(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp value) {
+        if (createdTimestampBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          createdTimestamp_ = value;
+        } else {
+          createdTimestampBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+       */
+      public Builder setCreatedTimestamp(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder builderForValue) {
+        if (createdTimestampBuilder_ == null) {
+          createdTimestamp_ = builderForValue.build();
+        } else {
+          createdTimestampBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+       */
+      public Builder mergeCreatedTimestamp(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp value) {
+        if (createdTimestampBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0) &&
+            createdTimestamp_ != null &&
+            createdTimestamp_ != io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance()) {
+            getCreatedTimestampBuilder().mergeFrom(value);
+          } else {
+            createdTimestamp_ = value;
+          }
+        } else {
+          createdTimestampBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+       */
+      public Builder clearCreatedTimestamp() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        createdTimestamp_ = null;
+        if (createdTimestampBuilder_ != null) {
+          createdTimestampBuilder_.dispose();
+          createdTimestampBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+       */
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder getCreatedTimestampBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getCreatedTimestampFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+       */
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getCreatedTimestampOrBuilder() {
+        if (createdTimestampBuilder_ != null) {
+          return createdTimestampBuilder_.getMessageOrBuilder();
+        } else {
+          return createdTimestamp_ == null ?
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+        }
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 4;</code>
+       */
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder> 
+          getCreatedTimestampFieldBuilder() {
+        if (createdTimestampBuilder_ == null) {
+          createdTimestampBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder>(
+                  getCreatedTimestamp(),
+                  getParentForChildren(),
+                  isClean());
+          createdTimestamp_ = null;
+        }
+        return createdTimestampBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -3746,34 +4133,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Summary>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<Summary>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Summary>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<Summary>() {
       @java.lang.Override
       public Summary parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Summary> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Summary> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Summary> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Summary> getParserForType() {
       return PARSER;
     }
 
@@ -3786,7 +4173,7 @@ public final class Metrics {
 
   public interface UntypedOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.Untyped)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>optional double value = 1;</code>
@@ -3803,12 +4190,12 @@ public final class Metrics {
    * Protobuf type {@code io.prometheus.client.Untyped}
    */
   public static final class Untyped extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.Untyped)
       UntypedOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Untyped.newBuilder() to construct.
-    private Untyped(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private Untyped(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private Untyped() {
@@ -3821,18 +4208,13 @@ public final class Metrics {
       return new Untyped();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Untyped_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Untyped_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -3871,7 +4253,7 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeDouble(1, value_);
@@ -3886,7 +4268,7 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(1, value_);
       }
       size += getUnknownFields().getSerializedSize();
@@ -3923,7 +4305,7 @@ public final class Metrics {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasValue()) {
         hash = (37 * hash) + VALUE_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getValue()));
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
@@ -3933,71 +4315,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -4017,7 +4401,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -4025,16 +4409,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.Untyped}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.Untyped)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.UntypedOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Untyped_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Untyped_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -4047,7 +4431,7 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
 
       }
@@ -4060,7 +4444,7 @@ public final class Metrics {
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Untyped_descriptor;
       }
@@ -4103,34 +4487,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped)other);
         } else {
@@ -4156,8 +4540,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -4183,7 +4567,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -4215,7 +4599,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setValue(double value) {
-        
+
         value_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
@@ -4233,13 +4617,13 @@ public final class Metrics {
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -4257,34 +4641,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Untyped>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<Untyped>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Untyped>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<Untyped>() {
       @java.lang.Override
       public Untyped parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Untyped> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Untyped> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Untyped> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Untyped> getParserForType() {
       return PARSER;
     }
 
@@ -4297,7 +4681,7 @@ public final class Metrics {
 
   public interface HistogramOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.Histogram)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>optional uint64 sample_count = 1;</code>
@@ -4383,6 +4767,21 @@ public final class Metrics {
      */
     io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketOrBuilder getBucketOrBuilder(
         int index);
+
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+     * @return Whether the createdTimestamp field is set.
+     */
+    boolean hasCreatedTimestamp();
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+     * @return The createdTimestamp.
+     */
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getCreatedTimestamp();
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+     */
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getCreatedTimestampOrBuilder();
 
     /**
      * <pre>
@@ -4579,6 +4978,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -4588,6 +4990,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -4596,6 +5001,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -4604,6 +5012,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -4613,6 +5024,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -4688,12 +5102,12 @@ public final class Metrics {
    * Protobuf type {@code io.prometheus.client.Histogram}
    */
   public static final class Histogram extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.Histogram)
       HistogramOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Histogram.newBuilder() to construct.
-    private Histogram(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private Histogram(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private Histogram() {
@@ -4713,18 +5127,13 @@ public final class Metrics {
       return new Histogram();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Histogram_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Histogram_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -4858,6 +5267,32 @@ public final class Metrics {
       return bucket_.get(index);
     }
 
+    public static final int CREATED_TIMESTAMP_FIELD_NUMBER = 15;
+    private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp createdTimestamp_;
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+     * @return Whether the createdTimestamp field is set.
+     */
+    @java.lang.Override
+    public boolean hasCreatedTimestamp() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+     * @return The createdTimestamp.
+     */
+    @java.lang.Override
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getCreatedTimestamp() {
+      return createdTimestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+    }
+    /**
+     * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+     */
+    @java.lang.Override
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getCreatedTimestampOrBuilder() {
+      return createdTimestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+    }
+
     public static final int SCHEMA_FIELD_NUMBER = 5;
     private int schema_ = 0;
     /**
@@ -4874,7 +5309,7 @@ public final class Metrics {
      */
     @java.lang.Override
     public boolean hasSchema() {
-      return ((bitField0_ & 0x00000008) != 0);
+      return ((bitField0_ & 0x00000010) != 0);
     }
     /**
      * <pre>
@@ -4905,7 +5340,7 @@ public final class Metrics {
      */
     @java.lang.Override
     public boolean hasZeroThreshold() {
-      return ((bitField0_ & 0x00000010) != 0);
+      return ((bitField0_ & 0x00000020) != 0);
     }
     /**
      * <pre>
@@ -4932,7 +5367,7 @@ public final class Metrics {
      */
     @java.lang.Override
     public boolean hasZeroCount() {
-      return ((bitField0_ & 0x00000020) != 0);
+      return ((bitField0_ & 0x00000040) != 0);
     }
     /**
      * <pre>
@@ -4959,7 +5394,7 @@ public final class Metrics {
      */
     @java.lang.Override
     public boolean hasZeroCountFloat() {
-      return ((bitField0_ & 0x00000040) != 0);
+      return ((bitField0_ & 0x00000080) != 0);
     }
     /**
      * <pre>
@@ -5037,7 +5472,7 @@ public final class Metrics {
 
     public static final int NEGATIVE_DELTA_FIELD_NUMBER = 10;
     @SuppressWarnings("serial")
-    private io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.LongList negativeDelta_;
+    private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.LongList negativeDelta_;
     /**
      * <pre>
      * Use either "negative_delta" or "negative_count", the former for
@@ -5083,7 +5518,7 @@ public final class Metrics {
 
     public static final int NEGATIVE_COUNT_FIELD_NUMBER = 11;
     @SuppressWarnings("serial")
-    private io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.DoubleList negativeCount_;
+    private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.DoubleList negativeCount_;
     /**
      * <pre>
      * Absolute count of each bucket.
@@ -5127,6 +5562,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -5138,6 +5576,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -5150,6 +5591,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -5161,6 +5605,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -5172,6 +5619,9 @@ public final class Metrics {
     /**
      * <pre>
      * Positive buckets for the native histogram.
+     * Use a no-op span (offset 0, length 0) for a native histogram without any
+     * observations yet and with a zero_threshold of 0. Otherwise, it would be
+     * indistinguishable from a classic histogram.
      * </pre>
      *
      * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -5184,7 +5634,7 @@ public final class Metrics {
 
     public static final int POSITIVE_DELTA_FIELD_NUMBER = 13;
     @SuppressWarnings("serial")
-    private io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.LongList positiveDelta_;
+    private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.LongList positiveDelta_;
     /**
      * <pre>
      * Use either "positive_delta" or "positive_count", the former for
@@ -5230,7 +5680,7 @@ public final class Metrics {
 
     public static final int POSITIVE_COUNT_FIELD_NUMBER = 14;
     @SuppressWarnings("serial")
-    private io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.DoubleList positiveCount_;
+    private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.DoubleList positiveCount_;
     /**
      * <pre>
      * Absolute count of each bucket.
@@ -5280,7 +5730,7 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeUInt64(1, sampleCount_);
@@ -5294,16 +5744,16 @@ public final class Metrics {
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeDouble(4, sampleCountFloat_);
       }
-      if (((bitField0_ & 0x00000008) != 0)) {
+      if (((bitField0_ & 0x00000010) != 0)) {
         output.writeSInt32(5, schema_);
       }
-      if (((bitField0_ & 0x00000010) != 0)) {
+      if (((bitField0_ & 0x00000020) != 0)) {
         output.writeDouble(6, zeroThreshold_);
       }
-      if (((bitField0_ & 0x00000020) != 0)) {
+      if (((bitField0_ & 0x00000040) != 0)) {
         output.writeUInt64(7, zeroCount_);
       }
-      if (((bitField0_ & 0x00000040) != 0)) {
+      if (((bitField0_ & 0x00000080) != 0)) {
         output.writeDouble(8, zeroCountFloat_);
       }
       for (int i = 0; i < negativeSpan_.size(); i++) {
@@ -5324,6 +5774,9 @@ public final class Metrics {
       for (int i = 0; i < positiveCount_.size(); i++) {
         output.writeDouble(14, positiveCount_.getDouble(i));
       }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeMessage(15, getCreatedTimestamp());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -5334,45 +5787,45 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeUInt64Size(1, sampleCount_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(2, sampleSum_);
       }
       for (int i = 0; i < bucket_.size(); i++) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(3, bucket_.get(i));
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(4, sampleCountFloat_);
       }
-      if (((bitField0_ & 0x00000008) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+      if (((bitField0_ & 0x00000010) != 0)) {
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeSInt32Size(5, schema_);
       }
-      if (((bitField0_ & 0x00000010) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+      if (((bitField0_ & 0x00000020) != 0)) {
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(6, zeroThreshold_);
       }
-      if (((bitField0_ & 0x00000020) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+      if (((bitField0_ & 0x00000040) != 0)) {
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeUInt64Size(7, zeroCount_);
       }
-      if (((bitField0_ & 0x00000040) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+      if (((bitField0_ & 0x00000080) != 0)) {
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(8, zeroCountFloat_);
       }
       for (int i = 0; i < negativeSpan_.size(); i++) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(9, negativeSpan_.get(i));
       }
       {
         int dataSize = 0;
         for (int i = 0; i < negativeDelta_.size(); i++) {
-          dataSize += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+          dataSize += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
             .computeSInt64SizeNoTag(negativeDelta_.getLong(i));
         }
         size += dataSize;
@@ -5385,13 +5838,13 @@ public final class Metrics {
         size += 1 * getNegativeCountList().size();
       }
       for (int i = 0; i < positiveSpan_.size(); i++) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(12, positiveSpan_.get(i));
       }
       {
         int dataSize = 0;
         for (int i = 0; i < positiveDelta_.size(); i++) {
-          dataSize += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+          dataSize += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
             .computeSInt64SizeNoTag(positiveDelta_.getLong(i));
         }
         size += dataSize;
@@ -5402,6 +5855,10 @@ public final class Metrics {
         dataSize = 8 * getPositiveCountList().size();
         size += dataSize;
         size += 1 * getPositiveCountList().size();
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
+          .computeMessageSize(15, getCreatedTimestamp());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -5437,6 +5894,11 @@ public final class Metrics {
       }
       if (!getBucketList()
           .equals(other.getBucketList())) return false;
+      if (hasCreatedTimestamp() != other.hasCreatedTimestamp()) return false;
+      if (hasCreatedTimestamp()) {
+        if (!getCreatedTimestamp()
+            .equals(other.getCreatedTimestamp())) return false;
+      }
       if (hasSchema() != other.hasSchema()) return false;
       if (hasSchema()) {
         if (getSchema()
@@ -5484,22 +5946,26 @@ public final class Metrics {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasSampleCount()) {
         hash = (37 * hash) + SAMPLE_COUNT_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             getSampleCount());
       }
       if (hasSampleCountFloat()) {
         hash = (37 * hash) + SAMPLE_COUNT_FLOAT_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getSampleCountFloat()));
       }
       if (hasSampleSum()) {
         hash = (37 * hash) + SAMPLE_SUM_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getSampleSum()));
       }
       if (getBucketCount() > 0) {
         hash = (37 * hash) + BUCKET_FIELD_NUMBER;
         hash = (53 * hash) + getBucketList().hashCode();
+      }
+      if (hasCreatedTimestamp()) {
+        hash = (37 * hash) + CREATED_TIMESTAMP_FIELD_NUMBER;
+        hash = (53 * hash) + getCreatedTimestamp().hashCode();
       }
       if (hasSchema()) {
         hash = (37 * hash) + SCHEMA_FIELD_NUMBER;
@@ -5507,17 +5973,17 @@ public final class Metrics {
       }
       if (hasZeroThreshold()) {
         hash = (37 * hash) + ZERO_THRESHOLD_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getZeroThreshold()));
       }
       if (hasZeroCount()) {
         hash = (37 * hash) + ZERO_COUNT_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             getZeroCount());
       }
       if (hasZeroCountFloat()) {
         hash = (37 * hash) + ZERO_COUNT_FLOAT_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getZeroCountFloat()));
       }
       if (getNegativeSpanCount() > 0) {
@@ -5551,71 +6017,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -5635,7 +6103,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -5643,16 +6111,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.Histogram}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.Histogram)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.HistogramOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Histogram_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Histogram_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -5661,13 +6129,22 @@ public final class Metrics {
 
       // Construct using io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram.newBuilder()
       private Builder() {
-
+        maybeForceBuilderInitialization();
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getBucketFieldBuilder();
+          getCreatedTimestampFieldBuilder();
+          getNegativeSpanFieldBuilder();
+          getPositiveSpanFieldBuilder();
+        }
       }
       @java.lang.Override
       public Builder clear() {
@@ -5683,6 +6160,11 @@ public final class Metrics {
           bucketBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000008);
+        createdTimestamp_ = null;
+        if (createdTimestampBuilder_ != null) {
+          createdTimestampBuilder_.dispose();
+          createdTimestampBuilder_ = null;
+        }
         schema_ = 0;
         zeroThreshold_ = 0D;
         zeroCount_ = 0L;
@@ -5693,7 +6175,7 @@ public final class Metrics {
           negativeSpan_ = null;
           negativeSpanBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000200);
         negativeDelta_ = emptyLongList();
         negativeCount_ = emptyDoubleList();
         if (positiveSpanBuilder_ == null) {
@@ -5702,14 +6184,14 @@ public final class Metrics {
           positiveSpan_ = null;
           positiveSpanBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000800);
+        bitField0_ = (bitField0_ & ~0x00001000);
         positiveDelta_ = emptyLongList();
         positiveCount_ = emptyDoubleList();
         return this;
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Histogram_descriptor;
       }
@@ -5748,41 +6230,41 @@ public final class Metrics {
           result.bucket_ = bucketBuilder_.build();
         }
         if (negativeSpanBuilder_ == null) {
-          if (((bitField0_ & 0x00000100) != 0)) {
+          if (((bitField0_ & 0x00000200) != 0)) {
             negativeSpan_ = java.util.Collections.unmodifiableList(negativeSpan_);
-            bitField0_ = (bitField0_ & ~0x00000100);
+            bitField0_ = (bitField0_ & ~0x00000200);
           }
           result.negativeSpan_ = negativeSpan_;
         } else {
           result.negativeSpan_ = negativeSpanBuilder_.build();
         }
-        if (((bitField0_ & 0x00000200) != 0)) {
+        if (((bitField0_ & 0x00000400) != 0)) {
           negativeDelta_.makeImmutable();
-          bitField0_ = (bitField0_ & ~0x00000200);
+          bitField0_ = (bitField0_ & ~0x00000400);
         }
         result.negativeDelta_ = negativeDelta_;
-        if (((bitField0_ & 0x00000400) != 0)) {
+        if (((bitField0_ & 0x00000800) != 0)) {
           negativeCount_.makeImmutable();
-          bitField0_ = (bitField0_ & ~0x00000400);
+          bitField0_ = (bitField0_ & ~0x00000800);
         }
         result.negativeCount_ = negativeCount_;
         if (positiveSpanBuilder_ == null) {
-          if (((bitField0_ & 0x00000800) != 0)) {
+          if (((bitField0_ & 0x00001000) != 0)) {
             positiveSpan_ = java.util.Collections.unmodifiableList(positiveSpan_);
-            bitField0_ = (bitField0_ & ~0x00000800);
+            bitField0_ = (bitField0_ & ~0x00001000);
           }
           result.positiveSpan_ = positiveSpan_;
         } else {
           result.positiveSpan_ = positiveSpanBuilder_.build();
         }
-        if (((bitField0_ & 0x00001000) != 0)) {
+        if (((bitField0_ & 0x00002000) != 0)) {
           positiveDelta_.makeImmutable();
-          bitField0_ = (bitField0_ & ~0x00001000);
+          bitField0_ = (bitField0_ & ~0x00002000);
         }
         result.positiveDelta_ = positiveDelta_;
-        if (((bitField0_ & 0x00002000) != 0)) {
+        if (((bitField0_ & 0x00004000) != 0)) {
           positiveCount_.makeImmutable();
-          bitField0_ = (bitField0_ & ~0x00002000);
+          bitField0_ = (bitField0_ & ~0x00004000);
         }
         result.positiveCount_ = positiveCount_;
       }
@@ -5803,20 +6285,26 @@ public final class Metrics {
           to_bitField0_ |= 0x00000004;
         }
         if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.schema_ = schema_;
+          result.createdTimestamp_ = createdTimestampBuilder_ == null
+              ? createdTimestamp_
+              : createdTimestampBuilder_.build();
           to_bitField0_ |= 0x00000008;
         }
         if (((from_bitField0_ & 0x00000020) != 0)) {
-          result.zeroThreshold_ = zeroThreshold_;
+          result.schema_ = schema_;
           to_bitField0_ |= 0x00000010;
         }
         if (((from_bitField0_ & 0x00000040) != 0)) {
-          result.zeroCount_ = zeroCount_;
+          result.zeroThreshold_ = zeroThreshold_;
           to_bitField0_ |= 0x00000020;
         }
         if (((from_bitField0_ & 0x00000080) != 0)) {
-          result.zeroCountFloat_ = zeroCountFloat_;
+          result.zeroCount_ = zeroCount_;
           to_bitField0_ |= 0x00000040;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.zeroCountFloat_ = zeroCountFloat_;
+          to_bitField0_ |= 0x00000080;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -5827,34 +6315,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram)other);
         } else {
@@ -5893,12 +6381,15 @@ public final class Metrics {
               bucket_ = other.bucket_;
               bitField0_ = (bitField0_ & ~0x00000008);
               bucketBuilder_ = 
-                io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getBucketFieldBuilder() : null;
             } else {
               bucketBuilder_.addAllMessages(other.bucket_);
             }
           }
+        }
+        if (other.hasCreatedTimestamp()) {
+          mergeCreatedTimestamp(other.getCreatedTimestamp());
         }
         if (other.hasSchema()) {
           setSchema(other.getSchema());
@@ -5916,7 +6407,7 @@ public final class Metrics {
           if (!other.negativeSpan_.isEmpty()) {
             if (negativeSpan_.isEmpty()) {
               negativeSpan_ = other.negativeSpan_;
-              bitField0_ = (bitField0_ & ~0x00000100);
+              bitField0_ = (bitField0_ & ~0x00000200);
             } else {
               ensureNegativeSpanIsMutable();
               negativeSpan_.addAll(other.negativeSpan_);
@@ -5929,9 +6420,9 @@ public final class Metrics {
               negativeSpanBuilder_.dispose();
               negativeSpanBuilder_ = null;
               negativeSpan_ = other.negativeSpan_;
-              bitField0_ = (bitField0_ & ~0x00000100);
+              bitField0_ = (bitField0_ & ~0x00000200);
               negativeSpanBuilder_ = 
-                io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getNegativeSpanFieldBuilder() : null;
             } else {
               negativeSpanBuilder_.addAllMessages(other.negativeSpan_);
@@ -5941,7 +6432,7 @@ public final class Metrics {
         if (!other.negativeDelta_.isEmpty()) {
           if (negativeDelta_.isEmpty()) {
             negativeDelta_ = other.negativeDelta_;
-            bitField0_ = (bitField0_ & ~0x00000200);
+            bitField0_ = (bitField0_ & ~0x00000400);
           } else {
             ensureNegativeDeltaIsMutable();
             negativeDelta_.addAll(other.negativeDelta_);
@@ -5951,7 +6442,7 @@ public final class Metrics {
         if (!other.negativeCount_.isEmpty()) {
           if (negativeCount_.isEmpty()) {
             negativeCount_ = other.negativeCount_;
-            bitField0_ = (bitField0_ & ~0x00000400);
+            bitField0_ = (bitField0_ & ~0x00000800);
           } else {
             ensureNegativeCountIsMutable();
             negativeCount_.addAll(other.negativeCount_);
@@ -5962,7 +6453,7 @@ public final class Metrics {
           if (!other.positiveSpan_.isEmpty()) {
             if (positiveSpan_.isEmpty()) {
               positiveSpan_ = other.positiveSpan_;
-              bitField0_ = (bitField0_ & ~0x00000800);
+              bitField0_ = (bitField0_ & ~0x00001000);
             } else {
               ensurePositiveSpanIsMutable();
               positiveSpan_.addAll(other.positiveSpan_);
@@ -5975,9 +6466,9 @@ public final class Metrics {
               positiveSpanBuilder_.dispose();
               positiveSpanBuilder_ = null;
               positiveSpan_ = other.positiveSpan_;
-              bitField0_ = (bitField0_ & ~0x00000800);
+              bitField0_ = (bitField0_ & ~0x00001000);
               positiveSpanBuilder_ = 
-                io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getPositiveSpanFieldBuilder() : null;
             } else {
               positiveSpanBuilder_.addAllMessages(other.positiveSpan_);
@@ -5987,7 +6478,7 @@ public final class Metrics {
         if (!other.positiveDelta_.isEmpty()) {
           if (positiveDelta_.isEmpty()) {
             positiveDelta_ = other.positiveDelta_;
-            bitField0_ = (bitField0_ & ~0x00001000);
+            bitField0_ = (bitField0_ & ~0x00002000);
           } else {
             ensurePositiveDeltaIsMutable();
             positiveDelta_.addAll(other.positiveDelta_);
@@ -5997,7 +6488,7 @@ public final class Metrics {
         if (!other.positiveCount_.isEmpty()) {
           if (positiveCount_.isEmpty()) {
             positiveCount_ = other.positiveCount_;
-            bitField0_ = (bitField0_ & ~0x00002000);
+            bitField0_ = (bitField0_ & ~0x00004000);
           } else {
             ensurePositiveCountIsMutable();
             positiveCount_.addAll(other.positiveCount_);
@@ -6016,8 +6507,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -6060,22 +6551,22 @@ public final class Metrics {
               } // case 33
               case 40: {
                 schema_ = input.readSInt32();
-                bitField0_ |= 0x00000010;
+                bitField0_ |= 0x00000020;
                 break;
               } // case 40
               case 49: {
                 zeroThreshold_ = input.readDouble();
-                bitField0_ |= 0x00000020;
+                bitField0_ |= 0x00000040;
                 break;
               } // case 49
               case 56: {
                 zeroCount_ = input.readUInt64();
-                bitField0_ |= 0x00000040;
+                bitField0_ |= 0x00000080;
                 break;
               } // case 56
               case 65: {
                 zeroCountFloat_ = input.readDouble();
-                bitField0_ |= 0x00000080;
+                bitField0_ |= 0x00000100;
                 break;
               } // case 65
               case 74: {
@@ -6168,6 +6659,13 @@ public final class Metrics {
                 input.popLimit(limit);
                 break;
               } // case 114
+              case 122: {
+                input.readMessage(
+                    getCreatedTimestampFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 122
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -6176,7 +6674,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -6208,7 +6706,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setSampleCount(long value) {
-        
+
         sampleCount_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
@@ -6260,7 +6758,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setSampleCountFloat(double value) {
-        
+
         sampleCountFloat_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
@@ -6304,7 +6802,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setSampleSum(double value) {
-        
+
         sampleSum_ = value;
         bitField0_ |= 0x00000004;
         onChanged();
@@ -6330,7 +6828,7 @@ public final class Metrics {
          }
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketOrBuilder> bucketBuilder_;
 
       /**
@@ -6502,7 +7000,7 @@ public final class Metrics {
           java.lang.Iterable<? extends io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket> values) {
         if (bucketBuilder_ == null) {
           ensureBucketIsMutable();
-          io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
               values, bucket_);
           onChanged();
         } else {
@@ -6618,11 +7116,11 @@ public final class Metrics {
            getBucketBuilderList() {
         return getBucketFieldBuilder().getBuilderList();
       }
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketOrBuilder> 
           getBucketFieldBuilder() {
         if (bucketBuilder_ == null) {
-          bucketBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+          bucketBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketOrBuilder>(
                   bucket_,
                   ((bitField0_ & 0x00000008) != 0),
@@ -6631,6 +7129,125 @@ public final class Metrics {
           bucket_ = null;
         }
         return bucketBuilder_;
+      }
+
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp createdTimestamp_;
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder> createdTimestampBuilder_;
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+       * @return Whether the createdTimestamp field is set.
+       */
+      public boolean hasCreatedTimestamp() {
+        return ((bitField0_ & 0x00000010) != 0);
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+       * @return The createdTimestamp.
+       */
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getCreatedTimestamp() {
+        if (createdTimestampBuilder_ == null) {
+          return createdTimestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+        } else {
+          return createdTimestampBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+       */
+      public Builder setCreatedTimestamp(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp value) {
+        if (createdTimestampBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          createdTimestamp_ = value;
+        } else {
+          createdTimestampBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+       */
+      public Builder setCreatedTimestamp(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder builderForValue) {
+        if (createdTimestampBuilder_ == null) {
+          createdTimestamp_ = builderForValue.build();
+        } else {
+          createdTimestampBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+       */
+      public Builder mergeCreatedTimestamp(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp value) {
+        if (createdTimestampBuilder_ == null) {
+          if (((bitField0_ & 0x00000010) != 0) &&
+            createdTimestamp_ != null &&
+            createdTimestamp_ != io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance()) {
+            getCreatedTimestampBuilder().mergeFrom(value);
+          } else {
+            createdTimestamp_ = value;
+          }
+        } else {
+          createdTimestampBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+       */
+      public Builder clearCreatedTimestamp() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        createdTimestamp_ = null;
+        if (createdTimestampBuilder_ != null) {
+          createdTimestampBuilder_.dispose();
+          createdTimestampBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+       */
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder getCreatedTimestampBuilder() {
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return getCreatedTimestampFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+       */
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getCreatedTimestampOrBuilder() {
+        if (createdTimestampBuilder_ != null) {
+          return createdTimestampBuilder_.getMessageOrBuilder();
+        } else {
+          return createdTimestamp_ == null ?
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : createdTimestamp_;
+        }
+      }
+      /**
+       * <code>optional .google.protobuf.Timestamp created_timestamp = 15;</code>
+       */
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder> 
+          getCreatedTimestampFieldBuilder() {
+        if (createdTimestampBuilder_ == null) {
+          createdTimestampBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder>(
+                  getCreatedTimestamp(),
+                  getParentForChildren(),
+                  isClean());
+          createdTimestamp_ = null;
+        }
+        return createdTimestampBuilder_;
       }
 
       private int schema_ ;
@@ -6648,7 +7265,7 @@ public final class Metrics {
        */
       @java.lang.Override
       public boolean hasSchema() {
-        return ((bitField0_ & 0x00000010) != 0);
+        return ((bitField0_ & 0x00000020) != 0);
       }
       /**
        * <pre>
@@ -6680,9 +7297,9 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setSchema(int value) {
-        
+
         schema_ = value;
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -6699,7 +7316,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder clearSchema() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000020);
         schema_ = 0;
         onChanged();
         return this;
@@ -6716,7 +7333,7 @@ public final class Metrics {
        */
       @java.lang.Override
       public boolean hasZeroThreshold() {
-        return ((bitField0_ & 0x00000020) != 0);
+        return ((bitField0_ & 0x00000040) != 0);
       }
       /**
        * <pre>
@@ -6740,9 +7357,9 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setZeroThreshold(double value) {
-        
+
         zeroThreshold_ = value;
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -6755,7 +7372,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder clearZeroThreshold() {
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000040);
         zeroThreshold_ = 0D;
         onChanged();
         return this;
@@ -6772,7 +7389,7 @@ public final class Metrics {
        */
       @java.lang.Override
       public boolean hasZeroCount() {
-        return ((bitField0_ & 0x00000040) != 0);
+        return ((bitField0_ & 0x00000080) != 0);
       }
       /**
        * <pre>
@@ -6796,9 +7413,9 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setZeroCount(long value) {
-        
+
         zeroCount_ = value;
-        bitField0_ |= 0x00000040;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -6811,7 +7428,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder clearZeroCount() {
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000080);
         zeroCount_ = 0L;
         onChanged();
         return this;
@@ -6828,7 +7445,7 @@ public final class Metrics {
        */
       @java.lang.Override
       public boolean hasZeroCountFloat() {
-        return ((bitField0_ & 0x00000080) != 0);
+        return ((bitField0_ & 0x00000100) != 0);
       }
       /**
        * <pre>
@@ -6852,9 +7469,9 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setZeroCountFloat(double value) {
-        
+
         zeroCountFloat_ = value;
-        bitField0_ |= 0x00000080;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
@@ -6867,7 +7484,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder clearZeroCountFloat() {
-        bitField0_ = (bitField0_ & ~0x00000080);
+        bitField0_ = (bitField0_ & ~0x00000100);
         zeroCountFloat_ = 0D;
         onChanged();
         return this;
@@ -6876,13 +7493,13 @@ public final class Metrics {
       private java.util.List<io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan> negativeSpan_ =
         java.util.Collections.emptyList();
       private void ensureNegativeSpanIsMutable() {
-        if (!((bitField0_ & 0x00000100) != 0)) {
+        if (!((bitField0_ & 0x00000200) != 0)) {
           negativeSpan_ = new java.util.ArrayList<io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan>(negativeSpan_);
-          bitField0_ |= 0x00000100;
+          bitField0_ |= 0x00000200;
          }
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpanOrBuilder> negativeSpanBuilder_;
 
       /**
@@ -7054,7 +7671,7 @@ public final class Metrics {
           java.lang.Iterable<? extends io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan> values) {
         if (negativeSpanBuilder_ == null) {
           ensureNegativeSpanIsMutable();
-          io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
               values, negativeSpan_);
           onChanged();
         } else {
@@ -7072,7 +7689,7 @@ public final class Metrics {
       public Builder clearNegativeSpan() {
         if (negativeSpanBuilder_ == null) {
           negativeSpan_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000100);
+          bitField0_ = (bitField0_ & ~0x00000200);
           onChanged();
         } else {
           negativeSpanBuilder_.clear();
@@ -7170,14 +7787,14 @@ public final class Metrics {
            getNegativeSpanBuilderList() {
         return getNegativeSpanFieldBuilder().getBuilderList();
       }
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpanOrBuilder> 
           getNegativeSpanFieldBuilder() {
         if (negativeSpanBuilder_ == null) {
-          negativeSpanBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+          negativeSpanBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpanOrBuilder>(
                   negativeSpan_,
-                  ((bitField0_ & 0x00000100) != 0),
+                  ((bitField0_ & 0x00000200) != 0),
                   getParentForChildren(),
                   isClean());
           negativeSpan_ = null;
@@ -7185,11 +7802,11 @@ public final class Metrics {
         return negativeSpanBuilder_;
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.LongList negativeDelta_ = emptyLongList();
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.LongList negativeDelta_ = emptyLongList();
       private void ensureNegativeDeltaIsMutable() {
-        if (!((bitField0_ & 0x00000200) != 0)) {
+        if (!((bitField0_ & 0x00000400) != 0)) {
           negativeDelta_ = mutableCopy(negativeDelta_);
-          bitField0_ |= 0x00000200;
+          bitField0_ |= 0x00000400;
         }
       }
       /**
@@ -7204,7 +7821,7 @@ public final class Metrics {
        */
       public java.util.List<java.lang.Long>
           getNegativeDeltaList() {
-        return ((bitField0_ & 0x00000200) != 0) ?
+        return ((bitField0_ & 0x00000400) != 0) ?
                  java.util.Collections.unmodifiableList(negativeDelta_) : negativeDelta_;
       }
       /**
@@ -7248,7 +7865,7 @@ public final class Metrics {
        */
       public Builder setNegativeDelta(
           int index, long value) {
-        
+
         ensureNegativeDeltaIsMutable();
         negativeDelta_.setLong(index, value);
         onChanged();
@@ -7266,7 +7883,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder addNegativeDelta(long value) {
-        
+
         ensureNegativeDeltaIsMutable();
         negativeDelta_.addLong(value);
         onChanged();
@@ -7286,7 +7903,7 @@ public final class Metrics {
       public Builder addAllNegativeDelta(
           java.lang.Iterable<? extends java.lang.Long> values) {
         ensureNegativeDeltaIsMutable();
-        io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
             values, negativeDelta_);
         onChanged();
         return this;
@@ -7303,16 +7920,16 @@ public final class Metrics {
        */
       public Builder clearNegativeDelta() {
         negativeDelta_ = emptyLongList();
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000400);
         onChanged();
         return this;
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.DoubleList negativeCount_ = emptyDoubleList();
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.DoubleList negativeCount_ = emptyDoubleList();
       private void ensureNegativeCountIsMutable() {
-        if (!((bitField0_ & 0x00000400) != 0)) {
+        if (!((bitField0_ & 0x00000800) != 0)) {
           negativeCount_ = mutableCopy(negativeCount_);
-          bitField0_ |= 0x00000400;
+          bitField0_ |= 0x00000800;
         }
       }
       /**
@@ -7325,7 +7942,7 @@ public final class Metrics {
        */
       public java.util.List<java.lang.Double>
           getNegativeCountList() {
-        return ((bitField0_ & 0x00000400) != 0) ?
+        return ((bitField0_ & 0x00000800) != 0) ?
                  java.util.Collections.unmodifiableList(negativeCount_) : negativeCount_;
       }
       /**
@@ -7363,7 +7980,7 @@ public final class Metrics {
        */
       public Builder setNegativeCount(
           int index, double value) {
-        
+
         ensureNegativeCountIsMutable();
         negativeCount_.setDouble(index, value);
         onChanged();
@@ -7379,7 +7996,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder addNegativeCount(double value) {
-        
+
         ensureNegativeCountIsMutable();
         negativeCount_.addDouble(value);
         onChanged();
@@ -7397,7 +8014,7 @@ public final class Metrics {
       public Builder addAllNegativeCount(
           java.lang.Iterable<? extends java.lang.Double> values) {
         ensureNegativeCountIsMutable();
-        io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
             values, negativeCount_);
         onChanged();
         return this;
@@ -7412,7 +8029,7 @@ public final class Metrics {
        */
       public Builder clearNegativeCount() {
         negativeCount_ = emptyDoubleList();
-        bitField0_ = (bitField0_ & ~0x00000400);
+        bitField0_ = (bitField0_ & ~0x00000800);
         onChanged();
         return this;
       }
@@ -7420,18 +8037,21 @@ public final class Metrics {
       private java.util.List<io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan> positiveSpan_ =
         java.util.Collections.emptyList();
       private void ensurePositiveSpanIsMutable() {
-        if (!((bitField0_ & 0x00000800) != 0)) {
+        if (!((bitField0_ & 0x00001000) != 0)) {
           positiveSpan_ = new java.util.ArrayList<io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan>(positiveSpan_);
-          bitField0_ |= 0x00000800;
+          bitField0_ |= 0x00001000;
          }
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpanOrBuilder> positiveSpanBuilder_;
 
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7446,6 +8066,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7460,6 +8083,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7474,6 +8100,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7495,6 +8124,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7513,6 +8145,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7533,6 +8168,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7554,6 +8192,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7572,6 +8213,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7590,6 +8234,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7598,7 +8245,7 @@ public final class Metrics {
           java.lang.Iterable<? extends io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan> values) {
         if (positiveSpanBuilder_ == null) {
           ensurePositiveSpanIsMutable();
-          io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
               values, positiveSpan_);
           onChanged();
         } else {
@@ -7609,6 +8256,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7616,7 +8266,7 @@ public final class Metrics {
       public Builder clearPositiveSpan() {
         if (positiveSpanBuilder_ == null) {
           positiveSpan_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000800);
+          bitField0_ = (bitField0_ & ~0x00001000);
           onChanged();
         } else {
           positiveSpanBuilder_.clear();
@@ -7626,6 +8276,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7643,6 +8296,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7654,6 +8310,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7668,6 +8327,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7683,6 +8345,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7694,6 +8359,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7706,6 +8374,9 @@ public final class Metrics {
       /**
        * <pre>
        * Positive buckets for the native histogram.
+       * Use a no-op span (offset 0, length 0) for a native histogram without any
+       * observations yet and with a zero_threshold of 0. Otherwise, it would be
+       * indistinguishable from a classic histogram.
        * </pre>
        *
        * <code>repeated .io.prometheus.client.BucketSpan positive_span = 12;</code>
@@ -7714,14 +8385,14 @@ public final class Metrics {
            getPositiveSpanBuilderList() {
         return getPositiveSpanFieldBuilder().getBuilderList();
       }
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpanOrBuilder> 
           getPositiveSpanFieldBuilder() {
         if (positiveSpanBuilder_ == null) {
-          positiveSpanBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+          positiveSpanBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpanOrBuilder>(
                   positiveSpan_,
-                  ((bitField0_ & 0x00000800) != 0),
+                  ((bitField0_ & 0x00001000) != 0),
                   getParentForChildren(),
                   isClean());
           positiveSpan_ = null;
@@ -7729,11 +8400,11 @@ public final class Metrics {
         return positiveSpanBuilder_;
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.LongList positiveDelta_ = emptyLongList();
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.LongList positiveDelta_ = emptyLongList();
       private void ensurePositiveDeltaIsMutable() {
-        if (!((bitField0_ & 0x00001000) != 0)) {
+        if (!((bitField0_ & 0x00002000) != 0)) {
           positiveDelta_ = mutableCopy(positiveDelta_);
-          bitField0_ |= 0x00001000;
+          bitField0_ |= 0x00002000;
         }
       }
       /**
@@ -7748,7 +8419,7 @@ public final class Metrics {
        */
       public java.util.List<java.lang.Long>
           getPositiveDeltaList() {
-        return ((bitField0_ & 0x00001000) != 0) ?
+        return ((bitField0_ & 0x00002000) != 0) ?
                  java.util.Collections.unmodifiableList(positiveDelta_) : positiveDelta_;
       }
       /**
@@ -7792,7 +8463,7 @@ public final class Metrics {
        */
       public Builder setPositiveDelta(
           int index, long value) {
-        
+
         ensurePositiveDeltaIsMutable();
         positiveDelta_.setLong(index, value);
         onChanged();
@@ -7810,7 +8481,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder addPositiveDelta(long value) {
-        
+
         ensurePositiveDeltaIsMutable();
         positiveDelta_.addLong(value);
         onChanged();
@@ -7830,7 +8501,7 @@ public final class Metrics {
       public Builder addAllPositiveDelta(
           java.lang.Iterable<? extends java.lang.Long> values) {
         ensurePositiveDeltaIsMutable();
-        io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
             values, positiveDelta_);
         onChanged();
         return this;
@@ -7847,16 +8518,16 @@ public final class Metrics {
        */
       public Builder clearPositiveDelta() {
         positiveDelta_ = emptyLongList();
-        bitField0_ = (bitField0_ & ~0x00001000);
+        bitField0_ = (bitField0_ & ~0x00002000);
         onChanged();
         return this;
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.DoubleList positiveCount_ = emptyDoubleList();
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.DoubleList positiveCount_ = emptyDoubleList();
       private void ensurePositiveCountIsMutable() {
-        if (!((bitField0_ & 0x00002000) != 0)) {
+        if (!((bitField0_ & 0x00004000) != 0)) {
           positiveCount_ = mutableCopy(positiveCount_);
-          bitField0_ |= 0x00002000;
+          bitField0_ |= 0x00004000;
         }
       }
       /**
@@ -7869,7 +8540,7 @@ public final class Metrics {
        */
       public java.util.List<java.lang.Double>
           getPositiveCountList() {
-        return ((bitField0_ & 0x00002000) != 0) ?
+        return ((bitField0_ & 0x00004000) != 0) ?
                  java.util.Collections.unmodifiableList(positiveCount_) : positiveCount_;
       }
       /**
@@ -7907,7 +8578,7 @@ public final class Metrics {
        */
       public Builder setPositiveCount(
           int index, double value) {
-        
+
         ensurePositiveCountIsMutable();
         positiveCount_.setDouble(index, value);
         onChanged();
@@ -7923,7 +8594,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder addPositiveCount(double value) {
-        
+
         ensurePositiveCountIsMutable();
         positiveCount_.addDouble(value);
         onChanged();
@@ -7941,7 +8612,7 @@ public final class Metrics {
       public Builder addAllPositiveCount(
           java.lang.Iterable<? extends java.lang.Double> values) {
         ensurePositiveCountIsMutable();
-        io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
             values, positiveCount_);
         onChanged();
         return this;
@@ -7956,19 +8627,19 @@ public final class Metrics {
        */
       public Builder clearPositiveCount() {
         positiveCount_ = emptyDoubleList();
-        bitField0_ = (bitField0_ & ~0x00002000);
+        bitField0_ = (bitField0_ & ~0x00004000);
         onChanged();
         return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -7986,34 +8657,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Histogram>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<Histogram>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Histogram>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<Histogram>() {
       @java.lang.Override
       public Histogram parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Histogram> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Histogram> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Histogram> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Histogram> getParserForType() {
       return PARSER;
     }
 
@@ -8026,7 +8697,7 @@ public final class Metrics {
 
   public interface BucketOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.Bucket)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <pre>
@@ -8109,12 +8780,12 @@ public final class Metrics {
    * Protobuf type {@code io.prometheus.client.Bucket}
    */
   public static final class Bucket extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.Bucket)
       BucketOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Bucket.newBuilder() to construct.
-    private Bucket(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private Bucket(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private Bucket() {
@@ -8127,18 +8798,13 @@ public final class Metrics {
       return new Bucket();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Bucket_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Bucket_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -8265,7 +8931,7 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeUInt64(1, cumulativeCount_);
@@ -8289,19 +8955,19 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeUInt64Size(1, cumulativeCount_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(2, upperBound_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(3, getExemplar());
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(4, cumulativeCountFloat_);
       }
       size += getUnknownFields().getSerializedSize();
@@ -8354,17 +9020,17 @@ public final class Metrics {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasCumulativeCount()) {
         hash = (37 * hash) + CUMULATIVE_COUNT_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             getCumulativeCount());
       }
       if (hasCumulativeCountFloat()) {
         hash = (37 * hash) + CUMULATIVE_COUNT_FLOAT_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getCumulativeCountFloat()));
       }
       if (hasUpperBound()) {
         hash = (37 * hash) + UPPER_BOUND_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getUpperBound()));
       }
       if (hasExemplar()) {
@@ -8378,71 +9044,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -8462,7 +9130,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -8475,16 +9143,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.Bucket}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.Bucket)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Bucket_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Bucket_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -8497,12 +9165,12 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+        if (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
           getExemplarFieldBuilder();
         }
@@ -8523,7 +9191,7 @@ public final class Metrics {
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Bucket_descriptor;
       }
@@ -8580,34 +9248,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Bucket)other);
         } else {
@@ -8642,8 +9310,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -8686,7 +9354,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -8730,7 +9398,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setCumulativeCount(long value) {
-        
+
         cumulativeCount_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
@@ -8786,7 +9454,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setCumulativeCountFloat(double value) {
-        
+
         cumulativeCountFloat_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
@@ -8842,7 +9510,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setUpperBound(double value) {
-        
+
         upperBound_ = value;
         bitField0_ |= 0x00000004;
         onChanged();
@@ -8864,7 +9532,7 @@ public final class Metrics {
       }
 
       private io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar exemplar_;
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.ExemplarOrBuilder> exemplarBuilder_;
       /**
        * <code>optional .io.prometheus.client.Exemplar exemplar = 3;</code>
@@ -8968,11 +9636,11 @@ public final class Metrics {
       /**
        * <code>optional .io.prometheus.client.Exemplar exemplar = 3;</code>
        */
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.ExemplarOrBuilder> 
           getExemplarFieldBuilder() {
         if (exemplarBuilder_ == null) {
-          exemplarBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          exemplarBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.ExemplarOrBuilder>(
                   getExemplar(),
                   getParentForChildren(),
@@ -8983,13 +9651,13 @@ public final class Metrics {
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -9007,34 +9675,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Bucket>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<Bucket>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Bucket>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<Bucket>() {
       @java.lang.Override
       public Bucket parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Bucket> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Bucket> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Bucket> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Bucket> getParserForType() {
       return PARSER;
     }
 
@@ -9047,7 +9715,7 @@ public final class Metrics {
 
   public interface BucketSpanOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.BucketSpan)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <pre>
@@ -9100,12 +9768,12 @@ public final class Metrics {
    * Protobuf type {@code io.prometheus.client.BucketSpan}
    */
   public static final class BucketSpan extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.BucketSpan)
       BucketSpanOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use BucketSpan.newBuilder() to construct.
-    private BucketSpan(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private BucketSpan(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private BucketSpan() {
@@ -9118,18 +9786,13 @@ public final class Metrics {
       return new BucketSpan();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_BucketSpan_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_BucketSpan_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -9203,7 +9866,7 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeSInt32(1, offset_);
@@ -9221,11 +9884,11 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeSInt32Size(1, offset_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeUInt32Size(2, length_);
       }
       size += getUnknownFields().getSerializedSize();
@@ -9279,71 +9942,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -9363,7 +10028,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -9380,16 +10045,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.BucketSpan}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.BucketSpan)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpanOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_BucketSpan_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_BucketSpan_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -9402,7 +10067,7 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
 
       }
@@ -9416,7 +10081,7 @@ public final class Metrics {
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_BucketSpan_descriptor;
       }
@@ -9463,34 +10128,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.BucketSpan)other);
         } else {
@@ -9519,8 +10184,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -9551,7 +10216,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -9595,7 +10260,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setOffset(int value) {
-        
+
         offset_ = value;
         bitField0_ |= 0x00000001;
         onChanged();
@@ -9651,7 +10316,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setLength(int value) {
-        
+
         length_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
@@ -9673,13 +10338,13 @@ public final class Metrics {
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -9697,34 +10362,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<BucketSpan>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<BucketSpan>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<BucketSpan>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<BucketSpan>() {
       @java.lang.Override
       public BucketSpan parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<BucketSpan> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<BucketSpan> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<BucketSpan> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<BucketSpan> getParserForType() {
       return PARSER;
     }
 
@@ -9737,7 +10402,7 @@ public final class Metrics {
 
   public interface ExemplarOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.Exemplar)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>repeated .io.prometheus.client.LabelPair label = 1;</code>
@@ -9791,7 +10456,7 @@ public final class Metrics {
      * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
      * @return The timestamp.
      */
-    io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp getTimestamp();
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getTimestamp();
     /**
      * <pre>
      * OpenMetrics-style.
@@ -9799,18 +10464,18 @@ public final class Metrics {
      *
      * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
      */
-    io.prometheus.metrics.com_google_protobuf_3_21_7.TimestampOrBuilder getTimestampOrBuilder();
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getTimestampOrBuilder();
   }
   /**
    * Protobuf type {@code io.prometheus.client.Exemplar}
    */
   public static final class Exemplar extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.Exemplar)
       ExemplarOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Exemplar.newBuilder() to construct.
-    private Exemplar(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private Exemplar(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private Exemplar() {
@@ -9824,18 +10489,13 @@ public final class Metrics {
       return new Exemplar();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Exemplar_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Exemplar_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -9904,7 +10564,7 @@ public final class Metrics {
     }
 
     public static final int TIMESTAMP_FIELD_NUMBER = 3;
-    private io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp timestamp_;
+    private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp timestamp_;
     /**
      * <pre>
      * OpenMetrics-style.
@@ -9926,8 +10586,8 @@ public final class Metrics {
      * @return The timestamp.
      */
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp getTimestamp() {
-      return timestamp_ == null ? io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : timestamp_;
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getTimestamp() {
+      return timestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : timestamp_;
     }
     /**
      * <pre>
@@ -9937,8 +10597,8 @@ public final class Metrics {
      * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
      */
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.TimestampOrBuilder getTimestampOrBuilder() {
-      return timestamp_ == null ? io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : timestamp_;
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getTimestampOrBuilder() {
+      return timestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : timestamp_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -9953,7 +10613,7 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       for (int i = 0; i < label_.size(); i++) {
         output.writeMessage(1, label_.get(i));
@@ -9974,15 +10634,15 @@ public final class Metrics {
 
       size = 0;
       for (int i = 0; i < label_.size(); i++) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(1, label_.get(i));
       }
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeDoubleSize(2, value_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(3, getTimestamp());
       }
       size += getUnknownFields().getSerializedSize();
@@ -10030,7 +10690,7 @@ public final class Metrics {
       }
       if (hasValue()) {
         hash = (37 * hash) + VALUE_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             java.lang.Double.doubleToLongBits(getValue()));
       }
       if (hasTimestamp()) {
@@ -10044,71 +10704,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -10128,7 +10790,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -10136,16 +10798,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.Exemplar}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.Exemplar)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.ExemplarOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Exemplar_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Exemplar_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -10158,12 +10820,12 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+        if (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
           getLabelFieldBuilder();
           getTimestampFieldBuilder();
@@ -10190,7 +10852,7 @@ public final class Metrics {
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Exemplar_descriptor;
       }
@@ -10252,34 +10914,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Exemplar)other);
         } else {
@@ -10309,7 +10971,7 @@ public final class Metrics {
               label_ = other.label_;
               bitField0_ = (bitField0_ & ~0x00000001);
               labelBuilder_ = 
-                io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getLabelFieldBuilder() : null;
             } else {
               labelBuilder_.addAllMessages(other.label_);
@@ -10334,8 +10996,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -10381,7 +11043,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -10399,7 +11061,7 @@ public final class Metrics {
          }
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPairOrBuilder> labelBuilder_;
 
       /**
@@ -10531,7 +11193,7 @@ public final class Metrics {
           java.lang.Iterable<? extends io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair> values) {
         if (labelBuilder_ == null) {
           ensureLabelIsMutable();
-          io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
               values, label_);
           onChanged();
         } else {
@@ -10615,11 +11277,11 @@ public final class Metrics {
            getLabelBuilderList() {
         return getLabelFieldBuilder().getBuilderList();
       }
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPairOrBuilder> 
           getLabelFieldBuilder() {
         if (labelBuilder_ == null) {
-          labelBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+          labelBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPairOrBuilder>(
                   label_,
                   ((bitField0_ & 0x00000001) != 0),
@@ -10653,7 +11315,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setValue(double value) {
-        
+
         value_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
@@ -10670,9 +11332,9 @@ public final class Metrics {
         return this;
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp timestamp_;
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.com_google_protobuf_3_21_7.TimestampOrBuilder> timestampBuilder_;
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp timestamp_;
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder> timestampBuilder_;
       /**
        * <pre>
        * OpenMetrics-style.
@@ -10692,9 +11354,9 @@ public final class Metrics {
        * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
        * @return The timestamp.
        */
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp getTimestamp() {
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp getTimestamp() {
         if (timestampBuilder_ == null) {
-          return timestamp_ == null ? io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : timestamp_;
+          return timestamp_ == null ? io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : timestamp_;
         } else {
           return timestampBuilder_.getMessage();
         }
@@ -10706,7 +11368,7 @@ public final class Metrics {
        *
        * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
        */
-      public Builder setTimestamp(io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp value) {
+      public Builder setTimestamp(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp value) {
         if (timestampBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -10727,7 +11389,7 @@ public final class Metrics {
        * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
        */
       public Builder setTimestamp(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.Builder builderForValue) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder builderForValue) {
         if (timestampBuilder_ == null) {
           timestamp_ = builderForValue.build();
         } else {
@@ -10744,11 +11406,11 @@ public final class Metrics {
        *
        * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
        */
-      public Builder mergeTimestamp(io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp value) {
+      public Builder mergeTimestamp(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp value) {
         if (timestampBuilder_ == null) {
           if (((bitField0_ & 0x00000004) != 0) &&
             timestamp_ != null &&
-            timestamp_ != io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance()) {
+            timestamp_ != io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance()) {
             getTimestampBuilder().mergeFrom(value);
           } else {
             timestamp_ = value;
@@ -10784,7 +11446,7 @@ public final class Metrics {
        *
        * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
        */
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.Builder getTimestampBuilder() {
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder getTimestampBuilder() {
         bitField0_ |= 0x00000004;
         onChanged();
         return getTimestampFieldBuilder().getBuilder();
@@ -10796,12 +11458,12 @@ public final class Metrics {
        *
        * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
        */
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.TimestampOrBuilder getTimestampOrBuilder() {
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder getTimestampOrBuilder() {
         if (timestampBuilder_ != null) {
           return timestampBuilder_.getMessageOrBuilder();
         } else {
           return timestamp_ == null ?
-              io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : timestamp_;
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.getDefaultInstance() : timestamp_;
         }
       }
       /**
@@ -10811,12 +11473,12 @@ public final class Metrics {
        *
        * <code>optional .google.protobuf.Timestamp timestamp = 3;</code>
        */
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.com_google_protobuf_3_21_7.TimestampOrBuilder> 
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder> 
           getTimestampFieldBuilder() {
         if (timestampBuilder_ == null) {
-          timestampBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
-              io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.com_google_protobuf_3_21_7.TimestampOrBuilder>(
+          timestampBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Timestamp.Builder, io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampOrBuilder>(
                   getTimestamp(),
                   getParentForChildren(),
                   isClean());
@@ -10826,13 +11488,13 @@ public final class Metrics {
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -10850,34 +11512,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Exemplar>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<Exemplar>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Exemplar>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<Exemplar>() {
       @java.lang.Override
       public Exemplar parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Exemplar> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Exemplar> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Exemplar> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Exemplar> getParserForType() {
       return PARSER;
     }
 
@@ -10890,7 +11552,7 @@ public final class Metrics {
 
   public interface MetricOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.Metric)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>repeated .io.prometheus.client.LabelPair label = 1;</code>
@@ -11006,12 +11668,12 @@ public final class Metrics {
    * Protobuf type {@code io.prometheus.client.Metric}
    */
   public static final class Metric extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.Metric)
       MetricOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use Metric.newBuilder() to construct.
-    private Metric(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private Metric(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private Metric() {
@@ -11025,18 +11687,13 @@ public final class Metrics {
       return new Metric();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Metric_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Metric_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -11246,7 +11903,7 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       for (int i = 0; i < label_.size(); i++) {
         output.writeMessage(1, label_.get(i));
@@ -11279,31 +11936,31 @@ public final class Metrics {
 
       size = 0;
       for (int i = 0; i < label_.size(); i++) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(1, label_.get(i));
       }
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(2, getGauge());
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(3, getCounter());
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(4, getSummary());
       }
       if (((bitField0_ & 0x00000008) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(5, getUntyped());
       }
       if (((bitField0_ & 0x00000020) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeInt64Size(6, timestampMs_);
       }
       if (((bitField0_ & 0x00000010) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(7, getHistogram());
       }
       size += getUnknownFields().getSerializedSize();
@@ -11390,7 +12047,7 @@ public final class Metrics {
       }
       if (hasTimestampMs()) {
         hash = (37 * hash) + TIMESTAMP_MS_FIELD_NUMBER;
-        hash = (53 * hash) + io.prometheus.metrics.com_google_protobuf_3_21_7.Internal.hashLong(
+        hash = (53 * hash) + io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Internal.hashLong(
             getTimestampMs());
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
@@ -11400,71 +12057,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -11484,7 +12143,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -11492,16 +12151,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.Metric}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.Metric)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Metric_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Metric_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -11514,12 +12173,12 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
       private void maybeForceBuilderInitialization() {
-        if (io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+        if (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
           getLabelFieldBuilder();
           getGaugeFieldBuilder();
@@ -11570,7 +12229,7 @@ public final class Metrics {
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_Metric_descriptor;
       }
@@ -11656,34 +12315,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric)other);
         } else {
@@ -11713,7 +12372,7 @@ public final class Metrics {
               label_ = other.label_;
               bitField0_ = (bitField0_ & ~0x00000001);
               labelBuilder_ = 
-                io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getLabelFieldBuilder() : null;
             } else {
               labelBuilder_.addAllMessages(other.label_);
@@ -11750,8 +12409,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -11825,7 +12484,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -11843,7 +12502,7 @@ public final class Metrics {
          }
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPairOrBuilder> labelBuilder_;
 
       /**
@@ -11975,7 +12634,7 @@ public final class Metrics {
           java.lang.Iterable<? extends io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair> values) {
         if (labelBuilder_ == null) {
           ensureLabelIsMutable();
-          io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
               values, label_);
           onChanged();
         } else {
@@ -12059,11 +12718,11 @@ public final class Metrics {
            getLabelBuilderList() {
         return getLabelFieldBuilder().getBuilderList();
       }
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPairOrBuilder> 
           getLabelFieldBuilder() {
         if (labelBuilder_ == null) {
-          labelBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+          labelBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPair.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.LabelPairOrBuilder>(
                   label_,
                   ((bitField0_ & 0x00000001) != 0),
@@ -12075,7 +12734,7 @@ public final class Metrics {
       }
 
       private io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge gauge_;
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.GaugeOrBuilder> gaugeBuilder_;
       /**
        * <code>optional .io.prometheus.client.Gauge gauge = 2;</code>
@@ -12179,11 +12838,11 @@ public final class Metrics {
       /**
        * <code>optional .io.prometheus.client.Gauge gauge = 2;</code>
        */
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.GaugeOrBuilder> 
           getGaugeFieldBuilder() {
         if (gaugeBuilder_ == null) {
-          gaugeBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          gaugeBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Gauge.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.GaugeOrBuilder>(
                   getGauge(),
                   getParentForChildren(),
@@ -12194,7 +12853,7 @@ public final class Metrics {
       }
 
       private io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter counter_;
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.CounterOrBuilder> counterBuilder_;
       /**
        * <code>optional .io.prometheus.client.Counter counter = 3;</code>
@@ -12298,11 +12957,11 @@ public final class Metrics {
       /**
        * <code>optional .io.prometheus.client.Counter counter = 3;</code>
        */
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.CounterOrBuilder> 
           getCounterFieldBuilder() {
         if (counterBuilder_ == null) {
-          counterBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          counterBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Counter.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.CounterOrBuilder>(
                   getCounter(),
                   getParentForChildren(),
@@ -12313,7 +12972,7 @@ public final class Metrics {
       }
 
       private io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary summary_;
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.SummaryOrBuilder> summaryBuilder_;
       /**
        * <code>optional .io.prometheus.client.Summary summary = 4;</code>
@@ -12417,11 +13076,11 @@ public final class Metrics {
       /**
        * <code>optional .io.prometheus.client.Summary summary = 4;</code>
        */
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.SummaryOrBuilder> 
           getSummaryFieldBuilder() {
         if (summaryBuilder_ == null) {
-          summaryBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          summaryBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Summary.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.SummaryOrBuilder>(
                   getSummary(),
                   getParentForChildren(),
@@ -12432,7 +13091,7 @@ public final class Metrics {
       }
 
       private io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped untyped_;
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.UntypedOrBuilder> untypedBuilder_;
       /**
        * <code>optional .io.prometheus.client.Untyped untyped = 5;</code>
@@ -12536,11 +13195,11 @@ public final class Metrics {
       /**
        * <code>optional .io.prometheus.client.Untyped untyped = 5;</code>
        */
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.UntypedOrBuilder> 
           getUntypedFieldBuilder() {
         if (untypedBuilder_ == null) {
-          untypedBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          untypedBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Untyped.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.UntypedOrBuilder>(
                   getUntyped(),
                   getParentForChildren(),
@@ -12551,7 +13210,7 @@ public final class Metrics {
       }
 
       private io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram histogram_;
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.HistogramOrBuilder> histogramBuilder_;
       /**
        * <code>optional .io.prometheus.client.Histogram histogram = 7;</code>
@@ -12655,11 +13314,11 @@ public final class Metrics {
       /**
        * <code>optional .io.prometheus.client.Histogram histogram = 7;</code>
        */
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.HistogramOrBuilder> 
           getHistogramFieldBuilder() {
         if (histogramBuilder_ == null) {
-          histogramBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
+          histogramBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.SingleFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Histogram.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.HistogramOrBuilder>(
                   getHistogram(),
                   getParentForChildren(),
@@ -12692,7 +13351,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setTimestampMs(long value) {
-        
+
         timestampMs_ = value;
         bitField0_ |= 0x00000040;
         onChanged();
@@ -12710,13 +13369,13 @@ public final class Metrics {
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -12734,34 +13393,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Metric>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<Metric>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Metric>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<Metric>() {
       @java.lang.Override
       public Metric parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Metric> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Metric> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<Metric> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<Metric> getParserForType() {
       return PARSER;
     }
 
@@ -12774,7 +13433,7 @@ public final class Metrics {
 
   public interface MetricFamilyOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.prometheus.client.MetricFamily)
-      io.prometheus.metrics.com_google_protobuf_3_21_7.MessageOrBuilder {
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.MessageOrBuilder {
 
     /**
      * <code>optional string name = 1;</code>
@@ -12790,7 +13449,7 @@ public final class Metrics {
      * <code>optional string name = 1;</code>
      * @return The bytes for name.
      */
-    io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
         getNameBytes();
 
     /**
@@ -12807,7 +13466,7 @@ public final class Metrics {
      * <code>optional string help = 2;</code>
      * @return The bytes for help.
      */
-    io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
         getHelpBytes();
 
     /**
@@ -12849,12 +13508,12 @@ public final class Metrics {
    * Protobuf type {@code io.prometheus.client.MetricFamily}
    */
   public static final class MetricFamily extends
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.prometheus.client.MetricFamily)
       MetricFamilyOrBuilder {
   private static final long serialVersionUID = 0L;
     // Use MetricFamily.newBuilder() to construct.
-    private MetricFamily(io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
+    private MetricFamily(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private MetricFamily() {
@@ -12871,18 +13530,13 @@ public final class Metrics {
       return new MetricFamily();
     }
 
-    @java.lang.Override
-    public final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+    public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
         getDescriptor() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_MetricFamily_descriptor;
     }
 
     @java.lang.Override
-    protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_MetricFamily_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
@@ -12911,8 +13565,8 @@ public final class Metrics {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString bs = 
-            (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString bs = 
+            (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           name_ = s;
@@ -12925,17 +13579,17 @@ public final class Metrics {
      * @return The bytes for name.
      */
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString b = 
-            io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString b = 
+            io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         name_ = b;
         return b;
       } else {
-        return (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+        return (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
       }
     }
 
@@ -12960,8 +13614,8 @@ public final class Metrics {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString bs = 
-            (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString bs = 
+            (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           help_ = s;
@@ -12974,17 +13628,17 @@ public final class Metrics {
      * @return The bytes for help.
      */
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
         getHelpBytes() {
       java.lang.Object ref = help_;
       if (ref instanceof java.lang.String) {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString b = 
-            io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString b = 
+            io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         help_ = b;
         return b;
       } else {
-        return (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+        return (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
       }
     }
 
@@ -13059,13 +13713,13 @@ public final class Metrics {
     }
 
     @java.lang.Override
-    public void writeTo(io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream output)
+    public void writeTo(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.writeString(output, 1, name_);
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.writeString(output, 1, name_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.writeString(output, 2, help_);
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.writeString(output, 2, help_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
         output.writeEnum(3, type_);
@@ -13083,17 +13737,17 @@ public final class Metrics {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.computeStringSize(1, name_);
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.computeStringSize(1, name_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.computeStringSize(2, help_);
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.computeStringSize(2, help_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeEnumSize(3, type_);
       }
       for (int i = 0; i < metric_.size(); i++) {
-        size += io.prometheus.metrics.com_google_protobuf_3_21_7.CodedOutputStream
+        size += io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedOutputStream
           .computeMessageSize(4, metric_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
@@ -13161,71 +13815,73 @@ public final class Metrics {
 
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(
         java.nio.ByteBuffer data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(
         java.nio.ByteBuffer data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString data,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(byte[] data)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(
         byte[] data,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-        throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
+
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseDelimitedFrom(
         java.io.InputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
     public static io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily parseFrom(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-        io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3
+      return io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
@@ -13245,7 +13901,7 @@ public final class Metrics {
 
     @java.lang.Override
     protected Builder newBuilderForType(
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -13253,16 +13909,16 @@ public final class Metrics {
      * Protobuf type {@code io.prometheus.client.MetricFamily}
      */
     public static final class Builder extends
-        io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
+        io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.prometheus.client.MetricFamily)
         io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamilyOrBuilder {
-      public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptor() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_MetricFamily_descriptor;
       }
 
       @java.lang.Override
-      protected io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+      protected io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_MetricFamily_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -13275,7 +13931,7 @@ public final class Metrics {
       }
 
       private Builder(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
 
       }
@@ -13297,7 +13953,7 @@ public final class Metrics {
       }
 
       @java.lang.Override
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
           getDescriptorForType() {
         return io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.internal_static_io_prometheus_client_MetricFamily_descriptor;
       }
@@ -13361,34 +14017,34 @@ public final class Metrics {
       }
       @java.lang.Override
       public Builder setField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
       @java.lang.Override
-      public Builder mergeFrom(io.prometheus.metrics.com_google_protobuf_3_21_7.Message other) {
+      public Builder mergeFrom(io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Message other) {
         if (other instanceof io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily) {
           return mergeFrom((io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricFamily)other);
         } else {
@@ -13431,7 +14087,7 @@ public final class Metrics {
               metric_ = other.metric_;
               bitField0_ = (bitField0_ & ~0x00000008);
               metricBuilder_ = 
-                io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getMetricFieldBuilder() : null;
             } else {
               metricBuilder_.addAllMessages(other.metric_);
@@ -13450,8 +14106,8 @@ public final class Metrics {
 
       @java.lang.Override
       public Builder mergeFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
@@ -13507,7 +14163,7 @@ public final class Metrics {
               } // default:
             } // switch (tag)
           } // while (!done)
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.unwrapIOException();
         } finally {
           onChanged();
@@ -13531,8 +14187,8 @@ public final class Metrics {
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString bs =
-              (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString bs =
+              (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             name_ = s;
@@ -13546,17 +14202,17 @@ public final class Metrics {
        * <code>optional string name = 1;</code>
        * @return The bytes for name.
        */
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
           getNameBytes() {
         java.lang.Object ref = name_;
         if (ref instanceof String) {
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString b = 
-              io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString b = 
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           name_ = b;
           return b;
         } else {
-          return (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+          return (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
         }
       }
       /**
@@ -13588,7 +14244,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setNameBytes(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString value) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         name_ = value;
         bitField0_ |= 0x00000001;
@@ -13611,8 +14267,8 @@ public final class Metrics {
       public java.lang.String getHelp() {
         java.lang.Object ref = help_;
         if (!(ref instanceof java.lang.String)) {
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString bs =
-              (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString bs =
+              (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             help_ = s;
@@ -13626,17 +14282,17 @@ public final class Metrics {
        * <code>optional string help = 2;</code>
        * @return The bytes for help.
        */
-      public io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString
+      public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString
           getHelpBytes() {
         java.lang.Object ref = help_;
         if (ref instanceof String) {
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString b = 
-              io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString b = 
+              io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           help_ = b;
           return b;
         } else {
-          return (io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString) ref;
+          return (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString) ref;
         }
       }
       /**
@@ -13668,7 +14324,7 @@ public final class Metrics {
        * @return This builder for chaining.
        */
       public Builder setHelpBytes(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ByteString value) {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         help_ = value;
         bitField0_ |= 0x00000002;
@@ -13727,7 +14383,7 @@ public final class Metrics {
          }
       }
 
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricOrBuilder> metricBuilder_;
 
       /**
@@ -13859,7 +14515,7 @@ public final class Metrics {
           java.lang.Iterable<? extends io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric> values) {
         if (metricBuilder_ == null) {
           ensureMetricIsMutable();
-          io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractMessageLite.Builder.addAll(
               values, metric_);
           onChanged();
         } else {
@@ -13943,11 +14599,11 @@ public final class Metrics {
            getMetricBuilderList() {
         return getMetricFieldBuilder().getBuilderList();
       }
-      private io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+      private io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
           io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricOrBuilder> 
           getMetricFieldBuilder() {
         if (metricBuilder_ == null) {
-          metricBuilder_ = new io.prometheus.metrics.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
+          metricBuilder_ = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.RepeatedFieldBuilderV3<
               io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.Metric.Builder, io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics.MetricOrBuilder>(
                   metric_,
                   ((bitField0_ & 0x00000008) != 0),
@@ -13959,13 +14615,13 @@ public final class Metrics {
       }
       @java.lang.Override
       public final Builder setUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
       public final Builder mergeUnknownFields(
-          final io.prometheus.metrics.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
+          final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
       }
 
@@ -13983,34 +14639,34 @@ public final class Metrics {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<MetricFamily>
-        PARSER = new io.prometheus.metrics.com_google_protobuf_3_21_7.AbstractParser<MetricFamily>() {
+    @java.lang.Deprecated public static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<MetricFamily>
+        PARSER = new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.AbstractParser<MetricFamily>() {
       @java.lang.Override
       public MetricFamily parsePartialFrom(
-          io.prometheus.metrics.com_google_protobuf_3_21_7.CodedInputStream input,
-          io.prometheus.metrics.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
-          throws io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.CodedInputStream input,
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.ExtensionRegistryLite extensionRegistry)
+          throws io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException {
         Builder builder = newBuilder();
         try {
           builder.mergeFrom(input, extensionRegistry);
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(builder.buildPartial());
-        } catch (io.prometheus.metrics.com_google_protobuf_3_21_7.UninitializedMessageException e) {
+        } catch (io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.UninitializedMessageException e) {
           throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
         } catch (java.io.IOException e) {
-          throw new io.prometheus.metrics.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
+          throw new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.InvalidProtocolBufferException(e)
               .setUnfinishedMessage(builder.buildPartial());
         }
         return builder.buildPartial();
       }
     };
 
-    public static io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<MetricFamily> parser() {
+    public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<MetricFamily> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public io.prometheus.metrics.com_google_protobuf_3_21_7.Parser<MetricFamily> getParserForType() {
+    public io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Parser<MetricFamily> getParserForType() {
       return PARSER;
     }
 
@@ -14021,200 +14677,205 @@ public final class Metrics {
 
   }
 
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_LabelPair_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_LabelPair_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_Gauge_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_Gauge_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_Counter_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_Counter_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_Quantile_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_Quantile_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_Summary_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_Summary_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_Untyped_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_Untyped_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_Histogram_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_Histogram_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_Bucket_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_Bucket_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_BucketSpan_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_BucketSpan_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_Exemplar_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_Exemplar_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_Metric_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_Metric_fieldAccessorTable;
-  private static final io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.Descriptor
+  private static final io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.Descriptor
     internal_static_io_prometheus_client_MetricFamily_descriptor;
   private static final 
-    io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable
       internal_static_io_prometheus_client_MetricFamily_fieldAccessorTable;
 
-  public static io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FileDescriptor
+  public static io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
   }
-  private static  io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FileDescriptor
+  private static  io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FileDescriptor
       descriptor;
   static {
     java.lang.String[] descriptorData = {
       "\n\037src/main/protobuf/metrics.proto\022\024io.pr" +
       "ometheus.client\032\037google/protobuf/timesta" +
       "mp.proto\"(\n\tLabelPair\022\014\n\004name\030\001 \001(\t\022\r\n\005v" +
-      "alue\030\002 \001(\t\"\026\n\005Gauge\022\r\n\005value\030\001 \001(\001\"J\n\007Co" +
-      "unter\022\r\n\005value\030\001 \001(\001\0220\n\010exemplar\030\002 \001(\0132\036" +
-      ".io.prometheus.client.Exemplar\"+\n\010Quanti" +
-      "le\022\020\n\010quantile\030\001 \001(\001\022\r\n\005value\030\002 \001(\001\"e\n\007S" +
-      "ummary\022\024\n\014sample_count\030\001 \001(\004\022\022\n\nsample_s" +
-      "um\030\002 \001(\001\0220\n\010quantile\030\003 \003(\0132\036.io.promethe" +
-      "us.client.Quantile\"\030\n\007Untyped\022\r\n\005value\030\001" +
-      " \001(\001\"\247\003\n\tHistogram\022\024\n\014sample_count\030\001 \001(\004" +
-      "\022\032\n\022sample_count_float\030\004 \001(\001\022\022\n\nsample_s" +
-      "um\030\002 \001(\001\022,\n\006bucket\030\003 \003(\0132\034.io.prometheus" +
-      ".client.Bucket\022\016\n\006schema\030\005 \001(\021\022\026\n\016zero_t" +
-      "hreshold\030\006 \001(\001\022\022\n\nzero_count\030\007 \001(\004\022\030\n\020ze" +
-      "ro_count_float\030\010 \001(\001\0227\n\rnegative_span\030\t " +
-      "\003(\0132 .io.prometheus.client.BucketSpan\022\026\n" +
-      "\016negative_delta\030\n \003(\022\022\026\n\016negative_count\030" +
-      "\013 \003(\001\0227\n\rpositive_span\030\014 \003(\0132 .io.promet" +
-      "heus.client.BucketSpan\022\026\n\016positive_delta" +
-      "\030\r \003(\022\022\026\n\016positive_count\030\016 \003(\001\"\211\001\n\006Bucke" +
-      "t\022\030\n\020cumulative_count\030\001 \001(\004\022\036\n\026cumulativ" +
-      "e_count_float\030\004 \001(\001\022\023\n\013upper_bound\030\002 \001(\001" +
-      "\0220\n\010exemplar\030\003 \001(\0132\036.io.prometheus.clien" +
-      "t.Exemplar\",\n\nBucketSpan\022\016\n\006offset\030\001 \001(\021" +
-      "\022\016\n\006length\030\002 \001(\r\"x\n\010Exemplar\022.\n\005label\030\001 " +
-      "\003(\0132\037.io.prometheus.client.LabelPair\022\r\n\005" +
-      "value\030\002 \001(\001\022-\n\ttimestamp\030\003 \001(\0132\032.google." +
-      "protobuf.Timestamp\"\276\002\n\006Metric\022.\n\005label\030\001" +
-      " \003(\0132\037.io.prometheus.client.LabelPair\022*\n" +
-      "\005gauge\030\002 \001(\0132\033.io.prometheus.client.Gaug" +
-      "e\022.\n\007counter\030\003 \001(\0132\035.io.prometheus.clien" +
-      "t.Counter\022.\n\007summary\030\004 \001(\0132\035.io.promethe" +
-      "us.client.Summary\022.\n\007untyped\030\005 \001(\0132\035.io." +
-      "prometheus.client.Untyped\0222\n\thistogram\030\007" +
-      " \001(\0132\037.io.prometheus.client.Histogram\022\024\n" +
-      "\014timestamp_ms\030\006 \001(\003\"\210\001\n\014MetricFamily\022\014\n\004" +
-      "name\030\001 \001(\t\022\014\n\004help\030\002 \001(\t\022.\n\004type\030\003 \001(\0162 " +
-      ".io.prometheus.client.MetricType\022,\n\006metr" +
-      "ic\030\004 \003(\0132\034.io.prometheus.client.Metric*b" +
-      "\n\nMetricType\022\013\n\007COUNTER\020\000\022\t\n\005GAUGE\020\001\022\013\n\007" +
-      "SUMMARY\020\002\022\013\n\007UNTYPED\020\003\022\r\n\tHISTOGRAM\020\004\022\023\n" +
-      "\017GAUGE_HISTOGRAM\020\005B\212\001\nLio.prometheus.met" +
-      "rics.expositionformats.generated.com_goo" +
-      "gle_protobuf_3_21_7Z:github.com/promethe" +
-      "us/client_model/go;io_prometheus_client"
+      "alue\030\002 \001(\t\"\026\n\005Gauge\022\r\n\005value\030\001 \001(\001\"\201\001\n\007C" +
+      "ounter\022\r\n\005value\030\001 \001(\001\0220\n\010exemplar\030\002 \001(\0132" +
+      "\036.io.prometheus.client.Exemplar\0225\n\021creat" +
+      "ed_timestamp\030\003 \001(\0132\032.google.protobuf.Tim" +
+      "estamp\"+\n\010Quantile\022\020\n\010quantile\030\001 \001(\001\022\r\n\005" +
+      "value\030\002 \001(\001\"\234\001\n\007Summary\022\024\n\014sample_count\030" +
+      "\001 \001(\004\022\022\n\nsample_sum\030\002 \001(\001\0220\n\010quantile\030\003 " +
+      "\003(\0132\036.io.prometheus.client.Quantile\0225\n\021c" +
+      "reated_timestamp\030\004 \001(\0132\032.google.protobuf" +
+      ".Timestamp\"\030\n\007Untyped\022\r\n\005value\030\001 \001(\001\"\336\003\n" +
+      "\tHistogram\022\024\n\014sample_count\030\001 \001(\004\022\032\n\022samp" +
+      "le_count_float\030\004 \001(\001\022\022\n\nsample_sum\030\002 \001(\001" +
+      "\022,\n\006bucket\030\003 \003(\0132\034.io.prometheus.client." +
+      "Bucket\0225\n\021created_timestamp\030\017 \001(\0132\032.goog" +
+      "le.protobuf.Timestamp\022\016\n\006schema\030\005 \001(\021\022\026\n" +
+      "\016zero_threshold\030\006 \001(\001\022\022\n\nzero_count\030\007 \001(" +
+      "\004\022\030\n\020zero_count_float\030\010 \001(\001\0227\n\rnegative_" +
+      "span\030\t \003(\0132 .io.prometheus.client.Bucket" +
+      "Span\022\026\n\016negative_delta\030\n \003(\022\022\026\n\016negative" +
+      "_count\030\013 \003(\001\0227\n\rpositive_span\030\014 \003(\0132 .io" +
+      ".prometheus.client.BucketSpan\022\026\n\016positiv" +
+      "e_delta\030\r \003(\022\022\026\n\016positive_count\030\016 \003(\001\"\211\001" +
+      "\n\006Bucket\022\030\n\020cumulative_count\030\001 \001(\004\022\036\n\026cu" +
+      "mulative_count_float\030\004 \001(\001\022\023\n\013upper_boun" +
+      "d\030\002 \001(\001\0220\n\010exemplar\030\003 \001(\0132\036.io.prometheu" +
+      "s.client.Exemplar\",\n\nBucketSpan\022\016\n\006offse" +
+      "t\030\001 \001(\021\022\016\n\006length\030\002 \001(\r\"x\n\010Exemplar\022.\n\005l" +
+      "abel\030\001 \003(\0132\037.io.prometheus.client.LabelP" +
+      "air\022\r\n\005value\030\002 \001(\001\022-\n\ttimestamp\030\003 \001(\0132\032." +
+      "google.protobuf.Timestamp\"\276\002\n\006Metric\022.\n\005" +
+      "label\030\001 \003(\0132\037.io.prometheus.client.Label" +
+      "Pair\022*\n\005gauge\030\002 \001(\0132\033.io.prometheus.clie" +
+      "nt.Gauge\022.\n\007counter\030\003 \001(\0132\035.io.prometheu" +
+      "s.client.Counter\022.\n\007summary\030\004 \001(\0132\035.io.p" +
+      "rometheus.client.Summary\022.\n\007untyped\030\005 \001(" +
+      "\0132\035.io.prometheus.client.Untyped\0222\n\thist" +
+      "ogram\030\007 \001(\0132\037.io.prometheus.client.Histo" +
+      "gram\022\024\n\014timestamp_ms\030\006 \001(\003\"\210\001\n\014MetricFam" +
+      "ily\022\014\n\004name\030\001 \001(\t\022\014\n\004help\030\002 \001(\t\022.\n\004type\030" +
+      "\003 \001(\0162 .io.prometheus.client.MetricType\022" +
+      ",\n\006metric\030\004 \003(\0132\034.io.prometheus.client.M" +
+      "etric*b\n\nMetricType\022\013\n\007COUNTER\020\000\022\t\n\005GAUG" +
+      "E\020\001\022\013\n\007SUMMARY\020\002\022\013\n\007UNTYPED\020\003\022\r\n\tHISTOGR" +
+      "AM\020\004\022\023\n\017GAUGE_HISTOGRAM\020\005B\212\001\nLio.prometh" +
+      "eus.metrics.expositionformats.generated." +
+      "com_google_protobuf_3_21_7Z:github.com/p" +
+      "rometheus/client_model/go;io_prometheus_" +
+      "client"
     };
-    descriptor = io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FileDescriptor
+    descriptor = io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
-        new io.prometheus.metrics.com_google_protobuf_3_21_7.Descriptors.FileDescriptor[] {
-          io.prometheus.metrics.com_google_protobuf_3_21_7.TimestampProto.getDescriptor(),
+        new io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.Descriptors.FileDescriptor[] {
+          io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampProto.getDescriptor(),
         });
     internal_static_io_prometheus_client_LabelPair_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_io_prometheus_client_LabelPair_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_LabelPair_descriptor,
         new java.lang.String[] { "Name", "Value", });
     internal_static_io_prometheus_client_Gauge_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_io_prometheus_client_Gauge_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_Gauge_descriptor,
         new java.lang.String[] { "Value", });
     internal_static_io_prometheus_client_Counter_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_io_prometheus_client_Counter_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_Counter_descriptor,
-        new java.lang.String[] { "Value", "Exemplar", });
+        new java.lang.String[] { "Value", "Exemplar", "CreatedTimestamp", });
     internal_static_io_prometheus_client_Quantile_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_io_prometheus_client_Quantile_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_Quantile_descriptor,
         new java.lang.String[] { "Quantile", "Value", });
     internal_static_io_prometheus_client_Summary_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_io_prometheus_client_Summary_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_Summary_descriptor,
-        new java.lang.String[] { "SampleCount", "SampleSum", "Quantile", });
+        new java.lang.String[] { "SampleCount", "SampleSum", "Quantile", "CreatedTimestamp", });
     internal_static_io_prometheus_client_Untyped_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_io_prometheus_client_Untyped_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_Untyped_descriptor,
         new java.lang.String[] { "Value", });
     internal_static_io_prometheus_client_Histogram_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_io_prometheus_client_Histogram_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_Histogram_descriptor,
-        new java.lang.String[] { "SampleCount", "SampleCountFloat", "SampleSum", "Bucket", "Schema", "ZeroThreshold", "ZeroCount", "ZeroCountFloat", "NegativeSpan", "NegativeDelta", "NegativeCount", "PositiveSpan", "PositiveDelta", "PositiveCount", });
+        new java.lang.String[] { "SampleCount", "SampleCountFloat", "SampleSum", "Bucket", "CreatedTimestamp", "Schema", "ZeroThreshold", "ZeroCount", "ZeroCountFloat", "NegativeSpan", "NegativeDelta", "NegativeCount", "PositiveSpan", "PositiveDelta", "PositiveCount", });
     internal_static_io_prometheus_client_Bucket_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_io_prometheus_client_Bucket_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_Bucket_descriptor,
         new java.lang.String[] { "CumulativeCount", "CumulativeCountFloat", "UpperBound", "Exemplar", });
     internal_static_io_prometheus_client_BucketSpan_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_io_prometheus_client_BucketSpan_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_BucketSpan_descriptor,
         new java.lang.String[] { "Offset", "Length", });
     internal_static_io_prometheus_client_Exemplar_descriptor =
       getDescriptor().getMessageTypes().get(9);
     internal_static_io_prometheus_client_Exemplar_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_Exemplar_descriptor,
         new java.lang.String[] { "Label", "Value", "Timestamp", });
     internal_static_io_prometheus_client_Metric_descriptor =
       getDescriptor().getMessageTypes().get(10);
     internal_static_io_prometheus_client_Metric_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_Metric_descriptor,
         new java.lang.String[] { "Label", "Gauge", "Counter", "Summary", "Untyped", "Histogram", "TimestampMs", });
     internal_static_io_prometheus_client_MetricFamily_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_io_prometheus_client_MetricFamily_fieldAccessorTable = new
-      io.prometheus.metrics.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
+      io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_prometheus_client_MetricFamily_descriptor,
         new java.lang.String[] { "Name", "Help", "Type", "Metric", });
-    io.prometheus.metrics.com_google_protobuf_3_21_7.TimestampProto.getDescriptor();
+    io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TimestampProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

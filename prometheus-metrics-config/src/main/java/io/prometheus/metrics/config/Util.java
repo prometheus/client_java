@@ -2,6 +2,7 @@ package io.prometheus.metrics.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -38,6 +39,10 @@ class Util {
         return result;
     }
 
+    static String loadString(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
+        return getProperty(name, properties);
+    }
+
     static List<String> loadStringList(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
         String property = getProperty(name, properties);
         if (property != null) {
@@ -65,6 +70,28 @@ class Util {
             return Arrays.asList(result);
         }
         return null;
+    }
+
+    // Map is represented as "key1=value1,key2=value2"
+    static Map<String, String> loadMap(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {
+        Map<String, String> result = new HashMap<>();
+        String property = getProperty(name, properties);
+        if (property != null) {
+            String[] pairs = property.split(",");
+            for (String pair : pairs) {
+                if (pair.contains("=")) {
+                    String[] keyValue = pair.split("=", 1);
+                    if (keyValue.length == 2) {
+                        String key = keyValue[0].trim();
+                        String value = keyValue[1].trim();
+                        if (key.length() > 0 && value.length() > 0) {
+                            result.putIfAbsent(key, value);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     static Integer loadInteger(String name, Map<Object, Object> properties) throws PrometheusPropertiesException {

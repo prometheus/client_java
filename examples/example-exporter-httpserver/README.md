@@ -10,10 +10,10 @@ This example is built as part of the `client_java` project.
 
 ## Run
 
-The build creates a JAR file with the example application in `./examples/example-httpserver/target/`.
+The build creates a JAR file with the example application in `./examples/example-exporter-httpserver/target/`.
 
 ```
-java -jar ./examples/example-httpserver/target/example-tomcat-servlet-1.0.0-alpha-3-SNAPSHOT.jar
+java -jar ./examples/example-exporter-httpserver/target/example-exporter-httpserver.jar
 ```
 
 ## Manually testing the Metrics Endpoint
@@ -31,7 +31,3 @@ The exporter supports a `debug` URL parameter to quickly view other formats in y
 * [http://localhost:9400/metrics?debug=text](http://localhost:9400/metrics?debug=text): Prometheus text format, same as without the `debug` option.
 * [http://localhost:9400/metrics?debug=openmetrics](http://localhost:9400/metrics?debug=openmetrics): OpenMetrics text format.
 * [http://localhost:9400/metrics?debug=prometheus-protobuf](http://localhost:9400/metrics?debug=prometheus-protobuf): Text representation of the Prometheus protobuf format.
-
-## TODO
-
-Implement an example of a histogram and show how to use this with Prometheus, see [../example-tomcat-servlet](../example-tomcat-servlet).

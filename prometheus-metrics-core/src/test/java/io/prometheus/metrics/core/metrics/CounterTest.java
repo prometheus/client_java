@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.com_google_protobuf_3_21_7.TextFormat;
+import io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
@@ -296,5 +296,23 @@ public class CounterTest {
         Assert.assertNull(getData(counter).getExemplar());
         counter.inc(2.0);
         Assert.assertNull(getData(counter).getExemplar());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstLabelsFirst() {
+        Counter.newBuilder()
+                .withName("test_total")
+                .withConstLabels(Labels.of("const_a", "const_b"))
+                .withLabelNames("const.a")
+                .build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstLabelsSecond() {
+        Counter.newBuilder()
+                .withName("test_total")
+                .withLabelNames("const.a")
+                .withConstLabels(Labels.of("const_a", "const_b"))
+                .build();
     }
 }

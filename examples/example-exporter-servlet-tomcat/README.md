@@ -10,10 +10,10 @@ This example is built as part of the `client_java` project.
 
 ## Run
 
-The build creates a JAR file with the example application in `./examples/tomcat-servlet-example/target/`.
+The build creates a JAR file with the example application in `./examples/example-exporter-servlet-tomcat/target/`.
 
 ```
-java -jar ./examples/tomcat-servlet-example/target/tomcat-servlet-example-1.0.0-alpha-2-SNAPSHOT.jar
+java -jar ./examples/example-exporter-servlet-tomcat/target/example-exporter-servlet-tomcat.jar
 ```
 
 Accessing [http://localhost:8080/](http://localhost:8080/) with a Web browser should yield `Hello, World!`.

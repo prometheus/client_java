@@ -47,9 +47,6 @@
     </developers>
 
     <modules>
-        <!-- protobuf-shaded is not included, because the source code contains the un-shaded packages. -->
-        <!-- By not including it, we force Maven to load the shaded version from the Maven repository. -->
-        <!-- However, that means protobuf-shaded must be built and installed manually if there are any changes. -->
         <module>prometheus-metrics-core</module>
         <module>prometheus-metrics-config</module>
         <module>prometheus-metrics-model</module>
@@ -58,6 +55,8 @@
         <module>prometheus-metrics-exporter-common</module>
         <module>prometheus-metrics-exporter-servlet-jakarta</module>
         <module>prometheus-metrics-exporter-httpserver</module>
+        <module>prometheus-metrics-exporter-opentelemetry</module>
+        <!-- <module>prometheus-metrics-shaded-dependencies</module> --> <!-- during development we exclude this to make sure we use the shaded versions -->
         <module>examples</module>
         <module>integration-tests</module>
 

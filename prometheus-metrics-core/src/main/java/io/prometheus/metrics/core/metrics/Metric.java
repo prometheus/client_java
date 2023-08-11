@@ -28,7 +28,7 @@ public abstract class Metric implements Collector {
 
         protected final List<String> illegalLabelNames;
         protected final PrometheusProperties properties;
-        private Labels constLabels = Labels.EMPTY;
+        protected Labels constLabels = Labels.EMPTY;
 
         protected Builder(List<String> illegalLabelNames, PrometheusProperties properties) {
             this.illegalLabelNames = new ArrayList<>(illegalLabelNames);
