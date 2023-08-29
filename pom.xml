@@ -56,7 +56,7 @@
         <module>prometheus-metrics-exporter-servlet-jakarta</module>
         <module>prometheus-metrics-exporter-httpserver</module>
         <module>prometheus-metrics-exporter-opentelemetry</module>
-        <module>prometheus-metrics-shaded-dependencies</module>
+        <!-- <module>prometheus-metrics-shaded-dependencies</module> -->
         <module>examples</module>
         <module>integration-tests</module>
 
