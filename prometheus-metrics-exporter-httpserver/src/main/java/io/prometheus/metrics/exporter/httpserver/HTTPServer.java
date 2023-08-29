@@ -45,13 +45,13 @@ public class HTTPServer implements Closeable {
     protected final HttpServer server;
     protected final ExecutorService executorService;
 
-    private HTTPServer(PrometheusProperties config, ExecutorService executorService, HttpServer httpServer, PrometheusRegistry registry, Authenticator authenticator) {
+    private HTTPServer(PrometheusProperties config, ExecutorService executorService, HttpServer httpServer, PrometheusRegistry registry, Authenticator authenticator, HttpHandler defaultHandler) {
         if (httpServer.getAddress() == null) {
             throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
         }
         this.server = httpServer;
         this.executorService = executorService;
-        registerHandler("/", new DefaultHandler(), authenticator);
+        registerHandler("/", defaultHandler == null ? new DefaultHandler() : defaultHandler, authenticator);
         registerHandler("/metrics", new MetricsHandler(config, registry), authenticator);
         registerHandler("/-/healthy", new HealthyHandler(), authenticator);
         this.server.start();
@@ -108,6 +108,7 @@ public class HTTPServer implements Closeable {
         private ExporterHttpServerProperties properties = null;
         private Authenticator authenticator = null;
         private HttpsConfigurator httpsConfigurator = null;
+        private HttpHandler defaultHandler = null;
 
         private Builder(PrometheusProperties config) {
             this.config = config;
@@ -175,6 +176,14 @@ public class HTTPServer implements Closeable {
         }
 
         /**
+         * Optional: Override default handler, i.e. the handler that will be registered for the / endpoint.
+         */
+        public Builder withDefaultHandler(HttpHandler defaultHandler) {
+            this.defaultHandler = defaultHandler;
+            return this;
+        }
+
+        /**
          * Build and start the HTTPServer.
          */
         public HTTPServer buildAndStart() throws IOException {
@@ -190,7 +199,7 @@ public class HTTPServer implements Closeable {
             }
             ExecutorService executorService = makeExecutorService();
             httpServer.setExecutor(executorService);
-            return new HTTPServer(config, executorService, httpServer, registry, authenticator);
+            return new HTTPServer(config, executorService, httpServer, registry, authenticator, defaultHandler);
         }
 
         private InetSocketAddress makeInetSocketAddress() {
