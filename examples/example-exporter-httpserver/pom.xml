@@ -5,12 +5,12 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>examples</artifactId>
-        <version>1.0.0-alpha-3-SNAPSHOT</version>
+        <version>1.0.0-alpha-3</version>
     </parent>
 
     <artifactId>example-exporter-httpserver</artifactId>
 
-    <name>>Example - HTTPServer Exporter</name>
+    <name>&gt;Example - HTTPServer Exporter</name>
     <description>
         Prometheus Metrics Example using the HTTPServer for exposing the metrics endpoint
     </description>
