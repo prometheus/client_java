@@ -41,6 +41,11 @@ public abstract class MetricWithFixedMetadata extends Metric {
         return name;
     }
 
+    @Override
+    public String getPrometheusName() {
+        return metadata.getPrometheusName();
+    }
+
     public static abstract class Builder<B extends Builder<B, M>, M extends MetricWithFixedMetadata> extends Metric.Builder<B, M> {
 
         protected String name;

@@ -33,7 +33,7 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusN
  * requestCount.withLabelValues("/hello-world", "500").inc();
  * }</pre>
  */
-public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint> implements CounterDataPoint, Collector {
+public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint> implements CounterDataPoint {
 
     private final boolean exemplarsEnabled;
     private final ExemplarSamplerConfig exemplarSamplerConfig;

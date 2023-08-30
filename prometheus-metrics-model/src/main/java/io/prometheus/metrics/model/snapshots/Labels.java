@@ -139,13 +139,24 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
      * Dots are treated as underscores, so {@code contains("my.label")} and {@code contains("my_label")} are the same.
      */
     public boolean contains(String labelName) {
+        return get(labelName) != null;
+    }
+
+    /**
+     * Get the label value for a given label name.
+     * <p>
+     * Returns {@code null} if the {@code labelName} is not found.
+     * <p>
+     * Dots are treated as underscores, so {@code get("my.label")} and {@code get("my_label")} are the same.
+     */
+    public String get(String labelName) {
         labelName = prometheusName(labelName);
-        for (String name : prometheusNames) {
-            if (name.equals(labelName)) {
-                return true;
+        for (int i=0; i<prometheusNames.length; i++) {
+            if (prometheusNames[i].equals(labelName)) {
+                return values[i];
             }
         }
-        return false;
+        return null;
     }
 
     private static void sortAndValidate(String[] names, String[] prometheusNames, String[] values) {
