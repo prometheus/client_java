@@ -101,9 +101,16 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
         return data.computeIfAbsent(Arrays.asList(labelValues), l -> newDataPoint());
     }
 
+    /**
+     * Remove the data point with the given label values.
+     * See <a href="https://prometheus.io/docs/instrumenting/writing_clientlibs/#labels">https://prometheus.io/docs/instrumenting/writing_clientlibs/#labels</a>.
+     */
     public void remove(String... labelValues) {
         data.remove(Arrays.asList(labelValues));
     }
+
+    // TODO: Write a clear() method that resets the metric (removes all data points),
+    // see https://prometheus.io/docs/instrumenting/writing_clientlibs/#labels
 
     protected abstract T newDataPoint();
 

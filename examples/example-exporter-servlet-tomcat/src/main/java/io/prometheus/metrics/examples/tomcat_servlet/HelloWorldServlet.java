@@ -19,6 +19,8 @@ public class HelloWorldServlet extends HttpServlet {
 
     private final Random random = new Random(0);
 
+    // Note: The requests_total counter is not a great example, because the
+    // request_duration_seconds histogram below also has a count with the number of requests.
     private final Counter counter = Counter.newBuilder()
             .withName("requests_total")
             .withHelp("total number of requests")

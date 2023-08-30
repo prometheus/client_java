@@ -1,6 +1,7 @@
 package io.prometheus.metrics.examples.otel_exemplars.greeting;
 
 import io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet;
+import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
@@ -13,6 +14,8 @@ import java.io.File;
 public class Main {
 
     public static void main(String[] args) throws LifecycleException {
+
+        JvmMetrics.newBuilder().register();
 
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(8081);

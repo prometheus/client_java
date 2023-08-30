@@ -2,6 +2,7 @@ package io.prometheus.metrics.examples.httpserver;
 
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
+import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 import io.prometheus.metrics.model.snapshots.Unit;
 
 import java.io.IOException;
@@ -13,6 +14,14 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
+        JvmMetrics.newBuilder().register();
+
+        // Note: uptime_seconds_total is not a great example:
+        // The built-in JvmMetrics have an out-of-the-box metric named process_start_time_seconds
+        // with the start timestamp in seconds, so if you want to know the uptime you can simply
+        // run the Prometheus query
+        //     time() - process_start_time_seconds
+        // rather than creating a custom uptime metric.
         Counter counter = Counter.newBuilder()
                 .withName("uptime_seconds_total")
                 .withHelp("total number of seconds since this application was started")

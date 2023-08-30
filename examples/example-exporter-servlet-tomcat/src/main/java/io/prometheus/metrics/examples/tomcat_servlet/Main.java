@@ -1,6 +1,7 @@
 package io.prometheus.metrics.examples.tomcat_servlet;
 
 import io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet;
+import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
@@ -16,6 +17,8 @@ import java.nio.file.Path;
 public class Main {
 
     public static void main(String[] args) throws LifecycleException, IOException {
+
+        JvmMetrics.newBuilder().register();
 
         Tomcat tomcat = new Tomcat();
         Path tmpDir = Files.createTempDirectory("prometheus-tomcat-servlet-example-");
