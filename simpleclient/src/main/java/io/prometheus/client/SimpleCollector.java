@@ -51,6 +51,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   protected final String help;
   protected final String unit;
   protected final List<String> labelNames;
+  protected final LabelValueSanitizer labelValueSanitizer;
 
   protected final ConcurrentMap<List<String>, Child> children = new ConcurrentHashMap<List<String>, Child>();
   protected Child noLabelsChild;
@@ -64,6 +65,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     if (labelValues.length != labelNames.size()) {
       throw new IllegalArgumentException("Incorrect number of labels.");
     }
+    labelValues = labelValueSanitizer.sanitize(labelValues);
     for (String label: labelValues) {
       if (label == null) {
         throw new IllegalArgumentException("Label cannot be null.");
@@ -174,10 +176,40 @@ public abstract class SimpleCollector<Child> extends Collector {
     for (String n: labelNames) {
       checkMetricLabelName(n);
     }
+    labelValueSanitizer = b.labelValueSanitizer;
 
     if (!b.dontInitializeNoLabelsChild) {
       initializeNoLabelsChild();
     }
+  }
+
+  /**
+   * Default Sanitizer - Will not perform any manipulation on labels
+   */
+  static LabelValueSanitizer NoOpLabelValueSanitizer() {
+    return new LabelValueSanitizer() {
+      @Override
+      public String[] sanitize(String... labelValue) {
+        return labelValue;
+      }
+    };
+  }
+
+  /**
+   * Transforms null labels to an empty string to guard against IllegalArgument runtime exceptions
+   */
+  static LabelValueSanitizer TransformNullLabelsToEmptyString() {
+    return new LabelValueSanitizer() {
+      @Override
+      public String[] sanitize(String... labelValue) {
+        for (int i = 0; i < labelValue.length; i++) {
+          if (labelValue[i] == null) {
+            labelValue[i] = "";
+          }
+        }
+        return labelValue;
+      }
+    };
   }
 
   /**
@@ -191,6 +223,7 @@ public abstract class SimpleCollector<Child> extends Collector {
     String unit = "";
     String help = "";
     String[] labelNames = new String[]{};
+    LabelValueSanitizer labelValueSanitizer = NoOpLabelValueSanitizer();
     // Some metrics require additional setup before the initialization can be done.
     boolean dontInitializeNoLabelsChild;
 
@@ -236,6 +269,18 @@ public abstract class SimpleCollector<Child> extends Collector {
      */
     public B labelNames(String... labelNames) {
       this.labelNames = labelNames;
+      return (B)this;
+    }
+
+    /**
+     * Sanitize labels. Optional, defaults to no manipulation of labels.
+     * Useful to scrub credentials from labels
+     * or avoid Null values causing runtime exceptions
+     * @param handler
+     * @return new array of labels to use
+     */
+    public B labelValueSanitizer(LabelValueSanitizer handler) {
+      this.labelValueSanitizer = handler;
       return (B)this;
     }
 
