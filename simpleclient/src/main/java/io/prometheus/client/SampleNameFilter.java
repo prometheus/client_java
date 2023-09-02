@@ -22,13 +22,17 @@ public class SampleNameFilter implements Predicate<String> {
     private final Collection<String> nameIsNotEqualTo;
     private final Collection<String> nameStartsWith;
     private final Collection<String> nameDoesNotStartWith;
+    private final Collection<String> nameEndsWith;
+    private final Collection<String> nameDoesNotEndWith;
 
     @Override
     public boolean test(String sampleName) {
         return matchesNameEqualTo(sampleName)
-                && !matchesNameNotEqualTo(sampleName)
+                && matchesNameNotEqualTo(sampleName)
                 && matchesNameStartsWith(sampleName)
-                && !matchesNameDoesNotStartWith(sampleName);
+                && matchesNameDoesNotStartWith(sampleName)
+                && matchesNameEndsWith(sampleName)
+                && matchesNameDoesNotEndWith(sampleName);
     }
 
     /**
@@ -55,9 +59,9 @@ public class SampleNameFilter implements Predicate<String> {
 
     private boolean matchesNameNotEqualTo(String metricName) {
         if (nameIsNotEqualTo.isEmpty()) {
-            return false;
+            return true;
         }
-        return nameIsNotEqualTo.contains(metricName);
+        return !nameIsNotEqualTo.contains(metricName);
     }
 
     private boolean matchesNameStartsWith(String metricName) {
@@ -74,14 +78,38 @@ public class SampleNameFilter implements Predicate<String> {
 
     private boolean matchesNameDoesNotStartWith(String metricName) {
         if (nameDoesNotStartWith.isEmpty()) {
-            return false;
+            return true;
         }
         for (String prefix : nameDoesNotStartWith) {
             if (metricName.startsWith(prefix)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean matchesNameEndsWith(String metricName) {
+        if (nameEndsWith.isEmpty()) {
+            return true;
+        }
+        for (String suffix : nameEndsWith) {
+            if (metricName.endsWith(suffix)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private boolean matchesNameDoesNotEndWith(String metricName) {
+        if (nameDoesNotEndWith.isEmpty()) {
+            return true;
+        }
+        for (String suffix : nameDoesNotEndWith) {
+            if (metricName.endsWith(suffix)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static class Builder {
@@ -90,6 +118,8 @@ public class SampleNameFilter implements Predicate<String> {
         private final Collection<String> nameNotEqualTo = new ArrayList<String>();
         private final Collection<String> nameStartsWith = new ArrayList<String>();
         private final Collection<String> nameDoesNotStartWith = new ArrayList<String>();
+        private final Collection<String> nameEndsWith = new ArrayList<String>();
+        private final Collection<String> nameDoesNotEndWith = new ArrayList<String>();
 
         /**
          * @see #nameMustBeEqualTo(Collection)
@@ -167,16 +197,54 @@ public class SampleNameFilter implements Predicate<String> {
             return this;
         }
 
+        /**
+         * @see #nameMustEndWith(Collection)
+         */
+        public Builder nameMustEndWith(String... prefixes) {
+            return nameMustEndWith(Arrays.asList(prefixes));
+        }
+
+        /**
+         * Only samples whose name ends with one of the {@code prefixes} will be included.
+         * @param prefixes empty means no restriction.
+         */
+        public Builder nameMustEndWith(Collection<String> prefixes) {
+            nameEndsWith.addAll(prefixes);
+            return this;
+        }
+
+        /**
+         * @see #nameMustNotEndWith(Collection)
+         */
+        public Builder nameMustNotEndWith(String... prefixes) {
+            return nameMustNotEndWith(Arrays.asList(prefixes));
+        }
+
+        /**
+         * Samples with names ending with one of the {@code prefixes} will be excluded.
+         * For example, this can be used to exclude {@code _created} metrics.
+         * @param prefixes empty means no time series will be excluded.
+         */
+        public Builder nameMustNotEndWith(Collection<String> prefixes) {
+            nameDoesNotEndWith.addAll(prefixes);
+            return this;
+        }
+
         public SampleNameFilter build() {
-            return new SampleNameFilter(nameEqualTo, nameNotEqualTo, nameStartsWith, nameDoesNotStartWith);
+            return new SampleNameFilter(nameEqualTo, nameNotEqualTo, nameStartsWith, nameDoesNotStartWith,
+                nameEndsWith, nameDoesNotEndWith);
         }
     }
 
-    private SampleNameFilter(Collection<String> nameIsEqualTo, Collection<String> nameIsNotEqualTo, Collection<String> nameStartsWith, Collection<String> nameDoesNotStartWith) {
+    private SampleNameFilter(Collection<String> nameIsEqualTo, Collection<String> nameIsNotEqualTo,
+                             Collection<String> nameStartsWith, Collection<String> nameDoesNotStartWith,
+                             Collection<String> nameEndsWith, Collection<String> nameDoesNotEndWith) {
         this.nameIsEqualTo = unmodifiableCollection(nameIsEqualTo);
         this.nameIsNotEqualTo = unmodifiableCollection(nameIsNotEqualTo);
         this.nameStartsWith = unmodifiableCollection(nameStartsWith);
         this.nameDoesNotStartWith = unmodifiableCollection(nameDoesNotStartWith);
+        this.nameEndsWith = unmodifiableCollection(nameEndsWith);
+        this.nameDoesNotEndWith = unmodifiableCollection(nameDoesNotEndWith);
     }
 
     private static class AllowAll implements Predicate<String> {

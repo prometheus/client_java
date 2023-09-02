@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.SampleNameFilter;
 import org.junit.Assert;
@@ -187,6 +188,45 @@ public class TestHTTPServer {
       assertThat(body).contains("b 0.0");
       assertThat(body).doesNotContain("c 0.0");
     } finally {
+      httpServer.close();
+    }
+  }
+
+  @Test
+  public void testCreatedMetricPresent() throws IOException {
+    Counter counter = Counter.build("my_counter", "my counter help").register(registry);
+    HTTPServer httpServer = new HTTPServer.Builder()
+        .withRegistry(registry)
+        .build();
+    try {
+      String body = createHttpRequestBuilder(httpServer, "/metrics")
+          .withHeader("Accept", "application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1")
+          .build().execute().getBody();
+      assertThat(body).contains("my_counter_total 0.0");
+      assertThat(body).contains("my_counter_created ");
+    } finally {
+      registry.unregister(counter);
+      httpServer.close();
+    }
+  }
+
+  @Test
+  public void testCreatedMetricRemoved() throws IOException {
+    Counter counter = Counter.build("my_counter", "my counter help").register(registry);
+    HTTPServer httpServer = new HTTPServer.Builder()
+        .withRegistry(registry)
+        .withSampleNameFilter(new SampleNameFilter.Builder()
+            .nameMustNotEndWith("_created")
+            .build())
+        .build();
+    try {
+      String body = createHttpRequestBuilder(httpServer, "/metrics")
+          .withHeader("Accept", "application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1")
+          .build().execute().getBody();
+      assertThat(body).contains("my_counter_total 0.0");
+      assertThat(body).doesNotContain("my_counter_created ");
+    } finally {
+      registry.unregister(counter);
       httpServer.close();
     }
   }
