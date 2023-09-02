@@ -44,5 +44,6 @@ public class DefaultExports {
     new StandardExports().register(registry);
     new ThreadExports().register(registry);
     new VersionInfoExports().register(registry);
+    new SafepointExports().register(registry);
   }
 }
