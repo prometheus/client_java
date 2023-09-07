@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>client_java</artifactId>
-        <version>1.0.0-alpha-4-SNAPSHOT</version>
+        <version>1.0.0-alpha-4</version>
     </parent>
 
     <artifactId>simpleclient_log4j2</artifactId>
