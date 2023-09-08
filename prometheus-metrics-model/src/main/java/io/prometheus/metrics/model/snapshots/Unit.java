@@ -41,8 +41,12 @@ public class Unit {
         return nanos / 1E9;
     }
 
-    public static double millisToSeconds(long nanos) {
-        return nanos / 1E3;
+    public static double millisToSeconds(long millis) {
+        return millis / 1E3;
+    }
+
+    public static double secondsToMillis(double seconds) {
+        return seconds * 1E3;
     }
 
     public static double kiloBytesToBytes(double kilobytes) {

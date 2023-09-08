@@ -8,11 +8,11 @@
         <version>1.0.0-alpha-5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>example-exporter-httpserver</artifactId>
+    <artifactId>example-simpleclient-bridge</artifactId>
 
-    <name>&gt;Example - HTTPServer Exporter</name>
+    <name>Example - Simpleclient Bridge</name>
     <description>
-        Prometheus Metrics Example using the HTTPServer for exposing the metrics endpoint
+        Prometheus Metrics Example of the Simpleclient Backwards Compatibility module
     </description>
 
     <licenses>
@@ -34,12 +34,12 @@
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-core</artifactId>
-            <version>${project.version}</version>
+            <artifactId>simpleclient</artifactId>
+            <version>0.16.0</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-instrumentation-jvm</artifactId>
+            <artifactId>prometheus-metrics-simpleclient-bridge</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

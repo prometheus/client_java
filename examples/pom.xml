@@ -37,6 +37,7 @@
         <module>example-exporter-servlet-tomcat</module>
         <module>example-exporter-httpserver</module>
         <module>example-exporter-opentelemetry</module>
+        <module>example-simpleclient-bridge</module>
     </modules>
 
 </project>

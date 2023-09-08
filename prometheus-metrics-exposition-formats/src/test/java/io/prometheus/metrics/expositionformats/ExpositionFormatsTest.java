@@ -741,7 +741,7 @@ public class ExpositionFormatsTest {
                 "response_size_bytes_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.1 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"0.0\"} 3 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"1.0\"} 3 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
                 "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + "\n" +
@@ -755,7 +755,7 @@ public class ExpositionFormatsTest {
                 "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.1 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"0.0\"} 3 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"1.0\"} 3 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + "\n" +
@@ -772,7 +772,7 @@ public class ExpositionFormatsTest {
                 "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 3 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.1 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"0.0\"} 3 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"1.0\"} 3 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
                 "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + "\n" +
@@ -785,7 +785,7 @@ public class ExpositionFormatsTest {
                 "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.1 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"0.0\"} 3 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"1.0\"} 3 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + "\n" +
@@ -819,7 +819,7 @@ public class ExpositionFormatsTest {
                         "sample_sum: 3.2 " +
                         "bucket { " +
                             "cumulative_count: 3 " +
-                            "upper_bound: 0.0 " +
+                            "upper_bound: 1.0 " +
                         "} bucket { " +
                             "cumulative_count: 5 " +
                             "upper_bound: 2.2 " +
@@ -839,7 +839,7 @@ public class ExpositionFormatsTest {
                 .addDataPoint(HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
                         .withSum(3.2)
                         .withClassicHistogramBuckets(ClassicHistogramBuckets.newBuilder()
-                                .addBucket(0.0, 3)
+                                .addBucket(1.0, 3)
                                 .addBucket(2.2, 2)
                                 .addBucket(Double.POSITIVE_INFINITY, 0)
                                 .build())
