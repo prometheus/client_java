@@ -16,6 +16,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -222,9 +224,14 @@ public class HTTPServer implements Closeable {
             if (executorService != null) {
                 return executorService;
             } else {
-                ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool(NamedDaemonThreadFactory.defaultThreadFactory(true));
-                executor.setKeepAliveTime(2, TimeUnit.MINUTES);
-                return executor;
+                return new ThreadPoolExecutor(
+                                1,
+                                10,
+                                120,
+                                TimeUnit.SECONDS,
+                                new SynchronousQueue<>(true),
+                                NamedDaemonThreadFactory.defaultThreadFactory(true),
+                                new BlockingRejectedExecutionHandler());
             }
         }
 
@@ -241,6 +248,19 @@ public class HTTPServer implements Closeable {
         private void assertNull(Object o, String msg) {
             if (o != null) {
                 throw new IllegalStateException(msg);
+            }
+        }
+    }
+
+    private static class BlockingRejectedExecutionHandler implements RejectedExecutionHandler {
+
+        @Override
+        public void rejectedExecution(Runnable runnable, ThreadPoolExecutor threadPoolExecutor) {
+            if (!threadPoolExecutor.isShutdown()) {
+                try {
+                    threadPoolExecutor.getQueue().put(runnable);
+                } catch (InterruptedException ignored) {
+                }
             }
         }
     }
