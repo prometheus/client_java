@@ -379,12 +379,13 @@ public final class HistogramSnapshot extends MetricSnapshot {
         }
 
         /**
-         * Create a Gauge Histogram. The data model for Gauge Histograms is the same as for regular histograms,
+         * {@code true} indicates that this histogram is a gauge histogram.
+         * The data model for gauge histograms is the same as for regular histograms,
          * except that bucket values are semantically gauges and not counters.
-         * See <a href="https://openmetrics.io">openmetrics.io</a> for more info on Gauge Histograms.
+         * See <a href="https://openmetrics.io">openmetrics.io</a> for more info on gauge histograms.
          */
-        public Builder gaugeHistogram() {
-            isGaugeHistogram = true;
+        public Builder gaugeHistogram(boolean isGaugeHistogram) {
+            this.isGaugeHistogram = isGaugeHistogram;
             return this;
         }
 

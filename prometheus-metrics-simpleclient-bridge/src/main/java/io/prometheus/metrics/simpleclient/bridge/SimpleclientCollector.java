@@ -153,10 +153,8 @@ public class SimpleclientCollector implements MultiCollector {
         HistogramSnapshot.Builder histogram = HistogramSnapshot.builder()
                 .name(samples.name)
                 .help(samples.help)
-                .unit(convertUnit(samples));
-        if (isGaugeHistogram) {
-            histogram.gaugeHistogram();
-        }
+                .unit(convertUnit(samples))
+                .gaugeHistogram(isGaugeHistogram);
         Map<Labels, HistogramSnapshot.HistogramDataPointSnapshot.Builder> dataPoints = new HashMap<>();
         Map<Labels, Map<Double, Long>> cumulativeBuckets = new HashMap<>();
         Map<Labels, Exemplars.Builder> exemplars = new HashMap<>();

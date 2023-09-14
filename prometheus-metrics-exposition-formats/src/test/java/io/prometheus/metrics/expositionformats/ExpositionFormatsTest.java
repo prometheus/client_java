@@ -1055,7 +1055,7 @@ public class ExpositionFormatsTest {
                 "}";
                 //@formatter:on
         HistogramSnapshot gaugeHistogram = HistogramSnapshot.builder()
-                .gaugeHistogram()
+                .gaugeHistogram(true)
                 .name("cache_size_bytes")
                 .help("number of bytes in the cache")
                 .unit(Unit.BYTES)
@@ -1118,7 +1118,7 @@ public class ExpositionFormatsTest {
                 "}";
                 //@formatter:on
         HistogramSnapshot gaugeHistogram = HistogramSnapshot.builder()
-                .gaugeHistogram()
+                .gaugeHistogram(true)
                 .name("queue_size_bytes")
                 .dataPoint(HistogramSnapshot.HistogramDataPointSnapshot.builder()
                         .classicHistogramBuckets(ClassicHistogramBuckets.builder()
@@ -1164,7 +1164,7 @@ public class ExpositionFormatsTest {
                 "}";
                 //@formatter:on
         HistogramSnapshot gaugeHistogram = HistogramSnapshot.builder()
-                .gaugeHistogram()
+                .gaugeHistogram(true)
                 .name("queue_size_bytes")
                 .dataPoint(HistogramSnapshot.HistogramDataPointSnapshot.builder()
                         .sum(27000)
