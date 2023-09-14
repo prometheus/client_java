@@ -11,7 +11,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
 
     /**
      * To create a new {@link UnknownSnapshot}, you can either call the constructor directly or use
-     * the builder with {@link UnknownSnapshot#newBuilder()}.
+     * the builder with {@link UnknownSnapshot#builder()}.
      *
      * @param metadata required name and optional help and unit.
      *                 See {@link MetricMetadata} for naming conventions.
@@ -22,8 +22,8 @@ public final class UnknownSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<UnknownDataPointSnapshot> getData() {
-        return (List<UnknownDataPointSnapshot>) data;
+    public List<UnknownDataPointSnapshot> getDataPoints() {
+        return (List<UnknownDataPointSnapshot>) dataPoints;
     }
 
     public static final class UnknownDataPointSnapshot extends DataPointSnapshot {
@@ -33,7 +33,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
 
         /**
          * To create a new {@link UnknownDataPointSnapshot}, you can either call the constructor directly or use the
-         * Builder with {@link UnknownDataPointSnapshot#newBuilder()}.
+         * Builder with {@link UnknownDataPointSnapshot#builder()}.
          *
          * @param value    the value.
          * @param labels   must not be null. Use {@link Labels#EMPTY} if there are no labels.
@@ -65,6 +65,10 @@ public final class UnknownSnapshot extends MetricSnapshot {
             return exemplar;
         }
 
+        public static Builder builder() {
+            return new Builder();
+        }
+
         public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
             private Exemplar exemplar = null;
@@ -76,7 +80,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
             /**
              * required.
              */
-            public Builder withValue(double value) {
+            public Builder value(double value) {
                 this.value = value;
                 return this;
             }
@@ -84,7 +88,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
             /**
              * Optional
              */
-            public Builder withExemplar(Exemplar exemplar) {
+            public Builder exemplar(Exemplar exemplar) {
                 this.exemplar = exemplar;
                 return this;
             }
@@ -101,10 +105,10 @@ public final class UnknownSnapshot extends MetricSnapshot {
                 return this;
             }
         }
+    }
 
-        public static Builder newBuilder() {
-            return new Builder();
-        }
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
@@ -114,7 +118,10 @@ public final class UnknownSnapshot extends MetricSnapshot {
         private Builder() {
         }
 
-        public Builder addDataPoint(UnknownDataPointSnapshot data) {
+        /**
+         * Add a data point. Call multiple times to add multiple data points.
+         */
+        public Builder dataPoint(UnknownDataPointSnapshot data) {
             dataPoints.add(data);
             return this;
         }
@@ -127,9 +134,5 @@ public final class UnknownSnapshot extends MetricSnapshot {
         protected Builder self() {
             return this;
         }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
     }
 }

@@ -50,7 +50,7 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
     public MetricSnapshot collect() {
         if (labelNames.length == 0 && data.size() == 0) {
             // This is a metric without labels that has not been used yet. Initialize the data on the fly.
-            withLabelValues();
+            labelValues();
         }
         List<Labels> labels = new ArrayList<>(data.size());
         List<T> metricData = new ArrayList<>(data.size());
@@ -73,7 +73,7 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
      * Now, the data points for the {@code payment_type} label values get initialized when they are
      * first used, i.e. the first time you call
      * <pre>{@code
-     * counter.withLabelValues("paypal").inc();
+     * counter.labelValues("paypal").inc();
      * }</pre>
      * the data point with label {@code payment_type="paypal"} will go from non-existent to having value {@code 1.0}.
      * <p>
@@ -87,13 +87,13 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
      * show up in the exposition format with an initial value of zero.
      */
     public void initLabelValues(String... labelValues) {
-        withLabelValues(labelValues);
+        labelValues(labelValues);
     }
 
-    public D withLabelValues(String... labelValues) {
+    public D labelValues(String... labelValues) {
         if (labelValues.length != labelNames.length) {
             if (labelValues.length == 0) {
-                throw new IllegalArgumentException(getClass().getSimpleName() + " " + getMetadata().getName() + " was created with label names, so you must call withLabelValues(...) when using it.");
+                throw new IllegalArgumentException(getClass().getSimpleName() + " " + getMetadata().getName() + " was created with label names, so you must call labelValues(...) when using it.");
             } else {
                 throw new IllegalArgumentException("Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
             }
@@ -117,7 +117,7 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
     protected T getNoLabels() {
         if (noLabels == null) {
             // Note that this will throw an IllegalArgumentException if labelNames is not empty.
-            noLabels = (T) withLabelValues();
+            noLabels = (T) labelValues();
         }
         return noLabels;
     }
@@ -175,8 +175,8 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
          * Override if there are more properties than just exemplars enabled.
          */
         protected MetricsProperties toProperties() {
-            return MetricsProperties.newBuilder()
-                    .withExemplarsEnabled(exemplarsEnabled)
+            return MetricsProperties.builder()
+                    .exemplarsEnabled(exemplarsEnabled)
                     .build();
         }
 
@@ -184,8 +184,8 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
          * Override if there are more properties than just exemplars enabled.
          */
         public MetricsProperties getDefaultProperties() {
-            return MetricsProperties.newBuilder()
-                    .withExemplarsEnabled(true)
+            return MetricsProperties.builder()
+                    .exemplarsEnabled(true)
                     .build();
         }
     }

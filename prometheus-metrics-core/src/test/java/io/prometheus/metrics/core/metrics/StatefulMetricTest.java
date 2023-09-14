@@ -10,13 +10,13 @@ public class StatefulMetricTest {
 
     @Test
     public void testLabelRemoveWhileCollecting() throws Exception {
-        Counter counter = Counter.newBuilder().withName("test").withLabelNames("label1", "label2").build();
+        Counter counter = Counter.builder().name("test").labelNames("label1", "label2").build();
         Field data = counter.getClass().getSuperclass().getDeclaredField("data");
         data.setAccessible(true);
 
-        counter.withLabelValues("a", "b").inc(1.0);
-        counter.withLabelValues("c", "d").inc(3.0);
-        counter.withLabelValues("e", "f").inc(7.0);
+        counter.labelValues("a", "b").inc(1.0);
+        counter.labelValues("c", "d").inc(3.0);
+        counter.labelValues("e", "f").inc(7.0);
 
         // collect() iterates over data.entrySet().
         // remove() removes entries from data.

@@ -11,7 +11,7 @@ public final class SummarySnapshot extends MetricSnapshot {
 
     /**
      * To create a new {@link SummarySnapshot}, you can either call the constructor directly or use
-     * the builder with {@link SummarySnapshot#newBuilder()}.
+     * the builder with {@link SummarySnapshot#builder()}.
      *
      * @param metadata See {@link MetricMetadata} for more naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
@@ -21,8 +21,8 @@ public final class SummarySnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<SummaryDataPointSnapshot> getData() {
-        return (List<SummaryDataPointSnapshot>) data;
+    public List<SummaryDataPointSnapshot> getDataPoints() {
+        return (List<SummaryDataPointSnapshot>) dataPoints;
     }
 
     public static final class SummaryDataPointSnapshot extends DistributionDataPointSnapshot {
@@ -32,7 +32,7 @@ public final class SummarySnapshot extends MetricSnapshot {
 
         /**
          * To create a new {@link SummaryDataPointSnapshot}, you can either call the constructor directly
-         * or use the Builder with {@link SummaryDataPointSnapshot#newBuilder()}.
+         * or use the Builder with {@link SummaryDataPointSnapshot#builder()}.
          *
          * @param count                  total number of observations. Optional, pass -1 if not available.
          * @param sum                    sum of all observed values. Optional, pass {@link Double#NaN} if not available.
@@ -75,6 +75,10 @@ public final class SummarySnapshot extends MetricSnapshot {
             }
         }
 
+        public static Builder builder() {
+            return new Builder();
+        }
+
         public static class Builder extends DistributionDataPointSnapshot.Builder<Builder> {
 
             private Quantiles quantiles = Quantiles.EMPTY;
@@ -87,14 +91,14 @@ public final class SummarySnapshot extends MetricSnapshot {
                 return this;
             }
 
-            public Builder withQuantiles(Quantiles quantiles) {
+            public Builder quantiles(Quantiles quantiles) {
                 this.quantiles = quantiles;
                 return this;
             }
 
             @Override
-            public Builder withCount(long count) {
-                super.withCount(count);
+            public Builder count(long count) {
+                super.count(count);
                 return this;
             }
 
@@ -102,10 +106,10 @@ public final class SummarySnapshot extends MetricSnapshot {
                 return new SummaryDataPointSnapshot(count, sum, quantiles, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
+    }
 
-        public static Builder newBuilder() {
-            return new Builder();
-        }
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
@@ -115,7 +119,10 @@ public final class SummarySnapshot extends MetricSnapshot {
         private Builder() {
         }
 
-        public Builder addDataPoint(SummaryDataPointSnapshot data) {
+        /**
+         * Add a data point. Call multiple times to add multiple data points.
+         */
+        public Builder dataPoint(SummaryDataPointSnapshot data) {
             dataPoints.add(data);
             return this;
         }
@@ -128,9 +135,5 @@ public final class SummarySnapshot extends MetricSnapshot {
         protected Builder self() {
             return this;
         }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
     }
 }

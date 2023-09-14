@@ -81,7 +81,7 @@ public class JvmMemoryMetricsTest {
     @Test
     public void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmMemoryMetrics.newBuilder()
+        JvmMemoryMetrics.builder()
                 .withMemoryBean(mockMemoryBean)
                 .withMemoryPoolBeans(Arrays.asList(mockPoolsBeanEdenSpace, mockPoolsBeanOldGen))
                 .register(registry);
@@ -158,12 +158,12 @@ public class JvmMemoryMetricsTest {
 
     @Test
     public void testIgnoredMetricNotScraped() {
-        MetricNameFilter filter = MetricNameFilter.newBuilder()
+        MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_memory_pool_used_bytes")
                 .build();
 
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmMemoryMetrics.newBuilder()
+        JvmMemoryMetrics.builder()
                 .withMemoryBean(mockMemoryBean)
                 .withMemoryPoolBeans(Arrays.asList(mockPoolsBeanEdenSpace, mockPoolsBeanOldGen))
                 .register(registry);

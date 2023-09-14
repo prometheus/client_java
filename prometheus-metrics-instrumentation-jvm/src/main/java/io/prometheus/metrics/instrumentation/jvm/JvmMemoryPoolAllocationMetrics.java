@@ -20,11 +20,11 @@ import java.util.Map;
 /**
  * JVM memory allocation metrics. The {@link JvmMemoryPoolAllocationMetrics} are registered as part of the {@link JvmMetrics} like this:
  * <pre>{@code
- *   JvmMetrics.newBuilder().register();
+ *   JvmMetrics.builder().register();
  * }</pre>
  * However, if you want only the {@link JvmMemoryPoolAllocationMetrics} you can also register them directly:
  * <pre>{@code
- *   JvmMemoryAllocationMetrics.newBuilder().register();
+ *   JvmMemoryAllocationMetrics.builder().register();
  * }</pre>
  * Example metrics being exported:
  * <pre>
@@ -52,10 +52,10 @@ public class JvmMemoryPoolAllocationMetrics {
 
     private void register(PrometheusRegistry registry) {
 
-        Counter allocatedCounter = Counter.newBuilder()
-                .withName(JVM_MEMORY_POOL_ALLOCATED_BYTES_TOTAL)
-                .withHelp("Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.")
-                .withLabelNames("pool")
+        Counter allocatedCounter = Counter.builder()
+                .name(JVM_MEMORY_POOL_ALLOCATED_BYTES_TOTAL)
+                .help("Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.")
+                .labelNames("pool")
                 .register(registry);
 
         AllocationCountingNotificationListener listener = new AllocationCountingNotificationListener(allocatedCounter);
@@ -120,7 +120,7 @@ public class JvmMemoryPoolAllocationMetrics {
             }
             long increase = diff1 + diff2;
             if (increase > 0) {
-                counter.withLabelValues(memoryPool).inc(increase);
+                counter.labelValues(memoryPool).inc(increase);
             }
         }
 
@@ -130,11 +130,11 @@ public class JvmMemoryPoolAllocationMetrics {
         }
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 

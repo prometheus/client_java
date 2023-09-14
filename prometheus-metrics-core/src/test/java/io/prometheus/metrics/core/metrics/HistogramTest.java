@@ -115,8 +115,8 @@ public class HistogramTest {
                                 "bucket { cumulative_count: 3 upper_bound: 5.0 } " +
                                 "bucket { cumulative_count: 3 upper_bound: 10.0 } " +
                                 "bucket { cumulative_count: 3 upper_bound: Infinity }",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .classicOnly()
                                 .build(),
                         1.0, 2.0, 3.0),
@@ -132,11 +132,11 @@ public class HistogramTest {
                                 "positive_delta: 1 " +
                                 "positive_delta: 0 " +
                                 "positive_delta: 0",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(3)
-                                .withNativeMaxZeroThreshold(0)
+                                .nativeInitialSchema(3)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0.0, 1.0, 2.0, 3.0),
                 new GolangTestCase("'factor 1.2 results in schema 2' from client_golang",
@@ -151,11 +151,11 @@ public class HistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2),
                 new GolangTestCase("'factor 4 results in schema -1' from client_golang",
@@ -171,11 +171,11 @@ public class HistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -1 " +
                                 "positive_delta: -2",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(-1)
-                                .withNativeMaxZeroThreshold(0)
+                                .nativeInitialSchema(-1)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0.0156251, 0.0625, // Bucket -2: (0.015625, 0.0625)
                         0.1, 0.25, // Bucket -1: (0.0625, 0.25]
@@ -195,11 +195,11 @@ public class HistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: 3 " +
                                 "positive_delta: -6",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(-2)
-                                .withNativeMaxZeroThreshold(0)
+                                .nativeInitialSchema(-2)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0.0156251, 0.0625, // Bucket -1: (0.015625, 0.0625]
                         0.1, 0.25, 0.5, 1, // Bucket 0: (0.0625, 1]
@@ -218,11 +218,11 @@ public class HistogramTest {
                                 "negative_delta: 2 " +
                                 "negative_delta: -2 " +
                                 "negative_delta: 2",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2
                 ),
@@ -244,11 +244,11 @@ public class HistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
                 ),
@@ -262,11 +262,11 @@ public class HistogramTest {
                                 "negative_delta: 2 " +
                                 "positive_span { offset: 4 length: 1 } " +
                                 "positive_delta: 2",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMinZeroThreshold(1.4)
+                                .nativeInitialSchema(2)
+                                .nativeMinZeroThreshold(1.4)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2, 1, 1.2, 1.4, 1.8, 2
                 ),
@@ -284,11 +284,11 @@ public class HistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        Histogram.newBuilder()
-                                .withName("test")
-                                .asNativeHistogram()
-                                .withNativeSchema(2)
-                                .withNativeMaxZeroThreshold(0)
+                        Histogram.builder()
+                                .name("test")
+                                .nativeHistogram()
+                                .nativeSchema(2)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NaN
                 ),
@@ -307,11 +307,11 @@ public class HistogramTest {
                                 "positive_delta: -2 " +
                                 "positive_delta: 2 " +
                                 "positive_delta: -1",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.POSITIVE_INFINITY
                 ),
@@ -329,11 +329,11 @@ public class HistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2, Double.NEGATIVE_INFINITY
                 ),
@@ -349,12 +349,12 @@ public class HistogramTest {
                                 "positive_delta: 2 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 2",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.2, 1.4, 1.8, 2
                 ),
@@ -370,12 +370,12 @@ public class HistogramTest {
                                 "positive_delta: -1 " +
                                 "positive_delta: -2 " +
                                 "positive_delta: 1",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
                 ),
@@ -393,12 +393,12 @@ public class HistogramTest {
                                 "positive_delta: -2 " +
                                 "positive_delta: 0 " +
                                 "positive_delta: 1",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(1.2)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3
                 ),
@@ -416,12 +416,12 @@ public class HistogramTest {
                                 "positive_delta: 0 " +
                                 "positive_delta: 1 " +
                                 "positive_delta: 0",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(1.2)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 3, 4),
                 new GolangTestCase("'buckets limited by reset' from client_golang",
@@ -433,13 +433,13 @@ public class HistogramTest {
                                 "positive_span { offset: 7 length: 2 } " +
                                 "positive_delta: 1 " +
                                 "positive_delta: 0",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMinZeroThreshold(0)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(1.2)
+                                .nativeMinZeroThreshold(0)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, RESET_DURATION_REACHED, 3, 4),
                 new GolangTestCase("'limited buckets but nothing triggered, negative observations' from client_golang",
@@ -454,12 +454,12 @@ public class HistogramTest {
                                 "negative_delta: 2 " +
                                 "negative_delta: -2 " +
                                 "negative_delta: 2",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.2, -1.4, -1.8, -2),
                 new GolangTestCase("'buckets limited by halving resolution, negative observations' from client_golang",
@@ -474,12 +474,12 @@ public class HistogramTest {
                                 "negative_delta: -1 " +
                                 "negative_delta: -2 " +
                                 "negative_delta: 1",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3),
                 new GolangTestCase("'buckets limited by widening the zero bucket, negative observations' from client_golang",
@@ -496,12 +496,12 @@ public class HistogramTest {
                                 "negative_delta: -2 " +
                                 "negative_delta: 0 " +
                                 "negative_delta: 1",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(1.2)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3),
                 new GolangTestCase("'buckets limited by widening the zero bucket twice, negative observations' from client_golang",
@@ -518,12 +518,12 @@ public class HistogramTest {
                                 "negative_delta: 0 " +
                                 "negative_delta: 1 " +
                                 "negative_delta: 0",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(1.2)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, -3, -4),
                 new GolangTestCase("'buckets limited by reset, negative observations' from client_golang",
@@ -535,12 +535,12 @@ public class HistogramTest {
                                 "negative_span { offset: 7 length: 2 } " +
                                 "negative_delta: 1 " +
                                 "negative_delta: 0",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(1.2)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, -1, -1.1, -1.2, -1.4, -1.8, -2, RESET_DURATION_REACHED, -3, -4),
                 new GolangTestCase("'buckets limited by halving resolution, then reset' from client_golang",
@@ -552,12 +552,12 @@ public class HistogramTest {
                                 "positive_span { offset: 7 length: 2 } " +
                                 "positive_delta: 1 " +
                                 "positive_delta: 0",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(0)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(0)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 5, 5.1, RESET_DURATION_REACHED, 3, 4),
                 new GolangTestCase("'buckets limited by widening the zero bucket, then reset' from client_golang",
@@ -569,12 +569,12 @@ public class HistogramTest {
                                 "positive_span { offset: 7 length: 2 } " +
                                 "positive_delta: 1 " +
                                 "positive_delta: 0",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(2)
-                                .withNativeMaxZeroThreshold(1.2)
-                                .withNativeMaxNumberOfBuckets(4)
+                                .nativeInitialSchema(2)
+                                .nativeMaxZeroThreshold(1.2)
+                                .nativeMaxNumberOfBuckets(4)
                                 .build(),
                         0, 1, 1.1, 1.2, 1.4, 1.8, 2, 5, 5.1, RESET_DURATION_REACHED, 3, 4)
         };
@@ -598,11 +598,11 @@ public class HistogramTest {
                                 "positive_span { offset: -1 length: 2 } " +
                                 "positive_delta: 1 " +
                                 "positive_delta: 0",
-                        Histogram.newBuilder()
-                                .withName("test")
+                        Histogram.builder()
+                                .name("test")
                                 .nativeOnly()
-                                .withNativeInitialSchema(0)
-                                .withNativeMaxZeroThreshold(0)
+                                .nativeInitialSchema(0)
+                                .nativeMaxZeroThreshold(0)
                                 .build(),
                         0.0, 0.5, 1.0)
         };
@@ -626,9 +626,9 @@ public class HistogramTest {
         Method method = Histogram.DataPoint.class.getDeclaredMethod("nativeBucketIndexToUpperBound", int.class, int.class);
         method.setAccessible(true);
         for (int i = 0; i < indexes.length; i++) {
-            Histogram histogram = Histogram.newBuilder()
-                    .withName("test")
-                    .withNativeInitialSchema(schemas[i])
+            Histogram histogram = Histogram.builder()
+                    .name("test")
+                    .nativeInitialSchema(schemas[i])
                     .build();
             Histogram.DataPoint histogramData = histogram.newDataPoint();
             double result = (double) method.invoke(histogramData, schemas[i], indexes[i]);
@@ -647,10 +647,10 @@ public class HistogramTest {
         findBucketIndex.setAccessible(true);
         nativeBucketIndexToUpperBound.setAccessible(true);
         for (int schema = -4; schema <= 8; schema++) {
-            Histogram histogram = Histogram.newBuilder()
+            Histogram histogram = Histogram.builder()
                     .nativeOnly()
-                    .withName("test")
-                    .withNativeInitialSchema(schema)
+                    .name("test")
+                    .nativeInitialSchema(schema)
                     .build();
             for (int i = 0; i < 10_000; i++) {
                 for (int zeros = -5; zeros <= 10; zeros++) {
@@ -666,7 +666,7 @@ public class HistogramTest {
 
     @Test
     public void testDefaults() throws IOException {
-        Histogram histogram = Histogram.newBuilder().withName("test").build();
+        Histogram histogram = Histogram.builder().name("test").build();
         histogram.observe(0.5);
         HistogramSnapshot snapshot = histogram.collect();
         String expectedNative = "" +
@@ -739,70 +739,70 @@ public class HistogramTest {
             public void markCurrentSpanAsExemplar() {
             }
         };
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
+        Histogram histogram = Histogram.builder()
+                .name("test")
                 // The default number of Exemplars is 4.
                 // Use 5 buckets to verify that the exemplar sample is configured with the buckets.
-                .withClassicBuckets(1.0, 2.0, 3.0, 4.0, Double.POSITIVE_INFINITY)
-                .withLabelNames("path")
+                .classicBuckets(1.0, 2.0, 3.0, 4.0, Double.POSITIVE_INFINITY)
+                .labelNames("path")
                 .build();
 
         long sampleIntervalMillis = 10;
         ExemplarSamplerConfigTestUtil.setSampleIntervalMillis(histogram, sampleIntervalMillis);
         SpanContextSupplier.setSpanContext(spanContext);
 
-        Exemplar ex1a = Exemplar.newBuilder()
-                .withValue(0.5)
-                .withSpanId("spanId-1")
-                .withTraceId("traceId-1")
+        Exemplar ex1a = Exemplar.builder()
+                .value(0.5)
+                .spanId("spanId-1")
+                .traceId("traceId-1")
                 .build();
-        Exemplar ex1b = Exemplar.newBuilder()
-                .withValue(0.5)
-                .withSpanId("spanId-2")
-                .withTraceId("traceId-2")
+        Exemplar ex1b = Exemplar.builder()
+                .value(0.5)
+                .spanId("spanId-2")
+                .traceId("traceId-2")
                 .build();
-        Exemplar ex2a = Exemplar.newBuilder()
-                .withValue(4.5)
-                .withSpanId("spanId-3")
-                .withTraceId("traceId-3")
+        Exemplar ex2a = Exemplar.builder()
+                .value(4.5)
+                .spanId("spanId-3")
+                .traceId("traceId-3")
                 .build();
-        Exemplar ex2b = Exemplar.newBuilder()
-                .withValue(4.5)
-                .withSpanId("spanId-4")
-                .withTraceId("traceId-4")
+        Exemplar ex2b = Exemplar.builder()
+                .value(4.5)
+                .spanId("spanId-4")
+                .traceId("traceId-4")
                 .build();
-        Exemplar ex3a = Exemplar.newBuilder()
-                .withValue(1.5)
-                .withSpanId("spanId-5")
-                .withTraceId("traceId-5")
+        Exemplar ex3a = Exemplar.builder()
+                .value(1.5)
+                .spanId("spanId-5")
+                .traceId("traceId-5")
                 .build();
-        Exemplar ex3b = Exemplar.newBuilder()
-                .withValue(1.5)
-                .withSpanId("spanId-6")
-                .withTraceId("traceId-6")
+        Exemplar ex3b = Exemplar.builder()
+                .value(1.5)
+                .spanId("spanId-6")
+                .traceId("traceId-6")
                 .build();
-        Exemplar ex4a = Exemplar.newBuilder()
-                .withValue(2.5)
-                .withSpanId("spanId-7")
-                .withTraceId("traceId-7")
+        Exemplar ex4a = Exemplar.builder()
+                .value(2.5)
+                .spanId("spanId-7")
+                .traceId("traceId-7")
                 .build();
-        Exemplar ex4b = Exemplar.newBuilder()
-                .withValue(2.5)
-                .withSpanId("spanId-8")
-                .withTraceId("traceId-8")
+        Exemplar ex4b = Exemplar.builder()
+                .value(2.5)
+                .spanId("spanId-8")
+                .traceId("traceId-8")
                 .build();
-        Exemplar ex5a = Exemplar.newBuilder()
-                .withValue(3.5)
-                .withSpanId("spanId-9")
-                .withTraceId("traceId-9")
+        Exemplar ex5a = Exemplar.builder()
+                .value(3.5)
+                .spanId("spanId-9")
+                .traceId("traceId-9")
                 .build();
-        Exemplar ex5b = Exemplar.newBuilder()
-                .withValue(3.5)
-                .withSpanId("spanId-10")
-                .withTraceId("traceId-10")
+        Exemplar ex5b = Exemplar.builder()
+                .value(3.5)
+                .spanId("spanId-10")
+                .traceId("traceId-10")
                 .build();
-        histogram.withLabelValues("/hello").observe(0.5);
-        histogram.withLabelValues("/world").observe(0.5); // different labels are tracked independently, i.e. we don't need to wait for sampleIntervalMillis
+        histogram.labelValues("/hello").observe(0.5);
+        histogram.labelValues("/world").observe(0.5); // different labels are tracked independently, i.e. we don't need to wait for sampleIntervalMillis
 
         HistogramSnapshot snapshot = histogram.collect();
         assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
@@ -817,8 +817,8 @@ public class HistogramTest {
         assertNull(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabelValues("/hello").observe(4.5);
-        histogram.withLabelValues("/world").observe(4.5);
+        histogram.labelValues("/hello").observe(4.5);
+        histogram.labelValues("/world").observe(4.5);
 
         snapshot = histogram.collect();
         assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
@@ -833,14 +833,14 @@ public class HistogramTest {
         assertExemplarEquals(ex2b, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabelValues("/hello").observe(1.5);
-        histogram.withLabelValues("/world").observe(1.5);
+        histogram.labelValues("/hello").observe(1.5);
+        histogram.labelValues("/world").observe(1.5);
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabelValues("/hello").observe(2.5);
-        histogram.withLabelValues("/world").observe(2.5);
+        histogram.labelValues("/hello").observe(2.5);
+        histogram.labelValues("/world").observe(2.5);
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabelValues("/hello").observe(3.5);
-        histogram.withLabelValues("/world").observe(3.5);
+        histogram.labelValues("/hello").observe(3.5);
+        histogram.labelValues("/world").observe(3.5);
 
         snapshot = histogram.collect();
         assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
@@ -854,19 +854,19 @@ public class HistogramTest {
         assertExemplarEquals(ex2a, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello"));
         assertExemplarEquals(ex2b, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
-        Exemplar custom = Exemplar.newBuilder()
-                .withValue(3.4)
-                .withLabels(Labels.of("key2", "value2", "key1", "value1", "trace_id", "traceId-11", "span_id", "spanId-11"))
+        Exemplar custom = Exemplar.builder()
+                .value(3.4)
+                .labels(Labels.of("key2", "value2", "key1", "value1", "trace_id", "traceId-11", "span_id", "spanId-11"))
                 .build();
         Thread.sleep(sampleIntervalMillis + 1);
-        histogram.withLabelValues("/hello").observeWithExemplar(3.4, Labels.of("key1", "value1", "key2", "value2"));
+        histogram.labelValues("/hello").observeWithExemplar(3.4, Labels.of("key1", "value1", "key2", "value2"));
         snapshot = histogram.collect();
         // custom exemplars have preference, so the automatic exemplar is replaced
         assertExemplarEquals(custom, getExemplar(snapshot, 4.0, "path", "/hello"));
     }
 
     private Exemplar getExemplar(HistogramSnapshot snapshot, double le, String... labels) {
-        HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getData().stream()
+        HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getDataPoints().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Labels not found"));
@@ -886,8 +886,8 @@ public class HistogramTest {
 
         // TODO: This was copied from the old simpleclient, can probably be refactored.
 
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
+        Histogram histogram = Histogram.builder()
+                .name("test")
                 .withExemplars()
                 .build();
 
@@ -924,7 +924,7 @@ public class HistogramTest {
         double lowerBound = Double.NEGATIVE_INFINITY;
         double upperBound = Double.POSITIVE_INFINITY;
         HistogramSnapshot snapshot = histogram.collect();
-        HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getData().stream()
+        HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getDataPoints().stream()
                 .filter(d -> d.getLabels().isEmpty())
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No data without labels found"));
@@ -973,41 +973,41 @@ public class HistogramTest {
             public void markCurrentSpanAsExemplar() {
             }
         };
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
+        Histogram histogram = Histogram.builder()
+                .name("test")
                 .nativeOnly()
-                .withLabelNames("path")
+                .labelNames("path")
                 .build();
 
         long sampleIntervalMillis = 10;
         ExemplarSamplerConfigTestUtil.setSampleIntervalMillis(histogram, sampleIntervalMillis);
         SpanContextSupplier.setSpanContext(spanContext);
 
-        Exemplar ex1 = Exemplar.newBuilder()
-                .withValue(3.11)
-                .withSpanId("spanId-1")
-                .withTraceId("traceId-1")
+        Exemplar ex1 = Exemplar.builder()
+                .value(3.11)
+                .spanId("spanId-1")
+                .traceId("traceId-1")
                 .build();
-        Exemplar ex2 = Exemplar.newBuilder()
-                .withValue(3.12)
-                .withSpanId("spanId-2")
-                .withTraceId("traceId-2")
+        Exemplar ex2 = Exemplar.builder()
+                .value(3.12)
+                .spanId("spanId-2")
+                .traceId("traceId-2")
                 .build();
-        Exemplar ex3 = Exemplar.newBuilder()
-                .withValue(3.13)
-                .withSpanId("spanId-3")
-                .withTraceId("traceId-3")
-                .withLabels(Labels.of("key1", "value1", "key2", "value2"))
+        Exemplar ex3 = Exemplar.builder()
+                .value(3.13)
+                .spanId("spanId-3")
+                .traceId("traceId-3")
+                .labels(Labels.of("key1", "value1", "key2", "value2"))
                 .build();
 
-        histogram.withLabelValues("/hello").observe(3.11);
-        histogram.withLabelValues("/world").observe(3.12);
+        histogram.labelValues("/hello").observe(3.11);
+        histogram.labelValues("/world").observe(3.12);
         assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
         assertExemplarEquals(ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
         assertEquals(1, getData(histogram, "path", "/world").getExemplars().size());
         assertExemplarEquals(ex2, getData(histogram, "path", "/world").getExemplars().iterator().next());
 
-        histogram.withLabelValues("/world").observeWithExemplar(3.13, Labels.of("key1", "value1", "key2", "value2"));
+        histogram.labelValues("/world").observeWithExemplar(3.13, Labels.of("key1", "value1", "key2", "value2"));
         assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
         assertExemplarEquals(ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
         assertEquals(2, getData(histogram, "path", "/world").getExemplars().size());
@@ -1024,46 +1024,46 @@ public class HistogramTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testIllegalLabelName() {
-        Histogram.newBuilder()
-                .withName("test")
-                .withLabelNames("label", "le");
+        Histogram.builder()
+                .name("test")
+                .labelNames("label", "le");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testIllegalLabelNameConstLabels() {
-        Histogram.newBuilder()
-                .withName("test")
-                .withConstLabels(Labels.of("label1", "value1", "le", "0.3"));
+        Histogram.builder()
+                .name("test")
+                .constLabels(Labels.of("label1", "value1", "le", "0.3"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testIllegalLabelNamePrefix() {
-        Histogram.newBuilder()
-                .withName("test")
-                .withLabelNames("__hello");
+        Histogram.builder()
+                .name("test")
+                .labelNames("__hello");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testIllegalName() {
-        Histogram.newBuilder().withName("my_namespace/server.durations");
+        Histogram.builder().name("my_namespace/server.durations");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNoName() {
-        Histogram.newBuilder().build();
+        Histogram.builder().build();
     }
 
     @Test(expected = NullPointerException.class)
     public void testNullName() {
-        Histogram.newBuilder()
-                .withName(null);
+        Histogram.builder()
+                .name(null);
     }
 
     @Test
     public void testDuplicateClassicBuckets() {
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
-                .withClassicBuckets(0, 3, 17, 3, 21)
+        Histogram histogram = Histogram.builder()
+                .name("test")
+                .classicBuckets(0, 3, 17, 3, 21)
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1073,9 +1073,9 @@ public class HistogramTest {
 
     @Test
     public void testUnsortedBuckets() {
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
-                .withClassicBuckets(0.2, 0.1)
+        Histogram histogram = Histogram.builder()
+                .name("test")
+                .classicBuckets(0.2, 0.1)
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1085,9 +1085,9 @@ public class HistogramTest {
 
     @Test
     public void testEmptyBuckets() {
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
-                .withClassicBuckets()
+        Histogram histogram = Histogram.builder()
+                .name("test")
+                .classicBuckets()
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1097,9 +1097,9 @@ public class HistogramTest {
 
     @Test
     public void testBucketsIncludePositiveInfinity() {
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
-                .withClassicBuckets(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY)
+        Histogram histogram = Histogram.builder()
+                .name("test")
+                .classicBuckets(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY)
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1109,9 +1109,9 @@ public class HistogramTest {
 
     @Test
     public void testLinearBuckets() {
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
-                .withClassicLinearBuckets(0.1, 0.1, 10)
+        Histogram histogram = Histogram.builder()
+                .name("test")
+                .classicLinearBuckets(0.1, 0.1, 10)
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1121,9 +1121,9 @@ public class HistogramTest {
 
     @Test
     public void testExponentialBuckets() {
-        Histogram histogram = Histogram.newBuilder()
-                .withClassicExponentialBuckets(2, 2.5, 3)
-                .withName("test")
+        Histogram histogram = Histogram.builder()
+                .classicExponentialBuckets(2, 2.5, 3)
+                .name("test")
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1133,14 +1133,14 @@ public class HistogramTest {
 
     @Test(expected = RuntimeException.class)
     public void testBucketsIncludeNaN() {
-        Histogram.newBuilder()
-                .withName("test")
-                .withClassicBuckets(0.01, 0.1, 1.0, Double.NaN);
+        Histogram.builder()
+                .name("test")
+                .classicBuckets(0.01, 0.1, 1.0, Double.NaN);
     }
 
     @Test
     public void testNoLabelsDefaultZeroValue() {
-        Histogram noLabels = Histogram.newBuilder().withName("test").build();
+        Histogram noLabels = Histogram.builder().name("test").build();
         assertEquals(0.0, getBucket(noLabels, 0.005).getCount(), 0.0);
         assertEquals(0, getData(noLabels).getCount());
         assertEquals(0.0, getData(noLabels).getSum(), 0.0);
@@ -1155,8 +1155,8 @@ public class HistogramTest {
 
     @Test
     public void testObserve() {
-        Histogram noLabels = Histogram.newBuilder()
-                .withName("test")
+        Histogram noLabels = Histogram.builder()
+                .name("test")
                 .build();
         noLabels.observe(2);
         assertEquals(1, getData(noLabels).getCount());
@@ -1176,10 +1176,10 @@ public class HistogramTest {
     @Test
     // See https://github.com/prometheus/client_java/issues/646
     public void testNegativeAmount() {
-        Histogram histogram = Histogram.newBuilder()
-                .withName("histogram")
-                .withHelp("test histogram for negative values")
-                .withClassicBuckets(-10, -5, 0, 5, 10)
+        Histogram histogram = Histogram.builder()
+                .name("histogram")
+                .help("test histogram for negative values")
+                .classicBuckets(-10, -5, 0, 5, 10)
                 .build();
         double expectedCount = 0;
         double expectedSum = 0;
@@ -1199,8 +1199,8 @@ public class HistogramTest {
 
     @Test
     public void testBoundaryConditions() {
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
+        Histogram histogram = Histogram.builder()
+                .name("test")
                 .build();
         histogram.observe(2.5);
         assertEquals(0, getBucket(histogram, 1).getCount());
@@ -1216,21 +1216,21 @@ public class HistogramTest {
 
     @Test
     public void testObserveWithLabels() {
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
-                .withConstLabels(Labels.of("env", "prod"))
-                .withLabelNames("path", "status")
+        Histogram histogram = Histogram.builder()
+                .name("test")
+                .constLabels(Labels.of("env", "prod"))
+                .labelNames("path", "status")
                 .build();
-        histogram.withLabelValues("/hello", "200").observe(0.11);
-        histogram.withLabelValues("/hello", "200").observe(0.2);
-        histogram.withLabelValues("/hello", "500").observe(0.19);
+        histogram.labelValues("/hello", "200").observe(0.11);
+        histogram.labelValues("/hello", "200").observe(0.2);
+        histogram.labelValues("/hello", "500").observe(0.19);
         HistogramSnapshot.HistogramDataPointSnapshot data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
         HistogramSnapshot.HistogramDataPointSnapshot data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
         assertEquals(2, data200.getCount());
         assertEquals(0.31, data200.getSum(), 0.0000001);
         assertEquals(1, data500.getCount());
         assertEquals(0.19, data500.getSum(), 0.0000001);
-        histogram.withLabelValues("/hello", "200").observe(0.13);
+        histogram.labelValues("/hello", "200").observe(0.13);
         data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
         data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
         assertEquals(3, data200.getCount());
@@ -1242,12 +1242,12 @@ public class HistogramTest {
     @Test
     public void testObserveMultithreaded() throws InterruptedException, ExecutionException, TimeoutException {
         // Hard to test concurrency, but let's run a couple of observations in parallel and assert none gets lost.
-        Histogram histogram = Histogram.newBuilder()
-                .withName("test")
-                .withLabelNames("status")
+        Histogram histogram = Histogram.builder()
+                .name("test")
+                .labelNames("status")
                 .build();
         int nThreads = 8;
-        DistributionDataPoint obs = histogram.withLabelValues("200");
+        DistributionDataPoint obs = histogram.labelValues("200");
         ExecutorService executor = Executors.newFixedThreadPool(nThreads);
         CompletionService<List<HistogramSnapshot>> completionService = new ExecutorCompletionService<>(executor);
         CountDownLatch startSignal = new CountDownLatch(nThreads);
@@ -1271,8 +1271,8 @@ public class HistogramTest {
             List<HistogramSnapshot> snapshots = future.get(5, TimeUnit.SECONDS);
             long count = 0;
             for (HistogramSnapshot snapshot : snapshots) {
-                Assert.assertEquals(1, snapshot.getData().size());
-                HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getData().stream().findFirst().orElseThrow(RuntimeException::new);
+                Assert.assertEquals(1, snapshot.getDataPoints().size());
+                HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getDataPoints().stream().findFirst().orElseThrow(RuntimeException::new);
                 Assert.assertTrue(data.getCount() >= (count + 1000)); // 1000 own observations plus the ones from other threads
                 count = data.getCount();
             }
@@ -1288,7 +1288,7 @@ public class HistogramTest {
 
 
     private HistogramSnapshot.HistogramDataPointSnapshot getData(Histogram histogram, String... labels) {
-        return histogram.collect().getData().stream()
+        return histogram.collect().getDataPoints().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("histogram with labels " + labels + " not found"));

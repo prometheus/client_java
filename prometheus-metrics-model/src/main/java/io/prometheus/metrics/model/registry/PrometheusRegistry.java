@@ -51,14 +51,14 @@ public class PrometheusRegistry {
     }
 
     public MetricSnapshots scrape() {
-        MetricSnapshots.Builder result = MetricSnapshots.newBuilder();
+        MetricSnapshots.Builder result = MetricSnapshots.builder();
         for (Collector collector : collectors) {
             MetricSnapshot snapshot = collector.collect();
             if (snapshot != null) {
                 if (result.containsMetricName(snapshot.getMetadata().getName())) {
                     throw new IllegalStateException(snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
                 }
-                result.addMetricSnapshot(snapshot);
+                result.metricSnapshot(snapshot);
             }
         }
         for (MultiCollector collector : multiCollectors) {
@@ -66,7 +66,7 @@ public class PrometheusRegistry {
                 if (result.containsMetricName(snapshot.getMetadata().getName())) {
                     throw new IllegalStateException(snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
                 }
-                result.addMetricSnapshot(snapshot);
+                result.metricSnapshot(snapshot);
             }
         }
         return result.build();
@@ -76,13 +76,13 @@ public class PrometheusRegistry {
         if (includedNames == null) {
             return scrape();
         }
-        MetricSnapshots.Builder result = MetricSnapshots.newBuilder();
+        MetricSnapshots.Builder result = MetricSnapshots.builder();
         for (Collector collector : collectors) {
             String prometheusName = collector.getPrometheusName();
             if (prometheusName == null || includedNames.test(prometheusName)) {
                 MetricSnapshot snapshot = collector.collect(includedNames);
                 if (snapshot != null) {
-                    result.addMetricSnapshot(snapshot);
+                    result.metricSnapshot(snapshot);
                 }
             }
         }
@@ -98,7 +98,7 @@ public class PrometheusRegistry {
             if (!excluded) {
                 for (MetricSnapshot snapshot : collector.collect(includedNames)) {
                     if (snapshot != null) {
-                        result.addMetricSnapshot(snapshot);
+                        result.metricSnapshot(snapshot);
                     }
                 }
             }

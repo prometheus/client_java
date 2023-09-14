@@ -30,7 +30,7 @@ public class ExporterHttpServerProperties {
         return new ExporterHttpServerProperties(port);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -40,7 +40,7 @@ public class ExporterHttpServerProperties {
 
         private Builder() {}
 
-        public Builder withPort(int port) {
+        public Builder port(int port) {
             this.port = port;
             return this;
         }

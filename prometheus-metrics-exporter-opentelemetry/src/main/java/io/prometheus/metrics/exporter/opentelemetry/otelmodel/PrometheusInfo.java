@@ -17,7 +17,7 @@ public class PrometheusInfo extends PrometheusData<DoublePointData> implements S
 
     public PrometheusInfo(InfoSnapshot snapshot, long currentTimeMillis) {
         super(MetricDataType.DOUBLE_SUM);
-        this.points = snapshot.getData().stream()
+        this.points = snapshot.getDataPoints().stream()
                 .map(dataPoint -> toOtelDataPoint(dataPoint, currentTimeMillis))
                 .collect(Collectors.toList());
     }

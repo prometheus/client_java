@@ -105,7 +105,7 @@ public class ExporterOpenTelemetryProperties {
         return new ExporterOpenTelemetryProperties(protocol, endpoint, headers, intervalSeconds, timeoutSeconds, serviceName, serviceNamespace, serviceInstanceId, serviceVersion, resourceAttributes);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -124,7 +124,7 @@ public class ExporterOpenTelemetryProperties {
 
         private Builder() {}
 
-        public Builder withProtocol(String protocol) {
+        public Builder protocol(String protocol) {
             if (!protocol.equals("grpc") && !protocol.equals("http/protobuf")) {
                 throw new IllegalArgumentException(protocol + ": Unsupported protocol. Expecting grpc or http/protobuf");
             }
@@ -132,17 +132,20 @@ public class ExporterOpenTelemetryProperties {
             return this;
         }
 
-        public Builder withEndpoint(String endpoint) {
+        public Builder endpoint(String endpoint) {
             this.endpoint = endpoint;
             return this;
         }
 
-        public Builder addHeader(String name, String value) {
+        /**
+         * Add a request header. Call multiple times to add multiple headers.
+         */
+        public Builder header(String name, String value) {
             this.headers.put(name, value);
             return this;
         }
 
-        public Builder withIntervalSeconds(int intervalSeconds) {
+        public Builder intervalSeconds(int intervalSeconds) {
             if (intervalSeconds <= 0) {
                 throw new IllegalArgumentException(intervalSeconds + ": Expecting intervalSeconds > 0");
             }
@@ -150,7 +153,7 @@ public class ExporterOpenTelemetryProperties {
             return this;
         }
 
-        public Builder withTimeoutSeconds(int timeoutSeconds) {
+        public Builder timeoutSeconds(int timeoutSeconds) {
             if (timeoutSeconds <= 0) {
                 throw new IllegalArgumentException(timeoutSeconds + ": Expecting timeoutSeconds > 0");
             }
@@ -158,27 +161,27 @@ public class ExporterOpenTelemetryProperties {
             return this;
         }
 
-        public Builder withServiceName(String serviceName) {
+        public Builder serviceName(String serviceName) {
             this.serviceName = serviceName;
             return this;
         }
 
-        public Builder withServiceNamespace(String serviceNamespace) {
+        public Builder serviceNamespace(String serviceNamespace) {
             this.serviceNamespace = serviceNamespace;
             return this;
         }
 
-        public Builder withServiceInstanceId(String serviceInstanceId) {
+        public Builder serviceInstanceId(String serviceInstanceId) {
             this.serviceInstanceId = serviceInstanceId;
             return this;
         }
 
-        public Builder withServiceVersion(String serviceVersion) {
+        public Builder serviceVersion(String serviceVersion) {
             this.serviceVersion = serviceVersion;
             return this;
         }
 
-        public Builder addResourceAttribute(String name, String value) {
+        public Builder resourceAttribute(String name, String value) {
             this.resourceAttributes.put(name, value);
             return this;
         }

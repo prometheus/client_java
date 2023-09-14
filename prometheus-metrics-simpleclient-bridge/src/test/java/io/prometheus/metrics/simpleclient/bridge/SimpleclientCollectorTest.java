@@ -10,7 +10,6 @@ import io.prometheus.client.Summary;
 import io.prometheus.client.exporter.common.TextFormat;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,8 +32,8 @@ public class SimpleclientCollectorTest {
     public void setUp() {
         origRegistry = new CollectorRegistry();
         newRegistry = new PrometheusRegistry();
-        SimpleclientCollector.newBuilder()
-                .withCollectorRegistry(origRegistry)
+        SimpleclientCollector.builder()
+                .collectorRegistry(origRegistry)
                 .register(newRegistry);
     }
 

@@ -29,8 +29,8 @@ public class JvmCompilationMetricsTest {
     @Test
     public void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmCompilationMetrics.newBuilder()
-                .withCompilationBean(mockCompilationBean)
+        JvmCompilationMetrics.builder()
+                .compilationBean(mockCompilationBean)
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
@@ -46,13 +46,13 @@ public class JvmCompilationMetricsTest {
 
     @Test
     public void testIgnoredMetricNotScraped() {
-        MetricNameFilter filter = MetricNameFilter.newBuilder()
+        MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_compilation_time_seconds_total")
                 .build();
 
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmCompilationMetrics.newBuilder()
-                .withCompilationBean(mockCompilationBean)
+        JvmCompilationMetrics.builder()
+                .compilationBean(mockCompilationBean)
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape(filter);
 

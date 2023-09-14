@@ -40,6 +40,11 @@
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
             <version>0.16.0</version>
             <scope>provided</scope><!-- provided so that this can be used with older simpleclient versions -->
@@ -63,6 +68,12 @@
             <artifactId>simpleclient_common</artifactId>
             <version>0.16.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-config</artifactId>
+            <version>1.0.0-alpha-6-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

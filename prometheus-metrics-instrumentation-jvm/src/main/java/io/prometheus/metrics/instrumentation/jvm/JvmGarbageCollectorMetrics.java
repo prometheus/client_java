@@ -13,11 +13,11 @@ import java.util.List;
 /**
  * JVM Garbage Collector metrics. The {@link JvmGarbageCollectorMetrics} are registered as part of the {@link JvmMetrics} like this:
  * <pre>{@code
- *   JvmMetrics.newBuilder().register();
+ *   JvmMetrics.builder().register();
  * }</pre>
  * However, if you want only the {@link JvmGarbageCollectorMetrics} you can also register them directly:
  * <pre>{@code
- *   JvmGarbageCollectorMetrics.newBuilder().register();
+ *   JvmGarbageCollectorMetrics.builder().register();
  * }</pre>
  * Example metrics being exported:
  * <pre>
@@ -43,12 +43,12 @@ public class JvmGarbageCollectorMetrics {
 
     private void register(PrometheusRegistry registry) {
 
-        SummaryWithCallback.newBuilder(config)
-                .withName(JVM_GC_COLLECTION_SECONDS)
-                .withHelp("Time spent in a given JVM garbage collector in seconds.")
-                .withUnit(Unit.SECONDS)
-                .withLabelNames("gc")
-                .withCallback(callback -> {
+        SummaryWithCallback.builder(config)
+                .name(JVM_GC_COLLECTION_SECONDS)
+                .help("Time spent in a given JVM garbage collector in seconds.")
+                .unit(Unit.SECONDS)
+                .labelNames("gc")
+                .callback(callback -> {
                     for (GarbageCollectorMXBean gc : garbageCollectorBeans) {
                         callback.call(gc.getCollectionCount(), Unit.millisToSeconds(gc.getCollectionTime()), Quantiles.EMPTY, gc.getName());
                     }
@@ -56,11 +56,11 @@ public class JvmGarbageCollectorMetrics {
                 .register(registry);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -76,7 +76,7 @@ public class JvmGarbageCollectorMetrics {
         /**
          * Package private. For testing only.
          */
-        Builder withGarbageCollectorBeans(List<GarbageCollectorMXBean> garbageCollectorBeans) {
+        Builder garbageCollectorBeans(List<GarbageCollectorMXBean> garbageCollectorBeans) {
             this.garbageCollectorBeans = garbageCollectorBeans;
             return this;
         }

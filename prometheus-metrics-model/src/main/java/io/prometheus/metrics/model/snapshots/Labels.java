@@ -46,7 +46,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
     /**
      * Create a new Labels instance.
      * You can either create Labels with one of the static {@code Labels.of(...)} methods,
-     * or you can use the {@link Labels#newBuilder()}.
+     * or you can use the {@link Labels#builder()}.
      *
      * @param keyValuePairs as in {@code {name1, value1, name2, value2}}. Length must be even.
      *                      {@link PrometheusNaming#isValidLabelName(String)} must be true for each name.
@@ -88,7 +88,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
     /**
      * Create a new Labels instance.
      * You can either create Labels with one of the static {@code Labels.of(...)} methods,
-     * or you can use the {@link Labels#newBuilder()}.
+     * or you can use the {@link Labels#builder()}.
      *
      * @param names  label names. {@link PrometheusNaming#isValidLabelName(String)} must be true for each name.
      *               Use {@link PrometheusNaming#sanitizeLabelName(String)} to convert arbitrary strings
@@ -112,7 +112,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
     /**
      * Create a new Labels instance.
      * You can either create Labels with one of the static {@code Labels.of(...)} methods,
-     * or you can use the {@link Labels#newBuilder()}.
+     * or you can use the {@link Labels#builder()}.
      *
      * @param names  label names. {@link PrometheusNaming#isValidLabelName(String)} must be true for each name.
      *               Use {@link PrometheusNaming#sanitizeLabelName(String)} to convert arbitrary strings
@@ -413,7 +413,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         return result;
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -424,7 +424,10 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         private Builder() {
         }
 
-        public Builder addLabel(String name, String value) {
+        /**
+         * Add a label. Call multiple times to add multiple labels.
+         */
+        public Builder label(String name, String value) {
             names.add(name);
             values.add(value);
             return this;

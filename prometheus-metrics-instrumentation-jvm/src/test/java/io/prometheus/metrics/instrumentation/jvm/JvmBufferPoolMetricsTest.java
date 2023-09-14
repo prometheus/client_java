@@ -1,6 +1,5 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
-import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -9,10 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.management.BufferPoolMXBean;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
@@ -40,8 +37,8 @@ public class JvmBufferPoolMetricsTest {
     @Test
     public void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmBufferPoolMetrics.newBuilder()
-                        .withBufferPoolBeans(Arrays.asList(mappedBuffer, directBuffer))
+        JvmBufferPoolMetrics.builder()
+                        .bufferPoolBeans(Arrays.asList(mappedBuffer, directBuffer))
                                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
@@ -67,13 +64,13 @@ public class JvmBufferPoolMetricsTest {
 
     @Test
     public void testIgnoredMetricNotScraped() {
-        MetricNameFilter filter = MetricNameFilter.newBuilder()
+        MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_buffer_pool_used_bytes")
                 .build();
 
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmBufferPoolMetrics.newBuilder()
-                .withBufferPoolBeans(Arrays.asList(directBuffer, mappedBuffer))
+        JvmBufferPoolMetrics.builder()
+                .bufferPoolBeans(Arrays.asList(directBuffer, mappedBuffer))
                 .register(registry);
         registry.scrape(filter);
 

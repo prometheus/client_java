@@ -43,7 +43,7 @@ public class ExporterProperties {
         return new ExporterProperties(includeCreatedTimestamps, exemplarsOnAllMetricTypes);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -58,7 +58,7 @@ public class ExporterProperties {
         /**
          * See {@link #getIncludeCreatedTimestamps()}
          */
-        public Builder withIncludeCreatedTimestamps(boolean includeCreatedTimestamps) {
+        public Builder includeCreatedTimestamps(boolean includeCreatedTimestamps) {
             this.includeCreatedTimestamps = includeCreatedTimestamps;
             return this;
         }
@@ -66,7 +66,7 @@ public class ExporterProperties {
         /**
          * See {@link #getExemplarsOnAllMetricTypes()}.
          */
-        public Builder withExemplarsOnAllMetricTypes(boolean exemplarsOnAllMetricTypes) {
+        public Builder exemplarsOnAllMetricTypes(boolean exemplarsOnAllMetricTypes) {
             this.exemplarsOnAllMetricTypes = exemplarsOnAllMetricTypes;
             return this;
         }

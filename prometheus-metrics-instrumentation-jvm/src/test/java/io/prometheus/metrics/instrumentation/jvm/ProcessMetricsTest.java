@@ -40,10 +40,10 @@ public class ProcessMetricsTest {
     @Test
     public void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
-        ProcessMetrics.newBuilder()
-                        .withOsBean(sunOsBean)
-                                .withRuntimeBean(runtimeBean)
-                .withGrepper(linuxGrepper)
+        ProcessMetrics.builder()
+                        .osBean(sunOsBean)
+                                .runtimeBean(runtimeBean)
+                .grepper(linuxGrepper)
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
@@ -78,10 +78,10 @@ public class ProcessMetricsTest {
     @Test
     public void testMinimal() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
-        ProcessMetrics.newBuilder()
-                .withOsBean(javaOsBean)
-                .withRuntimeBean(runtimeBean)
-                .withGrepper(windowsGrepper)
+        ProcessMetrics.builder()
+                .osBean(javaOsBean)
+                .runtimeBean(runtimeBean)
+                .grepper(windowsGrepper)
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
@@ -97,15 +97,15 @@ public class ProcessMetricsTest {
 
     @Test
     public void testIgnoredMetricNotScraped() {
-        MetricNameFilter filter = MetricNameFilter.newBuilder()
+        MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("process_max_fds")
                 .build();
 
         PrometheusRegistry registry = new PrometheusRegistry();
-        ProcessMetrics.newBuilder()
-                .withOsBean(sunOsBean)
-                .withRuntimeBean(runtimeBean)
-                .withGrepper(linuxGrepper)
+        ProcessMetrics.builder()
+                .osBean(sunOsBean)
+                .runtimeBean(runtimeBean)
+                .grepper(linuxGrepper)
                 .register(registry);
         registry.scrape(filter);
 

@@ -41,7 +41,7 @@ public abstract class Metric implements Collector {
         // server, or by one specific metric (e.g. a build_info or a
         // machine_role metric). See also
         // https://prometheus.io/docs/instrumenting/writing_exporters/#target-labels-not-static-scraped-labels
-        public B withConstLabels(Labels constLabels) {
+        public B constLabels(Labels constLabels) {
             for (Label label : constLabels) { // NPE if constLabels is null
                 if (illegalLabelNames.contains(label.getName())) {
                     throw new IllegalArgumentException(label.getName() + ": illegal label name for this metric type");

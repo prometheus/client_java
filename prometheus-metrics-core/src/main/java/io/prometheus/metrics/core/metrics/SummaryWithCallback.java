@@ -15,12 +15,12 @@ import java.util.function.Consumer;
  * <pre>{@code
  * double MILLISECONDS_PER_SECOND = 1E3;
  *
- * SummaryWithCallback.newBuilder()
- *         .withName("jvm_gc_collection_seconds")
- *         .withHelp("Time spent in a given JVM garbage collector in seconds.")
- *         .withUnit(Unit.SECONDS)
- *         .withLabelNames("gc")
- *         .withCallback(callback -> {
+ * SummaryWithCallback.builder()
+ *         .name("jvm_gc_collection_seconds")
+ *         .help("Time spent in a given JVM garbage collector in seconds.")
+ *         .unit(Unit.SECONDS)
+ *         .labelNames("gc")
+ *         .callback(callback -> {
  *             for (GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
  *                 callback.call(
  *                         gc.getCollectionCount(),
@@ -59,11 +59,11 @@ public class SummaryWithCallback extends CallbackMetric {
         return new SummarySnapshot(getMetadata(), dataPoints);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties properties) {
+    public static Builder builder(PrometheusProperties properties) {
         return new Builder(properties);
     }
 
@@ -71,7 +71,7 @@ public class SummaryWithCallback extends CallbackMetric {
 
         private Consumer<Callback> callback;
 
-        public Builder withCallback(Consumer<Callback> callback) {
+        public Builder callback(Consumer<Callback> callback) {
             this.callback = callback;
             return self();
         }

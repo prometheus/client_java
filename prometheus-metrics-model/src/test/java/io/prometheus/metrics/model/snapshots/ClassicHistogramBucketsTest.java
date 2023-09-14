@@ -1,7 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
-import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,21 +9,21 @@ public class ClassicHistogramBucketsTest {
 
     @Test
     public void testGoodCase() {
-        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.newBuilder()
-                .addBucket(Double.NEGATIVE_INFINITY, 0)
-                .addBucket(-10.0, 7)
-                .addBucket(1024, 3)
-                .addBucket(Double.POSITIVE_INFINITY, 8)
+        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.builder()
+                .bucket(Double.NEGATIVE_INFINITY, 0)
+                .bucket(-10.0, 7)
+                .bucket(1024, 3)
+                .bucket(Double.POSITIVE_INFINITY, 8)
                 .build();
         Assert.assertEquals(4, buckets.size());
     }
 
     @Test
     public void testSort() {
-        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.newBuilder()
-                .addBucket(7, 2)
-                .addBucket(2, 0)
-                .addBucket(Double.POSITIVE_INFINITY, 3)
+        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.builder()
+                .bucket(7, 2)
+                .bucket(2, 0)
+                .bucket(Double.POSITIVE_INFINITY, 3)
                 .build();
         Assert.assertEquals(3, buckets.size());
         Assert.assertEquals(2, buckets.getUpperBound(0), 0.0);
@@ -38,49 +36,49 @@ public class ClassicHistogramBucketsTest {
 
     @Test
     public void testMinimalBuckets() {
-        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.newBuilder()
-                .addBucket(Double.POSITIVE_INFINITY, 0)
+        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.builder()
+                .bucket(Double.POSITIVE_INFINITY, 0)
                 .build();
         Assert.assertEquals(1, buckets.size());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testInfBucketMissing() {
-        ClassicHistogramBuckets.newBuilder()
-                .addBucket(Double.NEGATIVE_INFINITY, 0)
+        ClassicHistogramBuckets.builder()
+                .bucket(Double.NEGATIVE_INFINITY, 0)
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNegativeCount() {
-        ClassicHistogramBuckets.newBuilder()
-                .addBucket(0.0, 10)
-                .addBucket(Double.POSITIVE_INFINITY, -1)
+        ClassicHistogramBuckets.builder()
+                .bucket(0.0, 10)
+                .bucket(Double.POSITIVE_INFINITY, -1)
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNaNBoundary() {
-        ClassicHistogramBuckets.newBuilder()
-                .addBucket(0.0, 1)
-                .addBucket(Double.NaN, 2)
-                .addBucket(Double.POSITIVE_INFINITY, 0)
+        ClassicHistogramBuckets.builder()
+                .bucket(0.0, 1)
+                .bucket(Double.NaN, 2)
+                .bucket(Double.POSITIVE_INFINITY, 0)
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testDuplicateBoundary() {
-        ClassicHistogramBuckets.newBuilder()
-                .addBucket(1.0, 1)
-                .addBucket(2.0, 2)
-                .addBucket(1.0, 2)
-                .addBucket(Double.POSITIVE_INFINITY, 0)
+        ClassicHistogramBuckets.builder()
+                .bucket(1.0, 1)
+                .bucket(2.0, 2)
+                .bucket(1.0, 2)
+                .bucket(Double.POSITIVE_INFINITY, 0)
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyBuckets() {
-        ClassicHistogramBuckets.newBuilder().build();
+        ClassicHistogramBuckets.builder().build();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -92,10 +90,10 @@ public class ClassicHistogramBucketsTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testImmutable() {
-        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.newBuilder()
-                .addBucket(1.0, 7)
-                .addBucket(2.0, 8)
-                .addBucket(Double.POSITIVE_INFINITY, 0)
+        ClassicHistogramBuckets buckets = ClassicHistogramBuckets.builder()
+                .bucket(1.0, 7)
+                .bucket(2.0, 8)
+                .bucket(Double.POSITIVE_INFINITY, 0)
                 .build();
         Iterator<ClassicHistogramBucket> iterator = buckets.iterator();
         iterator.next();

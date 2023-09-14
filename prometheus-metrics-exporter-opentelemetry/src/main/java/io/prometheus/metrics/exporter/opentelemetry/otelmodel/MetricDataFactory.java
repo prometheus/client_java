@@ -32,8 +32,8 @@ public class MetricDataFactory {
     }
 
     public MetricData create(HistogramSnapshot snapshot) {
-        if (!snapshot.getData().isEmpty()) {
-            HistogramSnapshot.HistogramDataPointSnapshot firstDataPoint = snapshot.getData().get(0);
+        if (!snapshot.getDataPoints().isEmpty()) {
+            HistogramSnapshot.HistogramDataPointSnapshot firstDataPoint = snapshot.getDataPoints().get(0);
             if (firstDataPoint.hasNativeHistogramData()) {
                 return new PrometheusMetricData<>(snapshot.getMetadata(), new PrometheusNativeHistogram(snapshot, currentTimeMillis), instrumentationScopeInfo, resource);
             } else if (firstDataPoint.hasClassicHistogramData()) {

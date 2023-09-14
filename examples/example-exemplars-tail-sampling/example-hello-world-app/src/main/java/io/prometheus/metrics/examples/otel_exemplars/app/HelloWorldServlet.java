@@ -28,11 +28,11 @@ public class HelloWorldServlet extends HttpServlet {
     private final Histogram histogram;
 
     public HelloWorldServlet() {
-        histogram = Histogram.newBuilder()
-                .withName("request_duration_seconds")
-                .withHelp("request duration in seconds")
-                .withUnit(Unit.SECONDS)
-                .withLabelNames("http_status")
+        histogram = Histogram.builder()
+                .name("request_duration_seconds")
+                .help("request duration in seconds")
+                .unit(Unit.SECONDS)
+                .labelNames("http_status")
                 .register();
         histogram.initLabelValues("200");
     }
@@ -49,7 +49,7 @@ public class HelloWorldServlet extends HttpServlet {
         } catch (Exception e) {
             throw new ServletException(e);
         } finally {
-            histogram.withLabelValues("200").observe(nanosToSeconds(System.nanoTime() - start));
+            histogram.labelValues("200").observe(nanosToSeconds(System.nanoTime() - start));
         }
     }
 

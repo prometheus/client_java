@@ -7,23 +7,23 @@ import io.prometheus.metrics.model.snapshots.Labels;
  * <p>
  * Example usage:
  * <pre>{@code
- * Counter counter = Counter.newBuilder()
- *     .withName("tasks_total")
- *     .withLabelNames("status")
+ * Counter counter = Counter.builder()
+ *     .name("tasks_total")
+ *     .labelNames("status")
  *     .register();
- * CounterDataPoint newTasks = counter.withLabelValues("new");
- * CounterDataPoint pendingTasks = counter.withLabelValues("pending");
- * CounterDataPoint completedTasks = counter.withLabelValues("completed");
+ * CounterDataPoint newTasks = counter.labelValues("new");
+ * CounterDataPoint pendingTasks = counter.labelValues("pending");
+ * CounterDataPoint completedTasks = counter.labelValues("completed");
  * }</pre>
  * <p>
  * Using {@code DataPoint} directly improves performance. If you increment a counter like this:
  * <pre>{@code
- * counter.withLabelValues("pending").inc();
+ * counter.labelValues("pending").inc();
  * }</pre>
  * the label value {@code "pending"} needs to be looked up every single time.
  * Using the {@code CounterDataPoint} like this:
  * <pre>{@code
- * CounterDataPoint pendingTasks = counter.withLabelValues("pending");
+ * CounterDataPoint pendingTasks = counter.labelValues("pending");
  * pendingTasks.inc();
  * }</pre>
  * allows you to look up the label value only once, and then use the {@code CounterDataPoint} directly.
@@ -31,13 +31,13 @@ import io.prometheus.metrics.model.snapshots.Labels;
  * <p>
  * If you have a counter without labels like this:
  * <pre>{@code
- * Counter counterWithoutLabels = Counter.newBuilder()
- *     .withName("events_total")
+ * Counter counterWithoutLabels = Counter.builder()
+ *     .name("events_total")
  *     .register();
  * }</pre>
  * You can use it as a {@code CounterDataPoint} directly. So the following:
  * <pre>{@code
- * CounterDataPoint counterData = counterWithoutLabels.withLabels();
+ * CounterDataPoint counterData = counterWithoutLabels.labelValues(); // empty label values
  * }</pre>
  * is equivalent to
  * <pre>{@code

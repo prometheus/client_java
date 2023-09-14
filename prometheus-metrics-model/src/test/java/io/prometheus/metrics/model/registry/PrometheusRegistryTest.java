@@ -12,8 +12,8 @@ public class PrometheusRegistryTest {
     Collector noName = new Collector() {
         @Override
         public MetricSnapshot collect() {
-            return GaugeSnapshot.newBuilder()
-                    .withName("no_name_gauge")
+            return GaugeSnapshot.builder()
+                    .name("no_name_gauge")
                     .build();
         }
 
@@ -23,20 +23,20 @@ public class PrometheusRegistryTest {
         }
     };
 
-    Collector counterA1 = () -> CounterSnapshot.newBuilder()
-            .withName("counter_a")
+    Collector counterA1 = () -> CounterSnapshot.builder()
+            .name("counter_a")
             .build();
 
-    Collector counterA2 = () -> CounterSnapshot.newBuilder()
-            .withName("counter.a")
+    Collector counterA2 = () -> CounterSnapshot.builder()
+            .name("counter.a")
             .build();
 
-    Collector counterB = () -> CounterSnapshot.newBuilder()
-            .withName("counter_b")
+    Collector counterB = () -> CounterSnapshot.builder()
+            .name("counter_b")
             .build();
 
-    Collector gaugeA = () -> GaugeSnapshot.newBuilder()
-            .withName("gauge_a")
+    Collector gaugeA = () -> GaugeSnapshot.builder()
+            .name("gauge_a")
             .build();
 
     @Test

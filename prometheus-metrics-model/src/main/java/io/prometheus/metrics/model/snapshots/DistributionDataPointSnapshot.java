@@ -66,22 +66,22 @@ public abstract class DistributionDataPointSnapshot extends DataPointSnapshot {
          * Count can be explicitly set on summaries (this is a public method for summary metrics),
          * and it is set implicitly on histograms (derived from the bucket counts).
          */
-        protected T withCount(long count) {
+        protected T count(long count) {
             this.count = count;
             return self();
         }
 
-        public T withSum(double sum) {
+        public T sum(double sum) {
             this.sum = sum;
             return self();
         }
 
-        public T withExemplars(Exemplars exemplars) {
+        public T exemplars(Exemplars exemplars) {
             this.exemplars = exemplars;
             return self();
         }
 
-        public T withCreatedTimestampMillis(long createdTimestampMillis) {
+        public T createdTimestampMillis(long createdTimestampMillis) {
             this.createdTimestampMillis = createdTimestampMillis;
             return self();
         }

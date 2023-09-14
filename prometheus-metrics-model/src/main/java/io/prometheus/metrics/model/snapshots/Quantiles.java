@@ -28,7 +28,7 @@ public class Quantiles implements Iterable<Quantile> {
      /**
      * Create a new Quantiles instance.
      * You can either create Quantiles with one of the static {@code Quantiles.of(...)} methods,
-     * or you can use the {@link Quantiles#newBuilder()}.
+     * or you can use the {@link Quantiles#builder()}.
      */
     public static Quantiles of(List<Quantile> quantiles) {
         return new Quantiles(quantiles);
@@ -37,7 +37,7 @@ public class Quantiles implements Iterable<Quantile> {
     /**
      * Create a new Quantiles instance.
      * You can either create Quantiles with one of the static {@code Quantiles.of(...)} methods,
-     * or you can use the {@link Quantiles#newBuilder()}.
+     * or you can use the {@link Quantiles#builder()}.
      */
     public static Quantiles of(Quantile... quantiles) {
         return of(Arrays.asList(quantiles));
@@ -56,20 +56,30 @@ public class Quantiles implements Iterable<Quantile> {
         return quantiles.iterator();
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder {
 
         private final List<Quantile> quantiles = new ArrayList<>();
-        private Builder() {}
 
-        public Builder addQuantile(Quantile quantile) {
+        private Builder() {
+        }
+
+        /**
+         * Add a quantile. Call multiple times to add multiple quantiles.
+         */
+        public Builder quantile(Quantile quantile) {
             quantiles.add(quantile);
             return this;
         }
 
         /**
+         * Add a quantile. Call multiple times to add multiple quantiles.
          * @param quantile 0.0 &lt;= quantile &lt;= 1.0
          */
-        public Builder addQuantile(double quantile, double value) {
+        public Builder quantile(double quantile, double value) {
             quantiles.add(new Quantile(quantile, value));
             return this;
         }
@@ -79,7 +89,4 @@ public class Quantiles implements Iterable<Quantile> {
         }
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
-    }
 }

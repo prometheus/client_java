@@ -1,7 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 
 import java.util.ArrayList;
@@ -14,12 +13,12 @@ import java.util.function.Consumer;
  * <pre>{@code
  * MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
  *
- * GaugeWithCallback.newBuilder()
- *     .withName("jvm_memory_bytes_used")
- *     .withHelp("Used bytes of a given JVM memory area.")
- *     .withUnit(Unit.BYTES)
- *     .withLabelNames("area")
- *     .withCallback(callback -> {
+ * GaugeWithCallback.builder()
+ *     .name("jvm_memory_bytes_used")
+ *     .help("Used bytes of a given JVM memory area.")
+ *     .unit(Unit.BYTES)
+ *     .labelNames("area")
+ *     .callback(callback -> {
  *         callback.call(memoryBean.getHeapMemoryUsage().getUsed(), "heap");
  *         callback.call(memoryBean.getNonHeapMemoryUsage().getUsed(), "nonheap");
  *     })
@@ -52,11 +51,11 @@ public class GaugeWithCallback extends CallbackMetric {
         return new GaugeSnapshot(getMetadata(), dataPoints);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties properties) {
+    public static Builder builder(PrometheusProperties properties) {
         return new Builder(properties);
     }
 
@@ -64,7 +63,7 @@ public class GaugeWithCallback extends CallbackMetric {
 
         private Consumer<Callback> callback;
 
-        public Builder withCallback(Consumer<Callback> callback) {
+        public Builder callback(Consumer<Callback> callback) {
             this.callback = callback;
             return self();
         }

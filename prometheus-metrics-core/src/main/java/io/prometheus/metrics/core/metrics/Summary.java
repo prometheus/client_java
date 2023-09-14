@@ -21,19 +21,19 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * Summary metric. Example:
  * <pre>{@code
- * Summary summary = Summary.newBuilder()
- *         .withName("http_request_duration_seconds_hi")
- *         .withHelp("HTTP request service time in seconds")
- *         .withUnit(SECONDS)
- *         .withLabelNames("method", "path", "status_code")
- *         .withQuantile(0.5, 0.01)
- *         .withQuantile(0.95, 0.001)
- *         .withQuantile(0.99, 0.001)
+ * Summary summary = Summary.builder()
+ *         .name("http_request_duration_seconds_hi")
+ *         .help("HTTP request service time in seconds")
+ *         .unit(SECONDS)
+ *         .labelNames("method", "path", "status_code")
+ *         .quantile(0.5, 0.01)
+ *         .quantile(0.95, 0.001)
+ *         .quantile(0.99, 0.001)
  *         .register();
  *
  * long start = System.nanoTime();
  * // process a request, duration will be observed
- * summary.withLabelValues("GET", "/", "200").observe(Unit.nanosToSeconds(System.nanoTime() - start));
+ * summary.labelValues("GET", "/", "200").observe(Unit.nanosToSeconds(System.nanoTime() - start));
  * }</pre>
  * See {@link Summary.Builder} for configuration options.
  */
@@ -204,23 +204,23 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
         }
     }
 
-    public static Summary.Builder newBuilder() {
+    public static Summary.Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Summary.Builder newBuilder(PrometheusProperties config) {
+    public static Summary.Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
     public static class Builder extends StatefulMetric.Builder<Summary.Builder, Summary> {
 
         /**
-         * 5 minutes. See {@link #withMaxAgeSeconds(long)}.
+         * 5 minutes. See {@link #maxAgeSeconds(long)}.
          */
         public static final long DEFAULT_MAX_AGE_SECONDS = TimeUnit.MINUTES.toSeconds(5);
 
         /**
-         * 5. See {@link #withNumberOfAgeBuckets(int)}
+         * 5. See {@link #numberOfAgeBuckets(int)}
          */
         public static final int DEFAULT_NUMBER_OF_AGE_BUCKETS = 5;
         private final List<CKMSQuantiles.Quantile> quantiles = new ArrayList<>();
@@ -242,7 +242,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
         }
 
         /**
-         * See {@link #withQuantile(double, double)}.
+         * Add a quantile. See {@link #quantile(double, double)}.
          * <p>
          * Default errors are:
          * <ul>
@@ -251,25 +251,27 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
          *     <li>error = 0.01 else.
          * </ul>
          */
-        public Builder withQuantile(double quantile) {
-            return withQuantile(quantile, defaultError(quantile));
+        public Builder quantile(double quantile) {
+            return quantile(quantile, defaultError(quantile));
         }
 
         /**
+         * Add a quantile. Call multiple times to add multiple quantiles.
+         * <p>
          * Example: The following will track the 0.95 quantile:
          * <pre>{@code
-         * .withQuantile(0.95, 0.001)
+         * .quantile(0.95, 0.001)
          * }</pre>
          * The second argument is the acceptable error margin, i.e. with the code above the quantile
          * will not be exactly the 0.95 quantile but something between 0.949 and 0.951.
          * <p>
          * There are two special cases:
          * <ul>
-         *     <li>{@code .withQuantile(0.0, 0.0)} gives you the minimum observed value</li>
-         *     <li>{@code .withQuantile(1.0, 0.0)} gives you the maximum observed value</li>
+         *     <li>{@code .quantile(0.0, 0.0)} gives you the minimum observed value</li>
+         *     <li>{@code .quantile(1.0, 0.0)} gives you the maximum observed value</li>
          * </ul>
          */
-        public Builder withQuantile(double quantile, double error) {
+        public Builder quantile(double quantile, double error) {
             if (quantile < 0.0 || quantile > 1.0) {
                 throw new IllegalArgumentException("Quantile " + quantile + " invalid: Expected number between 0.0 and 1.0.");
             }
@@ -285,7 +287,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
          * {@code maxAgeSeconds} is the size of that time window.
          * Default is {@link #DEFAULT_MAX_AGE_SECONDS}.
          */
-        public Builder withMaxAgeSeconds(long maxAgeSeconds) {
+        public Builder maxAgeSeconds(long maxAgeSeconds) {
             if (maxAgeSeconds <= 0) {
                 throw new IllegalArgumentException("maxAgeSeconds cannot be " + maxAgeSeconds);
             }
@@ -300,7 +302,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
          * then it is moving forward every minute by one minute.
          * Default is {@link #DEFAULT_NUMBER_OF_AGE_BUCKETS}.
          */
-        public Builder withNumberOfAgeBuckets(int ageBuckets) {
+        public Builder numberOfAgeBuckets(int ageBuckets) {
             if (ageBuckets <= 0) {
                 throw new IllegalArgumentException("ageBuckets cannot be " + ageBuckets);
             }
@@ -320,12 +322,12 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
                     quantileErrors[i] = this.quantiles.get(i).epsilon;
                 }
             }
-            return MetricsProperties.newBuilder()
-                    .withExemplarsEnabled(exemplarsEnabled)
-                    .withSummaryQuantiles(quantiles)
-                    .withSummaryQuantileErrors(quantileErrors)
-                    .withSummaryNumberOfAgeBuckets(ageBuckets)
-                    .withSummaryMaxAgeSeconds(maxAgeSeconds)
+            return MetricsProperties.builder()
+                    .exemplarsEnabled(exemplarsEnabled)
+                    .summaryQuantiles(quantiles)
+                    .summaryQuantileErrors(quantileErrors)
+                    .summaryNumberOfAgeBuckets(ageBuckets)
+                    .summaryMaxAgeSeconds(maxAgeSeconds)
                     .build();
         }
 
@@ -334,11 +336,11 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
          */
         @Override
         public MetricsProperties getDefaultProperties() {
-            return MetricsProperties.newBuilder()
-                    .withExemplarsEnabled(true)
-                    .withSummaryQuantiles()
-                    .withSummaryNumberOfAgeBuckets(DEFAULT_NUMBER_OF_AGE_BUCKETS)
-                    .withSummaryMaxAgeSeconds(DEFAULT_MAX_AGE_SECONDS)
+            return MetricsProperties.builder()
+                    .exemplarsEnabled(true)
+                    .summaryQuantiles()
+                    .summaryNumberOfAgeBuckets(DEFAULT_NUMBER_OF_AGE_BUCKETS)
+                    .summaryMaxAgeSeconds(DEFAULT_MAX_AGE_SECONDS)
                     .build();
         }
 

@@ -15,7 +15,7 @@ class PrometheusUnknown extends PrometheusData<DoublePointData> implements Gauge
 
     public PrometheusUnknown(UnknownSnapshot snapshot, long currentTimeMillis) {
         super(MetricDataType.DOUBLE_GAUGE);
-        this.points = snapshot.getData().stream()
+        this.points = snapshot.getDataPoints().stream()
                 .map(dataPoint -> toOtelDataPoint(dataPoint, currentTimeMillis))
                 .collect(Collectors.toList());
     }

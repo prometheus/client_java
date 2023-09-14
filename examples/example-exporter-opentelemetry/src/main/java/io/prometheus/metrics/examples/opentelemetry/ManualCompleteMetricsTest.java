@@ -42,8 +42,8 @@ public class ManualCompleteMetricsTest {
                 .withLabelNames("location")
                 .register();
 
-        gauge.withLabelValues("inside").set(23.4);
-        gauge.withLabelValues("outside").set(9.3);
+        gauge.labelValues("inside").set(23.4);
+        gauge.labelValues("outside").set(9.3);
 
         // By default, the histogram will be exported as an exponential histogram in OpenTelemetry.
         Histogram histogram = Histogram.newBuilder()
@@ -55,7 +55,7 @@ public class ManualCompleteMetricsTest {
 
         Random random = new Random(0);
         for (int i = 0; i < 1000; i++) {
-            histogram.withLabelValues("200").observe(random.nextGaussian());
+            histogram.labelValues("200").observe(random.nextGaussian());
         }
 
         // Explicitly use a classic-only histogram to have an example of a classic histogram in OpenTelemetry
@@ -69,7 +69,7 @@ public class ManualCompleteMetricsTest {
                 .register();
 
         for (int i = 0; i < 15; i++) {
-            classicHistogram.withLabelValues("200").observe(random.nextInt(3000));
+            classicHistogram.labelValues("200").observe(random.nextInt(3000));
         }
 
         Summary summary = Summary.newBuilder()
@@ -116,8 +116,8 @@ public class ManualCompleteMetricsTest {
                 .withStates("feature1", "feature2")
                 .register();
 
-        stateSet.withLabelValues("dev").setFalse("feature1");
-        stateSet.withLabelValues("dev").setTrue("feature2");
+        stateSet.labelValues("dev").setFalse("feature1");
+        stateSet.labelValues("dev").setTrue("feature2");
 
         PrometheusRegistry.defaultRegistry.register(() -> UnknownSnapshot.newBuilder()
                 .withName("my_unknown_metric")

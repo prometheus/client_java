@@ -12,45 +12,45 @@ public class SummarySnapshotTest {
         long createdTimestamp = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
         long scrapeTimestamp = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2);
         long exemplarTimestamp = System.currentTimeMillis();
-        SummarySnapshot snapshot = SummarySnapshot.newBuilder()
-                .withName("latency_seconds")
-                .withHelp("latency in seconds")
-                .withUnit(Unit.SECONDS)
-                .addDataPoint(SummarySnapshot.SummaryDataPointSnapshot.newBuilder()
-                        .withCreatedTimestampMillis(createdTimestamp)
-                        .withScrapeTimestampMillis(scrapeTimestamp)
-                        .withLabels(Labels.of("endpoint", "/"))
-                        .withQuantiles(Quantiles.newBuilder()
-                                .addQuantile(0.5, 0.2)
-                                .addQuantile(0.95, 0.22)
-                                .addQuantile(0.99, 0.23)
+        SummarySnapshot snapshot = SummarySnapshot.builder()
+                .name("latency_seconds")
+                .help("latency in seconds")
+                .unit(Unit.SECONDS)
+                .dataPoint(SummarySnapshot.SummaryDataPointSnapshot.builder()
+                        .createdTimestampMillis(createdTimestamp)
+                        .scrapeTimestampMillis(scrapeTimestamp)
+                        .labels(Labels.of("endpoint", "/"))
+                        .quantiles(Quantiles.builder()
+                                .quantile(0.5, 0.2)
+                                .quantile(0.95, 0.22)
+                                .quantile(0.99, 0.23)
                                 .build())
-                        .withExemplars(Exemplars.newBuilder()
-                                .addExemplar(Exemplar.newBuilder()
-                                        .withValue(0.2)
-                                        .withTraceId("abc123")
-                                        .withSpanId("123457")
-                                        .withTimestampMillis(exemplarTimestamp)
+                        .exemplars(Exemplars.builder()
+                                .exemplar(Exemplar.builder()
+                                        .value(0.2)
+                                        .traceId("abc123")
+                                        .spanId("123457")
+                                        .timestampMillis(exemplarTimestamp)
                                         .build())
-                                .addExemplar(Exemplar.newBuilder()
-                                        .withValue(0.21)
-                                        .withTraceId("abc124")
-                                        .withSpanId("123458")
-                                        .withTimestampMillis(exemplarTimestamp)
+                                .exemplar(Exemplar.builder()
+                                        .value(0.21)
+                                        .traceId("abc124")
+                                        .spanId("123458")
+                                        .timestampMillis(exemplarTimestamp)
                                         .build())
                                 .build())
-                        .withCount(1093)
-                        .withSum(218.6)
+                        .count(1093)
+                        .sum(218.6)
                         .build())
-                .addDataPoint(SummarySnapshot.SummaryDataPointSnapshot.newBuilder()
-                        .withLabels(Labels.of("endpoint", "/test"))
-                        .withCount(1093)
-                        .withSum(218.6)
+                .dataPoint(SummarySnapshot.SummaryDataPointSnapshot.builder()
+                        .labels(Labels.of("endpoint", "/test"))
+                        .count(1093)
+                        .sum(218.6)
                         .build())
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "latency_seconds", "latency in seconds", "seconds");
-        Assert.assertEquals(2, snapshot.getData().size());
-        SummarySnapshot.SummaryDataPointSnapshot data = snapshot.getData().get(0);
+        Assert.assertEquals(2, snapshot.getDataPoints().size());
+        SummarySnapshot.SummaryDataPointSnapshot data = snapshot.getDataPoints().get(0);
         Assert.assertEquals(Labels.of("endpoint", "/"), data.getLabels());
         Assert.assertTrue(data.hasCount());
         Assert.assertEquals(1093, data.getCount());
@@ -66,7 +66,7 @@ public class SummarySnapshotTest {
         Assert.assertEquals(2, data.getExemplars().size());
         // exemplars are tested in ExemplarsTest already, skipping here.
 
-        data = snapshot.getData().get(1);
+        data = snapshot.getDataPoints().get(1);
         Assert.assertFalse(data.hasCreatedTimestamp());
         Assert.assertFalse(data.hasScrapeTimestamp());
         Assert.assertTrue(data.hasCount());
@@ -75,26 +75,26 @@ public class SummarySnapshotTest {
 
     @Test
     public void testMinimal() {
-        SummarySnapshot snapshot = SummarySnapshot.newBuilder()
-                .withName("size_bytes")
-                .addDataPoint(SummarySnapshot.SummaryDataPointSnapshot.newBuilder()
-                        .withCount(10)
-                        .withSum(12.0)
+        SummarySnapshot snapshot = SummarySnapshot.builder()
+                .name("size_bytes")
+                .dataPoint(SummarySnapshot.SummaryDataPointSnapshot.builder()
+                        .count(10)
+                        .sum(12.0)
                         .build())
                 .build();
-        Assert.assertEquals(1, snapshot.getData().size());
-        Assert.assertEquals(Labels.EMPTY, snapshot.getData().get(0).getLabels());
+        Assert.assertEquals(1, snapshot.getDataPoints().size());
+        Assert.assertEquals(Labels.EMPTY, snapshot.getDataPoints().get(0).getLabels());
     }
 
     @Test
     public void testEmptySnapshot() {
-        SummarySnapshot snapshot = SummarySnapshot.newBuilder().withName("empty_summary").build();
-        Assert.assertEquals(0, snapshot.getData().size());
+        SummarySnapshot snapshot = SummarySnapshot.builder().name("empty_summary").build();
+        Assert.assertEquals(0, snapshot.getDataPoints().size());
     }
 
     @Test
     public void testEmptyData() {
-        SummarySnapshot.SummaryDataPointSnapshot data = SummarySnapshot.SummaryDataPointSnapshot.newBuilder().build();
+        SummarySnapshot.SummaryDataPointSnapshot data = SummarySnapshot.SummaryDataPointSnapshot.builder().build();
         Assert.assertEquals(0, data.getQuantiles().size());
         Assert.assertFalse(data.hasCount());
         Assert.assertFalse(data.hasSum());

@@ -8,21 +8,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Registers all JVM metrics. Example usage:
  * <pre>{@code
- *   JvmMetrics.newBuilder().register();
+ *   JvmMetrics.builder().register();
  * }</pre>
  */
 public class JvmMetrics {
 
     private static AtomicBoolean registeredWithTheDefaultRegistry = new AtomicBoolean(false);
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
     // Note: Currently there is no configuration for JVM metrics, so it doesn't matter whether you pass a config or not.
     // However, we will add config options in the future, like whether you want to use Prometheus naming conventions
     //'or OpenTelemetry semantic conventions for JVM metrics.
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -53,15 +53,15 @@ public class JvmMetrics {
          * throw an Exception because you are trying to register duplicate metrics.
          */
         public void register(PrometheusRegistry registry) {
-            JvmThreadsMetrics.newBuilder(config).register(registry);
-            JvmBufferPoolMetrics.newBuilder(config).register(registry);
-            JvmClassLoadingMetrics.newBuilder(config).register(registry);
-            JvmCompilationMetrics.newBuilder(config).register(registry);
-            JvmGarbageCollectorMetrics.newBuilder(config).register(registry);
-            JvmMemoryPoolAllocationMetrics.newBuilder(config).register(registry);
-            JvmMemoryMetrics.newBuilder(config).register(registry);
-            JvmRuntimeInfoMetric.newBuilder(config).register(registry);
-            ProcessMetrics.newBuilder(config).register(registry);
+            JvmThreadsMetrics.builder(config).register(registry);
+            JvmBufferPoolMetrics.builder(config).register(registry);
+            JvmClassLoadingMetrics.builder(config).register(registry);
+            JvmCompilationMetrics.builder(config).register(registry);
+            JvmGarbageCollectorMetrics.builder(config).register(registry);
+            JvmMemoryPoolAllocationMetrics.builder(config).register(registry);
+            JvmMemoryMetrics.builder(config).register(registry);
+            JvmRuntimeInfoMetric.builder(config).register(registry);
+            ProcessMetrics.builder(config).register(registry);
         }
     }
 }

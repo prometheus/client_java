@@ -21,7 +21,7 @@ public class Exemplar {
 
     /**
      * To create a new {@link Exemplar}, you can either call the constructor directly
-     * or use the Builder with {@link Exemplar#newBuilder()}.
+     * or use the Builder with {@link Exemplar#builder()}.
      *
      * @param value           the observed value. This is required.
      * @param labels          in most cases the labels will contain the {@link #TRACE_ID} and {@link #SPAN_ID}.
@@ -60,7 +60,7 @@ public class Exemplar {
         return timestampMillis;
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -75,22 +75,22 @@ public class Exemplar {
         private Builder() {
         }
 
-        public Builder withValue(double value) {
+        public Builder value(double value) {
             this.value = value;
             return this;
         }
 
-        public Builder withTraceId(String traceId) {
+        public Builder traceId(String traceId) {
             this.traceId = traceId;
             return this;
         }
 
-        public Builder withSpanId(String spanId) {
+        public Builder spanId(String spanId) {
             this.spanId = spanId;
             return this;
         }
 
-        public Builder withLabels(Labels labels) {
+        public Builder labels(Labels labels) {
             if (labels == null) {
                 throw new NullPointerException();
             }
@@ -98,13 +98,13 @@ public class Exemplar {
             return this;
         }
 
-        public Builder withTimestampMillis(long timestampMillis) {
+        public Builder timestampMillis(long timestampMillis) {
             this.timestampMillis = timestampMillis;
             return this;
         }
 
         /**
-         * @throws IllegalStateException if {@link #withValue(double)} wasn't called.
+         * @throws IllegalStateException if {@link #value(double)} wasn't called.
          */
         public Exemplar build() {
             if (value == null) {

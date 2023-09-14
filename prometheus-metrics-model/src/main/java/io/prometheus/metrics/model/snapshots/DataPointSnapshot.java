@@ -62,17 +62,17 @@ public abstract class DataPointSnapshot {
         protected Labels labels = Labels.EMPTY;
         protected long scrapeTimestampMillis = 0L;
 
-        public T withLabels(Labels labels) {
+        public T labels(Labels labels) {
             this.labels = labels;
             return self();
         }
 
         /**
-         * In most cases you should not need to set a timestamp, because the timestamp of a Prometheus metric should
-         * usually be set by the Prometheus server during scraping.
+         * In most cases you should not set a scrape timestamp,
+         * because the scrape timestamp is set by the Prometheus server during scraping.
          * Exceptions include mirroring metrics with given timestamps from other metric sources.
          */
-        public T withScrapeTimestampMillis(long scrapeTimestampMillis) {
+        public T scrapeTimestampMillis(long scrapeTimestampMillis) {
             this.scrapeTimestampMillis = scrapeTimestampMillis;
             return self();
         }

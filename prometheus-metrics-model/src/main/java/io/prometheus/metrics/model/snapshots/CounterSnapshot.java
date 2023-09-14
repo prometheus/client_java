@@ -11,19 +11,19 @@ public class CounterSnapshot extends MetricSnapshot {
 
     /**
      * To create a new {@link CounterSnapshot}, you can either call the constructor directly or use
-     * the builder with {@link CounterSnapshot#newBuilder()}.
+     * the builder with {@link CounterSnapshot#builder()}.
      *
-     * @param metadata the metric name in metadata must not include the {@code _total} suffix.
-     *                 See {@link MetricMetadata} for more naming conventions.
-     * @param data     the constructor will create a sorted copy of the collection.
+     * @param metadata   the metric name in metadata must not include the {@code _total} suffix.
+     *                   See {@link MetricMetadata} for more naming conventions.
+     * @param dataPoints the constructor will create a sorted copy of the collection.
      */
-    public CounterSnapshot(MetricMetadata metadata, Collection<CounterDataPointSnapshot> data) {
-        super(metadata, data);
+    public CounterSnapshot(MetricMetadata metadata, Collection<CounterDataPointSnapshot> dataPoints) {
+        super(metadata, dataPoints);
     }
 
     @Override
-    public List<CounterDataPointSnapshot> getData() {
-        return (List<CounterDataPointSnapshot>) data;
+    public List<CounterDataPointSnapshot> getDataPoints() {
+        return (List<CounterDataPointSnapshot>) dataPoints;
     }
 
     public static class CounterDataPointSnapshot extends DataPointSnapshot {
@@ -33,7 +33,7 @@ public class CounterSnapshot extends MetricSnapshot {
 
         /**
          * To create a new {@link CounterDataPointSnapshot}, you can either call the constructor directly or use the
-         * Builder with {@link CounterDataPointSnapshot#newBuilder()}.
+         * Builder with {@link CounterDataPointSnapshot#builder()}.
          *
          * @param value                  the counter value. Must not be negative.
          * @param labels                 must not be null. Use {@link Labels#EMPTY} if there are no labels.
@@ -75,6 +75,10 @@ public class CounterSnapshot extends MetricSnapshot {
             }
         }
 
+        public static Builder builder() {
+            return new Builder();
+        }
+
         public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
             private Exemplar exemplar = null;
@@ -87,17 +91,17 @@ public class CounterSnapshot extends MetricSnapshot {
             /**
              * Counter value. This is required. The value must not be negative.
              */
-            public Builder withValue(double value) {
+            public Builder value(double value) {
                 this.value = value;
                 return this;
             }
 
-            public Builder withExemplar(Exemplar exemplar) {
+            public Builder exemplar(Exemplar exemplar) {
                 this.exemplar = exemplar;
                 return this;
             }
 
-            public Builder withCreatedTimestampMillis(long createdTimestampMillis) {
+            public Builder createdTimestampMillis(long createdTimestampMillis) {
                 this.createdTimestampMillis = createdTimestampMillis;
                 return this;
             }
@@ -114,10 +118,10 @@ public class CounterSnapshot extends MetricSnapshot {
                 return this;
             }
         }
+    }
 
-        public static Builder newBuilder() {
-            return new Builder();
-        }
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
@@ -127,8 +131,11 @@ public class CounterSnapshot extends MetricSnapshot {
         private Builder() {
         }
 
-        public Builder addDataPoint(CounterDataPointSnapshot data) {
-            dataPoints.add(data);
+        /**
+         * Add a data point. Can be called multiple times to add multiple data points.
+         */
+        public Builder dataPoint(CounterDataPointSnapshot dataPoint) {
+            dataPoints.add(dataPoint);
             return this;
         }
 
@@ -140,9 +147,5 @@ public class CounterSnapshot extends MetricSnapshot {
         protected Builder self() {
             return this;
         }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
     }
 }

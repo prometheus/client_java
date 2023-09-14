@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import static io.prometheus.metrics.expositionformats.ProtobufUtil.timestampFromMillis;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * Write the Prometheus protobuf format as defined in
@@ -54,7 +53,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     public String toDebugString(MetricSnapshots metricSnapshots) {
         StringBuilder stringBuilder = new StringBuilder();
         for (MetricSnapshot snapshot : metricSnapshots) {
-            if (snapshot.getData().size() > 0) {
+            if (snapshot.getDataPoints().size() > 0) {
                 stringBuilder.append(TextFormat.printer().printToString(convert(snapshot)));
             }
         }
@@ -64,7 +63,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     @Override
     public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
         for (MetricSnapshot snapshot : metricSnapshots) {
-            if (snapshot.getData().size() > 0) {
+            if (snapshot.getDataPoints().size() > 0) {
                 convert(snapshot).writeDelimitedTo(out);
             }
         }
@@ -73,43 +72,43 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     public Metrics.MetricFamily convert(MetricSnapshot snapshot) {
         Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
         if (snapshot instanceof CounterSnapshot) {
-            for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getData()) {
+            for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getDataPoints()) {
                 builder.addMetric(convert(data));
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), "_total", Metrics.MetricType.COUNTER);
         } else if (snapshot instanceof GaugeSnapshot) {
-            for (GaugeSnapshot.GaugeDataPointSnapshot data : ((GaugeSnapshot) snapshot).getData()) {
+            for (GaugeSnapshot.GaugeDataPointSnapshot data : ((GaugeSnapshot) snapshot).getDataPoints()) {
                 builder.addMetric(convert(data));
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof HistogramSnapshot) {
             HistogramSnapshot histogram = (HistogramSnapshot) snapshot;
-            for (HistogramSnapshot.HistogramDataPointSnapshot data : histogram.getData()) {
+            for (HistogramSnapshot.HistogramDataPointSnapshot data : histogram.getDataPoints()) {
                 builder.addMetric(convert(data));
             }
             Metrics.MetricType type = histogram.isGaugeHistogram() ? Metrics.MetricType.GAUGE_HISTOGRAM : Metrics.MetricType.HISTOGRAM;
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, type);
         } else if (snapshot instanceof SummarySnapshot) {
-            for (SummarySnapshot.SummaryDataPointSnapshot data : ((SummarySnapshot) snapshot).getData()) {
+            for (SummarySnapshot.SummaryDataPointSnapshot data : ((SummarySnapshot) snapshot).getDataPoints()) {
                 if (data.hasCount() || data.hasSum() || data.getQuantiles().size() > 0) {
                     builder.addMetric(convert(data));
                 }
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.SUMMARY);
         } else if (snapshot instanceof InfoSnapshot) {
-            for (InfoSnapshot.InfoDataPointSnapshot data : ((InfoSnapshot) snapshot).getData()) {
+            for (InfoSnapshot.InfoDataPointSnapshot data : ((InfoSnapshot) snapshot).getDataPoints()) {
                 builder.addMetric(convert(data));
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), "_info", Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof StateSetSnapshot) {
-            for (StateSetSnapshot.StateSetDataPointSnapshot data : ((StateSetSnapshot) snapshot).getData()) {
+            for (StateSetSnapshot.StateSetDataPointSnapshot data : ((StateSetSnapshot) snapshot).getDataPoints()) {
                 for (int i = 0; i < data.size(); i++) {
                     builder.addMetric(convert(data, snapshot.getMetadata().getPrometheusName(), i));
                 }
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
         } else if (snapshot instanceof UnknownSnapshot) {
-            for (UnknownSnapshot.UnknownDataPointSnapshot data : ((UnknownSnapshot) snapshot).getData()) {
+            for (UnknownSnapshot.UnknownDataPointSnapshot data : ((UnknownSnapshot) snapshot).getDataPoints()) {
                 builder.addMetric(convert(data));
             }
             setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.UNTYPED);

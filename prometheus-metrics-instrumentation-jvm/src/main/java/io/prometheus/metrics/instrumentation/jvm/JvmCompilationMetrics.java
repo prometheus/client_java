@@ -13,11 +13,11 @@ import static io.prometheus.metrics.model.snapshots.Unit.millisToSeconds;
 /**
  * JVM Compilation metrics. The {@link JvmCompilationMetrics} are registered as part of the {@link JvmMetrics} like this:
  * <pre>{@code
- *   JvmMetrics.newBuilder().register();
+ *   JvmMetrics.builder().register();
  * }</pre>
  * However, if you want only the {@link JvmCompilationMetrics} you can also register them directly:
  * <pre>{@code
- *   JvmCompilationMetrics.newBuilder().register();
+ *   JvmCompilationMetrics.builder().register();
  * }</pre>
  * Example metrics being exported:
  * <pre>
@@ -44,19 +44,19 @@ public class JvmCompilationMetrics {
             return;
         }
 
-        CounterWithCallback.newBuilder(config)
-                .withName(JVM_COMPILATION_TIME_SECONDS_TOTAL)
-                .withHelp("The total time in seconds taken for HotSpot class compilation")
-                .withUnit(Unit.SECONDS)
-                .withCallback(callback -> callback.call(millisToSeconds(compilationBean.getTotalCompilationTime())))
+        CounterWithCallback.builder(config)
+                .name(JVM_COMPILATION_TIME_SECONDS_TOTAL)
+                .help("The total time in seconds taken for HotSpot class compilation")
+                .unit(Unit.SECONDS)
+                .callback(callback -> callback.call(millisToSeconds(compilationBean.getTotalCompilationTime())))
                 .register(registry);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -72,7 +72,7 @@ public class JvmCompilationMetrics {
         /**
          * Package private. For testing only.
          */
-        Builder withCompilationBean(CompilationMXBean compilationBean) {
+        Builder compilationBean(CompilationMXBean compilationBean) {
             this.compilationBean = compilationBean;
             return this;
         }

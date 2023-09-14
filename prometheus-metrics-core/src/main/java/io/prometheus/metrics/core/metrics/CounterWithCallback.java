@@ -13,10 +13,10 @@ import java.util.function.Consumer;
  * <pre>{@code
  * ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
  *
- * CounterWithCallback.newBuilder()
- *         .withName("classes_loaded_total")
- *         .withHelp("The total number of classes that have been loaded since the JVM has started execution")
- *         .withCallback(callback -> callback.call(classLoadingMXBean.getLoadedClassCount()))
+ * CounterWithCallback.builder()
+ *         .name("classes_loaded_total")
+ *         .help("The total number of classes that have been loaded since the JVM has started execution")
+ *         .callback(callback -> callback.call(classLoadingMXBean.getLoadedClassCount()))
  *         .register();
  * }</pre>
  */
@@ -46,11 +46,11 @@ public class CounterWithCallback extends CallbackMetric {
         return new CounterSnapshot(getMetadata(), dataPoints);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties properties) {
+    public static Builder builder(PrometheusProperties properties) {
         return new Builder(properties);
     }
 
@@ -58,7 +58,7 @@ public class CounterWithCallback extends CallbackMetric {
 
         private Consumer<Callback> callback;
 
-        public Builder withCallback(Consumer<Callback> callback) {
+        public Builder callback(Consumer<Callback> callback) {
             this.callback = callback;
             return self();
         }
@@ -70,11 +70,11 @@ public class CounterWithCallback extends CallbackMetric {
         /**
          * The {@code _total} suffix will automatically be appended if it's missing.
          * <pre>{@code
-         * CounterWithCallback c1 = CounterWithCallback.newBuilder()
-         *     .withName("events_total")
+         * CounterWithCallback c1 = CounterWithCallback.builder()
+         *     .name("events_total")
          *     .build();
-         * CounterWithCallback c2 = CounterWithCallback.newBuilder()
-         *     .withName("events")
+         * CounterWithCallback c2 = CounterWithCallback.builder()
+         *     .name("events")
          *     .build();
          * }</pre>
          * In the example above both {@code c1} and {@code c2} would be named {@code "events_total"} in Prometheus.
@@ -84,8 +84,8 @@ public class CounterWithCallback extends CallbackMetric {
          * is {@code false}.
          */
         @Override
-        public Builder withName(String name) {
-            return super.withName(Counter.stripTotalSuffix(name));
+        public Builder name(String name) {
+            return super.name(Counter.stripTotalSuffix(name));
         }
 
         @Override

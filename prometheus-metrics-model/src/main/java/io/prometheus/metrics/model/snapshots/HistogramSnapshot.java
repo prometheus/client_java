@@ -14,7 +14,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
     /**
      * To create a new {@link HistogramSnapshot}, you can either call the constructor directly or use
-     * the builder with {@link HistogramSnapshot#newBuilder()}.
+     * the builder with {@link HistogramSnapshot#builder()}.
      *
      * @param metadata see {@link MetricMetadata} for naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
@@ -39,8 +39,8 @@ public final class HistogramSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<HistogramDataPointSnapshot> getData() {
-        return (List<HistogramDataPointSnapshot>) data;
+    public List<HistogramDataPointSnapshot> getDataPoints() {
+        return (List<HistogramDataPointSnapshot>) dataPoints;
     }
 
     public static final class HistogramDataPointSnapshot extends DistributionDataPointSnapshot {
@@ -69,7 +69,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
          * Constructor for classic histograms (as opposed to native histograms).
          * <p>
          * To create a new {@link HistogramDataPointSnapshot}, you can either call the constructor directly or use the
-         * Builder with {@link HistogramSnapshot#newBuilder()}.
+         * Builder with {@link HistogramSnapshot#builder()}.
          *
          * @param classicBuckets         required. Must not be empty. Must at least contain the +Inf bucket.
          * @param sum                    sum of all observed values. Optional, pass {@link Double#NaN} if not available.
@@ -92,7 +92,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
          * Constructor for native histograms (as opposed to classic histograms).
          * <p>
          * To create a new {@link HistogramDataPointSnapshot}, you can either call the constructor directly or use the
-         * Builder with {@link HistogramSnapshot#newBuilder()}.
+         * Builder with {@link HistogramSnapshot#builder()}.
          *
          * @param nativeSchema                   number in [-4, 8]. See <a href="https://github.com/prometheus/client_model/blob/7f720d22828060526c55ac83bceff08f43d4cdbc/io/prometheus/client/metrics.proto#L76-L80">Prometheus client_model metrics.proto</a>.
          * @param nativeZeroCount                number of observed zero values (zero is special because there is no
@@ -125,7 +125,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
          * Constructor for a histogram with both, classic and native data.
          * <p>
          * To create a new {@link HistogramDataPointSnapshot}, you can either call the constructor directly or use the
-         * Builder with {@link HistogramSnapshot#newBuilder()}.
+         * Builder with {@link HistogramSnapshot#builder()}.
          *
          * @param classicBuckets                 required. Must not be empty. Must at least contain the +Inf bucket.
          * @param nativeSchema                   number in [-4, 8]. See <a href="https://github.com/prometheus/client_model/blob/7f720d22828060526c55ac83bceff08f43d4cdbc/io/prometheus/client/metrics.proto#L76-L80">Prometheus client_model metrics.proto</a>.
@@ -298,6 +298,10 @@ public final class HistogramSnapshot extends MetricSnapshot {
             }
         }
 
+        public static Builder builder() {
+            return new Builder();
+        }
+
         public static class Builder extends DistributionDataPointSnapshot.Builder<Builder> {
 
             private ClassicHistogramBuckets classicHistogramBuckets = ClassicHistogramBuckets.EMPTY;
@@ -315,32 +319,32 @@ public final class HistogramSnapshot extends MetricSnapshot {
                 return this;
             }
 
-            public Builder withClassicHistogramBuckets(ClassicHistogramBuckets classicBuckets) {
+            public Builder classicHistogramBuckets(ClassicHistogramBuckets classicBuckets) {
                 this.classicHistogramBuckets = classicBuckets;
                 return this;
             }
 
-            public Builder withNativeSchema(int nativeSchema) {
+            public Builder nativeSchema(int nativeSchema) {
                 this.nativeSchema = nativeSchema;
                 return this;
             }
 
-            public Builder withNativeZeroCount(long zeroCount) {
+            public Builder nativeZeroCount(long zeroCount) {
                 this.nativeZeroCount = zeroCount;
                 return this;
             }
 
-            public Builder withNativeZeroThreshold(double zeroThreshold) {
+            public Builder nativeZeroThreshold(double zeroThreshold) {
                 this.nativeZeroThreshold = zeroThreshold;
                 return this;
             }
 
-            public Builder withNativeBucketsForPositiveValues(NativeHistogramBuckets bucketsForPositiveValues) {
+            public Builder nativeBucketsForPositiveValues(NativeHistogramBuckets bucketsForPositiveValues) {
                 this.nativeBucketsForPositiveValues = bucketsForPositiveValues;
                 return this;
             }
 
-            public Builder withNativeBucketsForNegativeValues(NativeHistogramBuckets bucketsForNegativeValues) {
+            public Builder nativeBucketsForNegativeValues(NativeHistogramBuckets bucketsForNegativeValues) {
                 this.nativeBucketsForNegativeValues = bucketsForNegativeValues;
                 return this;
             }
@@ -352,10 +356,10 @@ public final class HistogramSnapshot extends MetricSnapshot {
                 return new HistogramDataPointSnapshot(classicHistogramBuckets, nativeSchema, nativeZeroCount, nativeZeroThreshold, nativeBucketsForPositiveValues, nativeBucketsForNegativeValues, sum, labels, exemplars, createdTimestampMillis, scrapeTimestampMillis);
             }
         }
+    }
 
-        public static Builder newBuilder() {
-            return new Builder();
-        }
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
@@ -366,8 +370,11 @@ public final class HistogramSnapshot extends MetricSnapshot {
         private Builder() {
         }
 
-        public Builder addDataPoint(HistogramDataPointSnapshot data) {
-            dataPoints.add(data);
+        /**
+         * Add a data point. Call multiple times to add multiple data points.
+         */
+        public Builder dataPoint(HistogramDataPointSnapshot dataPoint) {
+            dataPoints.add(dataPoint);
             return this;
         }
 
@@ -376,7 +383,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
          * except that bucket values are semantically gauges and not counters.
          * See <a href="https://openmetrics.io">openmetrics.io</a> for more info on Gauge Histograms.
          */
-        public Builder asGaugeHistogram() {
+        public Builder gaugeHistogram() {
             isGaugeHistogram = true;
             return this;
         }
@@ -389,9 +396,5 @@ public final class HistogramSnapshot extends MetricSnapshot {
         protected Builder self() {
             return this;
         }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
     }
 }

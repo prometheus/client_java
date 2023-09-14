@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -27,8 +26,8 @@ import java.util.concurrent.TimeUnit;
  * Example Usage:
  * <pre>
  * {@code
- * HTTPServer server = HTTPServer.newBuilder()
- *     .withPort(9090)
+ * HTTPServer server = HTTPServer.builder()
+ *     .port(9090)
  *     .buildAndStart();
  * }</pre>
  * */
@@ -90,11 +89,11 @@ public class HTTPServer implements Closeable {
         return server.getAddress().getPort();
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -120,27 +119,27 @@ public class HTTPServer implements Closeable {
          * Port to bind to. Default is 0, indicating that a random port will be selected.
          * You can learn the randomly selected port by calling {@link HTTPServer#getPort()}.
          */
-        public Builder withPort(int port) {
+        public Builder port(int port) {
             this.port = port;
             return this;
         }
 
         /**
          * Use this hostname to resolve the IP address to bind to.
-         * Must not be called together with {@link #withInetAddress(InetAddress)}.
+         * Must not be called together with {@link #inetAddress(InetAddress)}.
          * Default is empty, indicating that the HTTPServer binds to the wildcard address.
          */
-        public Builder withHostname(String hostname) {
+        public Builder hostname(String hostname) {
             this.hostname = hostname;
             return this;
         }
 
         /**
          * Bind to this IP address.
-         * Must not be called together with {@link #withHostname(String)}.
+         * Must not be called together with {@link #hostname(String)}.
          * Default is empty, indicating that the HTTPServer binds to the wildcard address.
          */
-        public Builder withInetAddress(InetAddress address) {
+        public Builder inetAddress(InetAddress address) {
             this.inetAddress = address;
             return this;
         }
@@ -148,7 +147,7 @@ public class HTTPServer implements Closeable {
         /**
          * Optional: ExecutorService used by the {@code httpServer}.
          */
-        public Builder withExecutorService(ExecutorService executorService) {
+        public Builder executorService(ExecutorService executorService) {
             this.executorService = executorService;
             return this;
         }
@@ -156,7 +155,7 @@ public class HTTPServer implements Closeable {
         /**
          * Optional: Default is {@link PrometheusRegistry#defaultRegistry}.
          */
-        public Builder withRegistry(PrometheusRegistry registry) {
+        public Builder registry(PrometheusRegistry registry) {
             this.registry = registry;
             return this;
         }
@@ -164,7 +163,7 @@ public class HTTPServer implements Closeable {
         /**
          * Optional: {@link Authenticator} for authentication.
          */
-        public Builder withAuthenticator(Authenticator authenticator) {
+        public Builder authenticator(Authenticator authenticator) {
             this.authenticator = authenticator;
             return this;
         }
@@ -172,7 +171,7 @@ public class HTTPServer implements Closeable {
         /**
          * Optional: {@link HttpsConfigurator} for TLS/SSL
          */
-        public Builder withHttpsConfigurator(HttpsConfigurator configurator) {
+        public Builder httpsConfigurator(HttpsConfigurator configurator) {
             this.httpsConfigurator = configurator;
             return this;
         }
@@ -180,7 +179,7 @@ public class HTTPServer implements Closeable {
         /**
          * Optional: Override default handler, i.e. the handler that will be registered for the / endpoint.
          */
-        public Builder withDefaultHandler(HttpHandler defaultHandler) {
+        public Builder defaultHandler(HttpHandler defaultHandler) {
             this.defaultHandler = defaultHandler;
             return this;
         }

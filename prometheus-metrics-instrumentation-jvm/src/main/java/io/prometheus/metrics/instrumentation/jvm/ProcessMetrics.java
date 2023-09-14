@@ -28,11 +28,11 @@ import java.lang.reflect.Method;
  * <p>
  * The {@link ProcessMetrics} are registered as part of the {@link JvmMetrics} like this:
  * <pre>{@code
- *   JvmMetrics.newBuilder().register();
+ *   JvmMetrics.builder().register();
  * }</pre>
  * However, if you want only the {@link ProcessMetrics} you can also register them directly:
  * <pre>{@code
- *   ProcessMetrics.newBuilder().register();
+ *   ProcessMetrics.builder().register();
  * }</pre>
  * Example metrics being exported:
  * <pre>
@@ -83,11 +83,11 @@ public class ProcessMetrics {
 
     private void register(PrometheusRegistry registry) {
 
-        CounterWithCallback.newBuilder(config)
-                .withName(PROCESS_CPU_SECONDS_TOTAL)
-                .withHelp("Total user and system CPU time spent in seconds.")
-                .withUnit(Unit.SECONDS)
-                .withCallback(callback -> {
+        CounterWithCallback.builder(config)
+                .name(PROCESS_CPU_SECONDS_TOTAL)
+                .help("Total user and system CPU time spent in seconds.")
+                .unit(Unit.SECONDS)
+                .callback(callback -> {
                     try {
                         // There exist at least 2 similar but unrelated UnixOperatingSystemMXBean interfaces, in
                         // com.sun.management and com.ibm.lang.management. Hence use reflection and recursively go
@@ -101,17 +101,17 @@ public class ProcessMetrics {
                 })
                 .register(registry);
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(PROCESS_START_TIME_SECONDS)
-                .withHelp("Start time of the process since unix epoch in seconds.")
-                .withUnit(Unit.SECONDS)
-                .withCallback(callback -> callback.call(Unit.millisToSeconds(runtimeBean.getStartTime())))
+        GaugeWithCallback.builder(config)
+                .name(PROCESS_START_TIME_SECONDS)
+                .help("Start time of the process since unix epoch in seconds.")
+                .unit(Unit.SECONDS)
+                .callback(callback -> callback.call(Unit.millisToSeconds(runtimeBean.getStartTime())))
                 .register(registry);
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(PROCESS_OPEN_FDS)
-                .withHelp("Number of open file descriptors.")
-                .withCallback(callback -> {
+        GaugeWithCallback.builder(config)
+                .name(PROCESS_OPEN_FDS)
+                .help("Number of open file descriptors.")
+                .callback(callback -> {
                     try {
                         Long openFds = callLongGetter("getOpenFileDescriptorCount", osBean);
                         if (openFds != null) {
@@ -122,10 +122,10 @@ public class ProcessMetrics {
                 })
                 .register(registry);
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(PROCESS_MAX_FDS)
-                .withHelp("Maximum number of open file descriptors.")
-                .withCallback(callback -> {
+        GaugeWithCallback.builder(config)
+                .name(PROCESS_MAX_FDS)
+                .help("Maximum number of open file descriptors.")
+                .callback(callback -> {
                     try {
                         Long maxFds = callLongGetter("getMaxFileDescriptorCount", osBean);
                         if (maxFds != null) {
@@ -138,11 +138,11 @@ public class ProcessMetrics {
 
         if (linux) {
 
-            GaugeWithCallback.newBuilder(config)
-                    .withName(PROCESS_VIRTUAL_MEMORY_BYTES)
-                    .withHelp("Virtual memory size in bytes.")
-                    .withUnit(Unit.BYTES)
-                    .withCallback(callback -> {
+            GaugeWithCallback.builder(config)
+                    .name(PROCESS_VIRTUAL_MEMORY_BYTES)
+                    .help("Virtual memory size in bytes.")
+                    .unit(Unit.BYTES)
+                    .callback(callback -> {
                         try {
                             String line = grepper.lineStartingWith(PROC_SELF_STATUS, "VmSize:");
                             callback.call(Unit.kiloBytesToBytes(Double.parseDouble(line.split("\\s+")[1])));
@@ -151,11 +151,11 @@ public class ProcessMetrics {
                     })
                     .register(registry);
 
-            GaugeWithCallback.newBuilder(config)
-                    .withName(PROCESS_RESIDENT_MEMORY_BYTES)
-                    .withHelp("Resident memory size in bytes.")
-                    .withUnit(Unit.BYTES)
-                    .withCallback(callback -> {
+            GaugeWithCallback.builder(config)
+                    .name(PROCESS_RESIDENT_MEMORY_BYTES)
+                    .help("Resident memory size in bytes.")
+                    .unit(Unit.BYTES)
+                    .callback(callback -> {
                         try {
                             String line = grepper.lineStartingWith(PROC_SELF_STATUS, "VmRSS:");
                             callback.call(Unit.kiloBytesToBytes(Double.parseDouble(line.split("\\s+")[1])));
@@ -228,11 +228,11 @@ public class ProcessMetrics {
         }
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -250,7 +250,7 @@ public class ProcessMetrics {
         /**
          * Package private. For testing only.
          */
-        Builder withOsBean(OperatingSystemMXBean osBean) {
+        Builder osBean(OperatingSystemMXBean osBean) {
             this.osBean = osBean;
             return this;
         }
@@ -258,7 +258,7 @@ public class ProcessMetrics {
         /**
          * Package private. For testing only.
          */
-        Builder withRuntimeBean(RuntimeMXBean runtimeBean) {
+        Builder runtimeBean(RuntimeMXBean runtimeBean) {
             this.runtimeBean = runtimeBean;
             return this;
         }
@@ -266,7 +266,7 @@ public class ProcessMetrics {
         /**
          * Package private. For testing only.
          */
-        Builder withGrepper(Grepper grepper) {
+        Builder grepper(Grepper grepper) {
             this.grepper = grepper;
             return this;
         }

@@ -1,7 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.Quantile;
-import io.prometheus.metrics.model.snapshots.Quantiles;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,10 +9,10 @@ public class QuantilesTest {
 
     @Test
     public void testSort() {
-        Quantiles quantiles = Quantiles.newBuilder()
-                .addQuantile(0.99, 0.23)
-                .addQuantile(0.5, 0.2)
-                .addQuantile(0.95, 0.22)
+        Quantiles quantiles = Quantiles.builder()
+                .quantile(0.99, 0.23)
+                .quantile(0.5, 0.2)
+                .quantile(0.95, 0.22)
                 .build();
         Assert.assertEquals(3, quantiles.size());
         Assert.assertEquals(0.5, quantiles.get(0).getQuantile(), 0);
@@ -27,10 +25,10 @@ public class QuantilesTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testImmutable() {
-        Quantiles quantiles = Quantiles.newBuilder()
-                .addQuantile(0.99, 0.23)
-                .addQuantile(0.5, 0.2)
-                .addQuantile(0.95, 0.22)
+        Quantiles quantiles = Quantiles.builder()
+                .quantile(0.99, 0.23)
+                .quantile(0.5, 0.2)
+                .quantile(0.95, 0.22)
                 .build();
         Iterator<Quantile> iterator = quantiles.iterator();
         iterator.next();
@@ -44,10 +42,10 @@ public class QuantilesTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testDuplicate() {
-        Quantiles.newBuilder()
-                .addQuantile(0.95, 0.23)
-                .addQuantile(0.5, 0.2)
-                .addQuantile(0.95, 0.22)
+        Quantiles.builder()
+                .quantile(0.95, 0.23)
+                .quantile(0.5, 0.2)
+                .quantile(0.95, 0.22)
                 .build();
     }
 }

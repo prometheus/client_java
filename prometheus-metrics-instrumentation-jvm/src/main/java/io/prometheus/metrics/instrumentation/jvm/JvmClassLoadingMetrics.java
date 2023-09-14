@@ -11,11 +11,11 @@ import java.lang.management.ManagementFactory;
 /**
  * JVM Class Loading metrics. The {@link JvmClassLoadingMetrics} are registered as part of the {@link JvmMetrics} like this:
  * <pre>{@code
- *   JvmMetrics.newBuilder().register();
+ *   JvmMetrics.builder().register();
  * }</pre>
  * However, if you want only the {@link JvmClassLoadingMetrics} you can also register them directly:
  * <pre>{@code
- *   JvmClassLoadingMetrics.newBuilder().register();
+ *   JvmClassLoadingMetrics.builder().register();
  * }</pre>
  * Example metrics being exported:
  * <pre>
@@ -46,30 +46,30 @@ public class JvmClassLoadingMetrics {
 
     private void register(PrometheusRegistry registry) {
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(JVM_CLASSES_CURRENTLY_LOADED)
-                .withHelp("The number of classes that are currently loaded in the JVM")
-                .withCallback(callback -> callback.call(classLoadingBean.getLoadedClassCount()))
+        GaugeWithCallback.builder(config)
+                .name(JVM_CLASSES_CURRENTLY_LOADED)
+                .help("The number of classes that are currently loaded in the JVM")
+                .callback(callback -> callback.call(classLoadingBean.getLoadedClassCount()))
                 .register(registry);
 
-        CounterWithCallback.newBuilder(config)
-                .withName(JVM_CLASSES_LOADED_TOTAL)
-                .withHelp("The total number of classes that have been loaded since the JVM has started execution")
-                .withCallback(callback -> callback.call(classLoadingBean.getTotalLoadedClassCount()))
+        CounterWithCallback.builder(config)
+                .name(JVM_CLASSES_LOADED_TOTAL)
+                .help("The total number of classes that have been loaded since the JVM has started execution")
+                .callback(callback -> callback.call(classLoadingBean.getTotalLoadedClassCount()))
                 .register(registry);
 
-        CounterWithCallback.newBuilder(config)
-                .withName(JVM_CLASSES_UNLOADED_TOTAL)
-                .withHelp("The total number of classes that have been unloaded since the JVM has started execution")
-                .withCallback(callback -> callback.call(classLoadingBean.getUnloadedClassCount()))
+        CounterWithCallback.builder(config)
+                .name(JVM_CLASSES_UNLOADED_TOTAL)
+                .help("The total number of classes that have been unloaded since the JVM has started execution")
+                .callback(callback -> callback.call(classLoadingBean.getUnloadedClassCount()))
                 .register(registry);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -85,7 +85,7 @@ public class JvmClassLoadingMetrics {
         /**
          * Package private. For testing only.
          */
-        Builder withClassLoadingBean(ClassLoadingMXBean classLoadingBean) {
+        Builder classLoadingBean(ClassLoadingMXBean classLoadingBean) {
             this.classLoadingBean = classLoadingBean;
             return this;
         }

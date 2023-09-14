@@ -19,19 +19,19 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>
  * Example usage:
  * <pre>{@code
- * Gauge currentActiveUsers = Gauge.newBuilder()
- *     .withName("current_active_users")
- *     .withHelp("Number of users that are currently active")
- *     .withLabelNames("region")
+ * Gauge currentActiveUsers = Gauge.builder()
+ *     .name("current_active_users")
+ *     .help("Number of users that are currently active")
+ *     .labelNames("region")
  *     .register();
  *
  * public void login(String region) {
- *     currentActiveUsers.withLabelValues(region).inc();
+ *     currentActiveUsers.labelValues(region).inc();
  *     // perform login
  * }
  *
  * public void logout(String region) {
- *     currentActiveUsers.withLabelValues(region).dec();
+ *     currentActiveUsers.labelValues(region).dec();
  *     // perform logout
  * }
  * }</pre>
@@ -186,11 +186,11 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
         }
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 

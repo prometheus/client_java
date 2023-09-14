@@ -28,7 +28,7 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
 
     /**
      * To create new {@link ClassicHistogramBuckets}, you can either use one of the static {@code of(...)} methods,
-     * or use {@link ClassicHistogramBuckets#newBuilder()}.
+     * or use {@link ClassicHistogramBuckets#builder()}.
      * <p>
      * This method will create a copy of upperBounds and counts.
      *
@@ -56,7 +56,7 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
 
     /**
      * To create new {@link ClassicHistogramBuckets}, you can either use one of the static {@code of(...)} methods,
-     * or use {@link ClassicHistogramBuckets#newBuilder()}.
+     * or use {@link ClassicHistogramBuckets#builder()}.
      * <p>
      * This method will create a copy of upperBounds and counts.
      *
@@ -81,7 +81,7 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
 
     /**
      * To create new {@link ClassicHistogramBuckets}, you can either use one of the static {@code of(...)} methods,
-     * or use {@link ClassicHistogramBuckets#newBuilder()}.
+     * or use {@link ClassicHistogramBuckets#builder()}.
      * <p>
      * This method will create a copy of upperBounds and counts.
      *
@@ -192,9 +192,9 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
 
     /**
      * To create new {@link ClassicHistogramBuckets}, you can either use one of the static {@code of(...)} methods,
-     * or use {@code newBuilder()}.
+     * or use {@code builder()}.
      */
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -207,7 +207,7 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
         /**
          * Must be called at least once for the {@link Double#POSITIVE_INFINITY} bucket.
          */
-        public Builder addBucket(double upperBound, long count) {
+        public Builder bucket(double upperBound, long count) {
             upperBounds.add(upperBound);
             counts.add(count);
             return this;

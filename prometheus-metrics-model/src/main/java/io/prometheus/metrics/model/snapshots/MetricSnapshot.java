@@ -13,23 +13,23 @@ import java.util.List;
 public abstract class MetricSnapshot {
 
     private final MetricMetadata metadata;
-    protected final List<? extends DataPointSnapshot> data;
+    protected final List<? extends DataPointSnapshot> dataPoints;
 
-    protected MetricSnapshot(MetricMetadata metadata, DataPointSnapshot... data) {
-        this(metadata, Arrays.asList(data));
+    protected MetricSnapshot(MetricMetadata metadata, DataPointSnapshot... dataPoints) {
+        this(metadata, Arrays.asList(dataPoints));
     }
 
-    protected MetricSnapshot(MetricMetadata metadata, Collection<? extends DataPointSnapshot> data) {
+    protected MetricSnapshot(MetricMetadata metadata, Collection<? extends DataPointSnapshot> dataPoints) {
         if (metadata == null) {
             throw new NullPointerException("metadata");
         }
-        if (data == null) {
-            throw new NullPointerException("data");
+        if (dataPoints == null) {
+            throw new NullPointerException("dataPoints");
         }
         this.metadata = metadata;
-        List<? extends DataPointSnapshot> dataCopy = new ArrayList<>(data);
+        List<? extends DataPointSnapshot> dataCopy = new ArrayList<>(dataPoints);
         dataCopy.sort(Comparator.comparing(DataPointSnapshot::getLabels));
-        this.data = Collections.unmodifiableList(dataCopy);
+        this.dataPoints = Collections.unmodifiableList(dataCopy);
         validateLabels();
     }
 
@@ -37,13 +37,13 @@ public abstract class MetricSnapshot {
         return metadata;
     }
 
-    public abstract List<? extends DataPointSnapshot> getData();
+    public abstract List<? extends DataPointSnapshot> getDataPoints();
 
     protected void validateLabels() {
         // Verify that labels are unique (the same set of names/values must not be used multiple times for the same metric).
-        for (int i = 0; i < data.size() - 1; i++) {
-            if (data.get(i).getLabels().equals(data.get(i + 1).getLabels())) {
-                throw new IllegalArgumentException("Duplicate labels in metric data: " + data.get(i).getLabels());
+        for (int i = 0; i < dataPoints.size() - 1; i++) {
+            if (dataPoints.get(i).getLabels().equals(dataPoints.get(i + 1).getLabels())) {
+                throw new IllegalArgumentException("Duplicate labels in metric data: " + dataPoints.get(i).getLabels());
             }
         }
         // Should we verify that all entries in data have the same label names?
@@ -61,17 +61,17 @@ public abstract class MetricSnapshot {
          * If the name is missing or invalid, {@code build()} will throw an {@link IllegalArgumentException}.
          * See {@link PrometheusNaming#isValidMetricName(String)} for info on valid metric names.
          */
-        public T withName(String name) {
+        public T name(String name) {
             this.name = name;
             return self();
         }
 
-        public T withHelp(String help) {
+        public T help(String help) {
             this.help = help;
             return self();
         }
 
-        public T withUnit(Unit unit) {
+        public T unit(Unit unit) {
             this.unit = unit;
             return self();
         }

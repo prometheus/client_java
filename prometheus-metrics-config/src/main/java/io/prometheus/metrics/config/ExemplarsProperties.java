@@ -79,7 +79,7 @@ public class ExemplarsProperties {
         );
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -92,17 +92,17 @@ public class ExemplarsProperties {
         private Builder() {
         }
 
-        public Builder withMinRetentionPeriodSeconds(int minRetentionPeriodSeconds) {
+        public Builder minRetentionPeriodSeconds(int minRetentionPeriodSeconds) {
             this.minRetentionPeriodSeconds = minRetentionPeriodSeconds;
             return this;
         }
 
-        public Builder withMaxRetentionPeriodSeconds(int maxRetentionPeriodSeconds) {
+        public Builder maxRetentionPeriodSeconds(int maxRetentionPeriodSeconds) {
             this.maxRetentionPeriodSeconds = maxRetentionPeriodSeconds;
             return this;
         }
 
-        public Builder withSampleIntervalMilliseconds(int sampleIntervalMilliseconds) {
+        public Builder sampleIntervalMilliseconds(int sampleIntervalMilliseconds) {
             this.sampleIntervalMilliseconds = sampleIntervalMilliseconds;
             return this;
         }

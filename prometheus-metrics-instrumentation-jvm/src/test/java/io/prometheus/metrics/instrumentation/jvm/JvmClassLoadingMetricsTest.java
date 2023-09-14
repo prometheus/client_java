@@ -30,8 +30,8 @@ public class JvmClassLoadingMetricsTest {
     @Test
     public void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmClassLoadingMetrics.newBuilder()
-                .withClassLoadingBean(mockClassLoadingBean)
+        JvmClassLoadingMetrics.builder()
+                .classLoadingBean(mockClassLoadingBean)
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
@@ -52,13 +52,13 @@ public class JvmClassLoadingMetricsTest {
 
     @Test
     public void testIgnoredMetricNotScraped() {
-        MetricNameFilter filter = MetricNameFilter.newBuilder()
+        MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_classes_currently_loaded")
                 .build();
 
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmClassLoadingMetrics.newBuilder()
-                .withClassLoadingBean(mockClassLoadingBean)
+        JvmClassLoadingMetrics.builder()
+                .classLoadingBean(mockClassLoadingBean)
                 .register(registry);
         registry.scrape(filter);
 

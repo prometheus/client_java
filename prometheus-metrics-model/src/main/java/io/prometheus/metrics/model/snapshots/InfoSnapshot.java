@@ -11,7 +11,7 @@ public final class InfoSnapshot extends MetricSnapshot {
 
     /**
      * To create a new {@link InfoSnapshot}, you can either call the constructor directly or use
-     * the builder with {@link InfoSnapshot#newBuilder()}.
+     * the builder with {@link InfoSnapshot#builder()}.
      *
      * @param metadata the metric name in metadata must not include the {@code _info} suffix.
      *                 See {@link MetricMetadata} for more naming conventions.
@@ -26,15 +26,15 @@ public final class InfoSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<InfoDataPointSnapshot> getData() {
-        return (List<InfoDataPointSnapshot>) data;
+    public List<InfoDataPointSnapshot> getDataPoints() {
+        return (List<InfoDataPointSnapshot>) dataPoints;
     }
 
     public static class InfoDataPointSnapshot extends DataPointSnapshot {
 
         /**
          * To create a new {@link InfoDataPointSnapshot}, you can either call the constructor directly or use the
-         * Builder with {@link InfoDataPointSnapshot#newBuilder()}.
+         * Builder with {@link InfoDataPointSnapshot#builder()}.
          *
          * @param labels must not be null. Use {@link Labels#EMPTY} if there are no labels.
          */
@@ -51,7 +51,14 @@ public final class InfoSnapshot extends MetricSnapshot {
             super(labels, 0L, scrapeTimestampMillis);
         }
 
+        public static Builder builder() {
+            return new Builder();
+        }
+
         public static class Builder extends DataPointSnapshot.Builder<Builder> {
+
+            private Builder() {
+            }
 
             public InfoDataPointSnapshot build() {
                 return new InfoDataPointSnapshot(labels, scrapeTimestampMillis);
@@ -62,10 +69,10 @@ public final class InfoSnapshot extends MetricSnapshot {
                 return this;
             }
         }
+    }
 
-        public static Builder newBuilder() {
-            return new Builder();
-        }
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
@@ -75,13 +82,16 @@ public final class InfoSnapshot extends MetricSnapshot {
         private Builder() {
         }
 
-        public Builder addDataPoint(InfoDataPointSnapshot data) {
-            dataPoints.add(data);
+        /**
+         * Add a data point. Call multiple times for adding multiple data points.
+         */
+        public Builder dataPoint(InfoDataPointSnapshot dataPoint) {
+            dataPoints.add(dataPoint);
             return this;
         }
 
         @Override
-        public Builder withUnit(Unit unit) {
+        public Builder unit(Unit unit) {
             throw new IllegalArgumentException("Info metric cannot have a unit.");
         }
 
@@ -93,9 +103,5 @@ public final class InfoSnapshot extends MetricSnapshot {
         protected Builder self() {
             return this;
         }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
     }
 }

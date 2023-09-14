@@ -11,7 +11,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
 
     /**
      * To create a new {@link GaugeSnapshot}, you can either call the constructor directly or use
-     * the builder with {@link GaugeSnapshot#newBuilder()}.
+     * the builder with {@link GaugeSnapshot#builder()}.
      *
      * @param metadata see {@link MetricMetadata} for naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
@@ -21,8 +21,8 @@ public final class GaugeSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<GaugeDataPointSnapshot> getData() {
-        return (List<GaugeDataPointSnapshot>) data;
+    public List<GaugeDataPointSnapshot> getDataPoints() {
+        return (List<GaugeDataPointSnapshot>) dataPoints;
     }
 
     public static final class GaugeDataPointSnapshot extends DataPointSnapshot {
@@ -32,7 +32,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
 
         /**
          * To create a new {@link GaugeDataPointSnapshot}, you can either call the constructor directly or use the
-         * Builder with {@link GaugeDataPointSnapshot#newBuilder()}.
+         * Builder with {@link GaugeDataPointSnapshot#builder()}.
          *
          * @param value    the gauge value.
          * @param labels   must not be null. Use {@link Labels#EMPTY} if there are no labels.
@@ -64,6 +64,10 @@ public final class GaugeSnapshot extends MetricSnapshot {
             return exemplar;
         }
 
+        public static Builder builder() {
+            return new Builder();
+        }
+
         public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
             private Exemplar exemplar = null;
@@ -75,7 +79,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
             /**
              * Gauge value. This is required.
              */
-            public Builder withValue(double value) {
+            public Builder value(double value) {
                 this.value = value;
                 return this;
             }
@@ -83,7 +87,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
             /**
              * Optional
              */
-            public Builder withExemplar(Exemplar exemplar) {
+            public Builder exemplar(Exemplar exemplar) {
                 this.exemplar = exemplar;
                 return this;
             }
@@ -100,10 +104,10 @@ public final class GaugeSnapshot extends MetricSnapshot {
                 return this;
             }
         }
+    }
 
-        public static Builder newBuilder() {
-            return new Builder();
-        }
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends MetricSnapshot.Builder<Builder> {
@@ -113,8 +117,11 @@ public final class GaugeSnapshot extends MetricSnapshot {
         private Builder() {
         }
 
-        public Builder addDataPoint(GaugeDataPointSnapshot data) {
-            dataPoints.add(data);
+        /**
+         * Add a data point. This can be alled multiple times to add multiple data points.
+         */
+        public Builder dataPoint(GaugeDataPointSnapshot dataPoint) {
+            dataPoints.add(dataPoint);
             return this;
         }
 
@@ -126,9 +133,5 @@ public final class GaugeSnapshot extends MetricSnapshot {
         protected Builder self() {
             return this;
         }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
     }
 }

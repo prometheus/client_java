@@ -31,7 +31,7 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
 
     /**
      * To create a new {@link NativeHistogramBuckets} instance, you can either use one of the static {@code of(...)}
-     * methods, or use {@link NativeHistogramBuckets#newBuilder()}.
+     * methods, or use {@link NativeHistogramBuckets#builder()}.
      * @param bucketIndexes see class javadoc of {@link NativeHistogramBuckets}. May be empty.
      * @param counts must have the same length as bucketIndexes
      */
@@ -44,7 +44,7 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
 
     /**
      * To create a new {@link NativeHistogramBuckets} instance, you can either use one of the static {@code of(...)}
-     * methods, or use {@link NativeHistogramBuckets#newBuilder()}.
+     * methods, or use {@link NativeHistogramBuckets#builder()}.
      * @param bucketIndexes see class javadoc of {@link NativeHistogramBuckets}. May be empty.
      * @param counts must have the same size as bucketIndexes
      */
@@ -135,7 +135,7 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
         }
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -146,7 +146,10 @@ public class NativeHistogramBuckets implements Iterable<NativeHistogramBucket> {
 
         private Builder() {}
 
-        public Builder addBucket(int bucketIndex, long count) {
+        /**
+         * Add a native histogram bucket. Call multiple times to add multiple buckets.
+         */
+        public Builder bucket(int bucketIndex, long count) {
             bucketIndexes.add(bucketIndex);
             counts.add(count);
             return this;

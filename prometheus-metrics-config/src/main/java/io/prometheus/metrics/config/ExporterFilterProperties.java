@@ -64,7 +64,7 @@ public class ExporterFilterProperties {
         return new ExporterFilterProperties(allowedNames, excludedNames, allowedPrefixes, excludedPrefixes, prefix);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -81,7 +81,7 @@ public class ExporterFilterProperties {
         /**
          * Only allowed metric names will be exposed.
          */
-        public Builder withAllowedNames(String... allowedNames) {
+        public Builder allowedNames(String... allowedNames) {
             this.allowedNames = Arrays.asList(allowedNames);
             return this;
         }
@@ -89,7 +89,7 @@ public class ExporterFilterProperties {
         /**
          * Excluded metric names will not be exposed.
          */
-        public Builder withExcludedNames(String... excludedNames) {
+        public Builder excludedNames(String... excludedNames) {
             this.excludedNames = Arrays.asList(excludedNames);
             return this;
         }
@@ -97,7 +97,7 @@ public class ExporterFilterProperties {
         /**
          * Only metrics with a name starting with an allowed prefix will be exposed.
          */
-        public Builder withAllowedPrefixes(String... allowedPrefixes) {
+        public Builder allowedPrefixes(String... allowedPrefixes) {
             this.allowedPrefixes = Arrays.asList(allowedPrefixes);
             return this;
         }
@@ -105,7 +105,7 @@ public class ExporterFilterProperties {
         /**
          * Metrics with a name starting with an excluded prefix will not be exposed.
          */
-        public Builder withExcludedPrefixes(String... excludedPrefixes) {
+        public Builder excludedPrefixes(String... excludedPrefixes) {
             this.excludedPrefixes = Arrays.asList(excludedPrefixes);
             return this;
         }

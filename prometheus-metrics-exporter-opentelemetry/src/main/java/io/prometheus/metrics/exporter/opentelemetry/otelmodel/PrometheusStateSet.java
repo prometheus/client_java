@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PrometheusStateSet extends PrometheusData<DoublePointData> implements SumData<DoublePointData> {
 
@@ -19,7 +18,7 @@ public class PrometheusStateSet extends PrometheusData<DoublePointData> implemen
     public PrometheusStateSet(StateSetSnapshot snapshot, long currentTimeMillis) {
         super(MetricDataType.DOUBLE_SUM);
         this.points = new ArrayList<>();
-        for (StateSetSnapshot.StateSetDataPointSnapshot dataPoint : snapshot.getData()) {
+        for (StateSetSnapshot.StateSetDataPointSnapshot dataPoint : snapshot.getDataPoints()) {
             for (int i=0; i<dataPoint.size(); i++) {
                 this.points.add(toOtelDataPoint(snapshot, dataPoint, i, currentTimeMillis));
             }

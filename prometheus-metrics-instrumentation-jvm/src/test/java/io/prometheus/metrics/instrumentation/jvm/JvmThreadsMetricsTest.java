@@ -49,9 +49,9 @@ public class JvmThreadsMetricsTest {
     @Test
     public void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmThreadsMetrics.newBuilder()
-                .withThreadBean(mockThreadsBean)
-                .withIsNativeImage(false)
+        JvmThreadsMetrics.builder()
+                .threadBean(mockThreadsBean)
+                .isNativeImage(false)
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
@@ -90,14 +90,14 @@ public class JvmThreadsMetricsTest {
 
     @Test
     public void testIgnoredMetricNotScraped() {
-        MetricNameFilter filter = MetricNameFilter.newBuilder()
+        MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_threads_deadlocked")
                 .build();
 
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmThreadsMetrics.newBuilder()
-                .withThreadBean(mockThreadsBean)
-                .withIsNativeImage(false)
+        JvmThreadsMetrics.builder()
+                .threadBean(mockThreadsBean)
+                .isNativeImage(false)
                 .register(registry);
         registry.scrape(filter);
 
@@ -108,7 +108,7 @@ public class JvmThreadsMetricsTest {
     @Test
     public void testInvalidThreadIds() {
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmThreadsMetrics.newBuilder().register(registry);
+        JvmThreadsMetrics.builder().register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
         // Number of threads to create with invalid thread ids
@@ -142,7 +142,7 @@ public class JvmThreadsMetricsTest {
         Map<String, Double> result = new HashMap<>();
         for (MetricSnapshot snapshot : snapshots) {
             if (snapshot.getMetadata().getName().equals("jvm_threads_state")) {
-                for (GaugeSnapshot.GaugeDataPointSnapshot data : ((GaugeSnapshot) snapshot).getData()) {
+                for (GaugeSnapshot.GaugeDataPointSnapshot data : ((GaugeSnapshot) snapshot).getDataPoints()) {
                     String state = data.getLabels().get("state");
                     Assert.assertNotNull(state);
                     result.put(state, data.getValue());

@@ -62,11 +62,11 @@ public class OpenTelemetryExporter {
         return resourceBuilder.build();
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -89,7 +89,7 @@ public class OpenTelemetryExporter {
             this.config = config;
         }
 
-        public Builder withRegistry(PrometheusRegistry registry) {
+        public Builder registry(PrometheusRegistry registry) {
             this.registry = registry;
             return this;
         }
@@ -101,7 +101,7 @@ public class OpenTelemetryExporter {
          * <p>
          * See OpenTelemetry's <a href="https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_protocol">OTEL_EXPORTER_OTLP_PROTOCOL</a>.
          */
-        public Builder withProtocol(String protocol) {
+        public Builder protocol(String protocol) {
             if (!protocol.equals("grpc") && !protocol.equals("http/protobuf")) {
                 throw new IllegalArgumentException(protocol + ": Unsupported protocol. Expecting grpc or http/protobuf");
             }
@@ -122,17 +122,18 @@ public class OpenTelemetryExporter {
          * <p>
          * See OpenTelemetry's <a href="https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_metrics_endpoint">OTEL_EXPORTER_OTLP_METRICS_ENDPOINT</a>.
          */
-        public Builder withEndpoint(String endpoint) {
+        public Builder endpoint(String endpoint) {
             this.endpoint = endpoint;
             return this;
         }
 
         /**
          * Add an HTTP header to be applied to outgoing requests.
+         * Call multiple times to add multiple headers.
          * <p>
          * See OpenTelemetry's <a href="https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers">OTEL_EXPORTER_OTLP_HEADERS</a>.
          */
-        public Builder addHeader(String name, String value) {
+        public Builder header(String name, String value) {
             this.headers.put(name, value);
             return this;
         }
@@ -143,7 +144,7 @@ public class OpenTelemetryExporter {
          * Like OpenTelemetry's <a href="https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#periodic-metric-reader">OTEL_METRIC_EXPORT_INTERVAL</a>,
          * but in seconds rather than milliseconds.
          */
-        public Builder withIntervalSeconds(int intervalSeconds) {
+        public Builder intervalSeconds(int intervalSeconds) {
             if (intervalSeconds <= 0) {
                 throw new IllegalStateException(intervalSeconds + ": expecting a push interval > 0s");
             }
@@ -157,7 +158,7 @@ public class OpenTelemetryExporter {
          * Like OpenTelemetry's <a href="https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_metrics_timeout">OTEL_EXPORTER_OTLP_METRICS_TIMEOUT</a>,
          * but in seconds rather than milliseconds.
          */
-        public Builder withTimeoutSeconds(int timeoutSeconds) {
+        public Builder timeoutSeconds(int timeoutSeconds) {
             if (timeoutSeconds <= 0) {
                 throw new IllegalStateException(timeoutSeconds + ": expecting a push interval > 0s");
             }
@@ -172,7 +173,7 @@ public class OpenTelemetryExporter {
          * <p>
          * See {@code service.name} in OpenTelemetry's <a href="https://opentelemetry.io/docs/specs/otel/resource/semantic_conventions/#service">Resource Semantic Conventions</a>.
          */
-        public Builder withServiceName(String serviceName) {
+        public Builder serviceName(String serviceName) {
             this.serviceName = serviceName;
             return this;
         }
@@ -182,7 +183,7 @@ public class OpenTelemetryExporter {
          * <p>
          * See {@code service.namespace} in OpenTelemetry's <a href="https://opentelemetry.io/docs/specs/otel/resource/semantic_conventions/#service-experimental">Resource Semantic Conventions</a>.
          */
-        public Builder withServiceNamespace(String serviceNamespace) {
+        public Builder serviceNamespace(String serviceNamespace) {
             this.serviceNamespace = serviceNamespace;
             return this;
         }
@@ -192,7 +193,7 @@ public class OpenTelemetryExporter {
          * <p>
          * See {@code service.instance.id} in OpenTelemetry's <a href="https://opentelemetry.io/docs/specs/otel/resource/semantic_conventions/#service-experimental">Resource Semantic Conventions</a>.
          */
-        public Builder withServiceInstanceId(String serviceInstanceId) {
+        public Builder serviceInstanceId(String serviceInstanceId) {
             this.serviceInstanceId = serviceInstanceId;
             return this;
         }
@@ -202,17 +203,17 @@ public class OpenTelemetryExporter {
          * <p>
          * See {@code service.version} in OpenTelemetry's <a href="https://opentelemetry.io/docs/specs/otel/resource/semantic_conventions/#service-experimental">Resource Semantic Conventions</a>.
          */
-        public Builder withServiceVersion(String serviceVersion) {
+        public Builder serviceVersion(String serviceVersion) {
             this.serviceVersion = serviceVersion;
             return this;
         }
 
         /**
-         * Add a resource attribute.
+         * Add a resource attribute. Call multiple times to add multiple resource attributes.
          * <p>
          * See OpenTelemetry's <a href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration">OTEL_RESOURCE_ATTRIBUTES</a>.
          */
-        public Builder addResourceAttribute(String name, String value) {
+        public Builder resourceAttribute(String name, String value) {
             this.resourceAttributes.put(name, value);
             return this;
         }

@@ -15,7 +15,7 @@ public class Main {
 
     public static void main(String[] args) throws LifecycleException {
 
-        JvmMetrics.newBuilder().register();
+        JvmMetrics.builder().register();
 
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(8081);

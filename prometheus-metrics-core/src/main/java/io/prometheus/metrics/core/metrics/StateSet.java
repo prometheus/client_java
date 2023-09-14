@@ -3,7 +3,6 @@ package io.prometheus.metrics.core.metrics;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.core.datapoints.StateSetDataPoint;
 
@@ -36,15 +35,15 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusN
  *
  * public static void main(String[] args) {
  *
- *     StateSet stateSet = StateSet.newBuilder()
- *             .withName("feature_flags")
- *             .withHelp("Feature flags")
- *             .withLabelNames("env")
- *             .withStates(Feature.class)
+ *     StateSet stateSet = StateSet.builder()
+ *             .name("feature_flags")
+ *             .help("Feature flags")
+ *             .labelNames("env")
+ *             .states(Feature.class)
  *             .register();
  *
- *     stateSet.withLabelValues("dev").setFalse(FEATURE_1);
- *     stateSet.withLabelValues("dev").setTrue(FEATURE_2);
+ *     stateSet.labelValues("dev").setFalse(FEATURE_1);
+ *     stateSet.labelValues("dev").setTrue(FEATURE_2);
  * }
  * }</pre>
  * The example above shows how to use a StateSet with an enum.
@@ -144,11 +143,11 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
         }
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -163,14 +162,14 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
         /**
          * Declare the states that should be represented by this StateSet.
          */
-        public Builder withStates(Class<? extends Enum<?>> enumClass) {
-            return withStates(Stream.of(enumClass.getEnumConstants()).map(Enum::toString).toArray(String[]::new));
+        public Builder states(Class<? extends Enum<?>> enumClass) {
+            return states(Stream.of(enumClass.getEnumConstants()).map(Enum::toString).toArray(String[]::new));
         }
 
         /**
          * Declare the states that should be represented by this StateSet.
          */
-        public Builder withStates(String... stateNames) {
+        public Builder states(String... stateNames) {
             if (stateNames.length == 0) {
                 throw new IllegalArgumentException("states cannot be empty");
             }

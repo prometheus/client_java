@@ -15,7 +15,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
 
     /**
      * To create a new {@link StateSetSnapshot}, you can either call the constructor directly or use
-     * the builder with {@link StateSetSnapshot#newBuilder()}.
+     * the builder with {@link StateSetSnapshot#builder()}.
      *
      * @param metadata See {@link MetricMetadata} for more naming conventions.
      * @param data     the constructor will create a sorted copy of the collection.
@@ -29,7 +29,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
         if (getMetadata().hasUnit()) {
             throw new IllegalArgumentException("An state set metric cannot have a unit.");
         }
-        for (StateSetDataPointSnapshot entry : getData()) {
+        for (StateSetDataPointSnapshot entry : getDataPoints()) {
             if (entry.getLabels().contains(getMetadata().getPrometheusName())) {
                 throw new IllegalArgumentException("Label name " + getMetadata().getPrometheusName() + " is reserved.");
             }
@@ -37,8 +37,8 @@ public final class StateSetSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public List<StateSetDataPointSnapshot> getData() {
-        return (List<StateSetDataPointSnapshot>) data;
+    public List<StateSetDataPointSnapshot> getDataPoints() {
+        return (List<StateSetDataPointSnapshot>) dataPoints;
     }
 
 
@@ -48,7 +48,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
 
         /**
          * To create a new {@link StateSetDataPointSnapshot}, you can either call the constructor directly or use the
-         * Builder with {@link StateSetDataPointSnapshot#newBuilder()}.
+         * Builder with {@link StateSetDataPointSnapshot#builder()}.
          *
          * @param names  state names. Must have at least 1 entry.
          *               The constructor will create a copy of the array.
@@ -142,6 +142,10 @@ public final class StateSetSnapshot extends MetricSnapshot {
             values[i] = tmpValue;
         }
 
+        public static Builder builder() {
+            return new Builder();
+        }
+
         public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
             private final ArrayList<String> names = new ArrayList<>();
@@ -149,7 +153,10 @@ public final class StateSetSnapshot extends MetricSnapshot {
 
             private Builder() {}
 
-            public Builder addState(String name, boolean value) {
+            /**
+             * Add a state. Call multple times to add multiple states.
+             */
+            public Builder state(String name, boolean value) {
                 names.add(name);
                 values.add(value);
                 return this;
@@ -167,10 +174,6 @@ public final class StateSetSnapshot extends MetricSnapshot {
                 }
                 return new StateSetDataPointSnapshot(names.toArray(new String[]{}), valuesArray, labels, scrapeTimestampMillis);
             }
-        }
-
-        public static Builder newBuilder() {
-            return new Builder();
         }
     }
 
@@ -192,6 +195,10 @@ public final class StateSetSnapshot extends MetricSnapshot {
         }
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder extends MetricSnapshot.Builder<Builder> {
 
         private final List<StateSetDataPointSnapshot> dataPoints = new ArrayList<>();
@@ -199,13 +206,16 @@ public final class StateSetSnapshot extends MetricSnapshot {
         private Builder() {
         }
 
-        public Builder addDataPoint(StateSetDataPointSnapshot data) {
-            dataPoints.add(data);
+        /**
+         * Add a data point. Call multiple times to add multiple data points.
+         */
+        public Builder dataPoint(StateSetDataPointSnapshot dataPoint) {
+            dataPoints.add(dataPoint);
             return this;
         }
 
         @Override
-        public Builder withUnit(Unit unit) {
+        public Builder unit(Unit unit) {
             throw new IllegalArgumentException("StateSet metric cannot have a unit.");
         }
 
@@ -217,9 +227,5 @@ public final class StateSetSnapshot extends MetricSnapshot {
         protected Builder self() {
             return this;
         }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
     }
 }

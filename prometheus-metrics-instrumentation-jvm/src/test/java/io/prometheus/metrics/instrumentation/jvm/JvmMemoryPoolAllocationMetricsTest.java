@@ -16,7 +16,7 @@ public class JvmMemoryPoolAllocationMetricsTest {
     @Test
     public void testListenerLogic() {
         PrometheusRegistry registry = new PrometheusRegistry();
-        Counter counter = Counter.newBuilder().withName("test").withLabelNames("pool").register(registry);
+        Counter counter = Counter.builder().name("test").labelNames("pool").register(registry);
         AllocationCountingNotificationListener listener = new AllocationCountingNotificationListener(counter);
 
         // Increase by 123
@@ -51,7 +51,7 @@ public class JvmMemoryPoolAllocationMetricsTest {
     private double getCountByPool(String metricName, String poolName, MetricSnapshots snapshots) {
         for (MetricSnapshot snapshot : snapshots) {
             if (snapshot.getMetadata().getPrometheusName().equals(metricName)) {
-                for (CounterSnapshot.CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getData()) {
+                for (CounterSnapshot.CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getDataPoints()) {
                     if (data.getLabels().get("pool").equals(poolName)) {
                         return data.getValue();
                     }

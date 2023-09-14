@@ -14,7 +14,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        JvmMetrics.newBuilder().register();
+        JvmMetrics.builder().register();
 
         // Note: uptime_seconds_total is not a great example:
         // The built-in JvmMetrics have an out-of-the-box metric named process_start_time_seconds
@@ -22,14 +22,14 @@ public class Main {
         // run the Prometheus query
         //     time() - process_start_time_seconds
         // rather than creating a custom uptime metric.
-        Counter counter = Counter.newBuilder()
-                .withName("uptime_seconds_total")
-                .withHelp("total number of seconds since this application was started")
-                .withUnit(Unit.SECONDS)
+        Counter counter = Counter.builder()
+                .name("uptime_seconds_total")
+                .help("total number of seconds since this application was started")
+                .unit(Unit.SECONDS)
                 .register();
 
-        HTTPServer server = HTTPServer.newBuilder()
-                .withPort(9400)
+        HTTPServer server = HTTPServer.builder()
+                .port(9400)
                 .buildAndStart();
 
         System.out.println("HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");

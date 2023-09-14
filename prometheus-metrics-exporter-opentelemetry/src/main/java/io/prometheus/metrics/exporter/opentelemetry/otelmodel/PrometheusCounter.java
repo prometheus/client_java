@@ -8,7 +8,6 @@ import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 class PrometheusCounter extends PrometheusData<DoublePointData> implements SumData<DoublePointData> {
@@ -17,7 +16,7 @@ class PrometheusCounter extends PrometheusData<DoublePointData> implements SumDa
 
     public PrometheusCounter(CounterSnapshot snapshot, long currentTimeMillis) {
         super(MetricDataType.DOUBLE_SUM);
-        this.points = snapshot.getData().stream()
+        this.points = snapshot.getDataPoints().stream()
                 .map(dataPoint -> toOtelDataPoint(dataPoint, currentTimeMillis))
                 .collect(Collectors.toList());
     }

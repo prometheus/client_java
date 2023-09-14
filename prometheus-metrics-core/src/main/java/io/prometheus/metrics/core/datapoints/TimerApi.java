@@ -14,14 +14,14 @@ public interface TimerApi {
     /**
      * Start a {@code Timer}. Example:
      * <pre>{@code
-     * Histogram histogram = Histogram.newBuilder()
-     *         .withName("http_request_duration_seconds")
-     *         .withHelp("HTTP request service time in seconds")
-     *         .withUnit(SECONDS)
-     *         .withLabelNames("method", "path")
+     * Histogram histogram = Histogram.builder()
+     *         .name("http_request_duration_seconds")
+     *         .help("HTTP request service time in seconds")
+     *         .unit(SECONDS)
+     *         .labelNames("method", "path")
      *         .register();
      *
-     * try (Timer timer = histogram.withLabelValues("GET", "/").startTimer()) {
+     * try (Timer timer = histogram.labelValues("GET", "/").startTimer()) {
      *     // duration of this code block will be observed.
      * }
      * }</pre>
@@ -33,14 +33,14 @@ public interface TimerApi {
     /**
      * Observe the duration of the {@code func} call. Example:
      * <pre>{@code
-     * Histogram histogram = Histogram.newBuilder()
-     *         .withName("request_duration_seconds")
-     *         .withHelp("HTTP request service time in seconds")
-     *         .withUnit(SECONDS)
-     *         .withLabelNames("method", "path")
+     * Histogram histogram = Histogram.builder()
+     *         .name("request_duration_seconds")
+     *         .help("HTTP request service time in seconds")
+     *         .unit(SECONDS)
+     *         .labelNames("method", "path")
      *         .register();
      *
-     * histogram2.withLabelValues("GET", "/").time(() -> {
+     * histogram2.labelValues("GET", "/").time(() -> {
      *     // duration of this code block will be observed.
      * });
      * }</pre>

@@ -14,10 +14,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Info metric. Example:
  * <pre>{@code
- * Info info = Info.newBuilder()
- *         .withName("java_runtime_info")
- *         .withHelp("Java runtime info")
- *         .withLabelNames("env", "version", "vendor", "runtime")
+ * Info info = Info.builder()
+ *         .name("java_runtime_info")
+ *         .help("Java runtime info")
+ *         .labelNames("env", "version", "vendor", "runtime")
  *         .register();
  *
  * String version = System.getProperty("java.runtime.version", "unknown");
@@ -87,11 +87,11 @@ public class Info extends MetricWithFixedMetadata {
         return new InfoSnapshot(getMetadata(), data);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -104,11 +104,11 @@ public class Info extends MetricWithFixedMetadata {
         /**
          * The {@code _info} suffix will automatically be appended if it's missing.
          * <pre>{@code
-         * Info info1 = Info.newBuilder()
-         *     .withName("runtime_info")
+         * Info info1 = Info.builder()
+         *     .name("runtime_info")
          *     .build();
-         * Info info2 = Info.newBuilder()
-         *     .withName("runtime")
+         * Info info2 = Info.builder()
+         *     .name("runtime")
          *     .build();
          * }</pre>
          * In the example above both {@code info1} and {@code info2} will be named {@code "runtime_info"} in Prometheus.
@@ -118,15 +118,15 @@ public class Info extends MetricWithFixedMetadata {
          * is {@code false}.
          */
         @Override
-        public Builder withName(String name) {
-            return super.withName(stripInfoSuffix(name));
+        public Builder name(String name) {
+            return super.name(stripInfoSuffix(name));
         }
 
         /**
          * Throws an {@link UnsupportedOperationException} because Info metrics cannot have a unit.
          */
         @Override
-        public Builder withUnit(Unit unit) {
+        public Builder unit(Unit unit) {
             if (unit != null) {
                 throw new UnsupportedOperationException("Info metrics cannot have a unit.");
             }

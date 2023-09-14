@@ -37,8 +37,8 @@ public class JvmGarbageCollectorMetricsTest {
     @Test
     public void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmGarbageCollectorMetrics.newBuilder()
-                .withGarbageCollectorBeans(Arrays.asList(mockGcBean1, mockGcBean2))
+        JvmGarbageCollectorMetrics.builder()
+                .garbageCollectorBeans(Arrays.asList(mockGcBean1, mockGcBean2))
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
@@ -57,13 +57,13 @@ public class JvmGarbageCollectorMetricsTest {
 
     @Test
     public void testIgnoredMetricNotScraped() {
-        MetricNameFilter filter = MetricNameFilter.newBuilder()
+        MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_gc_collection_seconds")
                 .build();
 
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmGarbageCollectorMetrics.newBuilder()
-                .withGarbageCollectorBeans(Arrays.asList(mockGcBean1, mockGcBean2))
+        JvmGarbageCollectorMetrics.builder()
+                .garbageCollectorBeans(Arrays.asList(mockGcBean1, mockGcBean2))
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape(filter);
 

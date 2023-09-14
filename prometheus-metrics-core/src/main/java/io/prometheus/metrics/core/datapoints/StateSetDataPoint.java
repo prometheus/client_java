@@ -8,24 +8,24 @@ package io.prometheus.metrics.core.datapoints;
 public interface StateSetDataPoint extends DataPoint {
 
     /**
-     * {@code state} must be one of the states from when the {@code StateSet} was created with {@link io.prometheus.metrics.core.metrics.StateSet.Builder#withStates(String...)}.
+     * {@code state} must be one of the states from when the {@code StateSet} was created with {@link io.prometheus.metrics.core.metrics.StateSet.Builder#states(String...)}.
      */
     void setTrue(String state);
 
     /**
-     * {@code state} must be one of the states from when the {@code StateSet} was created with {@link io.prometheus.metrics.core.metrics.StateSet.Builder#withStates(String...)}.
+     * {@code state} must be one of the states from when the {@code StateSet} was created with {@link io.prometheus.metrics.core.metrics.StateSet.Builder#states(String...)}.
      */
     void setFalse(String state);
 
     /**
-     * {@code state} must be one of the states from when the {@code StateSet} was created with {@link io.prometheus.metrics.core.metrics.StateSet.Builder#withStates(Class<? extends Enum<?>>)}.
+     * {@code state} must be one of the states from when the {@code StateSet} was created with {@link io.prometheus.metrics.core.metrics.StateSet.Builder#states(Class<? extends Enum<?>>)}.
      */
     default void setTrue(Enum<?> state) {
         setTrue(state.toString());
     }
 
     /**
-     * {@code state} must be one of the states from when the {@code StateSet} was created with {@link io.prometheus.metrics.core.metrics.StateSet.Builder#withStates(Class<? extends Enum<?>>)}.
+     * {@code state} must be one of the states from when the {@code StateSet} was created with {@link io.prometheus.metrics.core.metrics.StateSet.Builder#states(Class<? extends Enum<?>>)}.
      */
     default void setFalse(Enum<?> state) {
         setFalse(state.toString());

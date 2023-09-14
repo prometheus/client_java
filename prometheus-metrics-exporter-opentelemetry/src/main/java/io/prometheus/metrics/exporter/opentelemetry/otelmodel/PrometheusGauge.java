@@ -7,7 +7,6 @@ import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.metrics.data.Met
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 class PrometheusGauge extends PrometheusData<DoublePointData> implements GaugeData<DoublePointData> {
@@ -16,7 +15,7 @@ class PrometheusGauge extends PrometheusData<DoublePointData> implements GaugeDa
 
     public PrometheusGauge(GaugeSnapshot snapshot, long currentTimeMillis) {
         super(MetricDataType.DOUBLE_GAUGE);
-        this.points = snapshot.getData().stream()
+        this.points = snapshot.getDataPoints().stream()
                 .map(dataPoint -> toOtelDataPoint(dataPoint, currentTimeMillis))
                 .collect(Collectors.toList());
     }

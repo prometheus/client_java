@@ -29,16 +29,16 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * Histogram metric. Example usage:
  * <pre>{@code
- * Histogram histogram = Histogram.newBuilder()
- *         .withName("http_request_duration_seconds")
- *         .withHelp("HTTP request service time in seconds")
- *         .withUnit(SECONDS)
- *         .withLabelNames("method", "path", "status_code")
+ * Histogram histogram = Histogram.builder()
+ *         .name("http_request_duration_seconds")
+ *         .help("HTTP request service time in seconds")
+ *         .unit(SECONDS)
+ *         .labelNames("method", "path", "status_code")
  *         .register();
  *
  * long start = System.nanoTime();
  * // do something
- * histogram.withLabelValues("GET", "/", "200").observe(Unit.nanosToSeconds(System.nanoTime() - start));
+ * histogram.labelValues("GET", "/", "200").observe(Unit.nanosToSeconds(System.nanoTime() - start));
  * }</pre>
  * Prometheus supports two internal representations of histograms:
  * <ol>
@@ -636,11 +636,11 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         }
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -669,16 +669,16 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
         @Override
         protected MetricsProperties toProperties() {
-            return MetricsProperties.newBuilder()
-                    .withExemplarsEnabled(exemplarsEnabled)
-                    .withHistogramNativeOnly(nativeOnly)
-                    .withHistogramClassicOnly(classicOnly)
-                    .withHistogramClassicUpperBounds(classicUpperBounds)
-                    .withHistogramNativeInitialSchema(nativeInitialSchema)
-                    .withHistogramNativeMinZeroThreshold(nativeMinZeroThreshold)
-                    .withHistogramNativeMaxZeroThreshold(nativeMaxZeroThreshold)
-                    .withHistogramNativeMaxNumberOfBuckets(nativeMaxNumberOfBuckets)
-                    .withHistogramNativeResetDurationSeconds(nativeResetDurationSeconds)
+            return MetricsProperties.builder()
+                    .exemplarsEnabled(exemplarsEnabled)
+                    .histogramNativeOnly(nativeOnly)
+                    .histogramClassicOnly(classicOnly)
+                    .histogramClassicUpperBounds(classicUpperBounds)
+                    .histogramNativeInitialSchema(nativeInitialSchema)
+                    .histogramNativeMinZeroThreshold(nativeMinZeroThreshold)
+                    .histogramNativeMaxZeroThreshold(nativeMaxZeroThreshold)
+                    .histogramNativeMaxNumberOfBuckets(nativeMaxNumberOfBuckets)
+                    .histogramNativeResetDurationSeconds(nativeResetDurationSeconds)
                     .build();
         }
 
@@ -687,16 +687,16 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          */
         @Override
         public MetricsProperties getDefaultProperties() {
-            return MetricsProperties.newBuilder()
-                    .withExemplarsEnabled(true)
-                    .withHistogramNativeOnly(false)
-                    .withHistogramClassicOnly(false)
-                    .withHistogramClassicUpperBounds(DEFAULT_CLASSIC_UPPER_BOUNDS)
-                    .withHistogramNativeInitialSchema(DEFAULT_NATIVE_INITIAL_SCHEMA)
-                    .withHistogramNativeMinZeroThreshold(DEFAULT_NATIVE_MIN_ZERO_THRESHOLD)
-                    .withHistogramNativeMaxZeroThreshold(DEFAULT_NATIVE_MAX_ZERO_THRESHOLD)
-                    .withHistogramNativeMaxNumberOfBuckets(DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS)
-                    .withHistogramNativeResetDurationSeconds(DEFAULT_NATIVE_RESET_DURATION_SECONDS)
+            return MetricsProperties.builder()
+                    .exemplarsEnabled(true)
+                    .histogramNativeOnly(false)
+                    .histogramClassicOnly(false)
+                    .histogramClassicUpperBounds(DEFAULT_CLASSIC_UPPER_BOUNDS)
+                    .histogramNativeInitialSchema(DEFAULT_NATIVE_INITIAL_SCHEMA)
+                    .histogramNativeMinZeroThreshold(DEFAULT_NATIVE_MIN_ZERO_THRESHOLD)
+                    .histogramNativeMaxZeroThreshold(DEFAULT_NATIVE_MAX_ZERO_THRESHOLD)
+                    .histogramNativeMaxNumberOfBuckets(DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS)
+                    .histogramNativeResetDurationSeconds(DEFAULT_NATIVE_RESET_DURATION_SECONDS)
                     .build();
         }
 
@@ -735,7 +735,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * If the +Inf bucket is missing it will be added.
          * If upperBounds contains duplicates the duplicates will be removed.
          */
-        public Builder withClassicBuckets(double... upperBounds) {
+        public Builder classicBuckets(double... upperBounds) {
             this.classicUpperBounds = upperBounds;
             for (double bound : upperBounds) {
                 if (Double.isNaN(bound)) {
@@ -755,7 +755,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * @param width is the width of each bucket
          * @param count is the total number of buckets, including start
          */
-        public Builder withClassicLinearBuckets(double start, double width, int count) {
+        public Builder classicLinearBuckets(double start, double width, int count) {
             this.classicUpperBounds = new double[count];
             // Use BigDecimal to avoid weird bucket boundaries like 0.7000000000000001.
             BigDecimal s = new BigDecimal(Double.toString(start));
@@ -776,7 +776,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * @param factor growth factor
          * @param count  total number of buckets, including start
          */
-        public Builder withClassicExponentialBuckets(double start, double factor, int count) {
+        public Builder classicExponentialBuckets(double start, double factor, int count) {
             classicUpperBounds = new double[count];
             for (int i = 0; i < count; i++) {
                 classicUpperBounds[i] = start * Math.pow(factor, i);
@@ -792,7 +792,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * Schema is Prometheus terminology. In OpenTelemetry it's called "scale".
          * <p>
          * Note that the schema for a histogram may be automatically decreased at runtime if the number
-         * of native histogram buckets exceeds {@link #withNativeMaxNumberOfBuckets(int)}.
+         * of native histogram buckets exceeds {@link #nativeMaxNumberOfBuckets(int)}.
          * <p>
          * The following table shows:
          * <ul>
@@ -845,7 +845,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          *     </tr>
          * </table>
          */
-        public Builder withNativeInitialSchema(int nativeSchema) {
+        public Builder nativeInitialSchema(int nativeSchema) {
             if (nativeSchema < -4 || nativeSchema > 8) {
                 throw new IllegalArgumentException("Unsupported native histogram schema " + nativeSchema + ": expecting -4 <= schema <= 8.");
             }
@@ -863,7 +863,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * <p>
          * Default is {@link Builder#DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS}.
          */
-        public Builder withNativeMaxZeroThreshold(double nativeMaxZeroThreshold) {
+        public Builder nativeMaxZeroThreshold(double nativeMaxZeroThreshold) {
             if (nativeMaxZeroThreshold < 0) {
                 throw new IllegalArgumentException("Illegal native max zero threshold " + nativeMaxZeroThreshold + ": must be >= 0");
             }
@@ -881,7 +881,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * <p>
          * Default is {@link Builder#DEFAULT_NATIVE_MIN_ZERO_THRESHOLD}.
          */
-        public Builder withNativeMinZeroThreshold(double nativeMinZeroThreshold) {
+        public Builder nativeMinZeroThreshold(double nativeMinZeroThreshold) {
             if (nativeMinZeroThreshold < 0) {
                 throw new IllegalArgumentException("Illegal native min zero threshold " + nativeMinZeroThreshold + ": must be >= 0");
             }
@@ -892,25 +892,25 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         /**
          * Limit the number of native buckets.
          * <p>
-         * If the number of native buckets exceeds the maximum, the {@link #withNativeInitialSchema(int)} is decreased,
+         * If the number of native buckets exceeds the maximum, the {@link #nativeInitialSchema(int)} is decreased,
          * i.e. the resolution of the histogram is decreased to reduce the number of buckets.
          * <p>
          * Default is {@link Builder#DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS}.
          */
-        public Builder withNativeMaxNumberOfBuckets(int nativeMaxBuckets) {
+        public Builder nativeMaxNumberOfBuckets(int nativeMaxBuckets) {
             this.nativeMaxNumberOfBuckets = nativeMaxBuckets;
             return this;
         }
 
         /**
-         * If the histogram needed to be scaled down because {@link #withNativeMaxNumberOfBuckets(int)} was exceeded,
-         * reset the histogram after a certain time interval to go back to the original {@link #withNativeInitialSchema(int)}.
+         * If the histogram needed to be scaled down because {@link #nativeMaxNumberOfBuckets(int)} was exceeded,
+         * reset the histogram after a certain time interval to go back to the original {@link #nativeInitialSchema(int)}.
          * <p>
          * Reset means all values are set to zero. A good value might be 24h or 7d.
          * <p>
          * Default is no reset.
          */
-        public Builder withNativeResetDuration(long duration, TimeUnit unit) {
+        public Builder nativeResetDuration(long duration, TimeUnit unit) {
             // TODO: reset interval isn't tested yet
             if (duration <= 0) {
                 throw new IllegalArgumentException(duration + ": value > 0 expected");

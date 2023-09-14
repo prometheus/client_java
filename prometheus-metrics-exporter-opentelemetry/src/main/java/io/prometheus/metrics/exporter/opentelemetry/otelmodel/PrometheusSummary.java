@@ -16,7 +16,7 @@ class PrometheusSummary extends PrometheusData<SummaryPointData> implements Summ
 
     PrometheusSummary(SummarySnapshot snapshot, long currentTimeMillis) {
         super(MetricDataType.SUMMARY);
-        this.points = snapshot.getData().stream()
+        this.points = snapshot.getDataPoints().stream()
                 .map(dataPoint -> toOtelDataPoint(dataPoint, currentTimeMillis))
                 .collect(Collectors.toList());
     }

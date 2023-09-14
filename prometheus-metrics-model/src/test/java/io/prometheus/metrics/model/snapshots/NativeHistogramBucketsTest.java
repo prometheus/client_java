@@ -1,7 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.NativeHistogramBucket;
-import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,9 +9,9 @@ public class NativeHistogramBucketsTest {
 
     @Test
     public void testGoodCase() {
-        NativeHistogramBuckets buckets = NativeHistogramBuckets.newBuilder()
-                .addBucket(-10, 12)
-                .addBucket(120, 17)
+        NativeHistogramBuckets buckets = NativeHistogramBuckets.builder()
+                .bucket(-10, 12)
+                .bucket(120, 17)
                 .build();
         Assert.assertEquals(2, buckets.size());
         Assert.assertEquals(-10, buckets.getBucketIndex(0));
@@ -24,16 +22,16 @@ public class NativeHistogramBucketsTest {
 
     @Test
     public void testEmpty() {
-        NativeHistogramBuckets buckets = NativeHistogramBuckets.newBuilder().build();
+        NativeHistogramBuckets buckets = NativeHistogramBuckets.builder().build();
         Assert.assertEquals(0, buckets.size());
     }
 
     @Test
     public void testSort() {
-        NativeHistogramBuckets buckets = NativeHistogramBuckets.newBuilder()
-                .addBucket(7, 4)
-                .addBucket(2, 0)
-                .addBucket(5, 3)
+        NativeHistogramBuckets buckets = NativeHistogramBuckets.builder()
+                .bucket(7, 4)
+                .bucket(2, 0)
+                .bucket(5, 3)
                 .build();
         Assert.assertEquals(3, buckets.size());
         Assert.assertEquals(2, buckets.getBucketIndex(0));
@@ -53,9 +51,9 @@ public class NativeHistogramBucketsTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testImmutable() {
-        NativeHistogramBuckets buckets = NativeHistogramBuckets.newBuilder()
-                .addBucket(1, 1)
-                .addBucket(2, 1)
+        NativeHistogramBuckets buckets = NativeHistogramBuckets.builder()
+                .bucket(1, 1)
+                .bucket(2, 1)
                 .build();
         Iterator<NativeHistogramBucket> iterator = buckets.iterator();
         iterator.next();

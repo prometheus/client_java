@@ -16,7 +16,7 @@ public class Main {
         // The following call will register all metrics from the old CollectorRegistry.defaultRegistry
         // with the new PrometheusRegistry.defaultRegistry.
 
-        SimpleclientCollector.newBuilder().register();
+        SimpleclientCollector.builder().register();
 
         // Register a counter with the old CollectorRegistry.
         // It doesn't matter whether the counter is registered before or after bridging with PrometheusRegistry.
@@ -30,8 +30,8 @@ public class Main {
 
         // Expose metrics from the new PrometheusRegistry. This should contain the events_total metric.
 
-        HTTPServer server = HTTPServer.newBuilder()
-                .withPort(9400)
+        HTTPServer server = HTTPServer.builder()
+                .port(9400)
                 .buildAndStart();
 
         System.out.println("HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");

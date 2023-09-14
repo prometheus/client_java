@@ -15,7 +15,7 @@ public class Main {
         // Note: Some JVM metrics are also defined as OpenTelemetry's semantic conventions.
         // We have plans to implement a configuration option for JvmMetrics to use OpenTelemetry
         // naming conventions rather than the Prometheus names.
-        JvmMetrics.newBuilder().register();
+        JvmMetrics.builder().register();
 
         // Note: uptime_seconds_total is not a great example:
         // The built-in JvmMetrics have an out-of-the-box metric named process_start_time_seconds
@@ -23,14 +23,14 @@ public class Main {
         // run the Prometheus query
         //     time() - process_start_time_seconds
         // rather than creating a custom uptime metric.
-        Counter counter = Counter.newBuilder()
-                .withName("uptime_seconds_total")
-                .withHelp("total number of seconds since this application was started")
-                .withUnit(Unit.SECONDS)
+        Counter counter = Counter.builder()
+                .name("uptime_seconds_total")
+                .help("total number of seconds since this application was started")
+                .unit(Unit.SECONDS)
                 .register();
 
-        OpenTelemetryExporter.newBuilder()
-                .withIntervalSeconds(5)
+        OpenTelemetryExporter.builder()
+                .intervalSeconds(5)
                 .buildAndStart();
 
         while (true) {

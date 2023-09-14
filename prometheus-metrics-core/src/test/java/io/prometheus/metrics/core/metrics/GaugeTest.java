@@ -26,8 +26,8 @@ public class GaugeTest {
 
     @Before
     public void setUp() {
-        noLabels = Gauge.newBuilder().withName("nolabels").build();
-        labels = Gauge.newBuilder().withName("labels").withLabelNames("l").build();
+        noLabels = Gauge.builder().name("nolabels").build();
+        labels = Gauge.builder().name("labels").labelNames("l").build();
         origSpanContext = SpanContextSupplier.getSpanContext();
     }
 
@@ -37,7 +37,7 @@ public class GaugeTest {
     }
 
     private GaugeSnapshot.GaugeDataPointSnapshot getData(Gauge gauge, String... labels) {
-        return ((GaugeSnapshot) gauge.collect()).getData().stream()
+        return ((GaugeSnapshot) gauge.collect()).getDataPoints().stream()
                 .filter(data -> data.getLabels().equals(Labels.of(labels)))
                 .findAny()
                 .orElseThrow(RuntimeException::new);
@@ -94,34 +94,34 @@ public class GaugeTest {
 
     @Test
     public void testLabels() {
-        labels.withLabelValues("a").inc();
-        labels.withLabelValues("b").inc(3);
+        labels.labelValues("a").inc();
+        labels.labelValues("b").inc(3);
         assertEquals(1.0, getValue(labels, "l", "a"), .001);
         assertEquals(3.0, getValue(labels, "l", "b"), .001);
     }
 
     @Test
     public void testExemplarSampler() throws Exception {
-        final Exemplar exemplar1 = Exemplar.newBuilder()
-                .withValue(2.0)
-                .withTraceId("abc")
-                .withSpanId("123")
+        final Exemplar exemplar1 = Exemplar.builder()
+                .value(2.0)
+                .traceId("abc")
+                .spanId("123")
                 .build();
-        final Exemplar exemplar2 = Exemplar.newBuilder()
-                .withValue(6.5)
-                .withTraceId("def")
-                .withSpanId("456")
+        final Exemplar exemplar2 = Exemplar.builder()
+                .value(6.5)
+                .traceId("def")
+                .spanId("456")
                 .build();
-        final Exemplar exemplar3 = Exemplar.newBuilder()
-                .withValue(7.0)
-                .withTraceId("123")
-                .withSpanId("abc")
+        final Exemplar exemplar3 = Exemplar.builder()
+                .value(7.0)
+                .traceId("123")
+                .spanId("abc")
                 .build();
-        final Exemplar customExemplar = Exemplar.newBuilder()
-                .withValue(8.0)
-                .withTraceId("bab")
-                .withSpanId("cdc")
-                .withLabels(Labels.of("test", "test"))
+        final Exemplar customExemplar = Exemplar.builder()
+                .value(8.0)
+                .traceId("bab")
+                .spanId("cdc")
+                .labels(Labels.of("test", "test"))
                 .build();
         SpanContext spanContext = new SpanContext() {
             private int callNumber = 0;
@@ -171,8 +171,8 @@ public class GaugeTest {
             public void markCurrentSpanAsExemplar() {
             }
         };
-        Gauge gauge = Gauge.newBuilder()
-                .withName("my_gauge")
+        Gauge gauge = Gauge.builder()
+                .name("my_gauge")
                 .build();
 
         ExemplarSamplerConfigTestUtil.setMinRetentionPeriodMillis(gauge, exemplarMinAgeMillis);
@@ -210,8 +210,8 @@ public class GaugeTest {
 
     @Test
     public void testExemplarSamplerDisabled() {
-        Gauge gauge = Gauge.newBuilder()
-                .withName("test")
+        Gauge gauge = Gauge.builder()
+                .name("test")
                 .withoutExemplars()
                 .build();
         gauge.setWithExemplar(3.0, Labels.of("a", "b"));

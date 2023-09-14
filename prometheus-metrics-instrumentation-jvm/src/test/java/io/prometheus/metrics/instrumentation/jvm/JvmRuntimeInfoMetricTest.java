@@ -14,10 +14,10 @@ public class JvmRuntimeInfoMetricTest {
     @Test
     public void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
-        JvmRuntimeInfoMetric.newBuilder()
-                .withVersion("1.8.0_382-b05")
-                .withVendor("Oracle Corporation")
-                .withRuntime("OpenJDK Runtime Environment")
+        JvmRuntimeInfoMetric.builder()
+                .version("1.8.0_382-b05")
+                .vendor("Oracle Corporation")
+                .runtime("OpenJDK Runtime Environment")
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 

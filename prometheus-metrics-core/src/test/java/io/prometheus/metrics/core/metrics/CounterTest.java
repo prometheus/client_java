@@ -36,11 +36,11 @@ public class CounterTest {
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        noLabels = Counter.newBuilder().withName("nolabels").build();
-        labels = Counter.newBuilder().withName("labels")
-                .withHelp("help")
-                .withUnit(Unit.SECONDS)
-                .withLabelNames("l")
+        noLabels = Counter.builder().name("nolabels").build();
+        labels = Counter.builder().name("labels")
+                .help("help")
+                .unit(Unit.SECONDS)
+                .labelNames("l")
                 .build();
         origSpanContext = SpanContextSupplier.getSpanContext();
         ExemplarSamplerConfigTestUtil.setSampleIntervalMillis(noLabels, exemplarSampleIntervalMillis);
@@ -55,7 +55,7 @@ public class CounterTest {
     }
 
     private CounterSnapshot.CounterDataPointSnapshot getData(Counter counter, String... labels) {
-        return counter.collect().getData().stream()
+        return counter.collect().getDataPoints().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("counter with labels " + labels + " not found"));
@@ -67,7 +67,7 @@ public class CounterTest {
 
 
     private int getNumberOfLabels(Counter counter) {
-        return ((CounterSnapshot) counter.collect()).getData().size();
+        return ((CounterSnapshot) counter.collect()).getDataPoints().size();
     }
 
     @Test
@@ -76,9 +76,9 @@ public class CounterTest {
         assertEquals(1.0, getValue(noLabels), .001);
         noLabels.inc(2);
         assertEquals(3.0, getValue(noLabels), .001);
-        noLabels.withLabelValues().inc(4);
+        noLabels.labelValues().inc(4);
         assertEquals(7.0, getValue(noLabels), .001);
-        noLabels.withLabelValues().inc();
+        noLabels.labelValues().inc();
         assertEquals(8.0, getValue(noLabels), .001);
     }
 
@@ -98,10 +98,10 @@ public class CounterTest {
     @Test
     public void testLabels() {
         assertEquals(0, getNumberOfLabels(labels));
-        labels.withLabelValues("a").inc();
+        labels.labelValues("a").inc();
         assertEquals(1, getNumberOfLabels(labels));
         assertEquals(1.0, getValue(labels, "l", "a"), .001);
-        labels.withLabelValues("b").inc(3);
+        labels.labelValues("b").inc(3);
         assertEquals(2, getNumberOfLabels(labels));
         assertEquals(1.0, getValue(labels, "l", "a"), .001);
         assertEquals(3.0, getValue(labels, "l", "b"), .001);
@@ -114,9 +114,9 @@ public class CounterTest {
                 "my_counter_seconds_total", "my.counter.seconds.total",
                 "my_counter", "my.counter",
                 "my_counter_seconds", "my.counter.seconds"}) {
-            Counter counter = Counter.newBuilder()
-                    .withName(name)
-                    .withUnit(Unit.SECONDS)
+            Counter counter = Counter.builder()
+                    .name(name)
+                    .unit(Unit.SECONDS)
                     .build();
             Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(counter.collect());
             assertEquals("name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }", TextFormat.printer().shortDebugString(protobufData));
@@ -126,21 +126,21 @@ public class CounterTest {
     @Test
     public void testSnapshotComplete() {
         long before = System.currentTimeMillis();
-        Counter counter = Counter.newBuilder()
-                .withName("test_seconds_total")
-                .withUnit(Unit.SECONDS)
-                .withHelp("help message")
-                .withConstLabels(Labels.of("const1name", "const1value", "const2name", "const2value"))
-                .withLabelNames("path", "status")
+        Counter counter = Counter.builder()
+                .name("test_seconds_total")
+                .unit(Unit.SECONDS)
+                .help("help message")
+                .constLabels(Labels.of("const1name", "const1value", "const2name", "const2value"))
+                .labelNames("path", "status")
                 .build();
-        counter.withLabelValues("/", "200").inc(2);
-        counter.withLabelValues("/", "500").inc();
+        counter.labelValues("/", "200").inc(2);
+        counter.labelValues("/", "500").inc();
         CounterSnapshot snapshot = (CounterSnapshot) counter.collect();
         Assert.assertEquals("test_seconds", snapshot.getMetadata().getName());
         Assert.assertEquals("seconds", snapshot.getMetadata().getUnit().toString());
         Assert.assertEquals("help message", snapshot.getMetadata().getHelp());
-        Assert.assertEquals(2, snapshot.getData().size());
-        Iterator<CounterSnapshot.CounterDataPointSnapshot> iter = snapshot.getData().iterator();
+        Assert.assertEquals(2, snapshot.getDataPoints().size());
+        Iterator<CounterSnapshot.CounterDataPointSnapshot> iter = snapshot.getDataPoints().iterator();
         // data is ordered by labels, so 200 comes before 500
         CounterSnapshot.CounterDataPointSnapshot data = iter.next();
         Assert.assertEquals(Labels.of("const1name", "const1value", "const2name", "const2value", "path", "/", "status", "200"), data.getLabels());
@@ -179,26 +179,26 @@ public class CounterTest {
 
     @Test
     public void testExemplarSampler() throws Exception {
-        final Exemplar exemplar1 = Exemplar.newBuilder()
-                .withValue(2.0)
-                .withTraceId("abc")
-                .withSpanId("123")
+        final Exemplar exemplar1 = Exemplar.builder()
+                .value(2.0)
+                .traceId("abc")
+                .spanId("123")
                 .build();
-        final Exemplar exemplar2 = Exemplar.newBuilder()
-                .withValue(1.0)
-                .withTraceId("def")
-                .withSpanId("456")
+        final Exemplar exemplar2 = Exemplar.builder()
+                .value(1.0)
+                .traceId("def")
+                .spanId("456")
                 .build();
-        final Exemplar exemplar3 = Exemplar.newBuilder()
-                .withValue(1.0)
-                .withTraceId("123")
-                .withSpanId("abc")
+        final Exemplar exemplar3 = Exemplar.builder()
+                .value(1.0)
+                .traceId("123")
+                .spanId("abc")
                 .build();
-        final Exemplar customExemplar = Exemplar.newBuilder()
-                .withValue(1.0)
-                .withTraceId("bab")
-                .withSpanId("cdc")
-                .withLabels(Labels.of("test", "test"))
+        final Exemplar customExemplar = Exemplar.builder()
+                .value(1.0)
+                .traceId("bab")
+                .spanId("cdc")
+                .labels(Labels.of("test", "test"))
                 .build();
         SpanContext spanContext = new SpanContext() {
             private int callNumber = 0;
@@ -248,8 +248,8 @@ public class CounterTest {
             public void markCurrentSpanAsExemplar() {
             }
         };
-        Counter counter = Counter.newBuilder()
-                .withName("count_total")
+        Counter counter = Counter.builder()
+                .name("count_total")
                 .build();
 
         SpanContextSupplier.setSpanContext(spanContext);
@@ -287,9 +287,9 @@ public class CounterTest {
 
     @Test
     public void testExemplarSamplerDisabled() {
-        Counter counter = Counter.newBuilder()
+        Counter counter = Counter.builder()
                 //.withExemplarSampler((inc, prev) -> {throw new RuntimeException("unexpected call to exemplar sampler");})
-                .withName("count_total")
+                .name("count_total")
                 .withoutExemplars()
                 .build();
         counter.incWithExemplar(3.0, Labels.of("a", "b"));
@@ -300,19 +300,19 @@ public class CounterTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstLabelsFirst() {
-        Counter.newBuilder()
-                .withName("test_total")
-                .withConstLabels(Labels.of("const_a", "const_b"))
-                .withLabelNames("const.a")
+        Counter.builder()
+                .name("test_total")
+                .constLabels(Labels.of("const_a", "const_b"))
+                .labelNames("const.a")
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstLabelsSecond() {
-        Counter.newBuilder()
-                .withName("test_total")
-                .withLabelNames("const.a")
-                .withConstLabels(Labels.of("const_a", "const_b"))
+        Counter.builder()
+                .name("test_total")
+                .labelNames("const.a")
+                .constLabels(Labels.of("const_a", "const_b"))
                 .build();
     }
 }

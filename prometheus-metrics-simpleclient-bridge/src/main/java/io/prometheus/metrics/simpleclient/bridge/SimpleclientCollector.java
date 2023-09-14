@@ -2,6 +2,7 @@ package io.prometheus.metrics.simpleclient.bridge;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
@@ -35,15 +36,15 @@ import java.util.function.Predicate;
  * Usage: The following line will register all metrics from a {@code simpleclient} {@link CollectorRegistry#defaultRegistry}
  * to a {@code prometheus-metrics} {@link PrometheusRegistry#defaultRegistry}:
  * <pre>{@code
- * SimpleclientCollector.newBuilder().register();
+ * SimpleclientCollector.builder().register();
  * }</pre>
  * <p>
  * If you have custom registries (not the default registries), use the following snippet:
  * <pre>{@code
  * CollectorRegistry simpleclientRegistry = ...;
  * PrometheusRegistry prometheusRegistry = ...;
- * SimpleclientCollector.newBuilder()
- *     .withCollectorRegistry(simpleclientRegistry)
+ * SimpleclientCollector.builder()
+ *     .collectorRegistry(simpleclientRegistry)
  *     .register(prometheusRegistry);
  * }</pre>
  */
@@ -71,33 +72,33 @@ public class SimpleclientCollector implements MultiCollector {
     }
 
     private MetricSnapshots convert(Enumeration<Collector.MetricFamilySamples> samples) {
-        MetricSnapshots.Builder result = MetricSnapshots.newBuilder();
+        MetricSnapshots.Builder result = MetricSnapshots.builder();
         while (samples.hasMoreElements()) {
             Collector.MetricFamilySamples sample = samples.nextElement();
             switch (sample.type) {
                 case COUNTER:
-                    result.addMetricSnapshot(convertCounter(sample));
+                    result.metricSnapshot(convertCounter(sample));
                     break;
                 case GAUGE:
-                    result.addMetricSnapshot(convertGauge(sample));
+                    result.metricSnapshot(convertGauge(sample));
                     break;
                 case HISTOGRAM:
-                    result.addMetricSnapshot(convertHistogram(sample, false));
+                    result.metricSnapshot(convertHistogram(sample, false));
                     break;
                 case GAUGE_HISTOGRAM:
-                    result.addMetricSnapshot(convertHistogram(sample, true));
+                    result.metricSnapshot(convertHistogram(sample, true));
                     break;
                 case SUMMARY:
-                    result.addMetricSnapshot(convertSummary(sample));
+                    result.metricSnapshot(convertSummary(sample));
                     break;
                 case INFO:
-                    result.addMetricSnapshot(convertInfo(sample));
+                    result.metricSnapshot(convertInfo(sample));
                     break;
                 case STATE_SET:
-                    result.addMetricSnapshot(convertStateSet(sample));
+                    result.metricSnapshot(convertStateSet(sample));
                     break;
                 case UNKNOWN:
-                    result.addMetricSnapshot(convertUnknown(sample));
+                    result.metricSnapshot(convertUnknown(sample));
                     break;
                 default:
                     throw new IllegalStateException(sample.type + ": Unexpected metric type");
@@ -107,141 +108,141 @@ public class SimpleclientCollector implements MultiCollector {
     }
 
     private MetricSnapshot convertCounter(Collector.MetricFamilySamples samples) {
-        CounterSnapshot.Builder counter = CounterSnapshot.newBuilder()
-                .withName(stripSuffix(samples.name, "_total"))
-                .withHelp(samples.help)
-                .withUnit(convertUnit(samples));
+        CounterSnapshot.Builder counter = CounterSnapshot.builder()
+                .name(stripSuffix(samples.name, "_total"))
+                .help(samples.help)
+                .unit(convertUnit(samples));
         Map<Labels, CounterSnapshot.CounterDataPointSnapshot.Builder> dataPoints = new HashMap<>();
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
             Labels labels = Labels.of(sample.labelNames, sample.labelValues);
-            CounterSnapshot.CounterDataPointSnapshot.Builder dataPoint = dataPoints.computeIfAbsent(labels, l -> CounterSnapshot.CounterDataPointSnapshot.newBuilder().withLabels(labels));
+            CounterSnapshot.CounterDataPointSnapshot.Builder dataPoint = dataPoints.computeIfAbsent(labels, l -> CounterSnapshot.CounterDataPointSnapshot.builder().labels(labels));
             if (sample.name.endsWith("_created")) {
-                dataPoint.withCreatedTimestampMillis((long) Unit.secondsToMillis(sample.value));
+                dataPoint.createdTimestampMillis((long) Unit.secondsToMillis(sample.value));
             } else {
-                dataPoint.withValue(sample.value).withExemplar(convertExemplar(sample.exemplar));
+                dataPoint.value(sample.value).exemplar(convertExemplar(sample.exemplar));
                 if (sample.timestampMs != null) {
-                    dataPoint.withScrapeTimestampMillis(sample.timestampMs);
+                    dataPoint.scrapeTimestampMillis(sample.timestampMs);
                 }
             }
         }
         for (CounterSnapshot.CounterDataPointSnapshot.Builder dataPoint : dataPoints.values()) {
-            counter.addDataPoint(dataPoint.build());
+            counter.dataPoint(dataPoint.build());
         }
         return counter.build();
     }
 
     private MetricSnapshot convertGauge(Collector.MetricFamilySamples samples) {
-        GaugeSnapshot.Builder gauge = GaugeSnapshot.newBuilder()
-                .withName(samples.name)
-                .withHelp(samples.help)
-                .withUnit(convertUnit(samples));
+        GaugeSnapshot.Builder gauge = GaugeSnapshot.builder()
+                .name(samples.name)
+                .help(samples.help)
+                .unit(convertUnit(samples));
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
-            GaugeSnapshot.GaugeDataPointSnapshot.Builder dataPoint = GaugeSnapshot.GaugeDataPointSnapshot.newBuilder()
-                    .withValue(sample.value)
-                    .withLabels(Labels.of(sample.labelNames, sample.labelValues))
-                    .withExemplar(convertExemplar(sample.exemplar));
+            GaugeSnapshot.GaugeDataPointSnapshot.Builder dataPoint = GaugeSnapshot.GaugeDataPointSnapshot.builder()
+                    .value(sample.value)
+                    .labels(Labels.of(sample.labelNames, sample.labelValues))
+                    .exemplar(convertExemplar(sample.exemplar));
             if (sample.timestampMs != null) {
-                dataPoint.withScrapeTimestampMillis(sample.timestampMs);
+                dataPoint.scrapeTimestampMillis(sample.timestampMs);
             }
-            gauge.addDataPoint(dataPoint.build());
+            gauge.dataPoint(dataPoint.build());
         }
         return gauge.build();
     }
 
     private MetricSnapshot convertHistogram(Collector.MetricFamilySamples samples, boolean isGaugeHistogram) {
-        HistogramSnapshot.Builder histogram = HistogramSnapshot.newBuilder()
-                .withName(samples.name)
-                .withHelp(samples.help)
-                .withUnit(convertUnit(samples));
+        HistogramSnapshot.Builder histogram = HistogramSnapshot.builder()
+                .name(samples.name)
+                .help(samples.help)
+                .unit(convertUnit(samples));
         if (isGaugeHistogram) {
-            histogram.asGaugeHistogram();
+            histogram.gaugeHistogram();
         }
         Map<Labels, HistogramSnapshot.HistogramDataPointSnapshot.Builder> dataPoints = new HashMap<>();
         Map<Labels, Map<Double, Long>> cumulativeBuckets = new HashMap<>();
         Map<Labels, Exemplars.Builder> exemplars = new HashMap<>();
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
             Labels labels = labelsWithout(sample, "le");
-            dataPoints.computeIfAbsent(labels, l -> HistogramSnapshot.HistogramDataPointSnapshot.newBuilder()
-                    .withLabels(labels));
+            dataPoints.computeIfAbsent(labels, l -> HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                    .labels(labels));
             cumulativeBuckets.computeIfAbsent(labels, l -> new HashMap<>());
-            exemplars.computeIfAbsent(labels, l -> Exemplars.newBuilder());
+            exemplars.computeIfAbsent(labels, l -> Exemplars.builder());
             if (sample.name.endsWith("_sum")) {
-                dataPoints.get(labels).withSum(sample.value);
+                dataPoints.get(labels).sum(sample.value);
             }
             if (sample.name.endsWith("_bucket")) {
                 addBucket(cumulativeBuckets.get(labels), sample);
             }
             if (sample.name.endsWith("_created")) {
-                dataPoints.get(labels).withCreatedTimestampMillis((long) Unit.secondsToMillis(sample.value));
+                dataPoints.get(labels).createdTimestampMillis((long) Unit.secondsToMillis(sample.value));
             }
             if (sample.exemplar != null) {
-                exemplars.get(labels).addExemplar(convertExemplar(sample.exemplar));
+                exemplars.get(labels).exemplar(convertExemplar(sample.exemplar));
             }
             if (sample.timestampMs != null) {
-                dataPoints.get(labels).withScrapeTimestampMillis(sample.timestampMs);
+                dataPoints.get(labels).scrapeTimestampMillis(sample.timestampMs);
             }
         }
         for (Labels labels : dataPoints.keySet()) {
-            histogram.addDataPoint(dataPoints.get(labels)
-                    .withClassicHistogramBuckets(makeBuckets(cumulativeBuckets.get(labels)))
-                    .withExemplars(exemplars.get(labels).build())
+            histogram.dataPoint(dataPoints.get(labels)
+                    .classicHistogramBuckets(makeBuckets(cumulativeBuckets.get(labels)))
+                    .exemplars(exemplars.get(labels).build())
                     .build());
         }
         return histogram.build();
     }
 
     private MetricSnapshot convertSummary(Collector.MetricFamilySamples samples) {
-        SummarySnapshot.Builder summary = SummarySnapshot.newBuilder()
-                .withName(samples.name)
-                .withHelp(samples.help)
-                .withUnit(convertUnit(samples));
+        SummarySnapshot.Builder summary = SummarySnapshot.builder()
+                .name(samples.name)
+                .help(samples.help)
+                .unit(convertUnit(samples));
         Map<Labels, SummarySnapshot.SummaryDataPointSnapshot.Builder> dataPoints = new HashMap<>();
         Map<Labels, Quantiles.Builder> quantiles = new HashMap<>();
         Map<Labels, Exemplars.Builder> exemplars = new HashMap<>();
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
             Labels labels = labelsWithout(sample, "quantile");
-            dataPoints.computeIfAbsent(labels, l -> SummarySnapshot.SummaryDataPointSnapshot.newBuilder()
-                    .withLabels(labels));
-            quantiles.computeIfAbsent(labels, l -> Quantiles.newBuilder());
-            exemplars.computeIfAbsent(labels, l -> Exemplars.newBuilder());
+            dataPoints.computeIfAbsent(labels, l -> SummarySnapshot.SummaryDataPointSnapshot.builder()
+                    .labels(labels));
+            quantiles.computeIfAbsent(labels, l -> Quantiles.builder());
+            exemplars.computeIfAbsent(labels, l -> Exemplars.builder());
             if (sample.name.endsWith("_sum")) {
-                dataPoints.get(labels).withSum(sample.value);
+                dataPoints.get(labels).sum(sample.value);
             } else if (sample.name.endsWith("_count")) {
-                dataPoints.get(labels).withCount((long) sample.value);
+                dataPoints.get(labels).count((long) sample.value);
             } else if (sample.name.endsWith("_created")) {
-                dataPoints.get(labels).withCreatedTimestampMillis((long) Unit.secondsToMillis(sample.value));
+                dataPoints.get(labels).createdTimestampMillis((long) Unit.secondsToMillis(sample.value));
             } else {
                 for (int i=0; i<sample.labelNames.size(); i++) {
                     if (sample.labelNames.get(i).equals("quantile")) {
-                        quantiles.get(labels).addQuantile(new Quantile(Double.parseDouble(sample.labelValues.get(i)), sample.value));
+                        quantiles.get(labels).quantile(new Quantile(Double.parseDouble(sample.labelValues.get(i)), sample.value));
                         break;
                     }
                 }
             }
             if (sample.exemplar != null) {
-                exemplars.get(labels).addExemplar(convertExemplar(sample.exemplar));
+                exemplars.get(labels).exemplar(convertExemplar(sample.exemplar));
             }
             if (sample.timestampMs != null) {
-                dataPoints.get(labels).withScrapeTimestampMillis(sample.timestampMs);
+                dataPoints.get(labels).scrapeTimestampMillis(sample.timestampMs);
             }
         }
         for (Labels labels : dataPoints.keySet()) {
-            summary.addDataPoint(dataPoints.get(labels)
-                    .withQuantiles(quantiles.get(labels).build())
-                    .withExemplars(exemplars.get(labels).build())
+            summary.dataPoint(dataPoints.get(labels)
+                    .quantiles(quantiles.get(labels).build())
+                    .exemplars(exemplars.get(labels).build())
                     .build());
         }
         return summary.build();
     }
 
     private MetricSnapshot convertStateSet(Collector.MetricFamilySamples samples) {
-        StateSetSnapshot.Builder stateSet = StateSetSnapshot.newBuilder()
-                .withName(samples.name)
-                .withHelp(samples.help);
+        StateSetSnapshot.Builder stateSet = StateSetSnapshot.builder()
+                .name(samples.name)
+                .help(samples.help);
         Map<Labels, StateSetSnapshot.StateSetDataPointSnapshot.Builder> dataPoints = new HashMap<>();
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
             Labels labels = labelsWithout(sample, sample.name);
-            dataPoints.computeIfAbsent(labels, l -> StateSetSnapshot.StateSetDataPointSnapshot.newBuilder().withLabels(labels));
+            dataPoints.computeIfAbsent(labels, l -> StateSetSnapshot.StateSetDataPointSnapshot.builder().labels(labels));
             String stateName = null;
             for (int i=0; i<sample.labelNames.size(); i++) {
                 if (sample.labelNames.get(i).equals(sample.name)) {
@@ -252,31 +253,31 @@ public class SimpleclientCollector implements MultiCollector {
             if (stateName == null) {
                 throw new IllegalStateException("Invalid StateSet metric: No state name found.");
             }
-            dataPoints.get(labels).addState(stateName, sample.value == 1.0);
+            dataPoints.get(labels).state(stateName, sample.value == 1.0);
             if (sample.timestampMs != null) {
-                dataPoints.get(labels).withScrapeTimestampMillis(sample.timestampMs);
+                dataPoints.get(labels).scrapeTimestampMillis(sample.timestampMs);
             }
         }
         for (StateSetSnapshot.StateSetDataPointSnapshot.Builder dataPoint : dataPoints.values()) {
-            stateSet.addDataPoint(dataPoint.build());
+            stateSet.dataPoint(dataPoint.build());
         }
         return stateSet.build();
     }
 
     private MetricSnapshot convertUnknown(Collector.MetricFamilySamples samples) {
-        UnknownSnapshot.Builder unknown = UnknownSnapshot.newBuilder()
-                .withName(samples.name)
-                .withHelp(samples.help)
-                .withUnit(convertUnit(samples));
+        UnknownSnapshot.Builder unknown = UnknownSnapshot.builder()
+                .name(samples.name)
+                .help(samples.help)
+                .unit(convertUnit(samples));
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
-            UnknownSnapshot.UnknownDataPointSnapshot.Builder dataPoint = UnknownSnapshot.UnknownDataPointSnapshot.newBuilder()
-                    .withValue(sample.value)
-                    .withLabels(Labels.of(sample.labelNames, sample.labelValues))
-                    .withExemplar(convertExemplar(sample.exemplar));
+            UnknownSnapshot.UnknownDataPointSnapshot.Builder dataPoint = UnknownSnapshot.UnknownDataPointSnapshot.builder()
+                    .value(sample.value)
+                    .labels(Labels.of(sample.labelNames, sample.labelValues))
+                    .exemplar(convertExemplar(sample.exemplar));
             if (sample.timestampMs != null) {
-                dataPoint.withScrapeTimestampMillis(sample.timestampMs);
+                dataPoint.scrapeTimestampMillis(sample.timestampMs);
             }
-            unknown.addDataPoint(dataPoint.build());
+            unknown.dataPoint(dataPoint.build());
         }
         return unknown.build();
     }
@@ -301,11 +302,11 @@ public class SimpleclientCollector implements MultiCollector {
         List<Double> upperBounds = new ArrayList<>(cumulativeBuckets.size());
         Collections.sort(upperBounds);
         upperBounds.addAll(cumulativeBuckets.keySet());
-        ClassicHistogramBuckets.Builder result = ClassicHistogramBuckets.newBuilder();
+        ClassicHistogramBuckets.Builder result = ClassicHistogramBuckets.builder();
         long previousCount = 0L;
         for (Double upperBound : upperBounds) {
             long cumulativeCount = cumulativeBuckets.get(upperBound);
-            result.addBucket(upperBound, cumulativeCount - previousCount);
+            result.bucket(upperBound, cumulativeCount - previousCount);
             previousCount = cumulativeCount;
         }
         return result.build();
@@ -334,22 +335,22 @@ public class SimpleclientCollector implements MultiCollector {
 
 
     private Labels labelsWithout(Collector.MetricFamilySamples.Sample sample, String excludedLabelName) {
-        Labels.Builder labels = Labels.newBuilder();
+        Labels.Builder labels = Labels.builder();
         for (int i = 0; i < sample.labelNames.size(); i++) {
             if (!sample.labelNames.get(i).equals(excludedLabelName)) {
-                labels.addLabel(sample.labelNames.get(i), sample.labelValues.get(i));
+                labels.label(sample.labelNames.get(i), sample.labelValues.get(i));
             }
         }
         return labels.build();
     }
 
     private MetricSnapshot convertInfo(Collector.MetricFamilySamples samples) {
-        InfoSnapshot.Builder info = InfoSnapshot.newBuilder()
-                .withName(stripSuffix(samples.name, "_info"))
-                .withHelp(samples.help);
+        InfoSnapshot.Builder info = InfoSnapshot.builder()
+                .name(stripSuffix(samples.name, "_info"))
+                .help(samples.help);
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
-            info.addDataPoint(InfoSnapshot.InfoDataPointSnapshot.newBuilder()
-                    .withLabels(Labels.of(sample.labelNames, sample.labelValues))
+            info.dataPoint(InfoSnapshot.InfoDataPointSnapshot.builder()
+                    .labels(Labels.of(sample.labelNames, sample.labelValues))
                     .build());
         }
         return info.build();
@@ -359,26 +360,40 @@ public class SimpleclientCollector implements MultiCollector {
         if (exemplar == null) {
             return null;
         }
-        Exemplar.Builder result = Exemplar.newBuilder().withValue(exemplar.getValue());
+        Exemplar.Builder result = Exemplar.builder().value(exemplar.getValue());
         if (exemplar.getTimestampMs() != null) {
-            result.withTimestampMillis(exemplar.getTimestampMs());
+            result.timestampMillis(exemplar.getTimestampMs());
         }
-        Labels.Builder labels = Labels.newBuilder();
+        Labels.Builder labels = Labels.builder();
         for (int i = 0; i < exemplar.getNumberOfLabels(); i++) {
-            labels.addLabel(exemplar.getLabelName(i), exemplar.getLabelValue(i));
+            labels.label(exemplar.getLabelName(i), exemplar.getLabelValue(i));
         }
-        return result.withLabels(labels.build()).build();
+        return result.labels(labels.build()).build();
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
+    /**
+     * Currently there are no configuration options for the SimpleclientCollector.
+     * However, we want to follow the pattern to pass the config everywhere so that
+     * we can introduce config options later without the need for API changes.
+     */
+    public static Builder builder(PrometheusProperties config) {
+        return new Builder(config);
+    }
+
+    public static Builder builder() {
+        return builder(PrometheusProperties.get());
     }
 
     public static class Builder {
-        private CollectorRegistry collectorRegistry;
-        private Builder() {}
 
-        public Builder withCollectorRegistry(CollectorRegistry registry) {
+        private final PrometheusProperties config;
+        private CollectorRegistry collectorRegistry;
+
+        private Builder(PrometheusProperties config) {
+            this.config = config;
+        }
+
+        public Builder collectorRegistry(CollectorRegistry registry) {
             this.collectorRegistry = registry;
             return this;
         }

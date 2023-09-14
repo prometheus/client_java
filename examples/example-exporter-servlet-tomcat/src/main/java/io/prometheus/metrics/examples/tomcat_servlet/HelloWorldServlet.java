@@ -21,17 +21,17 @@ public class HelloWorldServlet extends HttpServlet {
 
     // Note: The requests_total counter is not a great example, because the
     // request_duration_seconds histogram below also has a count with the number of requests.
-    private final Counter counter = Counter.newBuilder()
-            .withName("requests_total")
-            .withHelp("total number of requests")
-            .withLabelNames("http_status")
+    private final Counter counter = Counter.builder()
+            .name("requests_total")
+            .help("total number of requests")
+            .labelNames("http_status")
             .register();
 
-    private final Histogram histogram = Histogram.newBuilder()
-            .withName("request_duration_seconds")
-            .withHelp("request duration in seconds")
-            .withUnit(Unit.SECONDS)
-            .withLabelNames("http_status")
+    private final Histogram histogram = Histogram.builder()
+            .name("request_duration_seconds")
+            .help("request duration in seconds")
+            .unit(Unit.SECONDS)
+            .labelNames("http_status")
             .register();
 
     public HelloWorldServlet() {
@@ -50,8 +50,8 @@ public class HelloWorldServlet extends HttpServlet {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
-            counter.withLabelValues("200").inc();
-            histogram.withLabelValues("200").observe(nanosToSeconds(System.nanoTime() - start));
+            counter.labelValues("200").inc();
+            histogram.labelValues("200").observe(nanosToSeconds(System.nanoTime() - start));
         }
     }
 }

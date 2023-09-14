@@ -19,7 +19,7 @@ class PrometheusClassicHistogram extends PrometheusData<HistogramPointData> impl
 
     PrometheusClassicHistogram(HistogramSnapshot snapshot, long currentTimeMillis) {
         super(MetricDataType.HISTOGRAM);
-        this.points = snapshot.getData().stream()
+        this.points = snapshot.getDataPoints().stream()
                 .map(dataPoint -> toOtelDataPoint(dataPoint, currentTimeMillis))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

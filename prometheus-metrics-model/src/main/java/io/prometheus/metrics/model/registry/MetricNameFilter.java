@@ -89,7 +89,7 @@ public class MetricNameFilter implements Predicate<String> {
         return false;
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder();
     }
 

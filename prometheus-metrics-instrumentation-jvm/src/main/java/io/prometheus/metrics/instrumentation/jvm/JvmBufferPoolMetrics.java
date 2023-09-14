@@ -12,11 +12,11 @@ import java.util.List;
 /**
  * JVM Buffer Pool metrics. The {@link JvmBufferPoolMetrics} are registered as part of the {@link JvmMetrics} like this:
  * <pre>{@code
- *   JvmMetrics.newBuilder().register();
+ *   JvmMetrics.builder().register();
  * }</pre>
  * However, if you want only the {@link JvmBufferPoolMetrics} you can also register them directly:
  * <pre>{@code
- *   JvmBufferPoolMetrics.newBuilder().register();
+ *   JvmBufferPoolMetrics.builder().register();
  * }</pre>
  * Example metrics being exported:
  * <pre>
@@ -50,35 +50,35 @@ public class JvmBufferPoolMetrics {
 
     private void register(PrometheusRegistry registry) {
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(JVM_BUFFER_POOL_USED_BYTES)
-                .withHelp("Used bytes of a given JVM buffer pool.")
-                .withUnit(Unit.BYTES)
-                .withLabelNames("pool")
-                .withCallback(callback -> {
+        GaugeWithCallback.builder(config)
+                .name(JVM_BUFFER_POOL_USED_BYTES)
+                .help("Used bytes of a given JVM buffer pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(callback -> {
                     for (BufferPoolMXBean pool : bufferPoolBeans) {
                         callback.call(pool.getMemoryUsed(), pool.getName());
                     }
                 })
                 .register(registry);
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(JVM_BUFFER_POOL_CAPACITY_BYTES)
-                .withHelp("Bytes capacity of a given JVM buffer pool.")
-                .withUnit(Unit.BYTES)
-                .withLabelNames("pool")
-                .withCallback(callback -> {
+        GaugeWithCallback.builder(config)
+                .name(JVM_BUFFER_POOL_CAPACITY_BYTES)
+                .help("Bytes capacity of a given JVM buffer pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(callback -> {
                     for (BufferPoolMXBean pool : bufferPoolBeans) {
                         callback.call(pool.getTotalCapacity(), pool.getName());
                     }
                 })
                 .register(registry);
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(JVM_BUFFER_POOL_USED_BUFFERS)
-                .withHelp("Used buffers of a given JVM buffer pool.")
-                .withLabelNames("pool")
-                .withCallback(callback -> {
+        GaugeWithCallback.builder(config)
+                .name(JVM_BUFFER_POOL_USED_BUFFERS)
+                .help("Used buffers of a given JVM buffer pool.")
+                .labelNames("pool")
+                .callback(callback -> {
                     for (BufferPoolMXBean pool : bufferPoolBeans) {
                         callback.call(pool.getCount(), pool.getName());
                     }
@@ -86,11 +86,11 @@ public class JvmBufferPoolMetrics {
                 .register(registry);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -106,7 +106,7 @@ public class JvmBufferPoolMetrics {
         /**
          * Package private. For testing only.
          */
-        Builder withBufferPoolBeans(List<BufferPoolMXBean> bufferPoolBeans) {
+        Builder bufferPoolBeans(List<BufferPoolMXBean> bufferPoolBeans) {
             this.bufferPoolBeans = bufferPoolBeans;
             return this;
         }

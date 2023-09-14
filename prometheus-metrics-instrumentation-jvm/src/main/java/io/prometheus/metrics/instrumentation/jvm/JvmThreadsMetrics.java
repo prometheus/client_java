@@ -15,11 +15,11 @@ import java.util.Map;
 /**
  * JVM Thread metrics. The {@link JvmThreadsMetrics} are registered as part of the {@link JvmMetrics} like this:
  * <pre>{@code
- *   JvmMetrics.newBuilder().register();
+ *   JvmMetrics.builder().register();
  * }</pre>
  * However, if you want only the {@link JvmThreadsMetrics} you can also register them directly:
  * <pre>{@code
- *   JvmThreadMetrics.newBuilder().register();
+ *   JvmThreadMetrics.builder().register();
  * }</pre>
  * Example metrics being exported:
  * <pre>
@@ -75,49 +75,49 @@ public class JvmThreadsMetrics {
 
     private void register(PrometheusRegistry registry) {
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(JVM_THREADS_CURRENT)
-                .withHelp("Current thread count of a JVM")
-                .withCallback(callback -> callback.call(threadBean.getThreadCount()))
+        GaugeWithCallback.builder(config)
+                .name(JVM_THREADS_CURRENT)
+                .help("Current thread count of a JVM")
+                .callback(callback -> callback.call(threadBean.getThreadCount()))
                 .register(registry);
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(JVM_THREADS_DAEMON)
-                .withHelp("Daemon thread count of a JVM")
-                .withCallback(callback -> callback.call(threadBean.getDaemonThreadCount()))
+        GaugeWithCallback.builder(config)
+                .name(JVM_THREADS_DAEMON)
+                .help("Daemon thread count of a JVM")
+                .callback(callback -> callback.call(threadBean.getDaemonThreadCount()))
                 .register(registry);
 
-        GaugeWithCallback.newBuilder(config)
-                .withName(JVM_THREADS_PEAK)
-                .withHelp("Peak thread count of a JVM")
-                .withCallback(callback -> callback.call(threadBean.getPeakThreadCount()))
+        GaugeWithCallback.builder(config)
+                .name(JVM_THREADS_PEAK)
+                .help("Peak thread count of a JVM")
+                .callback(callback -> callback.call(threadBean.getPeakThreadCount()))
                 .register(registry);
 
-        CounterWithCallback.newBuilder(config)
-                .withName(JVM_THREADS_STARTED_TOTAL)
-                .withHelp("Started thread count of a JVM")
-                .withCallback(callback -> callback.call(threadBean.getTotalStartedThreadCount()))
+        CounterWithCallback.builder(config)
+                .name(JVM_THREADS_STARTED_TOTAL)
+                .help("Started thread count of a JVM")
+                .callback(callback -> callback.call(threadBean.getTotalStartedThreadCount()))
                 .register(registry);
 
         if (!isNativeImage) {
-            GaugeWithCallback.newBuilder(config)
-                    .withName(JVM_THREADS_DEADLOCKED)
-                    .withHelp("Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers")
-                    .withCallback(callback -> callback.call(nullSafeArrayLength(threadBean.findDeadlockedThreads())))
+            GaugeWithCallback.builder(config)
+                    .name(JVM_THREADS_DEADLOCKED)
+                    .help("Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers")
+                    .callback(callback -> callback.call(nullSafeArrayLength(threadBean.findDeadlockedThreads())))
                     .register(registry);
 
-            GaugeWithCallback.newBuilder(config)
-                    .withName(JVM_THREADS_DEADLOCKED_MONITOR)
-                    .withHelp("Cycles of JVM-threads that are in deadlock waiting to acquire object monitors")
-                    .withCallback(callback -> callback.call(nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())))
+            GaugeWithCallback.builder(config)
+                    .name(JVM_THREADS_DEADLOCKED_MONITOR)
+                    .help("Cycles of JVM-threads that are in deadlock waiting to acquire object monitors")
+                    .callback(callback -> callback.call(nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())))
                     .register(registry);
 
 
-            GaugeWithCallback.newBuilder(config)
-                    .withName(JVM_THREADS_STATE)
-                    .withHelp("Current count of threads by state")
-                    .withLabelNames("state")
-                    .withCallback(callback -> {
+            GaugeWithCallback.builder(config)
+                    .name(JVM_THREADS_STATE)
+                    .help("Current count of threads by state")
+                    .labelNames("state")
+                    .callback(callback -> {
                         Map<String, Integer> threadStateCounts = getThreadStateCountMap(threadBean);
                         for (Map.Entry<String, Integer> entry : threadStateCounts.entrySet()) {
                             callback.call(entry.getValue(), entry.getKey());
@@ -168,11 +168,11 @@ public class JvmThreadsMetrics {
         return null == array ? 0 : array.length;
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -189,7 +189,7 @@ public class JvmThreadsMetrics {
         /**
          * Package private. For testing only.
          */
-        Builder withThreadBean(ThreadMXBean threadBean) {
+        Builder threadBean(ThreadMXBean threadBean) {
             this.threadBean = threadBean;
             return this;
         }
@@ -197,7 +197,7 @@ public class JvmThreadsMetrics {
         /**
          * Package private. For testing only.
          */
-        Builder withIsNativeImage(boolean isNativeImage) {
+        Builder isNativeImage(boolean isNativeImage) {
             this.isNativeImage = isNativeImage;
             return this;
         }

@@ -5,11 +5,9 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.CounterDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
-import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,20 +15,18 @@ import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
-
 /**
  * Counter metric.
  * <p>
  * Example usage:
  * <pre>{@code
- * Counter requestCount = Counter.newBuilder()
- *     .withName("requests_total")
- *     .withHelp("Total number of requests")
- *     .withLabelNames("path", "status")
+ * Counter requestCount = Counter.builder()
+ *     .name("requests_total")
+ *     .help("Total number of requests")
+ *     .labelNames("path", "status")
  *     .register();
- * requestCount.withLabelValues("/hello-world", "200").inc();
- * requestCount.withLabelValues("/hello-world", "500").inc();
+ * requestCount.labelValues("/hello-world", "200").inc();
+ * requestCount.labelValues("/hello-world", "500").inc();
  * }</pre>
  */
 public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint> implements CounterDataPoint {
@@ -207,11 +203,11 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
         }
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -224,11 +220,11 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
         /**
          * The {@code _total} suffix will automatically be appended if it's missing.
          * <pre>{@code
-         * Counter c1 = Counter.newBuilder()
-         *     .withName("events_total")
+         * Counter c1 = Counter.builder()
+         *     .name("events_total")
          *     .build();
-         * Counter c2 = Counter.newBuilder()
-         *     .withName("events")
+         * Counter c2 = Counter.builder()
+         *     .name("events")
          *     .build();
          * }</pre>
          * In the example above both {@code c1} and {@code c2} would be named {@code "events_total"} in Prometheus.
@@ -238,8 +234,8 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
          * is {@code false}.
          */
         @Override
-        public Builder withName(String name) {
-            return super.withName(stripTotalSuffix(name));
+        public Builder name(String name) {
+            return super.name(stripTotalSuffix(name));
         }
 
         @Override

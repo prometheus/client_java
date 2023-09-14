@@ -27,7 +27,7 @@ public class Exemplars implements Iterable<Exemplar> {
     /**
      * Create a new Exemplars instance.
      * You can either create Exemplars with one of the static {@code Exemplars.of(...)} methods,
-     * or you can use the {@link Exemplars#newBuilder()}.
+     * or you can use the {@link Exemplars#builder()}.
      *
      * @param exemplars a copy of the exemplars collection will be created.
      */
@@ -38,7 +38,7 @@ public class Exemplars implements Iterable<Exemplar> {
     /**
      * Create a new Exemplars instance.
      * You can either create Exemplars with one of the static {@code Exemplars.of(...)} methods,
-     * or you can use the {@link Exemplars#newBuilder()}.
+     * or you can use the {@link Exemplars#builder()}.
      *
      * @param exemplars a copy of the exemplars array will be created.
      */
@@ -100,6 +100,10 @@ public class Exemplars implements Iterable<Exemplar> {
         return latest;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder {
 
         private final ArrayList<Exemplar> exemplars = new ArrayList<>();
@@ -107,12 +111,18 @@ public class Exemplars implements Iterable<Exemplar> {
         private Builder() {
         }
 
-        public Builder addExemplar(Exemplar exemplar) {
+        /**
+         * Add an exemplar. This can be called multiple times to add multiple exemplars.
+         */
+        public Builder exemplar(Exemplar exemplar) {
             exemplars.add(exemplar);
             return this;
         }
 
-        public Builder addExemplars(List<Exemplar> exemplars) {
+        /**
+         * Add all exemplars form the collection.
+         */
+        public Builder exemplars(Collection<Exemplar> exemplars) {
             this.exemplars.addAll(exemplars);
             return this;
         }
@@ -120,9 +130,5 @@ public class Exemplars implements Iterable<Exemplar> {
         public Exemplars build() {
             return Exemplars.of(exemplars);
         }
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
     }
 }

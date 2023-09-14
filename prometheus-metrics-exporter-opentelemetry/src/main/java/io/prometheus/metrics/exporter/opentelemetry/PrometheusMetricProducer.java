@@ -74,8 +74,8 @@ class PrometheusMetricProducer implements MetricProducer {
         for (MetricSnapshot snapshot : snapshots) {
             if (snapshot.getMetadata().getName().equals("target") && snapshot instanceof InfoSnapshot) {
                 InfoSnapshot targetInfo = (InfoSnapshot) snapshot;
-                if (targetInfo.getData().size() > 0) {
-                    InfoSnapshot.InfoDataPointSnapshot data = targetInfo.getData().get(0);
+                if (targetInfo.getDataPoints().size() > 0) {
+                    InfoSnapshot.InfoDataPointSnapshot data = targetInfo.getDataPoints().get(0);
                     Labels labels = data.getLabels();
                     for (int i = 0; i < labels.size(); i++) {
                         result.put(labels.getName(i), labels.getValue(i));
@@ -90,8 +90,8 @@ class PrometheusMetricProducer implements MetricProducer {
         for (MetricSnapshot snapshot : snapshots) {
             if (snapshot.getMetadata().getPrometheusName().equals("otel_scope") && snapshot instanceof InfoSnapshot) {
                 InfoSnapshot scopeInfo = (InfoSnapshot) snapshot;
-                if (scopeInfo.getData().size() > 0) {
-                    Labels labels = scopeInfo.getData().get(0).getLabels();
+                if (scopeInfo.getDataPoints().size() > 0) {
+                    Labels labels = scopeInfo.getDataPoints().get(0).getLabels();
                     String name = null;
                     String version = null;
                     AttributesBuilder attributesBuilder = Attributes.builder();

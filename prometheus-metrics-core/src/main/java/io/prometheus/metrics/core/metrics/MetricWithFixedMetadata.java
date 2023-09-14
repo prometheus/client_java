@@ -9,8 +9,6 @@ import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
-
 /**
  * Almost all metrics have fixed metadata, i.e. the metric name is known when the metric is created.
  * <p>
@@ -57,7 +55,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
             super(illegalLabelNames, properties);
         }
 
-        public B withName(String name) {
+        public B name(String name) {
             if (!PrometheusNaming.isValidMetricName(name)) {
                 throw new IllegalArgumentException("'" + name + "': Illegal metric name.");
             }
@@ -65,17 +63,17 @@ public abstract class MetricWithFixedMetadata extends Metric {
             return self();
         }
 
-        public B withUnit(Unit unit) {
+        public B unit(Unit unit) {
             this.unit = unit;
             return self();
         }
 
-        public B withHelp(String help) {
+        public B help(String help) {
             this.help = help;
             return self();
         }
 
-        public B withLabelNames(String... labelNames) {
+        public B labelNames(String... labelNames) {
             for (String labelName : labelNames) {
                 if (!PrometheusNaming.isValidLabelName(labelName)) {
                     throw new IllegalArgumentException(labelName + ": illegal label name");
@@ -91,13 +89,13 @@ public abstract class MetricWithFixedMetadata extends Metric {
             return self();
         }
 
-        public B withConstLabels(Labels constLabels) {
+        public B constLabels(Labels constLabels) {
             for (String labelName : labelNames) {
                 if (constLabels.contains(labelName)) { // Labels.contains() treats dots like underscores
                     throw new IllegalArgumentException(labelName + ": duplicate label name");
                 }
             }
-            return super.withConstLabels(constLabels);
+            return super.constLabels(constLabels);
         }
 
         @Override

@@ -7,11 +7,11 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 /**
  * JVM Runtime Info metric. The {@link JvmRuntimeInfoMetric} is registered as part of the {@link JvmMetrics} like this:
  * <pre>{@code
- *   JvmMetrics.newBuilder().register();
+ *   JvmMetrics.builder().register();
  * }</pre>
  * However, if you want only the {@link JvmRuntimeInfoMetric} you can also register them directly:
  * <pre>{@code
- *   JvmRuntimeInfoMetric.newBuilder().register();
+ *   JvmRuntimeInfoMetric.builder().register();
  * }</pre>
  *
  * <pre>
@@ -38,20 +38,20 @@ public class JvmRuntimeInfoMetric {
 
     private void register(PrometheusRegistry registry) {
 
-        Info jvmInfo = Info.newBuilder(config)
-                .withName(JVM_RUNTIME_INFO)
-                .withHelp("JVM runtime info")
-                .withLabelNames("version", "vendor", "runtime")
+        Info jvmInfo = Info.builder(config)
+                .name(JVM_RUNTIME_INFO)
+                .help("JVM runtime info")
+                .labelNames("version", "vendor", "runtime")
                 .register(registry);
 
         jvmInfo.setLabelValues(version, vendor, runtime);
     }
 
-    public static Builder newBuilder() {
+    public static Builder builder() {
         return new Builder(PrometheusProperties.get());
     }
 
-    public static Builder newBuilder(PrometheusProperties config) {
+    public static Builder builder(PrometheusProperties config) {
         return new Builder(config);
     }
 
@@ -69,7 +69,7 @@ public class JvmRuntimeInfoMetric {
         /**
          * Package private. For testing only.
          */
-        Builder withVersion(String version) {
+        Builder version(String version) {
             this.version = version;
             return this;
         }
@@ -77,7 +77,7 @@ public class JvmRuntimeInfoMetric {
         /**
          * Package private. For testing only.
          */
-        Builder withVendor(String vendor) {
+        Builder vendor(String vendor) {
             this.vendor = vendor;
             return this;
         }
@@ -85,7 +85,7 @@ public class JvmRuntimeInfoMetric {
         /**
          * Package private. For testing only.
          */
-        Builder withRuntime(String runtime) {
+        Builder runtime(String runtime) {
             this.runtime = runtime;
             return this;
         }

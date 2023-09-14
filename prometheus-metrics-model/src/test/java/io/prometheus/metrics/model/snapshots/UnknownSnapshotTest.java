@@ -8,33 +8,33 @@ public class UnknownSnapshotTest {
     @Test
     public void testCompleteGoodCase() {
         long exemplarTimestamp = System.currentTimeMillis();
-        UnknownSnapshot snapshot = UnknownSnapshot.newBuilder()
-                .withName("my_unknown_seconds")
-                .withHelp("something in seconds")
-                .withUnit(Unit.SECONDS)
-                .addDataPoint(UnknownSnapshot.UnknownDataPointSnapshot.newBuilder()
-                        .withValue(0.3)
-                        .withExemplar(Exemplar.newBuilder()
-                                .withValue(0.12)
-                                .withTraceId("abc123")
-                                .withSpanId("123457")
-                                .withTimestampMillis(exemplarTimestamp)
+        UnknownSnapshot snapshot = UnknownSnapshot.builder()
+                .name("my_unknown_seconds")
+                .help("something in seconds")
+                .unit(Unit.SECONDS)
+                .dataPoint(UnknownSnapshot.UnknownDataPointSnapshot.builder()
+                        .value(0.3)
+                        .exemplar(Exemplar.builder()
+                                .value(0.12)
+                                .traceId("abc123")
+                                .spanId("123457")
+                                .timestampMillis(exemplarTimestamp)
                                 .build())
-                        .withLabels(Labels.newBuilder()
-                                .addLabel("env", "prod")
+                        .labels(Labels.builder()
+                                .label("env", "prod")
                                 .build())
                         .build()
-                ).addDataPoint(UnknownSnapshot.UnknownDataPointSnapshot.newBuilder()
-                        .withValue(0.29)
-                        .withLabels(Labels.newBuilder()
-                                .addLabel("env", "dev")
+                ).dataPoint(UnknownSnapshot.UnknownDataPointSnapshot.builder()
+                        .value(0.29)
+                        .labels(Labels.builder()
+                                .label("env", "dev")
                                 .build())
                         .build()
                 )
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "my_unknown_seconds", "something in seconds", "seconds");
-        Assert.assertEquals(2, snapshot.getData().size());
-        UnknownSnapshot.UnknownDataPointSnapshot data = snapshot.getData().get(1); // env="prod"
+        Assert.assertEquals(2, snapshot.getDataPoints().size());
+        UnknownSnapshot.UnknownDataPointSnapshot data = snapshot.getDataPoints().get(1); // env="prod"
         Assert.assertEquals(Labels.of("env", "prod"), data.getLabels());
         Assert.assertEquals(0.3, data.getValue(), 0.0);
         Assert.assertEquals(0.12, data.getExemplar().getValue(), 0.0);
@@ -44,28 +44,28 @@ public class UnknownSnapshotTest {
 
     @Test
     public void testMinimal() {
-        UnknownSnapshot snapshot = UnknownSnapshot.newBuilder()
-                .withName("test")
-                .addDataPoint(UnknownSnapshot.UnknownDataPointSnapshot.newBuilder()
-                        .withValue(1.0)
+        UnknownSnapshot snapshot = UnknownSnapshot.builder()
+                .name("test")
+                .dataPoint(UnknownSnapshot.UnknownDataPointSnapshot.builder()
+                        .value(1.0)
                         .build())
                 .build();
-        Assert.assertEquals(1, snapshot.getData().size());
+        Assert.assertEquals(1, snapshot.getDataPoints().size());
     }
 
     @Test
     public void testEmpty() {
-        UnknownSnapshot snapshot = UnknownSnapshot.newBuilder().withName("test").build();
-        Assert.assertEquals(0, snapshot.getData().size());
+        UnknownSnapshot snapshot = UnknownSnapshot.builder().name("test").build();
+        Assert.assertEquals(0, snapshot.getDataPoints().size());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNameMissing() {
-        UnknownSnapshot.newBuilder().build();
+        UnknownSnapshot.builder().build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testValueMissing() {
-        UnknownSnapshot.UnknownDataPointSnapshot.newBuilder().build();
+        UnknownSnapshot.UnknownDataPointSnapshot.builder().build();
     }
 }

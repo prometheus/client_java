@@ -25,15 +25,15 @@ public class StateSetTest {
 
     @Test
     public void testEnumStateSet() {
-        StateSet stateSet = StateSet.newBuilder()
-                .withName("feature_flags")
-                .withLabelNames("environment")
-                .withStates(MyFeatureFlag.class)
+        StateSet stateSet = StateSet.builder()
+                .name("feature_flags")
+                .labelNames("environment")
+                .states(MyFeatureFlag.class)
                 .build();
-        stateSet.withLabelValues("dev").setTrue(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
-        stateSet.withLabelValues("prod").setFalse(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
+        stateSet.labelValues("dev").setTrue(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
+        stateSet.labelValues("prod").setFalse(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
         StateSetSnapshot snapshot = stateSet.collect();
-        Assert.assertEquals(2, snapshot.getData().size());
+        Assert.assertEquals(2, snapshot.getDataPoints().size());
         Assert.assertEquals(2, getData(stateSet, "environment", "dev").size());
         Assert.assertEquals("feature1", getData(stateSet, "environment", "dev").getName(0));
         Assert.assertFalse(getData(stateSet, "environment", "dev").isTrue(0));
@@ -48,9 +48,9 @@ public class StateSetTest {
 
     @Test
     public void testDefaultFalse() {
-        StateSet stateSet = StateSet.newBuilder()
-                .withName("test")
-                .withStates("state1", "state2", "state3")
+        StateSet stateSet = StateSet.builder()
+                .name("test")
+                .states("state1", "state2", "state3")
                 .build();
         Assert.assertEquals(3, getData(stateSet).size());
         Assert.assertEquals("state1", getData(stateSet).getName(0));
@@ -62,7 +62,7 @@ public class StateSetTest {
     }
 
     private StateSetSnapshot.StateSetDataPointSnapshot getData(StateSet stateSet, String... labels) {
-        return stateSet.collect().getData().stream()
+        return stateSet.collect().getDataPoints().stream()
                 .filter(d -> d.getLabels().equals(Labels.of(labels)))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("stateset with labels " + labels + " not found"));
@@ -70,6 +70,6 @@ public class StateSetTest {
 
     @Test(expected = IllegalStateException.class)
     public void testStatesCannotBeEmpty() {
-        StateSet.newBuilder().withName("invalid").build();
+        StateSet.builder().name("invalid").build();
     }
 }

@@ -37,28 +37,28 @@ public class ExporterServletTomcatSample {
         int port = parsePortOrExit(args[0]);
         Mode mode = parseModeOrExit(args[1]);
 
-        Counter counter = Counter.newBuilder()
-                .withName("uptime_seconds_total")
-                .withHelp("total number of seconds since this application was started")
-                .withUnit(Unit.SECONDS)
+        Counter counter = Counter.builder()
+                .name("uptime_seconds_total")
+                .help("total number of seconds since this application was started")
+                .unit(Unit.SECONDS)
                 .register();
         counter.inc(17);
 
-        Info info = Info.newBuilder()
-                .withName("integration_test_info")
-                .withHelp("Info metric on this integration test")
-                .withLabelNames("test_name")
+        Info info = Info.builder()
+                .name("integration_test_info")
+                .help("Info metric on this integration test")
+                .labelNames("test_name")
                 .register();
         info.addLabelValues("exporter-servlet-tomcat-sample");
 
-        Gauge gauge = Gauge.newBuilder()
-                .withName("temperature_celsius")
-                .withHelp("Temperature in Celsius")
-                .withUnit(Unit.CELSIUS)
-                .withLabelNames("location")
+        Gauge gauge = Gauge.builder()
+                .name("temperature_celsius")
+                .help("Temperature in Celsius")
+                .unit(Unit.CELSIUS)
+                .labelNames("location")
                 .register();
-        gauge.withLabelValues("inside").set(23.0);
-        gauge.withLabelValues("outside").set(27.0);
+        gauge.labelValues("inside").set(23.0);
+        gauge.labelValues("outside").set(27.0);
 
         if (mode == Mode.error) {
             Collector failingCollector = new Collector() {

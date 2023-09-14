@@ -94,7 +94,7 @@ public class PrometheusScrapeHandler {
         if (props.getAllowedNames() == null && props.getExcludedNames() == null && props.getAllowedPrefixes() == null && props.getExcludedPrefixes() == null) {
             return null;
         } else {
-            return MetricNameFilter.newBuilder()
+            return MetricNameFilter.builder()
                     .nameMustBeEqualTo(props.getAllowedNames())
                     .nameMustNotBeEqualTo(props.getExcludedNames())
                     .nameMustStartWith(props.getAllowedPrefixes())
@@ -115,7 +115,7 @@ public class PrometheusScrapeHandler {
     private Predicate<String> makeNameFilter(String[] includedNames) {
         Predicate<String> result = null;
         if (includedNames != null) {
-            result = MetricNameFilter.newBuilder().nameMustBeEqualTo(includedNames).build();
+            result = MetricNameFilter.builder().nameMustBeEqualTo(includedNames).build();
         }
         if (result != null && nameFilter != null) {
             result = result.and(nameFilter);

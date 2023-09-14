@@ -12,45 +12,45 @@ public class GaugeSnapshotTest {
     @Test
     public void testCompleteGoodCase() {
         long exemplarTimestamp = System.currentTimeMillis();
-        GaugeSnapshot snapshot = GaugeSnapshot.newBuilder()
-                .withName("cache_size_bytes")
-                .withHelp("cache size in Bytes")
-                .withUnit(Unit.BYTES)
-                .addDataPoint(GaugeDataPointSnapshot.newBuilder()
-                        .withValue(1024.0)
-                        .withExemplar(Exemplar.newBuilder()
-                                .withValue(1024.0)
-                                .withTraceId("abc123")
-                                .withSpanId("123457")
-                                .withTimestampMillis(exemplarTimestamp)
+        GaugeSnapshot snapshot = GaugeSnapshot.builder()
+                .name("cache_size_bytes")
+                .help("cache size in Bytes")
+                .unit(Unit.BYTES)
+                .dataPoint(GaugeDataPointSnapshot.builder()
+                        .value(1024.0)
+                        .exemplar(Exemplar.builder()
+                                .value(1024.0)
+                                .traceId("abc123")
+                                .spanId("123457")
+                                .timestampMillis(exemplarTimestamp)
                                 .build())
-                        .withLabels(Labels.newBuilder()
-                                .addLabel("env", "prod")
+                        .labels(Labels.builder()
+                                .label("env", "prod")
                                 .build())
                         .build()
-                ).addDataPoint(GaugeDataPointSnapshot.newBuilder()
-                        .withValue(128.0)
-                        .withExemplar(Exemplar.newBuilder()
-                                .withValue(128.0)
-                                .withTraceId("def456")
-                                .withSpanId("234567")
-                                .withTimestampMillis(exemplarTimestamp)
+                ).dataPoint(GaugeDataPointSnapshot.builder()
+                        .value(128.0)
+                        .exemplar(Exemplar.builder()
+                                .value(128.0)
+                                .traceId("def456")
+                                .spanId("234567")
+                                .timestampMillis(exemplarTimestamp)
                                 .build())
-                        .withLabels(Labels.newBuilder()
-                                .addLabel("env", "dev")
+                        .labels(Labels.builder()
+                                .label("env", "dev")
                                 .build())
                         .build()
                 )
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "cache_size_bytes", "cache size in Bytes", "bytes");
-        Assert.assertEquals(2, snapshot.getData().size());
-        GaugeDataPointSnapshot data = snapshot.getData().get(0); // data is sorted by labels, so the first one should be path="/hello"
+        Assert.assertEquals(2, snapshot.getDataPoints().size());
+        GaugeDataPointSnapshot data = snapshot.getDataPoints().get(0); // data is sorted by labels, so the first one should be path="/hello"
         Assert.assertEquals(Labels.of("env", "dev"), data.getLabels());
         Assert.assertEquals(128.0, data.getValue(), 0.0);
         Assert.assertEquals(128.0, data.getExemplar().getValue(), 0.0);
         Assert.assertFalse(data.hasCreatedTimestamp());
         Assert.assertFalse(data.hasScrapeTimestamp());
-        data = snapshot.getData().get(1);
+        data = snapshot.getDataPoints().get(1);
         Assert.assertEquals(Labels.of("env", "prod"), data.getLabels());
         Assert.assertEquals(1024.0, data.getValue(), 0.0);
         Assert.assertEquals(1024.0, data.getExemplar().getValue(), 0.0);
@@ -60,13 +60,13 @@ public class GaugeSnapshotTest {
 
     @Test
     public void testMinimalGoodCase() {
-        GaugeSnapshot snapshot = GaugeSnapshot.newBuilder()
-                .withName("temperature")
-                .addDataPoint(GaugeDataPointSnapshot.newBuilder().withValue(23.0).build())
+        GaugeSnapshot snapshot = GaugeSnapshot.builder()
+                .name("temperature")
+                .dataPoint(GaugeDataPointSnapshot.builder().value(23.0).build())
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "temperature", null, null);
-        Assert.assertEquals(1, snapshot.getData().size());
-        GaugeDataPointSnapshot data = snapshot.getData().get(0);
+        Assert.assertEquals(1, snapshot.getDataPoints().size());
+        GaugeDataPointSnapshot data = snapshot.getDataPoints().get(0);
         Assert.assertEquals(Labels.EMPTY, data.getLabels());
         Assert.assertEquals(23.0, data.getValue(), 0.0);
         Assert.assertNull(data.getExemplar());
@@ -76,35 +76,35 @@ public class GaugeSnapshotTest {
 
     @Test
     public void testEmptyGauge() {
-        GaugeSnapshot snapshot = GaugeSnapshot.newBuilder()
-                .withName("temperature")
+        GaugeSnapshot snapshot = GaugeSnapshot.builder()
+                .name("temperature")
                 .build();
-        Assert.assertEquals(0, snapshot.getData().size());
+        Assert.assertEquals(0, snapshot.getDataPoints().size());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testTotalSuffixPresent() {
-        CounterSnapshot.newBuilder().withName("test_total").build();
+        CounterSnapshot.builder().name("test_total").build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testTotalSuffixPresentDot() {
-        CounterSnapshot.newBuilder().withName("test.total").build();
+        CounterSnapshot.builder().name("test.total").build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testValueMissing() {
-        CounterDataPointSnapshot.newBuilder().build();
+        CounterDataPointSnapshot.builder().build();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testDataImmutable() {
-        GaugeSnapshot snapshot = GaugeSnapshot.newBuilder()
-                .withName("gauge")
-                .addDataPoint(GaugeDataPointSnapshot.newBuilder().withLabels(Labels.of("a", "a")).withValue(23.0).build())
-                .addDataPoint(GaugeDataPointSnapshot.newBuilder().withLabels(Labels.of("a", "b")).withValue(23.0).build())
+        GaugeSnapshot snapshot = GaugeSnapshot.builder()
+                .name("gauge")
+                .dataPoint(GaugeDataPointSnapshot.builder().labels(Labels.of("a", "a")).value(23.0).build())
+                .dataPoint(GaugeDataPointSnapshot.builder().labels(Labels.of("a", "b")).value(23.0).build())
                 .build();
-        Iterator<GaugeDataPointSnapshot> iterator = snapshot.getData().iterator();
+        Iterator<GaugeDataPointSnapshot> iterator = snapshot.getDataPoints().iterator();
         iterator.next();
         iterator.remove();
     }

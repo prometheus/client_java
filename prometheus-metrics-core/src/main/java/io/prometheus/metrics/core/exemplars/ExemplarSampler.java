@@ -284,10 +284,10 @@ public class ExemplarSampler {
         if (!labels.contains(Exemplar.TRACE_ID) && !labels.contains(Exemplar.SPAN_ID)) {
             labels = labels.merge(doSampleExemplar());
         }
-        customExemplars[index] = Exemplar.newBuilder()
-                .withValue(value)
-                .withLabels(labels)
-                .withTimestampMillis(now)
+        customExemplars[index] = Exemplar.builder()
+                .value(value)
+                .labels(labels)
+                .timestampMillis(now)
                 .build();
         return now;
     }
@@ -295,10 +295,10 @@ public class ExemplarSampler {
     private long updateExemplar(int index, double value, long now) {
         Labels traceLabels = doSampleExemplar();
         if (!traceLabels.isEmpty()) {
-            exemplars[index] = Exemplar.newBuilder()
-                    .withValue(value)
-                    .withLabels(traceLabels)
-                    .withTimestampMillis(now)
+            exemplars[index] = Exemplar.builder()
+                    .value(value)
+                    .labels(traceLabels)
+                    .timestampMillis(now)
                     .build();
             return now;
         } else {
