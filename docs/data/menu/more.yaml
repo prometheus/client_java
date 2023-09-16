@@ -1,7 +1,7 @@
 ---
 more:
   - name: JavaDoc
-    ref: "/api"
+    ref: "/client_java/api"
     external: true
     icon: "gdoc_bookmark"
   - name: Releases

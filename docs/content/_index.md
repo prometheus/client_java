@@ -2,7 +2,7 @@
 title: "client_java"
 ---
 
-This is the documentation for the upcoming `client_java` 1.0.0 release. These docs are currently in progress. Target for the release is end of September 2023.
+This is the documentation for the upcoming Prometheus Java metrics 1.0.0 release. These docs are currently in progress. Target for the release is end of September 2023.
 
 <- the navigation on the left has the sections that are already available.
 

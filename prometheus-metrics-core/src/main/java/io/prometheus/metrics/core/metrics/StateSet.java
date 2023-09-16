@@ -27,7 +27,7 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusN
  *         this.name = name;
  *     }
  *
- *     @Override
+ *     // Override
  *     public String toString() {
  *         return name;
  *     }
