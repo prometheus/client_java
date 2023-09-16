@@ -79,6 +79,12 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <sourcepath>src/main/java;src/main/generated</sourcepath>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

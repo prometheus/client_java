@@ -2,6 +2,10 @@
 title: "client_java"
 ---
 
+This is the documentation for the upcoming `client_java` 1.0.0 release. These docs are currently in progress. Target for the release is end of September 2023.
+
+<- the navigation on the left has the sections that are already available.
+
 Brainstorming of potential topics:
 
 * Getting started
@@ -22,7 +26,7 @@ Brainstorming of potential topics:
   * Servlet filter
 * OpenTelemetry
   * OpenTelemetry exporter
-  * Combining Prometheus `client_java` with the OpenTelemetry instrumentation agent.
+  * Combining Prometheus client java with the OpenTelemetry instrumentation agent.
   * Trace sampling and Exemplars
   * API comparision: OpenTelemetry vs Prometheus
   * Performance comparison: OpenTelemetry vs Prometheus
