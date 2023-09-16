@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-tracer</artifactId>
-    <version>1.0.0-beta-1</version>
+    <version>1.0.0-beta-2-SNAPSHOT</version>
   </parent>
 
   <artifactId>prometheus-metrics-tracer-common</artifactId>
