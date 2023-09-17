@@ -13,7 +13,7 @@ Counter
 Counter is the most common and useful metric type. Counters can only increase, but never decrease. In the Prometheus query language, the [rate()](https://prometheus.io/docs/prometheus/latest/querying/functions/#rate) function is often used for counters to calculate the average increase per second.
 
 {{< hint type=note >}}
-Counter values do not need to be integers. In many cases counters are used to count the number of events (like the number of requests), and in that case the counter value will be an integer. However, counters can also be used for something like "total time spent doing something" in which case the counter value is a floating point number.
+Counter values do not need to be integers. In many cases counters represent a number of events (like the number of requests), and in that case the counter value is an integer. However, counters can also be used for something like "total time spent doing something" in which case the counter value is a floating point number.
 {{< /hint >}}
 
 Here's an example of a counter:

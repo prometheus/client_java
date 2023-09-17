@@ -7,8 +7,6 @@ import java.util.Map;
  */
 public class ExporterHttpServerProperties {
 
-    // TODO: Not used yet, will be used when we port the simpleclient_httpserver module to the new data model.
-
     private static final String PORT = "port";
     private final Integer port;
 

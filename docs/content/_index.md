@@ -2,9 +2,13 @@
 title: "client_java"
 ---
 
-This is the documentation for the upcoming Prometheus Java metrics 1.0.0 release. These docs are currently in progress. Target for the release is end of September 2023.
+This is the documentation for the upcoming [Prometheus client_java 1.0.0](https://github.com/prometheus/client_java) release.
 
-<- the navigation on the left has the sections that are already available.
+These docs are currently in progress. Source code is on the [1.0.x](https://github.com/prometheus/client_java/tree/1.0.x) feature branch.
+
+Target for the release is end of September 2023.
+
+<!--
 
 Brainstorming of potential topics:
 
@@ -36,3 +40,5 @@ Brainstorming of potential topics:
 * Runtime Configuration
 * Backwards Compatibility with Simpleclient
 * Requirements (Java 8)
+
+-->
