@@ -3,7 +3,6 @@ package io.prometheus.metrics.examples.httpserver;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
-import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
 
 import java.io.IOException;
@@ -15,7 +14,6 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        HistogramSnapshot.builder().gaugeHistogram(true).build();
         JvmMetrics.builder().register();
 
         // Note: uptime_seconds_total is not a great example:
