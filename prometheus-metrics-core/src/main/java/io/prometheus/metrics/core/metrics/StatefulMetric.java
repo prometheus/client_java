@@ -161,11 +161,17 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
             super(illegalLabelNames, config);
         }
 
+        /**
+         * Allow Exemplars for this metric.
+         */
         public B withExemplars() {
             this.exemplarsEnabled = TRUE;
             return self();
         }
 
+        /**
+         * Turn off Exemplars for this metric.
+         */
         public B withoutExemplars() {
             this.exemplarsEnabled = FALSE;
             return self();

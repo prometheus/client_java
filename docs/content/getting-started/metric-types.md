@@ -86,7 +86,7 @@ The histogram builder provides a lot of configuration for fine-tuning the histog
 * `classicBuckets(...)`: Set the classic bucket boundaries. Default buckets are `.005`, `.01`, `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The default bucket boundaries are designed for measuring request durations in seconds.
 * `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is 160. When the maximum is reached, the native histogram automatically reduces resolution to stay below the limit.
 
-See Javadoc for a complete list of options.
+See Javadoc for [Histogram.Builder](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html) for a complete list of options. Some options can be configured at runtime, see [config](/config/config).
 
 Histograms and summaries are both used for observing distributions. Therefore, the both implement the `DistributionDataPoint` interface. Using the `DistributionDataPoint` interface directly gives you the option to switch between histograms and summaries later with minimal code changes.
 
@@ -154,6 +154,8 @@ The second parameter to `quantile()` is the maximum acceptable error. The call `
 The 0.0 quantile (min value) and the 1.0 quantile (max value) are special cases because you can get the precise values (error 0.0) with almost no memory overhead.
 
 Quantile values are calculated based on a 5 minutes moving time window. The default time window can be changed with `maxAgeSeconds()` and `numberOfAgeBuckets()`.
+
+Some options can be configured at runtime, see [config](/config/config).
 
 In general you should prefer histograms over summaries. The Prometheus query language has a function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile) for calculating quantiles from histograms. The advantage of query-time quantile calculation is that you can aggregate histograms before calculating the quantile. With summaries you must use the quantile with all its labels as it is.
 
