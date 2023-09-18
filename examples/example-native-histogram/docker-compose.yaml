@@ -1,0 +1,27 @@
+version: "3"
+services:
+  example-application:
+    image: eclipse-temurin:17-jre
+    network_mode: host
+    volumes:
+      - ./target/example-native-histogram.jar:/example-native-histogram.jar
+    command:
+      - /opt/java/openjdk/bin/java
+      - -jar
+      - /example-native-histogram.jar
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    network_mode: host
+    volumes:
+      - ./docker-compose/prometheus.yml:/prometheus.yml
+    command:
+      - --enable-feature=native-histograms
+      - --config.file=/prometheus.yml
+  grafana:
+    image: grafana/grafana:10.0.0
+    network_mode: host
+    volumes:
+      - ./docker-compose/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/grafana-datasources.yaml
+      - ./docker-compose/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/grafana-dashboards.yaml
+      - ./docker-compose/grafana-dashboard-classic-histogram.json:/etc/grafana/grafana-dashboard-classic-histogram.json
+      - ./docker-compose/grafana-dashboard-native-histogram.json:/etc/grafana/grafana-dashboard-native-histogram.json
