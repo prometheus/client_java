@@ -164,21 +164,19 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
             addBuckets(histogramBuilder, data.getNativeBucketsForPositiveValues(), +1);
             addBuckets(histogramBuilder, data.getNativeBucketsForNegativeValues(), -1);
 
-            // Add a single +Inf bucket for the exemplar.
-            // It is currently not possible to have more than one exemplar in a native histogram,
-            // see https://cloud-native.slack.com/archives/C02KR205UMU/p1688414381799849
-            Exemplar exemplar = data.getExemplars().getLatest();
-            if (exemplar != null) {
-                Metrics.Bucket.Builder bucketBuilder = Metrics.Bucket.newBuilder()
-                        .setCumulativeCount(getNativeCount(data))
-                        .setUpperBound(Double.POSITIVE_INFINITY);
-                bucketBuilder.setExemplar(convert(exemplar));
-                histogramBuilder.addBucket(bucketBuilder);
+            if (!data.hasClassicHistogramData()) { // native only
+                // Add a single +Inf bucket for the exemplar.
+                Exemplar exemplar = data.getExemplars().getLatest();
+                if (exemplar != null) {
+                    Metrics.Bucket.Builder bucketBuilder = Metrics.Bucket.newBuilder()
+                            .setCumulativeCount(getNativeCount(data))
+                            .setUpperBound(Double.POSITIVE_INFINITY);
+                    bucketBuilder.setExemplar(convert(exemplar));
+                    histogramBuilder.addBucket(bucketBuilder);
+                }
             }
-        } else if (data.hasClassicHistogramData()) {
-
-            // Once native histograms support multiple exemplars the above can be changed from "else if" to "if",
-            // so that we always add the complete classic buckets and exemplars.
+        }
+        if (data.hasClassicHistogramData()) {
 
             ClassicHistogramBuckets buckets = data.getClassicBuckets();
             double lowerBound = Double.NEGATIVE_INFINITY;

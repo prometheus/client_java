@@ -669,13 +669,26 @@ public class HistogramTest {
         Histogram histogram = Histogram.builder().name("test").build();
         histogram.observe(0.5);
         HistogramSnapshot snapshot = histogram.collect();
-        String expectedNative = "" +
+        String expectedProtobuf = "" +
                 "name: \"test\" " +
                 "type: HISTOGRAM " +
                 "metric { " +
                 "histogram { " +
                 "sample_count: 1 " +
                 "sample_sum: 0.5 " +
+                // default has both, native and classic buckets
+                "bucket { cumulative_count: 0 upper_bound: 0.005 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.01 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.025 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.05 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.1 } " +
+                "bucket { cumulative_count: 0 upper_bound: 0.25 } " +
+                "bucket { cumulative_count: 1 upper_bound: 0.5 } " +
+                "bucket { cumulative_count: 1 upper_bound: 1.0 } " +
+                "bucket { cumulative_count: 1 upper_bound: 2.5 } " +
+                "bucket { cumulative_count: 1 upper_bound: 5.0 } " +
+                "bucket { cumulative_count: 1 upper_bound: 10.0 } " +
+                "bucket { cumulative_count: 1 upper_bound: Infinity } " +
                 // default native schema is 5
                 "schema: 5 " +
                 // default zero threshold is 2^-128
@@ -684,7 +697,7 @@ public class HistogramTest {
                 "positive_span { offset: -32 length: 1 } " +
                 "positive_delta: 1 " +
                 "} }";
-        String expectedClassic = "" +
+        String expectedTextFormat = "" +
                 // default classic buckets
                 "# TYPE test histogram\n" +
                 "test_bucket{le=\"0.005\"} 0\n" +
@@ -705,13 +718,13 @@ public class HistogramTest {
 
         // protobuf
         Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(snapshot);
-        Assert.assertEquals(expectedNative, TextFormat.printer().shortDebugString(protobufData));
+        Assert.assertEquals(expectedProtobuf, TextFormat.printer().shortDebugString(protobufData));
 
         // text
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
         writer.write(out, MetricSnapshots.of(snapshot));
-        Assert.assertEquals(expectedClassic, out.toString());
+        Assert.assertEquals(expectedTextFormat, out.toString());
     }
 
     @Test
