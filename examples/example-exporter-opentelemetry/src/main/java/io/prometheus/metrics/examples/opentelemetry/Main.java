@@ -30,7 +30,7 @@ public class Main {
                 .register();
 
         OpenTelemetryExporter.builder()
-                .intervalSeconds(5)
+                .intervalSeconds(5) // ridiculously short interval for demo purposes
                 .buildAndStart();
 
         while (true) {
