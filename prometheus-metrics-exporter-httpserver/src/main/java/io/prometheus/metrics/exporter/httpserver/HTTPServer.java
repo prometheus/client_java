@@ -103,10 +103,8 @@ public class HTTPServer implements Closeable {
         private Integer port = null;
         private String hostname = null;
         private InetAddress inetAddress = null;
-        private InetSocketAddress inetSocketAddress = null;
         private ExecutorService executorService = null;
         private PrometheusRegistry registry = null;
-        private ExporterHttpServerProperties properties = null;
         private Authenticator authenticator = null;
         private HttpsConfigurator httpsConfigurator = null;
         private HttpHandler defaultHandler = null;
@@ -204,12 +202,7 @@ public class HTTPServer implements Closeable {
         }
 
         private InetSocketAddress makeInetSocketAddress() {
-            if (inetSocketAddress != null) {
-                assertNull(port, "cannot configure 'inetSocketAddress' and 'port' at the same time");
-                assertNull(hostname, "cannot configure 'inetSocketAddress' and 'hostname' at the same time");
-                assertNull(inetAddress, "cannot configure 'inetSocketAddress' and 'inetAddress' at the same time");
-                return inetSocketAddress;
-            } else if (inetAddress != null) {
+            if (inetAddress != null) {
                 assertNull(hostname, "cannot configure 'inetAddress' and 'hostname' at the same time");
                 return new InetSocketAddress(inetAddress, findPort());
             } else if (hostname != null) {
@@ -235,8 +228,11 @@ public class HTTPServer implements Closeable {
         }
 
         private int findPort() {
-            if (properties != null && properties.getPort() != null) {
-                return properties.getPort(); // you can overwrite the hard-coded port with properties.
+            if (config != null && config.getExporterHttpServerProperties() != null) {
+                Integer port = config.getExporterHttpServerProperties().getPort();
+                if (port != null) {
+                    return port;
+                }
             }
             if (port != null) {
                 return port;

@@ -78,7 +78,7 @@ long start = System.nanoTime();
 duration.labelValues("GET", "/", "200").observe(Unit.nanosToSeconds(System.nanoTime() - start));
 ```
 
-Histograms implement the `TimerApi` interface, which provides convenience methods for measuring durations.
+Histograms implement the [TimerApi](/client_java/api/io/prometheus/metrics/core/datapoints/TimerApi.html) interface, which provides convenience methods for measuring durations.
 
 The histogram builder provides a lot of configuration for fine-tuning the histogram behavior. In most cases you don't need them, defaults are good. The following is an incomplete list showing the most important options:
 
