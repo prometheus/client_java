@@ -63,7 +63,7 @@ Prometheus supports two flavors of histograms:
 * Classic histograms: Bucket boundaries are explicitly defined when the histogram is created.
 * Native histograms (exponential histograms): Infinitly many virtual buckets.
 
-By default, histograms maintain both flavors. Which one is used depends on the scrape request from the Prometheus server. If the Prometheus server has native histograms enabled, it will request metrics in Prometheus protobuf format, and in that case both classic and native representation are exposed. If the Prometheus server does not have native histograms enabled, it will request OpenMetrics text format, and in that case only the classic representation is exposed.
+By default, histograms maintain both flavors. Which one is used depends on the scrape request from the Prometheus server. If the Prometheus server has native histograms enabled (`--enable-feature=native-histograms`), it will request metrics in Prometheus protobuf format and ingest the native histogram. If the Prometheus server does not have native histograms enabled, it will request OpenMetrics text format and ingest the classic histogram. Prometheus also has a scrape config option `scrape_classic_histograms: true` which makes it scrape both, the classic and the native representation. This is great for migration from classic to native histograms. See [examples/example-native-histogram](https://github.com/prometheus/client_java/tree/1.0.x/examples/example-native-histogram) for an example.
 
 ```java
 Histogram duration = Histogram.builder()
