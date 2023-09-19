@@ -92,9 +92,28 @@ TODO
 Exporter HTTPServer Properties
 ------------------------------
 
-TODO
+| Name            | Javadoc | Note |
+| --------------- | --------|------|
+| io.prometheus.exporter.httpServer.port | [HTTPServer.Builder.port()](/client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#port(int)) | |
 
 Exporter OpenTelemetry Properties
 ---------------------------------
 
-TODO
+| Name            | Javadoc | Note |
+| --------------- | --------|------|
+| io.prometheus.exporter.opentelemetry.protocol | [OpenTelemetryExporter.Builder.protocol()](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#protocol(java.lang.String)) | (1) |
+| io.prometheus.exporter.opentelemetry.endpoint | [OpenTelemetryExporter.Builder.endpoint()](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#endpoint(java.lang.String)) | |
+| io.prometheus.exporter.opentelemetry.headers | [OpenTelemetryExporter.Builder.headers](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#header(java.lang.String,java.lang.String)) | (2) |
+| io.prometheus.exporter.opentelemetry.intervalSeconds | [OpenTelemetryExporter.Builder.intervalSeconds()](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#intervalSeconds(int)) | |
+| io.prometheus.exporter.opentelemetry.timeoutSeconds | [OpenTelemetryExporter.Builder.timeoutSeconds()](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#timeoutSeconds(int)) | |
+| io.prometheus.exporter.opentelemetry.serviceName | [OpenTelemetryExporter.Builder.serviceName()](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#serviceName(java.lang.String)) | |
+| io.prometheus.exporter.opentelemetry.serviceNamespace | [OpenTelemetryExporter.Builder.serviceNamespace()](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#serviceNamespace(java.lang.String)) | |
+| io.prometheus.exporter.opentelemetry.serviceInstanceId | [OpenTelemetryExporter.Builder.serviceInstanceId()](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#serviceInstanceId(java.lang.String)) | |
+| io.prometheus.exporter.opentelemetry.serviceVersion | [OpenTelemetryExporter.Builder.serviceVersion()](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#serviceVersion(java.lang.String)) | |
+| io.prometheus.exporter.opentelemetry.resourceAttributes | [OpenTelemetryExporter.Builder.resourceAttributes()](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#resourceAttribute(java.lang.String,java.lang.String)) | (3) |
+
+(1) Protocol can be `grpc` or `http/protobuf`.<br>
+(2) Format: `key1=value1,key2=value2`<br>
+(3) Format: `key1=value1,key2=value2`
+
+Many of these attributes can alternatively be configured via OpenTelemetry environment variables, like `OTEL_EXPORTER_OTLP_ENDPOINT`. The Prometheus metrics library has support for OpenTelemetry environment variables. See Javadoc for details.
