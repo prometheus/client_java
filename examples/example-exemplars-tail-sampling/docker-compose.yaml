@@ -7,10 +7,8 @@ services:
       dockerfile_inline: |
         FROM openjdk:11-jre
         WORKDIR /
-        RUN curl -sOL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.28.0/opentelemetry-javaagent.jar
+        RUN curl -sOL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.30.0/opentelemetry-javaagent.jar
     network_mode: host
-    ports:
-      - "8080:8080"
     volumes:
       - ./example-hello-world-app/target/example-hello-world-app.jar:/example-hello-world-app.jar
     environment:
@@ -26,8 +24,6 @@ services:
     # The opentelemetry-java-agent image is coming from the hello-world-up service above.
     image: opentelemetry-java-agent
     network_mode: host
-    ports:
-      - "8081:8081"
     volumes:
       - ./example-greeting-service/target/example-greeting-service.jar:/example-greeting-service.jar
     environment:
@@ -40,20 +36,15 @@ services:
       - -jar
       - /example-greeting-service.jar
   collector:
-    image: otel/opentelemetry-collector-contrib:0.79.0
+    image: otel/opentelemetry-collector-contrib:0.85.0
     network_mode: host
-    ports:
-      - "4317:4317"
-      - "4318:4318"
     volumes:
       - ./config/otelcol-config.yaml:/config.yaml
     command:
       - --config=file:/config.yaml
   prometheus:
-    image: prom/prometheus:v2.45.0
+    image: prom/prometheus:v2.47.0
     network_mode: host
-    ports:
-      - "9090:9090"
     volumes:
       - ./config/prometheus.yaml:/prometheus.yaml
     command:
@@ -61,19 +52,14 @@ services:
       - --enable-feature=native-histograms
       - --config.file=/prometheus.yaml
   tempo:
-    image: grafana/tempo:2.1.1
+    image: grafana/tempo:2.2.3
     network_mode: host
-    ports:
-      - "3200:3200"
-      - "4417:4417"
-      - "4418:4418"
-      - "9096:9096"
     volumes:
       - ./config/tempo-config.yaml:/config.yaml
     command:
       - --config.file=/config.yaml
   grafana:
-    image: grafana/grafana:10.0.0
+    image: grafana/grafana:10.1.2
     network_mode: host
     ports:
       - "3000:3000"
