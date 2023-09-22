@@ -1,3 +1,7 @@
+_NOTE: Benchmarks for the new 1.0.0 release are in the io.prometheus.metrics.benchmarks package_.
+_The old benchmarks will be ported to the new 1.0.0 version and then be removed._
+_This readme is for the old benchmarks, we'll leave it here for reference until we ported all benchmarks over._
+
 # Client Benchmarks
 
 This module contains microbenchmarks for client instrumentation operations.

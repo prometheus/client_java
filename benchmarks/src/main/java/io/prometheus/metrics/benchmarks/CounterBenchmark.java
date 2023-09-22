@@ -17,6 +17,22 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 
+/**
+ * Results on a machine with dedicated 8 vCPU cores:
+ * <pre>
+ * Benchmark                                                                  Mode  Cnt      Score     Error  Units
+ * i.p.metrics.benchmarks.CounterBenchmark.codahaleIncNoLabels               thrpt   25  30978.055 ± 424.088  ops/s
+ * i.p.metrics.benchmarks.CounterBenchmark.openTelemetryAdd                  thrpt   25  12682.744 ± 162.425  ops/s
+ * i.p.metrics.benchmarks.CounterBenchmark.openTelemetryInc                  thrpt   25  14434.710 ±  99.809  ops/s
+ * i.p.metrics.benchmarks.CounterBenchmark.openTelemetryIncNoLabels          thrpt   25  16634.416 ±  13.098  ops/s
+ * i.p.metrics.benchmarks.CounterBenchmark.prometheusAdd                     thrpt   25  37317.024 ± 283.064  ops/s
+ * i.p.metrics.benchmarks.CounterBenchmark.prometheusInc                     thrpt   25  39436.278 ± 458.583  ops/s
+ * i.p.metrics.benchmarks.CounterBenchmark.prometheusNoLabelsInc             thrpt   25  34752.910 ± 293.979  ops/s
+ * i.p.metrics.benchmarks.CounterBenchmark.simpleclientAdd                   thrpt   25   9520.592 ± 245.787  ops/s
+ * i.p.metrics.benchmarks.CounterBenchmark.simpleclientInc                   thrpt   25   9057.637 ±  67.761  ops/s
+ * i.p.metrics.benchmarks.CounterBenchmark.simpleclientNoLabelsInc           thrpt   25   8993.471 ±  49.581  ops/s
+ * </pre>
+ */
 public class CounterBenchmark {
 
     @State(Scope.Benchmark)

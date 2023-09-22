@@ -17,6 +17,17 @@ import org.openjdk.jmh.annotations.Threads;
 
 import java.util.Arrays;
 
+/**
+ * Results on a machine with dedicated 8 vCPU cores:
+ * <pre>
+ * Benchmark                                                                  Mode  Cnt      Score     Error  Units
+ * i.p.metrics.benchmarks.HistogramBenchmark.openTelemetryClassic            thrpt   25   1908.715 ± 114.050  ops/s
+ * i.p.metrics.benchmarks.HistogramBenchmark.openTelemetryExponential        thrpt   25   1009.785 ±  12.965  ops/s
+ * i.p.metrics.benchmarks.HistogramBenchmark.prometheusClassic               thrpt   25   6451.533 ± 326.265  ops/s
+ * i.p.metrics.benchmarks.HistogramBenchmark.prometheusNative                thrpt   25   3372.789 ± 339.328  ops/s
+ * i.p.metrics.benchmarks.HistogramBenchmark.simpleclient                    thrpt   25   6488.252 ±  96.737  ops/s
+ * </pre>
+ */
 public class HistogramBenchmark {
 
     @State(Scope.Benchmark)
