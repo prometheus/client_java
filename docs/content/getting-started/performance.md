@@ -3,6 +3,11 @@ title: Performance
 weight: 6
 ---
 
+This section has tips on how to use the Prometheus Java client in high performance applications.
+
+Specify Label Values Only Once
+------------------------------
+
 For high performance applications, we recommend to specify label values only once, and then use the data point directly.
 
 This applies to all metric types. Let's use a counter as an example here:
@@ -34,3 +39,28 @@ Now, you can increment the data point directly, which is a highly optimized oper
 ```java
 successfulCalls.inc();
 ```
+
+Enable Only One Histogram Representation
+----------------------------------------
+
+By default, histograms maintain two representations under the hood: The classic histogram representation with static buckets, and the native histogram representation with dynamic buckets.
+
+While this default provides the flexibility to scrape different representations at runtime, it comes at a cost, because maintaining multiple representations causes performance overhead.
+
+In performance critical applications we recommend to use either the classic representation or the native representation, but not both.
+
+You can either configure this in code for each histogram by calling [classicOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicOnly()) or [nativeOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeOnly()), or you use the corresponding [config options](http://localhost:1313/config/config/).
+
+One way to do this via global config for all histograms is to add a file `prometheus.properties` to your classpath with the following line:
+
+```properties
+io.prometheus.metrics.histogramClassicOnly=true
+```
+
+or
+
+```properties
+io.prometheus.metrics.histogramNativeOnly=true
+```
+
+Alternatively, you can use an environment varialbe, system property, or define an external configuration file at runtime as described in the [config section](../../config/config).

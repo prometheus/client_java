@@ -17,6 +17,20 @@ public class ResourceAttributesFromOtelAgent {
 
     private static final String[] OTEL_JARS = new String[]{"opentelemetry-api-1.29.0.jar", "opentelemetry-context-1.29.0.jar"};
 
+    /**
+     * This grabs resource attributes like {@code service.name} and {@code service.instance.id} from
+     * the OTel Java agent (if present) and adds them to {@code result}.
+     * <p>
+     * The way this works is as follows: If the OTel Java agent is attached, it modifies the
+     * {@code GlobalOpenTelemetry.get()} method to return an agent-specific object.
+     * From that agent-specific object we can get the resource attributes via reflection.
+     * <p>
+     * So we load the {@code GlobalOpenTelemetry} class (in a separate class loader from the JAR files
+     * that are bundled with this module), call {@code .get()}, and inspect the returned object.
+     * <p>
+     * After that we discard the class loader so that all OTel specific classes are unloaded.
+     * No runtime dependency on any OTel version remains.
+     */
     public static void addIfAbsent(Map<String, String> result, String instrumentationScopeName) {
         try {
             Path tmpDir = createTempDirectory(instrumentationScopeName + "-");
