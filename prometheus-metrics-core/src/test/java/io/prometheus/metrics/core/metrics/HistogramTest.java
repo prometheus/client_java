@@ -756,7 +756,7 @@ public class HistogramTest {
                 .name("test")
                 // The default number of Exemplars is 4.
                 // Use 5 buckets to verify that the exemplar sample is configured with the buckets.
-                .classicBuckets(1.0, 2.0, 3.0, 4.0, Double.POSITIVE_INFINITY)
+                .classicUpperBounds(1.0, 2.0, 3.0, 4.0, Double.POSITIVE_INFINITY)
                 .labelNames("path")
                 .build();
 
@@ -1076,7 +1076,7 @@ public class HistogramTest {
     public void testDuplicateClassicBuckets() {
         Histogram histogram = Histogram.builder()
                 .name("test")
-                .classicBuckets(0, 3, 17, 3, 21)
+                .classicUpperBounds(0, 3, 17, 3, 21)
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1088,7 +1088,7 @@ public class HistogramTest {
     public void testUnsortedBuckets() {
         Histogram histogram = Histogram.builder()
                 .name("test")
-                .classicBuckets(0.2, 0.1)
+                .classicUpperBounds(0.2, 0.1)
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1100,7 +1100,7 @@ public class HistogramTest {
     public void testEmptyBuckets() {
         Histogram histogram = Histogram.builder()
                 .name("test")
-                .classicBuckets()
+                .classicUpperBounds()
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1112,7 +1112,7 @@ public class HistogramTest {
     public void testBucketsIncludePositiveInfinity() {
         Histogram histogram = Histogram.builder()
                 .name("test")
-                .classicBuckets(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY)
+                .classicUpperBounds(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY)
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1124,7 +1124,7 @@ public class HistogramTest {
     public void testLinearBuckets() {
         Histogram histogram = Histogram.builder()
                 .name("test")
-                .classicLinearBuckets(0.1, 0.1, 10)
+                .classicLinearUpperBounds(0.1, 0.1, 10)
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
@@ -1135,7 +1135,7 @@ public class HistogramTest {
     @Test
     public void testExponentialBuckets() {
         Histogram histogram = Histogram.builder()
-                .classicExponentialBuckets(2, 2.5, 3)
+                .classicExponentialUpperBounds(2, 2.5, 3)
                 .name("test")
                 .build();
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
@@ -1148,7 +1148,7 @@ public class HistogramTest {
     public void testBucketsIncludeNaN() {
         Histogram.builder()
                 .name("test")
-                .classicBuckets(0.01, 0.1, 1.0, Double.NaN);
+                .classicUpperBounds(0.01, 0.1, 1.0, Double.NaN);
     }
 
     @Test
@@ -1192,7 +1192,7 @@ public class HistogramTest {
         Histogram histogram = Histogram.builder()
                 .name("histogram")
                 .help("test histogram for negative values")
-                .classicBuckets(-10, -5, 0, 5, 10)
+                .classicUpperBounds(-10, -5, 0, 5, 10)
                 .build();
         double expectedCount = 0;
         double expectedSum = 0;

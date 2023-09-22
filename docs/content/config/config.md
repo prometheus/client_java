@@ -40,7 +40,7 @@ Metrics Properties
 | io.prometheus.metrics.exemplarsEnabled | [Counter.Builder.withExemplars()](/client_java/api/io/prometheus/metrics/core/metrics/Counter.Builder.html#withExemplars()) | (1) (2) |
 | io.prometheus.metrics.histogramNativeOnly | [Histogram.Builder.nativeOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeOnly()) | (2) |
 | io.prometheus.metrics.histogramClassicOnly | [Histogram.Builder.classicOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicOnly()) | (2) |
-| io.prometheus.metrics.histogramClassicUpperBounds | [Histogram.Builder.classicBuckets()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicBuckets(double...)) | (3) |
+| io.prometheus.metrics.histogramClassicUpperBounds | [Histogram.Builder.classicUpperBounds()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicUpperBounds(double...)) | (3) |
 | io.prometheus.metrics.histogramNativeInitialSchema | [Histogram.Builder.nativeInitialSchema()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeInitialSchema(int)) | |
 | io.prometheus.metrics.histogramNativeMinZeroThreshold | [Histogram.Builder.nativeMinZeroThreshold()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeMinZeroThreshold(double)) | |
 | io.prometheus.metrics.histogramNativeMaxZeroThreshold | [Histogram.Builder.nativeMaxZeroThreshold()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeMaxZeroThreshold(double)) | |

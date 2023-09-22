@@ -735,7 +735,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * If the +Inf bucket is missing it will be added.
          * If upperBounds contains duplicates the duplicates will be removed.
          */
-        public Builder classicBuckets(double... upperBounds) {
+        public Builder classicUpperBounds(double... upperBounds) {
             this.classicUpperBounds = upperBounds;
             for (double bound : upperBounds) {
                 if (Double.isNaN(bound)) {
@@ -755,7 +755,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * @param width is the width of each bucket
          * @param count is the total number of buckets, including start
          */
-        public Builder classicLinearBuckets(double start, double width, int count) {
+        public Builder classicLinearUpperBounds(double start, double width, int count) {
             this.classicUpperBounds = new double[count];
             // Use BigDecimal to avoid weird bucket boundaries like 0.7000000000000001.
             BigDecimal s = new BigDecimal(Double.toString(start));
@@ -776,7 +776,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
          * @param factor growth factor
          * @param count  total number of buckets, including start
          */
-        public Builder classicExponentialBuckets(double start, double factor, int count) {
+        public Builder classicExponentialUpperBounds(double start, double factor, int count) {
             classicUpperBounds = new double[count];
             for (int i = 0; i < count; i++) {
                 classicUpperBounds[i] = start * Math.pow(factor, i);
