@@ -11,10 +11,10 @@ import java.util.Map;
  */
 public class ExporterFilterProperties {
 
-    public static final String NAME_MUST_BE_EQUAL_TO = "nameMustBeEqualTo";
-    public static final String NAME_MUST_NOT_BE_EQUAL_TO = "nameMustNotBeEqualTo";
-    public static final String NAME_MUST_START_WITH = "nameMustStartWith";
-    public static final String NAME_MUST_NOT_START_WITH = "nameMustNotStartWith";
+    public static final String METRIC_NAME_MUST_BE_EQUAL_TO = "metricNameMustBeEqualTo";
+    public static final String METRIC_NAME_MUST_NOT_BE_EQUAL_TO = "metricNameMustNotBeEqualTo";
+    public static final String METRIC_NAME_MUST_START_WITH = "metricNameMustStartWith";
+    public static final String METRIC_NAME_MUST_NOT_START_WITH = "metricNameMustNotStartWith";
 
     private final List<String> allowedNames;
     private final List<String> excludedNames;
@@ -33,19 +33,19 @@ public class ExporterFilterProperties {
         validate(prefix);
     }
 
-    public List<String> getAllowedNames() {
+    public List<String> getAllowedMetricNames() {
         return allowedNames;
     }
 
-    public List<String> getExcludedNames() {
+    public List<String> getExcludedMetricNames() {
         return excludedNames;
     }
 
-    public List<String> getAllowedPrefixes() {
+    public List<String> getAllowedMetricNamePrefixes() {
         return allowedPrefixes;
     }
 
-    public List<String> getExcludedPrefixes() {
+    public List<String> getExcludedMetricNamePrefixes() {
         return excludedPrefixes;
     }
 
@@ -57,10 +57,10 @@ public class ExporterFilterProperties {
      * This is because we want to know if there are unused properties remaining after all properties have been loaded.
      */
     static ExporterFilterProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
-        List<String> allowedNames = Util.loadStringList(prefix + "." + NAME_MUST_BE_EQUAL_TO, properties);
-        List<String> excludedNames = Util.loadStringList(prefix + "." + NAME_MUST_NOT_BE_EQUAL_TO, properties);
-        List<String> allowedPrefixes = Util.loadStringList(prefix + "." + NAME_MUST_START_WITH, properties);
-        List<String> excludedPrefixes = Util.loadStringList(prefix + "." + NAME_MUST_NOT_START_WITH, properties);
+        List<String> allowedNames = Util.loadStringList(prefix + "." + METRIC_NAME_MUST_BE_EQUAL_TO, properties);
+        List<String> excludedNames = Util.loadStringList(prefix + "." + METRIC_NAME_MUST_NOT_BE_EQUAL_TO, properties);
+        List<String> allowedPrefixes = Util.loadStringList(prefix + "." + METRIC_NAME_MUST_START_WITH, properties);
+        List<String> excludedPrefixes = Util.loadStringList(prefix + "." + METRIC_NAME_MUST_NOT_START_WITH, properties);
         return new ExporterFilterProperties(allowedNames, excludedNames, allowedPrefixes, excludedPrefixes, prefix);
     }
 

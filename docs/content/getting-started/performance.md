@@ -63,4 +63,5 @@ or
 io.prometheus.metrics.histogramNativeOnly=true
 ```
 
-Alternatively, you can use an environment varialbe, system property, or define an external configuration file at runtime as described in the [config section](../../config/config).
+Alternatively, you pass the parameter `-Dio.prometheus.metrics.histogramNativeOnly=true` on application startup, or define an external configuration file at runtime as described in the [config section](../../config/config).
+Future releases will add support for configuration via environment variable`IO_PROMETHEUS_METRICS_HISTOGRAM_NATIVE_ONLY=true`.

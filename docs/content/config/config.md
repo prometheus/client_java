@@ -9,7 +9,8 @@ The Prometheus metrics library provides multiple options how to override configu
 
 * Properties file
 * System properties
-* Environment variables
+
+Future releases will add more options, like configuration via environment variables.
 
 Example:
 
@@ -21,7 +22,6 @@ The property above changes the port for the [HTTPServer exporter]({{< relref "/e
 
 * Properties file: Add the line above to the properties file.
 * System properties: Use the command line parameter `-Dio.prometheus.exporter.httpServer.port=9401` when starting your application.
-* Environment variable: `export IO_PROMETHEUS_EXPORTER_HTTPSERVER_PORT=9401`. The name of the environment variable is the uppercase property name with dots replaced with underscores.
 
 Location of the Properties File
 -------------------------------
@@ -30,7 +30,7 @@ The properties file is searched in the following locations:
 
 * `/prometheus.properties` in the classpath. This is for bundling a properties file with your application.
 * System property `-Dprometheus.config=/path/to/prometheus.properties`.
-* Enironment variable `PROMETHEUS_CONFIG=/path/to/prometheus.properties`.
+* Environment variable `PROMETHEUS_CONFIG=/path/to/prometheus.properties`.
 
 Metrics Properties
 ------------------
@@ -78,17 +78,36 @@ This works for all Metrics properties.
 Exemplar Properties
 -------------------
 
-TODO
+| Name            | Javadoc | Note |
+| --------------- | --------|------|
+| io.prometheus.exemplars.minRetentionPeriodSeconds  | [ExemplarsProperties.getMinRetentionPeriodSeconds()](/client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getMinRetentionPeriodSeconds()) | |
+| io.prometheus.exemplars.maxRetentionPeriodSeconds  | [ExemplarsProperties.getMaxRetentionPeriodSeconds()](/client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getMaxRetentionPeriodSeconds()) | |
+| io.prometheus.exemplars.sampleIntervalMilliseconds | [ExemplarsProperties.getSampleIntervalMilliseconds()](/client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getSampleIntervalMilliseconds()) | |
 
 Exporter Properties
 -------------------
 
-TODO
+| Name            | Javadoc | Note |
+| --------------- | --------|------|
+| io.prometheus.exporter.includeCreatedTimestamps  | [ExporterProperties.getExemplarsOnAllMetricTypes()](/client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getExemplarsOnAllMetricTypes()) | (1) |
+| io.prometheus.exporter.exemplarsOnAllMetricTypes  | [ExporterProperties.getIncludeCreatedTimestamps()](/client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getIncludeCreatedTimestamps()) | (1) |
+
+(1) Boolean value, `true` or `false`. Default see Javadoc.
 
 Exporter Filter Properties
 --------------------------
 
-TODO
+| Name            | Javadoc | Note |
+| --------------- | --------|------|
+| io.prometheus.exporter.filter.metricNameMustBeEqualTo | [ExporterFilterProperties.getAllowedMetricNames()](/client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getAllowedMetricNames()) | (1) |
+| io.prometheus.exporter.filter.metricNameMustNotBeEqualTo | [ExporterFilterProperties.getExcludedMetricNames()](/client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getExcludedMetricNames()) | (2) |
+| io.prometheus.exporter.filter.metricNameMustStartWith | [ExporterFilterProperties.getAllowedMetricNamePrefixes()](/client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getAllowedMetricNamePrefixes()) | (3) |
+| io.prometheus.exporter.filter.metricNameMustNotStartWith | [ExporterFilterProperties.getExcludedMetricNamePrefixes()](/client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getExcludedMetricNamePrefixes()) | (4) |
+
+(1) Comma sparated list of allowed metric names. Only these metrics will be exposed.<br/>
+(2) Comma sparated list of excluded metric names. These metrics will not be exposed.<br/>
+(3) Comma sparated list of prefixes. Only metrics starting with these prefixes will be exposed.<br/>
+(4) Comma sparated list of prefixes. Metrics starting with these prefixes will not be exposed.<br/>
 
 Exporter HTTPServer Properties
 ------------------------------

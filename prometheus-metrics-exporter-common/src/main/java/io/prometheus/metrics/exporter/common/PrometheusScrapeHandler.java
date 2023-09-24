@@ -91,14 +91,14 @@ public class PrometheusScrapeHandler {
     }
 
     private Predicate<String> makeNameFilter(ExporterFilterProperties props) {
-        if (props.getAllowedNames() == null && props.getExcludedNames() == null && props.getAllowedPrefixes() == null && props.getExcludedPrefixes() == null) {
+        if (props.getAllowedMetricNames() == null && props.getExcludedMetricNames() == null && props.getAllowedMetricNamePrefixes() == null && props.getExcludedMetricNamePrefixes() == null) {
             return null;
         } else {
             return MetricNameFilter.builder()
-                    .nameMustBeEqualTo(props.getAllowedNames())
-                    .nameMustNotBeEqualTo(props.getExcludedNames())
-                    .nameMustStartWith(props.getAllowedPrefixes())
-                    .nameMustNotStartWith(props.getExcludedPrefixes())
+                    .nameMustBeEqualTo(props.getAllowedMetricNames())
+                    .nameMustNotBeEqualTo(props.getExcludedMetricNames())
+                    .nameMustStartWith(props.getAllowedMetricNamePrefixes())
+                    .nameMustNotStartWith(props.getExcludedMetricNamePrefixes())
                     .build();
         }
     }
