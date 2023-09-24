@@ -32,6 +32,9 @@ import org.openjdk.jmh.annotations.Threads;
  * i.p.metrics.benchmarks.CounterBenchmark.simpleclientInc                   thrpt   25   9057.637 ±  67.761  ops/s
  * i.p.metrics.benchmarks.CounterBenchmark.simpleclientNoLabelsInc           thrpt   25   8993.471 ±  49.581  ops/s
  * </pre>
+ * Prometheus counters are faster than counters of other libraries. For example, incrementing a single counter
+ * without labels is more than 2 times faster (34752 ops / second) than doing the same with an OpenTelemetry
+ * counter (16634 ops / sec).
  */
 public class CounterBenchmark {
 

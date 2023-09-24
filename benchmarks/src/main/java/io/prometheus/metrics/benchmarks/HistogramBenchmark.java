@@ -27,7 +27,13 @@ import java.util.Arrays;
  * i.p.metrics.benchmarks.HistogramBenchmark.prometheusNative                thrpt   25   3372.789 ± 339.328  ops/s
  * i.p.metrics.benchmarks.HistogramBenchmark.simpleclient                    thrpt   25   6488.252 ±  96.737  ops/s
  * </pre>
+ * The simpleclient (i.e. client_java version 0.16.0 and older) histograms perform about the same as
+ * the classic histogram of the current 1.0.0 version.
+ * <p>
+ * Compared to OpenTelemetry histograms the Prometheus Java client histograms perform  more than 3 times better
+ * (OpenTelemetry has 1908 ops / sec for classic histograms, while Prometheus has 6451 ops / sec).
  */
+
 public class HistogramBenchmark {
 
     @State(Scope.Benchmark)
