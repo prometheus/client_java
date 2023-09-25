@@ -1,6 +1,6 @@
-package io.prometheus.client;
+package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.client.CKMSQuantiles.Quantile;
+import io.prometheus.metrics.core.metrics.CKMSQuantiles.Quantile;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;

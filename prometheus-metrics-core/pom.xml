@@ -48,14 +48,20 @@
             <artifactId>prometheus-metrics-tracer-initializer</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- test dependencies -->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>prometheus-metrics-exposition-formats</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
