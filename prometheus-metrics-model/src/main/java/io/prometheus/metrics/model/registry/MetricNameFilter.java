@@ -1,27 +1,33 @@
-package io.prometheus.client;
+package io.prometheus.metrics.model.registry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.function.Predicate;
 
 import static java.util.Collections.unmodifiableCollection;
 
 /**
  * Filter samples (i.e. time series) by name.
  */
-public class SampleNameFilter implements Predicate<String> {
+public class MetricNameFilter implements Predicate<String> {
 
     /**
      * For convenience, a filter that allows all names.
      */
-    public static final Predicate<String> ALLOW_ALL = new AllowAll();
+    public static final Predicate<String> ALLOW_ALL = name -> true;
 
     private final Collection<String> nameIsEqualTo;
     private final Collection<String> nameIsNotEqualTo;
     private final Collection<String> nameStartsWith;
     private final Collection<String> nameDoesNotStartWith;
+
+    private MetricNameFilter(Collection<String> nameIsEqualTo, Collection<String> nameIsNotEqualTo, Collection<String> nameStartsWith, Collection<String> nameDoesNotStartWith) {
+        this.nameIsEqualTo = unmodifiableCollection(new ArrayList<>(nameIsEqualTo));
+        this.nameIsNotEqualTo = unmodifiableCollection(new ArrayList<>(nameIsNotEqualTo));
+        this.nameStartsWith = unmodifiableCollection(new ArrayList<>(nameStartsWith));
+        this.nameDoesNotStartWith = unmodifiableCollection(new ArrayList<>(nameDoesNotStartWith));
+    }
 
     @Override
     public boolean test(String sampleName) {
@@ -31,33 +37,32 @@ public class SampleNameFilter implements Predicate<String> {
                 && !matchesNameDoesNotStartWith(sampleName);
     }
 
-    /**
-     * Replacement for Java 8's {@code Predicate.and()} for compatibility with Java versions &lt; 8.
-     */
-    public Predicate<String> and(final Predicate<? super String> other) {
-        if (other == null) {
-            throw new NullPointerException();
-        }
-        return new Predicate<String>() {
-            @Override
-            public boolean test(String s) {
-                return SampleNameFilter.this.test(s) && other.test(s);
-            }
-        };
-    }
-
     private boolean matchesNameEqualTo(String metricName) {
         if (nameIsEqualTo.isEmpty()) {
             return true;
         }
-        return nameIsEqualTo.contains(metricName);
+        for (String name : nameIsEqualTo) {
+            // The following ignores suffixes like _total.
+            // "request_count" and "request_count_total" both match a metric named "request_count".
+            if (name.startsWith(metricName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean matchesNameNotEqualTo(String metricName) {
         if (nameIsNotEqualTo.isEmpty()) {
             return false;
         }
-        return nameIsNotEqualTo.contains(metricName);
+        for (String name : nameIsNotEqualTo) {
+            // The following ignores suffixes like _total.
+            // "request_count" and "request_count_total" both match a metric named "request_count".
+            if (name.startsWith(metricName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean matchesNameStartsWith(String metricName) {
@@ -84,12 +89,19 @@ public class SampleNameFilter implements Predicate<String> {
         return false;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder {
 
-        private final Collection<String> nameEqualTo = new ArrayList<String>();
-        private final Collection<String> nameNotEqualTo = new ArrayList<String>();
-        private final Collection<String> nameStartsWith = new ArrayList<String>();
-        private final Collection<String> nameDoesNotStartWith = new ArrayList<String>();
+        private final Collection<String> nameEqualTo = new ArrayList<>();
+        private final Collection<String> nameNotEqualTo = new ArrayList<>();
+        private final Collection<String> nameStartsWith = new ArrayList<>();
+        private final Collection<String> nameDoesNotStartWith = new ArrayList<>();
+
+        private Builder() {
+        }
 
         /**
          * @see #nameMustBeEqualTo(Collection)
@@ -110,7 +122,9 @@ public class SampleNameFilter implements Predicate<String> {
          * @param names empty means no restriction.
          */
         public Builder nameMustBeEqualTo(Collection<String> names) {
-            nameEqualTo.addAll(names);
+            if (names != null) {
+                nameEqualTo.addAll(names);
+            }
             return this;
         }
 
@@ -131,7 +145,9 @@ public class SampleNameFilter implements Predicate<String> {
          * @param names empty means no name will be excluded.
          */
         public Builder nameMustNotBeEqualTo(Collection<String> names) {
-            nameNotEqualTo.addAll(names);
+            if (names != null) {
+                nameNotEqualTo.addAll(names);
+            }
             return this;
         }
 
@@ -144,10 +160,13 @@ public class SampleNameFilter implements Predicate<String> {
 
         /**
          * Only samples whose name starts with one of the {@code prefixes} will be included.
+         *
          * @param prefixes empty means no restriction.
          */
         public Builder nameMustStartWith(Collection<String> prefixes) {
-            nameStartsWith.addAll(prefixes);
+            if (prefixes != null) {
+                nameStartsWith.addAll(prefixes);
+            }
             return this;
         }
 
@@ -160,83 +179,18 @@ public class SampleNameFilter implements Predicate<String> {
 
         /**
          * Samples with names starting with one of the {@code prefixes} will be excluded.
+         *
          * @param prefixes empty means no time series will be excluded.
          */
         public Builder nameMustNotStartWith(Collection<String> prefixes) {
-            nameDoesNotStartWith.addAll(prefixes);
+            if (prefixes != null) {
+                nameDoesNotStartWith.addAll(prefixes);
+            }
             return this;
         }
 
-        public SampleNameFilter build() {
-            return new SampleNameFilter(nameEqualTo, nameNotEqualTo, nameStartsWith, nameDoesNotStartWith);
+        public MetricNameFilter build() {
+            return new MetricNameFilter(nameEqualTo, nameNotEqualTo, nameStartsWith, nameDoesNotStartWith);
         }
-    }
-
-    private SampleNameFilter(Collection<String> nameIsEqualTo, Collection<String> nameIsNotEqualTo, Collection<String> nameStartsWith, Collection<String> nameDoesNotStartWith) {
-        this.nameIsEqualTo = unmodifiableCollection(nameIsEqualTo);
-        this.nameIsNotEqualTo = unmodifiableCollection(nameIsNotEqualTo);
-        this.nameStartsWith = unmodifiableCollection(nameStartsWith);
-        this.nameDoesNotStartWith = unmodifiableCollection(nameDoesNotStartWith);
-    }
-
-    private static class AllowAll implements Predicate<String> {
-
-        private AllowAll() {
-        }
-
-        @Override
-        public boolean test(String s) {
-            return true;
-        }
-    }
-
-    /**
-     * Helper method to deserialize a {@code delimiter}-separated list of Strings into a {@code List<String>}.
-     * <p>
-     * {@code delimiter} is one of {@code , ; \t \n}.
-     * <p>
-     * This is implemented here so that exporters can provide a consistent configuration format for
-     * lists of allowed names.
-     */
-    public static List<String> stringToList(String s) {
-        List<String> result = new ArrayList<String>();
-        if (s != null) {
-            StringTokenizer tokenizer = new StringTokenizer(s, ",; \t\n");
-            while (tokenizer.hasMoreTokens()) {
-                String token = tokenizer.nextToken();
-                token = token.trim();
-                if (token.length() > 0) {
-                    result.add(token);
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Helper method to compose a filter such that Sample names must
-     * <ul>
-     *     <li>match the existing filter</li>
-     *     <li>and be in the list of allowedNames</li>
-     * </ul>
-     * This should be used to implement the {@code names[]} query parameter in HTTP exporters.
-     *
-     * @param filter may be null, indicating that the resulting filter should just filter by {@code allowedNames}.
-     * @param allowedNames may be null or empty, indicating that {@code filter} is returned unmodified.
-     * @return a filter combining the exising {@code filter} and the {@code allowedNames}, or {@code null}
-     *         if both parameters were {@code null}.
-     */
-    public static Predicate<String> restrictToNamesEqualTo(Predicate<String> filter, Collection<String> allowedNames) {
-        if (allowedNames != null && !allowedNames.isEmpty()) {
-            SampleNameFilter allowedNamesFilter = new SampleNameFilter.Builder()
-                    .nameMustBeEqualTo(allowedNames)
-                    .build();
-            if (filter == null) {
-                return allowedNamesFilter;
-            } else {
-                return allowedNamesFilter.and(filter);
-            }
-        }
-        return filter;
     }
 }

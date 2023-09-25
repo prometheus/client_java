@@ -1,44 +1,45 @@
-package io.prometheus.client.exemplars;
+package io.prometheus.metrics.tracer.initializer;
 
-import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
-import io.prometheus.client.exemplars.tracer.otel.OpenTelemetrySpanContextSupplier;
-import io.prometheus.client.exemplars.tracer.otel_agent.OpenTelemetryAgentSpanContextSupplier;
+import io.prometheus.metrics.tracer.common.SpanContext;
+import io.prometheus.metrics.tracer.otel.OpenTelemetrySpanContext;
+import io.prometheus.metrics.tracer.otel_agent.OpenTelemetryAgentSpanContext;
 
-class Tracer {
+import java.util.concurrent.atomic.AtomicReference;
 
-  ExemplarSampler initExemplarSampler() {
-    try {
-      Object spanContextSupplier = findSpanContextSupplier();
-      if (spanContextSupplier != null) {
-        return new DefaultExemplarSampler((SpanContextSupplier) spanContextSupplier);
-      }
-    } catch (NoClassDefFoundError ignored) {
-      // simpleclient_tracer_common dependency not found
+public class SpanContextSupplier {
+
+    private static final AtomicReference<SpanContext> spanContextRef = new AtomicReference<SpanContext>();
+
+    public static void setSpanContext(SpanContext spanContext) {
+        spanContextRef.set(spanContext);
     }
-    return null;
-  }
 
-  // Avoid SpanContextSupplier in the method signature so that we can handle the NoClassDefFoundError
-  // even if the user excluded simpleclient_tracer_common from the classpath.
-  private Object findSpanContextSupplier() {
-    try {
-      if (OpenTelemetrySpanContextSupplier.isAvailable()) {
-        return new OpenTelemetrySpanContextSupplier();
-      }
-    } catch (NoClassDefFoundError ignored) {
-      // tracer_otel dependency not found
-    } catch (UnsupportedClassVersionError ignored) {
-      // OpenTelemetry requires Java 8, but client_java might run on Java 6.
+    public static boolean hasSpanContext() {
+        return getSpanContext() != null;
     }
-    try {
-      if (OpenTelemetryAgentSpanContextSupplier.isAvailable()) {
-        return new OpenTelemetryAgentSpanContextSupplier();
-      }
-    } catch (NoClassDefFoundError ignored) {
-      // tracer_otel_agent dependency not found
-    } catch (UnsupportedClassVersionError ignored) {
-      // OpenTelemetry requires Java 8, but client_java might run on Java 6.
+
+    public static SpanContext getSpanContext() {
+        return spanContextRef.get();
     }
-    return null;
-  }
+
+    static {
+        try {
+            if (OpenTelemetrySpanContext.isAvailable()) {
+                spanContextRef.set(new OpenTelemetrySpanContext());
+            }
+        } catch (NoClassDefFoundError ignored) {
+            // tracer_otel dependency not found
+        } catch (UnsupportedClassVersionError ignored) {
+            // OpenTelemetry requires Java 8, but client_java might run on Java 6.
+        }
+        try {
+            if (OpenTelemetryAgentSpanContext.isAvailable()) {
+                spanContextRef.set(new OpenTelemetryAgentSpanContext());
+            }
+        } catch (NoClassDefFoundError ignored) {
+            // tracer_otel_agent dependency not found
+        } catch (UnsupportedClassVersionError ignored) {
+            // OpenTelemetry requires Java 8, but client_java might run on Java 6.
+        }
+    }
 }

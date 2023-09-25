@@ -1,109 +1,115 @@
-package io.prometheus.client.hotspot;
+package io.prometheus.metrics.instrumentation.jvm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.io.FileNotFoundException;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
-
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.model.registry.MetricNameFilter;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-public class StandardExportsTest {
+import java.io.File;
+import java.io.IOException;
+import java.lang.management.RuntimeMXBean;
 
-  static class StatusReaderTest extends StandardExports.StatusReader {
-    BufferedReader procSelfStatusReader() throws FileNotFoundException {
-      return new BufferedReader(new StringReader("Name:   cat\nVmSize:\t5900 kB\nVmRSS:\t   360 kB\n"));
-    }
-  }
+import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-  // Interface with a signature equivalent to com.sun.management.OperatingSystemMXBean and
-  // com.ibm.lang.management.OperatingSystemMXBean, without explicitly depending on either of
-  // these classes, used to test reflection.
-  interface GenericOperatingSystemMXBean extends OperatingSystemMXBean {
-    public long getCommittedVirtualMemorySize();
-    public long getTotalSwapSpaceSize();
-    public long getFreeSwapSpaceSize();
-    public long getProcessCpuTime();
-    public long getFreePhysicalMemorySize();
-    public long getTotalPhysicalMemorySize();
-  }
+public class ProcessMetricsTest {
 
-  // Interface with a signature equivalent to com.sun.management.UnixOperatingSystemMXBean and
-  // com.ibm.lang.management.UnixOperatingSystemMXBean, without explicitly depending on either of
-  // these classes, used to test reflection.
-  interface UnixOperatingSystemMXBean extends GenericOperatingSystemMXBean {
-    public long getOpenFileDescriptorCount();
-    public long getMaxFileDescriptorCount();
-  }
+    private com.sun.management.UnixOperatingSystemMXBean sunOsBean = Mockito.mock(com.sun.management.UnixOperatingSystemMXBean.class);
+    private java.lang.management.OperatingSystemMXBean javaOsBean = Mockito.mock(java.lang.management.OperatingSystemMXBean.class);
+    private ProcessMetrics.Grepper linuxGrepper = Mockito.mock(ProcessMetrics.Grepper.class);
+    private ProcessMetrics.Grepper windowsGrepper = Mockito.mock(ProcessMetrics.Grepper.class);
+    private RuntimeMXBean runtimeBean = Mockito.mock(RuntimeMXBean.class);
 
-  UnixOperatingSystemMXBean osBean;
-  RuntimeMXBean runtimeBean;
-
-  @Before
-  public void setUp() {
-    osBean = mock(UnixOperatingSystemMXBean.class);
-    when(osBean.getName()).thenReturn("Linux");
-    when(osBean.getProcessCpuTime()).thenReturn(123L);
-    when(osBean.getOpenFileDescriptorCount()).thenReturn(10L);
-    when(osBean.getMaxFileDescriptorCount()).thenReturn(20L);
-    runtimeBean = mock(RuntimeMXBean.class);
-    when(runtimeBean.getStartTime()).thenReturn(456L);
-  }
-
-  @Test
-  public void testStandardExports() {
-    CollectorRegistry registry = new CollectorRegistry();
-    new StandardExports(new StatusReaderTest(), osBean, runtimeBean).register(registry);
-
-    assertEquals(123 / 1.0E9,
-        registry.getSampleValue("process_cpu_seconds_total", new String[]{}, new String[]{}), .0000001);
-    assertEquals(10,
-        registry.getSampleValue("process_open_fds", new String[]{}, new String[]{}), .001);
-    assertEquals(20,
-        registry.getSampleValue("process_max_fds", new String[]{}, new String[]{}), .001);
-    assertEquals(456 / 1.0E3,
-        registry.getSampleValue("process_start_time_seconds", new String[]{}, new String[]{}), .0000001);
-    assertEquals(5900 * 1024,
-        registry.getSampleValue("process_virtual_memory_bytes", new String[]{}, new String[]{}), .001);
-    assertEquals(360 * 1024,
-        registry.getSampleValue("process_resident_memory_bytes", new String[]{}, new String[]{}), .001);
-  }
-
-  @Test
-  public void testNonUnixStandardExports() {
-    GenericOperatingSystemMXBean genericOsBean = mock(GenericOperatingSystemMXBean.class);
-    when(genericOsBean.getName()).thenReturn("Windows");
-    when(genericOsBean.getProcessCpuTime()).thenReturn(123L);
-    
-    CollectorRegistry registry = new CollectorRegistry();
-    new StandardExports(new StatusReaderTest(), genericOsBean, runtimeBean).register(registry);
-
-    assertEquals(123 / 1.0E9,
-        registry.getSampleValue("process_cpu_seconds_total", new String[]{}, new String[]{}), .0000001);
-    assertEquals(456 / 1.0E3,
-        registry.getSampleValue("process_start_time_seconds", new String[]{}, new String[]{}), .0000001);
-  }
-
-  @Test
-  public void testBrokenProcStatusReturnsOtherStats() {
-    class StatusReaderBroken extends StandardExports.StatusReader {
-      BufferedReader procSelfStatusReader() throws FileNotFoundException {
-        return new BufferedReader(new StringReader("Name:   cat\nVmSize:\n"));
-      }
+    @Before
+    public void setUp() throws IOException {
+        when(sunOsBean.getProcessCpuTime()).thenReturn(72L);
+        when(sunOsBean.getOpenFileDescriptorCount()).thenReturn(127L);
+        when(sunOsBean.getMaxFileDescriptorCount()).thenReturn(244L);
+        when(runtimeBean.getStartTime()).thenReturn(37100L);
+        when(linuxGrepper.lineStartingWith(any(File.class), eq("VmSize:"))).thenReturn("VmSize:     6036 kB");
+        when(linuxGrepper.lineStartingWith(any(File.class), eq("VmRSS:"))).thenReturn("VmRSS:      1012 kB");
     }
 
-    CollectorRegistry registry = new CollectorRegistry();
-    new StandardExports(new StatusReaderBroken(), osBean, runtimeBean).register(registry);
+    @Test
+    public void testGoodCase() throws IOException {
+        PrometheusRegistry registry = new PrometheusRegistry();
+        ProcessMetrics.builder()
+                        .osBean(sunOsBean)
+                                .runtimeBean(runtimeBean)
+                .grepper(linuxGrepper)
+                .register(registry);
+        MetricSnapshots snapshots = registry.scrape();
 
-    assertEquals(123 / 1.0E9,
-      registry.getSampleValue("process_cpu_seconds_total", new String[]{}, new String[]{}), .0000001);
-    assertNull(registry.getSampleValue("process_resident_memory_bytes", new String[]{}, new String[]{}));
-  }
+        String expected = "" +
+                "# TYPE process_cpu_seconds counter\n" +
+                "# UNIT process_cpu_seconds seconds\n" +
+                "# HELP process_cpu_seconds Total user and system CPU time spent in seconds.\n" +
+                "process_cpu_seconds_total 0.072\n" +
+                "# TYPE process_max_fds gauge\n" +
+                "# HELP process_max_fds Maximum number of open file descriptors.\n" +
+                "process_max_fds 244.0\n" +
+                "# TYPE process_open_fds gauge\n" +
+                "# HELP process_open_fds Number of open file descriptors.\n" +
+                "process_open_fds 127.0\n" +
+                "# TYPE process_resident_memory_bytes gauge\n" +
+                "# UNIT process_resident_memory_bytes bytes\n" +
+                "# HELP process_resident_memory_bytes Resident memory size in bytes.\n" +
+                "process_resident_memory_bytes 1036288.0\n" +
+                "# TYPE process_start_time_seconds gauge\n" +
+                "# UNIT process_start_time_seconds seconds\n" +
+                "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n" +
+                "process_start_time_seconds 37.1\n" +
+                "# TYPE process_virtual_memory_bytes gauge\n" +
+                "# UNIT process_virtual_memory_bytes bytes\n" +
+                "# HELP process_virtual_memory_bytes Virtual memory size in bytes.\n" +
+                "process_virtual_memory_bytes 6180864.0\n" +
+                "# EOF\n";
+
+        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    }
+
+    @Test
+    public void testMinimal() throws IOException {
+        PrometheusRegistry registry = new PrometheusRegistry();
+        ProcessMetrics.builder()
+                .osBean(javaOsBean)
+                .runtimeBean(runtimeBean)
+                .grepper(windowsGrepper)
+                .register(registry);
+        MetricSnapshots snapshots = registry.scrape();
+
+        String expected = "" +
+                "# TYPE process_start_time_seconds gauge\n" +
+                "# UNIT process_start_time_seconds seconds\n" +
+                "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n" +
+                "process_start_time_seconds 37.1\n" +
+                "# EOF\n";
+
+        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    }
+
+    @Test
+    public void testIgnoredMetricNotScraped() {
+        MetricNameFilter filter = MetricNameFilter.builder()
+                .nameMustNotBeEqualTo("process_max_fds")
+                .build();
+
+        PrometheusRegistry registry = new PrometheusRegistry();
+        ProcessMetrics.builder()
+                .osBean(sunOsBean)
+                .runtimeBean(runtimeBean)
+                .grepper(linuxGrepper)
+                .register(registry);
+        registry.scrape(filter);
+
+        verify(sunOsBean, times(0)).getMaxFileDescriptorCount();
+        verify(sunOsBean, times(1)).getOpenFileDescriptorCount();
+    }
 }

@@ -1,149 +1,126 @@
-package io.prometheus.client.hotspot;
+package io.prometheus.metrics.instrumentation.jvm;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.Predicate;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.metrics.GaugeWithCallback;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Unit;
 
+import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
-
-import static io.prometheus.client.SampleNameFilter.ALLOW_ALL;
 
 /**
- * Exports metrics about JVM buffers.
- *
- * Can be replaced with a simple access once JDK 1.7 compatibility is baseline.
- *
+ * JVM Buffer Pool metrics. The {@link JvmBufferPoolMetrics} are registered as part of the {@link JvmMetrics} like this:
+ * <pre>{@code
+ *   JvmMetrics.builder().register();
+ * }</pre>
+ * However, if you want only the {@link JvmBufferPoolMetrics} you can also register them directly:
+ * <pre>{@code
+ *   JvmBufferPoolMetrics.builder().register();
+ * }</pre>
+ * Example metrics being exported:
+ * <pre>
+ * # HELP jvm_buffer_pool_capacity_bytes Bytes capacity of a given JVM buffer pool.
+ * # TYPE jvm_buffer_pool_capacity_bytes gauge
+ * jvm_buffer_pool_capacity_bytes{pool="direct"} 8192.0
+ * jvm_buffer_pool_capacity_bytes{pool="mapped"} 0.0
+ * # HELP jvm_buffer_pool_used_buffers Used buffers of a given JVM buffer pool.
+ * # TYPE jvm_buffer_pool_used_buffers gauge
+ * jvm_buffer_pool_used_buffers{pool="direct"} 1.0
+ * jvm_buffer_pool_used_buffers{pool="mapped"} 0.0
+ * # HELP jvm_buffer_pool_used_bytes Used bytes of a given JVM buffer pool.
+ * # TYPE jvm_buffer_pool_used_bytes gauge
+ * jvm_buffer_pool_used_bytes{pool="direct"} 8192.0
+ * jvm_buffer_pool_used_bytes{pool="mapped"} 0.0
+ * </pre>
  */
-public class BufferPoolsExports extends Collector {
+public class JvmBufferPoolMetrics {
 
     private static final String JVM_BUFFER_POOL_USED_BYTES = "jvm_buffer_pool_used_bytes";
     private static final String JVM_BUFFER_POOL_CAPACITY_BYTES = "jvm_buffer_pool_capacity_bytes";
     private static final String JVM_BUFFER_POOL_USED_BUFFERS = "jvm_buffer_pool_used_buffers";
 
-    private static final Logger LOGGER = Logger.getLogger(BufferPoolsExports.class.getName());
+    private final PrometheusProperties config;
+    private final List<BufferPoolMXBean> bufferPoolBeans;
 
-    private final List<Object> bufferPoolMXBeans = new ArrayList<Object>();
-    private Method getName;
-    private Method getMemoryUsed;
-    private Method getTotalCapacity;
-    private Method getCount;
-
-    public BufferPoolsExports() {
-        try {
-            final Class<?> bufferPoolMXBeanClass = Class.forName("java.lang.management.BufferPoolMXBean");
-            bufferPoolMXBeans.addAll(accessBufferPoolMXBeans(bufferPoolMXBeanClass));
-
-            getName = bufferPoolMXBeanClass.getMethod("getName");
-            getMemoryUsed = bufferPoolMXBeanClass.getMethod("getMemoryUsed");
-            getTotalCapacity = bufferPoolMXBeanClass.getMethod("getTotalCapacity");
-            getCount = bufferPoolMXBeanClass.getMethod("getCount");
-
-        } catch (ClassNotFoundException e) {
-            LOGGER.fine("BufferPoolMXBean not available, no metrics for buffer pools will be exported");
-        } catch (NoSuchMethodException e) {
-            LOGGER.fine("Can not get necessary accessor from BufferPoolMXBean: " + e.getMessage());
-        }
+    private JvmBufferPoolMetrics(List<BufferPoolMXBean> bufferPoolBeans, PrometheusProperties config) {
+        this.config = config;
+        this.bufferPoolBeans = bufferPoolBeans;
     }
 
-    private static List<Object> accessBufferPoolMXBeans(final Class<?> bufferPoolMXBeanClass) {
-        try {
-            final Method getPlatformMXBeansMethod = ManagementFactory.class.getMethod("getPlatformMXBeans", Class.class);
-            final Object listOfBufferPoolMXBeanInstances = getPlatformMXBeansMethod.invoke(null, bufferPoolMXBeanClass);
+    private void register(PrometheusRegistry registry) {
 
-            return (List<Object>) listOfBufferPoolMXBeanInstances;
+        GaugeWithCallback.builder(config)
+                .name(JVM_BUFFER_POOL_USED_BYTES)
+                .help("Used bytes of a given JVM buffer pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(callback -> {
+                    for (BufferPoolMXBean pool : bufferPoolBeans) {
+                        callback.call(pool.getMemoryUsed(), pool.getName());
+                    }
+                })
+                .register(registry);
 
-        } catch (NoSuchMethodException e) {
-            LOGGER.fine("ManagementFactory.getPlatformMXBeans not available, no metrics for buffer pools will be exported");
-            return Collections.emptyList();
-        } catch (IllegalAccessException e) {
-            LOGGER.fine("ManagementFactory.getPlatformMXBeans not accessible, no metrics for buffer pools will be exported");
-            return Collections.emptyList();
-        } catch (InvocationTargetException e) {
-            LOGGER.warning("ManagementFactory.getPlatformMXBeans could not be invoked, no metrics for buffer pools will be exported");
-            return Collections.emptyList();
-        }
+        GaugeWithCallback.builder(config)
+                .name(JVM_BUFFER_POOL_CAPACITY_BYTES)
+                .help("Bytes capacity of a given JVM buffer pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(callback -> {
+                    for (BufferPoolMXBean pool : bufferPoolBeans) {
+                        callback.call(pool.getTotalCapacity(), pool.getName());
+                    }
+                })
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_BUFFER_POOL_USED_BUFFERS)
+                .help("Used buffers of a given JVM buffer pool.")
+                .labelNames("pool")
+                .callback(callback -> {
+                    for (BufferPoolMXBean pool : bufferPoolBeans) {
+                        callback.call(pool.getCount(), pool.getName());
+                    }
+                })
+                .register(registry);
     }
 
-    @Override
-    public List<MetricFamilySamples> collect() {
-        return collect(null);
+    public static Builder builder() {
+        return new Builder(PrometheusProperties.get());
     }
 
-    @Override
-    public List<MetricFamilySamples> collect(Predicate<String> nameFilter) {
-        List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-        if (nameFilter == null) {
-            nameFilter = ALLOW_ALL;
+    public static Builder builder(PrometheusProperties config) {
+        return new Builder(config);
+    }
+
+    public static class Builder {
+
+        private final PrometheusProperties config;
+        private List<BufferPoolMXBean> bufferPoolBeans;
+
+        private Builder(PrometheusProperties config) {
+            this.config = config;
         }
-        GaugeMetricFamily used = null;
-        if (nameFilter.test(JVM_BUFFER_POOL_USED_BYTES)) {
-            used = new GaugeMetricFamily(
-                    JVM_BUFFER_POOL_USED_BYTES,
-                    "Used bytes of a given JVM buffer pool.",
-                    Collections.singletonList("pool"));
-            mfs.add(used);
+
+        /**
+         * Package private. For testing only.
+         */
+        Builder bufferPoolBeans(List<BufferPoolMXBean> bufferPoolBeans) {
+            this.bufferPoolBeans = bufferPoolBeans;
+            return this;
         }
-        GaugeMetricFamily capacity = null;
-        if (nameFilter.test(JVM_BUFFER_POOL_CAPACITY_BYTES)) {
-            capacity = new GaugeMetricFamily(
-                    JVM_BUFFER_POOL_CAPACITY_BYTES,
-                    "Bytes capacity of a given JVM buffer pool.",
-                    Collections.singletonList("pool"));
-            mfs.add(capacity);
+
+        public void register() {
+            register(PrometheusRegistry.defaultRegistry);
         }
-        GaugeMetricFamily buffers = null;
-        if (nameFilter.test(JVM_BUFFER_POOL_USED_BUFFERS)) {
-            buffers = new GaugeMetricFamily(
-                    JVM_BUFFER_POOL_USED_BUFFERS,
-                    "Used buffers of a given JVM buffer pool.",
-                    Collections.singletonList("pool"));
-            mfs.add(buffers);
-        }
-        for (final Object pool : bufferPoolMXBeans) {
-            if (used != null) {
-                used.addMetric(
-                        Collections.singletonList(getName(pool)),
-                        callLongMethod(getMemoryUsed, pool));
+
+        public void register(PrometheusRegistry registry) {
+            List<BufferPoolMXBean> bufferPoolBeans = this.bufferPoolBeans;
+            if (bufferPoolBeans == null) {
+                bufferPoolBeans = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
             }
-            if (capacity != null) {
-                capacity.addMetric(
-                        Collections.singletonList(getName(pool)),
-                        callLongMethod(getTotalCapacity, pool));
-            }
-            if (buffers != null) {
-                buffers.addMetric(
-                        Collections.singletonList(getName(pool)),
-                        callLongMethod(getCount, pool));
-            }
+            new JvmBufferPoolMetrics(bufferPoolBeans, config).register(registry);
         }
-        return mfs;
-    }
-
-    private long callLongMethod(final Method method, final Object pool) {
-        try {
-            return (Long)method.invoke(pool);
-        } catch (IllegalAccessException e) {
-            LOGGER.fine("Couldn't call " + method.getName() + ": " + e.getMessage());
-        } catch (InvocationTargetException e) {
-            LOGGER.fine("Couldn't call " + method.getName() + ": " + e.getMessage());
-        }
-        return 0L;
-    }
-
-    private String getName(final Object pool) {
-        try {
-            return (String)getName.invoke(pool);
-        } catch (IllegalAccessException e) {
-            LOGGER.fine("Couldn't call getName " + e.getMessage());
-        } catch (InvocationTargetException e) {
-            LOGGER.fine("Couldn't call getName " + e.getMessage());
-        }
-        return "<unknown>";
     }
 }

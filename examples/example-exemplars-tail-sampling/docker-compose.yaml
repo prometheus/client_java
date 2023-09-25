@@ -1,0 +1,77 @@
+version: "3"
+services:
+  hello-world-app:
+    image: opentelemetry-java-agent
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM openjdk:11-jre
+        WORKDIR /
+        RUN curl -sOL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.30.0/opentelemetry-javaagent.jar
+    network_mode: host
+    volumes:
+      - ./example-hello-world-app/target/example-hello-world-app.jar:/example-hello-world-app.jar
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_LOGS_EXPORTER=none
+    command:
+      - java
+      - -javaagent:/opentelemetry-javaagent.jar
+      - -jar
+      - /example-hello-world-app.jar
+  greeting-service:
+    # The opentelemetry-java-agent image is coming from the hello-world-up service above.
+    image: opentelemetry-java-agent
+    network_mode: host
+    volumes:
+      - ./example-greeting-service/target/example-greeting-service.jar:/example-greeting-service.jar
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_LOGS_EXPORTER=none
+    command:
+      - java
+      - -javaagent:/opentelemetry-javaagent.jar
+      - -jar
+      - /example-greeting-service.jar
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.85.0
+    network_mode: host
+    volumes:
+      - ./config/otelcol-config.yaml:/config.yaml
+    command:
+      - --config=file:/config.yaml
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    network_mode: host
+    volumes:
+      - ./config/prometheus.yaml:/prometheus.yaml
+    command:
+      - --enable-feature=exemplar-storage
+      - --enable-feature=native-histograms
+      - --config.file=/prometheus.yaml
+  tempo:
+    image: grafana/tempo:2.2.3
+    network_mode: host
+    volumes:
+      - ./config/tempo-config.yaml:/config.yaml
+    command:
+      - --config.file=/config.yaml
+  grafana:
+    image: grafana/grafana:10.1.2
+    network_mode: host
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/grafana-datasources.yaml
+      - ./config/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/grafana-dashboards.yaml
+      - ./config/grafana-example-dashboard.json:/etc/grafana/example-dashboard.json
+  k6:
+    image: grafana/k6
+    network_mode: host
+    volumes:
+      - ./config/k6-script.js:/k6-script.js
+    command:
+      - run
+      - /k6-script.js

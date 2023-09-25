@@ -1,26 +1,23 @@
-package io.prometheus.client.exemplars.tracer.otel_agent;
+package io.prometheus.metrics.tracer.otel_agent;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanId;
 import io.opentelemetry.api.trace.TraceId;
-import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
+import io.prometheus.metrics.tracer.common.SpanContext;
 
 /**
  * This is exactly the same as the {@code OpenTelemetrySpanContextSupplier}.
  * However, the {@code io.opentelemetry.api} package is relocated to
  * {@code io.opentelemetry.javaagent.shaded.io.opentelemetry.api} in the OpenTelemetry agent.
  */
-public class OpenTelemetryAgentSpanContextSupplier implements SpanContextSupplier {
+public class OpenTelemetryAgentSpanContext implements SpanContext {
 
   public static boolean isAvailable() {
     try {
-      if ("inactive".equalsIgnoreCase(System.getProperties().getProperty("io.prometheus.otelExemplars"))) {
-        return false;
-      }
-      OpenTelemetryAgentSpanContextSupplier test = new OpenTelemetryAgentSpanContextSupplier();
-      test.getSpanId();
-      test.getTraceId();
-      test.isSampled();
+      OpenTelemetryAgentSpanContext test = new OpenTelemetryAgentSpanContext();
+      test.getCurrentSpanId();
+      test.getCurrentTraceId();
+      test.isCurrentSpanSampled();
       return true;
     } catch (LinkageError ignored) {
       // NoClassDefFoundError:
@@ -32,19 +29,24 @@ public class OpenTelemetryAgentSpanContextSupplier implements SpanContextSupplie
   }
 
   @Override
-  public String getTraceId() {
+  public String getCurrentTraceId() {
     String traceId = Span.current().getSpanContext().getTraceId();
     return TraceId.isValid(traceId) ? traceId : null;
   }
 
   @Override
-  public String getSpanId() {
+  public String getCurrentSpanId() {
     String spanId = Span.current().getSpanContext().getSpanId();
     return SpanId.isValid(spanId) ? spanId : null;
   }
 
   @Override
-  public boolean isSampled() {
+  public boolean isCurrentSpanSampled() {
     return Span.current().getSpanContext().isSampled();
+  }
+
+  @Override
+  public void markCurrentSpanAsExemplar() {
+    Span.current().setAttribute(EXEMPLAR_ATTRIBUTE_NAME, EXEMPLAR_ATTRIBUTE_VALUE);
   }
 }

@@ -1,59 +1,41 @@
-package io.prometheus.client.servlet.jakarta.exporter;
+package io.prometheus.metrics.exporter.servlet.jakarta;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Predicate;
-import io.prometheus.client.servlet.common.exporter.Exporter;
-
-import io.prometheus.client.servlet.common.exporter.ServletConfigurationException;
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.exporter.common.PrometheusScrapeHandler;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
-import static io.prometheus.client.servlet.jakarta.Adapter.wrap;
-
 /**
- * The MetricsServlet class provides a simple way of exposing the metrics values.
+ * Initial example exporter so that we can try the new metrics library out.
+ * <p>
+ * We'll add a Jakarta servlet, the built-in HTTPServer, etc. soon, and likely move common code into a common module.
  */
-public class MetricsServlet extends HttpServlet {
+public class PrometheusMetricsServlet extends HttpServlet {
 
-  private final Exporter exporter;
+    private final PrometheusScrapeHandler handler;
 
-  public MetricsServlet() {
-    this(CollectorRegistry.defaultRegistry, null);
-  }
-
-  public MetricsServlet(Predicate<String> sampleNameFilter) {
-    this(CollectorRegistry.defaultRegistry, sampleNameFilter);
-  }
-
-  public MetricsServlet(CollectorRegistry registry) {
-    this(registry, null);
-  }
-
-  public MetricsServlet(CollectorRegistry registry, Predicate<String> sampleNameFilter) {
-    exporter = new Exporter(registry, sampleNameFilter);
-  }
-
-  @Override
-  public void init(ServletConfig servletConfig) throws ServletException {
-    try {
-      super.init(servletConfig);
-      exporter.init(wrap(servletConfig));
-    } catch (ServletConfigurationException e) {
-      throw new ServletException(e);
+    public PrometheusMetricsServlet() {
+        this(PrometheusProperties.get(), PrometheusRegistry.defaultRegistry);
     }
-  }
 
-  @Override
-  protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-    exporter.doGet(wrap(req), wrap(resp));
-  }
+    public PrometheusMetricsServlet(PrometheusRegistry registry) {
+        this(PrometheusProperties.get(), registry);
+    }
 
-  @Override
-  protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-    exporter.doPost(wrap(req), wrap(resp));
-  }
+    public PrometheusMetricsServlet(PrometheusProperties config) {
+        this(config, PrometheusRegistry.defaultRegistry);
+    }
+
+    public PrometheusMetricsServlet(PrometheusProperties config, PrometheusRegistry registry) {
+        this.handler = new PrometheusScrapeHandler(config, registry);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        handler.handleRequest(new HttpExchangeAdapter(request, response));
+    }
 }

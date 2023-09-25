@@ -1,48 +1,67 @@
-package io.prometheus.client.hotspot;
+package io.prometheus.metrics.instrumentation.jvm;
 
-import io.prometheus.client.CollectorRegistry;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Registers the default Hotspot collectors.
- * <p>
- * This is intended to avoid users having to add in new
- * registrations every time a new exporter is added.
- * <p>
- * Example usage:
- * <pre>
- * {@code
- *   DefaultExports.initialize();
- * }
- * </pre>
+ * Registers all JVM metrics. Example usage:
+ * <pre>{@code
+ *   JvmMetrics.builder().register();
+ * }</pre>
  */
-public class DefaultExports {
+public class JvmMetrics {
 
-  private static boolean initialized = false;
+    private static AtomicBoolean registeredWithTheDefaultRegistry = new AtomicBoolean(false);
 
-  /**
-   * Register the default Hotspot collectors with the default
-   * registry. It is safe to call this method multiple times, as
-   * this will only register the collectors once.
-   */
-  public static synchronized void initialize() {
-    if (!initialized) {
-      register(CollectorRegistry.defaultRegistry);
-      initialized = true;
+    public static Builder builder() {
+        return new Builder(PrometheusProperties.get());
     }
-  }
 
-  /**
-   * Register the default Hotspot collectors with the given registry.
-   */
-  public static void register(CollectorRegistry registry) {
-    new BufferPoolsExports().register(registry);
-    new ClassLoadingExports().register(registry);
-    new CompilationExports().register(registry);
-    new GarbageCollectorExports().register(registry);
-    new MemoryAllocationExports().register(registry);
-    new MemoryPoolsExports().register(registry);
-    new StandardExports().register(registry);
-    new ThreadExports().register(registry);
-    new VersionInfoExports().register(registry);
-  }
+    // Note: Currently there is no configuration for JVM metrics, so it doesn't matter whether you pass a config or not.
+    // However, we will add config options in the future, like whether you want to use Prometheus naming conventions
+    //'or OpenTelemetry semantic conventions for JVM metrics.
+    public static Builder builder(PrometheusProperties config) {
+        return new Builder(config);
+    }
+
+    public static class Builder {
+
+        private final PrometheusProperties config;
+
+        private Builder(PrometheusProperties config) {
+            this.config = config;
+        }
+
+        /**
+         * Register all JVM metrics with the default registry.
+         * <p>
+         * It's safe to call this multiple times:
+         * Only the first call will register the metrics, all subsequent calls will be ignored.
+         */
+        public void register() {
+            if (!registeredWithTheDefaultRegistry.getAndSet(true)) {
+                register(PrometheusRegistry.defaultRegistry);
+            }
+        }
+
+        /**
+         * Register all JVM metrics with the {@code registry}.
+         * <p>
+         * You must make sure to call this only once per {@code registry}, otherwise it will
+         * throw an Exception because you are trying to register duplicate metrics.
+         */
+        public void register(PrometheusRegistry registry) {
+            JvmThreadsMetrics.builder(config).register(registry);
+            JvmBufferPoolMetrics.builder(config).register(registry);
+            JvmClassLoadingMetrics.builder(config).register(registry);
+            JvmCompilationMetrics.builder(config).register(registry);
+            JvmGarbageCollectorMetrics.builder(config).register(registry);
+            JvmMemoryPoolAllocationMetrics.builder(config).register(registry);
+            JvmMemoryMetrics.builder(config).register(registry);
+            JvmRuntimeInfoMetric.builder(config).register(registry);
+            ProcessMetrics.builder(config).register(registry);
+        }
+    }
 }

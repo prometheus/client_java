@@ -4,19 +4,38 @@
 
   <parent>
     <groupId>io.prometheus</groupId>
-    <artifactId>simpleclient_tracer</artifactId>
-    <version>0.16.1-SNAPSHOT</version>
+    <artifactId>prometheus-metrics-tracer</artifactId>
+    <version>1.0.0-beta-2-SNAPSHOT</version>
   </parent>
 
-  <artifactId>simpleclient_tracer_otel</artifactId>
+  <artifactId>prometheus-metrics-tracer-otel</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Prometheus Java Span Context Supplier - OpenTelemetry</name>
+  <name>Prometheus Metrics Tracer OpenTelemetry</name>
+  <description>
+    Prometheus integration with the OpenTelemetry distributed tracing library.
+  </description>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>fstab</id>
+      <name>Fabian Stäber</name>
+      <email>fabian@fstab.de</email>
+    </developer>
+  </developers>
 
   <dependencies>
     <dependency>
       <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_tracer_common</artifactId>
+      <artifactId>prometheus-metrics-tracer-common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -26,25 +45,4 @@
       <optional>true</optional>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
 </project>

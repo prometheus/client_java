@@ -1,4 +1,4 @@
-package io.prometheus.client.hotspot;
+package io.prometheus.metrics.instrumentation.jvm;
 
 /**
  * Contains utilities to check if we are running inside or building for native image. Default behavior is to check
@@ -6,7 +6,7 @@ package io.prometheus.client.hotspot;
  * "--initialize-at-build-time=io.prometheus.client.hotspot.NativeImageChecker" to graalvm native image build command and
  * the native image will be identified during build time.
  */
-public final class NativeImageChecker {
+class NativeImageChecker {
     static final boolean isGraalVmNativeImage = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
 
     private NativeImageChecker() {}

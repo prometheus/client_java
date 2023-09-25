@@ -24,8 +24,6 @@ import java.util.List;
 public class Log4j2IT {
 
     private final String image = "openjdk:8-jre";
-    // This test is green with a Java 6 image, but you need to downgrade the log4j version in pom.xml.
-    // private final String image = "azul/zulu-openjdk:6";
     private final Volume volume;
     private final GenericContainer<?> javaContainer;
 

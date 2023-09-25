@@ -4,16 +4,16 @@
 
     <parent>
         <groupId>io.prometheus</groupId>
-        <artifactId>parent</artifactId>
-        <version>0.16.1-SNAPSHOT</version>
+        <artifactId>client_java</artifactId>
+        <version>1.0.0-beta-2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>simpleclient_hotspot</artifactId>
+    <artifactId>prometheus-metrics-instrumentation-jvm</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Java Simpleclient Hotspot</name>
+    <name>Prometheus Metrics Instrumentation - JVM</name>
     <description>
-        Collectors of data from Java Hotspot.
+        Instrumentation library for JVM metrics
     </description>
 
     <licenses>
@@ -30,22 +30,21 @@
             <name>Brian Brazil</name>
             <email>brian.brazil@boxever.com</email>
         </developer>
+        <developer>
+            <id>fstab</id>
+            <name>Fabian Stäber</name>
+            <email>fabian@fstab.de</email>
+        </developer>
     </developers>
 
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient</artifactId>
-            <version>0.16.1-SNAPSHOT</version>
+            <artifactId>prometheus-metrics-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
-        
-        <!-- Test Dependencies Follow -->
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_servlet</artifactId>
-            <version>0.16.1-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
+
+        <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -55,60 +54,20 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.6.1</version>
+            <version>4.11.0</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>9.4.46.v20220331</version>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-exposition-formats</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <testSource>1.8</testSource>
-                    <testTarget>1.8</testTarget>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
-    <profiles>
-        <profile>
-            <!-- Intellij does not support different Java versions for source and testSource -->
-            <!-- As a workaround, use Java 8 in Intellij. -->
-            <!-- This will be fixed with https://youtrack.jetbrains.com/issue/IDEA-85478 -->
-            <id>intellij</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-                <property>
-                    <!-- This property is only set when you open the project in Intellij. -->
-                    <!-- When you compile in the command line, the property will not be set -->
-                    <!-- and this profile will not be used. -->
-                    <name>idea.maven.embedder.version</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

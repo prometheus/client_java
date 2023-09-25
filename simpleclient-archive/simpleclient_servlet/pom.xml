@@ -4,8 +4,8 @@
 
     <parent>
         <groupId>io.prometheus</groupId>
-        <artifactId>parent</artifactId>
-        <version>0.16.1-SNAPSHOT</version>
+        <artifactId>client_java</artifactId>
+        <version>1.0.0-beta-2-SNAPSHOT</version>
     </parent>
 
     <artifactId>simpleclient_servlet</artifactId>
@@ -40,17 +40,17 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.16.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_common</artifactId>
-            <version>0.16.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_servlet_common</artifactId>
-            <version>0.16.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

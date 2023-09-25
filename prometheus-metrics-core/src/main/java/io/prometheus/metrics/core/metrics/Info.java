@@ -1,173 +1,153 @@
-package io.prometheus.client;
+package io.prometheus.metrics.core.metrics;
+
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.snapshots.InfoSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Unit;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Info metric, key-value pairs.
- *
- * Examples of Info include build information, version information, and potential target metadata.
- * The string "_info" will be appended to the sample name.
- *
- * <p>
- * Example Info:
- * <pre>
- * {@code
- *   class YourClass {
- *     static final Info buildInfo = Info.build()
- *         .name("your_build").help("Build information.")
+ * Info metric. Example:
+ * <pre>{@code
+ * Info info = Info.builder()
+ *         .name("java_runtime_info")
+ *         .help("Java runtime info")
+ *         .labelNames("env", "version", "vendor", "runtime")
  *         .register();
  *
- *     void func() {
- *          // Your code here.
- *         buildInfo.info("branch", "HEAD", "version", "1.2.3", "revision", "e0704b");
- *     }
- *   }
- * }
- * </pre>
+ * String version = System.getProperty("java.runtime.version", "unknown");
+ * String vendor = System.getProperty("java.vm.vendor", "unknown");
+ * String runtime = System.getProperty("java.runtime.name", "unknown");
  *
- * @since 0.10.0
+ * info.addLabelValues("prod", version, vendor, runtime);
+ * info.addLabelValues("dev", version, vendor, runtime);
+ * }</pre>
  */
-public class Info extends SimpleCollector<Info.Child> implements Counter.Describable {
+public class Info extends MetricWithFixedMetadata {
 
-  Info(Builder b) {
-    super(b);
-  }
+    private final Set<Labels> labels = new CopyOnWriteArraySet<>();
 
-  public static class Builder extends SimpleCollector.Builder<Builder, Info> {
-    @Override
-    public Info create() {
-      if (!unit.isEmpty()) {
-        throw new IllegalStateException("Info metrics cannot have a unit.");
-      }
-      return new Info(this);
-    }
-  }
-
-  /**
-   *  Return a Builder to allow configuration of a new Info. Ensures required fields are provided.
-   *
-   *  @param name The name of the metric
-   *  @param help The help string of the metric
-   */
-  public static Builder build(String name, String help) {
-    return new Builder().name(name).help(help);
-  }
-
-  /**
-   *  Return a Builder to allow configuration of a new Info.
-   */
-  public static Builder build() {
-    return new Builder();
-  }
-
-  @Override
-  protected Child newChild() {
-    return new Child(labelNames);
-  }
-
-
-  /**
-   * The value of a single Info.
-   * <p>
-   * <em>Warning:</em> References to a Child become invalid after using
-   * {@link SimpleCollector#remove} or {@link SimpleCollector#clear}.
-   */
-  public static class Child {
-
-    private Map<String, String> value = Collections.emptyMap();
-    private List<String> labelNames;
-
-    private Child(List<String> labelNames) {
-      this.labelNames = labelNames;
+    private Info(Builder builder) {
+        super(builder);
     }
 
     /**
-     * Set the info.
+     * Set the info label values. This will replace any previous values,
+     * i.e. the info metric will only have one data point after calling setLabelValues().
+     * This is good for a metric like {@code target_info} where you want only one single data point.
      */
-    public void info(Map<String, String> v) {
-      for (String key : v.keySet()) {
-        checkMetricLabelName(key);
-      }
-      for (String label : labelNames) {
-        if (v.containsKey(label)) {
-          throw new IllegalArgumentException("Info and its value cannot have the same label name.");
+    public void setLabelValues(String... labelValues) {
+        if (labelValues.length != labelNames.length) {
+            throw new IllegalArgumentException(getClass().getSimpleName() + " " + getMetadata().getName() + " was created with " + labelNames.length + " label names, but you called setLabelValues() with " + labelValues.length + " label values.");
         }
-      }
-      this.value = v;
-    }
-    /**
-     * Set the info.
-     *
-     * @param v labels as pairs of key values
-     */
-    public void info(String... v) {
-      if (v.length % 2 != 0) {
-        throw new IllegalArgumentException("An even number of arguments must be passed");
-      }
-      Map<String, String> m = new TreeMap<String, String>();
-      for (int i = 0; i < v.length; i+=2) {
-        m.put(v[i], v[i+1]);
-      }
-      info(m);
+        Labels newLabels = Labels.of(labelNames, labelValues);
+        labels.add(newLabels);
+        labels.retainAll(Collections.singletonList(newLabels));
     }
 
     /**
-     * Get the info.
+     * Create an info data point with the given label values.
      */
-    public Map<String, String> get() {
-      return value;
-    }
-  }
-
-  // Convenience methods.
-  /**
-   * Set the info on the info with no labels.
-   */
-  public void info(String... v) {
-    noLabelsChild.info(v);
-  }
-
-  /**
-   * Set the info on the info with no labels.
-   *
-   * @param v labels as pairs of key values
-   */
-  public void info(Map<String, String> v) {
-    noLabelsChild.info(v);
-  }
-
-  /**
-   * Get the the info.
-   */
-  public Map<String, String> get() {
-    return noLabelsChild.get();
-  }
-
-  @Override
-  public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
-    for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      Map<String, String> v = c.getValue().get();
-      List<String> names = new ArrayList<String>(labelNames);
-      List<String> values = new ArrayList<String>(c.getKey());
-      for(Map.Entry<String, String> l: v.entrySet()) {
-        names.add(l.getKey());
-        values.add(l.getValue());
-      }
-      samples.add(new MetricFamilySamples.Sample(fullname + "_info", names, values, 1.0));
+    public void addLabelValues(String... labelValues) {
+        if (labelValues.length != labelNames.length) {
+            throw new IllegalArgumentException(getClass().getSimpleName() + " " + getMetadata().getName() + " was created with " + labelNames.length + " label names, but you called addLabelValues() with " + labelValues.length + " label values.");
+        }
+        labels.add(Labels.of(labelNames, labelValues));
     }
 
-    return familySamplesList(Type.INFO, samples);
-  }
+    /**
+     * Remove the data point with the specified label values.
+     */
+    public void remove(String... labelValues) {
+        if (labelValues.length != labelNames.length) {
+            throw new IllegalArgumentException(getClass().getSimpleName() + " " + getMetadata().getName() + " was created with " + labelNames.length + " label names, but you called remove() with " + labelValues.length + " label values.");
+        }
+        Labels toBeRemoved = Labels.of(labelNames, labelValues);
+        labels.remove(toBeRemoved);
+    }
 
-  @Override
-  public List<MetricFamilySamples> describe() {
-    return Collections.singletonList(
-            new MetricFamilySamples(fullname, Type.INFO, help, Collections.<MetricFamilySamples.Sample>emptyList()));
-  }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public InfoSnapshot collect() {
+        List<InfoSnapshot.InfoDataPointSnapshot> data = new ArrayList<>(labels.size());
+        if (labelNames.length == 0) {
+            data.add(new InfoSnapshot.InfoDataPointSnapshot(constLabels));
+        } else {
+            for (Labels label : labels) {
+                data.add(new InfoSnapshot.InfoDataPointSnapshot(label.merge(constLabels)));
+            }
+        }
+        return new InfoSnapshot(getMetadata(), data);
+    }
 
+    public static Builder builder() {
+        return new Builder(PrometheusProperties.get());
+    }
+
+    public static Builder builder(PrometheusProperties config) {
+        return new Builder(config);
+    }
+
+    public static class Builder extends MetricWithFixedMetadata.Builder<Builder, Info> {
+
+        private Builder(PrometheusProperties config) {
+            super(Collections.emptyList(), config);
+        }
+
+        /**
+         * The {@code _info} suffix will automatically be appended if it's missing.
+         * <pre>{@code
+         * Info info1 = Info.builder()
+         *     .name("runtime_info")
+         *     .build();
+         * Info info2 = Info.builder()
+         *     .name("runtime")
+         *     .build();
+         * }</pre>
+         * In the example above both {@code info1} and {@code info2} will be named {@code "runtime_info"} in Prometheus.
+         * <p>
+         * Throws an {@link IllegalArgumentException} if
+         * {@link io.prometheus.metrics.model.snapshots.PrometheusNaming#isValidMetricName(String) MetricMetadata.isValidMetricName(name)}
+         * is {@code false}.
+         */
+        @Override
+        public Builder name(String name) {
+            return super.name(stripInfoSuffix(name));
+        }
+
+        /**
+         * Throws an {@link UnsupportedOperationException} because Info metrics cannot have a unit.
+         */
+        @Override
+        public Builder unit(Unit unit) {
+            if (unit != null) {
+                throw new UnsupportedOperationException("Info metrics cannot have a unit.");
+            }
+            return this;
+        }
+
+        private static String stripInfoSuffix(String name) {
+            if (name != null && (name.endsWith("_info") || name.endsWith(".info"))) {
+                name = name.substring(0, name.length() - 5);
+            }
+            return name;
+        }
+
+        @Override
+        public Info build() {
+            return new Info(this);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
 }

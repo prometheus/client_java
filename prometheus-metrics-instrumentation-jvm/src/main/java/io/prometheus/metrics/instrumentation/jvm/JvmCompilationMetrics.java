@@ -1,66 +1,89 @@
-package io.prometheus.client.hotspot;
+package io.prometheus.metrics.instrumentation.jvm;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CounterMetricFamily;
-import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.Predicate;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.metrics.CounterWithCallback;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Unit;
 
-import java.lang.management.ManagementFactory;
 import java.lang.management.CompilationMXBean;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.management.ManagementFactory;
 
-import static io.prometheus.client.SampleNameFilter.ALLOW_ALL;
+import static io.prometheus.metrics.model.snapshots.Unit.millisToSeconds;
 
 /**
- * Exports metrics about JVM compilation.
- * <p>
- * Example usage:
- * <pre>
- * {@code
- *   new CompilationExports().register();
- * }
- * </pre>
+ * JVM Compilation metrics. The {@link JvmCompilationMetrics} are registered as part of the {@link JvmMetrics} like this:
+ * <pre>{@code
+ *   JvmMetrics.builder().register();
+ * }</pre>
+ * However, if you want only the {@link JvmCompilationMetrics} you can also register them directly:
+ * <pre>{@code
+ *   JvmCompilationMetrics.builder().register();
+ * }</pre>
  * Example metrics being exported:
  * <pre>
- *   jvm_compilation_time_ms_total{} 123432
+ * # HELP jvm_compilation_time_seconds_total The total time in seconds taken for HotSpot class compilation
+ * # TYPE jvm_compilation_time_seconds_total counter
+ * jvm_compilation_time_seconds_total 0.152
  * </pre>
  */
-public class CompilationExports extends Collector {
+public class JvmCompilationMetrics {
 
     private static final String JVM_COMPILATION_TIME_SECONDS_TOTAL = "jvm_compilation_time_seconds_total";
 
-    private final CompilationMXBean compilationMXBean;
+    private final PrometheusProperties config;
+    private final CompilationMXBean compilationBean;
 
-    public CompilationExports() {
-        this(ManagementFactory.getCompilationMXBean());
+    private JvmCompilationMetrics(CompilationMXBean compilationBean, PrometheusProperties config) {
+        this.compilationBean = compilationBean;
+        this.config = config;
     }
 
-    public CompilationExports(CompilationMXBean compilationMXBean) {
-        this.compilationMXBean = compilationMXBean;
-    }
+    private void register(PrometheusRegistry registry) {
 
-    void addCompilationMetrics(List<MetricFamilySamples> sampleFamilies, Predicate<String> nameFilter) {
-        // Sanity check in the scenario that a JVM doesn't implement compilation time monitoring
-        if (compilationMXBean != null && compilationMXBean.isCompilationTimeMonitoringSupported()) {
-            if (nameFilter.test(JVM_COMPILATION_TIME_SECONDS_TOTAL)) {
-                sampleFamilies.add(new CounterMetricFamily(
-                        JVM_COMPILATION_TIME_SECONDS_TOTAL,
-                        "The total time in seconds taken for HotSpot class compilation",
-                        compilationMXBean.getTotalCompilationTime() / MILLISECONDS_PER_SECOND));
-            }
+        if (compilationBean == null || !compilationBean.isCompilationTimeMonitoringSupported()) {
+            return;
         }
+
+        CounterWithCallback.builder(config)
+                .name(JVM_COMPILATION_TIME_SECONDS_TOTAL)
+                .help("The total time in seconds taken for HotSpot class compilation")
+                .unit(Unit.SECONDS)
+                .callback(callback -> callback.call(millisToSeconds(compilationBean.getTotalCompilationTime())))
+                .register(registry);
     }
 
-    @Override
-    public List<MetricFamilySamples> collect() {
-        return collect(null);
+    public static Builder builder() {
+        return new Builder(PrometheusProperties.get());
     }
 
-    @Override
-    public List<MetricFamilySamples> collect(Predicate<String> nameFilter) {
-        List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>(1);
-        addCompilationMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
-        return mfs;
+    public static Builder builder(PrometheusProperties config) {
+        return new Builder(config);
+    }
+
+    public static class Builder {
+
+        private final PrometheusProperties config;
+        private CompilationMXBean compilationBean;
+
+        private Builder(PrometheusProperties config) {
+            this.config = config;
+        }
+
+        /**
+         * Package private. For testing only.
+         */
+        Builder compilationBean(CompilationMXBean compilationBean) {
+            this.compilationBean = compilationBean;
+            return this;
+        }
+
+        public void register() {
+            register(PrometheusRegistry.defaultRegistry);
+        }
+
+        public void register(PrometheusRegistry registry) {
+            CompilationMXBean compilationBean = this.compilationBean != null ? this.compilationBean : ManagementFactory.getCompilationMXBean();
+            new JvmCompilationMetrics(compilationBean, config).register(registry);
+        }
     }
 }

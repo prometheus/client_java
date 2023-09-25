@@ -1,420 +1,357 @@
-package io.prometheus.client;
+package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.client.CKMSQuantiles.Quantile;
+import io.prometheus.metrics.config.MetricsProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.exemplars.ExemplarSampler;
+import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
+import io.prometheus.metrics.model.snapshots.Exemplars;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Quantile;
+import io.prometheus.metrics.model.snapshots.Quantiles;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
+import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.DoubleAdder;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
- * {@link Summary} metrics and {@link Histogram} metrics can both be used to monitor distributions like latencies or request sizes.
- * <p>
- * An overview of when to use Summaries and when to use Histograms can be found on <a href="https://prometheus.io/docs/practices/histograms">https://prometheus.io/docs/practices/histograms</a>.
- * <p>
- * The following example shows how to measure latencies and request sizes:
+ * Summary metric. Example:
+ * <pre>{@code
+ * Summary summary = Summary.builder()
+ *         .name("http_request_duration_seconds_hi")
+ *         .help("HTTP request service time in seconds")
+ *         .unit(SECONDS)
+ *         .labelNames("method", "path", "status_code")
+ *         .quantile(0.5, 0.01)
+ *         .quantile(0.95, 0.001)
+ *         .quantile(0.99, 0.001)
+ *         .register();
  *
- * <pre>
- * class YourClass {
- *
- *   private static final Summary requestLatency = Summary.build()
- *       .name("requests_latency_seconds")
- *       .help("request latency in seconds")
- *       .register();
- *
- *   private static final Summary receivedBytes = Summary.build()
- *       .name("requests_size_bytes")
- *       .help("request size in bytes")
- *       .register();
- *
- *   public void processRequest(Request req) {
- *     Summary.Timer requestTimer = requestLatency.startTimer();
- *     try {
- *       // Your code here.
- *     } finally {
- *       requestTimer.observeDuration();
- *       receivedBytes.observe(req.size());
- *     }
- *   }
- * }
- * </pre>
- *
- * The {@link Summary} class provides different utility methods for observing values, like {@link #observe(double)},
- * {@link #startTimer()} and {@link Timer#observeDuration()}, {@link #time(Callable)}, etc.
- * <p>
- * By default, {@link Summary} metrics provide the {@code count} and the {@code sum}. For example, if you measure
- * latencies of a REST service, the {@code count} will tell you how often the REST service was called,
- * and the {@code sum} will tell you the total aggregated response time.
- * You can calculate the average response time using a Prometheus query dividing {@code sum / count}.
- * <p>
- * In addition to {@code count} and {@code sum}, you can configure a Summary to provide quantiles:
- *
- * <pre>
- * Summary requestLatency = Summary.build()
- *     .name("requests_latency_seconds")
- *     .help("Request latency in seconds.")
- *     .quantile(0.5, 0.01)    // 0.5 quantile (median) with 0.01 allowed error
- *     .quantile(0.95, 0.005)  // 0.95 quantile with 0.005 allowed error
- *     // ...
- *     .register();
- * </pre>
- *
- * As an example, a 0.95 quantile of 120ms tells you that 95% of the calls were faster than 120ms, and 5% of the calls were slower than 120ms.
- * <p>
- * Tracking exact quantiles require a large amount of memory, because all observations need to be stored in a sorted list. Therefore, we allow an error to significantly reduce memory usage.
- * <p>
- * In the example, the allowed error of 0.005 means that you will not get the exact 0.95 quantile, but anything between the 0.945 quantile and the 0.955 quantile.
- * <p>
- * Experiments show that the {@link Summary} typically needs to keep less than 100 samples to provide that precision, even if you have hundreds of millions of observations.
- * <p>
- * There are a few special cases:
- *
- * <ul>
- *   <li>You can set an allowed error of 0, but then the {@link Summary} will keep all observations in memory.</li>
- *   <li>You can track the minimum value with {@code .quantile(0.0, 0.0)}.
- *       This special case will not use additional memory even though the allowed error is 0.</li>
- *   <li>You can track the maximum value with {@code .quantile(1.0, 0.0)}.
- *       This special case will not use additional memory even though the allowed error is 0.</li>
- * </ul>
- *
- * Typically, you don't want to have a {@link Summary} representing the entire runtime of the application,
- * but you want to look at a reasonable time interval. {@link Summary} metrics implement a configurable sliding
- * time window:
- *
- * <pre>
- * Summary requestLatency = Summary.build()
- *     .name("requests_latency_seconds")
- *     .help("Request latency in seconds.")
- *     .maxAgeSeconds(10 * 60)
- *     .ageBuckets(5)
- *     // ...
- *     .register();
- * </pre>
- *
- * The default is a time window of 10 minutes and 5 age buckets, i.e. the time window is 10 minutes wide, and
- * we slide it forward every 2 minutes.
+ * long start = System.nanoTime();
+ * // process a request, duration will be observed
+ * summary.labelValues("GET", "/", "200").observe(Unit.nanosToSeconds(System.nanoTime() - start));
+ * }</pre>
+ * See {@link Summary.Builder} for configuration options.
  */
-public class Summary extends SimpleCollector<Summary.Child> implements Counter.Describable {
+public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataPoint> implements DistributionDataPoint {
 
-  final List<Quantile> quantiles; // Can be empty, but can never be null.
-  final long maxAgeSeconds;
-  final int ageBuckets;
+    private final List<CKMSQuantiles.Quantile> quantiles; // May be empty, but cannot be null.
+    private final long maxAgeSeconds;
+    private final int ageBuckets;
+    private final boolean exemplarsEnabled;
+    private final ExemplarSamplerConfig exemplarSamplerConfig;
 
-  Summary(Builder b) {
-    super(b);
-    quantiles = Collections.unmodifiableList(new ArrayList<Quantile>(b.quantiles));
-    this.maxAgeSeconds = b.maxAgeSeconds;
-    this.ageBuckets = b.ageBuckets;
-    initializeNoLabelsChild();
-  }
-
-  public static class Builder extends SimpleCollector.Builder<Builder, Summary> {
-
-    private final List<Quantile> quantiles = new ArrayList<Quantile>();
-    private long maxAgeSeconds = TimeUnit.MINUTES.toSeconds(10);
-    private int ageBuckets = 5;
-
-    /**
-     * The class JavaDoc for {@link Summary} has more information on {@link #quantile(double, double)}.
-     * @see Summary
-     */
-    public Builder quantile(double quantile, double error) {
-      if (quantile < 0.0 || quantile > 1.0) {
-        throw new IllegalArgumentException("Quantile " + quantile + " invalid: Expected number between 0.0 and 1.0.");
-      }
-      if (error < 0.0 || error > 1.0) {
-        throw new IllegalArgumentException("Error " + error + " invalid: Expected number between 0.0 and 1.0.");
-      }
-      quantiles.add(new Quantile(quantile, error));
-      return this;
+    private Summary(Builder builder, PrometheusProperties prometheusProperties) {
+        super(builder);
+        MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        this.exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
+        this.quantiles = Collections.unmodifiableList(makeQuantiles(properties));
+        this.maxAgeSeconds = getConfigProperty(properties, MetricsProperties::getSummaryMaxAgeSeconds);
+        this.ageBuckets = getConfigProperty(properties, MetricsProperties::getSummaryNumberOfAgeBuckets);
+        this.exemplarSamplerConfig = new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 4);
     }
 
-    /**
-     * The class JavaDoc for {@link Summary} has more information on {@link #maxAgeSeconds(long)} 
-     * @see Summary
-     */
-    public Builder maxAgeSeconds(long maxAgeSeconds) {
-      if (maxAgeSeconds <= 0) {
-        throw new IllegalArgumentException("maxAgeSeconds cannot be " + maxAgeSeconds);
-      }
-      this.maxAgeSeconds = maxAgeSeconds;
-      return this;
-    }
-
-    /**
-     * The class JavaDoc for {@link Summary} has more information on {@link #ageBuckets(int)} 
-     * @see Summary
-     */
-    public Builder ageBuckets(int ageBuckets) {
-      if (ageBuckets <= 0) {
-        throw new IllegalArgumentException("ageBuckets cannot be " + ageBuckets);
-      }
-      this.ageBuckets = ageBuckets;
-      return this;
-    }
-
-    @Override
-    public Summary create() {
-      for (String label : labelNames) {
-        if (label.equals("quantile")) {
-          throw new IllegalStateException("Summary cannot have a label named 'quantile'.");
-        }
-      }
-      dontInitializeNoLabelsChild = true;
-      return new Summary(this);
-    }
-  }
-
-  /**
-   *  Return a Builder to allow configuration of a new Summary. Ensures required fields are provided.
-   *
-   *  @param name The name of the metric
-   *  @param help The help string of the metric
-   */
-  public static Builder build(String name, String help) {
-    return new Builder().name(name).help(help);
-  }
-
-  /**
-   *  Return a Builder to allow configuration of a new Summary.
-   */
-  public static Builder build() {
-    return new Builder();
-  }
-
-  @Override
-  protected Child newChild() {
-    return new Child(quantiles, maxAgeSeconds, ageBuckets);
-  }
-
-
-  /**
-   * Represents an event being timed.
-   */
-  public static class Timer implements Closeable {
-    private final Child child;
-    private final long start;
-    private Timer(Child child, long start) {
-      this.child = child;
-      this.start = start;
-    }
-    /**
-     * Observe the amount of time in seconds since {@link Child#startTimer} was called.
-     * @return Measured duration in seconds since {@link Child#startTimer} was called.
-     */
-    public double observeDuration() {
-      double elapsed = SimpleTimer.elapsedSecondsFromNanos(start, SimpleTimer.defaultTimeProvider.nanoTime());
-      child.observe(elapsed);
-      return elapsed;
-    }
-
-    /**
-     * Equivalent to calling {@link #observeDuration()}.
-     */
-    @Override
-    public void close() {
-      observeDuration();
-    }
-  }
-
-  /**
-   * The value of a single Summary.
-   * <p>
-   * <em>Warning:</em> References to a Child become invalid after using
-   * {@link SimpleCollector#remove} or {@link SimpleCollector#clear}.
-   */
-  public static class Child {
-
-    /**
-     * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
-     *
-     * @param timeable Code that is being timed
-     * @return Measured duration in seconds for timeable to complete.
-     */
-    public double time(Runnable timeable) {
-      Timer timer = startTimer();
-
-      double elapsed;
-      try {
-        timeable.run();
-      } finally {
-        elapsed = timer.observeDuration();
-      }
-      return elapsed;
-    }
-
-    /**
-     * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
-     *
-     * @param timeable Code that is being timed
-     * @return Result returned by callable.
-     */
-    public <E> E time(Callable<E> timeable) {
-      Timer timer = startTimer();
-
-      try {
-        return timeable.call();
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      } finally {
-        timer.observeDuration();
-      }
-    }
-
-    public static class Value {
-      public final double count;
-      public final double sum;
-      public final SortedMap<Double, Double> quantiles;
-      public final long created;
-
-      private Value(double count, double sum, List<Quantile> quantiles, TimeWindowQuantiles quantileValues, long created) {
-        this.count = count;
-        this.sum = sum;
-        this.quantiles = Collections.unmodifiableSortedMap(snapshot(quantiles, quantileValues));
-        this.created = created;
-      }
-
-      private SortedMap<Double, Double> snapshot(List<Quantile> quantiles, TimeWindowQuantiles quantileValues) {
-        SortedMap<Double, Double> result = new TreeMap<Double, Double>();
-        for (Quantile q : quantiles) {
-          result.put(q.quantile, quantileValues.get(q.quantile));
+    private List<CKMSQuantiles.Quantile> makeQuantiles(MetricsProperties[] properties) {
+        List<CKMSQuantiles.Quantile> result = new ArrayList<>();
+        List<Double> quantiles = getConfigProperty(properties, MetricsProperties::getSummaryQuantiles);
+        List<Double> quantileErrors = getConfigProperty(properties, MetricsProperties::getSummaryQuantileErrors);
+        if (quantiles != null) {
+            for (int i = 0; i < quantiles.size(); i++) {
+                if (quantileErrors.size() > 0) {
+                    result.add(new CKMSQuantiles.Quantile(quantiles.get(i), quantileErrors.get(i)));
+                } else {
+                    result.add(new CKMSQuantiles.Quantile(quantiles.get(i), Builder.defaultError(quantiles.get(i))));
+                }
+            }
         }
         return result;
-      }
     }
 
-    // Having these separate leaves us open to races,
-    // however Prometheus as whole has other races
-    // that mean adding atomicity here wouldn't be useful.
-    // This should be reevaluated in the future.
-    private final DoubleAdder count = new DoubleAdder();
-    private final DoubleAdder sum = new DoubleAdder();
-    private final List<Quantile> quantiles;
-    private final TimeWindowQuantiles quantileValues;
-    private final long created = System.currentTimeMillis();
-
-    private Child(List<Quantile> quantiles, long maxAgeSeconds, int ageBuckets) {
-      this.quantiles = quantiles;
-      if (quantiles.size() > 0) {
-        quantileValues = new TimeWindowQuantiles(quantiles.toArray(new Quantile[]{}), maxAgeSeconds, ageBuckets);
-      } else {
-        quantileValues = null;
-      }
+    @Override
+    protected boolean isExemplarsEnabled() {
+        return exemplarsEnabled;
     }
 
     /**
-     * Observe the given amount.
-     * @param amt in most cases amt should be &gt;= 0. Negative values are supported, but you should read
-     *            <a href="https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations">
-     *            https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations</a> for
-     *            implications and alternatives.
+     * {@inheritDoc}
      */
-    public void observe(double amt) {
-      count.add(1);
-      sum.add(amt);
-      if (quantileValues != null) {
-        quantileValues.insert(amt);
-      }
+    @Override
+    public void observe(double amount) {
+        getNoLabels().observe(amount);
     }
+
     /**
-     * Start a timer to track a duration.
-     * <p>
-     * Call {@link Timer#observeDuration} at the end of what you want to measure the duration of.
+     * {@inheritDoc}
      */
-    public Timer startTimer() {
-      return new Timer(this, SimpleTimer.defaultTimeProvider.nanoTime());
+    @Override
+    public void observeWithExemplar(double amount, Labels labels) {
+        getNoLabels().observeWithExemplar(amount, labels);
     }
+
     /**
-     * Get the value of the Summary.
-     * <p>
-     * <em>Warning:</em> The definition of {@link Value} is subject to change.
+     * {@inheritDoc}
      */
-    public Value get() {
-      return new Value(count.sum(), sum.sum(), quantiles, quantileValues, created);
-    }
-  }
-
-  // Convenience methods.
-  /**
-   * Observe the given amount on the summary with no labels.
-   * @param amt in most cases amt should be &gt;= 0. Negative values are supported, but you should read
-   *            <a href="https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations">
-   *            https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations</a> for
-   *            implications and alternatives.
-   */
-  public void observe(double amt) {
-    noLabelsChild.observe(amt);
-  }
-  /**
-   * Start a timer to track a duration on the summary with no labels.
-   * <p>
-   * Call {@link Timer#observeDuration} at the end of what you want to measure the duration of.
-   */
-  public Timer startTimer() {
-    return noLabelsChild.startTimer();
-  }
-
-  /**
-   * Executes runnable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
-   *
-   * @param timeable Code that is being timed
-   * @return Measured duration in seconds for timeable to complete.
-   */
-  public double time(Runnable timeable){
-    return noLabelsChild.time(timeable);
-  }
-
-  /**
-   * Executes callable code (e.g. a Java 8 Lambda) and observes a duration of how long it took to run.
-   *
-   * @param timeable Code that is being timed
-   * @return Result returned by callable.
-   */
-  public <E> E time(Callable<E> timeable){
-    return noLabelsChild.time(timeable);
-  }
-
-  /**
-   * Get the value of the Summary.
-   * <p>
-   * <em>Warning:</em> The definition of {@link Child.Value} is subject to change.
-   */
-  public Child.Value get() {
-    return noLabelsChild.get();
-  }
-
-  @Override
-  public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>();
-    for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      Child.Value v = c.getValue().get();
-      List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
-      labelNamesWithQuantile.add("quantile");
-      for(Map.Entry<Double, Double> q : v.quantiles.entrySet()) {
-        List<String> labelValuesWithQuantile = new ArrayList<String>(c.getKey());
-        labelValuesWithQuantile.add(doubleToGoString(q.getKey()));
-        samples.add(new MetricFamilySamples.Sample(fullname, labelNamesWithQuantile, labelValuesWithQuantile, q.getValue()));
-      }
-      samples.add(new MetricFamilySamples.Sample(fullname + "_count", labelNames, c.getKey(), v.count));
-      samples.add(new MetricFamilySamples.Sample(fullname + "_sum", labelNames, c.getKey(), v.sum));
-      if (Environment.includeCreatedSeries()) {
-        samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), v.created / 1000.0));
-      }
+    @Override
+    public SummarySnapshot collect() {
+        return (SummarySnapshot) super.collect();
     }
 
-    return familySamplesList(Type.SUMMARY, samples);
-  }
+    @Override
+    protected SummarySnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
+        List<SummarySnapshot.SummaryDataPointSnapshot> data = new ArrayList<>(labels.size());
+        for (int i = 0; i < labels.size(); i++) {
+            data.add(metricData.get(i).collect(labels.get(i)));
+        }
+        return new SummarySnapshot(getMetadata(), data);
+    }
 
-  @Override
-  public List<MetricFamilySamples> describe() {
-    return Collections.<MetricFamilySamples>singletonList(new SummaryMetricFamily(fullname, help, labelNames));
-  }
+    @Override
+    protected DataPoint newDataPoint() {
+        return new DataPoint();
+    }
 
+
+    public class DataPoint implements DistributionDataPoint {
+
+        private final LongAdder count = new LongAdder();
+        private final DoubleAdder sum = new DoubleAdder();
+        private final SlidingWindow<CKMSQuantiles> quantileValues;
+        private final Buffer buffer = new Buffer();
+        private final ExemplarSampler exemplarSampler;
+
+        private final long createdTimeMillis = System.currentTimeMillis();
+
+        private DataPoint() {
+            if (quantiles.size() > 0) {
+                CKMSQuantiles.Quantile[] quantilesArray = quantiles.toArray(new CKMSQuantiles.Quantile[0]);
+                quantileValues = new SlidingWindow<>(CKMSQuantiles.class, () -> new CKMSQuantiles(quantilesArray), CKMSQuantiles::insert, maxAgeSeconds, ageBuckets);
+            } else {
+                quantileValues = null;
+            }
+            if (exemplarsEnabled) {
+                exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
+            } else {
+                exemplarSampler = null;
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void observe(double value) {
+            if (Double.isNaN(value)) {
+                return;
+            }
+            if (!buffer.append(value)) {
+                doObserve(value);
+            }
+            if (isExemplarsEnabled()) {
+                exemplarSampler.observe(value);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void observeWithExemplar(double value, Labels labels) {
+            if (Double.isNaN(value)) {
+                return;
+            }
+            if (!buffer.append(value)) {
+                doObserve(value);
+            }
+            if (isExemplarsEnabled()) {
+                exemplarSampler.observeWithExemplar(value, labels);
+            }
+        }
+
+        private void doObserve(double amount) {
+            sum.add(amount);
+            if (quantileValues != null) {
+                quantileValues.observe(amount);
+            }
+            // count must be incremented last, because in collect() the count
+            // indicates the number of completed observations.
+            count.increment();
+        }
+
+        private SummarySnapshot.SummaryDataPointSnapshot collect(Labels labels) {
+            return buffer.run(
+                    expectedCount -> count.sum() == expectedCount,
+                    // TODO Exemplars (are hard-coded as empty in the line below)
+                    () -> new SummarySnapshot.SummaryDataPointSnapshot(count.sum(), sum.sum(), makeQuantiles(), labels, Exemplars.EMPTY, createdTimeMillis),
+                    this::doObserve
+            );
+        }
+
+        private List<CKMSQuantiles.Quantile> getQuantiles() {
+            return quantiles;
+        }
+
+        private Quantiles makeQuantiles() {
+            Quantile[] quantiles = new Quantile[getQuantiles().size()];
+            for (int i = 0; i < getQuantiles().size(); i++) {
+                CKMSQuantiles.Quantile quantile = getQuantiles().get(i);
+                quantiles[i] = new Quantile(quantile.quantile, quantileValues.current().get(quantile.quantile));
+            }
+            return Quantiles.of(quantiles);
+        }
+    }
+
+    public static Summary.Builder builder() {
+        return new Builder(PrometheusProperties.get());
+    }
+
+    public static Summary.Builder builder(PrometheusProperties config) {
+        return new Builder(config);
+    }
+
+    public static class Builder extends StatefulMetric.Builder<Summary.Builder, Summary> {
+
+        /**
+         * 5 minutes. See {@link #maxAgeSeconds(long)}.
+         */
+        public static final long DEFAULT_MAX_AGE_SECONDS = TimeUnit.MINUTES.toSeconds(5);
+
+        /**
+         * 5. See {@link #numberOfAgeBuckets(int)}
+         */
+        public static final int DEFAULT_NUMBER_OF_AGE_BUCKETS = 5;
+        private final List<CKMSQuantiles.Quantile> quantiles = new ArrayList<>();
+        private Long maxAgeSeconds;
+        private Integer ageBuckets;
+
+        private Builder(PrometheusProperties properties) {
+            super(Collections.singletonList("quantile"), properties);
+        }
+
+        private static double defaultError(double quantile) {
+            if (quantile <= 0.01 || quantile >= 0.99) {
+                return 0.001;
+            } else if (quantile <= 0.02 || quantile >= 0.98) {
+                return 0.005;
+            } else {
+                return 0.01;
+            }
+        }
+
+        /**
+         * Add a quantile. See {@link #quantile(double, double)}.
+         * <p>
+         * Default errors are:
+         * <ul>
+         *     <li>error = 0.001 if quantile &lt;= 0.01 or quantile &gt;= 0.99</li>
+         *     <li>error = 0.005 if quantile &lt;= 0.02 or quantile &gt;= 0.98</li>
+         *     <li>error = 0.01 else.
+         * </ul>
+         */
+        public Builder quantile(double quantile) {
+            return quantile(quantile, defaultError(quantile));
+        }
+
+        /**
+         * Add a quantile. Call multiple times to add multiple quantiles.
+         * <p>
+         * Example: The following will track the 0.95 quantile:
+         * <pre>{@code
+         * .quantile(0.95, 0.001)
+         * }</pre>
+         * The second argument is the acceptable error margin, i.e. with the code above the quantile
+         * will not be exactly the 0.95 quantile but something between 0.949 and 0.951.
+         * <p>
+         * There are two special cases:
+         * <ul>
+         *     <li>{@code .quantile(0.0, 0.0)} gives you the minimum observed value</li>
+         *     <li>{@code .quantile(1.0, 0.0)} gives you the maximum observed value</li>
+         * </ul>
+         */
+        public Builder quantile(double quantile, double error) {
+            if (quantile < 0.0 || quantile > 1.0) {
+                throw new IllegalArgumentException("Quantile " + quantile + " invalid: Expected number between 0.0 and 1.0.");
+            }
+            if (error < 0.0 || error > 1.0) {
+                throw new IllegalArgumentException("Error " + error + " invalid: Expected number between 0.0 and 1.0.");
+            }
+            quantiles.add(new CKMSQuantiles.Quantile(quantile, error));
+            return this;
+        }
+
+        /**
+         * The quantiles are relative to a moving time window.
+         * {@code maxAgeSeconds} is the size of that time window.
+         * Default is {@link #DEFAULT_MAX_AGE_SECONDS}.
+         */
+        public Builder maxAgeSeconds(long maxAgeSeconds) {
+            if (maxAgeSeconds <= 0) {
+                throw new IllegalArgumentException("maxAgeSeconds cannot be " + maxAgeSeconds);
+            }
+            this.maxAgeSeconds = maxAgeSeconds;
+            return this;
+        }
+
+        /**
+         * The quantiles are relative to a moving time window.
+         * The {@code numberOfAgeBuckets} defines how smoothly the time window moves forward.
+         * For example, if the time window is 5 minutes and has 5 age buckets,
+         * then it is moving forward every minute by one minute.
+         * Default is {@link #DEFAULT_NUMBER_OF_AGE_BUCKETS}.
+         */
+        public Builder numberOfAgeBuckets(int ageBuckets) {
+            if (ageBuckets <= 0) {
+                throw new IllegalArgumentException("ageBuckets cannot be " + ageBuckets);
+            }
+            this.ageBuckets = ageBuckets;
+            return this;
+        }
+
+        @Override
+        protected MetricsProperties toProperties() {
+            double[] quantiles = null;
+            double[] quantileErrors = null;
+            if (!this.quantiles.isEmpty()) {
+                quantiles = new double[this.quantiles.size()];
+                quantileErrors = new double[this.quantiles.size()];
+                for (int i = 0; i < this.quantiles.size(); i++) {
+                    quantiles[i] = this.quantiles.get(i).quantile;
+                    quantileErrors[i] = this.quantiles.get(i).epsilon;
+                }
+            }
+            return MetricsProperties.builder()
+                    .exemplarsEnabled(exemplarsEnabled)
+                    .summaryQuantiles(quantiles)
+                    .summaryQuantileErrors(quantileErrors)
+                    .summaryNumberOfAgeBuckets(ageBuckets)
+                    .summaryMaxAgeSeconds(maxAgeSeconds)
+                    .build();
+        }
+
+        /**
+         * Default properties for summary metrics.
+         */
+        @Override
+        public MetricsProperties getDefaultProperties() {
+            return MetricsProperties.builder()
+                    .exemplarsEnabled(true)
+                    .summaryQuantiles()
+                    .summaryNumberOfAgeBuckets(DEFAULT_NUMBER_OF_AGE_BUCKETS)
+                    .summaryMaxAgeSeconds(DEFAULT_MAX_AGE_SECONDS)
+                    .build();
+        }
+
+        @Override
+        public Summary build() {
+            return new Summary(this, properties);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
 }

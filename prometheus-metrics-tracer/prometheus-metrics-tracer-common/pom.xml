@@ -4,17 +4,17 @@
 
   <parent>
     <groupId>io.prometheus</groupId>
-    <artifactId>simpleclient_tracer</artifactId>
-    <version>0.16.1-SNAPSHOT</version>
+    <artifactId>prometheus-metrics-tracer</artifactId>
+    <version>1.0.0-beta-2-SNAPSHOT</version>
   </parent>
 
-  <artifactId>simpleclient_tracer_common</artifactId>
+  <artifactId>prometheus-metrics-tracer-common</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Prometheus Java Span Context Supplier - Common</name>
-
-  <dependencies>
-  </dependencies>
+  <name>Prometheus Metrics Tracer Common</name>
+  <description>
+    Common Module for Prometheus integrations with distributed tracing libraries.
+  </description>
 
   <licenses>
     <license>
@@ -23,4 +23,12 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <developers>
+    <developer>
+      <id>fstab</id>
+      <name>Fabian Stäber</name>
+      <email>fabian@fstab.de</email>
+    </developer>
+  </developers>
 </project>

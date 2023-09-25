@@ -1,59 +1,62 @@
-package io.prometheus.client.hotspot;
+package io.prometheus.metrics.instrumentation.jvm;
 
-import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.SampleNameFilter;
+import io.prometheus.metrics.model.registry.MetricNameFilter;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.lang.management.CompilationMXBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-public class CompilationExportsTest {
+public class JvmCompilationMetricsTest {
 
-    private CompilationMXBean mockCompilationsBean = Mockito.mock(CompilationMXBean.class);
-    private CollectorRegistry registry = new CollectorRegistry();
-    private CompilationExports collectorUnderTest;
-
-    private static final String[] EMPTY_LABEL = new String[0];
+    private CompilationMXBean mockCompilationBean = Mockito.mock(CompilationMXBean.class);
 
     @Before
     public void setUp() {
-        when(mockCompilationsBean.getTotalCompilationTime()).thenReturn(10000l);
-        when(mockCompilationsBean.isCompilationTimeMonitoringSupported()).thenReturn(true);
-        collectorUnderTest = new CompilationExports(mockCompilationsBean).register(registry);
+        when(mockCompilationBean.getTotalCompilationTime()).thenReturn(10000l);
+        when(mockCompilationBean.isCompilationTimeMonitoringSupported()).thenReturn(true);
     }
 
     @Test
-    public void testCompilationExports() {
-        assertEquals(
-                10.0,
-                registry.getSampleValue(
-                        "jvm_compilation_time_seconds_total", EMPTY_LABEL, EMPTY_LABEL),
-                .0000001);
+    public void testGoodCase() throws IOException {
+        PrometheusRegistry registry = new PrometheusRegistry();
+        JvmCompilationMetrics.builder()
+                .compilationBean(mockCompilationBean)
+                .register(registry);
+        MetricSnapshots snapshots = registry.scrape();
+
+        String expected = "" +
+                "# TYPE jvm_compilation_time_seconds counter\n" +
+                "# UNIT jvm_compilation_time_seconds seconds\n" +
+                "# HELP jvm_compilation_time_seconds The total time in seconds taken for HotSpot class compilation\n" +
+                "jvm_compilation_time_seconds_total 10.0\n" +
+                "# EOF\n";
+
+        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
     }
 
     @Test
-    public void testCompilationExportsWithFilter() {
-        assertEquals(
-                10.0,
-                registry.getSampleValue(
-                        "jvm_compilation_time_seconds_total", EMPTY_LABEL, EMPTY_LABEL, SampleNameFilter.ALLOW_ALL),
-                .0000001);
-    }
+    public void testIgnoredMetricNotScraped() {
+        MetricNameFilter filter = MetricNameFilter.builder()
+                .nameMustNotBeEqualTo("jvm_compilation_time_seconds_total")
+                .build();
 
-    @Test
-    public void testCompilationExportsFiltered() {
-        SampleNameFilter sampleNameFilter =
-                new SampleNameFilter.Builder()
-                        .nameMustNotBeEqualTo("jvm_compilation_time_seconds_total")
-                        .build();
+        PrometheusRegistry registry = new PrometheusRegistry();
+        JvmCompilationMetrics.builder()
+                .compilationBean(mockCompilationBean)
+                .register(registry);
+        MetricSnapshots snapshots = registry.scrape(filter);
 
-        assertNull(
-                registry.getSampleValue(
-                        "jvm_compilation_time_seconds_total", EMPTY_LABEL, EMPTY_LABEL, sampleNameFilter));
+        verify(mockCompilationBean, times(0)).getTotalCompilationTime();
+        Assert.assertEquals(0, snapshots.size());
     }
 }

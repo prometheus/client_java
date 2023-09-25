@@ -1,73 +1,93 @@
-package io.prometheus.client;
+package io.prometheus.metrics.core.metrics;
+
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.snapshots.Exemplars;
+import io.prometheus.metrics.model.snapshots.Quantiles;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
- * Summary metric family, for custom collectors and exporters.
- * <p>
- * Most users want a normal {@link Summary} instead.
+ * Example:
+ * <pre>{@code
+ * double MILLISECONDS_PER_SECOND = 1E3;
  *
- * Example usage:
- * <pre>
- * {@code
- *   class YourCustomCollector extends Collector {
- *     List<MetricFamilySamples> collect() {
- *       List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
- *       // With no labels.
- *       mfs.add(new SummaryMetricFamily("my_summary", "help", 1, 42));
- *       // With labels. Record 95th percentile as 3, and 99th percentile as 5.
- *       SummaryMetricFamily labeledSummary = new SummaryMetricFamily("my_other_summary", "help", 
- *           Arrays.asList("labelname"), Arrays.asList(.95, .99));
- *       labeledSummary.addMetric(Arrays.asList("foo"), 2, 10, Arrays.asList(3.0, 5.0));
- *       mfs.add(labeledSummary);
- *       return mfs;
- *     }
- *   }
- * }
- * </pre>
+ * SummaryWithCallback.builder()
+ *         .name("jvm_gc_collection_seconds")
+ *         .help("Time spent in a given JVM garbage collector in seconds.")
+ *         .unit(Unit.SECONDS)
+ *         .labelNames("gc")
+ *         .callback(callback -> {
+ *             for (GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
+ *                 callback.call(
+ *                         gc.getCollectionCount(),
+ *                         gc.getCollectionTime() / MILLISECONDS_PER_SECOND,
+ *                         Quantiles.EMPTY,
+ *                         gc.getName()
+ *                 );
+ *             }
+ *         })
+ *         .register();
+ * }</pre>
  */
-public class SummaryMetricFamily extends Collector.MetricFamilySamples {
+public class SummaryWithCallback extends CallbackMetric {
 
-  private final List<String> labelNames;
-  private final List<Double> quantiles;
-
-  public SummaryMetricFamily(String name, String help, double count, double sum) {
-    super(name, Collector.Type.SUMMARY, help, new ArrayList<Sample>());
-    this.labelNames = Collections.emptyList();
-    this.quantiles = Collections.emptyList();
-    addMetric(Collections.<String>emptyList(), count, sum);
-  }
-
-  public SummaryMetricFamily(String name, String help, List<String> labelNames) {
-    this(name, help, labelNames, Collections.<Double>emptyList());
-  }
-  public SummaryMetricFamily(String name, String help, List<String> labelNames, List<Double>quantiles) {
-    super(name, Collector.Type.SUMMARY, help, new ArrayList<Sample>());
-    this.labelNames = labelNames;
-    this.quantiles = quantiles;
-  }
-
-  public SummaryMetricFamily addMetric(List<String> labelValues, double count, double sum) {
-    return addMetric(labelValues, count, sum, Collections.<Double>emptyList());
-  }
-  public SummaryMetricFamily addMetric(List<String> labelValues, double count, double sum, List<Double> quantiles) {
-    if (labelValues.size() != labelNames.size()) {
-      throw new IllegalArgumentException("Incorrect number of labels.");
+    @FunctionalInterface
+    public interface Callback {
+        void call(long count, double sum, Quantiles quantiles, String... labelValues);
     }
-    if (this.quantiles.size() != quantiles.size()) {
-      throw new IllegalArgumentException("Incorrect number of quantiles.");
+
+    private final Consumer<Callback> callback;
+
+    private SummaryWithCallback(Builder builder) {
+        super(builder);
+        this.callback = builder.callback;
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
     }
-    samples.add(new Sample(name + "_count", labelNames, labelValues, count));
-    samples.add(new Sample(name + "_sum", labelNames, labelValues, sum));
-    List<String> labelNamesWithQuantile = new ArrayList<String>(labelNames);
-    labelNamesWithQuantile.add("quantile");
-    for (int i = 0; i < quantiles.size(); i++) {
-      List<String> labelValuesWithQuantile = new ArrayList<String>(labelValues);
-      labelValuesWithQuantile.add(Collector.doubleToGoString(this.quantiles.get(i)));
-      samples.add(new Sample(name, labelNamesWithQuantile, labelValuesWithQuantile, quantiles.get(i)));
+
+    @Override
+    public SummarySnapshot collect() {
+        List<SummarySnapshot.SummaryDataPointSnapshot> dataPoints = new ArrayList<>();
+        callback.accept((count, sum, quantiles, labelValues) -> {
+            dataPoints.add(new SummarySnapshot.SummaryDataPointSnapshot(count, sum, quantiles, makeLabels(labelValues), Exemplars.EMPTY, 0L));
+        });
+        return new SummarySnapshot(getMetadata(), dataPoints);
     }
-    return this;
-  }
+
+    public static Builder builder() {
+        return new Builder(PrometheusProperties.get());
+    }
+
+    public static Builder builder(PrometheusProperties properties) {
+        return new Builder(properties);
+    }
+
+    public static class Builder extends CallbackMetric.Builder<SummaryWithCallback.Builder, SummaryWithCallback> {
+
+        private Consumer<Callback> callback;
+
+        public Builder callback(Consumer<Callback> callback) {
+            this.callback = callback;
+            return self();
+        }
+
+        private Builder(PrometheusProperties properties) {
+            super(Collections.singletonList("quantile"), properties);
+        }
+
+        @Override
+        public SummaryWithCallback build() {
+            return new SummaryWithCallback(this);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
 }

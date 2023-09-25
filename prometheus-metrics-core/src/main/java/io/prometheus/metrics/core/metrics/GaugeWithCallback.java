@@ -1,58 +1,85 @@
-package io.prometheus.client;
+package io.prometheus.metrics.core.metrics;
+
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
- * Gauge metric family, for custom collectors and exporters.
- * <p>
- * Most users want a normal {@link Gauge} instead.
+ * Example:
+ * <pre>{@code
+ * MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
  *
- * Example usage:
- * <pre>
- * {@code
- *   class YourCustomCollector extends Collector {
- *     List<MetricFamilySamples> collect() {
- *       List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
- *       // With no labels.
- *       mfs.add(new GaugeMetricFamily("my_gauge", "help", 42));
- *       // With labels
- *       GaugeMetricFamily labeledGauge = new GaugeMetricFamily("my_other_gauge", "help", Arrays.asList("labelname"));
- *       labeledGauge.addMetric(Arrays.asList("foo"), 4);
- *       labeledGauge.addMetric(Arrays.asList("bar"), 5);
- *       mfs.add(labeledGauge);
- *       return mfs;
- *     }
- *   }
- * }
- * </pre>
+ * GaugeWithCallback.builder()
+ *     .name("jvm_memory_bytes_used")
+ *     .help("Used bytes of a given JVM memory area.")
+ *     .unit(Unit.BYTES)
+ *     .labelNames("area")
+ *     .callback(callback -> {
+ *         callback.call(memoryBean.getHeapMemoryUsage().getUsed(), "heap");
+ *         callback.call(memoryBean.getNonHeapMemoryUsage().getUsed(), "nonheap");
+ *     })
+ *     .register();
+ * }</pre>
  */
-public class GaugeMetricFamily extends Collector.MetricFamilySamples {
+public class GaugeWithCallback extends CallbackMetric {
 
-  private final List<String> labelNames;
-
-  public GaugeMetricFamily(String name, String help, double value) {
-    super(name, Collector.Type.GAUGE, help, new ArrayList<Sample>());
-    labelNames = Collections.emptyList();
-    samples.add(
-        new Sample(
-          name,
-          labelNames, 
-          Collections.<String>emptyList(),
-          value));
-  }
-
-  public GaugeMetricFamily(String name, String help, List<String> labelNames) {
-    super(name, Collector.Type.GAUGE, help, new ArrayList<Sample>());
-    this.labelNames = labelNames;
-  }
-
-  public GaugeMetricFamily addMetric(List<String> labelValues, double value) {
-    if (labelValues.size() != labelNames.size()) {
-      throw new IllegalArgumentException("Incorrect number of labels.");
+    @FunctionalInterface
+    public interface Callback {
+        void call(double value, String... labelValues);
     }
-    samples.add(new Sample(name, labelNames, labelValues, value));
-    return this;
-  }
+
+    private final Consumer<Callback> callback;
+
+    private GaugeWithCallback(Builder builder) {
+        super(builder);
+        this.callback = builder.callback;
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+    }
+
+    @Override
+    public GaugeSnapshot collect() {
+        List<GaugeSnapshot.GaugeDataPointSnapshot> dataPoints = new ArrayList<>();
+        callback.accept((value, labelValues) -> {
+            dataPoints.add(new GaugeSnapshot.GaugeDataPointSnapshot(value, makeLabels(labelValues), null, 0L));
+        });
+        return new GaugeSnapshot(getMetadata(), dataPoints);
+    }
+
+    public static Builder builder() {
+        return new Builder(PrometheusProperties.get());
+    }
+
+    public static Builder builder(PrometheusProperties properties) {
+        return new Builder(properties);
+    }
+
+    public static class Builder extends CallbackMetric.Builder<GaugeWithCallback.Builder, GaugeWithCallback> {
+
+        private Consumer<Callback> callback;
+
+        public Builder callback(Consumer<Callback> callback) {
+            this.callback = callback;
+            return self();
+        }
+
+        private Builder(PrometheusProperties properties) {
+            super(Collections.emptyList(), properties);
+        }
+
+        @Override
+        public GaugeWithCallback build() {
+            return new GaugeWithCallback(this);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
 }

@@ -1,96 +1,107 @@
-package io.prometheus.client;
+package io.prometheus.metrics.core.metrics;
 
-import org.junit.After;
-import org.junit.Before;
+import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TextFormat;
+import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 
 public class InfoTest {
 
-  CollectorRegistry registry;
-  Info noLabels, labels;
-
-  @Before
-  public void setUp() {
-    registry = new CollectorRegistry();
-    noLabels = Info.build().name("nolabels").help("help").register(registry);
-    labels = Info.build().name("labels").help("help").labelNames("l").register(registry);
-  }
-
-  private Double getInfo(String metric, String... labels) {
-    String[] names = new String[labels.length / 2];
-    String[] values = new String[labels.length / 2];
-    for (int i = 0; i < labels.length; i+=2) {
-      names[i/2] = labels[i];
-      values[i/2] = labels[i+1];
+    @Test
+    public void testInfoStrippedFromName() {
+        for (String name : new String[]{
+                "jvm.runtime", "jvm_runtime",
+                "jvm.runtime.info", "jvm_runtime_info"}) {
+            for (String labelName : new String[]{"my.key", "my_key"}) {
+                Info info = Info.builder()
+                        .name(name)
+                        .labelNames(labelName)
+                        .build();
+                info.addLabelValues("value");
+                Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(info.collect());
+                assertEquals("name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value: \"value\" } gauge { value: 1.0 } }", TextFormat.printer().shortDebugString(protobufData));
+            }
+        }
     }
-    return registry.getSampleValue(metric + "_info", names, values);
-  }
 
-  @Test
-  public void testInfo() {
-    assertEquals(null, getInfo("nolabels", "foo", "bar"));
-    noLabels.info("foo", "bar");
-    assertEquals(1.0, getInfo("nolabels", "foo", "bar"), .001);
-    noLabels.info("foo", "bar", "baz", "meh");
-    assertEquals(null, getInfo("nolabels", "foo", "bar"));
-    assertEquals(1.0, getInfo("nolabels", "baz", "meh", "foo", "bar"), .001);
-  }
+    @Test
+    public void testAddAndRemove() throws IOException {
+        Info info = Info.builder()
+                .name("test_info")
+                .labelNames("a", "b")
+                .build();
+        Assert.assertEquals(0, info.collect().getDataPoints().size());
+        info.addLabelValues("val1", "val2");
+        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        info.addLabelValues("val1", "val2"); // already exist, so no change
+        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        info.addLabelValues("val2", "val2");
+        Assert.assertEquals(2, info.collect().getDataPoints().size());
+        info.remove("val1", "val3"); // does not exist, so no change
+        Assert.assertEquals(2, info.collect().getDataPoints().size());
+        info.remove("val1", "val2");
+        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        info.remove("val2", "val2");
+        Assert.assertEquals(0, info.collect().getDataPoints().size());
+    }
 
-  @Test
-  public void testDefaultValue() {
-    assertEquals(1.0, getInfo("nolabels"), .001);
-  }
+    @Test
+    public void testSet() throws IOException {
+        Info info = Info.builder()
+                .name("target_info")
+                .constLabels(Labels.of("service.name", "test", "service.instance.id", "123"))
+                .labelNames("service.version")
+                .build();
+        info.setLabelValues("1.0.0");
+        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        info.setLabelValues("2.0.0");
+        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        assertTextFormat("target_info{service_instance_id=\"123\",service_name=\"test\",service_version=\"2.0.0\"} 1\n", info);
+    }
 
-  @Test
-  public void testLabels() {
-    assertEquals(null, getInfo("labels", "l", "a", "foo", "bar"));
-    assertEquals(null, getInfo("labels", "l", "b", "baz", "meh"));
-    labels.labels("a").info("foo", "bar");
-    assertEquals(1.0, getInfo("labels", "l", "a", "foo", "bar"), .001);
-    assertEquals(null, getInfo("labels", "l", "b", "baz", "meh"));
-    labels.labels("b").info("baz", "meh");
-    assertEquals(1.0, getInfo("labels", "l", "a", "foo", "bar"), .001);
-    assertEquals(1.0, getInfo("labels", "l", "b", "baz", "meh"), .001);
+    @Test
+    public void testConstLabelsOnly() throws IOException {
+        Info info = Info.builder()
+                .name("target_info")
+                .constLabels(Labels.of("service.name", "test", "service.instance.id", "123"))
+                .build();
+        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        assertTextFormat("target_info{service_instance_id=\"123\",service_name=\"test\"} 1\n", info);
+    }
 
-    assertEquals(null, getInfo("nolabels", "l", "a"));
-    assertEquals(null, getInfo("nolabels", "l", "b"));
-  }
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstLabelsDuplicate1() {
+        Info.builder()
+                .constLabels(Labels.of("a_1", "val1"))
+                .labelNames("a.1")
+                .build();
+    }
 
-  @Test(expected=IllegalArgumentException.class)
-  public void testDuplicateNameLabelThrows() {
-    Info i = Info.build().name("labels").help("help").labelNames("l").create();
-    i.labels("a").info("l", "bar");
-  }
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstLabelsDuplicate2() {
+        Info.builder()
+                .labelNames("a_1")
+                .constLabels(Labels.of("a.1", "val1"))
+                .build();
+    }
 
-  @Test(expected=IllegalArgumentException.class)
-  public void testOddInfoThrows() {
-    Info i = Info.build().name("labels").help("help").create();
-    i.info("odd");
-  }
-
-  @Test(expected=IllegalStateException.class)
-  public void testUnitThrows() {
-    Info.build().unit("seconds").name("nolabels").help("help").create();
-  }
-
-  @Test
-  public void testCollect() {
-    labels.labels("a").info("foo", "bar", "baz", "meh");
-    List<Collector.MetricFamilySamples> mfs = labels.collect();
-
-    ArrayList<Collector.MetricFamilySamples.Sample> samples = new ArrayList<Collector.MetricFamilySamples.Sample>();
-    samples.add(new Collector.MetricFamilySamples.Sample("labels_info", asList("l", "baz", "foo"), asList("a", "meh", "bar"), 1.0));
-    Collector.MetricFamilySamples mfsFixture = new Collector.MetricFamilySamples("labels", Collector.Type.INFO, "help", samples);
-
-    assertEquals(1, mfs.size());
-    assertEquals(mfsFixture, mfs.get(0));
-  }
+    private void assertTextFormat(String expected, Info info) throws IOException {
+        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        writer.write(outputStream, MetricSnapshots.of(info.collect()));
+        String result = outputStream.toString(StandardCharsets.UTF_8.name());
+        if (!result.contains(expected)) {
+            throw new AssertionError(expected + " is not contained in the following output:\n" + result);
+        }
+    }
 }

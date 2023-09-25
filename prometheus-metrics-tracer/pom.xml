@@ -4,24 +4,17 @@
 
   <parent>
     <groupId>io.prometheus</groupId>
-    <artifactId>parent</artifactId>
-    <version>0.16.1-SNAPSHOT</version>
+    <artifactId>client_java</artifactId>
+    <version>1.0.0-beta-2-SNAPSHOT</version>
   </parent>
 
-  <artifactId>simpleclient_tracer</artifactId>
+  <artifactId>prometheus-metrics-tracer</artifactId>
   <packaging>pom</packaging>
 
-  <name>Prometheus Java Span Context Supplier - Parent</name>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-api</artifactId>
-        <version>1.15.0</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <name>Prometheus Metrics Tracer</name>
+  <description>
+    Parent for Prometheus integrations with distributed tracing libraries.
+  </description>
 
   <licenses>
     <license>
@@ -31,10 +24,29 @@
     </license>
   </licenses>
 
+  <developers>
+    <developer>
+      <id>fstab</id>
+      <name>Fabian Stäber</name>
+      <email>fabian@fstab.de</email>
+    </developer>
+  </developers>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-api</artifactId>
+        <version>1.28.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <modules>
-    <module>simpleclient_tracer_common</module>
-    <module>simpleclient_tracer_otel</module>
-    <module>simpleclient_tracer_otel_agent</module>
+    <module>prometheus-metrics-tracer-common</module>
+    <module>prometheus-metrics-tracer-initializer</module>
+    <module>prometheus-metrics-tracer-otel</module>
+    <module>prometheus-metrics-tracer-otel-agent</module>
   </modules>
 
 </project>

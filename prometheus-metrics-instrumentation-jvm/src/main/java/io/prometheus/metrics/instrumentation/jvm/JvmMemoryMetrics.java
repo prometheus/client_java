@@ -1,240 +1,298 @@
-package io.prometheus.client.hotspot;
+package io.prometheus.metrics.instrumentation.jvm;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.Predicate;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.metrics.GaugeWithCallback;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Unit;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import static io.prometheus.client.SampleNameFilter.ALLOW_ALL;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
- * Exports metrics about JVM memory areas.
- * <p>
- * Example usage:
- * <pre>
- * {@code
- *   new MemoryPoolsExports().register();
- * }
- * </pre>
+ * JVM memory metrics. The {@link JvmMemoryMetrics} are registered as part of the {@link JvmMetrics} like this:
+ * <pre>{@code
+ *   JvmMetrics.builder().register();
+ * }</pre>
+ * However, if you want only the {@link JvmMemoryMetrics} you can also register them directly:
+ * <pre>{@code
+ *   JvmMemoryMetrics.builder().register();
+ * }</pre>
  * Example metrics being exported:
  * <pre>
- *   jvm_memory_bytes_used{area="heap"} 2000000
- *   jvm_memory_bytes_committed{area="nonheap"} 200000
- *   jvm_memory_bytes_max{area="nonheap"} 2000000
- *   jvm_memory_pool_bytes_used{pool="PS Eden Space"} 2000
+ * # HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.
+ * # TYPE jvm_memory_committed_bytes gauge
+ * jvm_memory_committed_bytes{area="heap"} 4.98597888E8
+ * jvm_memory_committed_bytes{area="nonheap"} 1.1993088E7
+ * # HELP jvm_memory_init_bytes Initial bytes of a given JVM memory area.
+ * # TYPE jvm_memory_init_bytes gauge
+ * jvm_memory_init_bytes{area="heap"} 5.20093696E8
+ * jvm_memory_init_bytes{area="nonheap"} 2555904.0
+ * # HELP jvm_memory_max_bytes Max (bytes) of a given JVM memory area.
+ * # TYPE jvm_memory_max_bytes gauge
+ * jvm_memory_max_bytes{area="heap"} 7.38983936E9
+ * jvm_memory_max_bytes{area="nonheap"} -1.0
+ * # HELP jvm_memory_objects_pending_finalization The number of objects waiting in the finalizer queue.
+ * # TYPE jvm_memory_objects_pending_finalization gauge
+ * jvm_memory_objects_pending_finalization 0.0
+ * # HELP jvm_memory_pool_collection_committed_bytes Committed after last collection bytes of a given JVM memory pool.
+ * # TYPE jvm_memory_pool_collection_committed_bytes gauge
+ * jvm_memory_pool_collection_committed_bytes{pool="PS Eden Space"} 1.30023424E8
+ * jvm_memory_pool_collection_committed_bytes{pool="PS Old Gen"} 3.47078656E8
+ * jvm_memory_pool_collection_committed_bytes{pool="PS Survivor Space"} 2.1495808E7
+ * # HELP jvm_memory_pool_collection_init_bytes Initial after last collection bytes of a given JVM memory pool.
+ * # TYPE jvm_memory_pool_collection_init_bytes gauge
+ * jvm_memory_pool_collection_init_bytes{pool="PS Eden Space"} 1.30023424E8
+ * jvm_memory_pool_collection_init_bytes{pool="PS Old Gen"} 3.47078656E8
+ * jvm_memory_pool_collection_init_bytes{pool="PS Survivor Space"} 2.1495808E7
+ * # HELP jvm_memory_pool_collection_max_bytes Max bytes after last collection of a given JVM memory pool.
+ * # TYPE jvm_memory_pool_collection_max_bytes gauge
+ * jvm_memory_pool_collection_max_bytes{pool="PS Eden Space"} 2.727870464E9
+ * jvm_memory_pool_collection_max_bytes{pool="PS Old Gen"} 5.542248448E9
+ * jvm_memory_pool_collection_max_bytes{pool="PS Survivor Space"} 2.1495808E7
+ * # HELP jvm_memory_pool_collection_used_bytes Used bytes after last collection of a given JVM memory pool.
+ * # TYPE jvm_memory_pool_collection_used_bytes gauge
+ * jvm_memory_pool_collection_used_bytes{pool="PS Eden Space"} 0.0
+ * jvm_memory_pool_collection_used_bytes{pool="PS Old Gen"} 1249696.0
+ * jvm_memory_pool_collection_used_bytes{pool="PS Survivor Space"} 0.0
+ * # HELP jvm_memory_pool_committed_bytes Committed bytes of a given JVM memory pool.
+ * # TYPE jvm_memory_pool_committed_bytes gauge
+ * jvm_memory_pool_committed_bytes{pool="Code Cache"} 4128768.0
+ * jvm_memory_pool_committed_bytes{pool="Compressed Class Space"} 917504.0
+ * jvm_memory_pool_committed_bytes{pool="Metaspace"} 6946816.0
+ * jvm_memory_pool_committed_bytes{pool="PS Eden Space"} 1.30023424E8
+ * jvm_memory_pool_committed_bytes{pool="PS Old Gen"} 3.47078656E8
+ * jvm_memory_pool_committed_bytes{pool="PS Survivor Space"} 2.1495808E7
+ * # HELP jvm_memory_pool_init_bytes Initial bytes of a given JVM memory pool.
+ * # TYPE jvm_memory_pool_init_bytes gauge
+ * jvm_memory_pool_init_bytes{pool="Code Cache"} 2555904.0
+ * jvm_memory_pool_init_bytes{pool="Compressed Class Space"} 0.0
+ * jvm_memory_pool_init_bytes{pool="Metaspace"} 0.0
+ * jvm_memory_pool_init_bytes{pool="PS Eden Space"} 1.30023424E8
+ * jvm_memory_pool_init_bytes{pool="PS Old Gen"} 3.47078656E8
+ * jvm_memory_pool_init_bytes{pool="PS Survivor Space"} 2.1495808E7
+ * # HELP jvm_memory_pool_max_bytes Max bytes of a given JVM memory pool.
+ * # TYPE jvm_memory_pool_max_bytes gauge
+ * jvm_memory_pool_max_bytes{pool="Code Cache"} 2.5165824E8
+ * jvm_memory_pool_max_bytes{pool="Compressed Class Space"} 1.073741824E9
+ * jvm_memory_pool_max_bytes{pool="Metaspace"} -1.0
+ * jvm_memory_pool_max_bytes{pool="PS Eden Space"} 2.727870464E9
+ * jvm_memory_pool_max_bytes{pool="PS Old Gen"} 5.542248448E9
+ * jvm_memory_pool_max_bytes{pool="PS Survivor Space"} 2.1495808E7
+ * # HELP jvm_memory_pool_used_bytes Used bytes of a given JVM memory pool.
+ * # TYPE jvm_memory_pool_used_bytes gauge
+ * jvm_memory_pool_used_bytes{pool="Code Cache"} 4065472.0
+ * jvm_memory_pool_used_bytes{pool="Compressed Class Space"} 766680.0
+ * jvm_memory_pool_used_bytes{pool="Metaspace"} 6659432.0
+ * jvm_memory_pool_used_bytes{pool="PS Eden Space"} 7801536.0
+ * jvm_memory_pool_used_bytes{pool="PS Old Gen"} 1249696.0
+ * jvm_memory_pool_used_bytes{pool="PS Survivor Space"} 0.0
+ * # HELP jvm_memory_used_bytes Used bytes of a given JVM memory area.
+ * # TYPE jvm_memory_used_bytes gauge
+ * jvm_memory_used_bytes{area="heap"} 9051232.0
+ * jvm_memory_used_bytes{area="nonheap"} 1.1490688E7
  * </pre>
  */
-public class MemoryPoolsExports extends Collector {
+public class JvmMemoryMetrics {
 
-  private static final String JVM_MEMORY_OBJECTS_PENDING_FINALIZATION = "jvm_memory_objects_pending_finalization";
-  private static final String JVM_MEMORY_BYTES_USED = "jvm_memory_bytes_used";
-  private static final String JVM_MEMORY_BYTES_COMMITTED = "jvm_memory_bytes_committed";
-  private static final String JVM_MEMORY_BYTES_MAX = "jvm_memory_bytes_max";
-  private static final String JVM_MEMORY_BYTES_INIT = "jvm_memory_bytes_init";
+    private static final String JVM_MEMORY_OBJECTS_PENDING_FINALIZATION = "jvm_memory_objects_pending_finalization";
+    private static final String JVM_MEMORY_USED_BYTES = "jvm_memory_used_bytes";
+    private static final String JVM_MEMORY_COMMITTED_BYTES = "jvm_memory_committed_bytes";
+    private static final String JVM_MEMORY_MAX_BYTES = "jvm_memory_max_bytes";
+    private static final String JVM_MEMORY_INIT_BYTES = "jvm_memory_init_bytes";
+    private static final String JVM_MEMORY_POOL_USED_BYTES = "jvm_memory_pool_used_bytes";
+    private static final String JVM_MEMORY_POOL_COMMITTED_BYTES = "jvm_memory_pool_committed_bytes";
+    private static final String JVM_MEMORY_POOL_MAX_BYTES = "jvm_memory_pool_max_bytes";
+    private static final String JVM_MEMORY_POOL_INIT_BYTES = "jvm_memory_pool_init_bytes";
+    private static final String JVM_MEMORY_POOL_COLLECTION_USED_BYTES = "jvm_memory_pool_collection_used_bytes";
+    private static final String JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES = "jvm_memory_pool_collection_committed_bytes";
+    private static final String JVM_MEMORY_POOL_COLLECTION_MAX_BYTES = "jvm_memory_pool_collection_max_bytes";
+    private static final String JVM_MEMORY_POOL_COLLECTION_INIT_BYTES = "jvm_memory_pool_collection_init_bytes";
 
-  // Note: The Prometheus naming convention is that units belong at the end of the metric name.
-  // For new metrics like jvm_memory_pool_collection_used_bytes we follow that convention.
-  // For old metrics like jvm_memory_pool_bytes_used we keep the names as they are to avoid a breaking change.
+    private final PrometheusProperties config;
+    private final MemoryMXBean memoryBean;
+    private final List<MemoryPoolMXBean> poolBeans;
 
-  private static final String JVM_MEMORY_POOL_BYTES_USED = "jvm_memory_pool_bytes_used";
-  private static final String JVM_MEMORY_POOL_BYTES_COMMITTED = "jvm_memory_pool_bytes_committed";
-  private static final String JVM_MEMORY_POOL_BYTES_MAX = "jvm_memory_pool_bytes_max";
-  private static final String JVM_MEMORY_POOL_BYTES_INIT = "jvm_memory_pool_bytes_init";
-  private static final String JVM_MEMORY_POOL_COLLECTION_USED_BYTES = "jvm_memory_pool_collection_used_bytes";
-  private static final String JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES = "jvm_memory_pool_collection_committed_bytes";
-  private static final String JVM_MEMORY_POOL_COLLECTION_MAX_BYTES = "jvm_memory_pool_collection_max_bytes";
-  private static final String JVM_MEMORY_POOL_COLLECTION_INIT_BYTES = "jvm_memory_pool_collection_init_bytes";
-
-  private final MemoryMXBean memoryBean;
-  private final List<MemoryPoolMXBean> poolBeans;
-
-  public MemoryPoolsExports() {
-    this(
-        ManagementFactory.getMemoryMXBean(),
-        ManagementFactory.getMemoryPoolMXBeans());
-  }
-
-  public MemoryPoolsExports(MemoryMXBean memoryBean,
-                             List<MemoryPoolMXBean> poolBeans) {
-    this.memoryBean = memoryBean;
-    this.poolBeans = poolBeans;
-  }
-
-  void addMemoryAreaMetrics(List<MetricFamilySamples> sampleFamilies, Predicate<String> nameFilter) {
-    MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
-    MemoryUsage nonHeapUsage = memoryBean.getNonHeapMemoryUsage();
-
-    if (nameFilter.test(JVM_MEMORY_OBJECTS_PENDING_FINALIZATION)) {
-      GaugeMetricFamily finalizer = new GaugeMetricFamily(
-              JVM_MEMORY_OBJECTS_PENDING_FINALIZATION,
-              "The number of objects waiting in the finalizer queue.",
-              memoryBean.getObjectPendingFinalizationCount());
-      sampleFamilies.add(finalizer);
+    private JvmMemoryMetrics(List<MemoryPoolMXBean> poolBeans, MemoryMXBean memoryBean, PrometheusProperties config) {
+        this.config = config;
+        this.poolBeans = poolBeans;
+        this.memoryBean = memoryBean;
     }
 
-    if (nameFilter.test(JVM_MEMORY_BYTES_USED)) {
-      GaugeMetricFamily used = new GaugeMetricFamily(
-              JVM_MEMORY_BYTES_USED,
-              "Used bytes of a given JVM memory area.",
-              Collections.singletonList("area"));
-      used.addMetric(Collections.singletonList("heap"), heapUsage.getUsed());
-      used.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getUsed());
-      sampleFamilies.add(used);
+    private void register(PrometheusRegistry registry) {
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_OBJECTS_PENDING_FINALIZATION)
+                .help("The number of objects waiting in the finalizer queue.")
+                .callback(callback -> callback.call(memoryBean.getObjectPendingFinalizationCount()))
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_USED_BYTES)
+                .help("Used bytes of a given JVM memory area.")
+                .unit(Unit.BYTES)
+                .labelNames("area")
+                .callback(callback -> {
+                    callback.call(memoryBean.getHeapMemoryUsage().getUsed(), "heap");
+                    callback.call(memoryBean.getNonHeapMemoryUsage().getUsed(), "nonheap");
+                })
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_COMMITTED_BYTES)
+                .help("Committed (bytes) of a given JVM memory area.")
+                .unit(Unit.BYTES)
+                .labelNames("area")
+                .callback(callback -> {
+                    callback.call(memoryBean.getHeapMemoryUsage().getCommitted(), "heap");
+                    callback.call(memoryBean.getNonHeapMemoryUsage().getCommitted(), "nonheap");
+                })
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_MAX_BYTES)
+                .help("Max (bytes) of a given JVM memory area.")
+                .unit(Unit.BYTES)
+                .labelNames("area")
+                .callback(callback -> {
+                    callback.call(memoryBean.getHeapMemoryUsage().getMax(), "heap");
+                    callback.call(memoryBean.getNonHeapMemoryUsage().getMax(), "nonheap");
+                })
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_INIT_BYTES)
+                .help("Initial bytes of a given JVM memory area.")
+                .unit(Unit.BYTES)
+                .labelNames("area")
+                .callback(callback -> {
+                    callback.call(memoryBean.getHeapMemoryUsage().getInit(), "heap");
+                    callback.call(memoryBean.getNonHeapMemoryUsage().getInit(), "nonheap");
+                })
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_POOL_USED_BYTES)
+                .help("Used bytes of a given JVM memory pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getUsed))
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_POOL_COMMITTED_BYTES)
+                .help("Committed bytes of a given JVM memory pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getCommitted))
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_POOL_MAX_BYTES)
+                .help("Max bytes of a given JVM memory pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getMax))
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_POOL_INIT_BYTES)
+                .help("Initial bytes of a given JVM memory pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getInit))
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_POOL_COLLECTION_USED_BYTES)
+                .help("Used bytes after last collection of a given JVM memory pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getUsed))
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES)
+                .help("Committed after last collection bytes of a given JVM memory pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getCommitted))
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_POOL_COLLECTION_MAX_BYTES)
+                .help("Max bytes after last collection of a given JVM memory pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getMax))
+                .register(registry);
+
+        GaugeWithCallback.builder(config)
+                .name(JVM_MEMORY_POOL_COLLECTION_INIT_BYTES)
+                .help("Initial after last collection bytes of a given JVM memory pool.")
+                .unit(Unit.BYTES)
+                .labelNames("pool")
+                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getInit))
+                .register(registry);
     }
 
-    if (nameFilter.test(JVM_MEMORY_BYTES_COMMITTED)) {
-      GaugeMetricFamily committed = new GaugeMetricFamily(
-              JVM_MEMORY_BYTES_COMMITTED,
-              "Committed (bytes) of a given JVM memory area.",
-              Collections.singletonList("area"));
-      committed.addMetric(Collections.singletonList("heap"), heapUsage.getCommitted());
-      committed.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getCommitted());
-      sampleFamilies.add(committed);
+    private Consumer<GaugeWithCallback.Callback> makeCallback(List<MemoryPoolMXBean> poolBeans, Function<MemoryPoolMXBean, MemoryUsage> memoryUsageFunc, Function<MemoryUsage, Long> valueFunc) {
+        return callback -> {
+            for (MemoryPoolMXBean pool : poolBeans) {
+                MemoryUsage poolUsage = memoryUsageFunc.apply(pool);
+                if (poolUsage != null) {
+                    callback.call(valueFunc.apply(poolUsage), pool.getName());
+                }
+            }
+        };
     }
 
-    if (nameFilter.test(JVM_MEMORY_BYTES_MAX)) {
-      GaugeMetricFamily max = new GaugeMetricFamily(
-              JVM_MEMORY_BYTES_MAX,
-              "Max (bytes) of a given JVM memory area.",
-              Collections.singletonList("area"));
-      max.addMetric(Collections.singletonList("heap"), heapUsage.getMax());
-      max.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getMax());
-      sampleFamilies.add(max);
+    public static Builder builder() {
+        return new Builder(PrometheusProperties.get());
     }
 
-    if (nameFilter.test(JVM_MEMORY_BYTES_INIT)) {
-      GaugeMetricFamily init = new GaugeMetricFamily(
-              JVM_MEMORY_BYTES_INIT,
-              "Initial bytes of a given JVM memory area.",
-              Collections.singletonList("area"));
-      init.addMetric(Collections.singletonList("heap"), heapUsage.getInit());
-      init.addMetric(Collections.singletonList("nonheap"), nonHeapUsage.getInit());
-      sampleFamilies.add(init);
+    public static Builder builder(PrometheusProperties config) {
+        return new Builder(config);
     }
-  }
 
-  void addMemoryPoolMetrics(List<MetricFamilySamples> sampleFamilies, Predicate<String> nameFilter) {
+    public static class Builder {
 
-    boolean anyPoolMetricPassesFilter = false;
+        private final PrometheusProperties config;
+        private MemoryMXBean memoryBean;
+        private List<MemoryPoolMXBean> poolBeans;
 
-    GaugeMetricFamily used = null;
-    if (nameFilter.test(JVM_MEMORY_POOL_BYTES_USED)) {
-      used = new GaugeMetricFamily(
-              JVM_MEMORY_POOL_BYTES_USED,
-              "Used bytes of a given JVM memory pool.",
-              Collections.singletonList("pool"));
-      sampleFamilies.add(used);
-      anyPoolMetricPassesFilter = true;
-    }
-    GaugeMetricFamily committed = null;
-    if (nameFilter.test(JVM_MEMORY_POOL_BYTES_COMMITTED)) {
-      committed = new GaugeMetricFamily(
-              JVM_MEMORY_POOL_BYTES_COMMITTED,
-              "Committed bytes of a given JVM memory pool.",
-              Collections.singletonList("pool"));
-      sampleFamilies.add(committed);
-      anyPoolMetricPassesFilter = true;
-    }
-    GaugeMetricFamily max = null;
-    if (nameFilter.test(JVM_MEMORY_POOL_BYTES_MAX)) {
-      max = new GaugeMetricFamily(
-              JVM_MEMORY_POOL_BYTES_MAX,
-              "Max bytes of a given JVM memory pool.",
-              Collections.singletonList("pool"));
-      sampleFamilies.add(max);
-      anyPoolMetricPassesFilter = true;
-    }
-    GaugeMetricFamily init = null;
-    if (nameFilter.test(JVM_MEMORY_POOL_BYTES_INIT)) {
-      init = new GaugeMetricFamily(
-              JVM_MEMORY_POOL_BYTES_INIT,
-              "Initial bytes of a given JVM memory pool.",
-              Collections.singletonList("pool"));
-      sampleFamilies.add(init);
-      anyPoolMetricPassesFilter = true;
-    }
-    GaugeMetricFamily collectionUsed = null;
-    if (nameFilter.test(JVM_MEMORY_POOL_COLLECTION_USED_BYTES)) {
-      collectionUsed = new GaugeMetricFamily(
-              JVM_MEMORY_POOL_COLLECTION_USED_BYTES,
-              "Used bytes after last collection of a given JVM memory pool.",
-              Collections.singletonList("pool"));
-      sampleFamilies.add(collectionUsed);
-      anyPoolMetricPassesFilter = true;
-    }
-    GaugeMetricFamily collectionCommitted = null;
-    if (nameFilter.test(JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES)) {
-      collectionCommitted = new GaugeMetricFamily(
-              JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES,
-              "Committed after last collection bytes of a given JVM memory pool.",
-              Collections.singletonList("pool"));
-      sampleFamilies.add(collectionCommitted);
-      anyPoolMetricPassesFilter = true;
-    }
-    GaugeMetricFamily collectionMax = null;
-    if (nameFilter.test(JVM_MEMORY_POOL_COLLECTION_MAX_BYTES)) {
-      collectionMax = new GaugeMetricFamily(
-              JVM_MEMORY_POOL_COLLECTION_MAX_BYTES,
-              "Max bytes after last collection of a given JVM memory pool.",
-              Collections.singletonList("pool"));
-      sampleFamilies.add(collectionMax);
-      anyPoolMetricPassesFilter = true;
-    }
-    GaugeMetricFamily collectionInit = null;
-    if (nameFilter.test(JVM_MEMORY_POOL_COLLECTION_INIT_BYTES)) {
-      collectionInit = new GaugeMetricFamily(
-              JVM_MEMORY_POOL_COLLECTION_INIT_BYTES,
-              "Initial after last collection bytes of a given JVM memory pool.",
-              Collections.singletonList("pool"));
-      sampleFamilies.add(collectionInit);
-      anyPoolMetricPassesFilter = true;
-    }
-    if (anyPoolMetricPassesFilter) {
-      for (final MemoryPoolMXBean pool : poolBeans) {
-        MemoryUsage poolUsage = pool.getUsage();
-        if (poolUsage != null) {
-          addPoolMetrics(used, committed, max, init, pool.getName(), poolUsage);
+        private Builder(PrometheusProperties config) {
+            this.config = config;
         }
-        MemoryUsage collectionPoolUsage = pool.getCollectionUsage();
-        if (collectionPoolUsage != null) {
-          addPoolMetrics(collectionUsed, collectionCommitted, collectionMax, collectionInit, pool.getName(), collectionPoolUsage);
+
+        /**
+         * Package private. For testing only.
+         */
+        Builder withMemoryBean(MemoryMXBean memoryBean) {
+            this.memoryBean = memoryBean;
+            return this;
         }
-      }
-    }
-  }
 
-  private void addPoolMetrics(GaugeMetricFamily used, GaugeMetricFamily committed, GaugeMetricFamily max, GaugeMetricFamily init, String poolName, MemoryUsage poolUsage) {
-    if (used != null) {
-      used.addMetric(Collections.singletonList(poolName), poolUsage.getUsed());
-    }
-    if (committed != null) {
-      committed.addMetric(Collections.singletonList(poolName), poolUsage.getCommitted());
-    }
-    if (max != null) {
-      max.addMetric(Collections.singletonList(poolName), poolUsage.getMax());
-    }
-    if (init != null) {
-      init.addMetric(Collections.singletonList(poolName), poolUsage.getInit());
-    }
-  }
+        /**
+         * Package private. For testing only.
+         */
+        Builder withMemoryPoolBeans(List<MemoryPoolMXBean> memoryPoolBeans) {
+            this.poolBeans = memoryPoolBeans;
+            return this;
+        }
 
-  @Override
-  public List<MetricFamilySamples> collect() {
-    return collect(null);
-  }
+        public void register() {
+            register(PrometheusRegistry.defaultRegistry);
+        }
 
-  @Override
-  public List<MetricFamilySamples> collect(Predicate<String> nameFilter) {
-    List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-    addMemoryAreaMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
-    addMemoryPoolMetrics(mfs, nameFilter == null ? ALLOW_ALL : nameFilter);
-    return mfs;
-  }
+        public void register(PrometheusRegistry registry) {
+            MemoryMXBean memoryMXBean = this.memoryBean != null ? this.memoryBean : ManagementFactory.getMemoryMXBean();
+            List<MemoryPoolMXBean> poolBeans = this.poolBeans != null ? this.poolBeans : ManagementFactory.getMemoryPoolMXBeans();
+            new JvmMemoryMetrics(poolBeans, memoryMXBean, config).register(registry);
+        }
+    }
 }

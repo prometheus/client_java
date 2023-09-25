@@ -1,369 +1,251 @@
-package io.prometheus.client;
+package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.client.exemplars.CounterExemplarSampler;
-import io.prometheus.client.exemplars.Exemplar;
-import io.prometheus.client.exemplars.ExemplarConfig;
+import io.prometheus.metrics.config.MetricsProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.datapoints.CounterDataPoint;
+import io.prometheus.metrics.core.exemplars.ExemplarSampler;
+import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Labels;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
+import java.util.concurrent.atomic.DoubleAdder;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
- * Counter metric, to track counts of events or running totals.
+ * Counter metric.
  * <p>
- * Example of Counters include:
- * <ul>
- *  <li>Number of requests processed</li>
- *  <li>Number of items that were inserted into a queue</li>
- *  <li>Total amount of data a system has processed</li>
- * </ul>
- *
- * Counters can only go up (and be reset), if your use case can go down you should use a {@link Gauge} instead.
- * Use the <code>rate()</code> function in Prometheus to calculate the rate of increase of a Counter.
- * By convention, the names of Counters are suffixed by <code>_total</code>.
- *
- * <p>
- * An example Counter:
- * <pre>
- * {@code
- *   class YourClass {
- *     static final Counter requests = Counter.build()
- *         .name("requests_total").help("Total requests.").register();
- *     static final Counter failedRequests = Counter.build()
- *         .name("requests_failed_total").help("Total failed requests.").register();
- *
- *     void processRequest() {
- *        requests.inc();
- *        try {
- *          // Your code here.
- *        } catch (Exception e) {
- *          failedRequests.inc();
- *          throw e;
- *        }
- *     }
- *   }
- * }
- * </pre>
- *
- * <p>
- * You can also use labels to track different types of metric:
- * <pre>
- * {@code
- *   class YourClass {
- *     static final Counter requests = Counter.build()
- *         .name("requests_total").help("Total requests.")
- *         .labelNames("method").register();
- *
- *     void processGetRequest() {
- *        requests.labels("get").inc();
- *        // Your code here.
- *     }
- *     void processPostRequest() {
- *        requests.labels("post").inc();
- *        // Your code here.
- *     }
- *   }
- * }
- * </pre>
- * These can be aggregated and processed together much more easily in the Prometheus
- * server than individual metrics for each labelset.
- *
- * If there is a suffix of <code>_total</code> on the metric name, it will be
- * removed. When exposing the time series for counter value, a
- * <code>_total</code> suffix will be added. This is for compatibility between
- * OpenMetrics and the Prometheus text format, as OpenMetrics requires the
- * <code>_total</code> suffix.
+ * Example usage:
+ * <pre>{@code
+ * Counter requestCount = Counter.builder()
+ *     .name("requests_total")
+ *     .help("Total number of requests")
+ *     .labelNames("path", "status")
+ *     .register();
+ * requestCount.labelValues("/hello-world", "200").inc();
+ * requestCount.labelValues("/hello-world", "500").inc();
+ * }</pre>
  */
-public class Counter extends SimpleCollector<Counter.Child> implements Collector.Describable {
+public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint> implements CounterDataPoint {
 
-  private final Boolean exemplarsEnabled; // null means default from ExemplarConfig applies
-  private final CounterExemplarSampler exemplarSampler;
+    private final boolean exemplarsEnabled;
+    private final ExemplarSamplerConfig exemplarSamplerConfig;
 
-  Counter(Builder b) {
-    super(b);
-    this.exemplarsEnabled = b.exemplarsEnabled;
-    this.exemplarSampler = b.exemplarSampler;
-    initializeNoLabelsChild();
-  }
+    private Counter(Builder builder, PrometheusProperties prometheusProperties) {
+        super(builder);
+        MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
+        exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
+        if (exemplarsEnabled) {
+            exemplarSamplerConfig = new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 1);
+        } else {
+            exemplarSamplerConfig = null;
+        }
+    }
 
-  public static class Builder extends SimpleCollector.Builder<Builder, Counter> {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void inc(long amount) {
+        getNoLabels().inc(amount);
+    }
 
-    private Boolean exemplarsEnabled = null;
-    private CounterExemplarSampler exemplarSampler = null;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void inc(double amount) {
+        getNoLabels().inc(amount);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void incWithExemplar(long amount, Labels labels) {
+        getNoLabels().incWithExemplar(amount, labels);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void incWithExemplar(double amount, Labels labels) {
+        getNoLabels().incWithExemplar(amount, labels);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CounterSnapshot collect() {
+        return (CounterSnapshot) super.collect();
+    }
 
     @Override
-    public Counter create() {
-      // Gracefully handle pre-OpenMetrics counters.
-      if (name.endsWith("_total")) {
-        name = name.substring(0, name.length() - 6);
-      }
-      dontInitializeNoLabelsChild = true;
-      return new Counter(this);
+    protected boolean isExemplarsEnabled() {
+        return exemplarsEnabled;
     }
 
-    /**
-     * Enable exemplars and provide a custom {@link CounterExemplarSampler}.
-     */
-    public Builder withExemplarSampler(CounterExemplarSampler exemplarSampler) {
-      if (exemplarSampler == null) {
-        throw new NullPointerException();
-      }
-      this.exemplarSampler = exemplarSampler;
-      return withExemplars();
-    }
-
-    /**
-     * Allow this counter to load exemplars from a {@link CounterExemplarSampler}.
-     * <p>
-     * If a specific exemplar sampler is configured for this counter that exemplar sampler is used
-     * (see {@link #withExemplarSampler(CounterExemplarSampler)}).
-     * Otherwise the default from {@link ExemplarConfig} is used.
-     */
-    public Builder withExemplars() {
-      this.exemplarsEnabled = TRUE;
-      return this;
-    }
-
-    /**
-     * Prevent this counter from loading exemplars from a {@link CounterExemplarSampler}.
-     * <p>
-     * You can still provide exemplars for explicitly individual observations, e.g. using
-     * {@link #incWithExemplar(double, String...)}.
-     */
-    public Builder withoutExemplars() {
-      this.exemplarsEnabled = FALSE;
-      return this;
-    }
-  }
-
-  /**
-   * Return a Builder to allow configuration of a new Counter. Ensures required fields are provided.
-   *
-   * @param name The name of the metric
-   * @param help The help string of the metric
-   */
-  public static Builder build(String name, String help) {
-    return new Builder().name(name).help(help);
-  }
-
-  /**
-   * Return a Builder to allow configuration of a new Counter.
-   */
-  public static Builder build() {
-    return new Builder();
-  }
-
-  @Override
-  protected Child newChild() {
-    return new Child(exemplarsEnabled, exemplarSampler);
-  }
-
-  /**
-   * The value of a single Counter.
-   * <p>
-   * <em>Warning:</em> References to a Child become invalid after using
-   * {@link SimpleCollector#remove} or {@link SimpleCollector#clear},
-   */
-  public static class Child {
-    private final DoubleAdder value = new DoubleAdder();
-    private final long created = System.currentTimeMillis();
-    private final Boolean exemplarsEnabled;
-    private final CounterExemplarSampler exemplarSampler;
-    private final AtomicReference<Exemplar> exemplar = new AtomicReference<Exemplar>();
-
-    public Child() {
-      this(null, null);
-    }
-
-    public Child(Boolean exemplarsEnabled, CounterExemplarSampler exemplarSampler) {
-      this.exemplarsEnabled = exemplarsEnabled;
-      this.exemplarSampler = exemplarSampler;
-    }
-
-    /**
-     * Increment the counter by 1.
-     */
-    public void inc() {
-      inc(1);
-    }
-
-    /**
-     * Same as {@link #incWithExemplar(double, String...) incWithExemplar(1, exemplarLabels)}.
-     */
-    public void incWithExemplar(String... exemplarLabels) {
-      incWithExemplar(1, exemplarLabels);
-    }
-
-    /**
-     * Same as {@link #incWithExemplar(double, Map) incWithExemplar(1, exemplarLabels)}.
-     */
-    public void incWithExemplar(Map<String, String> exemplarLabels) {
-      incWithExemplar(1, exemplarLabels);
-    }
-
-    /**
-     * Increment the counter by the given amount.
-     *
-     * @throws IllegalArgumentException If amt is negative.
-     */
-    public void inc(double amt) {
-      incWithExemplar(amt, (String[]) null);
-    }
-
-    /**
-     * Like {@link #inc(double)}, but additionally creates an exemplar.
-     * <p>
-     * This exemplar takes precedence over any exemplar returned by the {@link CounterExemplarSampler} configured
-     * in {@link ExemplarConfig}.
-     * <p>
-     * The exemplar will have {@code amt} as the value, {@code System.currentTimeMillis()} as the timestamp,
-     * and the specified labels.
-     *
-     * @param amt            same as in {@link #inc(double)}
-     * @param exemplarLabels list of name/value pairs, as documented in {@link Exemplar#Exemplar(double, String...)}.
-     *                       A commonly used name is {@code "trace_id"}.
-     *                       Calling {@code incWithExemplar(amt)} means that an exemplar without labels will be created.
-     *                       Calling {@code incWithExemplar(amt, (String[]) null)} is equivalent
-     *                       to calling {@code inc(amt)}.
-     */
-    public void incWithExemplar(double amt, String... exemplarLabels) {
-      Exemplar exemplar = exemplarLabels == null ? null : new Exemplar(amt, System.currentTimeMillis(), exemplarLabels);
-      if (amt < 0) {
-        throw new IllegalArgumentException("Amount to increment must be non-negative.");
-      }
-      value.add(amt);
-      updateExemplar(amt, exemplar);
-    }
-
-    /**
-     * Same as {@link #incWithExemplar(double, String...)}, but the exemplar labels are passed as a {@link Map}.
-     */
-    public void incWithExemplar(double amt, Map<String, String> exemplarLabels) {
-      incWithExemplar(amt, Exemplar.mapToArray(exemplarLabels));
-    }
-
-    private void updateExemplar(double amt, Exemplar userProvidedExemplar) {
-      Exemplar prev, next;
-      do {
-        prev = exemplar.get();
-        if (userProvidedExemplar == null) {
-          next = sampleNextExemplar(amt, prev);
+    @Override
+    protected DataPoint newDataPoint() {
+        if (isExemplarsEnabled()) {
+            return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
         } else {
-          next = userProvidedExemplar;
+            return new DataPoint(null);
         }
-        if (next == null || next == prev) {
-          return;
+    }
+
+    @Override
+    protected CounterSnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
+        List<CounterSnapshot.CounterDataPointSnapshot> data = new ArrayList<>(labels.size());
+        for (int i = 0; i < labels.size(); i++) {
+            data.add(metricData.get(i).collect(labels.get(i)));
         }
-      } while (!exemplar.compareAndSet(prev, next));
+        return new CounterSnapshot(getMetadata(), data);
     }
 
-    private Exemplar sampleNextExemplar(double amt, Exemplar prev) {
-      if (FALSE.equals(exemplarsEnabled)) {
-        return null;
-      }
-      if (exemplarSampler != null) {
-        return exemplarSampler.sample(amt, prev);
-      }
-      if (TRUE.equals(exemplarsEnabled) || ExemplarConfig.isExemplarsEnabled()) {
-        CounterExemplarSampler exemplarSampler = ExemplarConfig.getCounterExemplarSampler();
-        if (exemplarSampler != null) {
-          return exemplarSampler.sample(amt, prev);
+    static String stripTotalSuffix(String name) {
+        if (name != null && (name.endsWith("_total") || name.endsWith(".total"))) {
+            name = name.substring(0, name.length() - 6);
         }
-      }
-      return null;
+        return name;
     }
 
-    /**
-     * Get the value of the counter.
-     */
-    public double get() {
-      return value.sum();
+    class DataPoint implements CounterDataPoint {
+
+        private final DoubleAdder doubleValue = new DoubleAdder();
+        // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
+        // and DoubleAdder for double observations. If the user doesn't observe any double at all,
+        // we will be using the LongAdder and get the best performance.
+        private final LongAdder longValue = new LongAdder();
+        private final long createdTimeMillis = System.currentTimeMillis();
+        private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
+
+        private DataPoint(ExemplarSampler exemplarSampler) {
+            this.exemplarSampler = exemplarSampler;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void inc(long amount) {
+            validateAndAdd(amount);
+            if (isExemplarsEnabled()) {
+                exemplarSampler.observe(amount);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void inc(double amount) {
+            validateAndAdd(amount);
+            if (isExemplarsEnabled()) {
+                exemplarSampler.observe(amount);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void incWithExemplar(long amount, Labels labels) {
+            validateAndAdd(amount);
+            if (isExemplarsEnabled()) {
+                exemplarSampler.observeWithExemplar(amount, labels);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void incWithExemplar(double amount, Labels labels) {
+            validateAndAdd(amount);
+            if (isExemplarsEnabled()) {
+                exemplarSampler.observeWithExemplar(amount, labels);
+            }
+        }
+
+        private void validateAndAdd(long amount) {
+            if (amount < 0) {
+                throw new IllegalArgumentException("Negative increment " + amount + " is illegal for Counter metrics.");
+            }
+            longValue.add(amount);
+        }
+
+        private void validateAndAdd(double amount) {
+            if (amount < 0) {
+                throw new IllegalArgumentException("Negative increment " + amount + " is illegal for Counter metrics.");
+            }
+            doubleValue.add(amount);
+        }
+
+        private CounterSnapshot.CounterDataPointSnapshot collect(Labels labels) {
+            // Read the exemplar first. Otherwise, there is a race condition where you might
+            // see an Exemplar for a value that's not counted yet.
+            // If there are multiple Exemplars (by default it's just one), use the newest.
+            Exemplar latestExemplar = null;
+            if (exemplarSampler != null) {
+                for (Exemplar exemplar : exemplarSampler.collect()) {
+                    if (latestExemplar == null || exemplar.getTimestampMillis() > latestExemplar.getTimestampMillis()) {
+                        latestExemplar = exemplar;
+                    }
+                }
+            }
+            return new CounterSnapshot.CounterDataPointSnapshot(longValue.sum() + doubleValue.sum(), labels, latestExemplar, createdTimeMillis);
+        }
     }
 
-    private Exemplar getExemplar() {
-      return exemplar.get();
+    public static Builder builder() {
+        return new Builder(PrometheusProperties.get());
     }
 
-    /**
-     * Get the created time of the counter in milliseconds.
-     */
-    public long created() {
-      return created;
+    public static Builder builder(PrometheusProperties config) {
+        return new Builder(config);
     }
-  }
 
-  // Convenience methods.
+    public static class Builder extends StatefulMetric.Builder<Builder, Counter> {
 
-  /**
-   * Increment the counter with no labels by 1.
-   */
-  public void inc() {
-    inc(1);
-  }
+        private Builder(PrometheusProperties properties) {
+            super(Collections.emptyList(), properties);
+        }
 
-  /**
-   * Like {@link Child#incWithExemplar(String...)}, but for the counter without labels.
-   */
-  public void incWithExemplar(String... exemplarLabels) {
-    incWithExemplar(1, exemplarLabels);
-  }
+        /**
+         * The {@code _total} suffix will automatically be appended if it's missing.
+         * <pre>{@code
+         * Counter c1 = Counter.builder()
+         *     .name("events_total")
+         *     .build();
+         * Counter c2 = Counter.builder()
+         *     .name("events")
+         *     .build();
+         * }</pre>
+         * In the example above both {@code c1} and {@code c2} would be named {@code "events_total"} in Prometheus.
+         * <p>
+         * Throws an {@link IllegalArgumentException} if
+         * {@link io.prometheus.metrics.model.snapshots.PrometheusNaming#isValidMetricName(String) MetricMetadata.isValidMetricName(name)}
+         * is {@code false}.
+         */
+        @Override
+        public Builder name(String name) {
+            return super.name(stripTotalSuffix(name));
+        }
 
-  /**
-   * Like {@link Child#incWithExemplar(Map)}, but for the counter without labels.
-   */
-  public void incWithExemplar(Map<String, String> exemplarLabels) {
-    incWithExemplar(1, exemplarLabels);
-  }
+        @Override
+        public Counter build() {
+            return new Counter(this, properties);
+        }
 
-  /**
-   * Increment the counter with no labels by the given amount.
-   *
-   * @throws IllegalArgumentException If amt is negative.
-   */
-  public void inc(double amt) {
-    noLabelsChild.inc(amt);
-  }
-
-  /**
-   * Like {@link Child#incWithExemplar(double, String...)}, but for the counter without labels.
-   */
-  public void incWithExemplar(double amt, String... exemplarLabels) {
-    noLabelsChild.incWithExemplar(amt, exemplarLabels);
-  }
-
-  /**
-   * Like {@link Child#incWithExemplar(double, Map)}, but for the counter without labels.
-   */
-  public void incWithExemplar(double amt, Map<String, String> exemplarLabels) {
-    noLabelsChild.incWithExemplar(amt, exemplarLabels);
-  }
-
-  /**
-   * Get the value of the counter.
-   */
-  public double get() {
-    return noLabelsChild.get();
-  }
-
-  @Override
-  public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples.Sample> samples = new ArrayList<MetricFamilySamples.Sample>(children.size());
-    for(Map.Entry<List<String>, Child> c: children.entrySet()) {
-      samples.add(new MetricFamilySamples.Sample(fullname + "_total", labelNames, c.getKey(), c.getValue().get(), c.getValue().getExemplar()));
-      if (Environment.includeCreatedSeries()) {
-        samples.add(new MetricFamilySamples.Sample(fullname + "_created", labelNames, c.getKey(), c.getValue().created() / 1000.0));
-      }
+        @Override
+        protected Builder self() {
+            return this;
+        }
     }
-    return familySamplesList(Type.COUNTER, samples);
-  }
-
-  @Override
-  public List<MetricFamilySamples> describe() {
-    return Collections.<MetricFamilySamples>singletonList(new CounterMetricFamily(fullname, help, labelNames));
-  }
 }

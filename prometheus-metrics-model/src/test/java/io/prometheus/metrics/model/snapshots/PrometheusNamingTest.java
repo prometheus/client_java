@@ -1,70 +1,34 @@
-package io.prometheus.client;
+package io.prometheus.metrics.model.snapshots;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeLabelName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
 
-public class CollectorTest {
+public class PrometheusNamingTest {
 
-  @Test
-  public void sanitizeMetricPrefix() throws Exception {
-      assertEquals("afoo", Collector.sanitizeMetricName("afoo"));
-      assertEquals("zfoo", Collector.sanitizeMetricName("zfoo"));
-      assertEquals("Afoo", Collector.sanitizeMetricName("Afoo"));
-      assertEquals("Zfoo", Collector.sanitizeMetricName("Zfoo"));
-      assertEquals(":foo", Collector.sanitizeMetricName(":foo"));
-
-      assertEquals("_foo", Collector.sanitizeMetricName("0foo"));
-      assertEquals("_foo", Collector.sanitizeMetricName("5foo"));
-      assertEquals("_foo", Collector.sanitizeMetricName("9foo"));
-      assertEquals("_foo", Collector.sanitizeMetricName("/foo"));
-      assertEquals("_foo", Collector.sanitizeMetricName("*foo"));
-  }
-
-  @Test
-  public void sanitizeMetricBody() throws Exception {
-      assertEquals("aamzAMZ059", Collector.sanitizeMetricName("aamzAMZ059"));
-      assertEquals("aaMzAmZ009", Collector.sanitizeMetricName("aaMzAmZ009"));
-      assertEquals("aZmA950aMz", Collector.sanitizeMetricName("aZmA950aMz"));
-      assertEquals("aZ9mA0a5Mz", Collector.sanitizeMetricName("aZ9mA0a5Mz"));
-      assertEquals("aZ9mA_0a5Mz", Collector.sanitizeMetricName("aZ9mA*0a5Mz"));
-      assertEquals("aZ9mA_0a5Mz", Collector.sanitizeMetricName("aZ9mA&0a5Mz"));
-  }
-
-  @Test
-  public void sanitizeMetricName() throws Exception {
-      assertEquals("_hoge", Collector.sanitizeMetricName("0hoge"));
-      assertEquals("foo_bar0", Collector.sanitizeMetricName("foo.bar0"));
-      assertEquals(":baz::", Collector.sanitizeMetricName(":baz::"));
-  }
-
-  @Test
-  public void testTotalHandling() throws Exception {
-    class YourCustomCollector extends Collector {
-      public List<MetricFamilySamples> collect() {
-        List<String> emptyList = new ArrayList<String>();
-        return Arrays.<MetricFamilySamples>asList(
-            new MetricFamilySamples("a_total", Type.COUNTER, "help", Arrays.asList(
-                new MetricFamilySamples.Sample("a_total", emptyList, emptyList, 1.0))),
-            new MetricFamilySamples("b", Type.COUNTER, "help", Arrays.asList(
-                new MetricFamilySamples.Sample("b", emptyList, emptyList, 2.0))),
-            new MetricFamilySamples("c_total", Type.COUNTER, "help", Arrays.asList(
-                new MetricFamilySamples.Sample("c", emptyList, emptyList, 3.0))),
-            new MetricFamilySamples("d", Type.COUNTER, "help", Arrays.asList(
-                new MetricFamilySamples.Sample("d_total", emptyList, emptyList, 4.0)))
-        );
-      }
+    @Test
+    public void testSanitizeMetricName() {
+        Assert.assertEquals("_abc_def", prometheusName(sanitizeMetricName("0abc.def")));
+        Assert.assertEquals("___ab_:c0", prometheusName(sanitizeMetricName("___ab.:c0")));
+        Assert.assertEquals("my_prefix_my_metric", sanitizeMetricName("my_prefix/my_metric"));
+        Assert.assertEquals("my_counter", prometheusName(sanitizeMetricName("my_counter_total")));
+        Assert.assertEquals("jvm", sanitizeMetricName("jvm.info"));
+        Assert.assertEquals("jvm", sanitizeMetricName("jvm_info"));
+        Assert.assertEquals("jvm", sanitizeMetricName("jvm.info"));
+        Assert.assertEquals("a.b", sanitizeMetricName("a.b"));
     }
-    CollectorRegistry registry = new CollectorRegistry();
-    new YourCustomCollector().register(registry);
 
-    assertEquals(1.0, registry.getSampleValue("a_total").doubleValue(), .001);
-    assertEquals(2.0, registry.getSampleValue("b_total").doubleValue(), .001);
-    assertEquals(3.0, registry.getSampleValue("c_total").doubleValue(), .001);
-    assertEquals(4.0, registry.getSampleValue("d_total").doubleValue(), .001);
-  }
+    @Test
+    public void testSanitizeLabelName() {
+        Assert.assertEquals("_abc_def", prometheusName(sanitizeLabelName("0abc.def")));
+        Assert.assertEquals("_abc", prometheusName(sanitizeLabelName("_abc")));
+        Assert.assertEquals("_abc", prometheusName(sanitizeLabelName("__abc")));
+        Assert.assertEquals("_abc", prometheusName(sanitizeLabelName("___abc")));
+        Assert.assertEquals("_abc", prometheusName(sanitizeLabelName("_.abc")));
+        Assert.assertEquals("abc.def", sanitizeLabelName("abc.def"));
+        Assert.assertEquals("abc.def2", sanitizeLabelName("abc.def2"));
+    }
 }

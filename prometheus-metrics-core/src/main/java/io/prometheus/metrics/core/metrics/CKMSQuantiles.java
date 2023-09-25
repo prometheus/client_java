@@ -1,4 +1,4 @@
-package io.prometheus.client;
+package io.prometheus.metrics.core.metrics;
 
 // The original implementation was copied from
 // https://raw.githubusercontent.com/Netflix/ocelli/master/ocelli-core/src/main/java/netflix/ocelli/stats/CKMSQuantiles.java

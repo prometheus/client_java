@@ -1,185 +1,129 @@
-package io.prometheus.client.exemplars;
-
-import java.util.Arrays;
-import java.util.Map;
-import java.util.regex.Pattern;
+package io.prometheus.metrics.model.snapshots;
 
 /**
- * Immutable data class holding an Exemplar.
+ * Immutable representation of an Exemplar.
  */
 public class Exemplar {
 
-  private final String[] labels;
-  private final double value;
-  private final Long timestampMs;
+    /**
+     * Label name for trace id.
+     */
+    public static final String TRACE_ID = "trace_id";
 
-  private static final Pattern labelNameRegex = Pattern.compile("[a-zA-Z_][a-zA-Z_0-9]*");
+    /**
+     * Label name for span id.
+     */
+    public static final String SPAN_ID = "span_id";
 
-  /**
-   * Create an Exemplar without a timestamp
-   *
-   * @param value  the observed value
-   * @param labels name/value pairs. Expecting an even number of strings. The combined length of the label names and
-   *               values must not exceed 128 UTF-8 characters. Neither a label name nor a label value may be null.
-   */
-  public Exemplar(double value, String... labels) {
-    this(value, null, labels);
-  }
+    private final double value;
+    private final Labels labels;
+    private final long timestampMillis;
 
-  /**
-   * Create an Exemplar
-   *
-   * @param value       the observed value
-   * @param timestampMs as in {@link System#currentTimeMillis()}
-   * @param labels      name/value pairs. Expecting an even number of strings. The combined length of the
-   *                    label names and values must not exceed 128 UTF-8 characters. Neither a label name
-   *                    nor a label value may be null.
-   */
-  public Exemplar(double value, Long timestampMs, String... labels) {
-    this.labels = sortedCopy(labels);
-    this.value = value;
-    this.timestampMs = timestampMs;
-  }
-
-  /**
-   * Create an Exemplar
-   *
-   * @param value  the observed value
-   * @param labels the labels. Must not be null. The combined length of the label names and values must not exceed
-   *               128 UTF-8 characters. Neither a label name nor a label value may be null.
-   */
-  public Exemplar(double value, Map<String, String> labels) {
-    this(value, null, mapToArray(labels));
-  }
-
-  /**
-   * Create an Exemplar
-   *
-   * @param value       the observed value
-   * @param timestampMs as in {@link System#currentTimeMillis()}
-   * @param labels      the labels. Must not be null. The combined length of the label names and values must not exceed
-   *                    128 UTF-8 characters. Neither a label name nor a label value may be null.
-   */
-  public Exemplar(double value, Long timestampMs, Map<String, String> labels) {
-    this(value, timestampMs, mapToArray(labels));
-  }
-
-  public int getNumberOfLabels() {
-    return labels.length / 2;
-  }
-
-  /**
-   * Get the label name at index {@code i}.
-   * @param i the index, must be &gt;= 0 and &lt; {@link #getNumberOfLabels()}.
-   * @return the label name at index {@code i}
-   */
-  public String getLabelName(int i) {
-    return labels[2 * i];
-  }
-
-  /**
-   * Get the label value at index {@code i}.
-   * @param i the index, must be &gt;= 0 and &lt; {@link #getNumberOfLabels()}.
-   * @return the label value at index {@code i}
-   */
-  public String getLabelValue(int i) {
-    return labels[2 * i + 1];
-  }
-
-  public double getValue() {
-    return value;
-  }
-
-  /**
-   * @return Unix timestamp or {@code null} if no timestamp is present.
-   */
-  public Long getTimestampMs() {
-    return timestampMs;
-  }
-
-  private String[] sortedCopy(String... labels) {
-    if (labels.length % 2 != 0) {
-      throw new IllegalArgumentException("labels are name/value pairs, expecting an even number");
-    }
-    String[] result = new String[labels.length];
-    int charsTotal = 0;
-    for (int i = 0; i < labels.length; i+=2) {
-      if (labels[i] == null) {
-        throw new IllegalArgumentException("labels[" + i + "] is null");
-      }
-      if (labels[i+1] == null) {
-        throw new IllegalArgumentException("labels[" + (i+1) + "] is null");
-      }
-      if (!labelNameRegex.matcher(labels[i]).matches()) {
-        throw new IllegalArgumentException(labels[i] + " is not a valid label name");
-      }
-      result[i] = labels[i]; // name
-      result[i+1] = labels[i+1]; // value
-      charsTotal += labels[i].length() + labels[i+1].length();
-      // Move the current tuple down while the previous name is greater than current name.
-      for (int j=i-2; j>=0; j-=2) {
-        int compareResult = result[j+2].compareTo(result[j]);
-        if (compareResult == 0) {
-          throw new IllegalArgumentException(result[j] + ": label name is not unique");
-        } else if (compareResult < 0) {
-          String tmp = result[j];
-          result[j] = result[j+2];
-          result[j+2] = tmp;
-          tmp = result[j+1];
-          result[j+1] = result[j+3];
-          result[j+3] = tmp;
-        } else {
-          break;
+    /**
+     * To create a new {@link Exemplar}, you can either call the constructor directly
+     * or use the Builder with {@link Exemplar#builder()}.
+     *
+     * @param value           the observed value. This is required.
+     * @param labels          in most cases the labels will contain the {@link #TRACE_ID} and {@link #SPAN_ID}.
+     *                        Must not be {@code null}. Use {@link Labels#EMPTY} if no labels are present.
+     * @param timestampMillis timestamp when the value was observed. Optional. Use 0L if not available.
+     */
+    public Exemplar(double value, Labels labels, long timestampMillis) {
+        if (labels == null) {
+            throw new NullPointerException("Labels cannot be null. Use Labels.EMPTY.");
         }
-      }
+        this.value = value;
+        this.labels = labels;
+        this.timestampMillis = timestampMillis;
     }
-    if (charsTotal > 128) {
-      throw new IllegalArgumentException(
-          "the combined length of the label names and values must not exceed 128 UTF-8 characters");
-    }
-    return result;
-  }
 
-  /**
-   * Convert the map to an array {@code [key1, value1, key2, value2, ...]}.
-   */
-  public static String[] mapToArray(Map<String, String> labelMap) {
-    if (labelMap == null) {
-      return null;
+    public double getValue() {
+        return value;
     }
-    String[] result = new String[2 * labelMap.size()];
-    int i = 0;
-    for (Map.Entry<String, String> entry : labelMap.entrySet()) {
-      result[i] = entry.getKey();
-      result[i + 1] = entry.getValue();
-      i += 2;
-    }
-    return result;
-  }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
+    /**
+     * In most cases labels will contain {@link #TRACE_ID} and {@link #SPAN_ID}, but this is not required.
+     * May be {@link Labels#EMPTY}, but may not be {@code null}.
+     */
+    public Labels getLabels() {
+        return labels;
     }
-    if (!(obj instanceof Exemplar)) {
-      return false;
-    }
-    Exemplar other = (Exemplar) obj;
-    return Arrays.equals(this.labels, other.labels) &&
-        Double.compare(other.value, value) == 0 &&
-        (timestampMs == null && other.timestampMs == null
-            || timestampMs != null && timestampMs.equals(other.timestampMs));
-  }
 
-  @Override
-  public int hashCode() {
-    int hash = Arrays.hashCode(labels);
-    long d = Double.doubleToLongBits(value);
-    hash = 37 * hash + (int) (d ^ (d >>> 32));
-    if (timestampMs != null) {
-      hash = 37 * hash + timestampMs.intValue();
+    public boolean hasTimestamp() {
+        return timestampMillis != 0L;
     }
-    return hash;
-  }
+
+    /**
+     * Will return garbage if {@link #hasTimestamp()} is {@code false}.
+     */
+    public long getTimestampMillis() {
+        return timestampMillis;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private Double value = null;
+        private Labels labels = Labels.EMPTY;
+        private String traceId = null;
+        private String spanId = null;
+        private long timestampMillis = 0L;
+
+        private Builder() {
+        }
+
+        public Builder value(double value) {
+            this.value = value;
+            return this;
+        }
+
+        public Builder traceId(String traceId) {
+            this.traceId = traceId;
+            return this;
+        }
+
+        public Builder spanId(String spanId) {
+            this.spanId = spanId;
+            return this;
+        }
+
+        public Builder labels(Labels labels) {
+            if (labels == null) {
+                throw new NullPointerException();
+            }
+            this.labels = labels;
+            return this;
+        }
+
+        public Builder timestampMillis(long timestampMillis) {
+            this.timestampMillis = timestampMillis;
+            return this;
+        }
+
+        /**
+         * @throws IllegalStateException if {@link #value(double)} wasn't called.
+         */
+        public Exemplar build() {
+            if (value == null) {
+                throw new IllegalStateException("cannot build an Exemplar without a value");
+            }
+            Labels allLabels;
+            if (traceId != null && spanId != null) {
+                allLabels = Labels.of(TRACE_ID, traceId, SPAN_ID, spanId);
+            } else if (traceId != null) {
+                allLabels = Labels.of(TRACE_ID, traceId);
+            } else if (spanId != null) {
+                allLabels = Labels.of(SPAN_ID, spanId);
+            } else {
+                allLabels = Labels.EMPTY;
+            }
+            if (!labels.isEmpty()) {
+                allLabels = allLabels.merge(labels);
+            }
+            return new Exemplar(value, allLabels, timestampMillis);
+        }
+    }
 }

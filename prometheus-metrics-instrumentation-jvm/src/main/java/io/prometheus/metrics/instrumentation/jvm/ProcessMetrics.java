@@ -1,11 +1,13 @@
-package io.prometheus.client.hotspot;
+package io.prometheus.metrics.instrumentation.jvm;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.CounterMetricFamily;
-import io.prometheus.client.GaugeMetricFamily;
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.metrics.CounterWithCallback;
+import io.prometheus.metrics.core.metrics.GaugeWithCallback;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Unit;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -13,169 +15,271 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * Exports the standard exports common across all prometheus clients.
+ * Process metrics.
  * <p>
- * This includes stats like CPU time spent and memory usage.
+ * These metrics are defined in the <a href="https://prometheus.io/docs/instrumenting/writing_clientlibs/#process-metrics">process metrics</a>
+ * section of the Prometheus client library documentation, and they are implemented across client libraries in multiple programming languages.
  * <p>
- * Example usage:
+ * Technically, some of them are OS-level metrics and not JVM-level metrics. However, I'm still putting them
+ * in the {@code prometheus-metrics-instrumentation-jvm} module, because first it seems overkill to create a separate
+ * Maven module just for the {@link ProcessMetrics} class, and seconds some of these metrics are coming from the JVM via JMX anyway.
+ * <p>
+ * The {@link ProcessMetrics} are registered as part of the {@link JvmMetrics} like this:
+ * <pre>{@code
+ *   JvmMetrics.builder().register();
+ * }</pre>
+ * However, if you want only the {@link ProcessMetrics} you can also register them directly:
+ * <pre>{@code
+ *   ProcessMetrics.builder().register();
+ * }</pre>
+ * Example metrics being exported:
  * <pre>
- * {@code
- *   new StandardExports().register();
- * }
+ * # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+ * # TYPE process_cpu_seconds_total counter
+ * process_cpu_seconds_total 1.63
+ * # HELP process_max_fds Maximum number of open file descriptors.
+ * # TYPE process_max_fds gauge
+ * process_max_fds 524288.0
+ * # HELP process_open_fds Number of open file descriptors.
+ * # TYPE process_open_fds gauge
+ * process_open_fds 28.0
+ * # HELP process_resident_memory_bytes Resident memory size in bytes.
+ * # TYPE process_resident_memory_bytes gauge
+ * process_resident_memory_bytes 7.8577664E7
+ * # HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+ * # TYPE process_start_time_seconds gauge
+ * process_start_time_seconds 1.693829439767E9
+ * # HELP process_virtual_memory_bytes Virtual memory size in bytes.
+ * # TYPE process_virtual_memory_bytes gauge
+ * process_virtual_memory_bytes 1.2683624448E10
  * </pre>
  */
-public class StandardExports extends Collector {
-  private static final Logger LOGGER = Logger.getLogger(StandardExports.class.getName());
+public class ProcessMetrics {
 
-  private final StatusReader statusReader;
-  private final OperatingSystemMXBean osBean;
-  private final RuntimeMXBean runtimeBean;
-  private final boolean linux;
+    private static final String PROCESS_CPU_SECONDS_TOTAL = "process_cpu_seconds_total";
+    private static final String PROCESS_START_TIME_SECONDS = "process_start_time_seconds";
+    private static final String PROCESS_OPEN_FDS = "process_open_fds";
+    private static final String PROCESS_MAX_FDS = "process_max_fds";
+    private static final String PROCESS_VIRTUAL_MEMORY_BYTES = "process_virtual_memory_bytes";
+    private static final String PROCESS_RESIDENT_MEMORY_BYTES = "process_resident_memory_bytes";
 
-  public StandardExports() {
-    this(new StatusReader(),
-         ManagementFactory.getOperatingSystemMXBean(),
-         ManagementFactory.getRuntimeMXBean());
-  }
+    private static final File PROC_SELF_STATUS = new File("/proc/self/status");
 
-  StandardExports(StatusReader statusReader, OperatingSystemMXBean osBean, RuntimeMXBean runtimeBean) {
-      this.statusReader = statusReader;
-      this.osBean = osBean;
-      this.runtimeBean = runtimeBean;
-      this.linux = (osBean.getName().indexOf("Linux") == 0);
-  }
+    private final PrometheusProperties config;
+    private final OperatingSystemMXBean osBean;
+    private final RuntimeMXBean runtimeBean;
+    private final Grepper grepper;
+    private final boolean linux;
 
-  private final static double KB = 1024;
-
-  @Override
-  public List<MetricFamilySamples> collect() {
-    List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-
-    try {
-      // There exist at least 2 similar but unrelated UnixOperatingSystemMXBean interfaces, in
-      // com.sun.management and com.ibm.lang.management. Hence use reflection and recursively go
-      // through implemented interfaces until the method can be made accessible and invoked.
-      Long processCpuTime = callLongGetter("getProcessCpuTime", osBean);
-      mfs.add(new CounterMetricFamily("process_cpu_seconds_total", "Total user and system CPU time spent in seconds.",
-          processCpuTime / NANOSECONDS_PER_SECOND));
-    }
-    catch (Exception e) {
-      LOGGER.log(Level.FINE,"Could not access process cpu time", e);
+    private ProcessMetrics(OperatingSystemMXBean osBean, RuntimeMXBean runtimeBean, Grepper grepper, PrometheusProperties config) {
+        this.osBean = osBean;
+        this.runtimeBean = runtimeBean;
+        this.grepper = grepper;
+        this.config = config;
+        this.linux = PROC_SELF_STATUS.canRead();
     }
 
-    mfs.add(new GaugeMetricFamily("process_start_time_seconds", "Start time of the process since unix epoch in seconds.",
-        runtimeBean.getStartTime() / MILLISECONDS_PER_SECOND));
+    private void register(PrometheusRegistry registry) {
 
-    // There exist at least 2 similar but unrelated UnixOperatingSystemMXBean interfaces, in
-    // com.sun.management and com.ibm.lang.management. Hence use reflection and recursively go
-    // through implemented interfaces until the method can be made accessible and invoked.
-    try {
-      Long openFdCount = callLongGetter("getOpenFileDescriptorCount", osBean);
-      mfs.add(new GaugeMetricFamily(
-          "process_open_fds", "Number of open file descriptors.", openFdCount));
-      Long maxFdCount = callLongGetter("getMaxFileDescriptorCount", osBean);
-      mfs.add(new GaugeMetricFamily(
-          "process_max_fds", "Maximum number of open file descriptors.", maxFdCount));
-    } catch (Exception e) {
-      // Ignore, expected on non-Unix OSs.
-    }
+        CounterWithCallback.builder(config)
+                .name(PROCESS_CPU_SECONDS_TOTAL)
+                .help("Total user and system CPU time spent in seconds.")
+                .unit(Unit.SECONDS)
+                .callback(callback -> {
+                    try {
+                        // There exist at least 2 similar but unrelated UnixOperatingSystemMXBean interfaces, in
+                        // com.sun.management and com.ibm.lang.management. Hence use reflection and recursively go
+                        // through implemented interfaces until the method can be made accessible and invoked.
+                        Long processCpuTime = callLongGetter("getProcessCpuTime", osBean);
+                        if (processCpuTime != null) {
+                            callback.call(Unit.millisToSeconds(processCpuTime));
+                        }
+                    } catch (Exception ignored) {
+                    }
+                })
+                .register(registry);
 
-    // There's no standard Java or POSIX way to get memory stats,
-    // so add support for just Linux for now.
-    if (linux) {
-      try {
-        collectMemoryMetricsLinux(mfs);
-      } catch (Exception e) {
-        // If the format changes, log a warning and return what we can.
-        LOGGER.warning(e.toString());
-      }
-    }
-    return mfs;
-  }
+        GaugeWithCallback.builder(config)
+                .name(PROCESS_START_TIME_SECONDS)
+                .help("Start time of the process since unix epoch in seconds.")
+                .unit(Unit.SECONDS)
+                .callback(callback -> callback.call(Unit.millisToSeconds(runtimeBean.getStartTime())))
+                .register(registry);
 
-  static Long callLongGetter(String getterName, Object obj)
-      throws NoSuchMethodException, InvocationTargetException {
-    return callLongGetter(obj.getClass().getMethod(getterName), obj);
-  }
+        GaugeWithCallback.builder(config)
+                .name(PROCESS_OPEN_FDS)
+                .help("Number of open file descriptors.")
+                .callback(callback -> {
+                    try {
+                        Long openFds = callLongGetter("getOpenFileDescriptorCount", osBean);
+                        if (openFds != null) {
+                            callback.call(openFds);
+                        }
+                    } catch (Exception ignored) {
+                    }
+                })
+                .register(registry);
 
-  /**
-   * Attempts to call a method either directly or via one of the implemented interfaces.
-   * <p>
-   * A Method object refers to a specific method declared in a specific class. The first invocation
-   * might happen with method == SomeConcreteClass.publicLongGetter() and will fail if
-   * SomeConcreteClass is not public. We then recurse over all interfaces implemented by
-   * SomeConcreteClass (or extended by those interfaces and so on) until we eventually invoke
-   * callMethod() with method == SomePublicInterface.publicLongGetter(), which will then succeed.
-   * <p>
-   * There is a built-in assumption that the method will never return null (or, equivalently, that
-   * it returns the primitive data type, i.e. {@code long} rather than {@code Long}). If this
-   * assumption doesn't hold, the method might be called repeatedly and the returned value will be
-   * the one produced by the last call.
-   */
-  static Long callLongGetter(Method method, Object obj) throws InvocationTargetException  {
-    try {
-      return (Long) method.invoke(obj);
-    } catch (IllegalAccessException e) {
-      // Expected, the declaring class or interface might not be public.
-    }
+        GaugeWithCallback.builder(config)
+                .name(PROCESS_MAX_FDS)
+                .help("Maximum number of open file descriptors.")
+                .callback(callback -> {
+                    try {
+                        Long maxFds = callLongGetter("getMaxFileDescriptorCount", osBean);
+                        if (maxFds != null) {
+                            callback.call(maxFds);
+                        }
+                    } catch (Exception ignored) {
+                    }
+                })
+                .register(registry);
 
-    // Iterate over all implemented/extended interfaces and attempt invoking the method with the
-    // same name and parameters on each.
-    for (Class<?> clazz : method.getDeclaringClass().getInterfaces()) {
-      try {
-        Method interfaceMethod = clazz.getMethod(method.getName(), method.getParameterTypes());
-        Long result = callLongGetter(interfaceMethod, obj);
-        if (result != null) {
-          return result;
+        if (linux) {
+
+            GaugeWithCallback.builder(config)
+                    .name(PROCESS_VIRTUAL_MEMORY_BYTES)
+                    .help("Virtual memory size in bytes.")
+                    .unit(Unit.BYTES)
+                    .callback(callback -> {
+                        try {
+                            String line = grepper.lineStartingWith(PROC_SELF_STATUS, "VmSize:");
+                            callback.call(Unit.kiloBytesToBytes(Double.parseDouble(line.split("\\s+")[1])));
+                        } catch (Exception ignored) {
+                        }
+                    })
+                    .register(registry);
+
+            GaugeWithCallback.builder(config)
+                    .name(PROCESS_RESIDENT_MEMORY_BYTES)
+                    .help("Resident memory size in bytes.")
+                    .unit(Unit.BYTES)
+                    .callback(callback -> {
+                        try {
+                            String line = grepper.lineStartingWith(PROC_SELF_STATUS, "VmRSS:");
+                            callback.call(Unit.kiloBytesToBytes(Double.parseDouble(line.split("\\s+")[1])));
+                        } catch (Exception ignored) {
+                        }
+                    })
+                    .register(registry);
         }
-      } catch (NoSuchMethodException e) {
-        // Expected, class might implement multiple, unrelated interfaces.
-      }
     }
 
-    return null;
-  }
+    private Long callLongGetter(String getterName, Object obj) throws NoSuchMethodException, InvocationTargetException {
+        return callLongGetter(obj.getClass().getMethod(getterName), obj);
+    }
 
-  void collectMemoryMetricsLinux(List<MetricFamilySamples> mfs) {
-    // statm/stat report in pages, and it's non-trivial to get pagesize from Java
-    // so we parse status instead.
-    BufferedReader br = null;
-    try {
-      br = statusReader.procSelfStatusReader();
-      String line;
-      while ((line = br.readLine()) != null) {
-        if (line.startsWith("VmSize:")) {
-          mfs.add(new GaugeMetricFamily("process_virtual_memory_bytes",
-              "Virtual memory size in bytes.",
-              Float.parseFloat(line.split("\\s+")[1]) * KB));
-        } else if (line.startsWith("VmRSS:")) {
-          mfs.add(new GaugeMetricFamily("process_resident_memory_bytes",
-              "Resident memory size in bytes.",
-              Float.parseFloat(line.split("\\s+")[1]) * KB));
-        }
-      }
-    } catch (IOException e) {
-      LOGGER.fine(e.toString());
-    } finally {
-      if (br != null) {
+    /**
+     * Attempts to call a method either directly or via one of the implemented interfaces.
+     * <p>
+     * A Method object refers to a specific method declared in a specific class. The first invocation
+     * might happen with method == SomeConcreteClass.publicLongGetter() and will fail if
+     * SomeConcreteClass is not public. We then recurse over all interfaces implemented by
+     * SomeConcreteClass (or extended by those interfaces and so on) until we eventually invoke
+     * callMethod() with method == SomePublicInterface.publicLongGetter(), which will then succeed.
+     * <p>
+     * There is a built-in assumption that the method will never return null (or, equivalently, that
+     * it returns the primitive data type, i.e. {@code long} rather than {@code Long}). If this
+     * assumption doesn't hold, the method might be called repeatedly and the returned value will be
+     * the one produced by the last call.
+     */
+    private Long callLongGetter(Method method, Object obj) throws InvocationTargetException  {
         try {
-          br.close();
-        } catch (IOException e) {
-          LOGGER.fine(e.toString());
+            return (Long) method.invoke(obj);
+        } catch (IllegalAccessException e) {
+            // Expected, the declaring class or interface might not be public.
         }
-      }
-    }
-  }
 
-  static class StatusReader {
-    BufferedReader procSelfStatusReader() throws FileNotFoundException {
-      return new BufferedReader(new FileReader("/proc/self/status"));
+        // Iterate over all implemented/extended interfaces and attempt invoking the method with the
+        // same name and parameters on each.
+        for (Class<?> clazz : method.getDeclaringClass().getInterfaces()) {
+            try {
+                Method interfaceMethod = clazz.getMethod(method.getName(), method.getParameterTypes());
+                Long result = callLongGetter(interfaceMethod, obj);
+                if (result != null) {
+                    return result;
+                }
+            } catch (NoSuchMethodException e) {
+                // Expected, class might implement multiple, unrelated interfaces.
+            }
+        }
+        return null;
     }
-  }
+
+    interface Grepper {
+        String lineStartingWith(File file, String prefix) throws IOException;
+    }
+
+    private static class FileGrepper implements Grepper {
+
+        @Override
+        public String lineStartingWith(File file, String prefix) throws IOException {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line = reader.readLine();
+                while (line != null) {
+                    if (line.startsWith(prefix)) {
+                        return line;
+                    }
+                    line = reader.readLine();
+                }
+            }
+            return null;
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder(PrometheusProperties.get());
+    }
+
+    public static Builder builder(PrometheusProperties config) {
+        return new Builder(config);
+    }
+
+    public static class Builder {
+
+        private final PrometheusProperties config;
+        private OperatingSystemMXBean osBean;
+        private RuntimeMXBean runtimeBean;
+        private Grepper grepper;
+
+        private Builder(PrometheusProperties config) {
+            this.config = config;
+        }
+
+        /**
+         * Package private. For testing only.
+         */
+        Builder osBean(OperatingSystemMXBean osBean) {
+            this.osBean = osBean;
+            return this;
+        }
+
+        /**
+         * Package private. For testing only.
+         */
+        Builder runtimeBean(RuntimeMXBean runtimeBean) {
+            this.runtimeBean = runtimeBean;
+            return this;
+        }
+
+        /**
+         * Package private. For testing only.
+         */
+        Builder grepper(Grepper grepper) {
+            this.grepper = grepper;
+            return this;
+        }
+
+        public void register() {
+            register(PrometheusRegistry.defaultRegistry);
+        }
+
+        public void register(PrometheusRegistry registry) {
+            OperatingSystemMXBean osBean = this.osBean != null ? this.osBean : ManagementFactory.getOperatingSystemMXBean();
+            RuntimeMXBean runtimeMXBean = this.runtimeBean != null ? this.runtimeBean : ManagementFactory.getRuntimeMXBean();
+            Grepper grepper = this.grepper != null ? this.grepper : new FileGrepper();
+            new ProcessMetrics(osBean, runtimeMXBean, grepper, config).register(registry);
+        }
+    }
 }

@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s # very short interval for demo purposes
+
+scrape_configs:
+  - job_name: "demo"
+    scrape_classic_histograms: true # this will make Prometheus scrape both, the native and the classic histogram.
+    static_configs:
+      - targets: ["localhost:9400"]

@@ -1,69 +1,74 @@
-package io.prometheus.client;
+package io.prometheus.metrics.core.datapoints;
+
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 /**
- * SimpleTimer, to measure elapsed duration in seconds as a double.
- *
+ * Convenience API for timing durations.
  * <p>
- * This is a helper class intended to measure latencies and encapsulate the conversion to seconds without losing precision.
- *
- * <p>
- * Keep in mind that preferred approaches avoid using this mechanism if possible, since latency metrics broken out by
- * outcome should be minimized; {@link Summary#startTimer()} and {@link Histogram#startTimer()} are preferred.
- * Consider moving outcome labels to a separate metric like a counter.
- *
- * <p>
- * Example usage:
- * <pre>
- * {@code
- *   class YourClass {
- *     static final Summary requestLatency = Summary.build()
- *         .name("requests_latency_seconds")
- *         .help("Request latency in seconds.")
- *         .labelNames("aLabel")
- *         .register();
- *
- *     void processRequest(Request req) {
- *        SimpleTimer requestTimer = new SimpleTimer();
- *        try {
- *          // Your code here.
- *        } finally {
- *          requestLatency.labels("aLabelValue").observe(requestTimer.elapsedSeconds());
- *        }
- *     }
- *   }
- * }
- * </pre>
- *
+ * Durations are recorded in seconds. The Prometheus instrumentation guidelines <a href="https://prometheus.io/docs/instrumenting/writing_exporters/#naming">say</a>:
+ * <i>"Metrics must use base units (e.g. seconds, bytes) and leave converting them to something more readable to graphing tools".</i>
  */
-public class SimpleTimer {
-  private final long start;
-  static TimeProvider defaultTimeProvider = new TimeProvider();
-  private final TimeProvider timeProvider;
+public interface TimerApi {
 
-  static class TimeProvider {
-    long nanoTime() {
-      return System.nanoTime();
+    /**
+     * Start a {@code Timer}. Example:
+     * <pre>{@code
+     * Histogram histogram = Histogram.builder()
+     *         .name("http_request_duration_seconds")
+     *         .help("HTTP request service time in seconds")
+     *         .unit(SECONDS)
+     *         .labelNames("method", "path")
+     *         .register();
+     *
+     * try (Timer timer = histogram.labelValues("GET", "/").startTimer()) {
+     *     // duration of this code block will be observed.
+     * }
+     * }</pre>
+     * Durations are recorded in seconds. The Prometheus instrumentation guidelines <a href="https://prometheus.io/docs/instrumenting/writing_exporters/#naming">say</a>:
+     * <i>"Metrics must use base units (e.g. seconds, bytes) and leave converting them to something more readable to graphing tools".</i>
+     */
+    Timer startTimer();
+
+    /**
+     * Observe the duration of the {@code func} call. Example:
+     * <pre>{@code
+     * Histogram histogram = Histogram.builder()
+     *         .name("request_duration_seconds")
+     *         .help("HTTP request service time in seconds")
+     *         .unit(SECONDS)
+     *         .labelNames("method", "path")
+     *         .register();
+     *
+     * histogram2.labelValues("GET", "/").time(() -> {
+     *     // duration of this code block will be observed.
+     * });
+     * }</pre>
+     * <p>
+     * Durations are recorded in seconds. The Prometheus instrumentation guidelines <a href="https://prometheus.io/docs/instrumenting/writing_exporters/#naming">say</a>:
+     * <i>"Metrics must use base units (e.g. seconds, bytes) and leave converting them to something more readable to graphing tools".</i>
+     */
+    default void time(Runnable func) {
+        try (Timer timer = startTimer()) {
+            func.run();
+        }
     }
-  }
 
-  // Visible for testing.
-  SimpleTimer(TimeProvider timeProvider) {
-    this.timeProvider = timeProvider;
-    start = timeProvider.nanoTime();
-  }
+    /**
+     * Like {@link #time(Runnable)}, but returns the return value of {@code func}.
+     */
+    default <T> T time(Supplier<T> func) {
+        try (Timer timer = startTimer()) {
+            return func.get();
+        }
+    }
 
-  public SimpleTimer() {
-    this(defaultTimeProvider);
-  }
-
-  /**
-   * @return Measured duration in seconds since {@link SimpleTimer} was constructed.
-   */
-  public double elapsedSeconds() {
-    return elapsedSecondsFromNanos(start, timeProvider.nanoTime());
-  }
-
-  public static double elapsedSecondsFromNanos(long startNanos, long endNanos) {
-      return (endNanos - startNanos) / Collector.NANOSECONDS_PER_SECOND;
-  }
+    /**
+     * Like {@link #time(Supplier)}, but {@code func} may throw a checked {@code Exception}.
+     */
+    default <T> T timeChecked(Callable<T> func) throws Exception {
+        try (Timer timer = startTimer()) {
+            return func.call();
+        }
+    }
 }
