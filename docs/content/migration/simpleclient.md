@@ -3,15 +3,17 @@ title: Simpleclient
 weight: 1
 ---
 
-The Prometheus Java client library 1.0.0 is a complete rewrite, and is not backwards compatible with the old `simpleclient` modules for a variety of reasons:
+The Prometheus Java client library 1.0.0 is a complete rewrite of the underlying data model, and is not backwards compatible with releases 0.16.0 and older for a variety of reasons:
 
-* We rewrote the underlying data model. The `simpleclient` data model is based on [OpenMetrics](https://openmetrics.io/), which is based on the assumption that each data point has exactly one `double` value (`Collector.Sample.value` in `simpleclient`). With the new Prometheus native histograms this is no longer true. Native histograms have a complex data structure as value. This is the reason why native histograms cannot be exposed in OpenMetrics text format. The new `prometheus-metrics-model` implements the current Prometheus data model and is not based on OpenMetrics.
-* We refactored the package names. The simpleclient has package names that are reused by multiple Maven modules, which causes issues with the Java module system. The new `prometheus-metrics` modules each has their own package name, package names are not reused.
+* The old data model was based on [OpenMetrics](https://openmetrics.io). Native histograms don't fit with the OpenMetrics model because they don't follow the "every sample has exactly one double value" paradigm. It was a lot cleaner to implement a dedicated `prometheus-metrics-model` than trying to fit native histograms into the existing OpenMetrics-based model.
+* Version 0.16.0 and older has multiple Maven modules sharing the same Java package name. This is not supported by the Java module system. To support users of Java modules, we renamed all packages and made sure no package is reused across multiple Maven modules.
 
-Migrating from Simpleclient
----------------------------
+Migration using the Simpleclient Bridge
+---------------------------------------
 
-For users of previous versions of the Prometheus Java client we provide a migration module for bridging the simpleclient `CollectorRegistry` to the new `PromethesuRegistry`.
+Good news: Users of version 0.16.0 and older do not need to refactor all their instrumentation code to get started with 1.0.0.
+
+We provide a migration module for bridging the old simpleclient `CollectorRegistry` to the new `PromethesuRegistry`.
 
 To use the bridge, add the following dependency:
 
@@ -50,3 +52,47 @@ SimpleclientCollector.builder()
     .collectorRegistry(simpleclientRegistry)
     .register(prometheusRegistry);
 ```
+
+Refactoring the Instrumentation Code
+------------------------------------
+
+If you decide to get rid of the old 0.16.0 dependencies and use 1.0.0 only, you need to refactor your code:
+
+Dependencies:
+
+* `simpleclient` -> `prometheus-metrics-core`
+* `simpleclient_hotspot` -> `prometheus-metrics-instrumentation-jvm`
+* `simpleclient_httpserver` -> `prometheus-metrics-exporter-httpserver`
+* `simpleclient_servlet_jakarta` -> `prometheus-metrics-exporter-servlet-jakarta`
+
+As long as you are using high-level metric API like `Counter`, `Gauge`, `Histogram`, and `Summary` converting code to the new API is relatively straightforward. You will need to adapt the package name and apply some minor changes like using `builder()` instead of `build()` or using `labelValues()` instead of `labels()`.
+
+Example of the old 0.16.0 API:
+
+```java
+import io.prometheus.client.Counter;
+
+Counter counter = Counter.build()
+        .name("test")
+        .help("test counter")
+        .labelNames("path")
+        .register();
+
+counter.labels("/hello-world").inc();
+```
+
+Example of the new 1.0.0 API:
+
+```java
+import io.prometheus.metrics.core.metrics.Counter;
+
+Counter counter = Counter.builder()
+        .name("test")
+        .help("test counter")
+        .labelNames("path")
+        .register();
+
+counter.labelValues("/hello-world").inc();
+```
+
+If you are using the low level `Collector` API directly, you should have a look at the new callback metric types, see [/getting-started/callbacks/](../../getting-started/callbacks/). Chances are good that the new callback metrics have an easier way to achieve what you need than the old 0.16.0 code.
