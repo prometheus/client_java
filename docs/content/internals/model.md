@@ -5,7 +5,7 @@ weight: 1
 
 The illustration below shows the internal architecture of the Prometheus Java client library.
 
-![Internal architecture of the Prometheus Java client library](/images/model.png)
+![Internal architecture of the Prometheus Java client library](/client_java/images/model.png)
 
 prometheus-metrics-core
 -----------------------

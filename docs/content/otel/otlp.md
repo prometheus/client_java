@@ -5,7 +5,7 @@ weight: 1
 
 The Prometheus Java client library allows you to push metrics to an OpenTelemetry endpoint using the OTLP protocol.
 
-![Image of a with the Prometheus client library pushing metrics to an OpenTelemetry collector](/images/otel-pipeline.png)
+![Image of a with the Prometheus client library pushing metrics to an OpenTelemetry collector](/client_java/images/otel-pipeline.png)
 
 To implement this, you need to include `prometheus-metrics-exporter` as a dependency
 

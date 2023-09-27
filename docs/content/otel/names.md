@@ -7,7 +7,7 @@ OpenTelemetry naming conventions are different from Prometheus naming convention
 
 The goal is, if you set up a pipeline as illustrated below, you will see the same metric names in the Prometheus server as if you had exposed Prometheus metrics directly.
 
-![Image of a with the Prometheus client library pushing metrics to an OpenTelemetry collector](/images/otel-pipeline.png)
+![Image of a with the Prometheus client library pushing metrics to an OpenTelemetry collector](/client_java/images/otel-pipeline.png)
 
 The main steps when converting OpenTelemetry metric names to Prometheus metric names are:
 
