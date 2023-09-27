@@ -95,4 +95,6 @@ Counter counter = Counter.builder()
 counter.labelValues("/hello-world").inc();
 ```
 
+Reasons why we changed the API: Changing the package names was a neccessity because the previous package names were incompatible with the Java module system. However, renaming packages requires chaning code anyway, so we decided to clean up some things. For example, the name `builder()` for a builder method is very common in the Java ecosystem, it's used in Spring, Lombok, and so on. So naming the method `builder()` makes the Prometheus library more aligned with the broader Java ecosystem.
+
 If you are using the low level `Collector` API directly, you should have a look at the new callback metric types, see [/getting-started/callbacks/](../../getting-started/callbacks/). Chances are good that the new callback metrics have an easier way to achieve what you need than the old 0.16.0 code.
