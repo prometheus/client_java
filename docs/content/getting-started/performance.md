@@ -51,7 +51,19 @@ In performance critical applications we recommend to use either the classic repr
 
 You can either configure this in code for each histogram by calling [classicOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicOnly()) or [nativeOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeOnly()), or you use the corresponding [config options](http://localhost:1313/config/config/).
 
-One way to do this via global config for all histograms is to add a file `prometheus.properties` to your classpath with the following line:
+One way to do this is with system properties in the command line when you start your application
+
+```sh
+java -Dio.prometheus.metrics.histogramClassicOnly=true my-app.jar
+```
+
+or
+
+```sh
+java -Dio.prometheus.metrics.histogramNativeOnly=true my-app.jar
+```
+
+If you don't want to add a command line parameter every time you start your application, you can add a `prometheus.properties` file to your classpath (put it in the `src/main/resources/` directory so that it gets packed into your JAR file). The `prometheus.properties` file should have the following line:
 
 ```properties
 io.prometheus.metrics.histogramClassicOnly=true
@@ -63,5 +75,4 @@ or
 io.prometheus.metrics.histogramNativeOnly=true
 ```
 
-Alternatively, you pass the parameter `-Dio.prometheus.metrics.histogramNativeOnly=true` on application startup, or define an external configuration file at runtime as described in the [config section](../../config/config).
-Future releases will add support for configuration via environment variable`IO_PROMETHEUS_METRICS_HISTOGRAM_NATIVE_ONLY=true`.
+Future releases will add more configuration options, like support for configuration via environment variable`IO_PROMETHEUS_METRICS_HISTOGRAM_NATIVE_ONLY=true`.
