@@ -58,7 +58,7 @@ public abstract class SimpleCollector<Child> extends Collector {
   /**
    * Return the Child with the given labels, creating it if needed.
    * <p>
-   * Must be passed the same number of labels are were passed to {@link #labelNames}.
+   * Must be passed the same number of labels which were passed to {@link #labelNames}.
    */
   public Child labels(String... labelValues) {
     if (labelValues.length != labelNames.size()) {
