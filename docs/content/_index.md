@@ -2,7 +2,7 @@
 title: "client_java"
 ---
 
-This is the documentation for the [Prometheus Java client library](https://github.com/prometheus/client_java) verion 1.0.0 and higher.
+This is the documentation for the [Prometheus Java client library](https://github.com/prometheus/client_java) version 1.0.0 and higher.
 
 The main new features of the 1.0.0 release are:
 
