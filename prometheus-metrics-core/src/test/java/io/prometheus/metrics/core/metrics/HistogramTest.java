@@ -530,7 +530,7 @@ public class HistogramTest {
                         "sample_count: 2 " +
                                 "sample_sum: -7.0 " +
                                 "schema: 2 " +
-                                "zero_threshold: 2.9387358770557188E-39 " +
+                                "zero_threshold: " + Math.pow(2.0, -128.0) + " " +
                                 "zero_count: 0 " +
                                 "negative_span { offset: 7 length: 2 } " +
                                 "negative_delta: 1 " +
@@ -564,7 +564,7 @@ public class HistogramTest {
                         "sample_count: 2 " +
                                 "sample_sum: 7.0 " +
                                 "schema: 2 " +
-                                "zero_threshold: 2.9387358770557188E-39 " +
+                                "zero_threshold: " + Math.pow(2.0, -128.0) + " " +
                                 "zero_count: 0 " +
                                 "positive_span { offset: 7 length: 2 } " +
                                 "positive_delta: 1 " +

@@ -107,14 +107,21 @@ public class JvmThreadsMetricsTest {
 
     @Test
     public void testInvalidThreadIds() {
+        try {
+            int javaVersion = Integer.parseInt(System.getProperty("java.version"));
+            if (javaVersion >= 21) {
+                // With Java 21 and newer you can no longer have invalid thread ids.
+                return;
+            }
+        } catch (NumberFormatException ignored) {
+        }
         PrometheusRegistry registry = new PrometheusRegistry();
         JvmThreadsMetrics.builder().register(registry);
-        MetricSnapshots snapshots = registry.scrape();
 
         // Number of threads to create with invalid thread ids
         int numberOfInvalidThreadIds = 2;
 
-        Map<String, Double> expected = getCountByState(snapshots);
+        Map<String, Double> expected = getCountByState(registry.scrape());
         expected.compute("UNKNOWN", (key, oldValue) -> oldValue == null ? numberOfInvalidThreadIds : oldValue + numberOfInvalidThreadIds);
 
         final CountDownLatch countDownLatch = new CountDownLatch(numberOfInvalidThreadIds);
@@ -122,7 +129,7 @@ public class JvmThreadsMetricsTest {
         try {
             // Create and start threads with invalid thread ids (id=0, id=-1, etc.)
             for (int i = 0; i < numberOfInvalidThreadIds; i++) {
-                new TestThread(-i, new TestRunnable(countDownLatch)).start();
+                new ThreadWithInvalidId(-i, new TestRunnable(countDownLatch)).start();
             }
 
             Map<String, Double> actual = getCountByState(registry.scrape());
@@ -152,16 +159,21 @@ public class JvmThreadsMetricsTest {
         return result;
     }
 
-    private static class TestThread extends Thread {
+    private static class ThreadWithInvalidId extends Thread {
 
         private final long id;
 
-        public TestThread(long id, Runnable runnable) {
+        public ThreadWithInvalidId(long id, Runnable runnable) {
             super(runnable);
             setDaemon(true);
             this.id = id;
         }
 
+        /**
+         * Note that only Java versions < 21 call this to get the thread id.
+         * With Java 21 and newer it's no longer possible to make an invalid thread id.
+         */
+        @Override
         public long getId() {
             return this.id;
         }
