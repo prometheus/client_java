@@ -8,6 +8,11 @@ import java.util.Enumeration;
 public interface PrometheusHttpRequest {
 
     /**
+     * Return the absolute path of a Http Request
+     */
+    String getRequestPath();
+	
+    /**
      * See {@code jakarta.servlet.http.HttpServletRequest.getQueryString()}
      */
     String getQueryString();

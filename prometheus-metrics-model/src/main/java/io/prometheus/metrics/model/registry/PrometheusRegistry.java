@@ -72,6 +72,29 @@ public class PrometheusRegistry {
         return result.build();
     }
 
+    public MetricSnapshots scrape(PrometheusScrapeRequest scrapeRequest) {
+        MetricSnapshots.Builder result = MetricSnapshots.builder();
+        for (Collector collector : collectors) {
+            MetricSnapshot snapshot = collector.collect(scrapeRequest);
+            if (snapshot != null) {
+                if (result.containsMetricName(snapshot.getMetadata().getName())) {
+                    throw new IllegalStateException(snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
+                }
+                result.metricSnapshot(snapshot);
+            }
+        }
+        for (MultiCollector collector : multiCollectors) {
+            for (MetricSnapshot snapshot : collector.collect(scrapeRequest)) {
+                if (result.containsMetricName(snapshot.getMetadata().getName())) {
+                    throw new IllegalStateException(snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
+                }
+                result.metricSnapshot(snapshot);
+            }
+        }
+        return result.build();
+    }
+
+    
     public MetricSnapshots scrape(Predicate<String> includedNames) {
         if (includedNames == null) {
             return scrape();
@@ -97,6 +120,40 @@ public class PrometheusRegistry {
             }
             if (!excluded) {
                 for (MetricSnapshot snapshot : collector.collect(includedNames)) {
+                    if (snapshot != null) {
+                        result.metricSnapshot(snapshot);
+                    }
+                }
+            }
+        }
+        return result.build();
+    }
+
+    public MetricSnapshots scrape(Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
+        if (includedNames == null) {
+            return scrape(scrapeRequest);
+        }
+        MetricSnapshots.Builder result = MetricSnapshots.builder();
+        for (Collector collector : collectors) {
+            String prometheusName = collector.getPrometheusName();
+            if (prometheusName == null || includedNames.test(prometheusName)) {
+                MetricSnapshot snapshot = collector.collect(includedNames, scrapeRequest);
+                if (snapshot != null) {
+                    result.metricSnapshot(snapshot);
+                }
+            }
+        }
+        for (MultiCollector collector : multiCollectors) {
+            List<String> prometheusNames = collector.getPrometheusNames();
+            boolean excluded = true; // the multi-collector is excluded unless at least one name matches
+            for (String prometheusName : prometheusNames) {
+                if (includedNames.test(prometheusName)) {
+                    excluded = false;
+                    break;
+                }
+            }
+            if (!excluded) {
+                for (MetricSnapshot snapshot : collector.collect(includedNames, scrapeRequest)) {
                     if (snapshot != null) {
                         result.metricSnapshot(snapshot);
                     }
