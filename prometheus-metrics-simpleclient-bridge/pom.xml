@@ -32,6 +32,10 @@
         </developer>
     </developers>
 
+    <properties>
+        <automatic-module-name>io.prometheus.metrics.simpleclient.bridge</automatic-module-name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>

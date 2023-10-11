@@ -37,6 +37,10 @@
         </developer>
     </developers>
 
+    <properties>
+        <automatic-module-name>io.prometheus.metrics.instrumentation.jvm</automatic-module-name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>

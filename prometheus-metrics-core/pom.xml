@@ -32,6 +32,10 @@
         </developer>
     </developers>
 
+    <properties>
+        <automatic-module-name>io.prometheus.metrics.core</automatic-module-name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
