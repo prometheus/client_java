@@ -14,6 +14,8 @@ public class MainMultiTarget {
 
         SampleExtendedCollector xc = new SampleExtendedCollector();
         PrometheusRegistry.defaultRegistry.register(xc);
+        SampleExtendedMultiCollector xmc = new SampleExtendedMultiCollector();
+        PrometheusRegistry.defaultRegistry.register(xmc);
         HTTPServer server = HTTPServer.builder()
                 .port(9400)
                 .buildAndStart();
