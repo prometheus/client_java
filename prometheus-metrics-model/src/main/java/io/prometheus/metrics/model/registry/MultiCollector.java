@@ -3,9 +3,9 @@ package io.prometheus.metrics.model.registry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Like {@link Collector}, but collecting multiple Snapshots at once.
@@ -35,10 +35,18 @@ public interface MultiCollector {
     }
 
     /**
-     * Override this and return an empty list if the MultiCollector does not return a constant list of names
-     * (names may be added / removed between scrapes).
+     * This is called in two places:
+     * <ol>
+     * <li>During registration to check if a metric with that name already exists.</li>
+     * <li>During scrape to check if the collector can be skipped because a name filter is present and all names are excluded.</li>
+     * </ol>
+     * Returning an empty list means checks are omitted (registration metric always succeeds),
+     * and the collector is always scraped (if a name filter is present and all names are excluded the result is dropped).
+     * <p>
+     * If your collector returns a constant list of metrics that have names that do not change at runtime
+     * it is a good idea to overwrite this and return the names.
      */
     default List<String> getPrometheusNames() {
-        return collect().stream().map(snapshot -> snapshot.getMetadata().getPrometheusName()).collect(Collectors.toList());
+        return Collections.emptyList();
     }
 }
