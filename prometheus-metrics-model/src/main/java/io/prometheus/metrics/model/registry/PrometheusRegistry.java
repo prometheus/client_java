@@ -40,7 +40,10 @@ public class PrometheusRegistry {
 
     public void unregister(Collector collector) {
         collectors.remove(collector);
-        prometheusNames.remove(collector.getPrometheusName());
+        String prometheusName = collector.getPrometheusName();
+        if (prometheusName != null) {
+            prometheusNames.remove(collector.getPrometheusName());
+        }
     }
 
     public void unregister(MultiCollector collector) {
@@ -88,7 +91,7 @@ public class PrometheusRegistry {
         }
         for (MultiCollector collector : multiCollectors) {
             List<String> prometheusNames = collector.getPrometheusNames();
-            boolean excluded = true; // the multi-collector is excluded unless at least one name matches
+            boolean excluded = prometheusNames.size() > 0; // the multi-collector is excluded unless at least one name matches
             for (String prometheusName : prometheusNames) {
                 if (includedNames.test(prometheusName)) {
                     excluded = false;

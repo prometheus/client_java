@@ -9,35 +9,57 @@ import org.junit.Test;
 
 public class PrometheusRegistryTest {
 
-    Collector noName = new Collector() {
+    Collector noName = () -> GaugeSnapshot.builder()
+            .name("no_name_gauge")
+            .build();
+
+    Collector counterA1 = new Collector() {
         @Override
         public MetricSnapshot collect() {
-            return GaugeSnapshot.builder()
-                    .name("no_name_gauge")
-                    .build();
+            return CounterSnapshot.builder().name("counter_a").build();
         }
 
         @Override
         public String getPrometheusName() {
-            return null;
+            return "counter_a";
         }
     };
 
-    Collector counterA1 = () -> CounterSnapshot.builder()
-            .name("counter_a")
-            .build();
+    Collector counterA2 = new Collector() {
+        @Override
+        public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("counter.a").build();
+        }
 
-    Collector counterA2 = () -> CounterSnapshot.builder()
-            .name("counter.a")
-            .build();
+        @Override
+        public String getPrometheusName() {
+            return "counter_a";
+        }
+    };
 
-    Collector counterB = () -> CounterSnapshot.builder()
-            .name("counter_b")
-            .build();
+    Collector counterB = new Collector() {
+        @Override
+        public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("counter_b").build();
+        }
 
-    Collector gaugeA = () -> GaugeSnapshot.builder()
-            .name("gauge_a")
-            .build();
+        @Override
+        public String getPrometheusName() {
+            return "counter_b";
+        }
+    };
+
+    Collector gaugeA = new Collector() {
+        @Override
+        public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("gauge_a").build();
+        }
+
+        @Override
+        public String getPrometheusName() {
+            return "gauge_a";
+        }
+    };
 
     @Test
     public void registerNoName() {

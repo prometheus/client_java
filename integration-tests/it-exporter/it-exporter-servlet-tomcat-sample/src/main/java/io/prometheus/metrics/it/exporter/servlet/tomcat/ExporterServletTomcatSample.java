@@ -61,17 +61,8 @@ public class ExporterServletTomcatSample {
         gauge.labelValues("outside").set(27.0);
 
         if (mode == Mode.error) {
-            Collector failingCollector = new Collector() {
-
-                @Override
-                public String getPrometheusName() {
-                    return null;
-                }
-
-                @Override
-                public MetricSnapshot collect() {
-                    throw new RuntimeException("Simulating an error.");
-                }
+            Collector failingCollector = () -> {
+                throw new RuntimeException("Simulating an error.");
             };
 
             PrometheusRegistry.defaultRegistry.register(failingCollector);
