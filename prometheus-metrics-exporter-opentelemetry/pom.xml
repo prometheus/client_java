@@ -19,6 +19,7 @@
     <properties>
         <otel.version>1.28.0</otel.version>
         <otel.semconv.version>${otel.version}-alpha</otel.semconv.version>
+        <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry</automatic.module.name>
     </properties>
 
     <licenses>

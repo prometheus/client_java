@@ -16,6 +16,10 @@
         Jakarta Servlet for exposing a Prometheus scrape endpoint.
     </description>
 
+    <properties>
+        <automatic.module.name>io.prometheus.metrics.exporter.servlet.jakarta</automatic.module.name>
+    </properties>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>

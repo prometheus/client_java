@@ -13,6 +13,11 @@
         The Prometheus Java Metrics Library
     </description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <automatic.module.name>--module-name-need-to-be-overriden--</automatic.module.name>
+    </properties>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -63,10 +68,6 @@
         <module>benchmarks</module>
         <module>integration-tests</module>
     </modules>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <distributionManagement>
         <snapshotRepository>
@@ -192,6 +193,11 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>2.4.0</version>
                 <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
+                    </instructions>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

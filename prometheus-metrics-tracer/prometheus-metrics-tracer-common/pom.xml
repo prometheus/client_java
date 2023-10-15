@@ -31,4 +31,8 @@
       <email>fabian@fstab.de</email>
     </developer>
   </developers>
+
+  <properties>
+    <automatic.module.name>io.prometheus.metrics.tracer.common</automatic.module.name>
+  </properties>
 </project>
