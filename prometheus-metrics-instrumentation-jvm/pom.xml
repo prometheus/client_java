@@ -16,6 +16,10 @@
         Instrumentation library for JVM metrics
     </description>
 
+    <properties>
+        <automatic.module.name>io.prometheus.metrics.instrumentation.jvm</automatic.module.name>
+    </properties>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>

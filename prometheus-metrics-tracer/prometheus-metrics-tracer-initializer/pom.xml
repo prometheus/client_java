@@ -16,6 +16,10 @@
     Initialize Prometheus integrations with distributed tracing libraries.
   </description>
 
+  <properties>
+    <automatic.module.name>io.prometheus.metrics.tracer.initializer</automatic.module.name>
+  </properties>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
