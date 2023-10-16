@@ -61,16 +61,6 @@ public class SimpleclientCollector implements MultiCollector {
         return convert(simpleclientRegistry.metricFamilySamples());
     }
 
-    @Override
-    public MetricSnapshots collect(Predicate<String> includedNames) {
-        return MultiCollector.super.collect(includedNames);
-    }
-
-    @Override
-    public List<String> getPrometheusNames() {
-        return MultiCollector.super.getPrometheusNames();
-    }
-
     private MetricSnapshots convert(Enumeration<Collector.MetricFamilySamples> samples) {
         MetricSnapshots.Builder result = MetricSnapshots.builder();
         while (samples.hasMoreElements()) {

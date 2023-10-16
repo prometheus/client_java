@@ -116,7 +116,7 @@ public class PrometheusScrapeHandler {
 
     private Predicate<String> makeNameFilter(String[] includedNames) {
         Predicate<String> result = null;
-        if (includedNames != null) {
+        if (includedNames != null && includedNames.length > 0) {
             result = MetricNameFilter.builder().nameMustBeEqualTo(includedNames).build();
         }
         if (result != null && nameFilter != null) {

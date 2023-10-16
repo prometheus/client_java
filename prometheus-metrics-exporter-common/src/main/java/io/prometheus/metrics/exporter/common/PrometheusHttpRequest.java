@@ -67,7 +67,12 @@ public interface PrometheusHttpRequest {
                     }
                 }
             }
-            return result.toArray(new String[0]);
+            if (result.isEmpty()) {
+                // Servlet API: getParameterValues() returns null if the parameter does not exist.
+                return null;
+            } else {
+                return result.toArray(new String[0]);
+            }
         } catch (UnsupportedEncodingException e) {
             // UTF-8 encoding not supported.
             throw new RuntimeException(e);

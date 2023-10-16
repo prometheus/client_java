@@ -41,7 +41,7 @@ public interface Collector {
             return null;
         }
     }
-
+    
     /**
      * Like {@link #collect(includedNames)}, but with support for multi-target pattern.
      * <p>
@@ -55,13 +55,23 @@ public interface Collector {
             return null;
         }
     }
-
     
+
     /**
-     * Override this and return {@code null} if a collector does not have a constant name,
-     * or if you don't want this library to call {@link #collect()} during registration of this collector.
+     * This is called in two places:
+     * <ol>
+     * <li>During registration to check if a metric with that name already exists.</li>
+     * <li>During scrape to check if this collector can be skipped because a name filter is present and the metric name is excluded.</li>
+     * </ol>
+     * Returning {@code null} means checks are omitted (registration the metric always succeeds),
+     * and the collector is always scraped (the result is dropped after scraping if a name filter is present and
+     * the metric name is excluded).
+     * <p>
+     * If your metric has a name that does not change at runtime it is a good idea to overwrite this and return the name.
+     * <p>
+     * All metrics in {@code prometheus-metrics-core} override this.
      */
     default String getPrometheusName() {
-        return collect().getMetadata().getPrometheusName();
+        return null;
     }
 }
