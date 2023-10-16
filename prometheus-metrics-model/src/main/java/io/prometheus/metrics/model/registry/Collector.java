@@ -24,8 +24,7 @@ public interface Collector {
      * Override to implement request dependent logic to provide MetricSnapshot
      */
 	default MetricSnapshot collect(PrometheusScrapeRequest scrapeRequest) {
-		MetricSnapshot result = collect();
-		return result;
+		return collect();
 	}
     
     /**
@@ -43,7 +42,7 @@ public interface Collector {
     }
     
     /**
-     * Like {@link #collect(includedNames)}, but with support for multi-target pattern.
+     * Like {@link #collect(Predicate)}, but with support for multi-target pattern.
      * <p>
      * Override this if there is a more efficient way than first collecting the snapshot and then discarding it.
      */

@@ -1,16 +1,19 @@
----
-title: Multi-Target Pattern
-weight: 7
----
+package io.prometheus.metrics.examples.multitarget;
 
-{{< hint type=note >}}
-This is for the upcoming release 1.1.0.
-{{< /hint >}}
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-To support multi-target pattern you can create a custom collector overriding the purposed internal method in ExtendedMultiCollector
-see SampleExtendedMultiCollector in io.prometheus.metrics.examples.httpserver
+import io.prometheus.metrics.model.registry.ExtendedMultiCollector;
+import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot.Builder;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 
-```java
 public class SampleExtendedMultiCollector extends ExtendedMultiCollector {
 
 	public SampleExtendedMultiCollector() {
@@ -74,41 +77,3 @@ public class SampleExtendedMultiCollector extends ExtendedMultiCollector {
 	}
 
 }
-
-```
-`PrometheusScrapeRequest` provides methods to access http-related infos from the request originally received by the endpoint
-
-```java
-public interface PrometheusScrapeRequest {
-	String getRequestURI();
-
-	String[] getParameterValues(String name);
-}
-
-```
-
-
-Sample Prometheus scrape_config
-
-```
-  - job_name: "multi-target"
-
-    # metrics_path defaults to '/metrics'
-    # scheme defaults to 'http'.
-    params:
-      proc: [proc1, proc2]
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: localhost:9401 
-    static_configs:
-      - targets: ["target1", "target2"]
-```
-It's up to the specific MultiCollector implementation how to interpret the _target_ parameter.
-It might be an explicit real target (i.e. via host name/ip address) or as an alias in some internal configuration.
-The latter is more suitable when the MultiCollector implementation is a proxy (see https://github.com/prometheus/snmp_exporter)
-In this case, invoking real target might require extra parameters (e.g. credentials) that might be complex to manage in Prometheus configuration
-(not considering the case where the proxy might become an "open relay")

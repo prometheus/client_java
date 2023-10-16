@@ -1,4 +1,4 @@
-package io.prometheus.metrics.examples.httpserver;
+package io.prometheus.metrics.examples.multitarget;
 
 import java.io.IOException;
 
@@ -8,16 +8,14 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 /**
  * Simple example of an application exposing metrics via Prometheus' built-in HTTPServer.
  */
-public class MainMultiTarget {
+public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        SampleExtendedCollector xc = new SampleExtendedCollector();
-        PrometheusRegistry.defaultRegistry.register(xc);
         SampleExtendedMultiCollector xmc = new SampleExtendedMultiCollector();
         PrometheusRegistry.defaultRegistry.register(xmc);
         HTTPServer server = HTTPServer.builder()
-                .port(9400)
+                .port(9401)
                 .buildAndStart();
 
         System.out.println("HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");

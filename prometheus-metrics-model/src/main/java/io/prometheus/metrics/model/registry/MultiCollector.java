@@ -23,8 +23,7 @@ public interface MultiCollector {
      * Override to implement request dependent logic to provide MetricSnapshot
      */
 	default MetricSnapshots collect(PrometheusScrapeRequest scrapeRequest) {
-		MetricSnapshots result = collect();
-		return result;
+		return collect();
 	}
     
     
@@ -34,23 +33,16 @@ public interface MultiCollector {
      * Override this if there is a more efficient way than first collecting all snapshot and then discarding the excluded ones.
      */
     default MetricSnapshots collect(Predicate<String> includedNames) {
-        MetricSnapshots allSnapshots = collect();
-        MetricSnapshots.Builder result = MetricSnapshots.builder();
-        for (MetricSnapshot snapshot : allSnapshots) {
-            if (includedNames.test(snapshot.getMetadata().getPrometheusName())) {
-                result.metricSnapshot(snapshot);
-            }
-        }
-        return result.build();
+    	return collect(includedNames, null);
     }
 
     /**
-     * Like {@link #collect(includedNames)}, but with support for multi-target pattern.
+     * Like {@link #collect(Predicate)}, but with support for multi-target pattern.
      * <p>
      * Override this if there is a more efficient way than first collecting the snapshot and then discarding it.
      */
     default MetricSnapshots collect(Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
-    	MetricSnapshots allSnapshots = collect(scrapeRequest);
+    	MetricSnapshots allSnapshots = scrapeRequest == null ? collect(): collect(scrapeRequest);
         MetricSnapshots.Builder result = MetricSnapshots.builder();
         for (MetricSnapshot snapshot : allSnapshots) {
             if (includedNames.test(snapshot.getMetadata().getPrometheusName())) {
