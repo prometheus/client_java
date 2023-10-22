@@ -94,7 +94,7 @@ public class ProcessMetrics {
                         // through implemented interfaces until the method can be made accessible and invoked.
                         Long processCpuTime = callLongGetter("getProcessCpuTime", osBean);
                         if (processCpuTime != null) {
-                            callback.call(Unit.millisToSeconds(processCpuTime));
+                            callback.call(Unit.nanosToSeconds(processCpuTime));
                         }
                     } catch (Exception ignored) {
                     }
