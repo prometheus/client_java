@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.RuntimeMXBean;
+import java.util.concurrent.TimeUnit;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +30,7 @@ public class ProcessMetricsTest {
 
     @Before
     public void setUp() throws IOException {
-        when(sunOsBean.getProcessCpuTime()).thenReturn(72L);
+        when(sunOsBean.getProcessCpuTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(72));
         when(sunOsBean.getOpenFileDescriptorCount()).thenReturn(127L);
         when(sunOsBean.getMaxFileDescriptorCount()).thenReturn(244L);
         when(runtimeBean.getStartTime()).thenReturn(37100L);
