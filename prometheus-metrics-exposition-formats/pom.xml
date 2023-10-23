@@ -16,6 +16,10 @@
         Prometheus exposition formats.
     </description>
 
+    <properties>
+        <automatic.module.name>io.prometheus.metrics.expositionformats</automatic.module.name>
+    </properties>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -31,10 +35,6 @@
             <email>fabian@fstab.de</email>
         </developer>
     </developers>
-
-    <properties>
-        <automatic.module.name>io.prometheus.metrics.expositionformats</automatic.module.name>
-    </properties>
 
     <dependencies>
         <dependency>
