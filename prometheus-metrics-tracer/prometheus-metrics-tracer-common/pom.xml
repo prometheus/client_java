@@ -16,6 +16,10 @@
     Common Module for Prometheus integrations with distributed tracing libraries.
   </description>
 
+  <properties>
+    <automatic.module.name>io.prometheus.metrics.tracer.common</automatic.module.name>
+  </properties>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -31,8 +35,4 @@
       <email>fabian@fstab.de</email>
     </developer>
   </developers>
-
-  <properties>
-    <automatic.module.name>io.prometheus.metrics.tracer.common</automatic.module.name>
-  </properties>
 </project>
