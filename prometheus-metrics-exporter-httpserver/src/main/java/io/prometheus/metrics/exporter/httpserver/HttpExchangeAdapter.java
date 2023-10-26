@@ -30,19 +30,6 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
 
     public class HttpRequest implements PrometheusHttpRequest {
 
-    	
-    	
-        @Override
-		public String getRequestPath() {
-    		URI requestURI = httpExchange.getRequestURI();
-    		String uri = requestURI.toString();
-    		int qx = uri.indexOf('?');
-    		if (qx != -1) {
-    			uri = uri.substring(0, qx);
-    		}
-    		return uri;
-		}
-
 		@Override
         public String getQueryString() {
             return httpExchange.getRequestURI().getRawQuery();

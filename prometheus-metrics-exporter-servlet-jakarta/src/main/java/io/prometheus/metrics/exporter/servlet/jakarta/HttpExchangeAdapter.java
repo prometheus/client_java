@@ -53,24 +53,6 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
             this.request = request;
         }
 
-        @Override
-		public String getRequestPath() {
-        	StringBuffer uri = new StringBuffer();
-			String contextPath = request.getContextPath();
-        	if (contextPath.startsWith("/")) {
-        		uri.append(contextPath);
-        	}
-			String servletPath = request.getServletPath();
-			if (servletPath.startsWith("/")) {
-        		uri.append(servletPath);
-			}
-			String pathInfo = request.getPathInfo();
-			if (pathInfo != null) {
-				uri.append(pathInfo);
-			}
-			return uri.toString();
-		}
-
 		@Override
         public String getQueryString() {
             return request.getQueryString();

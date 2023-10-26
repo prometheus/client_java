@@ -5,13 +5,10 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-public interface PrometheusHttpRequest {
+import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 
-    /**
-     * Return the absolute path of a Http Request
-     */
-    String getRequestPath();
-	
+public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
+
     /**
      * See {@code jakarta.servlet.http.HttpServletRequest.getQueryString()}
      */

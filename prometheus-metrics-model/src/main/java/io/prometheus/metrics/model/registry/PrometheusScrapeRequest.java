@@ -6,8 +6,6 @@ package io.prometheus.metrics.model.registry;
  */
 public interface PrometheusScrapeRequest {
 	
-	String getRequestURI();
-
 	String[] getParameterValues(String name);
 
 }
