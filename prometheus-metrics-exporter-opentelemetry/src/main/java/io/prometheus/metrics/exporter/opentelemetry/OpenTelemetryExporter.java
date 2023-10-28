@@ -18,7 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class OpenTelemetryExporter {
+public class OpenTelemetryExporter implements AutoCloseable {
+    private final PeriodicMetricReader reader;
 
     private OpenTelemetryExporter(Builder builder, PrometheusProperties config, PrometheusRegistry registry) {
         InstrumentationScopeInfo instrumentationScopeInfo = PrometheusInstrumentationScope.loadInstrumentationScopeInfo();
@@ -42,11 +43,16 @@ public class OpenTelemetryExporter {
             }
             exporter = exporterBuilder.build();
         }
-        PeriodicMetricReader reader = PeriodicMetricReader.builder(exporter)
+        reader = PeriodicMetricReader.builder(exporter)
                 .setInterval(Duration.ofSeconds(ConfigHelper.getIntervalSeconds(builder, properties)))
                 .build();
+
         PrometheusMetricProducer prometheusMetricProducer = new PrometheusMetricProducer(registry, instrumentationScopeInfo, resource);
         reader.register(prometheusMetricProducer);
+    }
+
+    public void close() {
+        reader.shutdown();
     }
 
     private Resource initResourceAttributes(Builder builder, ExporterOpenTelemetryProperties properties, InstrumentationScopeInfo instrumentationScopeInfo) {
