@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        SampleExtendedMultiCollector xmc = new SampleExtendedMultiCollector();
+        SampleMultiCollector xmc = new SampleMultiCollector();
         PrometheusRegistry.defaultRegistry.register(xmc);
         HTTPServer server = HTTPServer.builder()
                 .port(9401)

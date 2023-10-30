@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import io.prometheus.metrics.model.registry.ExtendedMultiCollector;
+import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot.Builder;
@@ -14,13 +14,22 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 
-public class SampleExtendedMultiCollector extends ExtendedMultiCollector {
+public class SampleMultiCollector implements MultiCollector {
 
-	public SampleExtendedMultiCollector() {
+	public SampleMultiCollector() {
 		super();
+	}
+	
+	@Override
+	public MetricSnapshots collect() {
+		return new MetricSnapshots();
 	}
 
 	@Override
+	public MetricSnapshots collect(PrometheusScrapeRequest scrapeRequest) {
+		return collectMetricSnapshots(scrapeRequest);
+	}
+
 	protected MetricSnapshots collectMetricSnapshots(PrometheusScrapeRequest scrapeRequest) {
 
 		GaugeSnapshot.Builder gaugeBuilder = GaugeSnapshot.builder();
