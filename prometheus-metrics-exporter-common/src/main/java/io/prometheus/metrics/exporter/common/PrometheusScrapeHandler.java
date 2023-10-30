@@ -104,11 +104,12 @@ public class PrometheusScrapeHandler {
     }
 
     private MetricSnapshots scrape(PrometheusHttpRequest request) {
+
         Predicate<String> filter = makeNameFilter(request.getParameterValues("name[]"));
         if (filter != null) {
-            return registry.scrape(filter);
+            return registry.scrape(filter, request);
         } else {
-            return registry.scrape();
+            return registry.scrape(request);
         }
     }
 

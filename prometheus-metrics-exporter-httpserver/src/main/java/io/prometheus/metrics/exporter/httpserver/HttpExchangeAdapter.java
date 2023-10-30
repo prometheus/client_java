@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -29,7 +30,7 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
 
     public class HttpRequest implements PrometheusHttpRequest {
 
-        @Override
+		@Override
         public String getQueryString() {
             return httpExchange.getRequestURI().getRawQuery();
         }

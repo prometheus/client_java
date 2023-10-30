@@ -53,7 +53,7 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
             this.request = request;
         }
 
-        @Override
+		@Override
         public String getQueryString() {
             return request.getQueryString();
         }

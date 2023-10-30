@@ -5,7 +5,9 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-public interface PrometheusHttpRequest {
+import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
+
+public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
 
     /**
      * See {@code jakarta.servlet.http.HttpServletRequest.getQueryString()}

@@ -36,6 +36,7 @@
         <module>example-exemplars-tail-sampling</module>
         <module>example-exporter-servlet-tomcat</module>
         <module>example-exporter-httpserver</module>
+        <module>example-exporter-multi-target</module>
         <module>example-exporter-opentelemetry</module>
         <module>example-simpleclient-bridge</module>
         <module>example-native-histogram</module>

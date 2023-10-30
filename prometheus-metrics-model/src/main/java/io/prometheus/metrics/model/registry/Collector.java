@@ -20,6 +20,14 @@ public interface Collector {
     MetricSnapshot collect();
 
     /**
+     * Provides Collector with the details of the request issued by Prometheus to allow multi-target pattern implementation
+     * Override to implement request dependent logic to provide MetricSnapshot
+     */
+	default MetricSnapshot collect(PrometheusScrapeRequest scrapeRequest) {
+		return collect();
+	}
+    
+    /**
      * Like {@link #collect()}, but returns {@code null} if {@code includedNames.test(name)} is {@code false}.
      * <p>
      * Override this if there is a more efficient way than first collecting the snapshot and then discarding it.
@@ -32,6 +40,21 @@ public interface Collector {
             return null;
         }
     }
+    
+    /**
+     * Like {@link #collect(Predicate)}, but with support for multi-target pattern.
+     * <p>
+     * Override this if there is a more efficient way than first collecting the snapshot and then discarding it.
+     */
+    default MetricSnapshot collect(Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
+        MetricSnapshot result = collect(scrapeRequest);
+        if (includedNames.test(result.getMetadata().getPrometheusName())) {
+            return result;
+        } else {
+            return null;
+        }
+    }
+    
 
     /**
      * This is called in two places:
