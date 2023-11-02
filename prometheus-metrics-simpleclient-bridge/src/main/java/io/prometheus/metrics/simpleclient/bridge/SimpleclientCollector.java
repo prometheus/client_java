@@ -288,8 +288,8 @@ public class SimpleclientCollector implements MultiCollector {
 
     private ClassicHistogramBuckets makeBuckets(Map<Double, Long> cumulativeBuckets) {
         List<Double> upperBounds = new ArrayList<>(cumulativeBuckets.size());
-        Collections.sort(upperBounds);
         upperBounds.addAll(cumulativeBuckets.keySet());
+        Collections.sort(upperBounds);
         ClassicHistogramBuckets.Builder result = ClassicHistogramBuckets.builder();
         long previousCount = 0L;
         for (Double upperBound : upperBounds) {

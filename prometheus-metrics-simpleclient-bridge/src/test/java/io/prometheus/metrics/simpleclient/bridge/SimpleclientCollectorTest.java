@@ -94,7 +94,7 @@ public class SimpleclientCollectorTest {
                 .name("response_size_bytes")
                 .help("response size in Bytes")
                 .labelNames("status")
-                .buckets(64, 256)
+                .buckets(64, 256, 512.1)
                 .register(origRegistry);
         histogram.labels("200").observeWithExemplar(38, "trace_id", "1", "span_id", "2");
         histogram.labels("200").observeWithExemplar(127, "trace_id", "3", "span_id", "4");
