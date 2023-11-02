@@ -62,7 +62,7 @@ jobs:
       - name: Build client_java
         run: ./mvnw -B clean install -DskipTests
       - name: Make Javadoc
-        run: ./mvnw -B compile javadoc:javadoc javadoc:aggregate
+        run: ./mvnw -B clean compile javadoc:javadoc javadoc:aggregate
       - name: Move the Javadoc to docs/static/api/
         run: mv ./target/site/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api
       - name: Setup Pages
