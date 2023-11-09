@@ -2,6 +2,7 @@ package io.prometheus.metrics.core.metrics;
 
 import java.lang.reflect.Array;
 import java.util.concurrent.TimeUnit;
+import java.util.function.LongSupplier;
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.Supplier;
 
@@ -22,6 +23,7 @@ public class SlidingWindow<T> {
     private int currentBucket;
     private long lastRotateTimestampMillis;
     private final long durationBetweenRotatesMillis;
+    LongSupplier currentTimeMillis = System::currentTimeMillis; // to be replaced in unit tests
 
     /**
      * Example: If the {@code maxAgeSeconds} is 60 and {@code ageBuckets} is 3, then 3 instances of {@code T}
@@ -56,11 +58,14 @@ public class SlidingWindow<T> {
      * Observe a value.
      */
     public synchronized void observe(double value) {
-        observeFunction.accept(rotate(), value);
+        rotate();
+        for (T t : ringBuffer) {
+            observeFunction.accept(t, value);
+        }
     }
 
     private T rotate() {
-        long timeSinceLastRotateMillis = System.currentTimeMillis() - lastRotateTimestampMillis;
+        long timeSinceLastRotateMillis = currentTimeMillis.getAsLong() - lastRotateTimestampMillis;
         while (timeSinceLastRotateMillis > durationBetweenRotatesMillis) {
             ringBuffer[currentBucket] = constructor.get();
             if (++currentBucket >= ringBuffer.length) {
