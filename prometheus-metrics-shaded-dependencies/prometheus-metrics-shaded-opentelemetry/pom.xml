@@ -16,9 +16,8 @@
     </description>
 
     <properties>
-        <otel.version>1.28.0</otel.version>
-        <otel.semconv.version>${otel.version}-alpha</otel.semconv.version>
-        <otel.version.string>1_28_0</otel.version.string>
+        <otel.version>1.31.0</otel.version>
+        <otel.version.string>1_31_0</otel.version.string>
     </properties>
 
     <licenses>
@@ -47,11 +46,6 @@
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-sdk</artifactId>
             <version>${otel.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-semconv</artifactId>
-            <version>${otel.semconv.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>

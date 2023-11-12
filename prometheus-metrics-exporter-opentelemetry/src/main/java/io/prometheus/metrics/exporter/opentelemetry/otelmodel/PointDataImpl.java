@@ -1,9 +1,9 @@
 package io.prometheus.metrics.exporter.opentelemetry.otelmodel;
 
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.api.common.Attributes;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.metrics.data.DoubleExemplarData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.metrics.data.ExemplarData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.metrics.data.PointData;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.api.common.Attributes;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.data.DoubleExemplarData;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.data.ExemplarData;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.data.PointData;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package io.prometheus.metrics.exporter.opentelemetry.otelmodel;
 
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.metrics.data.ValueAtQuantile;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.data.ValueAtQuantile;
 
 public class ValueAtQuantileImpl implements ValueAtQuantile {
 

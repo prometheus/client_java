@@ -17,8 +17,7 @@
     </description>
 
     <properties>
-        <otel.version>1.28.0</otel.version>
-        <otel.semconv.version>${otel.version}-alpha</otel.semconv.version>
+        <otel.version>1.31.0</otel.version>
         <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry</automatic.module.name>
     </properties>
 
@@ -49,28 +48,6 @@
             <artifactId>prometheus-metrics-shaded-opentelemetry</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-            <version>${otel.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-sdk</artifactId>
-            <version>${otel.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-semconv</artifactId>
-            <version>${otel.semconv.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-otlp</artifactId>
-            <version>${otel.version}</version>
-        </dependency>
-        -->
 
         <!-- test dependencies -->
         <dependency>

@@ -12,19 +12,19 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.api.common.Attributes;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.api.common.AttributesBuilder;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.common.InstrumentationScopeInfo;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.metrics.data.MetricData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.metrics.internal.export.MetricProducer;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.resources.Resource;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_28_0.sdk.resources.ResourceBuilder;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.api.common.Attributes;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.api.common.AttributesBuilder;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.common.InstrumentationScopeInfo;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.data.MetricData;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.export.CollectionRegistration;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.resources.Resource;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.resources.ResourceBuilder;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-class PrometheusMetricProducer implements MetricProducer {
+class PrometheusMetricProducer implements CollectionRegistration {
 
     private final PrometheusRegistry registry;
     private final Resource resource;
