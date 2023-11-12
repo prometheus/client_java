@@ -2,8 +2,6 @@
 
 [![Build Status](https://circleci.com/gh/prometheus/client_java.svg?style=svg)](https://circleci.com/gh/prometheus/client_java)
 
-Release date for 1.0.0 is 27 Sep 2023. Pre-releases are [available](https://github.com/prometheus/client_java/releases).
-
 # Documentation
 
 [https://prometheus.github.io/client_java](https://prometheus.github.io/client_java)
