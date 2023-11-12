@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.Enumeration;
 
 public class HttpExchangeAdapter implements PrometheusHttpExchange {
@@ -66,6 +67,24 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
         @Override
         public String getMethod() {
             return request.getMethod();
+        }
+
+        @Override
+        public String getRequestPath() {
+            StringBuilder uri = new StringBuilder();
+            String contextPath = request.getContextPath();
+            if (contextPath.startsWith("/")) {
+                uri.append(contextPath);
+            }
+            String servletPath = request.getServletPath();
+            if (servletPath.startsWith("/")) {
+                uri.append(servletPath);
+            }
+            String pathInfo = request.getPathInfo();
+            if (pathInfo != null) {
+                uri.append(pathInfo);
+            }
+            return uri.toString();
         }
     }
 
