@@ -9,9 +9,9 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
-import io.opentelemetry.proto.metrics.v1.DoubleDataPoint;
 import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics;
 import io.opentelemetry.proto.metrics.v1.Metric;
+import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
 import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -23,7 +23,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
@@ -122,8 +128,8 @@ public class ExemplarTest {
                 for (ResourceMetrics resourceMetrics : exportMetricsServiceRequest.getResourceMetricsList()) {
                     for (InstrumentationLibraryMetrics instrumentationLibraryMetrics : resourceMetrics.getInstrumentationLibraryMetricsList()) {
                         for (Metric metric : instrumentationLibraryMetrics.getMetricsList()) {
-                            for (DoubleDataPoint doubleDataPoint : metric.getDoubleSum().getDataPointsList()) {
-                                if (doubleDataPoint.getExemplarsCount() == expectedCount) {
+                            for (NumberDataPoint numberDataPoint : metric.getSum().getDataPointsList()) {
+                                if (numberDataPoint.getExemplarsCount() == expectedCount) {
                                     return MatchResult.exactMatch();
                                 }
                             }

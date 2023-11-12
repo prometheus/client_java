@@ -82,7 +82,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>
-            <version>3.2.0</version>
+            <version>3.3.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -94,7 +94,7 @@
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-proto</artifactId>
-            <version>0.17.1</version>
+            <version>1.7.1-alpha</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -134,13 +134,13 @@
                     <artifactItem>
                         <groupId>io.opentelemetry</groupId>
                         <artifactId>opentelemetry-api</artifactId>
-                        <version>1.29.0</version>
+                        <version>${otel.version}</version>
                         <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
                     </artifactItem>
                     <artifactItem>
                         <groupId>io.opentelemetry</groupId>
                         <artifactId>opentelemetry-context</artifactId>
-                        <version>1.29.0</version>
+                        <version>${otel.version}</version>
                         <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
                     </artifactItem>
                 </artifactItems>
