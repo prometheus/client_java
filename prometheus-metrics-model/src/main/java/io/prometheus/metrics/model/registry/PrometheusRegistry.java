@@ -94,6 +94,8 @@ public class PrometheusRegistry {
 		MetricSnapshots.Builder result = MetricSnapshots.builder();
 		for (Collector collector : collectors) {
 			String prometheusName = collector.getPrometheusName();
+			// prometheusName == null means the name is unknown, and we have to scrape to learn the name.
+			// prometheusName != null means we can skip the scrape if the name is excluded.
 			if (prometheusName == null || includedNames.test(prometheusName)) {
 				MetricSnapshot snapshot = scrapeRequest == null ? collector.collect(includedNames) : collector.collect(includedNames, scrapeRequest);
 				if (snapshot != null) {
@@ -103,8 +105,9 @@ public class PrometheusRegistry {
 		}
 		for (MultiCollector collector : multiCollectors) {
 			List<String> prometheusNames = collector.getPrometheusNames();
-			boolean excluded = true; // the multi-collector is excluded unless
-										// at least one name matches
+			// empty prometheusNames means the names are unknown, and we have to scrape to learn the names.
+			// non-empty prometheusNames means we can exclude the collector if all names are excluded by the filter.
+			boolean excluded = !prometheusNames.isEmpty();
 			for (String prometheusName : prometheusNames) {
 				if (includedNames.test(prometheusName)) {
 					excluded = false;
@@ -112,8 +115,8 @@ public class PrometheusRegistry {
 				}
 			}
 			if (!excluded) {
-				MetricSnapshots snaphots = scrapeRequest == null ? collector.collect(includedNames) : collector.collect(includedNames, scrapeRequest);
-				for (MetricSnapshot snapshot : snaphots) {
+				MetricSnapshots snapshots = scrapeRequest == null ? collector.collect(includedNames) : collector.collect(includedNames, scrapeRequest);
+				for (MetricSnapshot snapshot : snapshots) {
 					if (snapshot != null) {
 						result.metricSnapshot(snapshot);
 					}

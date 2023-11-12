@@ -1,11 +1,20 @@
 package io.prometheus.metrics.model.registry;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 public class MetricNameFilterTest {
 
@@ -21,12 +30,12 @@ public class MetricNameFilterTest {
         registry.register(() -> CounterSnapshot.builder()
                 .name("counter1")
                 .help("test counter 1")
-                .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder()
+                .dataPoint(CounterDataPointSnapshot.builder()
                         .labels(Labels.of("path", "/hello"))
                         .value(1.0)
                         .build()
                 )
-                .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder()
+                .dataPoint(CounterDataPointSnapshot.builder()
                         .labels(Labels.of("path", "/goodbye"))
                         .value(2.0)
                         .build()
@@ -36,7 +45,7 @@ public class MetricNameFilterTest {
         registry.register(() -> CounterSnapshot.builder()
                 .name("counter2")
                 .help("test counter 2")
-                .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder()
+                .dataPoint(CounterDataPointSnapshot.builder()
                         .value(1.0)
                         .build()
                 )
