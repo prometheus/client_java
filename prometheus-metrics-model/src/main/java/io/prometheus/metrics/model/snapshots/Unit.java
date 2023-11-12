@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import java.util.Objects;
+
 /**
  * Some pre-defined units for convenience. You can create your own units with
  * <pre>
@@ -23,13 +25,13 @@ public class Unit {
     public static final Unit AMPERES = new Unit("amperes");
 
     public Unit(String name) {
-        this.name = name;
         if (name == null) {
             throw new NullPointerException("Unit name cannot be null.");
         }
-        if (name.isEmpty()) {
+        if (name.trim().isEmpty()) {
             throw new IllegalArgumentException("Unit name cannot be empty.");
         }
+        this.name = name.trim();
     }
 
     @Override
@@ -51,5 +53,18 @@ public class Unit {
 
     public static double kiloBytesToBytes(double kilobytes) {
         return kilobytes * 1024;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Unit unit = (Unit) o;
+        return Objects.equals(name, unit.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }
