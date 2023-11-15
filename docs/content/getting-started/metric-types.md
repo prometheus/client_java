@@ -54,7 +54,7 @@ Histogram
 Histograms are for observing distributions, like latency distributions for HTTP services or the distribution of request sizes.
 Unlike with counters and gauges, each histogram data point has a complex data structure representing different aspects of the distribution:
 
-* Count: The toal number of observations.
+* Count: The total number of observations.
 * Sum: The sum of all observed values, e.g. the total time spent serving requests.
 * Buckets: The histogram buckets representing the distribution.
 
