@@ -93,7 +93,7 @@ public class PrometheusScrapeHandler {
 
     private Predicate<String> makeNameFilter(ExporterFilterProperties props) {
         if (props.getAllowedMetricNames() == null && props.getExcludedMetricNames() == null && props.getAllowedMetricNamePrefixes() == null && props.getExcludedMetricNamePrefixes() == null) {
-            return null;
+            return MetricNameFilter.ALLOW_ALL;
         } else {
             return MetricNameFilter.builder()
                     .nameMustBeEqualTo(props.getAllowedMetricNames())
@@ -105,22 +105,16 @@ public class PrometheusScrapeHandler {
     }
 
     private MetricSnapshots scrape(PrometheusHttpRequest request) {
-
         Predicate<String> filter = makeNameFilter(request.getParameterValues("name[]"));
         return registry.collect(filter, request);
     }
 
     private Predicate<String> makeNameFilter(String[] includedNames) {
-        Predicate<String> result = MetricNameFilter.ALLOW_ALL;
         if (includedNames != null && includedNames.length > 0) {
-            result = MetricNameFilter.builder().nameMustBeEqualTo(includedNames).build();
+            return nameFilter.and(MetricNameFilter.builder().nameMustBeEqualTo(includedNames).build());
+        } else {
+            return nameFilter;
         }
-        if (result != null && nameFilter != null) {
-            result = result.and(nameFilter);
-        } else if (nameFilter != null) {
-            result = nameFilter;
-        }
-        return result;
     }
 
     private boolean writeDebugResponse(MetricSnapshots snapshots, PrometheusHttpExchange exchange) throws IOException {

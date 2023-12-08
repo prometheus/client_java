@@ -35,7 +35,7 @@ public class MetricsHandler implements HttpHandler {
         prometheusScrapeHandler = new PrometheusScrapeHandler(config);
     }
 
-    public MetricsHandler(PrometheusProperties config, PrometheusRegistry registry) {
+    public MetricsHandler(PrometheusProperties config, Collector registry) {
         prometheusScrapeHandler = new PrometheusScrapeHandler(config, registry);
     }
 

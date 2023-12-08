@@ -190,6 +190,7 @@ public class MetricNameFilter implements Predicate<String> {
         }
 
         public MetricNameFilter build() {
+            // TODO: should return MetricNameFilter.ALLOW_ALL if no filtering is needed
             return new MetricNameFilter(nameEqualTo, nameNotEqualTo, nameStartsWith, nameDoesNotStartWith);
         }
     }
