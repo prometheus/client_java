@@ -1,37 +1,23 @@
 package io.prometheus.metrics.examples.multitarget;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.function.Predicate;
 
-import io.prometheus.metrics.model.registry.MultiCollector;
+import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot.Builder;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 
-public class SampleMultiCollector implements MultiCollector {
-
-	public SampleMultiCollector() {
-		super();
-	}
-	
+public class SampleCollector implements Collector {
 	@Override
-	public MetricSnapshots collect() {
-		return new MetricSnapshots();
-	}
-
-	@Override
-	public MetricSnapshots collect(PrometheusScrapeRequest scrapeRequest) {
-		return collectMetricSnapshots(scrapeRequest);
+	public MetricSnapshots collect(Predicate<String> nameFilter, PrometheusScrapeRequest scrapeRequest) {
+		return collectMetricSnapshots(scrapeRequest).filter(nameFilter);
 	}
 
 	protected MetricSnapshots collectMetricSnapshots(PrometheusScrapeRequest scrapeRequest) {
-
 		GaugeSnapshot.Builder gaugeBuilder = GaugeSnapshot.builder();
 		gaugeBuilder.name("x_load").help("process load");
 
@@ -71,18 +57,7 @@ public class SampleMultiCollector implements MultiCollector {
 				gaugeBuilder.dataPoint(gaugeDataPointBuilder.build());
 			}
 		}
-		Collection<MetricSnapshot> snaps = new ArrayList<MetricSnapshot>();
-		snaps.add(counterBuilder.build());
-		snaps.add(gaugeBuilder.build());
-		MetricSnapshots msnaps = new MetricSnapshots(snaps);
+		MetricSnapshots msnaps = new MetricSnapshots(counterBuilder.build(), gaugeBuilder.build());
 		return msnaps;
 	}
-
-	public List<String> getPrometheusNames() {
-		List<String> names = new ArrayList<String>();
-		names.add("x_calls_total");
-		names.add("x_load");
-		return names;
-	}
-
 }

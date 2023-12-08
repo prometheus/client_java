@@ -1,54 +1,64 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
-import static java.util.Collections.unmodifiableList;
-import static java.util.Comparator.comparing;
 
 /**
  * Immutable list of metric snapshots.
+ * Guaranteed entries have unique metric names.
  */
 public class MetricSnapshots implements Iterable<MetricSnapshot> {
 
     private final List<MetricSnapshot> snapshots;
 
     /**
-     * See {@link #MetricSnapshots(Collection)}
+     * To create MetricSnapshots, use builder that takes care of all validations.
      */
-    public MetricSnapshots(MetricSnapshot... snapshots) {
-        this(Arrays.asList(snapshots));
+    private MetricSnapshots(Collection<MetricSnapshot> snapshots) {
+        this.snapshots = Collections.unmodifiableList(new ArrayList<>(snapshots));
     }
 
     /**
-     * To create MetricSnapshots, you can either call the constructor directly
-     * or use {@link #builder()}.
-     *
-     * @param snapshots the constructor creates a sorted copy of snapshots.
-     * @throws IllegalArgumentException if snapshots contains duplicate metric names.
-     *                                  To avoid duplicate metric names use {@link #builder()} and check
-     *                                  {@link Builder#containsMetricName(String)} before calling
-     *                                  {@link Builder#metricSnapshot(MetricSnapshot)}.
+     * TODO: just for compatibility
      */
-    public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
-        List<MetricSnapshot> list = new ArrayList<>(snapshots);
-        list.sort(comparing(s -> s.getMetadata().getPrometheusName()));
-        for (int i = 0; i < snapshots.size() - 1; i++) {
-            if (list.get(i).getMetadata().getPrometheusName().equals(list.get(i + 1).getMetadata().getPrometheusName())) {
-                throw new IllegalArgumentException(list.get(i).getMetadata().getPrometheusName() + ": duplicate metric name");
-            }
-        }
-        this.snapshots = unmodifiableList(list);
+    public MetricSnapshots(MetricSnapshot... snapshots) {
+        this.snapshots = builder().metricSnapshots(snapshots).build().snapshots;
+    }
+
+    public static MetricSnapshots empty() {
+        return new MetricSnapshots(Collections.emptyList());
     }
 
     public static MetricSnapshots of(MetricSnapshot... snapshots) {
-        return new MetricSnapshots(snapshots);
+        return builder().metricSnapshots(snapshots).build();
     }
+
+    public MetricSnapshots filter(Predicate<String> nameFilter) {
+        var result = snapshots
+                .stream()
+                .filter(snapshot -> snapshot.matches(nameFilter))
+                .collect(Collectors.toList());
+        return new MetricSnapshots(result);
+    }
+
+    public MetricSnapshots withLabels(Labels labels) {
+        var result = snapshots
+                .stream()
+                .map(snapshot -> snapshot.withLabels(labels))
+                .collect(Collectors.toList());
+        return new MetricSnapshots(result);
+    }
+
+    public MetricSnapshots withNamePrefix(String prefix) {
+        var result = snapshots
+                .stream()
+                .map(snapshot -> snapshot.withNamePrefix(prefix))
+                .collect(Collectors.toList());
+        return new MetricSnapshots(result);
+    }
+
 
     @Override
     public Iterator<MetricSnapshot> iterator() {
@@ -73,30 +83,38 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
 
     public static class Builder {
 
-        private final List<MetricSnapshot> snapshots = new ArrayList<>();
+        /** Used to merge metrics by prometheus names, and to produce correct output order. */
+        private final Map<String, MetricSnapshot> result = new TreeMap<>();
 
         private Builder() {
-        }
-
-        public boolean containsMetricName(String name) {
-            for (MetricSnapshot snapshot : snapshots) {
-                if (snapshot.getMetadata().getPrometheusName().equals(prometheusName(name))) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         /**
          * Add a metric snapshot. Call multiple times to add multiple metric snapshots.
          */
         public Builder metricSnapshot(MetricSnapshot snapshot) {
-            snapshots.add(snapshot);
+            result.merge(snapshot.getMetadata().getPrometheusName(), snapshot, MetricSnapshot::merge);
+            return this;
+        }
+
+        /**
+         * Add a metric snapshot collection.
+         */
+        public Builder metricSnapshots(Iterable<MetricSnapshot> snapshots) {
+            snapshots.forEach(this::metricSnapshot);
+            return this;
+        }
+
+        /**
+         * Add a metric snapshot collection.
+         */
+        public Builder metricSnapshots(MetricSnapshot[] snapshots) {
+            for (MetricSnapshot snapshot : snapshots) this.metricSnapshot(snapshot);
             return this;
         }
 
         public MetricSnapshots build() {
-            return new MetricSnapshots(snapshots);
+            return new MetricSnapshots(result.values());
         }
     }
 }

@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Immutable snapshot of a Counter.
@@ -24,6 +25,35 @@ public class CounterSnapshot extends MetricSnapshot {
     @Override
     public List<CounterDataPointSnapshot> getDataPoints() {
         return (List<CounterDataPointSnapshot>) dataPoints;
+    }
+
+    @Override
+    public CounterSnapshot merge(MetricSnapshot snapshot) {
+        if (!(getMetadata().equals(snapshot.getMetadata())))
+            throw new IllegalArgumentException("Unable to merge - metadata mismatch for metric " + this.getMetadata().getPrometheusName());
+        if (snapshot instanceof CounterSnapshot s) {
+            var result = new ArrayList<CounterSnapshot.CounterDataPointSnapshot>();
+            result.addAll(this.getDataPoints());
+            result.addAll(s.getDataPoints());
+            return new CounterSnapshot(getMetadata(), result);
+        } else {
+            throw new IllegalArgumentException("Unable to merge - invalid type of metric " + this.getMetadata().getPrometheusName());
+        }
+    }
+
+
+    @Override
+    public CounterSnapshot withNamePrefix(String prefix) {
+        return new CounterSnapshot(getMetadata().withNamePrefix(prefix), getDataPoints());
+    }
+
+    /** Merge additional labels to all the data points. */
+    public CounterSnapshot withLabels(Labels labels) {
+        var points = getDataPoints()
+                .stream()
+                .map(point -> new CounterSnapshot.CounterDataPointSnapshot(point.value, point.getLabels().merge(labels), point.exemplar, point.getCreatedTimestampMillis(), point.getScrapeTimestampMillis()))
+                .collect(Collectors.toList());
+        return new CounterSnapshot(getMetadata(), points);
     }
 
     public static class CounterDataPointSnapshot extends DataPointSnapshot {

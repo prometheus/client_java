@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Immutable snapshot of a Summary metric.
@@ -18,6 +19,36 @@ public final class SummarySnapshot extends MetricSnapshot {
      */
     public SummarySnapshot(MetricMetadata metadata, Collection<SummaryDataPointSnapshot> data) {
         super(metadata, data);
+    }
+
+    @Override
+    public SummarySnapshot merge(MetricSnapshot snapshot) {
+        if (!(getMetadata().equals(snapshot.getMetadata())))
+            throw new IllegalArgumentException("Unable to merge - metadata mismatch.");
+        if (snapshot instanceof SummarySnapshot s) {
+            var result = new ArrayList<SummarySnapshot.SummaryDataPointSnapshot>();
+            result.addAll(this.getDataPoints());
+            result.addAll(s.getDataPoints());
+            return new SummarySnapshot(getMetadata(), result);
+        } else {
+            throw new IllegalArgumentException("Unable to merge - invalid snapshot type");
+        }
+    }
+
+    @Override
+    public SummarySnapshot withNamePrefix(String prefix) {
+        return new SummarySnapshot(getMetadata().withNamePrefix(prefix), getDataPoints());
+    }
+
+    /**
+     * Merge additional labels to all the data points.
+     */
+    public SummarySnapshot withLabels(Labels labels) {
+        var points = getDataPoints()
+                .stream()
+                .map(point -> new SummarySnapshot.SummaryDataPointSnapshot(point.getCount(), point.getSum(), point.getQuantiles(), point.getLabels().merge(labels), point.getExemplars(), point.getCreatedTimestampMillis(), point.getScrapeTimestampMillis()))
+                .collect(Collectors.toList());
+        return new SummarySnapshot(getMetadata(), points);
     }
 
     @Override

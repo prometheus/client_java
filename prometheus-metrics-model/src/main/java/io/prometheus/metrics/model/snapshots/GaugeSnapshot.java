@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Immutable snapshot of a Gauge.
@@ -23,6 +24,34 @@ public final class GaugeSnapshot extends MetricSnapshot {
     @Override
     public List<GaugeDataPointSnapshot> getDataPoints() {
         return (List<GaugeDataPointSnapshot>) dataPoints;
+    }
+
+    @Override
+    public GaugeSnapshot merge(MetricSnapshot snapshot) {
+        if (!(getMetadata().equals(snapshot.getMetadata())))
+            throw new IllegalArgumentException("Unable to merge - metadata mismatch.");
+        if (snapshot instanceof GaugeSnapshot s) {
+            var result = new ArrayList<GaugeSnapshot.GaugeDataPointSnapshot>();
+            result.addAll(this.getDataPoints());
+            result.addAll(s.getDataPoints());
+            return new GaugeSnapshot(getMetadata(), result);
+        } else {
+            throw new IllegalArgumentException("Unable to merge - invalid snapshot type");
+        }
+    }
+
+    @Override
+    public GaugeSnapshot withNamePrefix(String prefix) {
+        return new GaugeSnapshot(getMetadata().withNamePrefix(prefix), getDataPoints());
+    }
+
+    /** Merge additional labels to all the data points. */
+    public GaugeSnapshot withLabels(Labels labels) {
+        var points = getDataPoints()
+                .stream()
+                .map(point -> new GaugeSnapshot.GaugeDataPointSnapshot(point.value, point.getLabels().merge(labels), point.exemplar, point.getScrapeTimestampMillis()))
+                .collect(Collectors.toList());
+        return new GaugeSnapshot(getMetadata(), points);
     }
 
     public static final class GaugeDataPointSnapshot extends DataPointSnapshot {

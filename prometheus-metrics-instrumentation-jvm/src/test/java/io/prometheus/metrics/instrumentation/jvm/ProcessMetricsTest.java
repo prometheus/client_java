@@ -16,9 +16,7 @@ import java.util.concurrent.TimeUnit;
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ProcessMetricsTest {
 
@@ -42,8 +40,8 @@ public class ProcessMetricsTest {
     public void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
         ProcessMetrics.builder()
-                        .osBean(sunOsBean)
-                                .runtimeBean(runtimeBean)
+                .osBean(sunOsBean)
+                .runtimeBean(runtimeBean)
                 .grepper(linuxGrepper)
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();

@@ -4,6 +4,7 @@ import io.prometheus.metrics.config.ExporterFilterProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.ExpositionFormats;
+import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -23,7 +24,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class PrometheusScrapeHandler {
 
-    private final PrometheusRegistry registry;
+    private final Collector registry;
     private final ExpositionFormats expositionFormats;
     private final Predicate<String> nameFilter;
     private AtomicInteger lastResponseSize = new AtomicInteger(2 << 9); //  0.5 MB
@@ -32,7 +33,7 @@ public class PrometheusScrapeHandler {
         this(PrometheusProperties.get(), PrometheusRegistry.defaultRegistry);
     }
 
-    public PrometheusScrapeHandler(PrometheusRegistry registry) {
+    public PrometheusScrapeHandler(Collector registry) {
         this(PrometheusProperties.get(), registry);
     }
 
@@ -40,7 +41,7 @@ public class PrometheusScrapeHandler {
         this(config, PrometheusRegistry.defaultRegistry);
     }
 
-    public PrometheusScrapeHandler(PrometheusProperties config, PrometheusRegistry registry) {
+    public PrometheusScrapeHandler(PrometheusProperties config, Collector registry) {
         this.expositionFormats = ExpositionFormats.init(config.getExporterProperties());
         this.registry = registry;
         this.nameFilter = makeNameFilter(config.getExporterFilterProperties());
@@ -106,15 +107,11 @@ public class PrometheusScrapeHandler {
     private MetricSnapshots scrape(PrometheusHttpRequest request) {
 
         Predicate<String> filter = makeNameFilter(request.getParameterValues("name[]"));
-        if (filter != null) {
-            return registry.scrape(filter, request);
-        } else {
-            return registry.scrape(request);
-        }
+        return registry.collect(filter, request);
     }
 
     private Predicate<String> makeNameFilter(String[] includedNames) {
-        Predicate<String> result = null;
+        Predicate<String> result = MetricNameFilter.ALLOW_ALL;
         if (includedNames != null && includedNames.length > 0) {
             result = MetricNameFilter.builder().nameMustBeEqualTo(includedNames).build();
         }

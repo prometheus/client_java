@@ -1,10 +1,10 @@
 package io.prometheus.metrics.simpleclient.bridge;
 
-import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.registry.MultiCollector;
+import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
@@ -48,7 +48,7 @@ import java.util.function.Predicate;
  *     .register(prometheusRegistry);
  * }</pre>
  */
-public class SimpleclientCollector implements MultiCollector {
+public class SimpleclientCollector implements Collector {
 
     private final CollectorRegistry simpleclientRegistry;
 
@@ -57,14 +57,20 @@ public class SimpleclientCollector implements MultiCollector {
     }
 
     @Override
-    public MetricSnapshots collect() {
-        return convert(simpleclientRegistry.metricFamilySamples());
+    public MetricSnapshots collect(Predicate<String> nameFilter, PrometheusScrapeRequest scrapeRequest) {
+        io.prometheus.client.Predicate<String> filter = new io.prometheus.client.Predicate<String>() {
+            @Override
+            public boolean test(String s) {
+                return nameFilter.test(s);
+            }
+        };
+        return convert(simpleclientRegistry.filteredMetricFamilySamples(filter));
     }
 
-    private MetricSnapshots convert(Enumeration<Collector.MetricFamilySamples> samples) {
+    private MetricSnapshots convert(Enumeration<io.prometheus.client.Collector.MetricFamilySamples> samples) {
         MetricSnapshots.Builder result = MetricSnapshots.builder();
         while (samples.hasMoreElements()) {
-            Collector.MetricFamilySamples sample = samples.nextElement();
+            io.prometheus.client.Collector.MetricFamilySamples sample = samples.nextElement();
             switch (sample.type) {
                 case COUNTER:
                     result.metricSnapshot(convertCounter(sample));
@@ -97,13 +103,13 @@ public class SimpleclientCollector implements MultiCollector {
         return result.build();
     }
 
-    private MetricSnapshot convertCounter(Collector.MetricFamilySamples samples) {
+    private MetricSnapshot convertCounter(io.prometheus.client.Collector.MetricFamilySamples samples) {
         CounterSnapshot.Builder counter = CounterSnapshot.builder()
                 .name(stripSuffix(samples.name, "_total"))
                 .help(samples.help)
                 .unit(convertUnit(samples));
         Map<Labels, CounterSnapshot.CounterDataPointSnapshot.Builder> dataPoints = new HashMap<>();
-        for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
+        for (io.prometheus.client.Collector.MetricFamilySamples.Sample sample : samples.samples) {
             Labels labels = Labels.of(sample.labelNames, sample.labelValues);
             CounterSnapshot.CounterDataPointSnapshot.Builder dataPoint = dataPoints.computeIfAbsent(labels, l -> CounterSnapshot.CounterDataPointSnapshot.builder().labels(labels));
             if (sample.name.endsWith("_created")) {
@@ -121,12 +127,12 @@ public class SimpleclientCollector implements MultiCollector {
         return counter.build();
     }
 
-    private MetricSnapshot convertGauge(Collector.MetricFamilySamples samples) {
+    private MetricSnapshot convertGauge(io.prometheus.client.Collector.MetricFamilySamples samples) {
         GaugeSnapshot.Builder gauge = GaugeSnapshot.builder()
                 .name(samples.name)
                 .help(samples.help)
                 .unit(convertUnit(samples));
-        for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
+        for (io.prometheus.client.Collector.MetricFamilySamples.Sample sample : samples.samples) {
             GaugeSnapshot.GaugeDataPointSnapshot.Builder dataPoint = GaugeSnapshot.GaugeDataPointSnapshot.builder()
                     .value(sample.value)
                     .labels(Labels.of(sample.labelNames, sample.labelValues))
@@ -139,7 +145,7 @@ public class SimpleclientCollector implements MultiCollector {
         return gauge.build();
     }
 
-    private MetricSnapshot convertHistogram(Collector.MetricFamilySamples samples, boolean isGaugeHistogram) {
+    private MetricSnapshot convertHistogram(io.prometheus.client.Collector.MetricFamilySamples samples, boolean isGaugeHistogram) {
         HistogramSnapshot.Builder histogram = HistogramSnapshot.builder()
                 .name(samples.name)
                 .help(samples.help)
@@ -148,7 +154,7 @@ public class SimpleclientCollector implements MultiCollector {
         Map<Labels, HistogramSnapshot.HistogramDataPointSnapshot.Builder> dataPoints = new HashMap<>();
         Map<Labels, Map<Double, Long>> cumulativeBuckets = new HashMap<>();
         Map<Labels, Exemplars.Builder> exemplars = new HashMap<>();
-        for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
+        for (io.prometheus.client.Collector.MetricFamilySamples.Sample sample : samples.samples) {
             Labels labels = labelsWithout(sample, "le");
             dataPoints.computeIfAbsent(labels, l -> HistogramSnapshot.HistogramDataPointSnapshot.builder()
                     .labels(labels));
@@ -179,7 +185,7 @@ public class SimpleclientCollector implements MultiCollector {
         return histogram.build();
     }
 
-    private MetricSnapshot convertSummary(Collector.MetricFamilySamples samples) {
+    private MetricSnapshot convertSummary(io.prometheus.client.Collector.MetricFamilySamples samples) {
         SummarySnapshot.Builder summary = SummarySnapshot.builder()
                 .name(samples.name)
                 .help(samples.help)
@@ -187,7 +193,7 @@ public class SimpleclientCollector implements MultiCollector {
         Map<Labels, SummarySnapshot.SummaryDataPointSnapshot.Builder> dataPoints = new HashMap<>();
         Map<Labels, Quantiles.Builder> quantiles = new HashMap<>();
         Map<Labels, Exemplars.Builder> exemplars = new HashMap<>();
-        for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
+        for (io.prometheus.client.Collector.MetricFamilySamples.Sample sample : samples.samples) {
             Labels labels = labelsWithout(sample, "quantile");
             dataPoints.computeIfAbsent(labels, l -> SummarySnapshot.SummaryDataPointSnapshot.builder()
                     .labels(labels));
@@ -223,12 +229,12 @@ public class SimpleclientCollector implements MultiCollector {
         return summary.build();
     }
 
-    private MetricSnapshot convertStateSet(Collector.MetricFamilySamples samples) {
+    private MetricSnapshot convertStateSet(io.prometheus.client.Collector.MetricFamilySamples samples) {
         StateSetSnapshot.Builder stateSet = StateSetSnapshot.builder()
                 .name(samples.name)
                 .help(samples.help);
         Map<Labels, StateSetSnapshot.StateSetDataPointSnapshot.Builder> dataPoints = new HashMap<>();
-        for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
+        for (io.prometheus.client.Collector.MetricFamilySamples.Sample sample : samples.samples) {
             Labels labels = labelsWithout(sample, sample.name);
             dataPoints.computeIfAbsent(labels, l -> StateSetSnapshot.StateSetDataPointSnapshot.builder().labels(labels));
             String stateName = null;
@@ -252,12 +258,12 @@ public class SimpleclientCollector implements MultiCollector {
         return stateSet.build();
     }
 
-    private MetricSnapshot convertUnknown(Collector.MetricFamilySamples samples) {
+    private MetricSnapshot convertUnknown(io.prometheus.client.Collector.MetricFamilySamples samples) {
         UnknownSnapshot.Builder unknown = UnknownSnapshot.builder()
                 .name(samples.name)
                 .help(samples.help)
                 .unit(convertUnit(samples));
-        for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
+        for (io.prometheus.client.Collector.MetricFamilySamples.Sample sample : samples.samples) {
             UnknownSnapshot.UnknownDataPointSnapshot.Builder dataPoint = UnknownSnapshot.UnknownDataPointSnapshot.builder()
                     .value(sample.value)
                     .labels(Labels.of(sample.labelNames, sample.labelValues))
@@ -278,7 +284,7 @@ public class SimpleclientCollector implements MultiCollector {
         }
     }
 
-    private Unit convertUnit(Collector.MetricFamilySamples samples) {
+    private Unit convertUnit(io.prometheus.client.Collector.MetricFamilySamples samples) {
         if (samples.unit != null && !samples.unit.isEmpty()) {
             return new Unit(samples.unit);
         } else {
@@ -300,7 +306,7 @@ public class SimpleclientCollector implements MultiCollector {
         return result.build();
     }
 
-    private void addBucket(Map<Double, Long> buckets, Collector.MetricFamilySamples.Sample sample) {
+    private void addBucket(Map<Double, Long> buckets, io.prometheus.client.Collector.MetricFamilySamples.Sample sample) {
         for (int i = 0; i < sample.labelNames.size(); i++) {
             if (sample.labelNames.get(i).equals("le")) {
                 double upperBound;
@@ -322,7 +328,7 @@ public class SimpleclientCollector implements MultiCollector {
     }
 
 
-    private Labels labelsWithout(Collector.MetricFamilySamples.Sample sample, String excludedLabelName) {
+    private Labels labelsWithout(io.prometheus.client.Collector.MetricFamilySamples.Sample sample, String excludedLabelName) {
         Labels.Builder labels = Labels.builder();
         for (int i = 0; i < sample.labelNames.size(); i++) {
             if (!sample.labelNames.get(i).equals(excludedLabelName)) {
@@ -332,11 +338,11 @@ public class SimpleclientCollector implements MultiCollector {
         return labels.build();
     }
 
-    private MetricSnapshot convertInfo(Collector.MetricFamilySamples samples) {
+    private MetricSnapshot convertInfo(io.prometheus.client.Collector.MetricFamilySamples samples) {
         InfoSnapshot.Builder info = InfoSnapshot.builder()
                 .name(stripSuffix(samples.name, "_info"))
                 .help(samples.help);
-        for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
+        for (io.prometheus.client.Collector.MetricFamilySamples.Sample sample : samples.samples) {
             info.dataPoint(InfoSnapshot.InfoDataPointSnapshot.builder()
                     .labels(Labels.of(sample.labelNames, sample.labelValues))
                     .build());

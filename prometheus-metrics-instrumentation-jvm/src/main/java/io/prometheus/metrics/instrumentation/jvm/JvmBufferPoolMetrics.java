@@ -2,6 +2,8 @@ package io.prometheus.metrics.instrumentation.jvm;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
+import io.prometheus.metrics.model.registry.Collector;
+import io.prometheus.metrics.model.registry.CollectorBuilder;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Unit;
 
@@ -40,17 +42,10 @@ public class JvmBufferPoolMetrics {
     private static final String JVM_BUFFER_POOL_CAPACITY_BYTES = "jvm_buffer_pool_capacity_bytes";
     private static final String JVM_BUFFER_POOL_USED_BUFFERS = "jvm_buffer_pool_used_buffers";
 
-    private final PrometheusProperties config;
-    private final List<BufferPoolMXBean> bufferPoolBeans;
+    private static Collector build(List<BufferPoolMXBean> bufferPoolBeans, PrometheusProperties config) {
+        var builder = CollectorBuilder.compositeBuilder();
 
-    private JvmBufferPoolMetrics(List<BufferPoolMXBean> bufferPoolBeans, PrometheusProperties config) {
-        this.config = config;
-        this.bufferPoolBeans = bufferPoolBeans;
-    }
-
-    private void register(PrometheusRegistry registry) {
-
-        GaugeWithCallback.builder(config)
+        builder.add(GaugeWithCallback.builder(config)
                 .name(JVM_BUFFER_POOL_USED_BYTES)
                 .help("Used bytes of a given JVM buffer pool.")
                 .unit(Unit.BYTES)
@@ -60,9 +55,9 @@ public class JvmBufferPoolMetrics {
                         callback.call(pool.getMemoryUsed(), pool.getName());
                     }
                 })
-                .register(registry);
+                .build());
 
-        GaugeWithCallback.builder(config)
+        builder.add(GaugeWithCallback.builder(config)
                 .name(JVM_BUFFER_POOL_CAPACITY_BYTES)
                 .help("Bytes capacity of a given JVM buffer pool.")
                 .unit(Unit.BYTES)
@@ -72,9 +67,9 @@ public class JvmBufferPoolMetrics {
                         callback.call(pool.getTotalCapacity(), pool.getName());
                     }
                 })
-                .register(registry);
+                .build());
 
-        GaugeWithCallback.builder(config)
+        builder.add(GaugeWithCallback.builder(config)
                 .name(JVM_BUFFER_POOL_USED_BUFFERS)
                 .help("Used buffers of a given JVM buffer pool.")
                 .labelNames("pool")
@@ -83,7 +78,9 @@ public class JvmBufferPoolMetrics {
                         callback.call(pool.getCount(), pool.getName());
                     }
                 })
-                .register(registry);
+                .build());
+
+        return builder.build();
     }
 
     public static Builder builder() {
@@ -111,16 +108,16 @@ public class JvmBufferPoolMetrics {
             return this;
         }
 
+        public Collector build() {
+            return JvmBufferPoolMetrics.build(bufferPoolBeans, config);
+        }
+
         public void register() {
-            register(PrometheusRegistry.defaultRegistry);
+            PrometheusRegistry.defaultRegistry.register(build());
         }
 
         public void register(PrometheusRegistry registry) {
-            List<BufferPoolMXBean> bufferPoolBeans = this.bufferPoolBeans;
-            if (bufferPoolBeans == null) {
-                bufferPoolBeans = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
-            }
-            new JvmBufferPoolMetrics(bufferPoolBeans, config).register(registry);
+            registry.register(build());
         }
     }
 }

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Base class for metric snapshots.
@@ -33,11 +34,23 @@ public abstract class MetricSnapshot {
         validateLabels();
     }
 
+    /** Merge datapoints from two metric snapshots, as long as type and metadata matches (exception otherwise). */
+    public abstract MetricSnapshot merge(MetricSnapshot snapshot);
+
+    public boolean matches(Predicate<String> nameFilter) {
+        return nameFilter.test(getMetadata().getPrometheusName());
+    }
+
     public MetricMetadata getMetadata() {
         return metadata;
     }
 
     public abstract List<? extends DataPointSnapshot> getDataPoints();
+
+    public abstract MetricSnapshot withNamePrefix(String prefix);
+
+    /** Merge additional labels to all the data points. */
+    public abstract MetricSnapshot withLabels(Labels labels);
 
     protected void validateLabels() {
         // Verify that labels are unique (the same set of names/values must not be used multiple times for the same metric).

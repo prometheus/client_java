@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.exporter.common.PrometheusScrapeHandler;
+import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 
 import java.io.ByteArrayOutputStream;
@@ -26,7 +27,7 @@ public class MetricsHandler implements HttpHandler {
         prometheusScrapeHandler = new PrometheusScrapeHandler();
     }
 
-    public MetricsHandler(PrometheusRegistry registry) {
+    public MetricsHandler(Collector registry) {
         prometheusScrapeHandler = new PrometheusScrapeHandler(registry);
     }
 

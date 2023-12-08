@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import java.util.Objects;
+
 /**
  * Immutable container for metric metadata: name, help, unit.
  */
@@ -96,6 +98,10 @@ public final class MetricMetadata {
         return unit;
     }
 
+    public MetricMetadata withNamePrefix(String prefix) {
+        return new MetricMetadata(prefix + name, help, unit);
+    }
+
     private void validate() {
         if (name == null) {
             throw new IllegalArgumentException("Missing required field: name is null");
@@ -105,5 +111,18 @@ public final class MetricMetadata {
             throw new IllegalArgumentException("'" + name + "': Illegal metric name. " + error
                     + " Call " + PrometheusNaming.class.getSimpleName() + ".sanitizeMetricName(name) to avoid this error.");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MetricMetadata that = (MetricMetadata) o;
+        return Objects.equals(name, that.name) && Objects.equals(prometheusName, that.prometheusName) && Objects.equals(help, that.help) && Objects.equals(unit, that.unit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(prometheusName);
     }
 }

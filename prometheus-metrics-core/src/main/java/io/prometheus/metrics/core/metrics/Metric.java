@@ -2,6 +2,7 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.Collector;
+import io.prometheus.metrics.model.registry.CollectorBuilder;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -20,9 +21,6 @@ public abstract class Metric implements Collector {
     protected Metric(Builder<?, ?> builder) {
         this.constLabels = builder.constLabels;
     }
-
-    @Override
-    public abstract MetricSnapshot collect();
 
     protected static abstract class Builder<B extends Builder<B, M>, M extends Metric> {
 

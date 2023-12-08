@@ -1,11 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -23,6 +19,34 @@ public final class StateSetSnapshot extends MetricSnapshot {
     public StateSetSnapshot(MetricMetadata metadata, Collection<StateSetDataPointSnapshot> data) {
         super(metadata, data);
         validate();
+    }
+
+    @Override
+    public StateSetSnapshot merge(MetricSnapshot snapshot) {
+        if (!(getMetadata().equals(snapshot.getMetadata())))
+            throw new IllegalArgumentException("Unable to merge - metadata mismatch.");
+        if (snapshot instanceof StateSetSnapshot s) {
+            var result = new ArrayList<StateSetDataPointSnapshot>();
+            result.addAll(this.getDataPoints());
+            result.addAll(s.getDataPoints());
+            return new StateSetSnapshot(getMetadata(), result);
+        } else {
+            throw new IllegalArgumentException("Unable to merge - invalid snapshot type");
+        }
+    }
+
+    @Override
+    public StateSetSnapshot withNamePrefix(String prefix) {
+        return new StateSetSnapshot(getMetadata().withNamePrefix(prefix), getDataPoints());
+    }
+
+    /** Merge additional labels to all the data points. */
+    public StateSetSnapshot withLabels(Labels labels) {
+        var points = getDataPoints()
+                .stream()
+                .map(point -> new StateSetSnapshot.StateSetDataPointSnapshot(point.names, point.values, point.getLabels().merge(labels), point.getScrapeTimestampMillis()))
+                .collect(Collectors.toList());
+        return new StateSetSnapshot(getMetadata(), points);
     }
 
     private void validate() {
@@ -151,7 +175,8 @@ public final class StateSetSnapshot extends MetricSnapshot {
             private final ArrayList<String> names = new ArrayList<>();
             private final ArrayList<Boolean> values = new ArrayList<>();
 
-            private Builder() {}
+            private Builder() {
+            }
 
             /**
              * Add a state. Call multple times to add multiple states.
