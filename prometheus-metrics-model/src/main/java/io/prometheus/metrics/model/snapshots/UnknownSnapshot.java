@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Immutable snapshot of an Unknown (Untyped) metric.
@@ -19,6 +20,36 @@ public final class UnknownSnapshot extends MetricSnapshot {
      */
     public UnknownSnapshot(MetricMetadata metadata, Collection<UnknownDataPointSnapshot> data) {
         super(metadata, data);
+    }
+
+
+    @Override
+    public UnknownSnapshot merge(MetricSnapshot snapshot) {
+        if (!(getMetadata().equals(snapshot.getMetadata())))
+            throw new IllegalArgumentException("Unable to merge - metadata mismatch.");
+        if (snapshot instanceof UnknownSnapshot s) {
+            var result = new ArrayList<UnknownSnapshot.UnknownDataPointSnapshot>();
+            result.addAll(this.getDataPoints());
+            result.addAll(s.getDataPoints());
+            return new UnknownSnapshot(getMetadata(), result);
+        } else {
+            throw new IllegalArgumentException("Unable to merge - invalid snapshot type");
+        }
+    }
+
+
+    @Override
+    public UnknownSnapshot withNamePrefix(String prefix) {
+        return new UnknownSnapshot(getMetadata().withNamePrefix(prefix), getDataPoints());
+    }
+
+    /** Merge additional labels to all the data points. */
+    public UnknownSnapshot withLabels(Labels labels) {
+        var points = getDataPoints()
+                .stream()
+                .map(point -> new UnknownSnapshot.UnknownDataPointSnapshot(point.value, point.getLabels().merge(labels), point.exemplar, point.getScrapeTimestampMillis()))
+                .collect(Collectors.toList());
+        return new UnknownSnapshot(getMetadata(), points);
     }
 
     @Override

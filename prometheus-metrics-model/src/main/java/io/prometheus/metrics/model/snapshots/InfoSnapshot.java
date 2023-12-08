@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Immutable snapshot of an Info metric.
@@ -29,6 +30,35 @@ public final class InfoSnapshot extends MetricSnapshot {
     public List<InfoDataPointSnapshot> getDataPoints() {
         return (List<InfoDataPointSnapshot>) dataPoints;
     }
+
+    @Override
+    public InfoSnapshot merge(MetricSnapshot snapshot) {
+        if (!(getMetadata().equals(snapshot.getMetadata())))
+            throw new IllegalArgumentException("Unable to merge - metadata mismatch.");
+        if (snapshot instanceof InfoSnapshot s) {
+            var result = new ArrayList<InfoSnapshot.InfoDataPointSnapshot>();
+            result.addAll(this.getDataPoints());
+            result.addAll(s.getDataPoints());
+            return new InfoSnapshot(getMetadata(), result);
+        } else {
+            throw new IllegalArgumentException("Unable to merge - invalid snapshot type");
+        }
+    }
+
+    @Override
+    public InfoSnapshot withNamePrefix(String prefix) {
+        return new InfoSnapshot(getMetadata().withNamePrefix(prefix), getDataPoints());
+    }
+
+    /** Merge additional labels to all the data points. */
+    public MetricSnapshot withLabels(Labels labels) {
+        var points = getDataPoints()
+                .stream()
+                .map(point -> new InfoDataPointSnapshot(point.getLabels().merge(labels), point.getScrapeTimestampMillis()))
+                .collect(Collectors.toList());
+        return new InfoSnapshot(getMetadata(), points);
+    }
+
 
     public static class InfoDataPointSnapshot extends DataPointSnapshot {
 

@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Immutable snapshot of a Histogram.
@@ -36,6 +37,48 @@ public final class HistogramSnapshot extends MetricSnapshot {
 
     public boolean isGaugeHistogram() {
         return gaugeHistogram;
+    }
+
+
+    @Override
+    public HistogramSnapshot merge(MetricSnapshot snapshot) {
+        if (!(getMetadata().equals(snapshot.getMetadata())))
+            throw new IllegalArgumentException("Unable to merge - metadata mismatch.");
+        if (snapshot instanceof HistogramSnapshot s) {
+            var result = new ArrayList<HistogramSnapshot.HistogramDataPointSnapshot>();
+            result.addAll(this.getDataPoints());
+            result.addAll(s.getDataPoints());
+            return new HistogramSnapshot(gaugeHistogram, getMetadata(), result);
+        } else {
+            throw new IllegalArgumentException("Unable to merge - invalid snapshot type");
+        }
+    }
+
+    @Override
+    public HistogramSnapshot withNamePrefix(String prefix) {
+        return new HistogramSnapshot(getMetadata().withNamePrefix(prefix), getDataPoints());
+    }
+
+    /**
+     * Merge additional labels to all the data points.
+     */
+    public HistogramSnapshot withLabels(Labels labels) {
+        var points = getDataPoints()
+                .stream()
+                .map(point -> new HistogramSnapshot.HistogramDataPointSnapshot(
+                        point.classicBuckets,
+                        point.nativeSchema,
+                        point.nativeZeroCount,
+                        point.nativeZeroThreshold,
+                        point.nativeBucketsForPositiveValues,
+                        point.nativeBucketsForNegativeValues,
+                        point.getSum(),
+                        point.getLabels().merge(labels),
+                        point.getExemplars(),
+                        point.getCreatedTimestampMillis(),
+                        point.getScrapeTimestampMillis()))
+                .collect(Collectors.toList());
+        return new HistogramSnapshot(getMetadata(), points);
     }
 
     @Override

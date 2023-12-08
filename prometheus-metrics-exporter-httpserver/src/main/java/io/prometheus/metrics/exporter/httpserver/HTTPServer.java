@@ -6,8 +6,8 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
-import io.prometheus.metrics.config.ExporterHttpServerProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 
 import java.io.Closeable;
@@ -46,7 +46,7 @@ public class HTTPServer implements Closeable {
     protected final HttpServer server;
     protected final ExecutorService executorService;
 
-    private HTTPServer(PrometheusProperties config, ExecutorService executorService, HttpServer httpServer, PrometheusRegistry registry, Authenticator authenticator, HttpHandler defaultHandler) {
+    private HTTPServer(PrometheusProperties config, ExecutorService executorService, HttpServer httpServer, Collector registry, Authenticator authenticator, HttpHandler defaultHandler) {
         if (httpServer.getAddress() == null) {
             throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
         }
@@ -104,7 +104,7 @@ public class HTTPServer implements Closeable {
         private String hostname = null;
         private InetAddress inetAddress = null;
         private ExecutorService executorService = null;
-        private PrometheusRegistry registry = null;
+        private Collector registry = null;
         private Authenticator authenticator = null;
         private HttpsConfigurator httpsConfigurator = null;
         private HttpHandler defaultHandler = null;
@@ -153,7 +153,7 @@ public class HTTPServer implements Closeable {
         /**
          * Optional: Default is {@link PrometheusRegistry#defaultRegistry}.
          */
-        public Builder registry(PrometheusRegistry registry) {
+        public Builder registry(Collector registry) {
             this.registry = registry;
             return this;
         }

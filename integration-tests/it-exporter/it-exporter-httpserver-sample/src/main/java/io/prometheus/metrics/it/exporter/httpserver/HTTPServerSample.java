@@ -4,9 +4,9 @@ import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.core.metrics.Info;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
+import io.prometheus.metrics.model.registry.CollectorBuilder;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
 
 import java.io.IOException;
@@ -53,9 +53,9 @@ public class HTTPServerSample {
         gauge.labelValues("outside").set(27.0);
 
         if (mode == Mode.error) {
-            Collector failingCollector = () -> {
+            Collector failingCollector = CollectorBuilder.fromMetric(() -> {
                 throw new RuntimeException("Simulating an error.");
-            };
+            });
 
             PrometheusRegistry.defaultRegistry.register(failingCollector);
         }

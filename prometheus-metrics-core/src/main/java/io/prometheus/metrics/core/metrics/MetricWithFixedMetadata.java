@@ -1,13 +1,15 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricMetadata;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
-import io.prometheus.metrics.model.snapshots.Unit;
+import io.prometheus.metrics.model.registry.Collector;
+import io.prometheus.metrics.model.registry.CollectorBuilder;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
+import io.prometheus.metrics.model.snapshots.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Almost all metrics have fixed metadata, i.e. the metric name is known when the metric is created.
@@ -30,6 +32,15 @@ public abstract class MetricWithFixedMetadata extends Metric {
         return metadata;
     }
 
+    protected abstract MetricSnapshot collect();
+
+    public MetricSnapshots collect(Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
+        if(includedNames.test(this.metadata.getPrometheusName()))
+            return MetricSnapshots.of(collect());
+        else
+            return MetricSnapshots.empty();
+    }
+
     private String makeName(String name, Unit unit) {
         if (unit != null) {
             if (!name.endsWith(unit.toString())) {
@@ -37,11 +48,6 @@ public abstract class MetricWithFixedMetadata extends Metric {
             }
         }
         return name;
-    }
-
-    @Override
-    public String getPrometheusName() {
-        return metadata.getPrometheusName();
     }
 
     public static abstract class Builder<B extends Builder<B, M>, M extends MetricWithFixedMetadata> extends Metric.Builder<B, M> {

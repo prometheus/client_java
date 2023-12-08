@@ -4,9 +4,9 @@ import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.core.metrics.Info;
 import io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet;
+import io.prometheus.metrics.model.registry.CollectorBuilder;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -57,9 +57,9 @@ public class ExporterServletJettySample {
         gauge.labelValues("outside").set(27.0);
 
         if (mode == Mode.error) {
-            Collector failingCollector = () -> {
+            Collector failingCollector = CollectorBuilder.fromMetrics(() -> {
                 throw new RuntimeException("Simulating an error.");
-            };
+            });
 
             PrometheusRegistry.defaultRegistry.register(failingCollector);
         }
