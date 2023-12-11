@@ -86,7 +86,7 @@ public class CacheMetricsCollector extends Collector {
     @Override
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-        List<String> labelNames = Arrays.asList("cache");
+        List<String> labelNames = Collections.singletonList("cache");
 
         CounterMetricFamily cacheHitTotal = new CounterMetricFamily("guava_cache_hit_total",
                 "Cache hit totals", labelNames);
@@ -121,7 +121,7 @@ public class CacheMetricsCollector extends Collector {
         mfs.add(cacheLoadSummary);
 
         for(Map.Entry<String, Cache> c: children.entrySet()) {
-            List<String> cacheName = Arrays.asList(c.getKey());
+            List<String> cacheName = Collections.singletonList(c.getKey());
             CacheStats stats = c.getValue().stats();
 
             cacheHitTotal.addMetric(cacheName, stats.hitCount());

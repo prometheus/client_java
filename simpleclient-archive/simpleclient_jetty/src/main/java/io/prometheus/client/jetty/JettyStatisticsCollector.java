@@ -32,7 +32,7 @@ import org.eclipse.jetty.server.handler.StatisticsHandler;
  */
 public class JettyStatisticsCollector extends Collector {
   private final StatisticsHandler statisticsHandler;
-  private static final List<String> EMPTY_LIST = new ArrayList<String>();
+  private static final List<String> EMPTY_LIST = Collections.emptyList();
 
   public JettyStatisticsCollector(StatisticsHandler statisticsHandler) {
     this.statisticsHandler = statisticsHandler;

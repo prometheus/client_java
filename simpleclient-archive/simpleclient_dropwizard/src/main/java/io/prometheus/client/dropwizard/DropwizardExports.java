@@ -86,7 +86,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
     MetricFamilySamples fromCounter(String dropwizardName, Counter counter) {
         MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "", new ArrayList<String>(), new ArrayList<String>(),
                 new Long(counter.getCount()).doubleValue());
-        return new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName, counter), Arrays.asList(sample));
+        return new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName, counter), Collections.singletonList(sample));
     }
 
     /**
@@ -106,7 +106,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
         }
         MetricFamilySamples.Sample sample = sampleBuilder.createSample(dropwizardName, "",
                 new ArrayList<String>(), new ArrayList<String>(), value);
-        return new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName, gauge), Arrays.asList(sample));
+        return new MetricFamilySamples(sample.name, Type.GAUGE, getHelpMessage(dropwizardName, gauge), Collections.singletonList(sample));
     }
 
     /**
@@ -155,7 +155,7 @@ public class DropwizardExports extends io.prometheus.client.Collector implements
                 new ArrayList<String>(),
                 meter.getCount());
         return new MetricFamilySamples(sample.name, Type.COUNTER, getHelpMessage(dropwizardName, meter),
-                        Arrays.asList(sample));
+                Collections.singletonList(sample));
     }
 
     @Override

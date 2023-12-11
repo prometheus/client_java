@@ -44,7 +44,7 @@ public class HibernateStatisticsCollector extends Collector {
 
   private static final List<String> LABEL_NAMES = Collections.singletonList("unit");
 
-  private static final List<String> LABEL_NAMES_PER_QUERY = Arrays.asList("unit", "query");
+  private static final List<String> LABEL_NAMES_PER_QUERY = Collections.unmodifiableList(Arrays.asList("unit", "query"));
 
   private final Map<String, SessionFactory> sessionFactories = new ConcurrentHashMap<String, SessionFactory>();
 
@@ -476,7 +476,7 @@ public class HibernateStatisticsCollector extends Collector {
   private List<MetricFamilySamples> getPerQueryMetrics() {
     List<MetricFamilySamples> metrics = new ArrayList<MetricFamilySamples>();
 
-    metrics.addAll(Arrays.asList(
+    Collections.addAll(metrics,
 
         createCounterForQuery("hibernate_per_query_cache_hit_total",
                 "Global number of cache hits for query (getCacheHitCount)",
@@ -558,7 +558,7 @@ public class HibernateStatisticsCollector extends Collector {
               }
             }
         )
-    ));
+    );
 
     return metrics;
   }
