@@ -11,7 +11,6 @@ import io.prometheus.client.servlet.common.adapter.ServletConfigAdapter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -87,7 +86,9 @@ public class Exporter {
     if (includedParam == null) {
       return Collections.emptySet();
     } else {
-      return new HashSet<String>(Arrays.asList(includedParam));
+      Set<String> result = new HashSet<String>();
+      Collections.addAll(result, includedParam);
+      return result;
     }
   }
 
