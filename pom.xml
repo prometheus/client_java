@@ -4,14 +4,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.prometheus</groupId>
-    <artifactId>parent</artifactId>
-    <version>0.16.1-SNAPSHOT</version>
+    <artifactId>client_java</artifactId>
+    <version>1.2.0-SNAPSHOT</version>
 
-    <name>Prometheus Java Suite</name>
+    <name>Prometheus Metrics Library</name>
     <url>http://github.com/prometheus/client_java</url>
     <description>
-        The Prometheus Java Suite: Client Metrics, Exposition, and Examples
+        The Prometheus Java Metrics Library
     </description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <automatic.module.name>--module-name-need-to-be-overriden--</automatic.module.name>
+    </properties>
 
     <licenses>
         <license>
@@ -34,40 +39,35 @@
             <name>Matt T. Proud</name>
             <email>matt.proud@gmail.com</email>
         </developer>
+        <developer>
+            <id>brian-brazil</id>
+            <name>Brian Brazil</name>
+            <email>brian.brazil@boxever.com</email>
+        </developer>
+        <developer>
+            <id>fstab</id>
+            <name>Fabian Stäber</name>
+            <email>fabian@fstab.de</email>
+        </developer>
     </developers>
 
     <modules>
-        <module>simpleclient</module>
-        <module>simpleclient_common</module>
-        <module>simpleclient_caffeine</module>
-        <module>simpleclient_dropwizard</module>
-        <module>simpleclient_graphite_bridge</module>
-        <module>simpleclient_hibernate</module>
-        <module>simpleclient_guava</module>
-        <module>simpleclient_hotspot</module>
-        <module>simpleclient_httpserver</module>
-        <module>simpleclient_log4j</module>
-        <module>simpleclient_log4j2</module>
-        <module>simpleclient_logback</module>
-        <module>simpleclient_pushgateway</module>
-        <module>simpleclient_servlet</module>
-        <module>simpleclient_servlet_common</module>
-        <module>simpleclient_servlet_jakarta</module>
-        <module>simpleclient_spring_web</module>
-        <module>simpleclient_spring_boot</module>
-        <module>simpleclient_jetty</module>
-        <module>simpleclient_jetty_jdk8</module>
-        <module>simpleclient_tracer</module>
-        <module>simpleclient_vertx</module>
-        <module>simpleclient_vertx4</module>
-        <module>simpleclient_bom</module>
+        <module>prometheus-metrics-core</module>
+        <module>prometheus-metrics-config</module>
+        <module>prometheus-metrics-model</module>
+        <module>prometheus-metrics-tracer</module>
+        <module>prometheus-metrics-exposition-formats</module>
+        <module>prometheus-metrics-exporter-common</module>
+        <module>prometheus-metrics-exporter-servlet-jakarta</module>
+        <module>prometheus-metrics-exporter-httpserver</module>
+        <module>prometheus-metrics-exporter-opentelemetry</module>
+        <module>prometheus-metrics-instrumentation-jvm</module>
+        <module>prometheus-metrics-simpleclient-bridge</module>
+        <!--<module>prometheus-metrics-shaded-dependencies</module>-->
+        <module>examples</module>
         <module>benchmarks</module>
-        <module>integration_tests</module>
+        <module>integration-tests</module>
     </modules>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <distributionManagement>
         <snapshotRepository>
@@ -181,6 +181,7 @@
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>release</releaseProfiles>
                     <goals>deploy</goals>
+                    <tagNameFormat>v${project.version}</tagNameFormat>
                 </configuration>
             </plugin>
             <plugin>
@@ -192,37 +193,33 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>2.4.0</version>
                 <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
+                    </instructions>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <encoding>UTF-8</encoding>
                     <docencoding>UTF-8</docencoding>
                     <linksource>true</linksource>
-                    <source>8</source>
-                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+                    <noqualifier>all</noqualifier>
+                    <show>public</show>
+                    <skippedModules>benchmarks,examples,integration-tests,integration_tests,,simpleclient,simpleclient_bom,simpleclient_caffeine,simpleclient_common,simpleclient_dropwizard,simpleclient_graphite_bridge,simpleclient_guava,simpleclient_hibernate,simpleclient_hotspot,simpleclient_httpserver,simpleclient_jetty,simpleclient_jetty_jdk8,simpleclient_log4j,simpleclient_log4j2,simpleclient_logback,simpleclient_pushgateway,simpleclient_servlet,simpleclient_servlet_common,simpleclient_servlet_jakarta,simpleclient_spring_boot,simpleclient_spring_web,simpleclient_tracer,simpleclient_vertx,simpleclient_vertx4</skippedModules>
+                    <excludePackageNames>io.prometheus.metrics.expositionformats.generated.*</excludePackageNames>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-javadoc-site-report</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>aggregate</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>

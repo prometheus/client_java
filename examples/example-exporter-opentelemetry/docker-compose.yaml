@@ -1,0 +1,31 @@
+version: "3"
+services:
+  prometheus-opentelemetry-example-app:
+    image: openjdk:11-jre
+    network_mode: host
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./target/example-exporter-opentelemetry.jar:/example-exporter-opentelemetry.jar
+    command:
+      - java
+      - -jar
+      #- -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005
+      - /example-exporter-opentelemetry.jar
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.85.0
+    network_mode: host
+    volumes:
+      - ./config/otelcol-config.yaml:/config.yaml
+    command:
+      - --config=file:/config.yaml
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    network_mode: host
+    volumes:
+      - ./config/prometheus.yaml:/prometheus.yaml
+    command:
+      - --enable-feature=exemplar-storage
+      - --enable-feature=native-histograms
+      - --web.enable-remote-write-receiver
+      - --config.file=/prometheus.yaml
