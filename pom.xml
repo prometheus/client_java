@@ -225,6 +225,7 @@
                     <show>public</show>
                     <skippedModules>benchmarks,examples,integration-tests,integration_tests,,simpleclient,simpleclient_bom,simpleclient_caffeine,simpleclient_common,simpleclient_dropwizard,simpleclient_graphite_bridge,simpleclient_guava,simpleclient_hibernate,simpleclient_hotspot,simpleclient_httpserver,simpleclient_jetty,simpleclient_jetty_jdk8,simpleclient_log4j,simpleclient_log4j2,simpleclient_logback,simpleclient_pushgateway,simpleclient_servlet,simpleclient_servlet_common,simpleclient_servlet_jakarta,simpleclient_spring_boot,simpleclient_spring_web,simpleclient_tracer,simpleclient_vertx,simpleclient_vertx4</skippedModules>
                     <excludePackageNames>io.prometheus.metrics.expositionformats.generated.*</excludePackageNames>
+                    <sourcepath>src/main/java;src/main/generated</sourcepath>
                 </configuration>
             </plugin>
             <plugin>
