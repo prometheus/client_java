@@ -1,13 +1,14 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class MetricSnapshotTest {
+class MetricSnapshotTest {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testDuplicateLabels() {
-        CounterSnapshot.builder()
+    @Test
+    void testDuplicateLabels() {
+        Assertions.assertThrows(IllegalArgumentException.class, () ->
+                CounterSnapshot.builder()
                 .name("events")
                 .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder()
                         .labels(Labels.of("path", "/hello", "status", "200"))
@@ -21,17 +22,17 @@ public class MetricSnapshotTest {
                         .labels(Labels.of("status", "200", "path", "/hello"))
                         .value(3.0)
                         .build())
-                .build();
+                .build());
     }
 
     @Test
-    public void testNoData() {
+    void testNoData() {
         MetricSnapshot snapshot = CounterSnapshot.builder().name("test").build();
-        Assert.assertEquals(0, snapshot.getDataPoints().size());
+        Assertions.assertEquals(0, snapshot.getDataPoints().size());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testNullData() {
-        new CounterSnapshot(new MetricMetadata("test"), null);
+    @Test
+    void testNullData() {
+        Assertions.assertThrows(NullPointerException.class, () -> new CounterSnapshot(new MetricMetadata("test"), null));
     }
 }

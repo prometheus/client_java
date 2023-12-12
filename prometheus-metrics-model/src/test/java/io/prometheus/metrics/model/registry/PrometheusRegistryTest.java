@@ -4,10 +4,10 @@ import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class PrometheusRegistryTest {
+class PrometheusRegistryTest {
 
     Collector noName = () -> GaugeSnapshot.builder()
             .name("no_name_gauge")
@@ -62,7 +62,7 @@ public class PrometheusRegistryTest {
     };
 
     @Test
-    public void registerNoName() {
+    void registerNoName() {
         PrometheusRegistry registry = new PrometheusRegistry();
         // If the collector does not have a name at registration time, there is no conflict during registration.
         registry.register(noName);
@@ -71,34 +71,34 @@ public class PrometheusRegistryTest {
         try {
             registry.scrape();
         } catch (IllegalStateException e) {
-            Assert.assertTrue(e.getMessage().contains("duplicate") && e.getMessage().contains("no_name_gauge"));
+            Assertions.assertTrue(e.getMessage().contains("duplicate") && e.getMessage().contains("no_name_gauge"));
             return;
         }
-        Assert.fail("Expected duplicate name exception");
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void registerDuplicateName() {
-        PrometheusRegistry registry = new PrometheusRegistry();
-        registry.register(counterA1);
-        registry.register(counterA2);
+        Assertions.fail("Expected duplicate name exception");
     }
 
     @Test
-    public void registerOk() {
+    void registerDuplicateName() {
+        PrometheusRegistry registry = new PrometheusRegistry();
+        registry.register(counterA1);
+        Assertions.assertThrows(IllegalStateException.class, () -> registry.register(counterA2));
+    }
+
+    @Test
+    void registerOk() {
         PrometheusRegistry registry = new PrometheusRegistry();
         registry.register(counterA1);
         registry.register(counterB);
         registry.register(gaugeA);
         MetricSnapshots snapshots = registry.scrape();
-        Assert.assertEquals(3, snapshots.size());
+        Assertions.assertEquals(3, snapshots.size());
 
         registry.unregister(counterB);
         snapshots = registry.scrape();
-        Assert.assertEquals(2, snapshots.size());
+        Assertions.assertEquals(2, snapshots.size());
 
         registry.register(counterB);
         snapshots = registry.scrape();
-        Assert.assertEquals(3, snapshots.size());
+        Assertions.assertEquals(3, snapshots.size());
     }
 }

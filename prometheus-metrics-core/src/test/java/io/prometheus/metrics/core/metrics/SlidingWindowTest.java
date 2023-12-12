@@ -1,14 +1,14 @@
 package io.prometheus.metrics.core.metrics;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SlidingWindowTest {
+class SlidingWindowTest {
 
     static class Observer {
 
@@ -23,7 +23,7 @@ public class SlidingWindowTest {
             for (double expectedValue : expectedValues) {
                 expectedList.add(expectedValue);
             }
-            Assert.assertEquals(expectedList, values);
+            Assertions.assertEquals(expectedList, values);
         }
     }
 
@@ -33,15 +33,15 @@ public class SlidingWindowTest {
     private final int ageBuckets = 5;
     private final long timeBetweenRotateMillis = maxAgeSeconds * 1000 / ageBuckets + 2;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         currentTimeMillis.set(System.currentTimeMillis());
         ringBuffer = new SlidingWindow<>(Observer.class, Observer::new, Observer::observe, maxAgeSeconds, ageBuckets);
         ringBuffer.currentTimeMillis = currentTimeMillis::get;
     }
 
     @Test
-    public void testRotate() {
+    void testRotate() {
         for (int i=0; i<ageBuckets; i++) {
             currentTimeMillis.addAndGet(timeBetweenRotateMillis);
             ringBuffer.observe(1.0);
@@ -60,7 +60,7 @@ public class SlidingWindowTest {
     }
 
     @Test
-    public void testMultiRotate() {
+    void testMultiRotate() {
         ringBuffer.observe(1.0);
         currentTimeMillis.addAndGet(2 * timeBetweenRotateMillis); // 2/5 of max aqe
         ringBuffer.observe(2.0);

@@ -1,6 +1,6 @@
 package io.prometheus.client.it.common;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class Volume {
 
     public static Volume create(String prefix) throws IOException, URISyntaxException {
         Path targetDir = Paths.get(Volume.class.getResource("/").toURI()).getParent();
-        Assert.assertEquals("failed to locate target/ directory", "target", targetDir.getFileName().toString());
+        Assertions.assertEquals("target", targetDir.getFileName().toString(), "failed to locate target/ directory");
         return new Volume(Files.createTempDirectory(targetDir, prefix + "-"));
     }
 
@@ -56,7 +56,7 @@ public class Volume {
                 }
             });
         } else {
-            Assert.fail(src + ": No such file or directory");
+            Assertions.fail(src + ": No such file or directory");
         }
         return this;
     }

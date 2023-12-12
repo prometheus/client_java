@@ -5,9 +5,9 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -22,15 +22,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class JvmThreadsMetricsTest {
+class JvmThreadsMetricsTest {
 
     private ThreadMXBean mockThreadsBean = Mockito.mock(ThreadMXBean.class);
     private ThreadInfo mockThreadInfoBlocked = Mockito.mock(ThreadInfo.class);
     private ThreadInfo mockThreadInfoRunnable1 = Mockito.mock(ThreadInfo.class);
     private ThreadInfo mockThreadInfoRunnable2 = Mockito.mock(ThreadInfo.class);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         when(mockThreadsBean.getThreadCount()).thenReturn(300);
         when(mockThreadsBean.getDaemonThreadCount()).thenReturn(200);
         when(mockThreadsBean.getPeakThreadCount()).thenReturn(301);
@@ -47,7 +47,7 @@ public class JvmThreadsMetricsTest {
     }
 
     @Test
-    public void testGoodCase() throws IOException {
+    void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
         JvmThreadsMetrics.builder()
                 .threadBean(mockThreadsBean)
@@ -85,11 +85,11 @@ public class JvmThreadsMetricsTest {
                 "jvm_threads_state{state=\"WAITING\"} 0.0\n" +
                 "# EOF\n";
 
-        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+        Assertions.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
     }
 
     @Test
-    public void testIgnoredMetricNotScraped() {
+    void testIgnoredMetricNotScraped() {
         MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_threads_deadlocked")
                 .build();
@@ -106,7 +106,7 @@ public class JvmThreadsMetricsTest {
     }
 
     @Test
-    public void testInvalidThreadIds() {
+    void testInvalidThreadIds() {
         try {
             int javaVersion = Integer.parseInt(System.getProperty("java.version"));
             if (javaVersion >= 21) {
@@ -134,9 +134,9 @@ public class JvmThreadsMetricsTest {
 
             Map<String, Double> actual = getCountByState(registry.scrape());
 
-            Assert.assertEquals(expected.size(), actual.size());
+            Assertions.assertEquals(expected.size(), actual.size());
             for (String threadState : expected.keySet()) {
-                Assert.assertEquals(expected.get(threadState), actual.get(threadState), 0.0);
+                Assertions.assertEquals(expected.get(threadState), actual.get(threadState), 0.0);
             }
         } finally {
             for (int i = 0; i < numberOfInvalidThreadIds; i++) {
@@ -151,7 +151,7 @@ public class JvmThreadsMetricsTest {
             if (snapshot.getMetadata().getName().equals("jvm_threads_state")) {
                 for (GaugeSnapshot.GaugeDataPointSnapshot data : ((GaugeSnapshot) snapshot).getDataPoints()) {
                     String state = data.getLabels().get("state");
-                    Assert.assertNotNull(state);
+                    Assertions.assertNotNull(state);
                     result.put(state, data.getValue());
                 }
             }

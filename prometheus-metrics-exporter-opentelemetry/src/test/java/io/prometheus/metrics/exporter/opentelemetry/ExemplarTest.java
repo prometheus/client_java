@@ -1,7 +1,7 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.ValueMatcher;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -9,31 +9,23 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
-import io.opentelemetry.proto.metrics.v1.InstrumentationLibraryMetrics;
-import io.opentelemetry.proto.metrics.v1.Metric;
-import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
-import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
+import io.opentelemetry.proto.metrics.v1.*;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import org.awaitility.core.ConditionTimeoutException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.containing;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.ok;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ExemplarTest {
+@WireMockTest(httpPort = 4317)
+class ExemplarTest {
     private static final String ENDPOINT_PATH = "/v1/metrics";
     private static final int TIMEOUT = 3;
     private static final String INSTRUMENTATION_SCOPE_NAME = "testInstrumentationScope";
@@ -41,11 +33,9 @@ public class ExemplarTest {
     public static final String TEST_COUNTER_NAME = "test_counter";
     private Counter testCounter;
     private OpenTelemetryExporter openTelemetryExporter;
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(4317);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         openTelemetryExporter = OpenTelemetryExporter.builder()
                 .endpoint("http://localhost:4317")
                 .protocol("http/protobuf")
@@ -57,21 +47,21 @@ public class ExemplarTest {
                 .withExemplars()
                 .register();
 
-        wireMockRule.stubFor(post(ENDPOINT_PATH)
+        stubFor(post(ENDPOINT_PATH)
                 .withHeader("Content-Type", containing("application/x-protobuf"))
                 .willReturn(ok()
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"partialSuccess\":{}}")));
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         PrometheusRegistry.defaultRegistry.unregister(testCounter);
         openTelemetryExporter.close();
     }
 
     @Test
-    public void sampledExemplarIsForwarded() {
+    void sampledExemplarIsForwarded() {
          try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
                     .setSampler(Sampler.alwaysOn())
                     .build()) {
@@ -96,8 +86,8 @@ public class ExemplarTest {
 
     }
 
-    @Test(expected = ConditionTimeoutException.class)
-    public void notSampledExemplarIsNotForwarded() {
+    @Test
+    void notSampledExemplarIsNotForwarded() {
         try (SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
                 .setSampler(Sampler.alwaysOff())
                 .build()) {
@@ -109,16 +99,16 @@ public class ExemplarTest {
                 testCounter.inc(2);
             }
         }
-
-        await().atMost(TIMEOUT, SECONDS)
-                .ignoreException(com.github.tomakehurst.wiremock.client.VerificationException.class)
-                .until(() -> {
-                    verify(postRequestedFor(urlEqualTo(ENDPOINT_PATH))
-                            .withHeader("Content-Type", equalTo("application/x-protobuf"))
-                            .andMatching(getExemplarCountMatcher(1)));
-                    return true;
-                });
-
+        assertThrows(ConditionTimeoutException.class,
+                () -> await().atMost(TIMEOUT, SECONDS)
+                        .ignoreException(com.github.tomakehurst.wiremock.client.VerificationException.class)
+                        .until(() -> {
+                            verify(postRequestedFor(urlEqualTo(ENDPOINT_PATH))
+                                    .withHeader("Content-Type", equalTo("application/x-protobuf"))
+                                    .andMatching(getExemplarCountMatcher(1)));
+                            return true;
+                        })
+        );
     }
 
     private static ValueMatcher<Request> getExemplarCountMatcher(int expectedCount) {
@@ -126,7 +116,7 @@ public class ExemplarTest {
             try {
                 ExportMetricsServiceRequest exportMetricsServiceRequest = ExportMetricsServiceRequest.parseFrom(request.getBody());
                 for (ResourceMetrics resourceMetrics : exportMetricsServiceRequest.getResourceMetricsList()) {
-                    for (InstrumentationLibraryMetrics instrumentationLibraryMetrics : resourceMetrics.getInstrumentationLibraryMetricsList()) {
+                    for (ScopeMetrics instrumentationLibraryMetrics : resourceMetrics.getScopeMetricsList()) {
                         for (Metric metric : instrumentationLibraryMetrics.getMetricsList()) {
                             for (NumberDataPoint numberDataPoint : metric.getSum().getDataPointsList()) {
                                 if (numberDataPoint.getExemplarsCount() == expectedCount) {

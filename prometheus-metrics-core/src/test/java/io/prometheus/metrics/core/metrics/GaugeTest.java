@@ -7,15 +7,15 @@ import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.core.datapoints.Timer;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GaugeTest {
+class GaugeTest {
 
     private static final long exemplarSampleIntervalMillis = 10;
     private static final long exemplarMinAgeMillis = 100;
@@ -24,15 +24,15 @@ public class GaugeTest {
 
     private SpanContext origSpanContext;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         noLabels = Gauge.builder().name("nolabels").build();
         labels = Gauge.builder().name("labels").labelNames("l").build();
         origSpanContext = SpanContextSupplier.getSpanContext();
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         SpanContextSupplier.setSpanContext(origSpanContext);
     }
 
@@ -48,7 +48,7 @@ public class GaugeTest {
     }
 
     @Test
-    public void testIncrement() {
+    void testIncrement() {
         noLabels.inc();
         assertEquals(1.0, getValue(noLabels), .001);
         noLabels.inc(2);
@@ -60,7 +60,7 @@ public class GaugeTest {
     }
 
     @Test
-    public void testDecrement() {
+    void testDecrement() {
         noLabels.dec();
         assertEquals(-1.0, getValue(noLabels), .001);
         noLabels.dec(2);
@@ -72,7 +72,7 @@ public class GaugeTest {
     }
 
     @Test
-    public void testSet() {
+    void testSet() {
         noLabels.set(42);
         assertEquals(42, getValue(noLabels), .001);
         noLabels.set(7);
@@ -80,7 +80,7 @@ public class GaugeTest {
     }
 
     @Test
-    public void testTimer() throws InterruptedException {
+    void testTimer() throws InterruptedException {
         try (Timer timer = noLabels.startTimer()) {
             Thread.sleep(12);
         }
@@ -88,12 +88,12 @@ public class GaugeTest {
     }
 
     @Test
-    public void noLabelsDefaultZeroValue() {
+    void noLabelsDefaultZeroValue() {
         assertEquals(0.0, getValue(noLabels), .001);
     }
 
     @Test
-    public void testLabels() {
+    void testLabels() {
         labels.labelValues("a").inc();
         labels.labelValues("b").inc(3);
         assertEquals(1.0, getValue(labels, "l", "a"), .001);
@@ -101,7 +101,7 @@ public class GaugeTest {
     }
 
     @Test
-    public void testExemplarSampler() throws Exception {
+    void testExemplarSampler() throws Exception {
         final Exemplar exemplar1 = Exemplar.builder()
                 .value(2.0)
                 .traceId("abc")
@@ -209,14 +209,14 @@ public class GaugeTest {
     }
 
     @Test
-    public void testExemplarSamplerDisabled() {
+    void testExemplarSamplerDisabled() {
         Gauge gauge = Gauge.builder()
                 .name("test")
                 .withoutExemplars()
                 .build();
         gauge.setWithExemplar(3.0, Labels.of("a", "b"));
-        Assert.assertNull(getData(gauge).getExemplar());
+        Assertions.assertNull(getData(gauge).getExemplar());
         gauge.inc(2.0);
-        Assert.assertNull(getData(gauge).getExemplar());
+        Assertions.assertNull(getData(gauge).getExemplar());
     }
 }

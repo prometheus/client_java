@@ -2,10 +2,10 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class StateSetTest {
+class StateSetTest {
 
     enum MyFeatureFlag {
         EXPERIMENTAL_FEATURE_1 {
@@ -24,7 +24,7 @@ public class StateSetTest {
     }
 
     @Test
-    public void testEnumStateSet() {
+    void testEnumStateSet() {
         StateSet stateSet = StateSet.builder()
                 .name("feature_flags")
                 .labelNames("environment")
@@ -33,32 +33,32 @@ public class StateSetTest {
         stateSet.labelValues("dev").setTrue(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
         stateSet.labelValues("prod").setFalse(MyFeatureFlag.EXPERIMENTAL_FEATURE_2);
         StateSetSnapshot snapshot = stateSet.collect();
-        Assert.assertEquals(2, snapshot.getDataPoints().size());
-        Assert.assertEquals(2, getData(stateSet, "environment", "dev").size());
-        Assert.assertEquals("feature1", getData(stateSet, "environment", "dev").getName(0));
-        Assert.assertFalse(getData(stateSet, "environment", "dev").isTrue(0));
-        Assert.assertEquals("feature2", getData(stateSet, "environment", "dev").getName(1));
-        Assert.assertTrue(getData(stateSet, "environment", "dev").isTrue(1));
-        Assert.assertEquals(2, getData(stateSet, "environment", "prod").size());
-        Assert.assertEquals("feature1", getData(stateSet, "environment", "prod").getName(0));
-        Assert.assertFalse(getData(stateSet, "environment", "prod").isTrue(0));
-        Assert.assertEquals("feature2", getData(stateSet, "environment", "prod").getName(1));
-        Assert.assertFalse(getData(stateSet, "environment", "prod").isTrue(1));
+        Assertions.assertEquals(2, snapshot.getDataPoints().size());
+        Assertions.assertEquals(2, getData(stateSet, "environment", "dev").size());
+        Assertions.assertEquals("feature1", getData(stateSet, "environment", "dev").getName(0));
+        Assertions.assertFalse(getData(stateSet, "environment", "dev").isTrue(0));
+        Assertions.assertEquals("feature2", getData(stateSet, "environment", "dev").getName(1));
+        Assertions.assertTrue(getData(stateSet, "environment", "dev").isTrue(1));
+        Assertions.assertEquals(2, getData(stateSet, "environment", "prod").size());
+        Assertions.assertEquals("feature1", getData(stateSet, "environment", "prod").getName(0));
+        Assertions.assertFalse(getData(stateSet, "environment", "prod").isTrue(0));
+        Assertions.assertEquals("feature2", getData(stateSet, "environment", "prod").getName(1));
+        Assertions.assertFalse(getData(stateSet, "environment", "prod").isTrue(1));
     }
 
     @Test
-    public void testDefaultFalse() {
+    void testDefaultFalse() {
         StateSet stateSet = StateSet.builder()
                 .name("test")
                 .states("state1", "state2", "state3")
                 .build();
-        Assert.assertEquals(3, getData(stateSet).size());
-        Assert.assertEquals("state1", getData(stateSet).getName(0));
-        Assert.assertFalse(getData(stateSet).isTrue(0));
-        Assert.assertEquals("state2", getData(stateSet).getName(1));
-        Assert.assertFalse(getData(stateSet).isTrue(1));
-        Assert.assertEquals("state3", getData(stateSet).getName(2));
-        Assert.assertFalse(getData(stateSet).isTrue(2));
+        Assertions.assertEquals(3, getData(stateSet).size());
+        Assertions.assertEquals("state1", getData(stateSet).getName(0));
+        Assertions.assertFalse(getData(stateSet).isTrue(0));
+        Assertions.assertEquals("state2", getData(stateSet).getName(1));
+        Assertions.assertFalse(getData(stateSet).isTrue(1));
+        Assertions.assertEquals("state3", getData(stateSet).getName(2));
+        Assertions.assertFalse(getData(stateSet).isTrue(2));
     }
 
     private StateSetSnapshot.StateSetDataPointSnapshot getData(StateSet stateSet, String... labels) {
@@ -68,8 +68,8 @@ public class StateSetTest {
                 .orElseThrow(() -> new RuntimeException("stateset with labels " + labels + " not found"));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testStatesCannotBeEmpty() {
-        StateSet.builder().name("invalid").build();
+    @Test
+    void testStatesCannotBeEmpty() {
+        Assertions.assertThrows(IllegalStateException.class, () -> StateSet.builder().name("invalid").build());
     }
 }

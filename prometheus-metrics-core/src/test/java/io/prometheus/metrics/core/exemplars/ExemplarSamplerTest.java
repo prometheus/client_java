@@ -5,12 +5,12 @@ import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.core.util.Scheduler;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ExemplarSamplerTest {
+class ExemplarSamplerTest {
 
     private final int tick = 10; // Time step in milliseconds. Make this larger if the test is flaky.
     private final int sampleInterval = 10 * tick; // do not change this
@@ -56,24 +56,24 @@ public class ExemplarSamplerTest {
     }
 
     @Test
-    public void testCustomExemplarsBuckets() throws Exception {
+    void testCustomExemplarsBuckets() throws Exception {
         // TODO
     }
 
     private io.prometheus.metrics.tracer.common.SpanContext origContext;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         origContext = SpanContextSupplier.getSpanContext();
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         SpanContextSupplier.setSpanContext(origContext);
     }
 
     @Test
-    public void testIsSampled() throws Exception {
+    void testIsSampled() throws Exception {
         SpanContext context = new SpanContext();
         context.isSampled = false;
         SpanContextSupplier.setSpanContext(context);
@@ -84,7 +84,7 @@ public class ExemplarSamplerTest {
     }
 
     @Test
-    public void testDefaultConfigHasFourExemplars() throws Exception {
+    void testDefaultConfigHasFourExemplars() throws Exception {
         SpanContext context = new SpanContext();
         SpanContextSupplier.setSpanContext(context);
         ExemplarSampler sampler = new ExemplarSampler(makeConfig());
@@ -103,7 +103,7 @@ public class ExemplarSamplerTest {
     }
 
     @Test
-    public void testEmptyBuckets() throws Exception {
+    void testEmptyBuckets() throws Exception {
         SpanContext context = new SpanContext();
         SpanContextSupplier.setSpanContext(context);
         ExemplarSampler sampler = new ExemplarSampler(makeConfig(Double.POSITIVE_INFINITY));
@@ -116,7 +116,7 @@ public class ExemplarSamplerTest {
     }
 
     @Test
-    public void testDefaultExemplarsBuckets() throws Exception {
+    void testDefaultExemplarsBuckets() throws Exception {
         SpanContext context = new SpanContext();
         SpanContextSupplier.setSpanContext(context);
         ExemplarSampler sampler = new ExemplarSampler(makeConfig(0.2, 0.4, 0.6, 0.8, 1.0, Double.POSITIVE_INFINITY));
@@ -144,12 +144,12 @@ public class ExemplarSamplerTest {
     }
 
     @Test
-    public void testCustomExemplarsNoBuckets() throws Exception {
+    void testCustomExemplarsNoBuckets() throws Exception {
         // TODO
     }
 
     @Test
-    public void testDefaultExemplarsNoBuckets() throws Exception {
+    void testDefaultExemplarsNoBuckets() throws Exception {
         SpanContext context = new SpanContext();
         SpanContextSupplier.setSpanContext(context);
         ExemplarSampler sampler = new ExemplarSampler(makeConfig());
@@ -193,7 +193,7 @@ public class ExemplarSamplerTest {
 
     private void assertExemplars(ExemplarSampler sampler, double... values) {
         Exemplars exemplars = sampler.collect();
-        Assert.assertEquals(values.length, exemplars.size());
+        Assertions.assertEquals(values.length, exemplars.size());
         for (double value : values) {
             boolean found = false;
             for (Exemplar exemplar : exemplars) {
@@ -202,7 +202,7 @@ public class ExemplarSamplerTest {
                     break;
                 }
             }
-            Assert.assertTrue(value + " not found", found);
+            Assertions.assertTrue(found, value + " not found");
         }
     }
 

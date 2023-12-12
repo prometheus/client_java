@@ -4,13 +4,13 @@ import io.prometheus.metrics.core.metrics.CKMSQuantiles.Quantile;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class CKMSQuantilesTest {
+class CKMSQuantilesTest {
 
     private final Quantile qMin = new Quantile(0.0, 0.00);
     private final Quantile q50 = new Quantile(0.5, 0.01);
@@ -19,13 +19,13 @@ public class CKMSQuantilesTest {
     private final Quantile qMax = new Quantile(1.0, 0.00);
 
     @Test
-    public void testGetOnEmptyValues() {
+    void testGetOnEmptyValues() {
         CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
         assertTrue(Double.isNaN(ckms.get(q95.quantile)));
     }
 
     @Test
-    public void testGet() {
+    void testGet() {
         Random random = new Random(0);
         CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
         List<Double> input = shuffledValues(100, random);
@@ -36,7 +36,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testBatchInsert() {
+    void testBatchInsert() {
         Random random = new Random(1);
         testInsertBatch(1, 1, 100, random);
         testInsertBatch(1, 10, 100, random);
@@ -76,7 +76,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testGetWithAMillionElements() {
+    void testGetWithAMillionElements() {
         Random random = new Random(2);
         List<Double> input = shuffledValues(1000*1000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
@@ -84,11 +84,11 @@ public class CKMSQuantilesTest {
             ckms.insert(v);
         }
         validateResults(ckms);
-        assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
+        assertTrue(ckms.samples.size() < 1000, "sample size should be way below 1_000_000");
     }
 
     @Test
-    public void testMin() {
+    void testMin() {
         Random random = new Random(3);
         List<Double> input = shuffledValues(1000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(qMin);
@@ -101,7 +101,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testMax() {
+    void testMax() {
         Random random = new Random(4);
         List<Double> input = shuffledValues(1000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(qMax);
@@ -114,7 +114,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testMinMax() {
+    void testMinMax() {
         Random random = new Random(5);
         List<Double> input = shuffledValues(1000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(qMin, qMax);
@@ -127,7 +127,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testMinAndOthers() {
+    void testMinAndOthers() {
         Random random = new Random(6);
         List<Double> input = shuffledValues(1000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(q95, qMin);
@@ -139,7 +139,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testMaxAndOthers() {
+    void testMaxAndOthers() {
         Random random = new Random(7);
         List<Double> input = shuffledValues(10000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, qMax);
@@ -151,7 +151,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testMinMaxAndOthers() {
+    void testMinMaxAndOthers() {
         Random random = new Random(8);
         List<Double> input = shuffledValues(10000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(qMin, q50, q95, q99, qMax);
@@ -163,7 +163,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testExactQuantile() {
+    void testExactQuantile() {
         Random random = new Random(9);
         List<Double> input = shuffledValues(10000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.95, 0));
@@ -176,7 +176,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testExactAndOthers() {
+    void testExactAndOthers() {
         Random random = new Random(10);
         List<Double> input = shuffledValues(10000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(q50, new Quantile(0.95, 0), q99);
@@ -189,7 +189,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testExactAndMin() {
+    void testExactAndMin() {
         Random random = new Random(11);
         List<Double> input = shuffledValues(10000, random);
         CKMSQuantiles ckms = new CKMSQuantiles(qMin, q50, new Quantile(0.95, 0));
@@ -202,7 +202,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testMaxEpsilon() {
+    void testMaxEpsilon() {
         Random random = new Random(12);
         List<Double> input = shuffledValues(10000, random);
         // epsilon == 1 basically gives you random results, but it should still not throw an exception.
@@ -214,7 +214,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testGetGaussian() {
+    void testGetGaussian() {
         RandomGenerator rand = new JDKRandomGenerator();
         rand.setSeed(0);
 
@@ -253,7 +253,7 @@ public class CKMSQuantilesTest {
         assertEquals(p95, ckms.get(0.95), errorBoundsNormalDistribution(0.95, 0.001, normalDistribution));
         assertEquals(p99, ckms.get(0.99), errorBoundsNormalDistribution(0.99, 0.001, normalDistribution));
 
-        assertTrue("sample size should be below 1000", ckms.samples.size() < 1000);
+        assertTrue(ckms.samples.size() < 1000, "sample size should be below 1000");
     }
 
     double errorBoundsNormalDistribution(double p, double epsilon, NormalDistribution nd) {
@@ -266,7 +266,7 @@ public class CKMSQuantilesTest {
     }
 
     @Test
-    public void testIllegalArgumentException() {
+    void testIllegalArgumentException() {
         try {
             new Quantile(-1, 0);
         } catch (IllegalArgumentException e) {
@@ -300,12 +300,12 @@ public class CKMSQuantilesTest {
         int r = 0; // sum of all g's left of the current sample
         for (CKMSQuantiles.Sample sample : ckms.samples) {
             String msg = "invalid sample " + sample + ": count=" + ckms.n + " r=" + r + " f(r)=" + ckms.f(r);
-            assertTrue(msg, sample.g + sample.delta <= ckms.f(r));
-            assertTrue("Samples not ordered. Keep in mind that insertBatch() takes a sorted array as parameter.", prev <= sample.value);
+            assertTrue(sample.g + sample.delta <= ckms.f(r), msg);
+            assertTrue(prev <= sample.value, "Samples not ordered. Keep in mind that insertBatch() takes a sorted array as parameter.");
             prev = sample.value;
             r += sample.g;
         }
-        assertEquals("the sum of all g's must be the total number of observations", r, ckms.n);
+        assertEquals(r, ckms.n, "the sum of all g's must be the total number of observations");
     }
 
     /**
@@ -334,7 +334,7 @@ public class CKMSQuantilesTest {
                 }
             }
             String errorMessage = q + ": " + actual + " not in [" + lowerBound + ", " + upperBound + "], n=" + ckms.n + ", " +  q.quantile + "*" + ckms.n + "=" + (q.quantile*ckms.n);
-            assertTrue(errorMessage, ok);
+            assertTrue(ok, errorMessage);
         }
     }
 }

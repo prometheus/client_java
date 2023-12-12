@@ -6,19 +6,20 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class InfoTest {
+class InfoTest {
 
     @Test
-    public void testInfoStrippedFromName() {
+    void testInfoStrippedFromName() {
         for (String name : new String[]{
                 "jvm.runtime", "jvm_runtime",
                 "jvm.runtime.info", "jvm_runtime_info"}) {
@@ -35,64 +36,66 @@ public class InfoTest {
     }
 
     @Test
-    public void testAddAndRemove() throws IOException {
+    void testAddAndRemove() throws IOException {
         Info info = Info.builder()
                 .name("test_info")
                 .labelNames("a", "b")
                 .build();
-        Assert.assertEquals(0, info.collect().getDataPoints().size());
+        Assertions.assertEquals(0, info.collect().getDataPoints().size());
         info.addLabelValues("val1", "val2");
-        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        Assertions.assertEquals(1, info.collect().getDataPoints().size());
         info.addLabelValues("val1", "val2"); // already exist, so no change
-        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        Assertions.assertEquals(1, info.collect().getDataPoints().size());
         info.addLabelValues("val2", "val2");
-        Assert.assertEquals(2, info.collect().getDataPoints().size());
+        Assertions.assertEquals(2, info.collect().getDataPoints().size());
         info.remove("val1", "val3"); // does not exist, so no change
-        Assert.assertEquals(2, info.collect().getDataPoints().size());
+        Assertions.assertEquals(2, info.collect().getDataPoints().size());
         info.remove("val1", "val2");
-        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        Assertions.assertEquals(1, info.collect().getDataPoints().size());
         info.remove("val2", "val2");
-        Assert.assertEquals(0, info.collect().getDataPoints().size());
+        Assertions.assertEquals(0, info.collect().getDataPoints().size());
     }
 
     @Test
-    public void testSet() throws IOException {
+    void testSet() throws IOException {
         Info info = Info.builder()
                 .name("target_info")
                 .constLabels(Labels.of("service.name", "test", "service.instance.id", "123"))
                 .labelNames("service.version")
                 .build();
         info.setLabelValues("1.0.0");
-        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        Assertions.assertEquals(1, info.collect().getDataPoints().size());
         info.setLabelValues("2.0.0");
-        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        Assertions.assertEquals(1, info.collect().getDataPoints().size());
         assertTextFormat("target_info{service_instance_id=\"123\",service_name=\"test\",service_version=\"2.0.0\"} 1\n", info);
     }
 
     @Test
-    public void testConstLabelsOnly() throws IOException {
+    void testConstLabelsOnly() throws IOException {
         Info info = Info.builder()
                 .name("target_info")
                 .constLabels(Labels.of("service.name", "test", "service.instance.id", "123"))
                 .build();
-        Assert.assertEquals(1, info.collect().getDataPoints().size());
+        Assertions.assertEquals(1, info.collect().getDataPoints().size());
         assertTextFormat("target_info{service_instance_id=\"123\",service_name=\"test\"} 1\n", info);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testConstLabelsDuplicate1() {
-        Info.builder()
-                .constLabels(Labels.of("a_1", "val1"))
-                .labelNames("a.1")
-                .build();
+    @Test
+    void testConstLabelsDuplicate1() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Info.builder()
+                        .constLabels(Labels.of("a_1", "val1"))
+                        .labelNames("a.1")
+                        .build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testConstLabelsDuplicate2() {
-        Info.builder()
-                .labelNames("a_1")
-                .constLabels(Labels.of("a.1", "val1"))
-                .build();
+    @Test
+    void testConstLabelsDuplicate2() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Info.builder()
+                        .labelNames("a_1")
+                        .constLabels(Labels.of("a.1", "val1"))
+                        .build());
     }
 
     private void assertTextFormat(String expected, Info info) throws IOException {

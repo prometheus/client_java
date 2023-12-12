@@ -14,10 +14,10 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,22 +42,21 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
-public class HistogramTest {
+
+class HistogramTest {
 
     private static final double RESET_DURATION_REACHED = -123.456; // just a random value indicating that we should simulate that the reset duration has been reached
 
     private SpanContext origSpanContext;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         origSpanContext = SpanContextSupplier.getSpanContext();
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         SpanContextSupplier.setSpanContext(origSpanContext);
     }
 
@@ -90,7 +89,7 @@ public class HistogramTest {
             }
             Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(histogram.collect());
             String expectedWithMetadata = "name: \"test\" type: HISTOGRAM metric { histogram { " + expected + " } }";
-            assertEquals("test \"" + name + "\" failed", expectedWithMetadata, TextFormat.printer().shortDebugString(protobufData));
+            Assertions.assertEquals(expectedWithMetadata, TextFormat.printer().shortDebugString(protobufData), "test \"" + name + "\" failed");
         }
     }
 
@@ -98,7 +97,7 @@ public class HistogramTest {
      * Test cases copied from histogram_test.go in client_golang.
      */
     @Test
-    public void testGolangTests() throws NoSuchFieldException, IllegalAccessException {
+    void testGolangTests() throws NoSuchFieldException, IllegalAccessException {
         GolangTestCase[] testCases = new GolangTestCase[]{
                 new GolangTestCase("'no sparse buckets' from client_golang",
                         "sample_count: 3 " +
@@ -587,7 +586,7 @@ public class HistogramTest {
      * Additional tests that are not part of client_golang's test suite.
      */
     @Test
-    public void testAdditional() throws NoSuchFieldException, IllegalAccessException {
+    void testAdditional() throws NoSuchFieldException, IllegalAccessException {
         GolangTestCase[] testCases = new GolangTestCase[]{
                 new GolangTestCase("observed values are exactly at bucket boundaries",
                         "sample_count: 3 " +
@@ -617,7 +616,7 @@ public class HistogramTest {
      * This test is ported from client_golang's TestGetLe().
      */
     @Test
-    public void testNativeBucketIndexToUpperBound() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void testNativeBucketIndexToUpperBound() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         int[] indexes = new int[]{-1, 0, 1, 512, 513, -1, 0, 1, 1024, 1025, -1, 0, 1, 4096, 4097};
         int[] schemas = new int[]{-1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2};
         double[] expectedUpperBounds = new double[]{0.25, 1, 4, Double.MAX_VALUE, Double.POSITIVE_INFINITY,
@@ -632,7 +631,7 @@ public class HistogramTest {
                     .build();
             Histogram.DataPoint histogramData = histogram.newDataPoint();
             double result = (double) method.invoke(histogramData, schemas[i], indexes[i]);
-            Assert.assertEquals("index=" + indexes[i] + ", schema=" + schemas[i], expectedUpperBounds[i], result, 0.0000000000001);
+            Assertions.assertEquals(expectedUpperBounds[i], result, 0.0000000000001, "index=" + indexes[i] + ", schema=" + schemas[i]);
         }
     }
 
@@ -640,7 +639,7 @@ public class HistogramTest {
      * Test if lowerBound < value <= upperBound is true for the bucket index returned by findBucketIndex()
      */
     @Test
-    public void testFindBucketIndex() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void testFindBucketIndex() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Random rand = new Random();
         Method findBucketIndex = Histogram.DataPoint.class.getDeclaredMethod("findBucketIndex", double.class);
         Method nativeBucketIndexToUpperBound = Histogram.DataPoint.class.getDeclaredMethod("nativeBucketIndexToUpperBound", int.class, int.class);
@@ -658,14 +657,14 @@ public class HistogramTest {
                     int bucketIndex = (int) findBucketIndex.invoke(histogram.getNoLabels(), value);
                     double lowerBound = (double) nativeBucketIndexToUpperBound.invoke(histogram.getNoLabels(), schema, bucketIndex - 1);
                     double upperBound = (double) nativeBucketIndexToUpperBound.invoke(histogram.getNoLabels(), schema, bucketIndex);
-                    Assert.assertTrue("Bucket index " + bucketIndex + " with schema " + schema + " has range [" + lowerBound + ", " + upperBound + "]. Value " + value + " is outside of that range.", lowerBound < value && upperBound >= value);
+                    Assertions.assertTrue(lowerBound < value && upperBound >= value, "Bucket index " + bucketIndex + " with schema " + schema + " has range [" + lowerBound + ", " + upperBound + "]. Value " + value + " is outside of that range.");
                 }
             }
         }
     }
 
     @Test
-    public void testDefaults() throws IOException {
+    void testDefaults() throws IOException {
         Histogram histogram = Histogram.builder().name("test").build();
         histogram.observe(0.5);
         HistogramSnapshot snapshot = histogram.collect();
@@ -718,17 +717,17 @@ public class HistogramTest {
 
         // protobuf
         Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(snapshot);
-        Assert.assertEquals(expectedProtobuf, TextFormat.printer().shortDebugString(protobufData));
+        Assertions.assertEquals(expectedProtobuf, TextFormat.printer().shortDebugString(protobufData));
 
         // text
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
         writer.write(out, MetricSnapshots.of(snapshot));
-        Assert.assertEquals(expectedTextFormat, out.toString());
+        Assertions.assertEquals(expectedTextFormat, out.toString());
     }
 
     @Test
-    public void testExemplarsClassicHistogram() throws Exception {
+    void testExemplarsClassicHistogram() throws Exception {
         SpanContext spanContext = new SpanContext() {
             int callCount = 0;
 
@@ -820,14 +819,14 @@ public class HistogramTest {
         HistogramSnapshot snapshot = histogram.collect();
         assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
         assertExemplarEquals(ex1b, getExemplar(snapshot, 1.0, "path", "/world"));
-        assertNull(getExemplar(snapshot, 2.0, "path", "/hello"));
-        assertNull(getExemplar(snapshot, 2.0, "path", "/world"));
-        assertNull(getExemplar(snapshot, 3.0, "path", "/hello"));
-        assertNull(getExemplar(snapshot, 3.0, "path", "/world"));
-        assertNull(getExemplar(snapshot, 4.0, "path", "/hello"));
-        assertNull(getExemplar(snapshot, 4.0, "path", "/world"));
-        assertNull(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello"));
-        assertNull(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
+        Assertions.assertNull(getExemplar(snapshot, 2.0, "path", "/hello"));
+        Assertions.assertNull(getExemplar(snapshot, 2.0, "path", "/world"));
+        Assertions.assertNull(getExemplar(snapshot, 3.0, "path", "/hello"));
+        Assertions.assertNull(getExemplar(snapshot, 3.0, "path", "/world"));
+        Assertions.assertNull(getExemplar(snapshot, 4.0, "path", "/hello"));
+        Assertions.assertNull(getExemplar(snapshot, 4.0, "path", "/world"));
+        Assertions.assertNull(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello"));
+        Assertions.assertNull(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
         Thread.sleep(sampleIntervalMillis + 1);
         histogram.labelValues("/hello").observe(4.5);
@@ -836,12 +835,12 @@ public class HistogramTest {
         snapshot = histogram.collect();
         assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
         assertExemplarEquals(ex1b, getExemplar(snapshot, 1.0, "path", "/world"));
-        assertNull(getExemplar(snapshot, 2.0, "path", "/hello"));
-        assertNull(getExemplar(snapshot, 2.0, "path", "/world"));
-        assertNull(getExemplar(snapshot, 3.0, "path", "/hello"));
-        assertNull(getExemplar(snapshot, 3.0, "path", "/world"));
-        assertNull(getExemplar(snapshot, 4.0, "path", "/hello"));
-        assertNull(getExemplar(snapshot, 4.0, "path", "/world"));
+        Assertions.assertNull(getExemplar(snapshot, 2.0, "path", "/hello"));
+        Assertions.assertNull(getExemplar(snapshot, 2.0, "path", "/world"));
+        Assertions.assertNull(getExemplar(snapshot, 3.0, "path", "/hello"));
+        Assertions.assertNull(getExemplar(snapshot, 3.0, "path", "/world"));
+        Assertions.assertNull(getExemplar(snapshot, 4.0, "path", "/hello"));
+        Assertions.assertNull(getExemplar(snapshot, 4.0, "path", "/world"));
         assertExemplarEquals(ex2a, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello"));
         assertExemplarEquals(ex2b, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
@@ -895,7 +894,7 @@ public class HistogramTest {
     }
 
     @Test
-    public void testCustomExemplarsClassicHistogram() throws InterruptedException, NoSuchFieldException, IllegalAccessException {
+    void testCustomExemplarsClassicHistogram() throws InterruptedException, NoSuchFieldException, IllegalAccessException {
 
         // TODO: This was copied from the old simpleclient, can probably be refactored.
 
@@ -950,18 +949,18 @@ public class HistogramTest {
             }
         }
         Exemplar exemplar = data.getExemplars().get(lowerBound, upperBound);
-        Assert.assertNotNull("No exemplar found in bucket [" + lowerBound + ", " + upperBound + "]", exemplar);
-        Assert.assertEquals(value, exemplar.getValue(), 0.0);
-        Assert.assertEquals("" + exemplar.getLabels(), labels.length / 2, exemplar.getLabels().size());
+        Assertions.assertNotNull(exemplar, "No exemplar found in bucket [" + lowerBound + ", " + upperBound + "]");
+        Assertions.assertEquals(value, exemplar.getValue(), 0.0);
+        Assertions.assertEquals(labels.length / 2, exemplar.getLabels().size(), "" + exemplar.getLabels());
         for (int i = 0; i < labels.length; i += 2) {
-            Assert.assertEquals(labels[i], exemplar.getLabels().getName(i / 2));
-            Assert.assertEquals(labels[i + 1], exemplar.getLabels().getValue(i / 2));
+            Assertions.assertEquals(labels[i], exemplar.getLabels().getName(i / 2));
+            Assertions.assertEquals(labels[i + 1], exemplar.getLabels().getValue(i / 2));
         }
     }
 
 
     @Test
-    public void testExemplarsNativeHistogram() throws NoSuchFieldException, IllegalAccessException {
+    void testExemplarsNativeHistogram() throws NoSuchFieldException, IllegalAccessException {
 
         SpanContext spanContext = new SpanContext() {
             int callCount = 0;
@@ -1015,65 +1014,67 @@ public class HistogramTest {
 
         histogram.labelValues("/hello").observe(3.11);
         histogram.labelValues("/world").observe(3.12);
-        assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
+        Assertions.assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
         assertExemplarEquals(ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
-        assertEquals(1, getData(histogram, "path", "/world").getExemplars().size());
+        Assertions.assertEquals(1, getData(histogram, "path", "/world").getExemplars().size());
         assertExemplarEquals(ex2, getData(histogram, "path", "/world").getExemplars().iterator().next());
 
         histogram.labelValues("/world").observeWithExemplar(3.13, Labels.of("key1", "value1", "key2", "value2"));
-        assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
+        Assertions.assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
         assertExemplarEquals(ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
-        assertEquals(2, getData(histogram, "path", "/world").getExemplars().size());
+        Assertions.assertEquals(2, getData(histogram, "path", "/world").getExemplars().size());
         Exemplars exemplars = getData(histogram, "path", "/world").getExemplars();
         List<Exemplar> exemplarList = new ArrayList<>(exemplars.size());
         for (Exemplar exemplar : exemplars) {
             exemplarList.add(exemplar);
         }
         exemplarList.sort(Comparator.comparingDouble(Exemplar::getValue));
-        assertEquals(2, exemplars.size());
+        Assertions.assertEquals(2, exemplars.size());
         assertExemplarEquals(ex2, exemplarList.get(0));
         assertExemplarEquals(ex3, exemplarList.get(1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testIllegalLabelName() {
-        Histogram.builder()
-                .name("test")
-                .labelNames("label", "le");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testIllegalLabelNameConstLabels() {
-        Histogram.builder()
-                .name("test")
-                .constLabels(Labels.of("label1", "value1", "le", "0.3"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testIllegalLabelNamePrefix() {
-        Histogram.builder()
-                .name("test")
-                .labelNames("__hello");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testIllegalName() {
-        Histogram.builder().name("my_namespace/server.durations");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testNoName() {
-        Histogram.builder().build();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testNullName() {
-        Histogram.builder()
-                .name(null);
+    @Test
+    void testIllegalLabelName() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Histogram.builder()
+                        .name("test")
+                        .labelNames("label", "le"));
     }
 
     @Test
-    public void testDuplicateClassicBuckets() {
+    void testIllegalLabelNameConstLabels() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Histogram.builder()
+                        .name("test")
+                        .constLabels(Labels.of("label1", "value1", "le", "0.3")));
+    }
+
+    @Test
+    void testIllegalLabelNamePrefix() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Histogram.builder()
+                        .name("test")
+                        .labelNames("__hello"));
+    }
+
+    @Test
+    void testIllegalName() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Histogram.builder().name("my_namespace/server.durations"));
+    }
+
+    @Test
+    void testNoName() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Histogram.builder().build());
+    }
+
+    @Test
+    void testNullName() {
+        Assertions.assertThrows(NullPointerException.class, () -> Histogram.builder().name(null));
+    }
+
+    @Test
+    void testDuplicateClassicBuckets() {
         Histogram histogram = Histogram.builder()
                 .name("test")
                 .classicUpperBounds(0, 3, 17, 3, 21)
@@ -1081,11 +1082,11 @@ public class HistogramTest {
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
                 .collect(Collectors.toList());
-        Assert.assertEquals(Arrays.asList(0.0, 3.0, 17.0, 21.0, Double.POSITIVE_INFINITY), upperBounds);
+        Assertions.assertEquals(Arrays.asList(0.0, 3.0, 17.0, 21.0, Double.POSITIVE_INFINITY), upperBounds);
     }
 
     @Test
-    public void testUnsortedBuckets() {
+    void testUnsortedBuckets() {
         Histogram histogram = Histogram.builder()
                 .name("test")
                 .classicUpperBounds(0.2, 0.1)
@@ -1093,11 +1094,11 @@ public class HistogramTest {
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
                 .collect(Collectors.toList());
-        Assert.assertEquals(Arrays.asList(0.1, 0.2, Double.POSITIVE_INFINITY), upperBounds);
+        Assertions.assertEquals(Arrays.asList(0.1, 0.2, Double.POSITIVE_INFINITY), upperBounds);
     }
 
     @Test
-    public void testEmptyBuckets() {
+    void testEmptyBuckets() {
         Histogram histogram = Histogram.builder()
                 .name("test")
                 .classicUpperBounds()
@@ -1105,11 +1106,11 @@ public class HistogramTest {
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
                 .collect(Collectors.toList());
-        Assert.assertEquals(Collections.singletonList(Double.POSITIVE_INFINITY), upperBounds);
+        Assertions.assertEquals(Collections.singletonList(Double.POSITIVE_INFINITY), upperBounds);
     }
 
     @Test
-    public void testBucketsIncludePositiveInfinity() {
+    void testBucketsIncludePositiveInfinity() {
         Histogram histogram = Histogram.builder()
                 .name("test")
                 .classicUpperBounds(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY)
@@ -1117,11 +1118,11 @@ public class HistogramTest {
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
                 .collect(Collectors.toList());
-        Assert.assertEquals(Arrays.asList(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY), upperBounds);
+        Assertions.assertEquals(Arrays.asList(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY), upperBounds);
     }
 
     @Test
-    public void testLinearBuckets() {
+    void testLinearBuckets() {
         Histogram histogram = Histogram.builder()
                 .name("test")
                 .classicLinearUpperBounds(0.1, 0.1, 10)
@@ -1129,11 +1130,11 @@ public class HistogramTest {
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
                 .collect(Collectors.toList());
-        Assert.assertEquals(Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, Double.POSITIVE_INFINITY), upperBounds);
+        Assertions.assertEquals(Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, Double.POSITIVE_INFINITY), upperBounds);
     }
 
     @Test
-    public void testExponentialBuckets() {
+    void testExponentialBuckets() {
         Histogram histogram = Histogram.builder()
                 .classicExponentialUpperBounds(2, 2.5, 3)
                 .name("test")
@@ -1141,22 +1142,23 @@ public class HistogramTest {
         List<Double> upperBounds = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getUpperBound)
                 .collect(Collectors.toList());
-        assertEquals(Arrays.asList(2.0, 5.0, 12.5, Double.POSITIVE_INFINITY), upperBounds);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testBucketsIncludeNaN() {
-        Histogram.builder()
-                .name("test")
-                .classicUpperBounds(0.01, 0.1, 1.0, Double.NaN);
+        Assertions.assertEquals(Arrays.asList(2.0, 5.0, 12.5, Double.POSITIVE_INFINITY), upperBounds);
     }
 
     @Test
-    public void testNoLabelsDefaultZeroValue() {
+    void testBucketsIncludeNaN() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Histogram.builder()
+                        .name("test")
+                        .classicUpperBounds(0.01, 0.1, 1.0, Double.NaN));
+    }
+
+    @Test
+    void testNoLabelsDefaultZeroValue() {
         Histogram noLabels = Histogram.builder().name("test").build();
-        assertEquals(0.0, getBucket(noLabels, 0.005).getCount(), 0.0);
-        assertEquals(0, getData(noLabels).getCount());
-        assertEquals(0.0, getData(noLabels).getSum(), 0.0);
+        Assertions.assertEquals(0.0, getBucket(noLabels, 0.005).getCount(), 0.0);
+        Assertions.assertEquals(0, getData(noLabels).getCount());
+        Assertions.assertEquals(0.0, getData(noLabels).getSum(), 0.0);
     }
 
     private ClassicHistogramBucket getBucket(Histogram histogram, double le, String... labels) {
@@ -1167,28 +1169,28 @@ public class HistogramTest {
     }
 
     @Test
-    public void testObserve() {
+    void testObserve() {
         Histogram noLabels = Histogram.builder()
                 .name("test")
                 .build();
         noLabels.observe(2);
-        assertEquals(1, getData(noLabels).getCount());
-        assertEquals(2.0, getData(noLabels).getSum(), .0);
-        assertEquals(0.0, getBucket(noLabels, 1).getCount(), .0);
-        assertEquals(1.0, getBucket(noLabels, 2.5).getCount(), .0);
+        Assertions.assertEquals(1, getData(noLabels).getCount());
+        Assertions.assertEquals(2.0, getData(noLabels).getSum(), .0);
+        Assertions.assertEquals(0.0, getBucket(noLabels, 1).getCount(), .0);
+        Assertions.assertEquals(1.0, getBucket(noLabels, 2.5).getCount(), .0);
         noLabels.observe(4);
-        assertEquals(2.0, getData(noLabels).getCount(), .0);
-        assertEquals(6.0, getData(noLabels).getSum(), .0);
-        assertEquals(0.0, getBucket(noLabels, 1).getCount(), .0);
-        assertEquals(1.0, getBucket(noLabels, 2.5).getCount(), .0);
-        assertEquals(1.0, getBucket(noLabels, 5).getCount(), .0);
-        assertEquals(0.0, getBucket(noLabels, 10).getCount(), .0);
-        assertEquals(0.0, getBucket(noLabels, Double.POSITIVE_INFINITY).getCount(), .0);
+        Assertions.assertEquals(2.0, getData(noLabels).getCount(), .0);
+        Assertions.assertEquals(6.0, getData(noLabels).getSum(), .0);
+        Assertions.assertEquals(0.0, getBucket(noLabels, 1).getCount(), .0);
+        Assertions.assertEquals(1.0, getBucket(noLabels, 2.5).getCount(), .0);
+        Assertions.assertEquals(1.0, getBucket(noLabels, 5).getCount(), .0);
+        Assertions.assertEquals(0.0, getBucket(noLabels, 10).getCount(), .0);
+        Assertions.assertEquals(0.0, getBucket(noLabels, Double.POSITIVE_INFINITY).getCount(), .0);
     }
 
     @Test
     // See https://github.com/prometheus/client_java/issues/646
-    public void testNegativeAmount() {
+    void testNegativeAmount() {
         Histogram histogram = Histogram.builder()
                 .name("histogram")
                 .help("test histogram for negative values")
@@ -1200,35 +1202,35 @@ public class HistogramTest {
             histogram.observe(i);
             expectedCount++;
             expectedSum += i;
-            assertEquals(expectedSum, getData(histogram).getSum(), .001);
-            assertEquals(expectedCount, getData(histogram).getCount(), .001);
+            Assertions.assertEquals(expectedSum, getData(histogram).getSum(), .001);
+            Assertions.assertEquals(expectedCount, getData(histogram).getCount(), .001);
         }
         List<Long> expectedBucketCounts = Arrays.asList(2L, 5L, 5L, 5L, 5L, 0L); // buckets -10, -5, 0, 5, 10, +Inf
         List<Long> actualBucketCounts = getData(histogram).getClassicBuckets().stream()
                 .map(ClassicHistogramBucket::getCount)
                 .collect(Collectors.toList());
-        assertEquals(expectedBucketCounts, actualBucketCounts);
+        Assertions.assertEquals(expectedBucketCounts, actualBucketCounts);
     }
 
     @Test
-    public void testBoundaryConditions() {
+    void testBoundaryConditions() {
         Histogram histogram = Histogram.builder()
                 .name("test")
                 .build();
         histogram.observe(2.5);
-        assertEquals(0, getBucket(histogram, 1).getCount());
-        assertEquals(1, getBucket(histogram, 2.5).getCount());
+        Assertions.assertEquals(0, getBucket(histogram, 1).getCount());
+        Assertions.assertEquals(1, getBucket(histogram, 2.5).getCount());
 
         histogram.observe(Double.POSITIVE_INFINITY);
-        assertEquals(0, getBucket(histogram, 1).getCount());
-        assertEquals(1, getBucket(histogram, 2.5).getCount());
-        assertEquals(0, getBucket(histogram, 5).getCount());
-        assertEquals(0, getBucket(histogram, 10).getCount());
-        assertEquals(1, getBucket(histogram, Double.POSITIVE_INFINITY).getCount());
+        Assertions.assertEquals(0, getBucket(histogram, 1).getCount());
+        Assertions.assertEquals(1, getBucket(histogram, 2.5).getCount());
+        Assertions.assertEquals(0, getBucket(histogram, 5).getCount());
+        Assertions.assertEquals(0, getBucket(histogram, 10).getCount());
+        Assertions.assertEquals(1, getBucket(histogram, Double.POSITIVE_INFINITY).getCount());
     }
 
     @Test
-    public void testObserveWithLabels() {
+    void testObserveWithLabels() {
         Histogram histogram = Histogram.builder()
                 .name("test")
                 .constLabels(Labels.of("env", "prod"))
@@ -1239,21 +1241,21 @@ public class HistogramTest {
         histogram.labelValues("/hello", "500").observe(0.19);
         HistogramSnapshot.HistogramDataPointSnapshot data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
         HistogramSnapshot.HistogramDataPointSnapshot data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
-        assertEquals(2, data200.getCount());
-        assertEquals(0.31, data200.getSum(), 0.0000001);
-        assertEquals(1, data500.getCount());
-        assertEquals(0.19, data500.getSum(), 0.0000001);
+        Assertions.assertEquals(2, data200.getCount());
+        Assertions.assertEquals(0.31, data200.getSum(), 0.0000001);
+        Assertions.assertEquals(1, data500.getCount());
+        Assertions.assertEquals(0.19, data500.getSum(), 0.0000001);
         histogram.labelValues("/hello", "200").observe(0.13);
         data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
         data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
-        assertEquals(3, data200.getCount());
-        assertEquals(0.44, data200.getSum(), 0.0000001);
-        assertEquals(1, data500.getCount());
-        assertEquals(0.19, data500.getSum(), 0.0000001);
+        Assertions.assertEquals(3, data200.getCount());
+        Assertions.assertEquals(0.44, data200.getSum(), 0.0000001);
+        Assertions.assertEquals(1, data500.getCount());
+        Assertions.assertEquals(0.19, data500.getSum(), 0.0000001);
     }
 
     @Test
-    public void testObserveMultithreaded() throws InterruptedException, ExecutionException, TimeoutException {
+    void testObserveMultithreaded() throws InterruptedException, ExecutionException, TimeoutException {
         // Hard to test concurrency, but let's run a couple of observations in parallel and assert none gets lost.
         Histogram histogram = Histogram.builder()
                 .name("test")
@@ -1284,19 +1286,19 @@ public class HistogramTest {
             List<HistogramSnapshot> snapshots = future.get(5, TimeUnit.SECONDS);
             long count = 0;
             for (HistogramSnapshot snapshot : snapshots) {
-                Assert.assertEquals(1, snapshot.getDataPoints().size());
+                Assertions.assertEquals(1, snapshot.getDataPoints().size());
                 HistogramSnapshot.HistogramDataPointSnapshot data = snapshot.getDataPoints().stream().findFirst().orElseThrow(RuntimeException::new);
-                Assert.assertTrue(data.getCount() >= (count + 1000)); // 1000 own observations plus the ones from other threads
+                Assertions.assertTrue(data.getCount() >= (count + 1000)); // 1000 own observations plus the ones from other threads
                 count = data.getCount();
             }
             if (count > maxCount) {
                 maxCount = count;
             }
         }
-        Assert.assertEquals(nThreads * 10_000, maxCount); // the last collect() has seen all observations
-        Assert.assertEquals(getBucket(histogram, 2.5, "status", "200").getCount(), nThreads * 10_000);
+        Assertions.assertEquals(nThreads * 10_000, maxCount); // the last collect() has seen all observations
+        Assertions.assertEquals(getBucket(histogram, 2.5, "status", "200").getCount(), nThreads * 10_000);
         executor.shutdown();
-        Assert.assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+        Assertions.assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
     }
 
 

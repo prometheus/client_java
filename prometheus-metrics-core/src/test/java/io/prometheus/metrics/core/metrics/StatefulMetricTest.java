@@ -1,15 +1,15 @@
 package io.prometheus.metrics.core.metrics;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
-public class StatefulMetricTest {
+class StatefulMetricTest {
 
     @Test
-    public void testLabelRemoveWhileCollecting() throws Exception {
+    void testLabelRemoveWhileCollecting() throws Exception {
         Counter counter = Counter.builder().name("test").labelNames("label1", "label2").build();
         Field data = counter.getClass().getSuperclass().getDeclaredField("data");
         data.setAccessible(true);
@@ -29,8 +29,8 @@ public class StatefulMetricTest {
                 counter.remove("c", "d");
                 counter.remove("e", "f");
             }
-            Assert.assertNotNull(entry.getKey());
-            Assert.assertNotNull(entry.getValue());
+            Assertions.assertNotNull(entry.getKey());
+            Assertions.assertNotNull(entry.getValue());
         }
     }
 }
