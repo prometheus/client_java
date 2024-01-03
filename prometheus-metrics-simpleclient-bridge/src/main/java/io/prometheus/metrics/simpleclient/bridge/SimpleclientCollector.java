@@ -123,7 +123,7 @@ public class SimpleclientCollector implements MultiCollector {
 
     private MetricSnapshot convertGauge(Collector.MetricFamilySamples samples) {
         GaugeSnapshot.Builder gauge = GaugeSnapshot.builder()
-                .name(samples.name)
+                .name(stripSuffix(samples.name, "_total"))
                 .help(samples.help)
                 .unit(convertUnit(samples));
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
