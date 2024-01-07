@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.caffeine;
 import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Policy;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -63,6 +65,7 @@ public class CacheMetricsCollector implements MultiCollector {
   private static final String METRIC_NAME_CACHE_LOAD_FAILURE = "caffeine_cache_load_failure";
   private static final String METRIC_NAME_CACHE_LOADS = "caffeine_cache_loads";
   private static final String METRIC_NAME_CACHE_ESTIMATED_SIZE = "caffeine_cache_estimated_size";
+  private static final String METRIC_NAME_CACHE_WEIGHTED_SIZE = "caffeine_cache_weighted_size";
   private static final String METRIC_NAME_CACHE_LOAD_DURATION_SECONDS =
       "caffeine_cache_load_duration_seconds";
 
@@ -77,6 +80,7 @@ public class CacheMetricsCollector implements MultiCollector {
               METRIC_NAME_CACHE_LOAD_FAILURE,
               METRIC_NAME_CACHE_LOADS,
               METRIC_NAME_CACHE_ESTIMATED_SIZE,
+              METRIC_NAME_CACHE_WEIGHTED_SIZE,
               METRIC_NAME_CACHE_LOAD_DURATION_SECONDS));
 
   protected final ConcurrentMap<String, Cache<?, ?>> children = new ConcurrentHashMap<>();
@@ -162,6 +166,11 @@ public class CacheMetricsCollector implements MultiCollector {
     final GaugeSnapshot.Builder cacheSize =
         GaugeSnapshot.builder().name(METRIC_NAME_CACHE_ESTIMATED_SIZE).help("Estimated cache size");
 
+    final GaugeSnapshot.Builder cacheWeightedSize =
+        GaugeSnapshot.builder()
+            .name(METRIC_NAME_CACHE_WEIGHTED_SIZE)
+            .help("Approximate accumulated weight of cache entries");
+
     final SummarySnapshot.Builder cacheLoadSummary =
         SummarySnapshot.builder()
             .name(METRIC_NAME_CACHE_LOAD_DURATION_SECONDS)
@@ -181,6 +190,15 @@ public class CacheMetricsCollector implements MultiCollector {
                 .build());
       } catch (Exception e) {
         // EvictionWeight metric is unavailable, newer version of Caffeine is needed.
+      }
+
+      final Optional<? extends Policy.Eviction<?, ?>> eviction = c.getValue().policy().eviction();
+      if (eviction.isPresent() && eviction.get().weightedSize().isPresent()) {
+        cacheWeightedSize.dataPoint(
+            GaugeSnapshot.GaugeDataPointSnapshot.builder()
+                .labels(labels)
+                .value(eviction.get().weightedSize().getAsLong())
+                .build());
       }
 
       cacheHitTotal.dataPoint(
@@ -244,6 +262,7 @@ public class CacheMetricsCollector implements MultiCollector {
         .metricSnapshot(cacheLoadFailure.build())
         .metricSnapshot(cacheLoadTotal.build())
         .metricSnapshot(cacheSize.build())
+        .metricSnapshot(cacheWeightedSize.build())
         .metricSnapshot(cacheLoadSummary.build())
         .build();
   }
