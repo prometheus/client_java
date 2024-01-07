@@ -146,10 +146,10 @@ public class CacheMetricsCollector implements MultiCollector {
             .name(METRIC_NAME_CACHE_EVICTION)
             .help("Cache eviction totals, doesn't include manually removed entries");
 
-    final GaugeSnapshot.Builder cacheEvictionWeight =
-        GaugeSnapshot.builder()
+    final CounterSnapshot.Builder cacheEvictionWeight =
+        CounterSnapshot.builder()
             .name(METRIC_NAME_CACHE_EVICTION_WEIGHT)
-            .help("Cache eviction weight");
+            .help("Weight of evicted cache entries, doesn't include manually removed entries");
 
     final CounterSnapshot.Builder cacheLoadFailure =
         CounterSnapshot.builder().name(METRIC_NAME_CACHE_LOAD_FAILURE).help("Cache load failures");
@@ -175,7 +175,7 @@ public class CacheMetricsCollector implements MultiCollector {
 
       try {
         cacheEvictionWeight.dataPoint(
-            GaugeSnapshot.GaugeDataPointSnapshot.builder()
+            CounterSnapshot.CounterDataPointSnapshot.builder()
                 .labels(labels)
                 .value(stats.evictionWeight())
                 .build());

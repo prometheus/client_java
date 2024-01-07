@@ -52,6 +52,7 @@ class CacheMetricsCollectorTest {
     assertCounterMetric(registry, "caffeine_cache_miss", "users", 2.0);
     assertCounterMetric(registry, "caffeine_cache_requests", "users", 3.0);
     assertCounterMetric(registry, "caffeine_cache_eviction", "users", 2.0);
+    assertCounterMetric(registry, "caffeine_cache_eviction_weight", "users", 2.0);
 
     final String expected =
         "# TYPE caffeine_cache_estimated_size gauge\n"
@@ -60,9 +61,9 @@ class CacheMetricsCollectorTest {
             + "# TYPE caffeine_cache_eviction counter\n"
             + "# HELP caffeine_cache_eviction Cache eviction totals, doesn't include manually removed entries\n"
             + "caffeine_cache_eviction_total{cache=\"users\"} 2.0\n"
-            + "# TYPE caffeine_cache_eviction_weight gauge\n"
-            + "# HELP caffeine_cache_eviction_weight Cache eviction weight\n"
-            + "caffeine_cache_eviction_weight{cache=\"users\"} 2.0\n"
+            + "# TYPE caffeine_cache_eviction_weight counter\n"
+            + "# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries\n"
+            + "caffeine_cache_eviction_weight_total{cache=\"users\"} 2.0\n"
             + "# TYPE caffeine_cache_hit counter\n"
             + "# HELP caffeine_cache_hit Cache hit totals\n"
             + "caffeine_cache_hit_total{cache=\"users\"} 1.0\n"
