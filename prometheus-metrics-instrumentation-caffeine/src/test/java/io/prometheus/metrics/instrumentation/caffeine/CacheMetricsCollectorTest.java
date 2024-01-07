@@ -78,6 +78,66 @@ class CacheMetricsCollectorTest {
     assertThat(convertToOpenMetricsFormat(registry)).isEqualTo(expected);
   }
 
+  @Test
+  public void weightedCacheExposesMetricsForHitMissAndEvictionWeightedSize() {
+    // Run cleanup in same thread, to remove async behavior with evictions
+    final Cache<String, String> cache =
+        Caffeine.newBuilder()
+            .weigher((String k, String v) -> k.length() + v.length())
+            .maximumWeight(35)
+            .recordStats()
+            .executor(Runnable::run)
+            .build();
+
+    final CacheMetricsCollector collector = new CacheMetricsCollector();
+    collector.addCache("users", cache);
+
+    final PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(collector);
+
+    cache.getIfPresent("user1");
+    cache.getIfPresent("user1");
+    cache.put("user1", "First User");
+    cache.getIfPresent("user1");
+
+    // Add to cache to trigger eviction.
+    cache.put("user2", "Second User");
+    cache.put("user3", "Third User");
+    cache.put("user4", "Fourth User");
+
+    assertCounterMetric(registry, "caffeine_cache_hit", "users", 1.0);
+    assertCounterMetric(registry, "caffeine_cache_miss", "users", 2.0);
+    assertCounterMetric(registry, "caffeine_cache_requests", "users", 3.0);
+    assertCounterMetric(registry, "caffeine_cache_eviction", "users", 2.0);
+    assertCounterMetric(registry, "caffeine_cache_eviction_weight", "users", 31.0);
+
+    final String expected =
+        "# TYPE caffeine_cache_estimated_size gauge\n"
+            + "# HELP caffeine_cache_estimated_size Estimated cache size\n"
+            + "caffeine_cache_estimated_size{cache=\"users\"} 2.0\n"
+            + "# TYPE caffeine_cache_eviction counter\n"
+            + "# HELP caffeine_cache_eviction Cache eviction totals, doesn't include manually removed entries\n"
+            + "caffeine_cache_eviction_total{cache=\"users\"} 2.0\n"
+            + "# TYPE caffeine_cache_eviction_weight counter\n"
+            + "# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries\n"
+            + "caffeine_cache_eviction_weight_total{cache=\"users\"} 31.0\n"
+            + "# TYPE caffeine_cache_hit counter\n"
+            + "# HELP caffeine_cache_hit Cache hit totals\n"
+            + "caffeine_cache_hit_total{cache=\"users\"} 1.0\n"
+            + "# TYPE caffeine_cache_miss counter\n"
+            + "# HELP caffeine_cache_miss Cache miss totals\n"
+            + "caffeine_cache_miss_total{cache=\"users\"} 2.0\n"
+            + "# TYPE caffeine_cache_requests counter\n"
+            + "# HELP caffeine_cache_requests Cache request totals, hits + misses\n"
+            + "caffeine_cache_requests_total{cache=\"users\"} 3.0\n"
+            + "# TYPE caffeine_cache_weighted_size gauge\n"
+            + "# HELP caffeine_cache_weighted_size Approximate accumulated weight of cache entries\n"
+            + "caffeine_cache_weighted_size{cache=\"users\"} 31.0\n"
+            + "# EOF\n";
+
+    assertThat(convertToOpenMetricsFormat(registry)).isEqualTo(expected);
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   public void loadingCacheExposesMetricsForLoadsAndExceptions() throws Exception {
