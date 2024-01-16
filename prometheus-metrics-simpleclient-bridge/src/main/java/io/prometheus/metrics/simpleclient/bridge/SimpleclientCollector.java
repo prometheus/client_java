@@ -1,5 +1,7 @@
 package io.prometheus.metrics.simpleclient.bridge;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
+
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.metrics.config.PrometheusProperties;
@@ -123,7 +125,7 @@ public class SimpleclientCollector implements MultiCollector {
 
     private MetricSnapshot convertGauge(Collector.MetricFamilySamples samples) {
         GaugeSnapshot.Builder gauge = GaugeSnapshot.builder()
-                .name(stripSuffix(samples.name, "_total"))
+                .name(sanitizeMetricName(samples.name))
                 .help(samples.help)
                 .unit(convertUnit(samples));
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
