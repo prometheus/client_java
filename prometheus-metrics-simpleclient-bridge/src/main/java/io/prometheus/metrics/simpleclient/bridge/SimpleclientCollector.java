@@ -101,7 +101,7 @@ public class SimpleclientCollector implements MultiCollector {
 
     private MetricSnapshot convertCounter(Collector.MetricFamilySamples samples) {
         CounterSnapshot.Builder counter = CounterSnapshot.builder()
-                .name(stripSuffix(samples.name, "_total"))
+                .name(sanitizeMetricName(samples.name))
                 .help(samples.help)
                 .unit(convertUnit(samples));
         Map<Labels, CounterSnapshot.CounterDataPointSnapshot.Builder> dataPoints = new HashMap<>();
@@ -143,7 +143,7 @@ public class SimpleclientCollector implements MultiCollector {
 
     private MetricSnapshot convertHistogram(Collector.MetricFamilySamples samples, boolean isGaugeHistogram) {
         HistogramSnapshot.Builder histogram = HistogramSnapshot.builder()
-                .name(samples.name)
+                .name(sanitizeMetricName(samples.name))
                 .help(samples.help)
                 .unit(convertUnit(samples))
                 .gaugeHistogram(isGaugeHistogram);
@@ -183,7 +183,7 @@ public class SimpleclientCollector implements MultiCollector {
 
     private MetricSnapshot convertSummary(Collector.MetricFamilySamples samples) {
         SummarySnapshot.Builder summary = SummarySnapshot.builder()
-                .name(samples.name)
+                .name(sanitizeMetricName(samples.name))
                 .help(samples.help)
                 .unit(convertUnit(samples));
         Map<Labels, SummarySnapshot.SummaryDataPointSnapshot.Builder> dataPoints = new HashMap<>();
@@ -227,7 +227,7 @@ public class SimpleclientCollector implements MultiCollector {
 
     private MetricSnapshot convertStateSet(Collector.MetricFamilySamples samples) {
         StateSetSnapshot.Builder stateSet = StateSetSnapshot.builder()
-                .name(samples.name)
+                .name(sanitizeMetricName(samples.name))
                 .help(samples.help);
         Map<Labels, StateSetSnapshot.StateSetDataPointSnapshot.Builder> dataPoints = new HashMap<>();
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
@@ -256,7 +256,7 @@ public class SimpleclientCollector implements MultiCollector {
 
     private MetricSnapshot convertUnknown(Collector.MetricFamilySamples samples) {
         UnknownSnapshot.Builder unknown = UnknownSnapshot.builder()
-                .name(samples.name)
+                .name(sanitizeMetricName(samples.name))
                 .help(samples.help)
                 .unit(convertUnit(samples));
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
@@ -336,7 +336,7 @@ public class SimpleclientCollector implements MultiCollector {
 
     private MetricSnapshot convertInfo(Collector.MetricFamilySamples samples) {
         InfoSnapshot.Builder info = InfoSnapshot.builder()
-                .name(stripSuffix(samples.name, "_info"))
+                .name(sanitizeMetricName(samples.name))
                 .help(samples.help);
         for (Collector.MetricFamilySamples.Sample sample : samples.samples) {
             info.dataPoint(InfoSnapshot.InfoDataPointSnapshot.builder()
