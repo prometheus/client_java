@@ -34,7 +34,7 @@ Counter eventsTotal = Counter.builder()
 Registering a Metric with Multiple Registries
 ---------------------------------------------
 
-As an alternative to calling `register()` direclty, you can `build()` metrics without registering them,
+As an alternative to calling `register()` directly, you can `build()` metrics without registering them,
 and register them later:
 
 ```java

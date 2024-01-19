@@ -21,7 +21,7 @@ The model is an internal library, implementing read-only immutable snapshots. Th
 
 There is no need for users to use `prometheus-metrics-model` directly. Users should use the API provided by `prometheus-metrics-core`, which includes the core metrics as well as callback metrics.
 
-However, maintianers of 3rd party metrics libraries might want to use `prometheus-metrics-model` if they want to add Prometheus exposition formats to their metrics library.
+However, maintainers of 3rd party metrics libraries might want to use `prometheus-metrics-model` if they want to add Prometheus exposition formats to their metrics library.
 
 exporters and exposition formats
 --------------------------------

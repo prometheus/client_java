@@ -13,7 +13,7 @@ HTTPServer server = HTTPServer.builder()
 
 By default, `HTTPServer` binds to any IP address, you can change this with [hostname()](/client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#hostname(java.lang.String)) or [inetAddress()](/client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#inetAddress(java.net.InetAddress)).
 
-`HTTPServer` is configured with three endoints:
+`HTTPServer` is configured with three endpoints:
 
 * `/metrics` for Prometheus scraping.
 * `/-/healthy` for simple health checks.
@@ -24,8 +24,8 @@ The default handler can be changed with [defaultHandler()](/client_java/api/io/p
 Authentication and HTTPS
 ------------------------
 
-* [authenticator()](https://prometheus.github.io/client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#authenticator(com.sun.net.httpserver.Authenticator)) is for configuring authentication.
-* [httpsConfigurator()](https://prometheus.github.io/client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#httpsConfigurator(com.sun.net.httpserver.HttpsConfigurator)) is for configuring HTTPS.
+* [authenticator()](/client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#authenticator(com.sun.net.httpserver.Authenticator)) is for configuring authentication.
+* [httpsConfigurator()](/client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#httpsConfigurator(com.sun.net.httpserver.HttpsConfigurator)) is for configuring HTTPS.
 
 You can find an example of authentication and SSL in the [jmx_exporter](https://github.com/prometheus/jmx_exporter).
 
