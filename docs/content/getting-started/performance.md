@@ -26,7 +26,7 @@ You could increment the counter above like this:
 requestCount.labelValue("/", "200").inc();
 ```
 
-However, the line above does not only increment the counter, it also lookus up the label values to find the right data point.
+However, the line above does not only increment the counter, it also looks up the label values to find the right data point.
 
 In high performance applications you can optimize this by looking up the data point only once:
 
@@ -49,7 +49,7 @@ While this default provides the flexibility to scrape different representations 
 
 In performance critical applications we recommend to use either the classic representation or the native representation, but not both.
 
-You can either configure this in code for each histogram by calling [classicOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicOnly()) or [nativeOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeOnly()), or you use the corresponding [config options](http://localhost:1313/config/config/).
+You can either configure this in code for each histogram by calling [classicOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicOnly()) or [nativeOnly()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeOnly()), or you use the corresponding [config options](../../config/config/).
 
 One way to do this is with system properties in the command line when you start your application
 

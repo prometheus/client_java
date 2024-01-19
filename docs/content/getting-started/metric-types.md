@@ -61,7 +61,7 @@ Unlike with counters and gauges, each histogram data point has a complex data st
 Prometheus supports two flavors of histograms:
 
 * Classic histograms: Bucket boundaries are explicitly defined when the histogram is created.
-* Native histograms (exponential histograms): Infinitly many virtual buckets.
+* Native histograms (exponential histograms): Infinitely many virtual buckets.
 
 By default, histograms maintain both flavors. Which one is used depends on the scrape request from the Prometheus server.
 * By default, the Prometheus server will scrape metrics in OpenMetrics format and get the classic histogram flavor.
@@ -91,7 +91,7 @@ The histogram builder provides a lot of configuration for fine-tuning the histog
 * `classicBuckets(...)`: Set the classic bucket boundaries. Default buckets are `.005`, `.01`, `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The default bucket boundaries are designed for measuring request durations in seconds.
 * `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is 160. When the maximum is reached, the native histogram automatically reduces resolution to stay below the limit.
 
-See Javadoc for [Histogram.Builder](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html) for a complete list of options. Some options can be configured at runtime, see [config](/config/config).
+See Javadoc for [Histogram.Builder](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html) for a complete list of options. Some options can be configured at runtime, see [config](../../config/config).
 
 Histograms and summaries are both used for observing distributions. Therefore, the both implement the `DistributionDataPoint` interface. Using the `DistributionDataPoint` interface directly gives you the option to switch between histograms and summaries later with minimal code changes.
 
@@ -148,19 +148,19 @@ Summary requestLatency = Summary.builder()
 requestLatency.labelValues("ok").observe(2.7);
 ```
 
-The example above creates a summary with the 50th percentile (median), the 95th percentila, and the 99th percentile. Quantiles are optional, you can create a summary without quantiles if all you need is the count and the sum.
+The example above creates a summary with the 50th percentile (median), the 95th percentile, and the 99th percentile. Quantiles are optional, you can create a summary without quantiles if all you need is the count and the sum.
 
 {{< hint type=note >}}
 The terms "percentile" and "quantile" mean the same thing. We use percentile when we express it as a number in [0, 100], and we use quantile when we express it as a number in [0.0, 1.0].
 {{< /hint >}}
 
-The second parameter to `quantile()` is the maximum acceptable error. The call `.quantile(0.5, 0.01)` means that the actual quantile is somewhere in [0.49, 0.51]. Higher presicion means higher memory usage.
+The second parameter to `quantile()` is the maximum acceptable error. The call `.quantile(0.5, 0.01)` means that the actual quantile is somewhere in [0.49, 0.51]. Higher precision means higher memory usage.
 
 The 0.0 quantile (min value) and the 1.0 quantile (max value) are special cases because you can get the precise values (error 0.0) with almost no memory overhead.
 
 Quantile values are calculated based on a 5 minutes moving time window. The default time window can be changed with `maxAgeSeconds()` and `numberOfAgeBuckets()`.
 
-Some options can be configured at runtime, see [config](/config/config).
+Some options can be configured at runtime, see [config](../../config/config).
 
 In general you should prefer histograms over summaries. The Prometheus query language has a function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile) for calculating quantiles from histograms. The advantage of query-time quantile calculation is that you can aggregate histograms before calculating the quantile. With summaries you must use the quantile with all its labels as it is.
 

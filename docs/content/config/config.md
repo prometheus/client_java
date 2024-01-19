@@ -46,8 +46,8 @@ Metrics Properties
 | io.prometheus.metrics.histogramNativeMaxZeroThreshold | [Histogram.Builder.nativeMaxZeroThreshold()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeMaxZeroThreshold(double)) | |
 | io.prometheus.metrics.histogramNativeMaxNumberOfBuckets | [Histogram.Builder.nativeMaxNumberOfBuckets()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeMaxNumberOfBuckets(int)) | |
 | io.prometheus.metrics.histogramNativeResetDurationSeconds | [Histogram.Builder.nativeResetDuration()](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeResetDuration(long,java.util.concurrent.TimeUnit)) | |
-| io.prometheus.metrics.summaryQuantiles | [Summary.Builder.quantile(double)](https://prometheus.github.io/client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#quantile(double)) | (4) |
-| io.prometheus.metrics.summaryQuantileErrors | [Summary.Builder.quantile(double, double)](ihttps://prometheus.github.io/client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#quantile(double,double)) | (5) |
+| io.prometheus.metrics.summaryQuantiles | [Summary.Builder.quantile(double)](/client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#quantile(double)) | (4) |
+| io.prometheus.metrics.summaryQuantileErrors | [Summary.Builder.quantile(double, double)](/client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#quantile(double,double)) | (5) |
 | io.prometheus.metrics.summaryMaxAgeSeconds | [Summary.Builder.maxAgeSeconds()](/client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#maxAgeSeconds(long)) | |
 | io.prometheus.metrics.summaryNumberOfAgeBuckets | [Summary.Builder.numberOfAgeBuckets()](/client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#numberOfAgeBuckets(int)) | |
 
