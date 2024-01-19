@@ -73,11 +73,5 @@
             <version>0.16.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-config</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 </project>
