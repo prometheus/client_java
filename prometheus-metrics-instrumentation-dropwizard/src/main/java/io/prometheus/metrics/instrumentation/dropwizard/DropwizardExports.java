@@ -2,10 +2,10 @@ package io.prometheus.metrics.instrumentation.dropwizard;
 
 import io.dropwizard.metrics5.Timer;
 import io.dropwizard.metrics5.*;
-import io.prometheus.metrics.instrumentation.dropwizard.samplebuilder.DefaultSampleBuilder;
-import io.prometheus.metrics.instrumentation.dropwizard.samplebuilder.SampleBuilder;
+import io.prometheus.metrics.instrumentation.dropwizard.labels.CustomLabelMapper;
+import io.prometheus.metrics.instrumentation.dropwizard.labels.DefaultSampleBuilder;
+import io.prometheus.metrics.instrumentation.dropwizard.labels.SampleBuilder;
 import io.prometheus.metrics.model.registry.MultiCollector;
-import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import io.prometheus.metrics.model.snapshots.*;
 
 import java.util.*;
@@ -20,10 +20,10 @@ public class DropwizardExports implements MultiCollector {
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
     private MetricRegistry registry;
     private MetricFilter metricFilter;
-    private SampleBuilder sampleBuilder;
+    private CustomLabelMapper labelMapper;
 
     /**
-     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and {@link MetricFilter#ALL}.
+     * Creates a new DropwizardExports and {@link MetricFilter#ALL}.
      *
      * @param registry a metric registry to export in prometheus.
      */
@@ -31,11 +31,11 @@ public class DropwizardExports implements MultiCollector {
         super();
         this.registry = registry;
         this.metricFilter = MetricFilter.ALL;
-        this.sampleBuilder = new DefaultSampleBuilder();
+        this.labelMapper = null;
     }
 
     /**
-     * Creates a new DropwizardExports with a {@link DefaultSampleBuilder} and custom {@link MetricFilter}.
+     * Creates a new DropwizardExports with a custom {@link MetricFilter}.
      *
      * @param registry     a metric registry to export in prometheus.
      * @param metricFilter a custom metric filter.
@@ -43,28 +43,28 @@ public class DropwizardExports implements MultiCollector {
     public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter) {
         this.registry = registry;
         this.metricFilter = metricFilter;
-        this.sampleBuilder = new DefaultSampleBuilder();
+        this.labelMapper = null;
     }
 
     /**
-     * @param registry      a metric registry to export in prometheus.
-     * @param sampleBuilder sampleBuilder to use to create prometheus samples.
+     * @param registry    a metric registry to export in prometheus.
+     * @param labelMapper a labelMapper to use to map labels.
      */
-    public DropwizardExports(MetricRegistry registry, SampleBuilder sampleBuilder) {
+    public DropwizardExports(MetricRegistry registry, CustomLabelMapper labelMapper) {
         this.registry = registry;
         this.metricFilter = MetricFilter.ALL;
-        this.sampleBuilder = sampleBuilder;
+        this.labelMapper = labelMapper;
     }
 
     /**
-     * @param registry      a metric registry to export in prometheus.
-     * @param metricFilter  a custom metric filter.
-     * @param sampleBuilder sampleBuilder to use to create prometheus samples.
+     * @param registry     a metric registry to export in prometheus.
+     * @param metricFilter a custom metric filter.
+     * @param labelMapper  a labelMapper to use to map labels.
      */
-    public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter, SampleBuilder sampleBuilder) {
+    public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter, CustomLabelMapper labelMapper) {
         this.registry = registry;
         this.metricFilter = metricFilter;
-        this.sampleBuilder = sampleBuilder;
+        this.labelMapper = labelMapper;
     }
 
     private static String getHelpMessage(String metricName, Metric metric) {
@@ -146,16 +146,16 @@ public class DropwizardExports implements MultiCollector {
     }
 
     /**
-     * Export a Meter as as prometheus COUNTER.
+     * Export a Meter as a prometheus COUNTER.
      */
     MetricSnapshot fromMeter(String dropwizardName, Meter meter) {
-        MetricMetadata metadata = getMetricMetaData(dropwizardName+"_total", meter);
+        MetricMetadata metadata = getMetricMetaData(dropwizardName + "_total", meter);
         CounterSnapshot.CounterDataPointSnapshot dataPointSnapshot = CounterSnapshot.CounterDataPointSnapshot.builder().value(meter.getCount()).build();
         return new CounterSnapshot(metadata, Collections.singletonList(dataPointSnapshot));
     }
 
     @Override
-    public MetricSnapshots collect(){
+    public MetricSnapshots collect() {
         MetricSnapshots.Builder metricSnapshots = MetricSnapshots.builder();
         for (SortedMap.Entry<MetricName, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
             Optional.ofNullable(fromGauge(entry.getKey().getKey(), entry.getValue())).map(metricSnapshots::metricSnapshot);
