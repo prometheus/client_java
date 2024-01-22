@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.dropwizard.labels;
 
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 
 import java.util.ArrayList;
@@ -25,41 +26,31 @@ public class CustomLabelMapper  {
         }
     }
 
-//
-//    public MetricSnapshot createSample(final String dropwizardName, final String nameSuffix, final List<String> additionalLabelNames, final List<String> additionalLabelValues, final double value) {
-//        if (dropwizardName == null) {
-//            throw new IllegalArgumentException("Dropwizard metric name cannot be null");
-//        }
-//
-//        CompiledMapperConfig matchingConfig = null;
-//        for (CompiledMapperConfig config : this.compiledMapperConfigs) {
-//            if (config.pattern.matches(dropwizardName)) {
-//                matchingConfig = config;
-//                break;
-//            }
-//        }
-//
-//        if (matchingConfig != null) {
-//            final Map<String, String> params = matchingConfig.pattern.extractParameters(dropwizardName);
-//            final NameAndLabels nameAndLabels = getNameAndLabels(matchingConfig.mapperConfig, params);
-//            nameAndLabels.labelNames.addAll(additionalLabelNames);
-//            nameAndLabels.labelValues.addAll(additionalLabelValues);
-//            return defaultMetricSampleBuilder.createSample(
-//                    nameAndLabels.name, nameSuffix,
-//                    nameAndLabels.labelNames,
-//                    nameAndLabels.labelValues,
-//                    value
-//            );
-//        }
-//
-//
-//        return defaultMetricSampleBuilder.createSample(
-//                dropwizardName, nameSuffix,
-//                additionalLabelNames,
-//                additionalLabelValues,
-//                value
-//        );
-//    }
+
+
+    public Labels getLabels(final String dropwizardName, final List<String> additionalLabelNames, final List<String> additionalLabelValues){
+        if (dropwizardName == null) {
+            throw new IllegalArgumentException("Dropwizard metric name cannot be null");
+        }
+
+        CompiledMapperConfig matchingConfig = null;
+        for (CompiledMapperConfig config : this.compiledMapperConfigs) {
+            if (config.pattern.matches(dropwizardName)) {
+                matchingConfig = config;
+                break;
+            }
+        }
+
+        if (matchingConfig != null) {
+            final Map<String, String> params = matchingConfig.pattern.extractParameters(dropwizardName);
+            final NameAndLabels nameAndLabels = getNameAndLabels(matchingConfig.mapperConfig, params);
+            nameAndLabels.labelNames.addAll(additionalLabelNames);
+            nameAndLabels.labelValues.addAll(additionalLabelValues);
+            return Labels.of(nameAndLabels.labelNames, nameAndLabels.labelValues);
+        }
+
+        return Labels.of(additionalLabelNames, additionalLabelValues);
+    }
 
     protected NameAndLabels getNameAndLabels(final MapperConfig config, final Map<String, String> parameters) {
         final String metricName = formatTemplate(config.getName(), parameters);

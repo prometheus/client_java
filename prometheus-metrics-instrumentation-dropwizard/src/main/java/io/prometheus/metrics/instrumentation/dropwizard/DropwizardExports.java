@@ -80,8 +80,11 @@ public class DropwizardExports implements MultiCollector {
      */
     MetricSnapshot fromCounter(String dropwizardName, Counter counter) {
         MetricMetadata metadata = getMetricMetaData(dropwizardName, counter);
-        CounterSnapshot.CounterDataPointSnapshot dataPointSnapshot = CounterSnapshot.CounterDataPointSnapshot.builder().value(Long.valueOf(counter.getCount()).doubleValue()).build();
-        return new CounterSnapshot(metadata, Collections.singletonList(dataPointSnapshot));
+        CounterSnapshot.CounterDataPointSnapshot.Builder dataPointSnapshot = CounterSnapshot.CounterDataPointSnapshot.builder().value(Long.valueOf(counter.getCount()).doubleValue());
+        if (labelMapper != null) {
+            dataPointSnapshot.labels(labelMapper.getLabels(dropwizardName, new ArrayList<>(), new ArrayList<>()));
+        }
+        return new CounterSnapshot(metadata, Collections.singletonList(dataPointSnapshot.build()));
     }
 
     /**
@@ -100,8 +103,11 @@ public class DropwizardExports implements MultiCollector {
             return null;
         }
         MetricMetadata metadata = getMetricMetaData(dropwizardName, gauge);
-        GaugeSnapshot.GaugeDataPointSnapshot dataPointSnapshot = GaugeSnapshot.GaugeDataPointSnapshot.builder().value(value).build();
-        return new GaugeSnapshot(metadata, Collections.singletonList(dataPointSnapshot));
+        GaugeSnapshot.GaugeDataPointSnapshot.Builder dataPointBuilder = GaugeSnapshot.GaugeDataPointSnapshot.builder().value(value);
+        if (labelMapper != null) {
+            dataPointBuilder.labels(labelMapper.getLabels(dropwizardName, new ArrayList<>(), new ArrayList<>()));
+        }
+        return new GaugeSnapshot(metadata, Collections.singletonList(dataPointBuilder.build()));
     }
 
     /**
@@ -123,8 +129,11 @@ public class DropwizardExports implements MultiCollector {
                 .build();
 
         MetricMetadata metadata = new MetricMetadata(PrometheusNaming.sanitizeMetricName(dropwizardName), helpMessage);
-        SummarySnapshot.SummaryDataPointSnapshot dataPointSnapshot = SummarySnapshot.SummaryDataPointSnapshot.builder().quantiles(quantiles).count(count).build();
-        return new SummarySnapshot(metadata, Collections.singletonList(dataPointSnapshot));
+        SummarySnapshot.SummaryDataPointSnapshot.Builder dataPointBuilder = SummarySnapshot.SummaryDataPointSnapshot.builder().quantiles(quantiles).count(count);
+        if (labelMapper != null) {
+            dataPointBuilder.labels(labelMapper.getLabels(dropwizardName, new ArrayList<>(), new ArrayList<>()));
+        }
+        return new SummarySnapshot(metadata, Collections.singletonList(dataPointBuilder.build()));
     }
 
     /**
@@ -148,8 +157,11 @@ public class DropwizardExports implements MultiCollector {
      */
     MetricSnapshot fromMeter(String dropwizardName, Meter meter) {
         MetricMetadata metadata = getMetricMetaData(dropwizardName + "_total", meter);
-        CounterSnapshot.CounterDataPointSnapshot dataPointSnapshot = CounterSnapshot.CounterDataPointSnapshot.builder().value(meter.getCount()).build();
-        return new CounterSnapshot(metadata, Collections.singletonList(dataPointSnapshot));
+        CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder = CounterSnapshot.CounterDataPointSnapshot.builder().value(meter.getCount());
+        if (labelMapper != null) {
+            dataPointBuilder.labels(labelMapper.getLabels(dropwizardName, new ArrayList<>(), new ArrayList<>()));
+        }
+        return new CounterSnapshot(metadata, Collections.singletonList(dataPointBuilder.build()));
     }
 
     @Override
