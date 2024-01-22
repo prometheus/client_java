@@ -11,7 +11,7 @@
     <artifactId>prometheus-metrics-instrumentation-dropwizard</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Metrics Exporter - Dropwizard</name>
+    <name>Prometheus Metrics Instrumentation - Dropwizard</name>
     <description>
         Instrumentation library for Dropwizard metrics
     </description>

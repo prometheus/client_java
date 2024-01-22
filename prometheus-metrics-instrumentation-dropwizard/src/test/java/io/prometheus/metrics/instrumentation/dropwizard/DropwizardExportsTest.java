@@ -1,8 +1,6 @@
 package io.prometheus.metrics.instrumentation.dropwizard;
 
-import  io.dropwizard.metrics5.*;
-import  io.dropwizard.metrics5.Timer;
-
+import io.dropwizard.metrics5.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
@@ -12,29 +10,22 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 
 
 public class DropwizardExportsTest {
 
     private PrometheusRegistry registry = new PrometheusRegistry();
     private MetricRegistry metricRegistry;
-//
-//    private SampleBuilder sampleBuilder;
 
     private DropwizardExports dropwizardExports;
 
     @Before
     public void setUp() {
         metricRegistry = new MetricRegistry();
-//        sampleBuilder = Mockito.mock(SampleBuilder.class);
         dropwizardExports = new DropwizardExports(metricRegistry);//.register(registry);
         registry.register(dropwizardExports);
     }
@@ -43,7 +34,6 @@ public class DropwizardExportsTest {
     @Test
     public void testCounter()  {
         metricRegistry.counter("foo.bar").inc(1);
-        System.out.println(convertToOpenMetricsFormat());
         String expected = "# TYPE foo_bar counter\n" +
                 "# HELP foo_bar Generated from Dropwizard metric import (metric=foo.bar, type=io.dropwizard.metrics5.Counter)\n" +
                 "foo_bar_total 1.0\n" +
@@ -182,43 +172,24 @@ public class DropwizardExportsTest {
     }
 
     @Test
-    public void testTimer() throws IOException, InterruptedException {
-
+    public void testTimer() throws InterruptedException {
         final MetricRegistry metricRegistry = new MetricRegistry();
-        PrometheusRegistry pmRegistry = new PrometheusRegistry();
         DropwizardExports exports = new DropwizardExports(metricRegistry);
-        pmRegistry.register(exports);
-
         Timer t = metricRegistry.timer("timer");
         Timer.Context time = t.time();
-        Thread.sleep(1L);
-        time.stop();
+        Thread.sleep(100L);
+        long timeSpentNanos = time.stop();
+        double timeSpentMillis = TimeUnit.NANOSECONDS.toMillis(timeSpentNanos);
+        System.out.println(timeSpentMillis);
 
-//        System.out.println( convertToOpenMetricsFormat(pmRegistry));
-
+        SummarySnapshot.SummaryDataPointSnapshot dataPointSnapshot = (SummarySnapshot.SummaryDataPointSnapshot) exports.collect().stream().flatMap(i -> i.getDataPoints().stream()).findFirst().get();
         // We slept for 1Ms so we ensure that all timers are above 1ms:
-//        assertTrue(registry.getSampleValue("timer", new String[]{"quantile"}, new String[]{"0.99"}) > 0.001);
-        SummarySnapshot.SummaryDataPointSnapshot aa = (SummarySnapshot.SummaryDataPointSnapshot) pmRegistry.scrape().stream().findFirst().get().getDataPoints().get(0);
-        System.out.println(aa);;
-
-//        aa.getQuantiles().iterator().
-//        assertEquals();
-
-        String expected = "# TYPE timer summary\n" +
-                "# HELP timer Generated from Dropwizard metric import (metric=timer, type=io.dropwizard.metrics5.Timer)\n" +
-                "timer{quantile=\"0.5\"} 0.0013355420000000001\n" +
-                "timer{quantile=\"0.75\"} 0.0013355420000000001\n" +
-                "timer{quantile=\"0.95\"} 0.0013355420000000001\n" +
-                "timer{quantile=\"0.98\"} 0.0013355420000000001\n" +
-                "timer{quantile=\"0.99\"} 0.0013355420000000001\n" +
-                "timer{quantile=\"0.999\"} 0.0013355420000000001\n" +
-                "timer_count 1\n" +
-                "# EOF";
-        assertEquals(expected, convertToOpenMetricsFormat(pmRegistry));
-        //Doesn't work.
-        //TODO fix this
-
-//        assertEquals(new Double(1.0D), registry.getSampleValue("timer_count"));
+        assertTrue(dataPointSnapshot.getQuantiles().size() > 1);
+        dataPointSnapshot.getQuantiles().forEach( i-> {
+            System.out.println(i.getQuantile() + " : " + i.getValue());
+            assertTrue(i.getValue() > timeSpentMillis/1000d);
+        });
+        assertEquals(1, dataPointSnapshot.getCount());
     }
 
     @Test
@@ -261,103 +232,6 @@ public class DropwizardExportsTest {
         assertEquals(expected, convertToOpenMetricsFormat());
     }
 
-    @Test
-    public void testThatMetricsMappedToSameNameAreGroupedInSameFamily() {
-//        final Collector.MetricFamilySamples.Sample namedTimerSample1 = new Collector.MetricFamilySamples.Sample("my_application_namedTimer", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedTimer1"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedTimerSample1);
-//
-//        final Collector.MetricFamilySamples.Sample namedTimerSample2 = new Collector.MetricFamilySamples.Sample("my_application_namedTimer", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedTimer2"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedTimerSample2);
-//
-//        final Collector.MetricFamilySamples.Sample namedCounter1 = new Collector.MetricFamilySamples.Sample("my_application_namedCounter", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedCounter1"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedCounter1);
-//
-//        final Collector.MetricFamilySamples.Sample namedCounter2 = new Collector.MetricFamilySamples.Sample("my_application_namedCounter", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedCounter2"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedCounter2);
-//
-//        final Collector.MetricFamilySamples.Sample namedMeter1 = new Collector.MetricFamilySamples.Sample("my_application_namedMeter_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter1"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedMeter1);
-//
-//        final Collector.MetricFamilySamples.Sample namedMeter2 = new Collector.MetricFamilySamples.Sample("my_application_namedMeter_total", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedMeter2"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedMeter2);
-//
-//        final Collector.MetricFamilySamples.Sample namedHistogram1 = new Collector.MetricFamilySamples.Sample("my_application_namedHistogram", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedHistogram1"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedHistogram1);
-//
-//        final Collector.MetricFamilySamples.Sample namedHistogram2 = new Collector.MetricFamilySamples.Sample("my_application_namedHistogram", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedHistogram2"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedHistogram2);
-//
-//        final Collector.MetricFamilySamples.Sample namedGauge1 = new Collector.MetricFamilySamples.Sample("my_application_namedGauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1234);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedGauge1"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedGauge1);
-//
-//        final Collector.MetricFamilySamples.Sample namedGauge2 = new Collector.MetricFamilySamples.Sample("my_application_namedGauge", Collections.<String>emptyList(), Collections.<String>emptyList(), 1235);
-//        Mockito.when(sampleBuilder.createSample(eq("my.application.namedGauge2"), anyString(), anyList(), anyList(), anyDouble()))
-//                .thenReturn(namedGauge2);
-//
-//        metricRegistry.timer("my.application.namedTimer1");
-//        metricRegistry.timer("my.application.namedTimer2");
-//        metricRegistry.counter("my.application.namedCounter1");
-//        metricRegistry.counter("my.application.namedCounter2");
-//        metricRegistry.meter("my.application.namedMeter1");
-//        metricRegistry.meter("my.application.namedMeter2");
-//        metricRegistry.histogram("my.application.namedHistogram1");
-//        metricRegistry.histogram("my.application.namedHistogram2");
-//        metricRegistry.register("my.application.namedGauge1", new ExampleDoubleGauge());
-//        metricRegistry.register("my.application.namedGauge2", new ExampleDoubleGauge());
-//
-//        Enumeration<Collector.MetricFamilySamples> metricFamilySamples = registry.metricFamilySamples();
-//
-//
-//        Map<String, Collector.MetricFamilySamples> elements = new HashMap<String, Collector.MetricFamilySamples>();
-//
-//        while (metricFamilySamples.hasMoreElements()) {
-//            Collector.MetricFamilySamples element = metricFamilySamples.nextElement();
-//            elements.put(element.name, element);
-//        }
-//        assertEquals(5, elements.size());
-//
-//        final Collector.MetricFamilySamples namedTimer = elements.get("my_application_namedTimer");
-//        assertNotNull(namedTimer);
-//        assertEquals(Collector.Type.SUMMARY, namedTimer.type);
-//        assertEquals(14, namedTimer.samples.size());
-//
-//        final Collector.MetricFamilySamples namedCounter = elements.get("my_application_namedCounter");
-//        assertNotNull(namedCounter);
-//        assertEquals(Collector.Type.GAUGE, namedCounter.type);
-//        assertEquals(2, namedCounter.samples.size());
-//        assertTrue(namedCounter.samples.contains(namedCounter1));
-//        assertTrue(namedCounter.samples.contains(namedCounter2));
-//
-//        final Collector.MetricFamilySamples namedMeter = elements.get("my_application_namedMeter");
-//        assertNotNull(namedMeter);
-//        assertEquals(Collector.Type.COUNTER, namedMeter.type);
-//        assertEquals(2, namedMeter.samples.size());
-//        assertTrue(namedMeter.samples.contains(namedMeter1));
-//        assertTrue(namedMeter.samples.contains(namedMeter2));
-//
-//        final Collector.MetricFamilySamples namedHistogram = elements.get("my_application_namedHistogram");
-//        assertNotNull(namedHistogram);
-//        assertEquals(Collector.Type.SUMMARY, namedHistogram.type);
-//        assertEquals(Collector.Type.SUMMARY, namedHistogram.type);
-//        assertEquals(14, namedHistogram.samples.size());
-//
-//        final Collector.MetricFamilySamples namedGauge = elements.get("my_application_namedGauge");
-//        assertNotNull(namedGauge);
-//        assertEquals(Collector.Type.GAUGE, namedGauge.type);
-//        assertEquals(2, namedGauge.samples.size());
-//        assertTrue(namedGauge.samples.contains(namedGauge1));
-//        assertTrue(namedGauge.samples.contains(namedGauge2));
-//
-    }
 
     private static class ExampleDoubleGauge implements Gauge<Double> {
         @Override
