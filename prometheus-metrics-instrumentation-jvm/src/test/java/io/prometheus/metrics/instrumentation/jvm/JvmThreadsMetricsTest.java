@@ -108,8 +108,9 @@ public class JvmThreadsMetricsTest {
     @Test
     public void testInvalidThreadIds() {
         try {
-            int javaVersion = Integer.parseInt(System.getProperty("java.version"));
-            if (javaVersion >= 21) {
+            String javaVersion = System.getProperty("java.version"); // Example: "21.0.2"
+            String majorJavaVersion = javaVersion.replaceAll("\\..*", ""); // Example: "21"
+            if (Integer.parseInt(majorJavaVersion) >= 21) {
                 // With Java 21 and newer you can no longer have invalid thread ids.
                 return;
             }
