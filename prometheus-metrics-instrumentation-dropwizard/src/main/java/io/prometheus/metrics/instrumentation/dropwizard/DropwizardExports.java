@@ -3,8 +3,6 @@ package io.prometheus.metrics.instrumentation.dropwizard;
 import io.dropwizard.metrics5.Timer;
 import io.dropwizard.metrics5.*;
 import io.prometheus.metrics.instrumentation.dropwizard.labels.CustomLabelMapper;
-import io.prometheus.metrics.instrumentation.dropwizard.labels.DefaultSampleBuilder;
-import io.prometheus.metrics.instrumentation.dropwizard.labels.SampleBuilder;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.snapshots.*;
 

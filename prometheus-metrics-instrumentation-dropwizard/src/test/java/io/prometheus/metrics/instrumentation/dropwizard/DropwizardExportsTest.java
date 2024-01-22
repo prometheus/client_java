@@ -1,30 +1,17 @@
 package io.prometheus.metrics.instrumentation.dropwizard;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import  io.dropwizard.metrics5.*;
 import  io.dropwizard.metrics5.Timer;
-//import io.prometheus.client.Collector;
 
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
-import io.prometheus.metrics.instrumentation.dropwizard.samplebuilder.SampleBuilder;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -32,9 +19,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 
 
@@ -210,11 +194,15 @@ public class DropwizardExportsTest {
         Thread.sleep(1L);
         time.stop();
 
-        System.out.println( convertToOpenMetricsFormat(pmRegistry));
+//        System.out.println( convertToOpenMetricsFormat(pmRegistry));
 
         // We slept for 1Ms so we ensure that all timers are above 1ms:
 //        assertTrue(registry.getSampleValue("timer", new String[]{"quantile"}, new String[]{"0.99"}) > 0.001);
+        SummarySnapshot.SummaryDataPointSnapshot aa = (SummarySnapshot.SummaryDataPointSnapshot) pmRegistry.scrape().stream().findFirst().get().getDataPoints().get(0);
+        System.out.println(aa);;
 
+//        aa.getQuantiles().iterator().
+//        assertEquals();
 
         String expected = "# TYPE timer summary\n" +
                 "# HELP timer Generated from Dropwizard metric import (metric=timer, type=io.dropwizard.metrics5.Timer)\n" +
