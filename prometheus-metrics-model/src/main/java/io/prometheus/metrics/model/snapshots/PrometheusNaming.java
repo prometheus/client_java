@@ -1,6 +1,12 @@
 package io.prometheus.metrics.model.snapshots;
 
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
+
+enum ValidationScheme {
+    LegacyValidation,
+    UTF8Validation
+}
 
 /**
  * Utility for Prometheus Metric and Label naming.
@@ -9,6 +15,7 @@ import java.util.regex.Pattern;
  * in Prometheus exposition formats. However, if metrics are exposed in OpenTelemetry format the dots are retained.
  */
 public class PrometheusNaming {
+    static ValidationScheme nameValidationScheme = ValidationScheme.LegacyValidation;
 
     /**
      * Legal characters for metric names, including dot.
@@ -61,12 +68,26 @@ public class PrometheusNaming {
         return validateMetricName(name) == null;
     }
 
+    static String validateMetricName(String name) {
+        switch (nameValidationScheme) {
+            case LegacyValidation:
+                return validateLegacyMetricName(name);
+            case UTF8Validation:
+                if(!StandardCharsets.UTF_8.newEncoder().canEncode(name)) {
+                    return "The metric name contains unsupported characters";
+                }
+                return null;
+            default:
+                throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+        }
+    }
+
     /**
      * Same as {@link #isValidMetricName(String)}, but produces an error message.
      * <p>
      * The name is valid if the error message is {@code null}.
      */
-    static String validateMetricName(String name) {
+    public static String validateLegacyMetricName(String name) {
         for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
             if (name.endsWith(reservedSuffix)) {
                 return "The metric name must not include the '" + reservedSuffix + "' suffix.";
@@ -79,8 +100,15 @@ public class PrometheusNaming {
     }
 
     public static boolean isValidLabelName(String name) {
-        return LABEL_NAME_PATTERN.matcher(name).matches() &&
-                !(name.startsWith("__") || name.startsWith("._") || name.startsWith("..") || name.startsWith("_."));
+        switch (nameValidationScheme) {
+            case LegacyValidation:
+                return LABEL_NAME_PATTERN.matcher(name).matches() &&
+                        !(name.startsWith("__") || name.startsWith("._") || name.startsWith("..") || name.startsWith("_."));
+            case UTF8Validation:
+                return StandardCharsets.UTF_8.newEncoder().canEncode(name);
+            default:
+                throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+        }
     }
 
     /**

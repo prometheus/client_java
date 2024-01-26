@@ -1,12 +1,11 @@
 package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 public class TextFormatUtil {
 
@@ -38,7 +37,7 @@ public class TextFormatUtil {
         writer.write(Long.toString(ms));
     }
 
-    static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
+    static void writeEscapedString(Writer writer, String s) throws IOException {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             switch (c) {
@@ -57,15 +56,17 @@ public class TextFormatUtil {
         }
     }
 
-    static void writeLabels(OutputStreamWriter writer, Labels labels, String additionalLabelName, double additionalLabelValue) throws IOException {
-        writer.write('{');
+    static void writeLabels(OutputStreamWriter writer, Labels labels, String additionalLabelName, double additionalLabelValue, boolean metricInsideBraces) throws IOException {
+        if (!metricInsideBraces) {
+            writer.write('{');
+        }
         for (int i = 0; i < labels.size(); i++) {
-            if (i > 0) {
+            if (i > 0 || metricInsideBraces) {
                 writer.write(",");
             }
-            writer.write(labels.getPrometheusName(i));
+            writeName(writer, labels.getPrometheusName(i));
             writer.write("=\"");
-            writeEscapedLabelValue(writer, labels.getValue(i));
+            writeEscapedString(writer, labels.getValue(i));
             writer.write("\"");
         }
         if (additionalLabelName != null) {
@@ -78,5 +79,15 @@ public class TextFormatUtil {
             writer.write("\"");
         }
         writer.write('}');
+    }
+
+    static void writeName(OutputStreamWriter writer, String name) throws IOException {
+        if (PrometheusNaming.validateLegacyMetricName(name) == null) {
+            writer.write(name);
+            return;
+        }
+        writer.write('"');
+        writeEscapedString(writer, name);
+        writer.write('"');
     }
 }
