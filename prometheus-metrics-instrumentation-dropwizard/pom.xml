@@ -8,7 +8,7 @@
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>prometheus-metrics-instrumentation-dropwizard</artifactId>
+    <artifactId>prometheus-metrics-instrumentation-dropwizard5</artifactId>
     <packaging>bundle</packaging>
 
     <name>Prometheus Metrics Instrumentation - Dropwizard</name>
@@ -17,7 +17,7 @@
     </description>
 
     <properties>
-        <automatic.module.name>io.prometheus.metrics.exporter.dw</automatic.module.name>
+        <automatic.module.name>io.prometheus.metrics.instrumentation.dropwizard</automatic.module.name>
     </properties>
 
     <licenses>

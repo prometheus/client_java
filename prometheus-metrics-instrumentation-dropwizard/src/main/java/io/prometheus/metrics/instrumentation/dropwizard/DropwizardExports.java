@@ -4,6 +4,7 @@ import io.dropwizard.metrics5.Timer;
 import io.dropwizard.metrics5.*;
 import io.prometheus.metrics.instrumentation.dropwizard.labels.CustomLabelMapper;
 import io.prometheus.metrics.model.registry.MultiCollector;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.*;
 
 import java.util.*;
@@ -16,16 +17,16 @@ import java.util.logging.Logger;
  */
 public class DropwizardExports implements MultiCollector {
     private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
-    private MetricRegistry registry;
-    private MetricFilter metricFilter;
-    private Optional<CustomLabelMapper> labelMapper;
+    private final MetricRegistry registry;
+    private final MetricFilter metricFilter;
+    private final Optional<CustomLabelMapper> labelMapper;
 
     /**
      * Creates a new DropwizardExports and {@link MetricFilter#ALL}.
      *
      * @param registry a metric registry to export in prometheus.
      */
-    public DropwizardExports(MetricRegistry registry) {
+    DropwizardExports(MetricRegistry registry) {
         super();
         this.registry = registry;
         this.metricFilter = MetricFilter.ALL;
@@ -41,17 +42,7 @@ public class DropwizardExports implements MultiCollector {
     public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter) {
         this.registry = registry;
         this.metricFilter = metricFilter;
-        this.labelMapper = Optional.empty();;
-    }
-
-    /**
-     * @param registry    a metric registry to export in prometheus.
-     * @param labelMapper a labelMapper to use to map labels.
-     */
-    public DropwizardExports(MetricRegistry registry, CustomLabelMapper labelMapper) {
-        this.registry = registry;
-        this.metricFilter = MetricFilter.ALL;
-        this.labelMapper = Optional.ofNullable(labelMapper);
+        this.labelMapper = Optional.empty();
     }
 
     /**
@@ -175,6 +166,56 @@ public class DropwizardExports implements MultiCollector {
             metricSnapshots.metricSnapshot(fromMeter(entry.getKey().getKey(), entry.getValue()));
         }
         return metricSnapshots.build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    //Builder class for DropwizardExports
+    public static class Builder {
+        private MetricRegistry registry;
+        private MetricFilter metricFilter;
+        private CustomLabelMapper labelMapper;
+
+        private Builder() {
+            this.metricFilter = MetricFilter.ALL;
+        }
+
+        public Builder dropwizardRegistry(MetricRegistry registry) {
+            this.registry = registry;
+            return this;
+        }
+
+        public Builder metricFilter(MetricFilter metricFilter) {
+            this.metricFilter = metricFilter;
+            return this;
+        }
+
+        public Builder customLabelMapper(CustomLabelMapper labelMapper) {
+            this.labelMapper = labelMapper;
+            return this;
+        }
+
+        DropwizardExports build() {
+            if (registry == null) {
+                throw new IllegalArgumentException("MetricRegistry must be set");
+            }
+            if (labelMapper == null) {
+                return new DropwizardExports(registry, metricFilter);
+            } else {
+                return new DropwizardExports(registry, metricFilter, labelMapper);
+            }
+        }
+
+        public void register() {
+            register(PrometheusRegistry.defaultRegistry);
+        }
+
+        public void register(PrometheusRegistry registry) {
+            DropwizardExports dropwizardExports = build();
+            registry.register(dropwizardExports);
+        }
     }
 
 }

@@ -21,13 +21,11 @@ public class DropwizardExportsTest {
     private PrometheusRegistry registry = new PrometheusRegistry();
     private MetricRegistry metricRegistry;
 
-    private DropwizardExports dropwizardExports;
 
     @Before
     public void setUp() {
         metricRegistry = new MetricRegistry();
-        dropwizardExports = new DropwizardExports(metricRegistry);//.register(registry);
-        registry.register(dropwizardExports);
+        DropwizardExports.builder().dropwizardRegistry(metricRegistry).register(registry);
     }
 
 
@@ -134,8 +132,7 @@ public class DropwizardExportsTest {
         // just test the standard mapper
         final MetricRegistry metricRegistry = new MetricRegistry();
         PrometheusRegistry pmRegistry = new PrometheusRegistry();
-        DropwizardExports exports = new DropwizardExports(metricRegistry);
-        pmRegistry.register(exports);
+        DropwizardExports.builder().dropwizardRegistry(metricRegistry).register(pmRegistry);
 
         Histogram hist = metricRegistry.histogram("hist");
         int i = 0;

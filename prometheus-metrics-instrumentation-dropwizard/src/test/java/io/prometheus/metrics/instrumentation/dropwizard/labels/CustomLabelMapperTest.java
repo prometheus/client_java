@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.dropwizard.labels;
 
+import io.dropwizard.metrics5.MetricFilter;
 import io.dropwizard.metrics5.MetricRegistry;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports;
@@ -36,7 +37,7 @@ public class CustomLabelMapperTest {
                 new MapperConfig("not.even.this.*.*.*")
         );
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
-        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, labelMapper);
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, MetricFilter.ALL, labelMapper);
 
         metricRegistry.counter("app.okhttpclient.client.HttpClient.service.total").inc(1);
         System.out.println(convertToOpenMetricsFormat(dropwizardExports.collect()));
@@ -64,7 +65,7 @@ public class CustomLabelMapperTest {
                 new MapperConfig("not.even.this.*.*.*")
         );
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
-        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, labelMapper);
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, MetricFilter.ALL, labelMapper);
 
         metricRegistry.counter("app.okhttpclient.client.HttpClient.greatService.total").inc(1);
 
@@ -90,7 +91,7 @@ public class CustomLabelMapperTest {
                 new MapperConfig("app.okhttpclient.client.HttpClient.*.*") // this matches as well
         );
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
-        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, labelMapper);
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, MetricFilter.ALL, labelMapper);
 
         metricRegistry.counter("app.okhttpclient.client.HttpClient.greatService.total").inc(1);
 
@@ -148,7 +149,7 @@ public class CustomLabelMapperTest {
 
 
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
-        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, labelMapper);
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry,MetricFilter.ALL,  labelMapper);
         metricRegistry.counter("app.okhttpclient.client.HttpClient.greatService.400").inc(1);
         System.out.println(convertToOpenMetricsFormat(dropwizardExports.collect()));
 
@@ -178,7 +179,7 @@ public class CustomLabelMapperTest {
         );
 
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
-        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, labelMapper);
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry,MetricFilter.ALL,  labelMapper);
         metricRegistry.histogram("app.okhttpclient.client.HttpClient.greatService.400");
 
         String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService_400 summary\n" +
