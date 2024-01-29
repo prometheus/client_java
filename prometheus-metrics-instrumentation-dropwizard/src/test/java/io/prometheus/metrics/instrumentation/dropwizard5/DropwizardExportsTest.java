@@ -1,7 +1,8 @@
-package io.prometheus.metrics.instrumentation.dropwizard;
+package io.prometheus.metrics.instrumentation.dropwizard5;
 
 import io.dropwizard.metrics5.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
+import io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import org.junit.Before;
@@ -80,19 +81,19 @@ public class DropwizardExportsTest {
         metricRegistry.register("boolean.gauge", booleanGauge);
 
         String expected = "# TYPE boolean_gauge gauge\n" +
-                "# HELP boolean_gauge Generated from Dropwizard metric import (metric=boolean.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$5)\n" +
+                "# HELP boolean_gauge Generated from Dropwizard metric import (metric=boolean.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$5)\n" +
                 "boolean_gauge 1.0\n" +
                 "# TYPE double_gauge gauge\n" +
-                "# HELP double_gauge Generated from Dropwizard metric import (metric=double.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$2)\n" +
+                "# HELP double_gauge Generated from Dropwizard metric import (metric=double.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$2)\n" +
                 "double_gauge 1.234\n" +
                 "# TYPE float_gauge gauge\n" +
-                "# HELP float_gauge Generated from Dropwizard metric import (metric=float.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$4)\n" +
+                "# HELP float_gauge Generated from Dropwizard metric import (metric=float.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$4)\n" +
                 "float_gauge 0.1234000027179718\n" +
                 "# TYPE integer_gauge gauge\n" +
-                "# HELP integer_gauge Generated from Dropwizard metric import (metric=integer.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$1)\n" +
+                "# HELP integer_gauge Generated from Dropwizard metric import (metric=integer.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$1)\n" +
                 "integer_gauge 1234.0\n" +
                 "# TYPE long_gauge gauge\n" +
-                "# HELP long_gauge Generated from Dropwizard metric import (metric=long.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$3)\n" +
+                "# HELP long_gauge Generated from Dropwizard metric import (metric=long.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$3)\n" +
                 "long_gauge 1234.0\n" +
                 "# EOF\n";
 
@@ -202,7 +203,7 @@ public class DropwizardExportsTest {
                 "# HELP my_application_namedCounter1 Generated from Dropwizard metric import (metric=my.application.namedCounter1, type=io.dropwizard.metrics5.Counter)\n" +
                 "my_application_namedCounter1_total 0.0\n" +
                 "# TYPE my_application_namedGauge1 gauge\n" +
-                "# HELP my_application_namedGauge1 Generated from Dropwizard metric import (metric=my.application.namedGauge1, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$ExampleDoubleGauge)\n" +
+                "# HELP my_application_namedGauge1 Generated from Dropwizard metric import (metric=my.application.namedGauge1, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$ExampleDoubleGauge)\n" +
                 "my_application_namedGauge1 0.0\n" +
                 "# TYPE my_application_namedHistogram1 summary\n" +
                 "# HELP my_application_namedHistogram1 Generated from Dropwizard metric import (metric=my.application.namedHistogram1, type=io.dropwizard.metrics5.Histogram)\n" +

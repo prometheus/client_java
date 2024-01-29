@@ -1,9 +1,9 @@
-package io.prometheus.metrics.instrumentation.dropwizard.labels;
+package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
 import io.dropwizard.metrics5.MetricFilter;
 import io.dropwizard.metrics5.MetricRegistry;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
-import io.prometheus.metrics.instrumentation.dropwizard.DropwizardExports;
+import io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.Before;
 import org.junit.Test;
@@ -120,7 +120,7 @@ public class CustomLabelMapperTest {
         );
 
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
-        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, labelMapper);
+        DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, MetricFilter.ALL, labelMapper);
         metricRegistry.counter("app.okhttpclient.client.HttpClient.greatService.400").inc(1);
 
         String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService_400 counter\n" +

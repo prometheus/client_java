@@ -1,4 +1,4 @@
-package io.prometheus.metrics.instrumentation.dropwizard.labels;
+package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
 import java.util.HashMap;
 import java.util.Map;

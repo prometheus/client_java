@@ -1,8 +1,8 @@
-package io.prometheus.metrics.instrumentation.dropwizard;
+package io.prometheus.metrics.instrumentation.dropwizard5;
 
 import io.dropwizard.metrics5.Timer;
 import io.dropwizard.metrics5.*;
-import io.prometheus.metrics.instrumentation.dropwizard.labels.CustomLabelMapper;
+import io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.*;

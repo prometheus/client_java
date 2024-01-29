@@ -1,7 +1,6 @@
-package io.prometheus.metrics.instrumentation.dropwizard.labels;
+package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;

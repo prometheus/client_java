@@ -1,11 +1,11 @@
-package io.prometheus.metrics.instrumentation.dropwizard.labels;
+package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.prometheus.metrics.instrumentation.dropwizard.labels.MapperConfig.METRIC_GLOB_REGEX;
+import static io.prometheus.metrics.instrumentation.dropwizard5.labels.MapperConfig.METRIC_GLOB_REGEX;
 
 /**
  * GraphiteNamePattern is initialised with a simplified glob pattern that only allows '*' as special character.

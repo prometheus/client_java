@@ -1,6 +1,5 @@
-package io.prometheus.metrics.instrumentation.dropwizard.labels;
+package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
-import io.prometheus.metrics.instrumentation.dropwizard.labels.MapperConfig;
 import org.junit.Test;
 
 import java.util.Collections;

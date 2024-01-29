@@ -11,13 +11,13 @@
     <artifactId>prometheus-metrics-instrumentation-dropwizard5</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Metrics Instrumentation - Dropwizard</name>
+    <name>Prometheus Metrics Instrumentation - Dropwizard 5.x</name>
     <description>
-        Instrumentation library for Dropwizard metrics
+        Instrumentation library for Dropwizard metrics 5.x
     </description>
 
     <properties>
-        <automatic.module.name>io.prometheus.metrics.instrumentation.dropwizard</automatic.module.name>
+        <automatic.module.name>io.prometheus.metrics.instrumentation.dropwizard5</automatic.module.name>
     </properties>
 
     <licenses>
