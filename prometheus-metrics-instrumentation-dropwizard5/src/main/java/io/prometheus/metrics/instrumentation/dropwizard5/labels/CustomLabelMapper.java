@@ -26,7 +26,6 @@ public class CustomLabelMapper  {
     }
 
 
-
     public Labels getLabels(final String dropwizardName, final List<String> additionalLabelNames, final List<String> additionalLabelValues){
         if (dropwizardName == null) {
             throw new IllegalArgumentException("Dropwizard metric name cannot be null");
