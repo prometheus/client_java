@@ -1,6 +1,5 @@
 package io.prometheus.metrics.config;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,10 +25,10 @@ public class ExporterFilterProperties {
     }
 
     private ExporterFilterProperties(List<String> allowedNames, List<String> excludedNames, List<String> allowedPrefixes, List<String> excludedPrefixes, String prefix) {
-        this.allowedNames = allowedNames == null ? null : Collections.unmodifiableList(new ArrayList<>(allowedNames));
-        this.excludedNames = excludedNames == null ? null : Collections.unmodifiableList(new ArrayList<>(excludedNames));
-        this.allowedPrefixes = allowedPrefixes == null ? null : Collections.unmodifiableList(new ArrayList<>(allowedPrefixes));
-        this.excludedPrefixes = excludedPrefixes == null ? null : Collections.unmodifiableList(new ArrayList<>(excludedPrefixes));
+        this.allowedNames = allowedNames == null ? null : Collections.unmodifiableList(allowedNames);
+        this.excludedNames = excludedNames == null ? null : Collections.unmodifiableList(excludedNames);
+        this.allowedPrefixes = allowedPrefixes == null ? null : Collections.unmodifiableList(allowedPrefixes);
+        this.excludedPrefixes = excludedPrefixes == null ? null : Collections.unmodifiableList(excludedPrefixes);
         validate(prefix);
     }
 

@@ -87,7 +87,9 @@ public class Exporter {
     if (includedParam == null) {
       return Collections.emptySet();
     } else {
-      return new HashSet<String>(Arrays.asList(includedParam));
+      Set<String> result = new HashSet<String>();
+      Collections.addAll(result, includedParam);
+      return result;
     }
   }
 

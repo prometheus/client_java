@@ -1,8 +1,8 @@
 package io.prometheus.metrics.model.registry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Predicate;
 
 import static java.util.Collections.unmodifiableCollection;
@@ -23,10 +23,10 @@ public class MetricNameFilter implements Predicate<String> {
     private final Collection<String> nameDoesNotStartWith;
 
     private MetricNameFilter(Collection<String> nameIsEqualTo, Collection<String> nameIsNotEqualTo, Collection<String> nameStartsWith, Collection<String> nameDoesNotStartWith) {
-        this.nameIsEqualTo = unmodifiableCollection(new ArrayList<>(nameIsEqualTo));
-        this.nameIsNotEqualTo = unmodifiableCollection(new ArrayList<>(nameIsNotEqualTo));
-        this.nameStartsWith = unmodifiableCollection(new ArrayList<>(nameStartsWith));
-        this.nameDoesNotStartWith = unmodifiableCollection(new ArrayList<>(nameDoesNotStartWith));
+        this.nameIsEqualTo = unmodifiableCollection(nameIsEqualTo);
+        this.nameIsNotEqualTo = unmodifiableCollection(nameIsNotEqualTo);
+        this.nameStartsWith = unmodifiableCollection(nameStartsWith);
+        this.nameDoesNotStartWith = unmodifiableCollection(nameDoesNotStartWith);
     }
 
     @Override
@@ -107,7 +107,8 @@ public class MetricNameFilter implements Predicate<String> {
          * @see #nameMustBeEqualTo(Collection)
          */
         public Builder nameMustBeEqualTo(String... names) {
-            return nameMustBeEqualTo(Arrays.asList(names));
+            Collections.addAll(nameEqualTo, names);
+            return this;
         }
 
         /**
@@ -132,7 +133,8 @@ public class MetricNameFilter implements Predicate<String> {
          * @see #nameMustNotBeEqualTo(Collection)
          */
         public Builder nameMustNotBeEqualTo(String... names) {
-            return nameMustNotBeEqualTo(Arrays.asList(names));
+            Collections.addAll(nameNotEqualTo, names);
+            return this;
         }
 
         /**
@@ -155,7 +157,8 @@ public class MetricNameFilter implements Predicate<String> {
          * @see #nameMustStartWith(Collection)
          */
         public Builder nameMustStartWith(String... prefixes) {
-            return nameMustStartWith(Arrays.asList(prefixes));
+            Collections.addAll(nameStartsWith, prefixes);
+            return this;
         }
 
         /**
@@ -174,7 +177,8 @@ public class MetricNameFilter implements Predicate<String> {
          * @see #nameMustNotStartWith(Collection)
          */
         public Builder nameMustNotStartWith(String... prefixes) {
-            return nameMustNotStartWith(Arrays.asList(prefixes));
+            Collections.addAll(nameDoesNotStartWith, prefixes);
+            return this;
         }
 
         /**
