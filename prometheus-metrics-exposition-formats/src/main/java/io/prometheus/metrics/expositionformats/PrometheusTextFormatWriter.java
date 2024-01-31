@@ -278,7 +278,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
             metricInsideBraces = true;
             writer.write('{');
         }
-        writeName(writer, name + (suffix != null ? suffix : ""));
+        writeName(writer, name + (suffix != null ? suffix : ""), NameType.Metric);
 
         if (!labels.isEmpty() || additionalLabelName != null) {
             writeLabels(writer, labels, additionalLabelName, additionalLabelValue, metricInsideBraces);
@@ -294,13 +294,13 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     private void writeMetadata(OutputStreamWriter writer, String suffix, String typeString, MetricMetadata metadata) throws IOException {
         if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
             writer.write("# HELP ");
-            writeName(writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""));
+            writeName(writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""), NameType.Metric);
             writer.write(' ');
             writeEscapedHelp(writer, metadata.getHelp());
             writer.write('\n');
         }
         writer.write("# TYPE ");
-        writeName(writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""));
+        writeName(writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""), NameType.Metric);
         writer.write(' ');
         writer.write(typeString);
         writer.write('\n');

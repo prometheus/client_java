@@ -274,7 +274,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
             metricInsideBraces = true;
             writer.write('{');
         }
-        writeName(writer, name + (suffix != null ? suffix : ""));
+        writeName(writer, name + (suffix != null ? suffix : ""), NameType.Metric);
 
         if (!labels.isEmpty() || additionalLabelName != null) {
             writeLabels(writer, labels, additionalLabelName, additionalLabelValue, metricInsideBraces);
@@ -307,20 +307,20 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
     private void writeMetadata(OutputStreamWriter writer, String typeName, MetricMetadata metadata) throws IOException {
         writer.write("# TYPE ");
-        writeName(writer, metadata.getPrometheusName());
+        writeName(writer, metadata.getPrometheusName(), NameType.Metric);
         writer.write(' ');
         writer.write(typeName);
         writer.write('\n');
         if (metadata.getUnit() != null) {
             writer.write("# UNIT ");
-            writeName(writer, metadata.getPrometheusName());
+            writeName(writer, metadata.getPrometheusName(), NameType.Metric);
             writer.write(' ');
             writeEscapedString(writer, metadata.getUnit().toString());
             writer.write('\n');
         }
         if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
             writer.write("# HELP ");
-            writeName(writer, metadata.getPrometheusName());
+            writeName(writer, metadata.getPrometheusName(), NameType.Metric);
             writer.write(' ');
             writeEscapedString(writer, metadata.getHelp());
             writer.write('\n');

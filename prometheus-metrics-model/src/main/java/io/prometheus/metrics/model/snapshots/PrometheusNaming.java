@@ -73,7 +73,7 @@ public class PrometheusNaming {
             case LegacyValidation:
                 return validateLegacyMetricName(name);
             case UTF8Validation:
-                if(!StandardCharsets.UTF_8.newEncoder().canEncode(name)) {
+                if(name.isEmpty() || !StandardCharsets.UTF_8.newEncoder().canEncode(name)) {
                     return "The metric name contains unsupported characters";
                 }
                 return null;
@@ -93,22 +93,30 @@ public class PrometheusNaming {
                 return "The metric name must not include the '" + reservedSuffix + "' suffix.";
             }
         }
-        if (!METRIC_NAME_PATTERN.matcher(name).matches()) {
+        if (!isValidLegacyMetricName(name)) {
             return "The metric name contains unsupported characters";
         }
         return null;
     }
 
+    public static boolean isValidLegacyMetricName(String name) {
+        return METRIC_NAME_PATTERN.matcher(name).matches();
+    }
+
     public static boolean isValidLabelName(String name) {
         switch (nameValidationScheme) {
             case LegacyValidation:
-                return LABEL_NAME_PATTERN.matcher(name).matches() &&
+                return isValidLegacyLabelName(name) &&
                         !(name.startsWith("__") || name.startsWith("._") || name.startsWith("..") || name.startsWith("_."));
             case UTF8Validation:
                 return StandardCharsets.UTF_8.newEncoder().canEncode(name);
             default:
                 throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
         }
+    }
+
+    public static boolean isValidLegacyLabelName(String name) {
+        return LABEL_NAME_PATTERN.matcher(name).matches();
     }
 
     /**

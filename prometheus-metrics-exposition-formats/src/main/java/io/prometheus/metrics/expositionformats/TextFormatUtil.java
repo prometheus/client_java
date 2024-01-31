@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
+enum NameType {
+    Metric,
+    Label
+}
+
 public class TextFormatUtil {
 
     static void writeLong(OutputStreamWriter writer, long value) throws IOException {
@@ -64,7 +69,7 @@ public class TextFormatUtil {
             if (i > 0 || metricInsideBraces) {
                 writer.write(",");
             }
-            writeName(writer, labels.getPrometheusName(i));
+            writeName(writer, labels.getPrometheusName(i), NameType.Label);
             writer.write("=\"");
             writeEscapedString(writer, labels.getValue(i));
             writer.write("\"");
@@ -81,10 +86,22 @@ public class TextFormatUtil {
         writer.write('}');
     }
 
-    static void writeName(OutputStreamWriter writer, String name) throws IOException {
-        if (PrometheusNaming.validateLegacyMetricName(name) == null) {
-            writer.write(name);
-            return;
+    static void writeName(OutputStreamWriter writer, String name, NameType nameType) throws IOException {
+        switch (nameType) {
+            case Metric:
+                if (PrometheusNaming.isValidLegacyMetricName(name)) {
+                    writer.write(name);
+                    return;
+                }
+                break;
+            case Label:
+                if (PrometheusNaming.isValidLegacyLabelName(name)) {
+                    writer.write(name);
+                    return;
+                }
+                break;
+            default:
+                throw new RuntimeException("Invalid name type requested: " + nameType);
         }
         writer.write('"');
         writeEscapedString(writer, name);
