@@ -60,6 +60,7 @@ public class JvmMetrics {
             JvmGarbageCollectorMetrics.builder(config).register(registry);
             JvmMemoryPoolAllocationMetrics.builder(config).register(registry);
             JvmMemoryMetrics.builder(config).register(registry);
+            JvmNativeMemoryMetrics.builder(config).register(registry);
             JvmRuntimeInfoMetric.builder(config).register(registry);
             ProcessMetrics.builder(config).register(registry);
         }
