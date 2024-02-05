@@ -9,6 +9,7 @@ public class PrometheusNamingTest {
 
     @Test
     public void testSanitizeMetricName() {
+        nameValidationScheme = ValidationScheme.LegacyValidation;
         Assert.assertEquals("_abc_def", prometheusName(sanitizeMetricName("0abc.def")));
         Assert.assertEquals("___ab_:c0", prometheusName(sanitizeMetricName("___ab.:c0")));
         Assert.assertEquals("my_prefix_my_metric", sanitizeMetricName("my_prefix/my_metric"));
@@ -21,6 +22,7 @@ public class PrometheusNamingTest {
 
     @Test
     public void testSanitizeLabelName() {
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LegacyValidation;
         Assert.assertEquals("_abc_def", prometheusName(sanitizeLabelName("0abc.def")));
         Assert.assertEquals("_abc", prometheusName(sanitizeLabelName("_abc")));
         Assert.assertEquals("_abc", prometheusName(sanitizeLabelName("__abc")));

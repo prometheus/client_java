@@ -3,11 +3,6 @@ package io.prometheus.metrics.model.snapshots;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
-enum ValidationScheme {
-    LegacyValidation,
-    UTF8Validation
-}
-
 /**
  * Utility for Prometheus Metric and Label naming.
  * <p>
@@ -15,17 +10,21 @@ enum ValidationScheme {
  * in Prometheus exposition formats. However, if metrics are exposed in OpenTelemetry format the dots are retained.
  */
 public class PrometheusNaming {
-    static ValidationScheme nameValidationScheme = ValidationScheme.LegacyValidation;
+    public static ValidationScheme nameValidationScheme = ValidationScheme.LegacyValidation;
 
     /**
      * Legal characters for metric names, including dot.
      */
-    private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.:][a-zA-Z0-9_.:]+$");
+    private static final Pattern LEGACY_METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.:][a-zA-Z0-9_.:]+$");
+
+    private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]+$");
 
     /**
      * Legal characters for label names, including dot.
      */
-    private static final Pattern LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
+    private static final Pattern LEGACY_LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
+
+    private static final Pattern LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
 
     /**
      * According to OpenMetrics {@code _count} and {@code _sum} (and {@code _gcount}, {@code _gsum}) should also be
@@ -49,7 +48,7 @@ public class PrometheusNaming {
     /**
      * Test if a metric name is valid. Rules:
      * <ul>
-     * <li>The name must match {@link #METRIC_NAME_PATTERN}.</li>
+     * <li>The name must match {@link #LEGACY_METRIC_NAME_PATTERN}.</li>
      * <li>The name MUST NOT end with one of the {@link #RESERVED_METRIC_NAME_SUFFIXES}.</li>
      * </ul>
      * If a metric has a {@link Unit}, the metric name SHOULD end with the unit as a suffix.
@@ -100,7 +99,14 @@ public class PrometheusNaming {
     }
 
     public static boolean isValidLegacyMetricName(String name) {
-        return METRIC_NAME_PATTERN.matcher(name).matches();
+        switch (nameValidationScheme) {
+            case LegacyValidation:
+                return LEGACY_METRIC_NAME_PATTERN.matcher(name).matches();
+            case UTF8Validation:
+                return METRIC_NAME_PATTERN.matcher(name).matches();
+            default:
+                throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+        }
     }
 
     public static boolean isValidLabelName(String name) {
@@ -116,7 +122,14 @@ public class PrometheusNaming {
     }
 
     public static boolean isValidLegacyLabelName(String name) {
-        return LABEL_NAME_PATTERN.matcher(name).matches();
+        switch (nameValidationScheme) {
+            case LegacyValidation:
+                return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches();
+            case UTF8Validation:
+                return LABEL_NAME_PATTERN.matcher(name).matches();
+            default:
+                throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+        }
     }
 
     /**
@@ -128,7 +141,14 @@ public class PrometheusNaming {
      * @return the name with dots replaced by underscores.
      */
     public static String prometheusName(String name) {
-        return name.replace(".", "_");
+        switch (nameValidationScheme) {
+            case LegacyValidation:
+                return name.replace(".", "_");
+            case UTF8Validation:
+                return name;
+            default:
+                throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+        }
     }
 
     /**
@@ -172,7 +192,7 @@ public class PrometheusNaming {
     }
 
     /**
-     * Returns a string that matches {@link #METRIC_NAME_PATTERN}.
+     * Returns a string that matches {@link #LEGACY_METRIC_NAME_PATTERN}.
      */
     private static String replaceIllegalCharsInMetricName(String name) {
         int length = name.length();
@@ -193,7 +213,7 @@ public class PrometheusNaming {
     }
 
     /**
-     * Returns a string that matches {@link #LABEL_NAME_PATTERN}.
+     * Returns a string that matches {@link #LEGACY_LABEL_NAME_PATTERN}.
      */
     private static String replaceIllegalCharsInLabelName(String name) {
         int length = name.length();

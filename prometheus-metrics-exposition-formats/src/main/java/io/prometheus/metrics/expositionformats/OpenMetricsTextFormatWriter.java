@@ -278,9 +278,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
         if (!labels.isEmpty() || additionalLabelName != null) {
             writeLabels(writer, labels, additionalLabelName, additionalLabelValue, metricInsideBraces);
-        }
-
-        if (metricInsideBraces) {
+        } else if (metricInsideBraces) {
             writer.write('}');
         }
 
