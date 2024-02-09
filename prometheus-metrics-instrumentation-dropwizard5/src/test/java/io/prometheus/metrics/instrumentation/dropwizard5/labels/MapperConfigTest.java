@@ -1,6 +1,5 @@
-package io.prometheus.client.dropwizard.samplebuilder;
+package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
-import io.prometheus.client.dropwizard.samplebuilder.MapperConfig;
 import org.junit.Test;
 
 import java.util.Collections;

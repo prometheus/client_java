@@ -5,16 +5,20 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>client_java</artifactId>
-        <version>1.0.0-beta-2-SNAPSHOT</version>
+        <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>simpleclient_dropwizard</artifactId>
+    <artifactId>prometheus-metrics-instrumentation-dropwizard5</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Java Simpleclient Dropwizard</name>
+    <name>Prometheus Metrics Instrumentation - Dropwizard 5.x</name>
     <description>
-        Collector of data from Dropwizard metrics library.
+        Instrumentation library for Dropwizard metrics 5.x
     </description>
+
+    <properties>
+        <automatic.module.name>io.prometheus.metrics.instrumentation.dropwizard5</automatic.module.name>
+    </properties>
 
     <licenses>
         <license>
@@ -29,17 +33,25 @@
             <name>Francois Visconte</name>
             <email>f.visconte@gmail.com</email>
         </developer>
+
+        <developer>
+            <id>kingster</id>
+            <name>Kinshuk Bairagi</name>
+            <email>hi@kinsh.uk</email>
+        </developer>
+
     </developers>
+
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient</artifactId>
+            <artifactId>prometheus-metrics-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
+            <groupId>io.dropwizard.metrics5</groupId>
             <artifactId>metrics-core</artifactId>
-            <version>4.2.9</version>
+            <version>5.0.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- Test Dependencies Follow -->
@@ -61,6 +73,20 @@
             <version>4.6.1</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-exposition-formats</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

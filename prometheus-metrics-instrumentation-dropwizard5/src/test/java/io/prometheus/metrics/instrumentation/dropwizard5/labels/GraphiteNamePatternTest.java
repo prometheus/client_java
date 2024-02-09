@@ -1,4 +1,4 @@
-package io.prometheus.client.dropwizard.samplebuilder;
+package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;

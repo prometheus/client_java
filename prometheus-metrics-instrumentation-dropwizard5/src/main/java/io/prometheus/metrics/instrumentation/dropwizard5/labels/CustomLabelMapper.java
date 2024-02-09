@@ -1,25 +1,22 @@
-package io.prometheus.client.dropwizard.samplebuilder;
+package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
-import io.prometheus.client.Collector;
+import io.prometheus.metrics.model.snapshots.Labels;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Custom {@link SampleBuilder} implementation to allow Dropwizard metrics to be translated to Prometheus metrics including custom labels and names.
+ * A LabelMapper to allow Dropwizard metrics to be translated to Prometheus metrics including custom labels and names.
  * Prometheus metric name and labels are extracted from the Dropwizard name based on the provided list of {@link MapperConfig}s.
  * The FIRST matching config will be used.
- * If no config is matched, the {@link DefaultSampleBuilder} is used.
  */
-public class CustomMappingSampleBuilder implements SampleBuilder {
+public class CustomLabelMapper  {
     private final List<CompiledMapperConfig> compiledMapperConfigs;
-    private final DefaultSampleBuilder defaultMetricSampleBuilder = new DefaultSampleBuilder();
 
-    public CustomMappingSampleBuilder(final List<MapperConfig> mapperConfigs) {
+    public CustomLabelMapper(final List<MapperConfig> mapperConfigs) {
         if (mapperConfigs == null || mapperConfigs.isEmpty()) {
-            throw new IllegalArgumentException("CustomMappingSampleBuilder needs some mapper configs!");
+            throw new IllegalArgumentException("CustomLabelMapper needs some mapper configs!");
         }
 
         this.compiledMapperConfigs = new ArrayList<CompiledMapperConfig>(mapperConfigs.size());
@@ -28,8 +25,8 @@ public class CustomMappingSampleBuilder implements SampleBuilder {
         }
     }
 
-    @Override
-    public Collector.MetricFamilySamples.Sample createSample(final String dropwizardName, final String nameSuffix, final List<String> additionalLabelNames, final List<String> additionalLabelValues, final double value) {
+
+    public Labels getLabels(final String dropwizardName, final List<String> additionalLabelNames, final List<String> additionalLabelValues){
         if (dropwizardName == null) {
             throw new IllegalArgumentException("Dropwizard metric name cannot be null");
         }
@@ -47,21 +44,10 @@ public class CustomMappingSampleBuilder implements SampleBuilder {
             final NameAndLabels nameAndLabels = getNameAndLabels(matchingConfig.mapperConfig, params);
             nameAndLabels.labelNames.addAll(additionalLabelNames);
             nameAndLabels.labelValues.addAll(additionalLabelValues);
-            return defaultMetricSampleBuilder.createSample(
-                    nameAndLabels.name, nameSuffix,
-                    nameAndLabels.labelNames,
-                    nameAndLabels.labelValues,
-                    value
-            );
+            return Labels.of(nameAndLabels.labelNames, nameAndLabels.labelValues);
         }
 
-
-        return defaultMetricSampleBuilder.createSample(
-                dropwizardName, nameSuffix,
-                additionalLabelNames,
-                additionalLabelValues,
-                value
-        );
+        return Labels.of(additionalLabelNames, additionalLabelValues);
     }
 
     protected NameAndLabels getNameAndLabels(final MapperConfig config, final Map<String, String> parameters) {
