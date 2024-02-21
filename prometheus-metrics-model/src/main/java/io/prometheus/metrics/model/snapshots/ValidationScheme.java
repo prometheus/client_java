@@ -1,6 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
 public enum ValidationScheme {
-    LegacyValidation,
-    UTF8Validation
+    LEGACY_VALIDATION,
+    UTF_8_VALIDATION
 }

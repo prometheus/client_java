@@ -40,9 +40,11 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         return CONTENT_TYPE;
     }
 
-    public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
+    public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
-        for (MetricSnapshot snapshot : metricSnapshots) {
+        for (MetricSnapshot s : metricSnapshots) {
+            MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
+
             if (snapshot.getDataPoints().size() > 0) {
                 if (snapshot instanceof CounterSnapshot) {
                     writeCounter(writer, (CounterSnapshot) snapshot);

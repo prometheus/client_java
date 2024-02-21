@@ -1,24 +1,9 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
-import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.Exemplar;
-import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
-import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
-import io.prometheus.metrics.model.snapshots.InfoSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricMetadata;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
-import io.prometheus.metrics.model.snapshots.Quantiles;
-import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
-import io.prometheus.metrics.model.snapshots.SummarySnapshot;
-import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,7 +46,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     }
 
     @Override
-    public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
+    public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException {
         for (MetricSnapshot snapshot : metricSnapshots) {
             if (snapshot.getDataPoints().size() > 0) {
                 convert(snapshot).writeDelimitedTo(out);

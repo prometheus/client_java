@@ -9,7 +9,7 @@ public class PrometheusNamingTest {
 
     @Test
     public void testSanitizeMetricName() {
-        nameValidationScheme = ValidationScheme.LegacyValidation;
+        nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         Assert.assertEquals("_abc_def", prometheusName(sanitizeMetricName("0abc.def")));
         Assert.assertEquals("___ab_:c0", prometheusName(sanitizeMetricName("___ab.:c0")));
         Assert.assertEquals("my_prefix_my_metric", sanitizeMetricName("my_prefix/my_metric"));
@@ -22,7 +22,7 @@ public class PrometheusNamingTest {
 
     @Test
     public void testSanitizeLabelName() {
-        PrometheusNaming.nameValidationScheme = ValidationScheme.LegacyValidation;
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         Assert.assertEquals("_abc_def", prometheusName(sanitizeLabelName("0abc.def")));
         Assert.assertEquals("_abc", prometheusName(sanitizeLabelName("_abc")));
         Assert.assertEquals("_abc", prometheusName(sanitizeLabelName("__abc")));
@@ -34,7 +34,7 @@ public class PrometheusNamingTest {
 
     @Test
     public void testMetricNameIsValid() {
-        PrometheusNaming.nameValidationScheme = ValidationScheme.LegacyValidation;
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         Assert.assertNull(validateMetricName("Avalid_23name"));
         Assert.assertNull(validateMetricName("_Avalid_23name"));
         Assert.assertEquals("The metric name contains unsupported characters", validateMetricName("1valid_23name"));
@@ -45,7 +45,7 @@ public class PrometheusNamingTest {
         Assert.assertNull(validateMetricName("colon:in:the:middle"));
         Assert.assertEquals("The metric name contains unsupported characters", validateMetricName(""));
         Assert.assertEquals("The metric name contains unsupported characters", validateMetricName("a\ud800z"));
-        PrometheusNaming.nameValidationScheme = ValidationScheme.UTF8Validation;
+        PrometheusNaming.nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
         Assert.assertNull(validateMetricName("Avalid_23name"));
         Assert.assertNull(validateMetricName("_Avalid_23name"));
         Assert.assertNull(validateMetricName("1valid_23name"));
@@ -60,7 +60,7 @@ public class PrometheusNamingTest {
 
     @Test
     public void testLabelNameIsValid() {
-        PrometheusNaming.nameValidationScheme = ValidationScheme.LegacyValidation;
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         Assert.assertTrue(isValidLabelName("Avalid_23name"));
         Assert.assertTrue(isValidLabelName("_Avalid_23name"));
         Assert.assertFalse(isValidLabelName("1valid_23name"));
@@ -70,7 +70,7 @@ public class PrometheusNamingTest {
         Assert.assertFalse(isValidLabelName(":leading_colon"));
         Assert.assertFalse(isValidLabelName("colon:in:the:middle"));
         Assert.assertFalse(isValidLabelName("a\ud800z"));
-        PrometheusNaming.nameValidationScheme = ValidationScheme.UTF8Validation;
+        PrometheusNaming.nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
         Assert.assertTrue(isValidLabelName("Avalid_23name"));
         Assert.assertTrue(isValidLabelName("_Avalid_23name"));
         Assert.assertTrue(isValidLabelName("1valid_23name"));
