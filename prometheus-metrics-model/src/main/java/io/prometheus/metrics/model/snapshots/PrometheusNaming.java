@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Character.MAX_LOW_SURROGATE;
+import static java.lang.Character.MIN_HIGH_SURROGATE;
+
 /**
  * Utility for Prometheus Metric and Label naming.
  * <p>
@@ -281,6 +284,7 @@ public class PrometheusNaming {
                 }
                 if (l.getName() == null || isValidLegacyMetricName(l.getName())) {
                     outLabelsBuilder.label(l.getName(), l.getValue());
+                    continue;
                 }
                 outLabelsBuilder.label(escapeName(l.getName(), scheme), l.getValue());
             }
@@ -481,16 +485,20 @@ public class PrometheusNaming {
                     char c = name.charAt(i);
                     if (isValidLegacyChar(c, i)) {
                         escaped.append(c);
-                    } else if (!isValidUTF8Byte(c)) {
+                    } else if (!isValidUTF8Char(c)) {
                         escaped.append("_FFFD_");
                     } else if (c < 0x100) {
                         // TODO Check if this is ok
                         escaped.append('_');
-                        escaped.append(encodeByte(c));
+                        for (int s = 4; s >= 0; s -= 4) {
+                            escaped.append(LOWERHEX.charAt((c >> s) & 0xF));
+                        }
                         escaped.append('_');
                     } else {
                         escaped.append('_');
-                        escaped.append(encodeShort((short) c));
+                        for (int s = 12; s >= 0; s -= 4) {
+                            escaped.append(LOWERHEX.charAt((c >> s) & 0xF));
+                        }
                         escaped.append('_');
                     }
                 }
@@ -546,7 +554,7 @@ public class PrometheusNaming {
                             // Found a closing underscore, convert to a char, check validity, and append.
                             if (escapedName.charAt(i) == '_') {
                                 char utf8Char = (char) utf8Val;
-                                if (!Character.isDefined(utf8Char)) {
+                                if (!isValidUTF8Char(utf8Char)) {
                                     return name;
                                 }
                                 unescaped.append(utf8Char);
@@ -579,20 +587,8 @@ public class PrometheusNaming {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == ':' || (c >= '0' && c <= '9' && i > 0);
     }
 
-    private static boolean isValidUTF8Byte(char b) {
-        byte[] bytes = Character.toString(b).getBytes(StandardCharsets.UTF_8);
-        return bytes.length == 1;
-    }
-
-    private static String encodeByte(char b) {
-        return encodeShort((short) b);
-    }
-
-    private static String encodeShort(short b) {
-        StringBuilder encoded = new StringBuilder();
-        for (int s = 12; s >= 0; s -= 4) {
-            encoded.append(LOWERHEX.charAt((b >> s) & 0xF));
-        }
-        return encoded.toString();
+    private static boolean isValidUTF8Char(char b) {
+        return ((b < MIN_HIGH_SURROGATE || b > MAX_LOW_SURROGATE) &&
+                (b < 0xFFFE));
     }
 }

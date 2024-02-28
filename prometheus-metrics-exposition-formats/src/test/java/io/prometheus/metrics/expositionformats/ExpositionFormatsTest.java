@@ -12,6 +12,9 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 
 public class ExpositionFormatsTest {
 
@@ -373,6 +376,8 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertPrometheusText(prometheusText, gauge);
+
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     }
 
     @Test
@@ -1837,31 +1842,134 @@ public class ExpositionFormatsTest {
         assertPrometheusText(prometheus, counter);
     }
 
+    @Test
+    public void testFindWriter() {
+        EscapingScheme oldDefault = nameEscapingScheme;
+        nameEscapingScheme = EscapingScheme.UNDERSCORE_ESCAPING;
+        ExpositionFormats expositionFormats = ExpositionFormats.init();
+
+        // delimited format
+        String acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited";
+        String expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=underscores";
+        EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // plain text format
+        acceptHeaderValue = "text/plain;version=0.0.4";
+        expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=underscores";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // delimited format UTF-8
+        acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited; escaping=allow-utf-8";
+        expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // TODO review if this is ok
+        nameEscapingScheme = EscapingScheme.VALUE_ENCODING_ESCAPING;
+
+        // OM format, no version
+        acceptHeaderValue = "application/openmetrics-text";
+        expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=values";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // OM format, 0.0.1 version
+        acceptHeaderValue = "application/openmetrics-text;version=0.0.1; escaping=underscores";
+        expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // plain text format
+        acceptHeaderValue = "text/plain;version=0.0.4";
+        expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=values";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // plain text format UTF-8
+        acceptHeaderValue = "text/plain;version=0.0.4; escaping=allow-utf-8";
+        expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // delimited format UTF-8
+        acceptHeaderValue = "text/plain;version=0.0.4; escaping=allow-utf-8";
+        expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        nameEscapingScheme = oldDefault;
+    }
+
+    @Test
+    public void testWrite() throws IOException {
+        ByteArrayOutputStream buff = new ByteArrayOutputStream(new AtomicInteger(2 << 9).get() + 1024);
+        ExpositionFormats expositionFormats = ExpositionFormats.init();
+        UnknownSnapshot unknown = UnknownSnapshot.builder()
+                .name("foo_metric")
+                .dataPoint(UnknownDataPointSnapshot.builder()
+                        .value(1.234)
+                        .build())
+                .build();
+
+        String acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited";
+        EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        ExpositionFormatWriter protoWriter = expositionFormats.findWriter(acceptHeaderValue);
+
+        protoWriter.write(buff, MetricSnapshots.of(unknown), escapingScheme);
+        byte[] out = buff.toByteArray();
+        Assert.assertNotEquals(0, out.length);
+
+        buff.reset();
+
+        acceptHeaderValue = "text/plain; version=0.0.4; charset=utf-8";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        ExpositionFormatWriter textWriter = expositionFormats.findWriter(acceptHeaderValue);
+
+        textWriter.write(buff, MetricSnapshots.of(unknown), escapingScheme);
+        out = buff.toByteArray();
+        Assert.assertNotEquals(0, out.length);
+
+        String expected = "# TYPE foo_metric untyped\n" +
+                "foo_metric 1.234\n";
+
+        Assert.assertEquals(expected, new String(out));
+    }
+
     private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
-        writer.write(out, MetricSnapshots.of(snapshot));
+        writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
         Assert.assertEquals(expected, out.toString());
     }
 
     private void assertOpenMetricsTextWithoutCreated(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
-        writer.write(out, MetricSnapshots.of(snapshot));
+        writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
         Assert.assertEquals(expected, out.toString());
     }
 
     private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(true);
-        writer.write(out, MetricSnapshots.of(snapshot));
+        writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
         Assert.assertEquals(expected, out.toString());
     }
 
     private void assertPrometheusTextWithoutCreated(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(false);
-        writer.write(out, MetricSnapshots.of(snapshot));
+        writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
         Assert.assertEquals(expected, out.toString());
     }
 
