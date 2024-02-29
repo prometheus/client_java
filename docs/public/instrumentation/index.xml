@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Instrumentation on client_java</title>
+    <link>http://localhost:1313/instrumentation/</link>
+    <description>Recent content in Instrumentation on client_java</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://localhost:1313/instrumentation/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>JVM</title>
+      <link>http://localhost:1313/instrumentation/jvm/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/instrumentation/jvm/</guid>
+      <description>The JVM instrumentation module provides a variety of out-of-the-box JVM and process metrics. To use it, add the following dependency:&#xA;Gradle implementation &amp;#39;io.prometheus:prometheus-metrics-instrumentation-jvm:1.0.0&amp;#39; Maven &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;io.prometheus&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;prometheus-metrics-instrumentation-jvm&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;1.0.0&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; Now, you can register the JVM metrics as follows:&#xA;JvmMetrics.builder().register(); The line above will initialize all JVM metrics and register them with the default registry. If you want to register the metrics with a custom PrometheusRegistry, you can pass the registry as parameter to the register() call.</description>
+    </item>
+  </channel>
+</rss>

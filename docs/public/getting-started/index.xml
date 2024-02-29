@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Getting Started on client_java</title>
+    <link>http://localhost:1313/getting-started/</link>
+    <description>Recent content in Getting Started on client_java</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://localhost:1313/getting-started/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Quickstart</title>
+      <link>http://localhost:1313/getting-started/quickstart/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/getting-started/quickstart/</guid>
+      <description>This tutorial shows the quickest way to get started with the Prometheus Java metrics library.&#xA;Dependencies We use the following dependencies:&#xA;prometheus-metrics-core is the actual metrics library. prometheus-metrics-instrumentation-jvm provides out-of-the-box JVM metrics. prometheus-metrics-exporter-httpserver is a standalone HTTP server for exposing Prometheus metrics. Gradle implementation &amp;#39;io.prometheus:prometheus-metrics-core:1.0.0&amp;#39;&#xD;implementation &amp;#39;io.prometheus:prometheus-metrics-instrumentation-jvm:1.0.0&amp;#39;&#xD;implementation &amp;#39;io.prometheus:prometheus-metrics-exporter-httpserver:1.0.0&amp;#39; Maven &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;io.prometheus&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;prometheus-metrics-core&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;1.0.0&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;io.prometheus&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;prometheus-metrics-instrumentation-jvm&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;1.0.0&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;io.prometheus&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;prometheus-metrics-exporter-httpserver&amp;lt;/artifactId&amp;gt; &amp;lt;version&amp;gt;1.0.0&amp;lt;/version&amp;gt; &amp;lt;/dependency&amp;gt; There are alternative exporters as well, for example if you are using a Servlet container like Tomcat or Undertow you might want to use prometheus-exporter-servlet-jakarta rather than a standalone HTTP server.</description>
+    </item>
+    <item>
+      <title>Registry</title>
+      <link>http://localhost:1313/getting-started/registry/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/getting-started/registry/</guid>
+      <description>In order to expose metrics, you need to register them with a PrometheusRegistry. We are using a counter as an example here, but the register() method is the same for all metric types.&#xA;Registering a Metrics with the Default Registry Counter eventsTotal = Counter.builder() .name(&amp;#34;events_total&amp;#34;) .help(&amp;#34;Total number of events&amp;#34;) .register(); // &amp;lt;-- implicitly uses PrometheusRegistry.defaultRegistry The register() call above builds the counter and registers it with the global static PrometheusRegistry.defaultRegistry. Using the default registry is recommended.</description>
+    </item>
+    <item>
+      <title>Labels</title>
+      <link>http://localhost:1313/getting-started/labels/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/getting-started/labels/</guid>
+      <description>The following shows an example of a Prometheus metric in text format:&#xA;# HELP payments_total total number of payments&#xD;# TYPE payments_total counter&#xD;payments_total{status=&amp;#34;error&amp;#34;,type=&amp;#34;paypal&amp;#34;} 1.0&#xD;payments_total{status=&amp;#34;success&amp;#34;,type=&amp;#34;credit card&amp;#34;} 3.0&#xD;payments_total{status=&amp;#34;success&amp;#34;,type=&amp;#34;paypal&amp;#34;} 2.0 The example shows a counter metric named payments_total with two labels: status and type. Each individual data point (each line in text format) is identified by the unique combination of its metric name and its label name/value pairs.&#xA;Creating a Metric with Labels Labels are supported for all metric types.</description>
+    </item>
+    <item>
+      <title>Metric Types</title>
+      <link>http://localhost:1313/getting-started/metric-types/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/getting-started/metric-types/</guid>
+      <description>The Prometheus Java metrics library implements the metric types defined in the OpenMetrics standard:&#xA;Counter Gauge Histogram Summary Info StateSet GaugeHistogram and Unknown Counter Counter is the most common and useful metric type. Counters can only increase, but never decrease. In the Prometheus query language, the rate() function is often used for counters to calculate the average increase per second.&#xA;Counter values do not need to be integers. In many cases counters represent a number of events (like the number of requests), and in that case the counter value is an integer.</description>
+    </item>
+    <item>
+      <title>Callbacks</title>
+      <link>http://localhost:1313/getting-started/callbacks/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/getting-started/callbacks/</guid>
+      <description>The section on metric types showed how to use metrics that actively maintain their state.&#xA;This section shows how to create callback-based metrics, i.e. metrics that invoke a callback at scrape time to get the current values.&#xA;For example, let&amp;rsquo;s assume we have two instances of a Cache, a coldCache and a hotCache. The following implements a callback-based cache_size_bytes metric:&#xA;Cache coldCache = new Cache(); Cache hotCache = new Cache(); GaugeWithCallback.</description>
+    </item>
+    <item>
+      <title>Performance</title>
+      <link>http://localhost:1313/getting-started/performance/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/getting-started/performance/</guid>
+      <description>This section has tips on how to use the Prometheus Java client in high performance applications.&#xA;Specify Label Values Only Once For high performance applications, we recommend to specify label values only once, and then use the data point directly.&#xA;This applies to all metric types. Let&amp;rsquo;s use a counter as an example here:&#xA;Counter requestCount = Counter.builder() .name(&amp;#34;requests_total&amp;#34;) .help(&amp;#34;total number of requests&amp;#34;) .labelNames(&amp;#34;path&amp;#34;, &amp;#34;status&amp;#34;) .register(); You could increment the counter above like this:</description>
+    </item>
+    <item>
+      <title>Multi-Target Pattern</title>
+      <link>http://localhost:1313/getting-started/multi-target/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/getting-started/multi-target/</guid>
+      <description>This is for the upcoming release 1.1.0. To support multi-target pattern you can create a custom collector overriding the purposed internal method in ExtendedMultiCollector see SampleExtendedMultiCollector in io.prometheus.metrics.examples.httpserver&#xA;public class SampleExtendedMultiCollector extends ExtendedMultiCollector { public SampleExtendedMultiCollector() { super(); } @Override protected MetricSnapshots collectMetricSnapshots(PrometheusScrapeRequest scrapeRequest) { GaugeSnapshot.Builder gaugeBuilder = GaugeSnapshot.builder(); gaugeBuilder.name(&amp;#34;x_load&amp;#34;).help(&amp;#34;process load&amp;#34;); CounterSnapshot.Builder counterBuilder = CounterSnapshot.builder(); counterBuilder.name(PrometheusNaming.sanitizeMetricName(&amp;#34;x_calls_total&amp;#34;)).help(&amp;#34;invocations&amp;#34;); String[] targetNames = scrapeRequest.getParameterValues(&amp;#34;target&amp;#34;); String targetName; String[] procs = scrapeRequest.getParameterValues(&amp;#34;proc&amp;#34;); if (targetNames == null || targetNames.</description>
+    </item>
+  </channel>
+</rss>

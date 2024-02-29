@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Config on client_java</title>
+    <link>http://localhost:1313/config/</link>
+    <description>Recent content in Config on client_java</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://localhost:1313/config/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Config</title>
+      <link>http://localhost:1313/config/config/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/config/config/</guid>
+      <description>Location of the Properties File Metrics Properties Exemplar Properties Exporter Properties Exporter Filter Properties Exporter HTTPServer Properties Exporter OpenTelemetry Properties The Prometheus metrics library provides multiple options how to override configuration at runtime:&#xA;Properties file System properties Future releases will add more options, like configuration via environment variables.&#xA;Example:&#xA;io.prometheus.exporter.httpServer.port = 9401 The property above changes the port for the HTTPServer exporter to 9401.&#xA;Properties file: Add the line above to the properties file.</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Compatibility on client_java</title>
+    <link>http://localhost:1313/migration/</link>
+    <description>Recent content in Compatibility on client_java</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="http://localhost:1313/migration/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Simpleclient</title>
+      <link>http://localhost:1313/migration/simpleclient/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/migration/simpleclient/</guid>
+      <description>The Prometheus Java client library 1.0.0 is a complete rewrite of the underlying data model, and is not backwards compatible with releases 0.16.0 and older for a variety of reasons:&#xA;The old data model was based on OpenMetrics. Native histograms don&amp;rsquo;t fit with the OpenMetrics model because they don&amp;rsquo;t follow the &amp;ldquo;every sample has exactly one double value&amp;rdquo; paradigm. It was a lot cleaner to implement a dedicated prometheus-metrics-model than trying to fit native histograms into the existing OpenMetrics-based model.</description>
+    </item>
+  </channel>
+</rss>
