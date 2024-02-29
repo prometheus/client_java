@@ -6,8 +6,7 @@ theme = "hugo-geekdoc"
 pluralizeListTitles = false
 
 # Geekdoc required configuration
-#pygmentsUseClasses = true
-pygmentsUseClasses = false
+pygmentsUseClasses = true
 pygmentsCodeFences = true
 disablePathToLower = true
 # geekdocFileTreeSortBy = "linkTitle"
