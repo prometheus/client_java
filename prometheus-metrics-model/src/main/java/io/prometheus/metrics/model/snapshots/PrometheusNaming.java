@@ -18,10 +18,23 @@ import static java.lang.Character.MIN_HIGH_SURROGATE;
  * in Prometheus exposition formats. However, if metrics are exposed in OpenTelemetry format the dots are retained.
  */
 public class PrometheusNaming {
+    // nameValidationScheme determines the method of name validation to be used by
+    // all calls to validateMetricName() and isValidMetricName(). Setting UTF-8 mode
+    // in isolation from other components that don't support UTF-8 may result in
+    // bugs or other undefined behavior. This value is intended to be set by
+    // UTF-8-aware binaries as part of their startup via a properties file.
     public static ValidationScheme nameValidationScheme = initValidationScheme();
 
+    // nameEscapingScheme defines the default way that names will be
+    // escaped when presented to systems that do not support UTF-8 names. If the
+    // Accept "escaping" term is specified, that will override this value.
     public static EscapingScheme nameEscapingScheme = EscapingScheme.VALUE_ENCODING_ESCAPING;
 
+    // ESCAPING_KEY is the key in an Accept header that defines how
+    // metric and label names that do not conform to the legacy character
+    // requirements should be escaped when being scraped by a legacy Prometheus
+    // system. If a system does not explicitly pass an escaping parameter in the
+    // Accept header, the default nameEscapingScheme will be used.
     public static final String ESCAPING_KEY = "escaping";
 
     private static final String LOWERHEX = "0123456789abcdef";
@@ -258,6 +271,8 @@ public class PrometheusNaming {
         return new String(sanitized);
     }
 
+    // escapeMetricSnapshot escapes the given metric names and labels with the given
+    // escaping scheme.
     public static MetricSnapshot escapeMetricSnapshot(MetricSnapshot v, EscapingScheme scheme) {
         if (v == null) {
             return null;
@@ -269,6 +284,7 @@ public class PrometheusNaming {
 
         String outName;
 
+        // If the name is null, copy as-is, don't try to escape.
         if (v.getMetadata().getPrometheusName() == null || isValidLegacyMetricName(v.getMetadata().getPrometheusName())) {
             outName = v.getMetadata().getPrometheusName();
         } else {
@@ -453,6 +469,10 @@ public class PrometheusNaming {
         return false;
     }
 
+    // escapeName escapes the incoming name according to the provided escaping
+    // scheme. Depending on the rules of escaping, this may cause no change in the
+    // string that is returned (especially NO_ESCAPING, which by definition is a
+    // noop). This method does not do any validation of the name.
     static String escapeName(String name, EscapingScheme scheme) {
         if (name.isEmpty()) {
             return name;
@@ -475,6 +495,7 @@ public class PrometheusNaming {
                 }
                 return escaped.toString();
             case DOTS_ESCAPING:
+                // Do not early return for legacy valid names, we still escape underscores.
                 for (int i = 0; i < name.length(); i++) {
                     char c = name.charAt(i);
                     if (c == '_') {
@@ -519,6 +540,9 @@ public class PrometheusNaming {
         }
     }
 
+    // unescapeName unescapes the incoming name according to the provided escaping
+    // scheme if possible. Some schemes are partially or totally non-roundtripable.
+    // If any error is encountered, returns the original input.
     static String unescapeName(String name, EscapingScheme scheme) {
         if (name.isEmpty()) {
             return name;

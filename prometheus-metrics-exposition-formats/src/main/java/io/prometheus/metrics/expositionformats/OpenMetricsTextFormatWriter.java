@@ -272,6 +272,8 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     private void writeNameAndLabels(OutputStreamWriter writer, String name, String suffix, Labels labels,
                                     String additionalLabelName, double additionalLabelValue) throws IOException {
         boolean metricInsideBraces = false;
+        // If the name does not pass the legacy validity check, we must put the
+        // metric name inside the braces.
         if (PrometheusNaming.validateLegacyMetricName(name) != null) {
             metricInsideBraces = true;
             writer.write('{');
