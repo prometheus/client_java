@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.PrometheusProperties;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,7 @@ import static java.lang.Character.MIN_HIGH_SURROGATE;
  * in Prometheus exposition formats. However, if metrics are exposed in OpenTelemetry format the dots are retained.
  */
 public class PrometheusNaming {
-    public static ValidationScheme nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    public static ValidationScheme nameValidationScheme = initValidationScheme();
 
     public static EscapingScheme nameEscapingScheme = EscapingScheme.VALUE_ENCODING_ESCAPING;
 
@@ -79,6 +81,16 @@ public class PrometheusNaming {
      */
     public static boolean isValidMetricName(String name) {
         return validateMetricName(name) == null;
+    }
+
+    static ValidationScheme initValidationScheme() {
+        if (PrometheusProperties.get() != null && PrometheusProperties.get().getNamingProperties() != null) {
+            String validationScheme = PrometheusProperties.get().getNamingProperties().getValidationScheme();
+            if (validationScheme != null && validationScheme.equals("utf-8")) {
+                return ValidationScheme.UTF_8_VALIDATION;
+            }
+        }
+        return ValidationScheme.LEGACY_VALIDATION;
     }
 
     static String validateMetricName(String name) {
@@ -488,7 +500,6 @@ public class PrometheusNaming {
                     } else if (!isValidUTF8Char(c)) {
                         escaped.append("_FFFD_");
                     } else if (c < 0x100) {
-                        // TODO Check if this is ok
                         escaped.append('_');
                         for (int s = 4; s >= 0; s -= 4) {
                             escaped.append(LOWERHEX.charAt((c >> s) & 0xF));
@@ -523,7 +534,6 @@ public class PrometheusNaming {
                 name = name.replaceAll("__", "_");
                 return name;
             case VALUE_ENCODING_ESCAPING:
-                // TODO Check if this is ok
                 Matcher matcher = Pattern.compile("U__").matcher(name);
                 if (matcher.find()) {
                     String escapedName = name.substring(matcher.end());
