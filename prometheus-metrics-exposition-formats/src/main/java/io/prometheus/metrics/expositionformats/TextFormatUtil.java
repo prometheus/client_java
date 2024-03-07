@@ -2,6 +2,7 @@ package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.ValidationScheme;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -95,7 +96,7 @@ public class TextFormatUtil {
                 }
                 break;
             case Label:
-                if (PrometheusNaming.isValidLegacyLabelName(name)) {
+                if (PrometheusNaming.isValidLegacyLabelName(name) && PrometheusNaming.nameValidationScheme == ValidationScheme.LEGACY_VALIDATION) {
                     writer.write(name);
                     return;
                 }

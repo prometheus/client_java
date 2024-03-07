@@ -74,6 +74,16 @@ public class PrometheusNaming {
             ".total", ".created", ".bucket", ".info"
     };
 
+    static ValidationScheme initValidationScheme() {
+        if (PrometheusProperties.get() != null && PrometheusProperties.get().getNamingProperties() != null) {
+            String validationScheme = PrometheusProperties.get().getNamingProperties().getValidationScheme();
+            if (validationScheme != null && validationScheme.equals("utf-8")) {
+                return ValidationScheme.UTF_8_VALIDATION;
+            }
+        }
+        return ValidationScheme.LEGACY_VALIDATION;
+    }
+
     /**
      * Test if a metric name is valid. Rules:
      * <ul>
@@ -94,16 +104,6 @@ public class PrometheusNaming {
      */
     public static boolean isValidMetricName(String name) {
         return validateMetricName(name) == null;
-    }
-
-    static ValidationScheme initValidationScheme() {
-        if (PrometheusProperties.get() != null && PrometheusProperties.get().getNamingProperties() != null) {
-            String validationScheme = PrometheusProperties.get().getNamingProperties().getValidationScheme();
-            if (validationScheme != null && validationScheme.equals("utf-8")) {
-                return ValidationScheme.UTF_8_VALIDATION;
-            }
-        }
-        return ValidationScheme.LEGACY_VALIDATION;
     }
 
     static String validateMetricName(String name) {
@@ -151,8 +151,7 @@ public class PrometheusNaming {
     public static boolean isValidLabelName(String name) {
         switch (nameValidationScheme) {
             case LEGACY_VALIDATION:
-                return isValidLegacyLabelName(name) &&
-                        !(name.startsWith("__") || name.startsWith("._") || name.startsWith("..") || name.startsWith("_."));
+                return isValidLegacyLabelName(name);
             case UTF_8_VALIDATION:
                 return StandardCharsets.UTF_8.newEncoder().canEncode(name);
             default:
@@ -161,14 +160,8 @@ public class PrometheusNaming {
     }
 
     public static boolean isValidLegacyLabelName(String name) {
-        switch (nameValidationScheme) {
-            case LEGACY_VALIDATION:
-                return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches();
-            case UTF_8_VALIDATION:
-                return LABEL_NAME_PATTERN.matcher(name).matches();
-            default:
-                throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
-        }
+        return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches() &&
+                !(name.startsWith("__") || name.startsWith("._") || name.startsWith("..") || name.startsWith("_."));
     }
 
     /**
