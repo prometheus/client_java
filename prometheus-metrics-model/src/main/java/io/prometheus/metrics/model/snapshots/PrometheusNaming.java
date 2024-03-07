@@ -180,14 +180,7 @@ public class PrometheusNaming {
      * @return the name with dots replaced by underscores.
      */
     public static String prometheusName(String name) {
-        switch (nameValidationScheme) {
-            case LEGACY_VALIDATION:
-                return name.replace(".", "_");
-            case UTF_8_VALIDATION:
-                return name;
-            default:
-                throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
-        }
+        return name.replace(".", "_");
     }
 
     /**

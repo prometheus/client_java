@@ -75,7 +75,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
     static String[] makePrometheusNames(String[] names) {
         String[] prometheusNames = names;
         for (int i=0; i<names.length; i++) {
-            if (names[i].contains(".")) {
+            if (names[i].contains(".") && PrometheusNaming.nameValidationScheme == ValidationScheme.LEGACY_VALIDATION) {
                 if (prometheusNames == names) {
                     prometheusNames = Arrays.copyOf(names, names.length);
                 }
