@@ -120,7 +120,6 @@ public class PrometheusNamingTest {
         got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
         Assert.assertEquals("no:escaping_required", got);
 
-        // TODO should add test for legacy validation?
         // name with dots
         got = escapeName("mysystem.prod.west.cpu.load", EscapingScheme.UNDERSCORE_ESCAPING);
         Assert.assertEquals("mysystem_prod_west_cpu_load", got);

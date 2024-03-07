@@ -1869,7 +1869,6 @@ public class ExpositionFormatsTest {
         writer = expositionFormats.findWriter(acceptHeaderValue);
         Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
 
-        // TODO review if this is ok
         nameEscapingScheme = EscapingScheme.VALUE_ENCODING_ESCAPING;
 
         // OM format, no version
