@@ -53,8 +53,6 @@ public class PrometheusNaming {
      */
     private static final Pattern LEGACY_LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
 
-    private static final Pattern LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
-
     /**
      * According to OpenMetrics {@code _count} and {@code _sum} (and {@code _gcount}, {@code _gsum}) should also be
      * reserved metric name suffixes. However, popular instrumentation libraries have Gauges with names
