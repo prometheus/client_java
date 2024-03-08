@@ -1,12 +1,17 @@
 package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.ValidationScheme;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+enum NameType {
+    Metric,
+    Label
+}
 
 public class TextFormatUtil {
 
@@ -38,7 +43,7 @@ public class TextFormatUtil {
         writer.write(Long.toString(ms));
     }
 
-    static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
+    static void writeEscapedString(Writer writer, String s) throws IOException {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             switch (c) {
@@ -57,15 +62,17 @@ public class TextFormatUtil {
         }
     }
 
-    static void writeLabels(OutputStreamWriter writer, Labels labels, String additionalLabelName, double additionalLabelValue) throws IOException {
-        writer.write('{');
+    static void writeLabels(OutputStreamWriter writer, Labels labels, String additionalLabelName, double additionalLabelValue, boolean metricInsideBraces) throws IOException {
+        if (!metricInsideBraces) {
+            writer.write('{');
+        }
         for (int i = 0; i < labels.size(); i++) {
-            if (i > 0) {
+            if (i > 0 || metricInsideBraces) {
                 writer.write(",");
             }
-            writer.write(labels.getPrometheusName(i));
+            writeName(writer, labels.getPrometheusName(i), NameType.Label);
             writer.write("=\"");
-            writeEscapedLabelValue(writer, labels.getValue(i));
+            writeEscapedString(writer, labels.getValue(i));
             writer.write("\"");
         }
         if (additionalLabelName != null) {
@@ -78,5 +85,27 @@ public class TextFormatUtil {
             writer.write("\"");
         }
         writer.write('}');
+    }
+
+    static void writeName(OutputStreamWriter writer, String name, NameType nameType) throws IOException {
+        switch (nameType) {
+            case Metric:
+                if (PrometheusNaming.isValidLegacyMetricName(name)) {
+                    writer.write(name);
+                    return;
+                }
+                break;
+            case Label:
+                if (PrometheusNaming.isValidLegacyLabelName(name) && PrometheusNaming.nameValidationScheme == ValidationScheme.LEGACY_VALIDATION) {
+                    writer.write(name);
+                    return;
+                }
+                break;
+            default:
+                throw new RuntimeException("Invalid name type requested: " + nameType);
+        }
+        writer.write('"');
+        writeEscapedString(writer, name);
+        writer.write('"');
     }
 }

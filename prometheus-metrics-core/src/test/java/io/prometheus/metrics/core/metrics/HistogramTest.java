@@ -1,17 +1,12 @@
 package io.prometheus.metrics.core.metrics;
 
+import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
-import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
-import io.prometheus.metrics.model.snapshots.Exemplar;
-import io.prometheus.metrics.model.snapshots.Exemplars;
-import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import org.junit.After;
@@ -723,7 +718,7 @@ public class HistogramTest {
         // text
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
-        writer.write(out, MetricSnapshots.of(snapshot));
+        writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
         Assert.assertEquals(expectedTextFormat, out.toString());
     }
 

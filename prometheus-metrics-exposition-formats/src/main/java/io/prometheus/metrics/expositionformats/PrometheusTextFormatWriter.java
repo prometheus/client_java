@@ -1,19 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
-import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
-import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
-import io.prometheus.metrics.model.snapshots.InfoSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricMetadata;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.Quantile;
-import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
-import io.prometheus.metrics.model.snapshots.SummarySnapshot;
-import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
+import io.prometheus.metrics.model.snapshots.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -21,11 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeDouble;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscapedLabelValue;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimestamp;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.*;
 
 /**
  * Write the Prometheus text format. This is the default if you view a Prometheus endpoint with your Web browser.
@@ -54,11 +37,13 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
         return CONTENT_TYPE;
     }
 
-    public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
+    public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException {
         // See https://prometheus.io/docs/instrumenting/exposition_formats/
         // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and "summary".
         OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
-        for (MetricSnapshot snapshot : metricSnapshots) {
+        for (MetricSnapshot s : metricSnapshots) {
+            MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
+
             if (snapshot.getDataPoints().size() > 0) {
                 if (snapshot instanceof CounterSnapshot) {
                     writeCounter(writer, (CounterSnapshot) snapshot);
@@ -78,7 +63,9 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
             }
         }
         if (writeCreatedTimestamps) {
-            for (MetricSnapshot snapshot : metricSnapshots) {
+            for (MetricSnapshot ms : metricSnapshots) {
+                MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(ms, escapingScheme);
+
                 if (snapshot.getDataPoints().size() > 0) {
                     if (snapshot instanceof CounterSnapshot) {
                         writeCreated(writer, snapshot);
@@ -254,7 +241,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
                     }
                     writer.write(data.getLabels().getPrometheusName(j));
                     writer.write("=\"");
-                    writeEscapedLabelValue(writer, data.getLabels().getValue(j));
+                    writeEscapedString(writer, data.getLabels().getValue(j));
                     writer.write("\"");
                 }
                 if (!data.getLabels().isEmpty()) {
@@ -262,7 +249,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
                 }
                 writer.write(metadata.getPrometheusName());
                 writer.write("=\"");
-                writeEscapedLabelValue(writer, data.getName(i));
+                writeEscapedString(writer, data.getName(i));
                 writer.write("\"} ");
                 if (data.isTrue(i)) {
                     writer.write("1");
@@ -290,32 +277,34 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
 
     private void writeNameAndLabels(OutputStreamWriter writer, String name, String suffix, Labels labels,
                                     String additionalLabelName, double additionalLabelValue) throws IOException {
-        writer.write(name);
-        if (suffix != null) {
-            writer.write(suffix);
+        boolean metricInsideBraces = false;
+        // If the name does not pass the legacy validity check, we must put the
+        // metric name inside the braces.
+        if (PrometheusNaming.validateLegacyMetricName(name) != null) {
+            metricInsideBraces = true;
+            writer.write('{');
         }
+        writeName(writer, name + (suffix != null ? suffix : ""), NameType.Metric);
+
         if (!labels.isEmpty() || additionalLabelName != null) {
-            writeLabels(writer, labels, additionalLabelName, additionalLabelValue);
+            writeLabels(writer, labels, additionalLabelName, additionalLabelValue, metricInsideBraces);
+        } else if (metricInsideBraces) {
+            writer.write('}');
         }
+
         writer.write(' ');
     }
 
     private void writeMetadata(OutputStreamWriter writer, String suffix, String typeString, MetricMetadata metadata) throws IOException {
         if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
             writer.write("# HELP ");
-            writer.write(metadata.getPrometheusName());
-            if (suffix != null) {
-                writer.write(suffix);
-            }
+            writeName(writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""), NameType.Metric);
             writer.write(' ');
             writeEscapedHelp(writer, metadata.getHelp());
             writer.write('\n');
         }
         writer.write("# TYPE ");
-        writer.write(metadata.getPrometheusName());
-        if (suffix != null) {
-            writer.write(suffix);
-        }
+        writeName(writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""), NameType.Metric);
         writer.write(' ');
         writer.write(typeString);
         writer.write('\n');

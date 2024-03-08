@@ -1,32 +1,20 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TextFormat;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.Exemplar;
-import io.prometheus.metrics.model.snapshots.Exemplars;
-import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
-import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
-import io.prometheus.metrics.model.snapshots.InfoSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
-import io.prometheus.metrics.model.snapshots.Quantiles;
-import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
-import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.Unit;
-import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 
 public class ExpositionFormatsTest {
 
@@ -140,6 +128,7 @@ public class ExpositionFormatsTest {
                     "timestamp_ms: 1672850585820 " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
 
         CounterSnapshot counter = CounterSnapshot.builder()
                 .name("service_time_seconds")
@@ -184,6 +173,7 @@ public class ExpositionFormatsTest {
                 "my_counter_total 1.1\n";
         String prometheusProtobuf = "" +
                 "name: \"my_counter_total\" type: COUNTER metric { counter { value: 1.1 } }";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         CounterSnapshot counter = CounterSnapshot.builder()
                 .name("my_counter")
                 .dataPoint(CounterDataPointSnapshot.builder().value(1.1).build())
@@ -215,6 +205,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
 
         CounterSnapshot counter = CounterSnapshot.builder()
                 .name("my.request.count")
@@ -260,6 +251,7 @@ public class ExpositionFormatsTest {
                     "timestamp_ms: 1672850585820 " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         GaugeSnapshot gauge = GaugeSnapshot.builder()
                 .name("disk_usage_ratio")
                 .help("percentage used")
@@ -299,6 +291,7 @@ public class ExpositionFormatsTest {
                 "temperature_centigrade 22.3\n";
         String prometheusProtobuf = "" +
                 "name: \"temperature_centigrade\" type: GAUGE metric { gauge { value: 22.3 } }";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         GaugeSnapshot gauge = GaugeSnapshot.builder()
                 .name("temperature_centigrade")
                 .dataPoint(GaugeDataPointSnapshot.builder()
@@ -336,6 +329,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
 
         GaugeSnapshot gauge = GaugeSnapshot.builder()
                 .name("my.temperature.celsius")
@@ -352,6 +346,38 @@ public class ExpositionFormatsTest {
         assertOpenMetricsText(openMetricsText, gauge);
         assertPrometheusText(prometheusText, gauge);
         assertPrometheusProtobuf(prometheusProtobuf, gauge);
+    }
+
+    @Test
+    public void testGaugeUTF8() throws IOException {
+        String prometheusText =
+                "# HELP \"gauge.name\" gauge\\ndoc\\nstr\"ing\n" +
+                "# TYPE \"gauge.name\" gauge\n" +
+                "{\"gauge.name\",\"name*2\"=\"val with \\\\backslash and \\\"quotes\\\"\",\"name.1\"=\"val with\\nnew line\"} +Inf\n" +
+                "{\"gauge.name\",\"name*2\"=\"佖佥\",\"name.1\"=\"Björn\"} 3.14E42\n";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+
+        GaugeSnapshot gauge = GaugeSnapshot.builder()
+                .name("gauge.name")
+                .help("gauge\ndoc\nstr\"ing")
+                .dataPoint(GaugeDataPointSnapshot.builder()
+                        .value(Double.POSITIVE_INFINITY)
+                        .labels(Labels.builder()
+                                .label("name.1", "val with\nnew line")
+                                .label("name*2", "val with \\backslash and \"quotes\"")
+                                .build())
+                        .build())
+                .dataPoint(GaugeDataPointSnapshot.builder()
+                        .value(3.14e42)
+                        .labels(Labels.builder()
+                                .label("name.1", "Björn")
+                                .label("name*2", "佖佥")
+                                .build())
+                        .build())
+                .build();
+        assertPrometheusText(prometheusText, gauge);
+
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     }
 
     @Test
@@ -445,6 +471,7 @@ public class ExpositionFormatsTest {
                     "timestamp_ms: 1672850585820 " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         SummarySnapshot summary = SummarySnapshot.builder()
                 .name("http_request_duration_seconds")
                 .help("request duration")
@@ -513,6 +540,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         SummarySnapshot summary = SummarySnapshot.builder()
                 .name("latency_seconds")
                 .help("latency")
@@ -548,6 +576,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         SummarySnapshot summary = SummarySnapshot.builder()
                 .name("latency_seconds")
                 .dataPoint(SummaryDataPointSnapshot.builder()
@@ -580,6 +609,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
         //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         SummarySnapshot summary = SummarySnapshot.builder()
                 .name("latency_seconds")
                 .dataPoint(SummaryDataPointSnapshot.builder()
@@ -612,6 +642,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         SummarySnapshot summary = SummarySnapshot.builder()
                 .name("latency_seconds")
                 .dataPoint(SummaryDataPointSnapshot.builder()
@@ -627,6 +658,7 @@ public class ExpositionFormatsTest {
 
     @Test
     public void testSummaryEmptyData() throws IOException {
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         // SummaryData can be present but empty (no count, no sum, no quantiles).
         // This should be treated like no data is present.
         SummarySnapshot summary = SummarySnapshot.builder()
@@ -665,6 +697,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         SummarySnapshot summary = SummarySnapshot.builder()
                 .name("latency_seconds")
                 .dataPoint(SummaryDataPointSnapshot.builder()
@@ -710,6 +743,7 @@ public class ExpositionFormatsTest {
                     "summary { sample_count: 1 sample_sum: 0.03 } " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
 
         SummarySnapshot summary = SummarySnapshot.builder()
                 .name("my.request.duration.seconds")
@@ -831,6 +865,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         HistogramSnapshot histogram = HistogramSnapshot.builder()
                 .name("response_size_bytes")
                 .help("help")
@@ -892,6 +927,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         HistogramSnapshot histogram = HistogramSnapshot.builder()
                 .name("request_latency_seconds")
                 .dataPoint(HistogramSnapshot.HistogramDataPointSnapshot.builder()
@@ -935,6 +971,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         HistogramSnapshot histogram = HistogramSnapshot.builder()
                 .name("request_latency_seconds")
                 .dataPoint(HistogramSnapshot.HistogramDataPointSnapshot.builder()
@@ -1054,6 +1091,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         HistogramSnapshot gaugeHistogram = HistogramSnapshot.builder()
                 .gaugeHistogram(true)
                 .name("cache_size_bytes")
@@ -1117,6 +1155,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         HistogramSnapshot gaugeHistogram = HistogramSnapshot.builder()
                 .gaugeHistogram(true)
                 .name("queue_size_bytes")
@@ -1163,6 +1202,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         HistogramSnapshot gaugeHistogram = HistogramSnapshot.builder()
                 .gaugeHistogram(true)
                 .name("queue_size_bytes")
@@ -1210,6 +1250,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
 
         HistogramSnapshot histogram = HistogramSnapshot.builder()
                 .name("my.request.duration.seconds")
@@ -1337,6 +1378,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         HistogramSnapshot nativeHistogram = HistogramSnapshot.builder()
                 .name("response_size_bytes")
                 .help("help")
@@ -1417,6 +1459,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         HistogramSnapshot nativeHistogram = HistogramSnapshot.builder()
                 .name("latency_seconds")
                 .dataPoint(HistogramSnapshot.HistogramDataPointSnapshot.builder()
@@ -1463,6 +1506,7 @@ public class ExpositionFormatsTest {
                     "} " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
 
         HistogramSnapshot histogram = HistogramSnapshot.builder()
                 .name("my.request.duration.seconds")
@@ -1499,6 +1543,7 @@ public class ExpositionFormatsTest {
                 "# HELP version_info version information\n" +
                 "# TYPE version_info gauge\n" +
                 "version_info{version=\"1.2.3\"} 1\n";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         InfoSnapshot info = InfoSnapshot.builder()
                 .name("version")
                 .help("version information")
@@ -1533,6 +1578,7 @@ public class ExpositionFormatsTest {
                     "gauge { value: 1.0 } " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         InfoSnapshot info = InfoSnapshot.builder()
                 .name("jvm.status")
                 .help("JVM status info")
@@ -1562,6 +1608,7 @@ public class ExpositionFormatsTest {
                 "state{env=\"dev\",state=\"state2\"} 0 " + scrapeTimestamp1s + "\n" +
                 "state{env=\"prod\",state=\"state1\"} 0 " + scrapeTimestamp2s + "\n" +
                 "state{env=\"prod\",state=\"state2\"} 1 " + scrapeTimestamp2s + "\n";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         StateSetSnapshot stateSet = StateSetSnapshot.builder()
                 .name("state")
                 .help("complete state set example")
@@ -1595,6 +1642,7 @@ public class ExpositionFormatsTest {
                 "# TYPE state gauge\n" +
                 "state{state=\"a\"} 1\n" +
                 "state{state=\"bb\"} 0\n";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         StateSetSnapshot stateSet = StateSetSnapshot.builder()
                 .name("state")
                 .dataPoint(StateSetSnapshot.StateSetDataPointSnapshot.builder()
@@ -1636,6 +1684,7 @@ public class ExpositionFormatsTest {
                     "gauge { value: 0.0 } " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         StateSetSnapshot stateSet = StateSetSnapshot.builder()
                 .name("my.application.state")
                 .help("My application state")
@@ -1664,6 +1713,7 @@ public class ExpositionFormatsTest {
                 "# TYPE my_special_thing_bytes untyped\n" +
                 "my_special_thing_bytes{env=\"dev\"} 0.2 " + scrapeTimestamp1s + "\n" +
                 "my_special_thing_bytes{env=\"prod\"} 0.7 " + scrapeTimestamp2s + "\n";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         UnknownSnapshot unknown = UnknownSnapshot.builder()
                 .name("my_special_thing_bytes")
                 .help("help message")
@@ -1696,6 +1746,7 @@ public class ExpositionFormatsTest {
         String prometheus = "" +
                 "# TYPE other untyped\n" +
                 "other 22.3\n";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         UnknownSnapshot unknown = UnknownSnapshot.builder()
                 .name("other")
                 .dataPoint(UnknownDataPointSnapshot.builder()
@@ -1730,6 +1781,7 @@ public class ExpositionFormatsTest {
                     "untyped { value: 0.7 } " +
                 "}";
                 //@formatter:on
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         UnknownSnapshot unknown = UnknownSnapshot.builder()
                 .name("some.unknown.metric")
                 .help("help message")
@@ -1756,6 +1808,7 @@ public class ExpositionFormatsTest {
                 "# HELP test_total Some text and \\n some \" escaping\n" +
                 "# TYPE test_total counter\n" +
                 "test_total 1.0\n";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         CounterSnapshot counter = CounterSnapshot.builder()
                 .name("test")
                 .help("Some text and \n some \" escaping") // example from https://openMetrics.io
@@ -1776,6 +1829,7 @@ public class ExpositionFormatsTest {
         String prometheus = "" +
                 "# TYPE test_total counter\n" +
                 "test_total{a=\"x\",b=\"escaping\\\" example \\n \"} 1.0\n";
+        PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
         CounterSnapshot counter = CounterSnapshot.builder()
                 .name("test")
                 .dataPoint(CounterDataPointSnapshot.builder()
@@ -1788,31 +1842,133 @@ public class ExpositionFormatsTest {
         assertPrometheusText(prometheus, counter);
     }
 
+    @Test
+    public void testFindWriter() {
+        EscapingScheme oldDefault = nameEscapingScheme;
+        nameEscapingScheme = EscapingScheme.UNDERSCORE_ESCAPING;
+        ExpositionFormats expositionFormats = ExpositionFormats.init();
+
+        // delimited format
+        String acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited";
+        String expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=underscores";
+        EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // plain text format
+        acceptHeaderValue = "text/plain;version=0.0.4";
+        expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=underscores";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // delimited format UTF-8
+        acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited; escaping=allow-utf-8";
+        expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        nameEscapingScheme = EscapingScheme.VALUE_ENCODING_ESCAPING;
+
+        // OM format, no version
+        acceptHeaderValue = "application/openmetrics-text";
+        expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=values";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // OM format, 0.0.1 version
+        acceptHeaderValue = "application/openmetrics-text;version=0.0.1; escaping=underscores";
+        expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // plain text format
+        acceptHeaderValue = "text/plain;version=0.0.4";
+        expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=values";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // plain text format UTF-8
+        acceptHeaderValue = "text/plain;version=0.0.4; escaping=allow-utf-8";
+        expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        // delimited format UTF-8
+        acceptHeaderValue = "text/plain;version=0.0.4; escaping=allow-utf-8";
+        expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        writer = expositionFormats.findWriter(acceptHeaderValue);
+        Assert.assertEquals(expectedFmt, writer.getContentType() + escapingScheme.toHeaderFormat());
+
+        nameEscapingScheme = oldDefault;
+    }
+
+    @Test
+    public void testWrite() throws IOException {
+        ByteArrayOutputStream buff = new ByteArrayOutputStream(new AtomicInteger(2 << 9).get() + 1024);
+        ExpositionFormats expositionFormats = ExpositionFormats.init();
+        UnknownSnapshot unknown = UnknownSnapshot.builder()
+                .name("foo_metric")
+                .dataPoint(UnknownDataPointSnapshot.builder()
+                        .value(1.234)
+                        .build())
+                .build();
+
+        String acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited";
+        EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        ExpositionFormatWriter protoWriter = expositionFormats.findWriter(acceptHeaderValue);
+
+        protoWriter.write(buff, MetricSnapshots.of(unknown), escapingScheme);
+        byte[] out = buff.toByteArray();
+        Assert.assertNotEquals(0, out.length);
+
+        buff.reset();
+
+        acceptHeaderValue = "text/plain; version=0.0.4; charset=utf-8";
+        escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+        ExpositionFormatWriter textWriter = expositionFormats.findWriter(acceptHeaderValue);
+
+        textWriter.write(buff, MetricSnapshots.of(unknown), escapingScheme);
+        out = buff.toByteArray();
+        Assert.assertNotEquals(0, out.length);
+
+        String expected = "# TYPE foo_metric untyped\n" +
+                "foo_metric 1.234\n";
+
+        Assert.assertEquals(expected, new String(out));
+    }
+
     private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
-        writer.write(out, MetricSnapshots.of(snapshot));
+        writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
         Assert.assertEquals(expected, out.toString());
     }
 
     private void assertOpenMetricsTextWithoutCreated(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
-        writer.write(out, MetricSnapshots.of(snapshot));
+        writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
         Assert.assertEquals(expected, out.toString());
     }
 
     private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(true);
-        writer.write(out, MetricSnapshots.of(snapshot));
+        writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
         Assert.assertEquals(expected, out.toString());
     }
 
     private void assertPrometheusTextWithoutCreated(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(false);
-        writer.write(out, MetricSnapshots.of(snapshot));
+        writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
         Assert.assertEquals(expected, out.toString());
     }
 

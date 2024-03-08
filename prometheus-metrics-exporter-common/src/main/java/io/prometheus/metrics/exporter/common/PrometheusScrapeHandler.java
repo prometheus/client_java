@@ -6,6 +6,7 @@ import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.ExpositionFormats;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 
 import java.io.ByteArrayOutputStream;
@@ -51,15 +52,16 @@ public class PrometheusScrapeHandler {
             PrometheusHttpRequest request = exchange.getRequest();
             PrometheusHttpResponse response = exchange.getResponse();
             MetricSnapshots snapshots = scrape(request);
-            if (writeDebugResponse(snapshots, exchange)) {
+            String acceptHeader = request.getHeader("Accept");
+            EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeader);
+            if (writeDebugResponse(snapshots, exchange, escapingScheme)) {
                 return;
             }
             ByteArrayOutputStream responseBuffer = new ByteArrayOutputStream(lastResponseSize.get() + 1024);
-            String acceptHeader = request.getHeader("Accept");
             ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
-            writer.write(responseBuffer, snapshots);
+            writer.write(responseBuffer, snapshots, escapingScheme);
             lastResponseSize.set(responseBuffer.size());
-            response.setHeader("Content-Type", writer.getContentType());
+            response.setHeader("Content-Type", writer.getContentType() + escapingScheme.toHeaderFormat());
 
             if (shouldUseCompression(request)) {
                 response.setHeader("Content-Encoding", "gzip");
@@ -126,7 +128,7 @@ public class PrometheusScrapeHandler {
         return result;
     }
 
-    private boolean writeDebugResponse(MetricSnapshots snapshots, PrometheusHttpExchange exchange) throws IOException {
+    private boolean writeDebugResponse(MetricSnapshots snapshots, PrometheusHttpExchange exchange, EscapingScheme escapingScheme) throws IOException {
         String debugParam = exchange.getRequest().getParameter("debug");
         PrometheusHttpResponse response = exchange.getResponse();
         if (debugParam == null) {
@@ -138,10 +140,10 @@ public class PrometheusScrapeHandler {
             OutputStream body = response.sendHeadersAndGetBody(responseStatus, 0);
             switch (debugParam) {
                 case "openmetrics":
-                    expositionFormats.getOpenMetricsTextFormatWriter().write(body, snapshots);
+                    expositionFormats.getOpenMetricsTextFormatWriter().write(body, snapshots, escapingScheme);
                     break;
                 case "text":
-                    expositionFormats.getPrometheusTextFormatWriter().write(body, snapshots);
+                    expositionFormats.getPrometheusTextFormatWriter().write(body, snapshots, escapingScheme);
                     break;
                 case "prometheus-protobuf":
                     String debugString = expositionFormats.getPrometheusProtobufWriter().toDebugString(snapshots);

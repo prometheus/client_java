@@ -1,5 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 
 import java.io.IOException;
@@ -11,6 +12,6 @@ public interface ExpositionFormatWriter {
     /**
      * Text formats use UTF-8 encoding.
      */
-    void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException;
+    void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException;
     String getContentType();
 }

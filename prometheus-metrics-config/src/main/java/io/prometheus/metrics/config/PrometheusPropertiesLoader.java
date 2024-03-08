@@ -33,8 +33,9 @@ public class PrometheusPropertiesLoader {
         ExporterFilterProperties exporterFilterProperties = ExporterFilterProperties.load("io.prometheus.exporter.filter", properties);
         ExporterHttpServerProperties exporterHttpServerProperties = ExporterHttpServerProperties.load("io.prometheus.exporter.httpServer", properties);
         ExporterOpenTelemetryProperties exporterOpenTelemetryProperties = ExporterOpenTelemetryProperties.load("io.prometheus.exporter.opentelemetry", properties);
+        NamingProperties namingProperties = NamingProperties.load("io.prometheus.naming", properties);
         validateAllPropertiesProcessed(properties);
-        return new PrometheusProperties(defaultMetricsProperties, metricsConfigs, exemplarConfig, exporterProperties, exporterFilterProperties, exporterHttpServerProperties, exporterOpenTelemetryProperties);
+        return new PrometheusProperties(defaultMetricsProperties, metricsConfigs, exemplarConfig, exporterProperties, exporterFilterProperties, exporterHttpServerProperties, exporterOpenTelemetryProperties, namingProperties);
     }
 
     // This will remove entries from properties when they are processed.
