@@ -3,9 +3,9 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -16,18 +16,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
-public class JvmCompilationMetricsTest {
+class JvmCompilationMetricsTest {
 
     private CompilationMXBean mockCompilationBean = Mockito.mock(CompilationMXBean.class);
 
-    @Before
-    public void setUp() {
-        when(mockCompilationBean.getTotalCompilationTime()).thenReturn(10000l);
+    @BeforeEach
+    void setUp() {
+        when(mockCompilationBean.getTotalCompilationTime()).thenReturn(10000L);
         when(mockCompilationBean.isCompilationTimeMonitoringSupported()).thenReturn(true);
     }
 
     @Test
-    public void testGoodCase() throws IOException {
+    void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
         JvmCompilationMetrics.builder()
                 .compilationBean(mockCompilationBean)
@@ -41,11 +41,11 @@ public class JvmCompilationMetricsTest {
                 "jvm_compilation_time_seconds_total 10.0\n" +
                 "# EOF\n";
 
-        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+        Assertions.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
     }
 
     @Test
-    public void testIgnoredMetricNotScraped() {
+    void testIgnoredMetricNotScraped() {
         MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_compilation_time_seconds_total")
                 .build();
@@ -57,6 +57,6 @@ public class JvmCompilationMetricsTest {
         MetricSnapshots snapshots = registry.scrape(filter);
 
         verify(mockCompilationBean, times(0)).getTotalCompilationTime();
-        Assert.assertEquals(0, snapshots.size());
+        Assertions.assertEquals(0, snapshots.size());
     }
 }

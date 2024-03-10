@@ -1,12 +1,14 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class UnknownSnapshotTest {
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class UnknownSnapshotTest {
 
     @Test
-    public void testCompleteGoodCase() {
+    void testCompleteGoodCase() {
         long exemplarTimestamp = System.currentTimeMillis();
         UnknownSnapshot snapshot = UnknownSnapshot.builder()
                 .name("my_unknown_seconds")
@@ -33,39 +35,39 @@ public class UnknownSnapshotTest {
                 )
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "my_unknown_seconds", "something in seconds", "seconds");
-        Assert.assertEquals(2, snapshot.getDataPoints().size());
+        Assertions.assertEquals(2, snapshot.getDataPoints().size());
         UnknownSnapshot.UnknownDataPointSnapshot data = snapshot.getDataPoints().get(1); // env="prod"
-        Assert.assertEquals(Labels.of("env", "prod"), data.getLabels());
-        Assert.assertEquals(0.3, data.getValue(), 0.0);
-        Assert.assertEquals(0.12, data.getExemplar().getValue(), 0.0);
-        Assert.assertFalse(data.hasCreatedTimestamp());
-        Assert.assertFalse(data.hasScrapeTimestamp());
+        Assertions.assertEquals(Labels.of("env", "prod"), data.getLabels());
+        Assertions.assertEquals(0.3, data.getValue(), 0.0);
+        Assertions.assertEquals(0.12, data.getExemplar().getValue(), 0.0);
+        Assertions.assertFalse(data.hasCreatedTimestamp());
+        Assertions.assertFalse(data.hasScrapeTimestamp());
     }
 
     @Test
-    public void testMinimal() {
+    void testMinimal() {
         UnknownSnapshot snapshot = UnknownSnapshot.builder()
                 .name("test")
                 .dataPoint(UnknownSnapshot.UnknownDataPointSnapshot.builder()
                         .value(1.0)
                         .build())
                 .build();
-        Assert.assertEquals(1, snapshot.getDataPoints().size());
+        Assertions.assertEquals(1, snapshot.getDataPoints().size());
     }
 
     @Test
-    public void testEmpty() {
+    void testEmpty() {
         UnknownSnapshot snapshot = UnknownSnapshot.builder().name("test").build();
-        Assert.assertEquals(0, snapshot.getDataPoints().size());
+        Assertions.assertEquals(0, snapshot.getDataPoints().size());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testNameMissing() {
-        UnknownSnapshot.builder().build();
+    @Test
+    void testNameMissing() {
+        assertThrows(IllegalArgumentException.class, () -> UnknownSnapshot.builder().build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testValueMissing() {
-        UnknownSnapshot.UnknownDataPointSnapshot.builder().build();
+    @Test
+    void testValueMissing() {
+        assertThrows(IllegalArgumentException.class, () -> UnknownSnapshot.UnknownDataPointSnapshot.builder().build());
     }
 }

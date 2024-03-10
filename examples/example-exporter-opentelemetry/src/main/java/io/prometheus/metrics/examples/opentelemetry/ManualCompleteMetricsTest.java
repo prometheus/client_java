@@ -17,7 +17,7 @@ import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import java.util.Random;
 */
 
-public class ManualCompleteMetricsTest {
+class ManualCompleteMetricsTest {
 
     // This contains a complete set of all metric types, and target_info and otel_scope_info.
     // I used this to expose in Prometheus format and OTLP format at the same time and compare the results.

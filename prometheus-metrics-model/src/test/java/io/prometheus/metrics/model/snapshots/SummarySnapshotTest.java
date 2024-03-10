@@ -1,14 +1,13 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import java.util.concurrent.TimeUnit;
 
-public class SummarySnapshotTest {
+class SummarySnapshotTest {
 
     @Test
-    public void testCompleteGoodCase() {
+    void testCompleteGoodCase() {
         long createdTimestamp = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
         long scrapeTimestamp = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2);
         long exemplarTimestamp = System.currentTimeMillis();
@@ -49,32 +48,32 @@ public class SummarySnapshotTest {
                         .build())
                 .build();
         SnapshotTestUtil.assertMetadata(snapshot, "latency_seconds", "latency in seconds", "seconds");
-        Assert.assertEquals(2, snapshot.getDataPoints().size());
+        Assertions.assertEquals(2, snapshot.getDataPoints().size());
         SummarySnapshot.SummaryDataPointSnapshot data = snapshot.getDataPoints().get(0);
-        Assert.assertEquals(Labels.of("endpoint", "/"), data.getLabels());
-        Assert.assertTrue(data.hasCount());
-        Assert.assertEquals(1093, data.getCount());
-        Assert.assertTrue(data.hasSum());
-        Assert.assertEquals(218.6, data.getSum(), 0);
-        Assert.assertTrue(data.hasCreatedTimestamp());
-        Assert.assertEquals(createdTimestamp, data.getCreatedTimestampMillis());
-        Assert.assertTrue(data.hasScrapeTimestamp());
-        Assert.assertEquals(scrapeTimestamp, data.getScrapeTimestampMillis());
+        Assertions.assertEquals(Labels.of("endpoint", "/"), data.getLabels());
+        Assertions.assertTrue(data.hasCount());
+        Assertions.assertEquals(1093, data.getCount());
+        Assertions.assertTrue(data.hasSum());
+        Assertions.assertEquals(218.6, data.getSum(), 0);
+        Assertions.assertTrue(data.hasCreatedTimestamp());
+        Assertions.assertEquals(createdTimestamp, data.getCreatedTimestampMillis());
+        Assertions.assertTrue(data.hasScrapeTimestamp());
+        Assertions.assertEquals(scrapeTimestamp, data.getScrapeTimestampMillis());
         Quantiles quantiles = data.getQuantiles();
-        Assert.assertEquals(3, quantiles.size());
+        Assertions.assertEquals(3, quantiles.size());
         // quantiles are tested in QuantilesTest already, skipping here.
-        Assert.assertEquals(2, data.getExemplars().size());
+        Assertions.assertEquals(2, data.getExemplars().size());
         // exemplars are tested in ExemplarsTest already, skipping here.
 
         data = snapshot.getDataPoints().get(1);
-        Assert.assertFalse(data.hasCreatedTimestamp());
-        Assert.assertFalse(data.hasScrapeTimestamp());
-        Assert.assertTrue(data.hasCount());
-        Assert.assertTrue(data.hasSum());
+        Assertions.assertFalse(data.hasCreatedTimestamp());
+        Assertions.assertFalse(data.hasScrapeTimestamp());
+        Assertions.assertTrue(data.hasCount());
+        Assertions.assertTrue(data.hasSum());
     }
 
     @Test
-    public void testMinimal() {
+    void testMinimal() {
         SummarySnapshot snapshot = SummarySnapshot.builder()
                 .name("size_bytes")
                 .dataPoint(SummarySnapshot.SummaryDataPointSnapshot.builder()
@@ -82,24 +81,24 @@ public class SummarySnapshotTest {
                         .sum(12.0)
                         .build())
                 .build();
-        Assert.assertEquals(1, snapshot.getDataPoints().size());
-        Assert.assertEquals(Labels.EMPTY, snapshot.getDataPoints().get(0).getLabels());
+        Assertions.assertEquals(1, snapshot.getDataPoints().size());
+        Assertions.assertEquals(Labels.EMPTY, snapshot.getDataPoints().get(0).getLabels());
     }
 
     @Test
-    public void testEmptySnapshot() {
+    void testEmptySnapshot() {
         SummarySnapshot snapshot = SummarySnapshot.builder().name("empty_summary").build();
-        Assert.assertEquals(0, snapshot.getDataPoints().size());
+        Assertions.assertEquals(0, snapshot.getDataPoints().size());
     }
 
     @Test
-    public void testEmptyData() {
+    void testEmptyData() {
         SummarySnapshot.SummaryDataPointSnapshot data = SummarySnapshot.SummaryDataPointSnapshot.builder().build();
-        Assert.assertEquals(0, data.getQuantiles().size());
-        Assert.assertFalse(data.hasCount());
-        Assert.assertFalse(data.hasSum());
-        Assert.assertFalse(data.hasCreatedTimestamp());
-        Assert.assertFalse(data.hasScrapeTimestamp());
-        Assert.assertEquals(0, data.getExemplars().size());
+        Assertions.assertEquals(0, data.getQuantiles().size());
+        Assertions.assertFalse(data.hasCount());
+        Assertions.assertFalse(data.hasSum());
+        Assertions.assertFalse(data.hasCreatedTimestamp());
+        Assertions.assertFalse(data.hasScrapeTimestamp());
+        Assertions.assertEquals(0, data.getExemplars().size());
     }
 }

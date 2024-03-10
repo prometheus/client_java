@@ -3,9 +3,9 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -16,19 +16,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class JvmClassLoadingMetricsTest {
+class JvmClassLoadingMetricsTest {
 
     private ClassLoadingMXBean mockClassLoadingBean = Mockito.mock(ClassLoadingMXBean.class);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         when(mockClassLoadingBean.getLoadedClassCount()).thenReturn(1000);
         when(mockClassLoadingBean.getTotalLoadedClassCount()).thenReturn(2000L);
         when(mockClassLoadingBean.getUnloadedClassCount()).thenReturn(500L);
     }
 
     @Test
-    public void testGoodCase() throws IOException {
+    void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
         JvmClassLoadingMetrics.builder()
                 .classLoadingBean(mockClassLoadingBean)
@@ -47,11 +47,11 @@ public class JvmClassLoadingMetricsTest {
                 "jvm_classes_unloaded_total 500.0\n" +
                 "# EOF\n";
 
-        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+        Assertions.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
     }
 
     @Test
-    public void testIgnoredMetricNotScraped() {
+    void testIgnoredMetricNotScraped() {
         MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_classes_currently_loaded")
                 .build();

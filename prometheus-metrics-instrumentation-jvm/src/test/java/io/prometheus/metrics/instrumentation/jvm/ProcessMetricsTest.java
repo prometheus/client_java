@@ -3,9 +3,9 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class ProcessMetricsTest {
+class ProcessMetricsTest {
 
     private com.sun.management.UnixOperatingSystemMXBean sunOsBean = Mockito.mock(com.sun.management.UnixOperatingSystemMXBean.class);
     private java.lang.management.OperatingSystemMXBean javaOsBean = Mockito.mock(java.lang.management.OperatingSystemMXBean.class);
@@ -28,8 +28,8 @@ public class ProcessMetricsTest {
     private ProcessMetrics.Grepper windowsGrepper = Mockito.mock(ProcessMetrics.Grepper.class);
     private RuntimeMXBean runtimeBean = Mockito.mock(RuntimeMXBean.class);
 
-    @Before
-    public void setUp() throws IOException {
+    @BeforeEach
+    void setUp() throws IOException {
         when(sunOsBean.getProcessCpuTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(72));
         when(sunOsBean.getOpenFileDescriptorCount()).thenReturn(127L);
         when(sunOsBean.getMaxFileDescriptorCount()).thenReturn(244L);
@@ -39,12 +39,13 @@ public class ProcessMetricsTest {
     }
 
     @Test
-    public void testGoodCase() throws IOException {
+    void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
         ProcessMetrics.builder()
-                        .osBean(sunOsBean)
-                                .runtimeBean(runtimeBean)
+                .osBean(sunOsBean)
+                .runtimeBean(runtimeBean)
                 .grepper(linuxGrepper)
+                .linux(true)
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
@@ -73,11 +74,11 @@ public class ProcessMetricsTest {
                 "process_virtual_memory_bytes 6180864.0\n" +
                 "# EOF\n";
 
-        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+        Assertions.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
     }
 
     @Test
-    public void testMinimal() throws IOException {
+    void testMinimal() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
         ProcessMetrics.builder()
                 .osBean(javaOsBean)
@@ -93,11 +94,11 @@ public class ProcessMetricsTest {
                 "process_start_time_seconds 37.1\n" +
                 "# EOF\n";
 
-        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+        Assertions.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
     }
 
     @Test
-    public void testIgnoredMetricNotScraped() {
+    void testIgnoredMetricNotScraped() {
         MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("process_max_fds")
                 .build();

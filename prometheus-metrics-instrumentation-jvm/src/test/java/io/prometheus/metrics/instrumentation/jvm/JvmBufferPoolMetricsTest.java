@@ -3,9 +3,9 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -17,13 +17,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class JvmBufferPoolMetricsTest {
+class JvmBufferPoolMetricsTest {
 
     private final BufferPoolMXBean directBuffer = Mockito.mock(BufferPoolMXBean.class);
     private final BufferPoolMXBean mappedBuffer = Mockito.mock(BufferPoolMXBean.class);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         when(directBuffer.getName()).thenReturn("direct");
         when(directBuffer.getCount()).thenReturn(2L);
         when(directBuffer.getMemoryUsed()).thenReturn(1234L);
@@ -35,7 +35,7 @@ public class JvmBufferPoolMetricsTest {
     }
 
     @Test
-    public void testGoodCase() throws IOException {
+    void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
         JvmBufferPoolMetrics.builder()
                         .bufferPoolBeans(Arrays.asList(mappedBuffer, directBuffer))
@@ -59,11 +59,11 @@ public class JvmBufferPoolMetricsTest {
                 "jvm_buffer_pool_used_bytes{pool=\"mapped\"} 2345.0\n" +
                 "# EOF\n";
 
-        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+        Assertions.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
     }
 
     @Test
-    public void testIgnoredMetricNotScraped() {
+    void testIgnoredMetricNotScraped() {
         MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_buffer_pool_used_bytes")
                 .build();

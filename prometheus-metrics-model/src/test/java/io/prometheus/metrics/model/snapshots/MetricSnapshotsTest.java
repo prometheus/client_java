@@ -1,20 +1,22 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 
-public class MetricSnapshotsTest {
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class MetricSnapshotsTest {
 
     @Test
-    public void testEmpty() {
+    void testEmpty() {
         MetricSnapshots snapshots = MetricSnapshots.builder().build();
-        Assert.assertFalse(snapshots.stream().findAny().isPresent());
+        Assertions.assertFalse(snapshots.stream().findAny().isPresent());
     }
 
     @Test
-    public void testSort() {
+    void testSort() {
         CounterSnapshot c1 = CounterSnapshot.builder()
                 .name("counter1")
                 .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1.0).build())
@@ -28,14 +30,14 @@ public class MetricSnapshotsTest {
                 .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1.0).build())
                 .build();
         MetricSnapshots snapshots = new MetricSnapshots(c2, c3, c1);
-        Assert.assertEquals(3, snapshots.size());
-        Assert.assertEquals("counter1", snapshots.get(0).getMetadata().getName());
-        Assert.assertEquals("counter2", snapshots.get(1).getMetadata().getName());
-        Assert.assertEquals("counter3", snapshots.get(2).getMetadata().getName());
+        Assertions.assertEquals(3, snapshots.size());
+        Assertions.assertEquals("counter1", snapshots.get(0).getMetadata().getName());
+        Assertions.assertEquals("counter2", snapshots.get(1).getMetadata().getName());
+        Assertions.assertEquals("counter3", snapshots.get(2).getMetadata().getName());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testDuplicateName() {
+    @Test
+    void testDuplicateName() {
         // Q: What if you have a counter named "foo" and a gauge named "foo"?
         // A: Great question. You might think this is a valid scenario, because the counter will produce
         //    the values "foo_total" and "foo_created" while the gauge will produce the value "foo".
@@ -49,23 +51,23 @@ public class MetricSnapshotsTest {
                 .name("my_metric")
                 .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(1.0).build())
                 .build();
-        new MetricSnapshots(c, g);
+        assertThrows(IllegalArgumentException.class, () -> new MetricSnapshots(c, g));
     }
 
     @Test
-    public void testBuilder() {
+    void testBuilder() {
         CounterSnapshot counter = CounterSnapshot.builder()
                 .name("my_metric")
                 .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1.0).build())
                 .build();
         MetricSnapshots.Builder builder = MetricSnapshots.builder();
-        Assert.assertFalse(builder.containsMetricName("my_metric"));
+        Assertions.assertFalse(builder.containsMetricName("my_metric"));
         builder.metricSnapshot(counter);
-        Assert.assertTrue(builder.containsMetricName("my_metric"));
+        Assertions.assertTrue(builder.containsMetricName("my_metric"));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testImmutable() {
+    @Test
+    void testImmutable() {
         CounterSnapshot c1 = CounterSnapshot.builder()
                 .name("counter1")
                 .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1.0).build())
@@ -81,6 +83,6 @@ public class MetricSnapshotsTest {
         MetricSnapshots snapshots = new MetricSnapshots(c2, c3, c1);
         Iterator<MetricSnapshot> iterator = snapshots.iterator();
         iterator.next();
-        iterator.remove();
+        Assertions.assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
 }

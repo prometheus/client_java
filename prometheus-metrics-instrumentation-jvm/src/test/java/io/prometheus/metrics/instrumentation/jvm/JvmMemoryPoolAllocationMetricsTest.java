@@ -6,15 +6,15 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JvmMemoryPoolAllocationMetricsTest {
+class JvmMemoryPoolAllocationMetricsTest {
 
     @Test
-    public void testListenerLogic() {
+    void testListenerLogic() {
         PrometheusRegistry registry = new PrometheusRegistry();
         Counter counter = Counter.builder().name("test").labelNames("pool").register(registry);
         AllocationCountingNotificationListener listener = new AllocationCountingNotificationListener(counter);
@@ -58,7 +58,7 @@ public class JvmMemoryPoolAllocationMetricsTest {
                 }
             }
         }
-        Assert.fail("pool " + poolName + " not found.");
+        Assertions.fail("pool " + poolName + " not found.");
         return 0.0;
     }
 

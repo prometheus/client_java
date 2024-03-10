@@ -3,9 +3,9 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -19,13 +19,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
-public class JvmGarbageCollectorMetricsTest {
+class JvmGarbageCollectorMetricsTest {
 
     private GarbageCollectorMXBean mockGcBean1 = Mockito.mock(GarbageCollectorMXBean.class);
     private GarbageCollectorMXBean mockGcBean2 = Mockito.mock(GarbageCollectorMXBean.class);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         when(mockGcBean1.getName()).thenReturn("MyGC1");
         when(mockGcBean1.getCollectionCount()).thenReturn(100L);
         when(mockGcBean1.getCollectionTime()).thenReturn(TimeUnit.SECONDS.toMillis(10));
@@ -35,7 +35,7 @@ public class JvmGarbageCollectorMetricsTest {
     }
 
     @Test
-    public void testGoodCase() throws IOException {
+    void testGoodCase() throws IOException {
         PrometheusRegistry registry = new PrometheusRegistry();
         JvmGarbageCollectorMetrics.builder()
                 .garbageCollectorBeans(Arrays.asList(mockGcBean1, mockGcBean2))
@@ -52,11 +52,11 @@ public class JvmGarbageCollectorMetricsTest {
                 "jvm_gc_collection_seconds_sum{gc=\"MyGC2\"} 20.0\n" +
                 "# EOF\n";
 
-        Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+        Assertions.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
     }
 
     @Test
-    public void testIgnoredMetricNotScraped() {
+    void testIgnoredMetricNotScraped() {
         MetricNameFilter filter = MetricNameFilter.builder()
                 .nameMustNotBeEqualTo("jvm_gc_collection_seconds")
                 .build();
@@ -69,6 +69,6 @@ public class JvmGarbageCollectorMetricsTest {
 
         verify(mockGcBean1, times(0)).getCollectionTime();
         verify(mockGcBean1, times(0)).getCollectionCount();
-        Assert.assertEquals(0, snapshots.size());
+        Assertions.assertEquals(0, snapshots.size());
     }
 }

@@ -1,57 +1,59 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
-import org.junit.Test;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
 
-public class MetricMetadataTest {
+class MetricMetadataTest {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testEmptyName() {
-        new MetricMetadata("");
-    }
+    @Test
+    void testEmptyName() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new MetricMetadata(""));
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullName() {
-        new MetricMetadata(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testIllegalName() {
-        new MetricMetadata("my_namespace/http_server_duration"); // let's see when we decide to allow slashes :)
     }
 
     @Test
-    public void testSanitizationIllegalCharacters() {
+    void testNullName() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new MetricMetadata(null));
+    }
+
+    @Test
+    void testIllegalName() {
+        // let's see when we decide to allow slashes :)
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new MetricMetadata("my_namespace/http_server_duration"));
+    }
+
+    @Test
+    void testSanitizationIllegalCharacters() {
         MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_namespace/http.server.duration"), "help string", Unit.SECONDS);
-        Assert.assertEquals("my_namespace_http.server.duration", metadata.getName());
-        Assert.assertEquals("my_namespace_http_server_duration", metadata.getPrometheusName());
-        Assert.assertEquals("help string", metadata.getHelp());
-        Assert.assertEquals("seconds", metadata.getUnit().toString());
+        Assertions.assertEquals("my_namespace_http.server.duration", metadata.getName());
+        Assertions.assertEquals("my_namespace_http_server_duration", metadata.getPrometheusName());
+        Assertions.assertEquals("help string", metadata.getHelp());
+        Assertions.assertEquals("seconds", metadata.getUnit().toString());
     }
 
     @Test
-    public void testSanitizationCounter() {
+    void testSanitizationCounter() {
         MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_events_total"));
-        Assert.assertEquals("my_events", metadata.getName());
+        Assertions.assertEquals("my_events", metadata.getName());
     }
 
     @Test
-    public void testSanitizationInfo() {
+    void testSanitizationInfo() {
         MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("target_info"));
-        Assert.assertEquals("target", metadata.getName());
+        Assertions.assertEquals("target", metadata.getName());
     }
 
     @Test
-    public void testSanitizationWeirdCornerCase() {
+    void testSanitizationWeirdCornerCase() {
         MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("_total_created"));
-        Assert.assertEquals("total", metadata.getName());
+        Assertions.assertEquals("total", metadata.getName());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testSanitizeEmptyString() {
-        sanitizeMetricName("");
+    @Test
+    void testSanitizeEmptyString() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> sanitizeMetricName(""));
     }
 }

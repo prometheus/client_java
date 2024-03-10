@@ -10,9 +10,9 @@ import io.prometheus.client.Summary;
 import io.prometheus.client.exporter.common.TextFormat;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,13 +23,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class SimpleclientCollectorTest {
+class SimpleclientCollectorTest {
 
     private CollectorRegistry origRegistry;
     private PrometheusRegistry newRegistry;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         origRegistry = new CollectorRegistry();
         newRegistry = new PrometheusRegistry();
         SimpleclientCollector.builder()
@@ -38,7 +38,7 @@ public class SimpleclientCollectorTest {
     }
 
     @Test
-    public void testCounterComplete() throws IOException, InterruptedException {
+    void testCounterComplete() throws IOException, InterruptedException {
         Counter counter = Counter.build()
                 .name("service_time_seconds_total")
                 .help("total time spent serving")
@@ -48,21 +48,21 @@ public class SimpleclientCollectorTest {
         Thread.sleep(3); // make timestamps a bit different
         counter.labels("/hello", "500").incWithExemplar(2.4, "trace_id", "23446", "span_id", "bcdef");
 
-        Assert.assertEquals(fixTimestamps(sort(origOpenMetrics())), sort(newOpenMetrics()));
+        Assertions.assertEquals(fixTimestamps(sort(origOpenMetrics())), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testCounterMinimal() throws IOException, InterruptedException {
+    void testCounterMinimal() throws IOException, InterruptedException {
         Counter.build()
                 .name("events")
                 .help("total number of events")
                 .register(origRegistry);
 
-        Assert.assertEquals(fixTimestamps(sort(origOpenMetrics())), sort(newOpenMetrics()));
+        Assertions.assertEquals(fixTimestamps(sort(origOpenMetrics())), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testGaugeComplete() throws IOException, InterruptedException {
+    void testGaugeComplete() throws IOException, InterruptedException {
         Gauge gauge = Gauge.build()
                 .name("disk_usage_ratio")
                 .help("percentage used")
@@ -73,11 +73,11 @@ public class SimpleclientCollectorTest {
         Thread.sleep(3);
         gauge.labels("/dev/sda2").set(0.7);
 
-        Assert.assertEquals(sort(origOpenMetrics()), sort(newOpenMetrics()));
+        Assertions.assertEquals(sort(origOpenMetrics()), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testGaugeMinimal() throws IOException, InterruptedException {
+    void testGaugeMinimal() throws IOException, InterruptedException {
         Gauge gauge = Gauge.build()
                 .name("temperature_centigrade")
                 .help("temperature")
@@ -85,11 +85,11 @@ public class SimpleclientCollectorTest {
                 .register(origRegistry);
         gauge.set(22.3);
 
-        Assert.assertEquals(sort(origOpenMetrics()), sort(newOpenMetrics()));
+        Assertions.assertEquals(sort(origOpenMetrics()), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testHistogramComplete() throws IOException, InterruptedException {
+    void testHistogramComplete() throws IOException, InterruptedException {
         Histogram histogram = Histogram.build()
                 .name("response_size_bytes")
                 .help("response size in Bytes")
@@ -104,21 +104,21 @@ public class SimpleclientCollectorTest {
         Thread.sleep(3); // make timestamps a bit different
         histogram.labels("500").observeWithExemplar(10000, "trace_id", "11", "span_id", "12");
 
-        Assert.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
+        Assertions.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testHistogramMinimal() throws IOException, InterruptedException {
+    void testHistogramMinimal() throws IOException, InterruptedException {
         Histogram.build()
                 .name("request_latency")
                 .help("request latency")
                 .register(origRegistry);
 
-        Assert.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
+        Assertions.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testSummaryComplete() throws IOException, InterruptedException {
+    void testSummaryComplete() throws IOException, InterruptedException {
         Summary summary = Summary.build()
                 .name("http_request_duration_seconds")
                 .help("request duration")
@@ -137,21 +137,21 @@ public class SimpleclientCollectorTest {
         summary.labels("/", "500").observe(0.31);
         summary.labels("/", "500").observe(0.32);
 
-        Assert.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
+        Assertions.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testSummaryMinimal() throws IOException, InterruptedException {
+    void testSummaryMinimal() throws IOException, InterruptedException {
         Summary summary = Summary.build()
                 .name("request_size")
                 .help("request size")
                 .register(origRegistry);
 
-        Assert.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
+        Assertions.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testInfoComplete() throws IOException, InterruptedException {
+    void testInfoComplete() throws IOException, InterruptedException {
         Info info = Info.build()
                 .name("version")
                 .help("version information")
@@ -161,22 +161,22 @@ public class SimpleclientCollectorTest {
         Thread.sleep(3);
         info.labels("dev").info("major_version", "13", "minor_version", "1");
 
-        Assert.assertEquals(fixBoolean(sort(origOpenMetrics())), sort(newOpenMetrics()));
+        Assertions.assertEquals(fixBoolean(sort(origOpenMetrics())), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testInfoMinimal() throws IOException, InterruptedException {
+    void testInfoMinimal() throws IOException, InterruptedException {
         Info info = Info.build()
                 .name("jvm")
                 .help("JVM info")
                 .register(origRegistry);
         info.info("version", "17");
 
-        Assert.assertEquals(fixBoolean(sort(origOpenMetrics())), sort(newOpenMetrics()));
+        Assertions.assertEquals(fixBoolean(sort(origOpenMetrics())), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testStateSetComplete() throws IOException {
+    void testStateSetComplete() throws IOException {
         Collector stateSet = new Collector() {
             @Override
             public List<MetricFamilySamples> collect() {
@@ -188,11 +188,11 @@ public class SimpleclientCollectorTest {
         };
         origRegistry.register(stateSet);
 
-        Assert.assertEquals(fixBoolean(sort(origOpenMetrics())), sort(newOpenMetrics()));
+        Assertions.assertEquals(fixBoolean(sort(origOpenMetrics())), sort(newOpenMetrics()));
     }
 
     @Test
-    public void testUnknownComplete() throws IOException {
+    void testUnknownComplete() throws IOException {
         Collector unknown = new Collector() {
             @Override
             public List<MetricFamilySamples> collect() {
@@ -204,7 +204,7 @@ public class SimpleclientCollectorTest {
         };
         origRegistry.register(unknown);
 
-        Assert.assertEquals(sort(origOpenMetrics()), sort(newOpenMetrics()));
+        Assertions.assertEquals(sort(origOpenMetrics()), sort(newOpenMetrics()));
     }
 
     private String fixBoolean(String s) {

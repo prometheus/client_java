@@ -51,9 +51,8 @@
 
         <!-- test dependencies -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -69,9 +68,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.opentelemetry</groupId>
+            <groupId>io.opentelemetry.proto</groupId>
             <artifactId>opentelemetry-proto</artifactId>
-            <version>1.7.1-alpha</version>
+            <version>1.0.0-alpha</version>
             <scope>test</scope>
         </dependency>
         <dependency>

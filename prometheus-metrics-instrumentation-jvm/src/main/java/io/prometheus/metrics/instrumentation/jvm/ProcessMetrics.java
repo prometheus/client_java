@@ -73,12 +73,12 @@ public class ProcessMetrics {
     private final Grepper grepper;
     private final boolean linux;
 
-    private ProcessMetrics(OperatingSystemMXBean osBean, RuntimeMXBean runtimeBean, Grepper grepper, PrometheusProperties config) {
+    private ProcessMetrics(OperatingSystemMXBean osBean, RuntimeMXBean runtimeBean, Grepper grepper, PrometheusProperties config, boolean linux) {
         this.osBean = osBean;
         this.runtimeBean = runtimeBean;
         this.grepper = grepper;
         this.config = config;
-        this.linux = PROC_SELF_STATUS.canRead();
+        this.linux = linux;
     }
 
     private void register(PrometheusRegistry registry) {
@@ -242,6 +242,7 @@ public class ProcessMetrics {
         private OperatingSystemMXBean osBean;
         private RuntimeMXBean runtimeBean;
         private Grepper grepper;
+        private Boolean linux;
 
         private Builder(PrometheusProperties config) {
             this.config = config;
@@ -271,6 +272,14 @@ public class ProcessMetrics {
             return this;
         }
 
+        /**
+         * Package private. For testing only.
+         */
+        Builder linux(boolean linux) {
+            this.linux = linux;
+            return this;
+        }
+
         public void register() {
             register(PrometheusRegistry.defaultRegistry);
         }
@@ -279,7 +288,8 @@ public class ProcessMetrics {
             OperatingSystemMXBean osBean = this.osBean != null ? this.osBean : ManagementFactory.getOperatingSystemMXBean();
             RuntimeMXBean runtimeMXBean = this.runtimeBean != null ? this.runtimeBean : ManagementFactory.getRuntimeMXBean();
             Grepper grepper = this.grepper != null ? this.grepper : new FileGrepper();
-            new ProcessMetrics(osBean, runtimeMXBean, grepper, config).register(registry);
+            boolean linux = this.linux != null ? this.linux : PROC_SELF_STATUS.canRead();
+            new ProcessMetrics(osBean, runtimeMXBean, grepper, config, linux).register(registry);
         }
     }
 }

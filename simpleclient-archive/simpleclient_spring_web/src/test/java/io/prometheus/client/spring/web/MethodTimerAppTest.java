@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration
 @EnablePrometheusTiming
