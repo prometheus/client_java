@@ -37,11 +37,23 @@ public class ExemplarSampler {
     // to be overwritten by automatic exemplar sampling. exemplars.lengt == customExemplars.length
     private final AtomicBoolean acceptingNewExemplars = new AtomicBoolean(true);
     private final AtomicBoolean acceptingNewCustomExemplars = new AtomicBoolean(true);
+    private final SpanContext spanContext; // may be null, in that case SpanContextSupplier.getSpanContext() is used.
 
     public ExemplarSampler(ExemplarSamplerConfig config) {
+        this(config, null);
+    }
+
+    /**
+     * Constructor with an additional {code spanContext} argument.
+     * This is useful for testing, but may also be useful in some production scenarios.
+     * If {@code spanContext != null} that spanContext is used and {@link SpanContextSupplier} is not used.
+     * If {@code spanContext == null} the {@link SpanContextSupplier#getSpanContext()} is called to find a span context.
+     */
+    public ExemplarSampler(ExemplarSamplerConfig config, SpanContext spanContext) {
         this.config = config;
         this.exemplars = new Exemplar[config.getNumberOfExemplars()];
         this.customExemplars = new Exemplar[exemplars.length];
+        this.spanContext = spanContext;
     }
 
     public Exemplars collect() {
@@ -307,8 +319,8 @@ public class ExemplarSampler {
     }
 
     private Labels doSampleExemplar() {
+        SpanContext spanContext = this.spanContext != null ? this.spanContext : SpanContextSupplier.getSpanContext();
         try {
-            SpanContext spanContext = SpanContextSupplier.getSpanContext();
             if (spanContext != null) {
                 if (spanContext.isCurrentSpanSampled()) {
                     String spanId = spanContext.getCurrentSpanId();

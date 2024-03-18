@@ -76,8 +76,7 @@ public class ExemplarSamplerTest {
     public void testIsSampled() throws Exception {
         SpanContext context = new SpanContext();
         context.isSampled = false;
-        SpanContextSupplier.setSpanContext(context);
-        ExemplarSampler sampler = new ExemplarSampler(makeConfig());
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig(), context);
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.3); // no sampled, because isSampled() returns false
         assertExemplars(sampler); // empty
@@ -85,9 +84,7 @@ public class ExemplarSamplerTest {
 
     @Test
     public void testDefaultConfigHasFourExemplars() throws Exception {
-        SpanContext context = new SpanContext();
-        SpanContextSupplier.setSpanContext(context);
-        ExemplarSampler sampler = new ExemplarSampler(makeConfig());
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig(), new SpanContext());
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.3);
         Thread.sleep(sampleInterval + tick); // t = 12 tick
@@ -104,9 +101,7 @@ public class ExemplarSamplerTest {
 
     @Test
     public void testEmptyBuckets() throws Exception {
-        SpanContext context = new SpanContext();
-        SpanContextSupplier.setSpanContext(context);
-        ExemplarSampler sampler = new ExemplarSampler(makeConfig(Double.POSITIVE_INFINITY));
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig(Double.POSITIVE_INFINITY), new SpanContext());
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.8); // observed in the +Inf bucket
         Thread.sleep(sampleInterval + tick); // t = 12 tick
@@ -117,9 +112,7 @@ public class ExemplarSamplerTest {
 
     @Test
     public void testDefaultExemplarsBuckets() throws Exception {
-        SpanContext context = new SpanContext();
-        SpanContextSupplier.setSpanContext(context);
-        ExemplarSampler sampler = new ExemplarSampler(makeConfig(0.2, 0.4, 0.6, 0.8, 1.0, Double.POSITIVE_INFINITY));
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig(0.2, 0.4, 0.6, 0.8, 1.0, Double.POSITIVE_INFINITY), new SpanContext());
         Scheduler.awaitInitialization();
         Thread.sleep(tick); // t = 1 tick
         sampler.observe(0.3);
@@ -150,9 +143,7 @@ public class ExemplarSamplerTest {
 
     @Test
     public void testDefaultExemplarsNoBuckets() throws Exception {
-        SpanContext context = new SpanContext();
-        SpanContextSupplier.setSpanContext(context);
-        ExemplarSampler sampler = new ExemplarSampler(makeConfig());
+        ExemplarSampler sampler = new ExemplarSampler(makeConfig(), new SpanContext());
         Scheduler.awaitInitialization();
         Thread.sleep(tick);           // t = 1 tick
         sampler.observe(1);    // observed
