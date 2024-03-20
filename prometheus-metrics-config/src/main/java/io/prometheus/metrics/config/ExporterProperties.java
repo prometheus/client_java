@@ -27,7 +27,7 @@ public class ExporterProperties {
 
     /**
      * Allow Exemplars on all metric types in OpenMetrics format?
-     * Default is {@code false}, which means Exemplars will only be added for Counters and Histograms.
+     * Default is {@code false}, which means Exemplars will only be added for Counters and Histogram buckets.
      */
     public boolean getExemplarsOnAllMetricTypes() {
         return exemplarsOnAllMetricTypes != null && exemplarsOnAllMetricTypes;

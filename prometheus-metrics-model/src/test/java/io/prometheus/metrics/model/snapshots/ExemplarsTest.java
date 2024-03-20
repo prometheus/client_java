@@ -37,4 +37,16 @@ public class ExemplarsTest {
         iterator.next();
         iterator.remove();
     }
+
+    @Test
+    public void testGet() {
+        Exemplar oldest = Exemplar.builder().timestampMillis(System.currentTimeMillis() - 100).value(1.8).build();
+        Exemplar middle =  Exemplar.builder().timestampMillis(System.currentTimeMillis() - 50).value(1.2).build();
+        Exemplar newest = Exemplar.builder().timestampMillis(System.currentTimeMillis()).value(1.0).build();
+        Exemplars exemplars = Exemplars.of(oldest, newest, middle);
+        Exemplar result = exemplars.get(1.1, 1.9); // newest is not within these bounds
+        Assert.assertSame(result, middle);
+        result = exemplars.get(0.9, Double.POSITIVE_INFINITY);
+        Assert.assertSame(result, newest);
+    }
 }

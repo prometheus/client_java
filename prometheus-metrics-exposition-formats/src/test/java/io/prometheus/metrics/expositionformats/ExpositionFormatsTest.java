@@ -237,6 +237,13 @@ public class ExpositionFormatsTest {
                 "# TYPE disk_usage_ratio gauge\n" +
                 "# UNIT disk_usage_ratio ratio\n" +
                 "# HELP disk_usage_ratio percentage used\n" +
+                "disk_usage_ratio{device=\"/dev/sda1\"} 0.2 " + scrapeTimestamp1s + "\n" +
+                "disk_usage_ratio{device=\"/dev/sda2\"} 0.7 " + scrapeTimestamp2s + "\n" +
+                "# EOF\n";
+        String openMetricsTextWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE disk_usage_ratio gauge\n" +
+                "# UNIT disk_usage_ratio ratio\n" +
+                "# HELP disk_usage_ratio percentage used\n" +
                 "disk_usage_ratio{device=\"/dev/sda1\"} 0.2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
                 "disk_usage_ratio{device=\"/dev/sda2\"} 0.7 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "# EOF\n";
@@ -282,6 +289,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, gauge);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsTextWithExemplarsOnAllTimeSeries, gauge);
         assertPrometheusText(prometheusText, gauge);
         assertOpenMetricsTextWithoutCreated(openMetricsText, gauge);
         assertPrometheusTextWithoutCreated(prometheusText, gauge);
@@ -318,6 +326,12 @@ public class ExpositionFormatsTest {
                 "# TYPE my_temperature_celsius gauge\n" +
                 "# UNIT my_temperature_celsius celsius\n" +
                 "# HELP my_temperature_celsius Temperature\n" +
+                "my_temperature_celsius{location_id=\"data-center-1\"} 23.0\n" +
+                "# EOF\n";
+        String openMetricsTextWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE my_temperature_celsius gauge\n" +
+                "# UNIT my_temperature_celsius celsius\n" +
+                "# HELP my_temperature_celsius Temperature\n" +
                 "my_temperature_celsius{location_id=\"data-center-1\"} 23.0 # " + exemplarWithDotsString + "\n" +
                 "# EOF\n";
         String prometheusText = "" +
@@ -350,6 +364,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, gauge);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsTextWithExemplarsOnAllTimeSeries, gauge);
         assertPrometheusText(prometheusText, gauge);
         assertPrometheusProtobuf(prometheusProtobuf, gauge);
     }
@@ -360,17 +375,34 @@ public class ExpositionFormatsTest {
                 "# TYPE http_request_duration_seconds summary\n" +
                 "# UNIT http_request_duration_seconds seconds\n" +
                 "# HELP http_request_duration_seconds request duration\n" +
+                "http_request_duration_seconds{status=\"200\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds{status=\"200\",quantile=\"0.9\"} 240.7 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds{status=\"200\",quantile=\"0.95\"} 245.1 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds_sum{status=\"200\"} 1.2 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds{status=\"500\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp2s + "\n" +
+                "http_request_duration_seconds{status=\"500\",quantile=\"0.9\"} 240.7 " + scrapeTimestamp2s + "\n" +
+                "http_request_duration_seconds{status=\"500\",quantile=\"0.95\"} 245.1 " + scrapeTimestamp2s + "\n" +
+                "http_request_duration_seconds_count{status=\"500\"} 7 " + scrapeTimestamp2s + "\n" +
+                "http_request_duration_seconds_sum{status=\"500\"} 2.2 " + scrapeTimestamp2s + "\n" +
+                "http_request_duration_seconds_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
+                "# EOF\n";
+        String openMetricsTextWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE http_request_duration_seconds summary\n" +
+                "# UNIT http_request_duration_seconds seconds\n" +
+                "# HELP http_request_duration_seconds request duration\n" +
                 "http_request_duration_seconds{status=\"200\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
                 "http_request_duration_seconds{status=\"200\",quantile=\"0.9\"} 240.7 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
                 "http_request_duration_seconds{status=\"200\",quantile=\"0.95\"} 245.1 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
                 "http_request_duration_seconds_count{status=\"200\"} 3 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "http_request_duration_seconds_sum{status=\"200\"} 1.2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
+                "http_request_duration_seconds_sum{status=\"200\"} 1.2 " + scrapeTimestamp1s + "\n" +
                 "http_request_duration_seconds_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
                 "http_request_duration_seconds{status=\"500\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "http_request_duration_seconds{status=\"500\",quantile=\"0.9\"} 240.7 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "http_request_duration_seconds{status=\"500\",quantile=\"0.95\"} 245.1 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "http_request_duration_seconds_count{status=\"500\"} 7 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
-                "http_request_duration_seconds_sum{status=\"500\"} 2.2 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
+                "http_request_duration_seconds_sum{status=\"500\"} 2.2 " + scrapeTimestamp2s + "\n" +
                 "http_request_duration_seconds_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
         String prometheusText = "" +
@@ -394,16 +426,16 @@ public class ExpositionFormatsTest {
                 "# TYPE http_request_duration_seconds summary\n" +
                 "# UNIT http_request_duration_seconds seconds\n" +
                 "# HELP http_request_duration_seconds request duration\n" +
-                "http_request_duration_seconds{status=\"200\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "http_request_duration_seconds{status=\"200\",quantile=\"0.9\"} 240.7 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "http_request_duration_seconds{status=\"200\",quantile=\"0.95\"} 245.1 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "http_request_duration_seconds_count{status=\"200\"} 3 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "http_request_duration_seconds_sum{status=\"200\"} 1.2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
-                "http_request_duration_seconds{status=\"500\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
-                "http_request_duration_seconds{status=\"500\",quantile=\"0.9\"} 240.7 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
-                "http_request_duration_seconds{status=\"500\",quantile=\"0.95\"} 245.1 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
-                "http_request_duration_seconds_count{status=\"500\"} 7 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
-                "http_request_duration_seconds_sum{status=\"500\"} 2.2 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
+                "http_request_duration_seconds{status=\"200\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds{status=\"200\",quantile=\"0.9\"} 240.7 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds{status=\"200\",quantile=\"0.95\"} 245.1 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds_count{status=\"200\"} 3 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds_sum{status=\"200\"} 1.2 " + scrapeTimestamp1s + "\n" +
+                "http_request_duration_seconds{status=\"500\",quantile=\"0.5\"} 225.3 " + scrapeTimestamp2s + "\n" +
+                "http_request_duration_seconds{status=\"500\",quantile=\"0.9\"} 240.7 " + scrapeTimestamp2s + "\n" +
+                "http_request_duration_seconds{status=\"500\",quantile=\"0.95\"} 245.1 " + scrapeTimestamp2s + "\n" +
+                "http_request_duration_seconds_count{status=\"500\"} 7 " + scrapeTimestamp2s + "\n" +
+                "http_request_duration_seconds_sum{status=\"500\"} 2.2 " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
         String prometheusTextWithoutCreated = "" +
                 "# HELP http_request_duration_seconds request duration\n" +
@@ -481,6 +513,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, summary);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsTextWithExemplarsOnAllTimeSeries, summary);
         assertPrometheusText(prometheusText, summary);
         assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, summary);
         assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, summary);
@@ -692,8 +725,15 @@ public class ExpositionFormatsTest {
                 "# TYPE my_request_duration_seconds summary\n" +
                 "# UNIT my_request_duration_seconds seconds\n" +
                 "# HELP my_request_duration_seconds Request duration in seconds\n" +
+                "my_request_duration_seconds_count{http_path=\"/hello\"} 1\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.03\n" +
+                "# EOF\n";
+        String openMetricsTextWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE my_request_duration_seconds summary\n" +
+                "# UNIT my_request_duration_seconds seconds\n" +
+                "# HELP my_request_duration_seconds Request duration in seconds\n" +
                 "my_request_duration_seconds_count{http_path=\"/hello\"} 1 # " + exemplarWithDotsString + "\n" +
-                "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.03 # " + exemplarWithDotsString + "\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.03\n" +
                 "# EOF\n";
         String prometheusText = "" +
                 "# HELP my_request_duration_seconds Request duration in seconds\n" +
@@ -725,6 +765,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, summary);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsTextWithExemplarsOnAllTimeSeries, summary);
         assertPrometheusText(prometheusText, summary);
         assertPrometheusProtobuf(prometheusProtobuf, summary);
     }
@@ -744,6 +785,22 @@ public class ExpositionFormatsTest {
                 "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
                 "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
+                "# EOF\n";
+        String openMetricsTextWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE response_size_bytes histogram\n" +
+                "# UNIT response_size_bytes bytes\n" +
+                "# HELP response_size_bytes help\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"2.2\"} 2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 3 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_count{status=\"200\"} 3 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_sum{status=\"200\"} 4.1 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"1.0\"} 3 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"2.2\"} 5 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 5 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_count{status=\"500\"} 5 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
@@ -860,6 +917,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, histogram);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsTextWithExemplarsOnAllTimeSeries, histogram);
         assertPrometheusText(prometheusText, histogram);
         assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, histogram);
         assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, histogram);
@@ -965,6 +1023,21 @@ public class ExpositionFormatsTest {
                 "cache_size_bytes_bucket{db=\"options\",le=\"2.0\"} 4 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
                 "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 4 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "cache_size_bytes_gcount{db=\"options\"} 4 " + scrapeTimestamp2s + "\n" +
+                "cache_size_bytes_gsum{db=\"options\"} 18.0 " + scrapeTimestamp2s + "\n" +
+                "cache_size_bytes_created{db=\"options\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
+                "# EOF\n";
+        String openMetricsTextWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE cache_size_bytes gaugehistogram\n" +
+                "# UNIT cache_size_bytes bytes\n" +
+                "# HELP cache_size_bytes number of bytes in the cache\n" +
+                "cache_size_bytes_bucket{db=\"items\",le=\"2.0\"} 3 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
+                "cache_size_bytes_bucket{db=\"items\",le=\"+Inf\"} 4 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "cache_size_bytes_gcount{db=\"items\"} 4 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "cache_size_bytes_gsum{db=\"items\"} 17.0 " + scrapeTimestamp1s + "\n" +
+                "cache_size_bytes_created{db=\"items\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
+                "cache_size_bytes_bucket{db=\"options\",le=\"2.0\"} 4 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
+                "cache_size_bytes_bucket{db=\"options\",le=\"+Inf\"} 4 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
+                "cache_size_bytes_gcount{db=\"options\"} 4 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "cache_size_bytes_gsum{db=\"options\"} 18.0 " + scrapeTimestamp2s + "\n" +
                 "cache_size_bytes_created{db=\"options\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
@@ -1084,6 +1157,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, gaugeHistogram);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsTextWithExemplarsOnAllTimeSeries, gaugeHistogram);
         assertPrometheusText(prometheusText, gaugeHistogram);
         assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, gaugeHistogram);
         assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, gaugeHistogram);
@@ -1190,6 +1264,14 @@ public class ExpositionFormatsTest {
                 "my_request_duration_seconds_count{http_path=\"/hello\"} 130\n" +
                 "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.01\n" +
                 "# EOF\n";
+        String openMetricsTextWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE my_request_duration_seconds histogram\n" +
+                "# UNIT my_request_duration_seconds seconds\n" +
+                "# HELP my_request_duration_seconds Request duration in seconds\n" +
+                "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 130 # " + exemplarWithDotsString + "\n" +
+                "my_request_duration_seconds_count{http_path=\"/hello\"} 130 # " + exemplarWithDotsString + "\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.01\n" +
+                "# EOF\n";
         String prometheusText = "" +
                 "# HELP my_request_duration_seconds Request duration in seconds\n" +
                 "# TYPE my_request_duration_seconds histogram\n" +
@@ -1227,6 +1309,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, histogram);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsTextWithExemplarsOnAllTimeSeries, histogram);
         assertPrometheusText(prometheusText, histogram);
         assertPrometheusProtobuf(prometheusProtobuf, histogram);
     }
@@ -1237,12 +1320,25 @@ public class ExpositionFormatsTest {
                 "# TYPE response_size_bytes histogram\n" +
                 "# UNIT response_size_bytes bytes\n" +
                 "# HELP response_size_bytes help\n" +
-                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 2 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_count{status=\"200\"} 2 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.2 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 55 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 55 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_count{status=\"500\"} 55 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
+                "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
+                "# EOF\n";
+        String openMetricsTextWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE response_size_bytes histogram\n" +
+                "# UNIT response_size_bytes bytes\n" +
+                "# HELP response_size_bytes help\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 2 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_count{status=\"200\"} 2 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_sum{status=\"200\"} 4.2 " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_created{status=\"200\"} " + createdTimestamp1s + " " + scrapeTimestamp1s + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 55 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
+                "response_size_bytes_count{status=\"500\"} 55 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_created{status=\"500\"} " + createdTimestamp2s + " " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
@@ -1263,10 +1359,10 @@ public class ExpositionFormatsTest {
                 "# TYPE response_size_bytes histogram\n" +
                 "# UNIT response_size_bytes bytes\n" +
                 "# HELP response_size_bytes help\n" +
-                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_bucket{status=\"200\",le=\"+Inf\"} 2 " + scrapeTimestamp1s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_count{status=\"200\"} 2 " + scrapeTimestamp1s + "\n" +
                 "response_size_bytes_sum{status=\"200\"} 4.2 " + scrapeTimestamp1s + "\n" +
-                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 55 " + scrapeTimestamp2s + " # " + exemplar1String + "\n" +
+                "response_size_bytes_bucket{status=\"500\",le=\"+Inf\"} 55 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "response_size_bytes_count{status=\"500\"} 55 " + scrapeTimestamp2s + "\n" +
                 "response_size_bytes_sum{status=\"500\"} 3.2 " + scrapeTimestamp2s + "\n" +
                 "# EOF\n";
@@ -1388,6 +1484,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, nativeHistogram);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsTextWithExemplarsOnAllTimeSeries, nativeHistogram);
         assertPrometheusText(prometheusText, nativeHistogram);
         assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, nativeHistogram);
         assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, nativeHistogram);
@@ -1438,6 +1535,14 @@ public class ExpositionFormatsTest {
                 "my_request_duration_seconds_count{http_path=\"/hello\"} 4\n" +
                 "my_request_duration_seconds_sum{http_path=\"/hello\"} 3.2\n" +
                 "# EOF\n";
+        String openMetricsTextWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE my_request_duration_seconds histogram\n" +
+                "# UNIT my_request_duration_seconds seconds\n" +
+                "# HELP my_request_duration_seconds Request duration in seconds\n" +
+                "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 4 # " + exemplarWithDotsString + "\n" +
+                "my_request_duration_seconds_count{http_path=\"/hello\"} 4 # " + exemplarWithDotsString + "\n" +
+                "my_request_duration_seconds_sum{http_path=\"/hello\"} 3.2\n" +
+                "# EOF\n";
         String prometheusText = "" +
                 "# HELP my_request_duration_seconds Request duration in seconds\n" +
                 "# TYPE my_request_duration_seconds histogram\n" +
@@ -1483,6 +1588,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetricsText, histogram);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsTextWithExemplarsOnAllTimeSeries, histogram);
         assertPrometheusText(prometheusText, histogram);
         assertPrometheusProtobuf(prometheusProtobuf, histogram);
     }
@@ -1656,6 +1762,13 @@ public class ExpositionFormatsTest {
                 "# TYPE my_special_thing_bytes unknown\n" +
                 "# UNIT my_special_thing_bytes bytes\n" +
                 "# HELP my_special_thing_bytes help message\n" +
+                "my_special_thing_bytes{env=\"dev\"} 0.2 " + scrapeTimestamp1s + "\n" +
+                "my_special_thing_bytes{env=\"prod\"} 0.7 " + scrapeTimestamp2s + "\n" +
+                "# EOF\n";
+        String openMetricsWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE my_special_thing_bytes unknown\n" +
+                "# UNIT my_special_thing_bytes bytes\n" +
+                "# HELP my_special_thing_bytes help message\n" +
                 "my_special_thing_bytes{env=\"dev\"} 0.2 " + scrapeTimestamp1s + " # " + exemplar1String + "\n" +
                 "my_special_thing_bytes{env=\"prod\"} 0.7 " + scrapeTimestamp2s + " # " + exemplar2String + "\n" +
                 "# EOF\n";
@@ -1682,6 +1795,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetrics, unknown);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsWithExemplarsOnAllTimeSeries, unknown);
         assertPrometheusText(prometheus, unknown);
         assertOpenMetricsTextWithoutCreated(openMetrics, unknown);
         assertPrometheusTextWithoutCreated(prometheus, unknown);
@@ -1714,6 +1828,12 @@ public class ExpositionFormatsTest {
                 "# TYPE some_unknown_metric unknown\n" +
                 "# UNIT some_unknown_metric bytes\n" +
                 "# HELP some_unknown_metric help message\n" +
+                "some_unknown_metric{test_env=\"7\"} 0.7\n" +
+                "# EOF\n";
+        String openMetricsWithExemplarsOnAllTimeSeries = "" +
+                "# TYPE some_unknown_metric unknown\n" +
+                "# UNIT some_unknown_metric bytes\n" +
+                "# HELP some_unknown_metric help message\n" +
                 "some_unknown_metric{test_env=\"7\"} 0.7 # " + exemplarWithDotsString + "\n" +
                 "# EOF\n";
         String prometheus = "" +
@@ -1741,6 +1861,7 @@ public class ExpositionFormatsTest {
                         .build())
                 .build();
         assertOpenMetricsText(openMetrics, unknown);
+        assertOpenMetricsTextWithExemplarsOnAllTimeSeries(openMetricsWithExemplarsOnAllTimeSeries, unknown);
         assertPrometheusText(prometheus, unknown);
         assertPrometheusProtobuf(prometheusProtobuf, unknown);
     }
@@ -1790,6 +1911,13 @@ public class ExpositionFormatsTest {
 
     private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, false);
+        writer.write(out, MetricSnapshots.of(snapshot));
+        Assert.assertEquals(expected, out.toString());
+    }
+
+    private void assertOpenMetricsTextWithExemplarsOnAllTimeSeries(String expected, MetricSnapshot snapshot) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
         writer.write(out, MetricSnapshots.of(snapshot));
         Assert.assertEquals(expected, out.toString());
@@ -1797,7 +1925,7 @@ public class ExpositionFormatsTest {
 
     private void assertOpenMetricsTextWithoutCreated(String expected, MetricSnapshot snapshot) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
+        OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, false);
         writer.write(out, MetricSnapshots.of(snapshot));
         Assert.assertEquals(expected, out.toString());
     }
