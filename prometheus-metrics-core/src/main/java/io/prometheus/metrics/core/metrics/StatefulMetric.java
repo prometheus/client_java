@@ -109,8 +109,12 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
         data.remove(Arrays.asList(labelValues));
     }
 
-    // TODO: Write a clear() method that resets the metric (removes all data points),
-    // see https://prometheus.io/docs/instrumenting/writing_clientlibs/#labels
+    /**
+     * Reset the metric (remove all data points).
+     */
+    public void clear() {
+        data.clear();
+    }
 
     protected abstract T newDataPoint();
 

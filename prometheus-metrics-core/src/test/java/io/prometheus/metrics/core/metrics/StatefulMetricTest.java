@@ -33,4 +33,32 @@ public class StatefulMetricTest {
             Assert.assertNotNull(entry.getValue());
         }
     }
+
+    @Test
+    public void testClear() {
+        Counter counter = Counter.builder().name("test").labelNames("label1", "label2").build();
+        counter.labelValues("a", "b").inc(3.0);
+        counter.labelValues("c", "d").inc(3.0);
+        counter.labelValues("a", "b").inc();
+        Assert.assertEquals(2, counter.collect().getDataPoints().size());
+
+        counter.clear();
+        Assert.assertEquals(0, counter.collect().getDataPoints().size());
+
+        counter.labelValues("a", "b").inc();
+        Assert.assertEquals(1, counter.collect().getDataPoints().size());
+    }
+
+    @Test
+    public void testClearNoLabels() {
+        Counter counter = Counter.builder().name("test").build();
+        counter.inc();
+        Assert.assertEquals(1, counter.collect().getDataPoints().size());
+        Assert.assertEquals(1.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
+
+        counter.clear();
+        // No labels is always present, but as no value has been observed after clear() the value should be 0.0
+        Assert.assertEquals(1, counter.collect().getDataPoints().size());
+        Assert.assertEquals(0.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
+    }
 }
