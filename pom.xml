@@ -52,6 +52,7 @@
     </developers>
 
     <modules>
+        <module>prometheus-metrics-bom</module>
         <module>prometheus-metrics-core</module>
         <module>prometheus-metrics-config</module>
         <module>prometheus-metrics-model</module>
