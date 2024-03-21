@@ -107,7 +107,7 @@ public class ExemplarsProperties {
             return this;
         }
 
-        public ExemplarsProperties builder() {
+        public ExemplarsProperties build() {
             return new ExemplarsProperties(minRetentionPeriodSeconds, maxRetentionPeriodSeconds, sampleIntervalMilliseconds);
         }
     }

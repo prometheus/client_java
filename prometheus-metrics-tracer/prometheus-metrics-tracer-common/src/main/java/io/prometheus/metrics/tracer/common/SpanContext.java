@@ -2,8 +2,8 @@ package io.prometheus.metrics.tracer.common;
 
 public interface SpanContext {
 
-  public static final String EXEMPLAR_ATTRIBUTE_NAME = "exemplar";
-  public static final String EXEMPLAR_ATTRIBUTE_VALUE = "true";
+  String EXEMPLAR_ATTRIBUTE_NAME = "exemplar";
+  String EXEMPLAR_ATTRIBUTE_VALUE = "true";
 
   /**
    * @return the current trace id, or {@code null} if this call is not happening within a span context.
