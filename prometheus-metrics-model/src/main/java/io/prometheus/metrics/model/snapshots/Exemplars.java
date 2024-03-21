@@ -21,7 +21,14 @@ public class Exemplars implements Iterable<Exemplar> {
     private final List<Exemplar> exemplars;
 
     private Exemplars(Collection<Exemplar> exemplars) {
-        this.exemplars = Collections.unmodifiableList(new ArrayList<>(exemplars));
+        ArrayList<Exemplar> copy = new ArrayList<>(exemplars.size());
+        for (Exemplar exemplar : exemplars) {
+            if (exemplar == null) {
+                throw new NullPointerException("Illegal null value in Exemplars");
+            }
+            copy.add(exemplar);
+        }
+        this.exemplars = Collections.unmodifiableList(copy);
     }
 
     /**
@@ -61,16 +68,24 @@ public class Exemplars implements Iterable<Exemplar> {
 
     /**
      * This is used by classic histograms to find an exemplar with a value between lowerBound and upperBound.
+     * If there is more than one exemplar within the bounds the one with the newest time stamp is returned.
      */
     public Exemplar get(double lowerBound, double upperBound) {
+        Exemplar result = null;
         for (int i = 0; i < exemplars.size(); i++) {
             Exemplar exemplar = exemplars.get(i);
             double value = exemplar.getValue();
             if (value > lowerBound && value <= upperBound) {
-                return exemplar;
+                if (result == null) {
+                    result = exemplar;
+                } else if (result.hasTimestamp() && exemplar.hasTimestamp()) {
+                   if (exemplar.getTimestampMillis() > result.getTimestampMillis()) {
+                       result = exemplar;
+                   }
+                }
             }
         }
-        return null;
+        return result;
     }
 
     /**

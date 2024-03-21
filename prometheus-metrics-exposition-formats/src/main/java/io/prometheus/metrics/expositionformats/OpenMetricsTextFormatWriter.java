@@ -138,11 +138,9 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
                 }
                 writeScrapeTimestampAndExemplar(writer, data, exemplar);
             }
+            // In OpenMetrics format, histogram _count and _sum are either both present or both absent.
             if (data.hasCount() && data.hasSum()) {
-                // In OpenMetrics format, histogram _count and _sum are either both present or both absent.
-                // While Prometheus allows Exemplars for histogram's _count and _sum now, we don't
-                // use Exemplars here to be backwards compatible with previous behavior.
-                writeCountAndSum(writer, metadata, data, countSuffix, sumSuffix, Exemplars.EMPTY);
+                writeCountAndSum(writer, metadata, data, countSuffix, sumSuffix, exemplars);
             }
             writeCreated(writer, metadata, data);
         }
@@ -241,7 +239,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
             writeNameAndLabels(writer, metadata.getPrometheusName(), null, data.getLabels());
             writeDouble(writer, data.getValue());
             if (exemplarsOnAllMetricTypesEnabled) {
-            writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
+                writeScrapeTimestampAndExemplar(writer, data, data.getExemplar());
             } else {
                 writeScrapeTimestampAndExemplar(writer, data, null);
             }
@@ -249,13 +247,11 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
 
     private void writeCountAndSum(OutputStreamWriter writer, MetricMetadata metadata, DistributionDataPointSnapshot data, String countSuffix, String sumSuffix, Exemplars exemplars) throws IOException {
-        int exemplarIndex = 0;
         if (data.hasCount()) {
             writeNameAndLabels(writer, metadata.getPrometheusName(), countSuffix, data.getLabels());
             writeLong(writer, data.getCount());
-            if (exemplars.size() > 0) {
-                writeScrapeTimestampAndExemplar(writer, data, exemplars.get(exemplarIndex));
-                exemplarIndex = exemplarIndex + 1 % exemplars.size();
+            if (exemplarsOnAllMetricTypesEnabled) {
+                writeScrapeTimestampAndExemplar(writer, data, exemplars.getLatest());
             } else {
                 writeScrapeTimestampAndExemplar(writer, data, null);
             }
@@ -263,11 +259,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
         if (data.hasSum()) {
             writeNameAndLabels(writer, metadata.getPrometheusName(), sumSuffix, data.getLabels());
             writeDouble(writer, data.getSum());
-            if (exemplars.size() > 0) {
-                writeScrapeTimestampAndExemplar(writer, data, exemplars.get(exemplarIndex));
-            } else {
-                writeScrapeTimestampAndExemplar(writer, data, null);
-            }
+            writeScrapeTimestampAndExemplar(writer, data, null);
         }
     }
 
