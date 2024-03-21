@@ -58,10 +58,13 @@ public class DefaultHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        exchange.getResponseHeaders().set("Content-Type", contentType);
-        exchange.getResponseHeaders().set("Content-Length", Integer.toString(responseBytes.length));
-        exchange.sendResponseHeaders(200, responseBytes.length);
-        exchange.getResponseBody().write(responseBytes);
-        exchange.close();
+        try {
+            exchange.getResponseHeaders().set("Content-Type", contentType);
+            exchange.getResponseHeaders().set("Content-Length", Integer.toString(responseBytes.length));
+            exchange.sendResponseHeaders(200, responseBytes.length);
+            exchange.getResponseBody().write(responseBytes);
+        } finally {
+            exchange.close();
+        }
     }
 }
