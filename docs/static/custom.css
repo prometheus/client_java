@@ -37,3 +37,7 @@
     --footer-link-color-visited: #ffffff;
   }
 }
+
+.gdoc-markdown pre,.gdoc-markdown code {
+  overflow: auto;
+}
