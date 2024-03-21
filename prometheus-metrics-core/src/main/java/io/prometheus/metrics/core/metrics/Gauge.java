@@ -64,6 +64,14 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
      * {@inheritDoc}
      */
     @Override
+    public double get() {
+        return getNoLabels().get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void incWithExemplar(double amount, Labels labels) {
         getNoLabels().incWithExemplar(amount, labels);
     }
@@ -162,6 +170,14 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
          * {@inheritDoc}
          */
         @Override
+        public double get() {
+            return Double.longBitsToDouble(value.get());
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
         public void setWithExemplar(double value, Labels labels) {
             this.value.set(Double.doubleToRawLongBits(value));
             if (isExemplarsEnabled()) {
@@ -182,7 +198,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint> imple
                     }
                 }
             }
-            return new GaugeSnapshot.GaugeDataPointSnapshot(Double.longBitsToDouble(value.get()), labels, oldest);
+            return new GaugeSnapshot.GaugeDataPointSnapshot(get(), labels, oldest);
         }
     }
 

@@ -67,6 +67,11 @@ public interface GaugeDataPoint extends DataPoint, TimerApi {
     void set(double value);
 
     /**
+     * Get the current value.
+     */
+    double get();
+
+    /**
      * Set the gauge to {@code value}, and create a custom exemplar with the given labels.
      */
     void setWithExemplar(double value, Labels labels);
