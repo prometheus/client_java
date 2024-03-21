@@ -85,4 +85,14 @@ public interface CounterDataPoint extends DataPoint {
      * Throws an {@link IllegalArgumentException} if {@code amount} is negative.
      */
     void incWithExemplar(double amount, Labels labels);
+
+    /**
+     * Get the current value.
+     */
+    double get();
+
+    /**
+     * Get the current value as a {@code long}. Decimal places will be discarded.
+     */
+    long getLongValue();
 }

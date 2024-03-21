@@ -80,6 +80,20 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     /**
      * {@inheritDoc}
      */
+    public double get() {
+        return getNoLabels().get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long getLongValue() {
+        return getNoLabels().getLongValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CounterSnapshot collect() {
         return (CounterSnapshot) super.collect();
@@ -127,6 +141,20 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
 
         private DataPoint(ExemplarSampler exemplarSampler) {
             this.exemplarSampler = exemplarSampler;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public double get() {
+            return longValue.sum() + doubleValue.sum();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public long getLongValue() {
+            return longValue.sum() + (long) doubleValue.sum();
         }
 
         /**
@@ -199,7 +227,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
                     }
                 }
             }
-            return new CounterSnapshot.CounterDataPointSnapshot(longValue.sum() + doubleValue.sum(), labels, latestExemplar, createdTimeMillis);
+            return new CounterSnapshot.CounterDataPointSnapshot(get(), labels, latestExemplar, createdTimeMillis);
         }
     }
 
