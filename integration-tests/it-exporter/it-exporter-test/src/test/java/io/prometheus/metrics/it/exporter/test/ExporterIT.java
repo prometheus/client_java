@@ -2,7 +2,7 @@ package io.prometheus.metrics.it.exporter.test;
 
 import io.prometheus.client.it.common.LogConsumer;
 import io.prometheus.client.it.common.Volume;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;

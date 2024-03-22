@@ -7,9 +7,9 @@ import io.prometheus.metrics.model.snapshots.InfoSnapshot;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.common.InstrumentationScopeInfo;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.data.MetricData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.resources.Resource;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.common.InstrumentationScopeInfo;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.metrics.data.MetricData;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.resources.Resource;
 
 public class MetricDataFactory {
 
