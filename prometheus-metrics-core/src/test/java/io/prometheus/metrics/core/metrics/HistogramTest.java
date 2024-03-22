@@ -1,11 +1,11 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.shaded.com_google_protobuf_3_21_7.TextFormat;
+import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_21_7.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
