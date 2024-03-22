@@ -12,8 +12,8 @@ import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.data.Met
 import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.data.PointData;
 import io.prometheus.metrics.shaded.io_opentelemetry_1_31_0.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -43,13 +43,15 @@ abstract class PrometheusData<T extends PointData> implements Data<T> {
     }
 
     protected List<DoubleExemplarData> convertExemplar(Exemplar exemplar) {
+        if (exemplar == null) {
+            return Collections.emptyList();
+        }
         return convertExemplars(Exemplars.of(exemplar));
     }
 
     protected List<DoubleExemplarData> convertExemplars(Exemplars exemplars) {
         return StreamSupport.stream(exemplars.spliterator(), false)
                 .map(this::toDoubleExemplarData)
-                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
