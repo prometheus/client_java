@@ -17,7 +17,7 @@
     </description>
 
     <properties>
-        <otel.version>1.31.0</otel.version>
+        <otel.version>1.36.0</otel.version>
         <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry</automatic.module.name>
     </properties>
 
@@ -59,13 +59,13 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>
-            <version>3.3.1</version>
+            <version>3.4.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.2.0</version>
+            <version>4.2.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
