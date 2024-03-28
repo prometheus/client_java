@@ -25,7 +25,11 @@ public class PrometheusPropertiesLoader {
      * See {@link PrometheusProperties#get()}.
      */
     public static PrometheusProperties load() throws PrometheusPropertiesException {
-        Map<Object, Object> properties = loadProperties();
+        return load(new Properties());
+    }
+
+    public static PrometheusProperties load(Map<Object, Object> externalProperties) throws PrometheusPropertiesException {
+        Map<Object, Object> properties = loadProperties(externalProperties);
         Map<String, MetricsProperties> metricsConfigs = loadMetricsConfigs(properties);
         MetricsProperties defaultMetricsProperties = MetricsProperties.load("io.prometheus.metrics", properties);
         ExemplarsProperties exemplarConfig = ExemplarsProperties.load("io.prometheus.exemplars", properties);
@@ -72,11 +76,12 @@ public class PrometheusPropertiesLoader {
         }
     }
 
-    private static Map<Object, Object> loadProperties() {
+    private static Map<Object, Object> loadProperties(Map<Object, Object> externalProperties) {
         Map<Object, Object> properties = new HashMap<>();
         properties.putAll(loadPropertiesFromClasspath());
         properties.putAll(loadPropertiesFromFile()); // overriding the entries from the classpath file
         properties.putAll(System.getProperties()); // overriding the entries from the properties file
+        properties.putAll(externalProperties); // overriding all the entries above
         // TODO: Add environment variables like EXEMPLARS_ENABLED.
         return properties;
     }
