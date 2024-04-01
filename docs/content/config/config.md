@@ -89,8 +89,8 @@ Exporter Properties
 
 | Name            | Javadoc | Note |
 | --------------- | --------|------|
-| io.prometheus.exporter.includeCreatedTimestamps  | [ExporterProperties.getExemplarsOnAllMetricTypes()](/client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getExemplarsOnAllMetricTypes()) | (1) |
-| io.prometheus.exporter.exemplarsOnAllMetricTypes  | [ExporterProperties.getIncludeCreatedTimestamps()](/client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getIncludeCreatedTimestamps()) | (1) |
+| io.prometheus.exporter.includeCreatedTimestamps  | [ExporterProperties.getIncludeCreatedTimestamps()](/client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getIncludeCreatedTimestamps()) | (1) |
+| io.prometheus.exporter.exemplarsOnAllMetricTypes  | [ExporterProperties.getExemplarsOnAllMetricTypes()](/client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getExemplarsOnAllMetricTypes()) | (1) |
 
 (1) Boolean value, `true` or `false`. Default see Javadoc.
 
