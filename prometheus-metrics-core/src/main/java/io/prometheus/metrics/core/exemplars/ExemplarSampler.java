@@ -1,7 +1,6 @@
 package io.prometheus.metrics.core.exemplars;
 
 import io.prometheus.metrics.tracer.common.SpanContext;
-import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -46,8 +45,11 @@ public class ExemplarSampler {
     /**
      * Constructor with an additional {code spanContext} argument.
      * This is useful for testing, but may also be useful in some production scenarios.
-     * If {@code spanContext != null} that spanContext is used and {@link SpanContextSupplier} is not used.
-     * If {@code spanContext == null} the {@link SpanContextSupplier#getSpanContext()} is called to find a span context.
+     * If {@code spanContext != null} that spanContext is used and
+     * {@link io.prometheus.metrics.tracer.initializer.SpanContextSupplier SpanContextSupplier} is not used.
+     * If {@code spanContext == null}
+     * {@link io.prometheus.metrics.tracer.initializer.SpanContextSupplier#getSpanContext() SpanContextSupplier.getSpanContext()}
+     * is called to find a span context.
      */
     public ExemplarSampler(ExemplarSamplerConfig config, SpanContext spanContext) {
         this.config = config;
@@ -319,7 +321,10 @@ public class ExemplarSampler {
     }
 
     private Labels doSampleExemplar() {
-        SpanContext spanContext = this.spanContext != null ? this.spanContext : SpanContextSupplier.getSpanContext();
+        // Using the qualified name so that Micrometer can exclude the dependency on prometheus-metrics-tracer-initializer
+        // as they provide their own implementation of SpanContextSupplier.
+        // If we had an import statement for SpanContextSupplier the dependency would be needed in any case.
+        SpanContext spanContext = this.spanContext != null ? this.spanContext : io.prometheus.metrics.tracer.initializer.SpanContextSupplier.getSpanContext();
         try {
             if (spanContext != null) {
                 if (spanContext.isCurrentSpanSampled()) {
