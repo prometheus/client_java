@@ -52,7 +52,7 @@ public class SimpleclientCollectorTest {
     }
 
     @Test
-    public void testCounterMinimal() throws IOException, InterruptedException {
+    public void testCounterMinimal() throws IOException {
         Counter.build()
                 .name("events")
                 .help("total number of events")
@@ -222,9 +222,17 @@ public class SimpleclientCollectorTest {
         // Example of a "_created" timestamp in new format: 1694464002.939
         // The following regex translates the orig timestamp to the new timestamp
         return s
-                .replaceAll( "1\\.([0-9]{9})([0-9]{3})E9", "1$1.$2") // Example: 1.694464002939E9
-                .replaceAll( "1\\.([0-9]{9})([0-9]{2})E9", "1$1.$20") // Example: 1.69460725747E9
-                .replaceAll( "1\\.([0-9]{9})([0-9])E9", "1$1.$200"); // Example: 1.6946072574E9
+                .replaceAll("1\\.([0-9]{9})([0-9]{3})E9", "1$1.$2")   // Example: 1.694464002939E9
+                .replaceAll("1\\.([0-9]{9})([0-9]{2})E9", "1$1.$20")  // Example: 1.69460725747E9
+                .replaceAll("1\\.([0-9]{9})([0-9])E9", "1$1.$200") // Example: 1.6946072574E9
+                .replaceAll("1\\.([0-9]{9})E9", "1$1.000")  // Example: 1.712332231E9
+                .replaceAll("1\\.([0-9]{8})E9", "1$10.000") // Example: 1.71233242E9
+                .replaceAll("1\\.([0-9]{7})E9", "1$100.000") // Example: 1.7123324E9
+                .replaceAll("1\\.([0-9]{6})E9", "1$1000.000")
+                .replaceAll("1\\.([0-9]{5})E9", "1$10000.000")
+                .replaceAll("1\\.([0-9]{4})E9", "1$100000.000")
+                .replaceAll("1\\.([0-9]{3})E9", "1$1000000.000")
+                .replaceAll("1\\.([0-9]{2})E9", "1$10000000.000");
     }
 
     private String fixCounts(String s) {
