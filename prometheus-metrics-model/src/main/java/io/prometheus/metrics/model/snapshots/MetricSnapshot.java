@@ -43,7 +43,7 @@ public abstract class MetricSnapshot {
         // Verify that labels are unique (the same set of names/values must not be used multiple times for the same metric).
         for (int i = 0; i < dataPoints.size() - 1; i++) {
             if (dataPoints.get(i).getLabels().equals(dataPoints.get(i + 1).getLabels())) {
-                throw new IllegalArgumentException("Duplicate labels in metric data: " + dataPoints.get(i).getLabels());
+                throw new DuplicateLabelsException(metadata, dataPoints.get(i).getLabels());
             }
         }
         // Should we verify that all entries in data have the same label names?
