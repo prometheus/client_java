@@ -43,7 +43,7 @@ public class SlidingWindow<T> {
             this.ringBuffer[i] = constructor.get();
         }
         this.currentBucket = 0;
-        this.lastRotateTimestampMillis = System.currentTimeMillis();
+        this.lastRotateTimestampMillis = currentTimeMillis.getAsLong();
         this.durationBetweenRotatesMillis = TimeUnit.SECONDS.toMillis(maxAgeSeconds) / ageBuckets;
     }
 
