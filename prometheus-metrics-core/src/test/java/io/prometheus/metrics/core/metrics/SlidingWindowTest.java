@@ -10,9 +10,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class SlidingWindowTest {
 
-    static class Observer {
+    class Observer {
 
-        List<Double> values = new ArrayList<>();
+        final List<Double> values = new ArrayList<>();
 
         public void observe(double value) {
             values.add(value);
@@ -23,10 +23,11 @@ public class SlidingWindowTest {
             for (double expectedValue : expectedValues) {
                 expectedList.add(expectedValue);
             }
-            Assert.assertEquals(expectedList, values);
+            Assert.assertEquals("Start time: " + startTime + ", current time: " + currentTimeMillis.get() + ", elapsed time: " + (currentTimeMillis.get() - startTime), expectedList, values);
         }
     }
 
+    private long startTime;
     private final AtomicLong currentTimeMillis = new AtomicLong();
     private SlidingWindow<Observer> ringBuffer;
     private final long maxAgeSeconds = 30;
@@ -35,7 +36,8 @@ public class SlidingWindowTest {
 
     @Before
     public void setUp() {
-        currentTimeMillis.set(System.currentTimeMillis());
+        startTime = System.currentTimeMillis();
+        currentTimeMillis.set(startTime);
         ringBuffer = new SlidingWindow<>(Observer.class, Observer::new, Observer::observe, maxAgeSeconds, ageBuckets);
         ringBuffer.currentTimeMillis = currentTimeMillis::get;
     }
