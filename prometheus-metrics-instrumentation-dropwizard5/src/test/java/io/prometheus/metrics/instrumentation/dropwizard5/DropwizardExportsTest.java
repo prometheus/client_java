@@ -2,9 +2,11 @@ package io.prometheus.metrics.instrumentation.dropwizard5;
 
 import io.dropwizard.metrics5.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
-import io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -142,17 +144,58 @@ public class DropwizardExportsTest {
             i += 1;
         }
 
-        String expected = "# TYPE hist summary\n" +
-                "# HELP hist Generated from Dropwizard metric import (metric=hist, type=io.dropwizard.metrics5.Histogram)\n" +
-                "hist{quantile=\"0.5\"} 49.0\n" +
-                "hist{quantile=\"0.75\"} 74.0\n" +
-                "hist{quantile=\"0.95\"} 94.0\n" +
-                "hist{quantile=\"0.98\"} 97.0\n" +
-                "hist{quantile=\"0.99\"} 98.0\n" +
-                "hist{quantile=\"0.999\"} 99.0\n" +
-                "hist_count 100\n" +
-                "# EOF\n";
-        assertEquals(expected, convertToOpenMetricsFormat(pmRegistry));
+        // The result should look like this
+        //
+        // # TYPE hist summary
+        // # HELP hist Generated from Dropwizard metric import (metric=hist, type=io.dropwizard.metrics5.Histogram)
+        // hist{quantile="0.5"} 49.0
+        // hist{quantile="0.75"} 74.0
+        // hist{quantile="0.95"} 94.0
+        // hist{quantile="0.98"} 97.0
+        // hist{quantile="0.99"} 98.0
+        // hist{quantile="0.999"} 99.0
+        // hist_count 100
+        // # EOF
+        //
+        // However, Dropwizard uses a random reservoir sampling algorithm, so the values could as well be off-by-one
+        //
+        // # TYPE hist summary
+        // # HELP hist Generated from Dropwizard metric import (metric=hist, type=io.dropwizard.metrics5.Histogram)
+        // hist{quantile="0.5"} 50.0
+        // hist{quantile="0.75"} 75.0
+        // hist{quantile="0.95"} 95.0
+        // hist{quantile="0.98"} 98.0
+        // hist{quantile="0.99"} 99.0
+        // hist{quantile="0.999"} 99.0
+        // hist_count 100
+        // # EOF
+        //
+        // The following asserts the values, but allows an error of 1.0 for quantile values.
+
+        MetricSnapshots snapshots = pmRegistry.scrape(name -> name.equals("hist"));
+        Assert.assertEquals(1, snapshots.size());
+        SummarySnapshot snapshot = (SummarySnapshot) snapshots.get(0);
+        Assert.assertEquals("hist", snapshot.getMetadata().getName());
+        Assert.assertEquals("Generated from Dropwizard metric import (metric=hist, type=io.dropwizard.metrics5.Histogram)", snapshot.getMetadata().getHelp());
+        Assert.assertEquals(1, snapshot.getDataPoints().size());
+        SummarySnapshot.SummaryDataPointSnapshot dataPoint = snapshot.getDataPoints().get(0);
+        Assert.assertTrue(dataPoint.hasCount());
+        Assert.assertEquals(100, dataPoint.getCount());
+        Assert.assertFalse(dataPoint.hasSum());
+        Quantiles quantiles = dataPoint.getQuantiles();
+        Assert.assertEquals(6, quantiles.size());
+        Assert.assertEquals(0.5, quantiles.get(0).getQuantile(), 0.0);
+        Assert.assertEquals(49.0, quantiles.get(0).getValue(), 1.0);
+        Assert.assertEquals(0.75, quantiles.get(1).getQuantile(), 0.0);
+        Assert.assertEquals(74.0, quantiles.get(1).getValue(), 1.0);
+        Assert.assertEquals(0.95, quantiles.get(2).getQuantile(), 0.0);
+        Assert.assertEquals(94.0, quantiles.get(2).getValue(), 1.0);
+        Assert.assertEquals(0.98, quantiles.get(3).getQuantile(), 0.0);
+        Assert.assertEquals(97.0, quantiles.get(3).getValue(), 1.0);
+        Assert.assertEquals(0.99, quantiles.get(4).getQuantile(), 0.0);
+        Assert.assertEquals(98.0, quantiles.get(4).getValue(), 1.0);
+        Assert.assertEquals(0.999, quantiles.get(5).getQuantile(), 0.0);
+        Assert.assertEquals(99.0, quantiles.get(5).getValue(), 1.0);
     }
 
     @Test
