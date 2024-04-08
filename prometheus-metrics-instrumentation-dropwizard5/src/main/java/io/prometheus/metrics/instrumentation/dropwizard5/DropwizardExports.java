@@ -26,7 +26,7 @@ public class DropwizardExports implements MultiCollector {
      *
      * @param registry a metric registry to export in prometheus.
      */
-    DropwizardExports(MetricRegistry registry) {
+    public DropwizardExports(MetricRegistry registry) {
         super();
         this.registry = registry;
         this.metricFilter = MetricFilter.ALL;
@@ -62,8 +62,13 @@ public class DropwizardExports implements MultiCollector {
     }
 
 
-    private static MetricMetadata getMetricMetaData(String metricName, Metric metric) {
-        return new MetricMetadata(PrometheusNaming.sanitizeMetricName(metricName), getHelpMessage(metricName, metric));
+    private MetricMetadata getMetricMetaData(String metricName, Metric metric) {
+        if (labelMapper.isPresent()){
+            String convertedName = labelMapper.get().getName(metricName);
+            return new MetricMetadata(PrometheusNaming.sanitizeMetricName(convertedName), getHelpMessage(metricName, metric));
+        } else{
+            return new MetricMetadata(PrometheusNaming.sanitizeMetricName(metricName), getHelpMessage(metricName, metric));
+        }
     }
 
     /**
