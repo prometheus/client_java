@@ -61,14 +61,9 @@ public class DropwizardExports implements MultiCollector {
                 metricName, metric.getClass().getName());
     }
 
-
     private MetricMetadata getMetricMetaData(String metricName, Metric metric) {
-        if (labelMapper.isPresent()){
-            String convertedName = labelMapper.get().getName(metricName);
-            return new MetricMetadata(PrometheusNaming.sanitizeMetricName(convertedName), getHelpMessage(metricName, metric));
-        } else{
-            return new MetricMetadata(PrometheusNaming.sanitizeMetricName(metricName), getHelpMessage(metricName, metric));
-        }
+        String name = labelMapper.isPresent() ? labelMapper.get().getName(metricName) : metricName;
+        return new MetricMetadata(PrometheusNaming.sanitizeMetricName(name), getHelpMessage(metricName, metric));
     }
 
     /**

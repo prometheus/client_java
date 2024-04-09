@@ -2,8 +2,10 @@ package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
 import io.dropwizard.metrics5.MetricFilter;
 import io.dropwizard.metrics5.MetricRegistry;
+import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.Before;
 import org.junit.Test;
@@ -113,10 +115,17 @@ public class CustomLabelMapperTest {
                 "app.okhttpclient.client.HttpClient",
                 labels
         );
+
+        final MapperConfig mapperConfig2 = new MapperConfig(
+                "app.okhttpclient.client.HttpClient.*.*",
+                "app.okhttpclient.client.HttpClient2",
+                labels
+        );
+
         final List<MapperConfig> mapperConfigs = Arrays.asList(
                 new MapperConfig("client-nope.*.*.*"),
                 mapperConfig,
-                new MapperConfig("app.okhttpclient.client.HttpClient.*.total") // this matches as well
+                mapperConfig2 // this matches as well
         );
 
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
@@ -144,7 +153,7 @@ public class CustomLabelMapperTest {
         final List<MapperConfig> mapperConfigs = Arrays.asList(
                 new MapperConfig("client-nope.*.*.*"),
                 mapperConfig,
-                new MapperConfig("app.okhttpclient.client.HttpClient.*.total") // this matches as well
+                new MapperConfig("app.okhttpclient.client.HttpClient.*.*") // this matches as well
         );
 
 
@@ -175,8 +184,7 @@ public class CustomLabelMapperTest {
         );
         final List<MapperConfig> mapperConfigs = Arrays.asList(
                 new MapperConfig("client-nope.*.*.*"),
-                mapperConfig,
-                new MapperConfig("app.okhttpclient.client.HttpClient.*.total") // this matches as well
+                mapperConfig
         );
 
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
@@ -186,7 +194,7 @@ public class CustomLabelMapperTest {
         String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService counter\n" +
                 "# HELP app_okhttpclient_client_HttpClient_greatService Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Counter)\n" +
                 "app_okhttpclient_client_HttpClient_greatService_total{client=\"sampleClient\",service=\"greatService\",status=\"s_400\"} 1.0\n" +
-                "# EOF\n\n";
+                "# EOF\n";
         assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
     }
 
