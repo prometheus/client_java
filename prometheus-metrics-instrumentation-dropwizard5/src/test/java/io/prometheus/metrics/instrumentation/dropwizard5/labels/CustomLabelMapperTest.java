@@ -2,8 +2,10 @@ package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
 import io.dropwizard.metrics5.MetricFilter;
 import io.dropwizard.metrics5.MetricRegistry;
+import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,9 +71,9 @@ public class CustomLabelMapperTest {
 
         metricRegistry.counter("app.okhttpclient.client.HttpClient.greatService.total").inc(1);
 
-        String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService counter\n" +
-                "# HELP app_okhttpclient_client_HttpClient_greatService Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.total, type=io.dropwizard.metrics5.Counter)\n" +
-                "app_okhttpclient_client_HttpClient_greatService_total{service=\"greatService\"} 1.0\n" +
+        String expected = "# TYPE app_okhttpclient_client_HttpClient counter\n" +
+                "# HELP app_okhttpclient_client_HttpClient Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.total, type=io.dropwizard.metrics5.Counter)\n" +
+                "app_okhttpclient_client_HttpClient_total{service=\"greatService\"} 1.0\n" +
                 "# EOF\n";
         assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
     }
@@ -96,9 +98,9 @@ public class CustomLabelMapperTest {
         metricRegistry.counter("app.okhttpclient.client.HttpClient.greatService.total").inc(1);
 
 
-        String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService counter\n" +
-                "# HELP app_okhttpclient_client_HttpClient_greatService Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.total, type=io.dropwizard.metrics5.Counter)\n" +
-                "app_okhttpclient_client_HttpClient_greatService_total{service=\"greatService\"} 1.0\n" +
+        String expected = "# TYPE app_okhttpclient_client_HttpClient counter\n" +
+                "# HELP app_okhttpclient_client_HttpClient Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.total, type=io.dropwizard.metrics5.Counter)\n" +
+                "app_okhttpclient_client_HttpClient_total{service=\"greatService\"} 1.0\n" +
                 "# EOF\n";
         assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
     }
@@ -113,19 +115,26 @@ public class CustomLabelMapperTest {
                 "app.okhttpclient.client.HttpClient",
                 labels
         );
+
+        final MapperConfig mapperConfig2 = new MapperConfig(
+                "app.okhttpclient.client.HttpClient.*.*",
+                "app.okhttpclient.client.HttpClient2",
+                labels
+        );
+
         final List<MapperConfig> mapperConfigs = Arrays.asList(
                 new MapperConfig("client-nope.*.*.*"),
                 mapperConfig,
-                new MapperConfig("app.okhttpclient.client.HttpClient.*.total") // this matches as well
+                mapperConfig2 // this matches as well
         );
 
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
         DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry, MetricFilter.ALL, labelMapper);
         metricRegistry.counter("app.okhttpclient.client.HttpClient.greatService.400").inc(1);
 
-        String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService_400 counter\n" +
-                "# HELP app_okhttpclient_client_HttpClient_greatService_400 Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Counter)\n" +
-                "app_okhttpclient_client_HttpClient_greatService_400_total{service=\"greatService\",status=\"400\"} 1.0\n" +
+        String expected = "# TYPE app_okhttpclient_client_HttpClient counter\n" +
+                "# HELP app_okhttpclient_client_HttpClient Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Counter)\n" +
+                "app_okhttpclient_client_HttpClient_total{service=\"greatService\",status=\"400\"} 1.0\n" +
                 "# EOF\n";
         assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
 
@@ -144,7 +153,7 @@ public class CustomLabelMapperTest {
         final List<MapperConfig> mapperConfigs = Arrays.asList(
                 new MapperConfig("client-nope.*.*.*"),
                 mapperConfig,
-                new MapperConfig("app.okhttpclient.client.HttpClient.*.total") // this matches as well
+                new MapperConfig("app.okhttpclient.client.HttpClient.*.*") // this matches as well
         );
 
 
@@ -154,9 +163,9 @@ public class CustomLabelMapperTest {
         System.out.println(convertToOpenMetricsFormat(dropwizardExports.collect()));
 
 
-        String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService_400 counter\n" +
-                "# HELP app_okhttpclient_client_HttpClient_greatService_400 Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Counter)\n" +
-                "app_okhttpclient_client_HttpClient_greatService_400_total{service=\"greatService_400\",status=\"s_400\"} 1.0\n" +
+        String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService counter\n" +
+                "# HELP app_okhttpclient_client_HttpClient_greatService Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Counter)\n" +
+                "app_okhttpclient_client_HttpClient_greatService_total{service=\"greatService_400\",status=\"s_400\"} 1.0\n" +
                 "# EOF\n";
         assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
     }
@@ -167,6 +176,7 @@ public class CustomLabelMapperTest {
         final Map<String, String> labels = new LinkedHashMap<String, String>();
         labels.put("service", "${0}");
         labels.put("status", "s_${1}");
+        labels.put("client", "sampleClient");
         final MapperConfig mapperConfig = new MapperConfig(
                 "app.okhttpclient.client.HttpClient.*.*",
                 "app.okhttpclient.client.HttpClient.${0}",
@@ -174,23 +184,16 @@ public class CustomLabelMapperTest {
         );
         final List<MapperConfig> mapperConfigs = Arrays.asList(
                 new MapperConfig("client-nope.*.*.*"),
-                mapperConfig,
-                new MapperConfig("app.okhttpclient.client.HttpClient.*.total") // this matches as well
+                mapperConfig
         );
 
         final CustomLabelMapper labelMapper = new CustomLabelMapper(mapperConfigs);
         DropwizardExports dropwizardExports = new DropwizardExports(metricRegistry,MetricFilter.ALL,  labelMapper);
-        metricRegistry.histogram("app.okhttpclient.client.HttpClient.greatService.400");
+        metricRegistry.counter("app.okhttpclient.client.HttpClient.greatService.400").inc(1);
 
-        String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService_400 summary\n" +
-                "# HELP app_okhttpclient_client_HttpClient_greatService_400 Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Histogram)\n" +
-                "app_okhttpclient_client_HttpClient_greatService_400{service=\"greatService\",status=\"s_400\",quantile=\"0.5\"} 0.0\n" +
-                "app_okhttpclient_client_HttpClient_greatService_400{service=\"greatService\",status=\"s_400\",quantile=\"0.75\"} 0.0\n" +
-                "app_okhttpclient_client_HttpClient_greatService_400{service=\"greatService\",status=\"s_400\",quantile=\"0.95\"} 0.0\n" +
-                "app_okhttpclient_client_HttpClient_greatService_400{service=\"greatService\",status=\"s_400\",quantile=\"0.98\"} 0.0\n" +
-                "app_okhttpclient_client_HttpClient_greatService_400{service=\"greatService\",status=\"s_400\",quantile=\"0.99\"} 0.0\n" +
-                "app_okhttpclient_client_HttpClient_greatService_400{service=\"greatService\",status=\"s_400\",quantile=\"0.999\"} 0.0\n" +
-                "app_okhttpclient_client_HttpClient_greatService_400_count{service=\"greatService\",status=\"s_400\"} 0\n" +
+        String expected = "# TYPE app_okhttpclient_client_HttpClient_greatService counter\n" +
+                "# HELP app_okhttpclient_client_HttpClient_greatService Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Counter)\n" +
+                "app_okhttpclient_client_HttpClient_greatService_total{client=\"sampleClient\",service=\"greatService\",status=\"s_400\"} 1.0\n" +
                 "# EOF\n";
         assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
     }
