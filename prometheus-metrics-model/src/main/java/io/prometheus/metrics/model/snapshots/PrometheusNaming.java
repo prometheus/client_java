@@ -13,7 +13,7 @@ public class PrometheusNaming {
     /**
      * Legal characters for metric names, including dot.
      */
-    private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.:][a-zA-Z0-9_.:]+$");
+    private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.:][a-zA-Z0-9_.:]*$");
 
     /**
      * Legal characters for label names, including dot.
