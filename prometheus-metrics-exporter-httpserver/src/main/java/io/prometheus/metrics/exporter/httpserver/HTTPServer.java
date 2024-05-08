@@ -57,6 +57,7 @@ public class HTTPServer implements Closeable {
         registerHandler("/-/healthy", new HealthyHandler(), authenticator);
         try {
             executorService.submit(() -> this.server.start()).get();
+            // calling .get() on the Future here to avoid silently discarding errors
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
