@@ -1,4 +1,4 @@
-package io.prometheus.client.exporter;
+package io.prometheus.metrics.exporter.pushgateway;
 
 import io.prometheus.client.Gauge;
 import io.prometheus.client.CollectorRegistry;
