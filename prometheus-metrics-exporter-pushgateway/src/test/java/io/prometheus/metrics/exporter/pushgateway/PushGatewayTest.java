@@ -1,4 +1,4 @@
-package io.prometheus.client.exporter;
+package io.prometheus.metrics.exporter.pushgateway;
 
 
 import static org.junit.rules.ExpectedException.none;
@@ -10,6 +10,7 @@ import io.prometheus.client.Gauge;
 import java.io.IOException;
 import java.util.TreeMap;
 import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
