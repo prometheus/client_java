@@ -1,0 +1,4 @@
+basic_auth_users:
+    # Note: The bcrypt hash of the password was generated with the following command line:
+    # python -c 'import bcrypt; print(bcrypt.hashpw(b"secret_password", bcrypt.gensalt(rounds=10)).decode("ascii"))'
+    my_user: $2b$10$kmIxr/4wpcORDXnKLvTMC.WPGqT8nqjBm8AI3MqGkzcSrWJioTfUG

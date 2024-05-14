@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "push"
+    honor_labels: true
+    static_configs:
+      - targets: ["pushgateway:9091"]

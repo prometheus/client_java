@@ -29,6 +29,7 @@
     <modules>
         <module>it-common</module>
         <module>it-exporter</module>
+        <module>it-pushgateway</module>
     </modules>
 
     <build>
