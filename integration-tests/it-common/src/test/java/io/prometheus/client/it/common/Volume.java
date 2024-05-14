@@ -30,7 +30,7 @@ public class Volume {
 
     /**
      * Copy a file or directory to this volume.
-     * @param src is reltive to {@code ./target/}
+     * @param src is relative to {@code ./target/}
      */
     public Volume copy(String src) throws IOException {
         Path srcPath = tmpDir.getParent().resolve(src);

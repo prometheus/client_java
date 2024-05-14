@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
+import io.prometheus.metrics.config.ExporterHttpServerProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 
@@ -13,7 +14,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
@@ -55,14 +55,7 @@ public class HTTPServer implements Closeable {
         registerHandler("/", defaultHandler == null ? new DefaultHandler() : defaultHandler, authenticator);
         registerHandler("/metrics", new MetricsHandler(config, registry), authenticator);
         registerHandler("/-/healthy", new HealthyHandler(), authenticator);
-        try {
-            executorService.submit(() -> this.server.start()).get();
-            // calling .get() on the Future here to avoid silently discarding errors
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        this.server.start();
     }
 
     private void registerHandler(String path, HttpHandler handler, Authenticator authenticator) {
