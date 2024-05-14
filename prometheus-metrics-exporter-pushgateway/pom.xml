@@ -5,15 +5,15 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>client_java</artifactId>
-        <version>1.0.0-beta-2-SNAPSHOT</version>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>simpleclient_pushgateway</artifactId>
+    <artifactId>prometheus-metrics-exporter-pushgateway</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Java Simpleclient Pushgateway</name>
+    <name>Prometheus Metrics Exporter - Pushgateway</name>
     <description>
-        Pushgateway exporter for the simpleclient.
+        Exporter for pushing metrics to a pushgateway.
     </description>
 
     <licenses>
@@ -25,10 +25,15 @@
     </licenses>
 
     <developers>
-        <developer>
+       <developer>
             <id>brian-brazil</id>
             <name>Brian Brazil</name>
             <email>brian.brazil@boxever.com</email>
+       </developer>
+       <developer>
+            <id>fstab</id>
+            <name>Fabian Stäber</name>
+            <email>fabian@fstab.de</email>
         </developer>
     </developers>
 
@@ -36,12 +41,7 @@
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_common</artifactId>
+            <artifactId>prometheus-metrics-exporter-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -50,7 +50,6 @@
             <version>2.4.0-b180830.0359</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Test Dependencies Follow -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -67,6 +66,12 @@
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-junit-rule-no-dependencies</artifactId>
             <version>5.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-core</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
