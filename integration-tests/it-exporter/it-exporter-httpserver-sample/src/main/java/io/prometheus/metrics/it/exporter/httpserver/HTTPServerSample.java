@@ -65,7 +65,7 @@ public class HTTPServerSample {
                 .buildAndStart();
 
         System.out.println("HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");
-        Thread.sleep(10_000);
+        Thread.currentThread().join(); // wait forever
     }
 
     private static int parsePortOrExit(String port) {

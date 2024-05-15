@@ -56,11 +56,14 @@ public class HTTPServer implements Closeable {
         registerHandler("/metrics", new MetricsHandler(config, registry), authenticator);
         registerHandler("/-/healthy", new HealthyHandler(), authenticator);
         try {
-            executorService.submit(() -> this.server.start()).get();
+            // HttpServer.start() starts the HttpServer in a new background thread.
+            // If we call HttpServer.start() from a thread of the executorService,
+            // the background thread will inherit the "daemon" property,
+            // i.e. the server will run as a Daemon thread.
+            // See https://github.com/prometheus/client_java/pull/955
+            this.executorService.submit(this.server::start).get();
             // calling .get() on the Future here to avoid silently discarding errors
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
