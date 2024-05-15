@@ -137,3 +137,13 @@ Exporter OpenTelemetry Properties
 (3) Format: `key1=value1,key2=value2`
 
 Many of these attributes can alternatively be configured via OpenTelemetry environment variables, like `OTEL_EXPORTER_OTLP_ENDPOINT`. The Prometheus metrics library has support for OpenTelemetry environment variables. See Javadoc for details.
+
+Exporter PushGateway Properties
+-------------------------------
+
+| Name                                       | Javadoc                                                                                                                                         | Note |
+|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|------|
+| io.prometheus.exporter.pushgateway.address | [PushGateway.Builder.address()](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#address(java.lang.String)) | |
+| io.prometheus.exporter.pushgateway.scheme  | [PushGateway.Builder.scheme()](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#scheme(java.lang.String))   | |
+| io.prometheus.exporter.pushgateway.job     | [PushGateway.Builder.job()](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#job(java.lang.String))         | |
+
