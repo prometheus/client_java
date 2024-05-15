@@ -122,6 +122,20 @@ public class PrometheusNaming {
     }
 
     /**
+     * Like {@link #sanitizeMetricName(String)}, but also makes sure that the unit is appended
+     * as a suffix if the unit is not {@code null}.
+     */
+    public static String sanitizeMetricName(String metricName, Unit unit) {
+        String result = sanitizeLabelName(metricName);
+        if (unit != null) {
+            if (!result.endsWith("_" + unit) && !result.endsWith("." + unit)) {
+                result += "_" + unit;
+            }
+        }
+        return result;
+    }
+
+    /**
      * Convert an arbitrary string to a name where {@link #isValidLabelName(String) isValidLabelName(name)} is true.
      */
     public static String sanitizeLabelName(String labelName) {

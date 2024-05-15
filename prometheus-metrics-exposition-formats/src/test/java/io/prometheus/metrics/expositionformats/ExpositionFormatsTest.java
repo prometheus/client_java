@@ -1,26 +1,11 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.Exemplar;
-import io.prometheus.metrics.model.snapshots.Exemplars;
-import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
-import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
-import io.prometheus.metrics.model.snapshots.InfoSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
-import io.prometheus.metrics.model.snapshots.Quantiles;
-import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
-import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.Unit;
-import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
 import org.junit.Assert;
 import org.junit.Test;
@@ -1825,24 +1810,24 @@ public class ExpositionFormatsTest {
     @Test
     public void testUnknownWithDots() throws IOException {
         String openMetrics = "" +
-                "# TYPE some_unknown_metric unknown\n" +
-                "# UNIT some_unknown_metric bytes\n" +
-                "# HELP some_unknown_metric help message\n" +
-                "some_unknown_metric{test_env=\"7\"} 0.7\n" +
+                "# TYPE some_unknown_metric_bytes unknown\n" +
+                "# UNIT some_unknown_metric_bytes bytes\n" +
+                "# HELP some_unknown_metric_bytes help message\n" +
+                "some_unknown_metric_bytes{test_env=\"7\"} 0.7\n" +
                 "# EOF\n";
         String openMetricsWithExemplarsOnAllTimeSeries = "" +
-                "# TYPE some_unknown_metric unknown\n" +
-                "# UNIT some_unknown_metric bytes\n" +
-                "# HELP some_unknown_metric help message\n" +
-                "some_unknown_metric{test_env=\"7\"} 0.7 # " + exemplarWithDotsString + "\n" +
+                "# TYPE some_unknown_metric_bytes unknown\n" +
+                "# UNIT some_unknown_metric_bytes bytes\n" +
+                "# HELP some_unknown_metric_bytes help message\n" +
+                "some_unknown_metric_bytes{test_env=\"7\"} 0.7 # " + exemplarWithDotsString + "\n" +
                 "# EOF\n";
         String prometheus = "" +
-                "# HELP some_unknown_metric help message\n" +
-                "# TYPE some_unknown_metric untyped\n" +
-                "some_unknown_metric{test_env=\"7\"} 0.7\n";
+                "# HELP some_unknown_metric_bytes help message\n" +
+                "# TYPE some_unknown_metric_bytes untyped\n" +
+                "some_unknown_metric_bytes{test_env=\"7\"} 0.7\n";
         String prometheusProtobuf = "" +
                 //@formatter:off
-                "name: \"some_unknown_metric\" " +
+                "name: \"some_unknown_metric_bytes\" " +
                 "help: \"help message\" " +
                 "type: UNTYPED " +
                 "metric { " +
@@ -1851,7 +1836,7 @@ public class ExpositionFormatsTest {
                 "}";
                 //@formatter:on
         UnknownSnapshot unknown = UnknownSnapshot.builder()
-                .name("some.unknown.metric")
+                .name(PrometheusNaming.sanitizeMetricName("some.unknown.metric", Unit.BYTES))
                 .help("help message")
                 .unit(Unit.BYTES)
                 .dataPoint(UnknownDataPointSnapshot.builder()

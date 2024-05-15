@@ -25,9 +25,9 @@ public class MetricMetadataTest {
 
     @Test
     public void testSanitizationIllegalCharacters() {
-        MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_namespace/http.server.duration"), "help string", Unit.SECONDS);
-        Assert.assertEquals("my_namespace_http.server.duration", metadata.getName());
-        Assert.assertEquals("my_namespace_http_server_duration", metadata.getPrometheusName());
+        MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_namespace/http.server.duration", Unit.SECONDS), "help string", Unit.SECONDS);
+        Assert.assertEquals("my_namespace_http.server.duration_seconds", metadata.getName());
+        Assert.assertEquals("my_namespace_http_server_duration_seconds", metadata.getPrometheusName());
         Assert.assertEquals("help string", metadata.getHelp());
         Assert.assertEquals("seconds", metadata.getUnit().toString());
     }

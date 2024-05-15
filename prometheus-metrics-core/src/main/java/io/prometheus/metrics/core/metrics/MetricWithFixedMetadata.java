@@ -32,8 +32,8 @@ public abstract class MetricWithFixedMetadata extends Metric {
 
     private String makeName(String name, Unit unit) {
         if (unit != null) {
-            if (!name.endsWith(unit.toString())) {
-                name = name + "_" + unit;
+            if (!name.endsWith("_" + unit) && !name.endsWith("." + unit)) {
+                name += "_" + unit;
             }
         }
         return name;
