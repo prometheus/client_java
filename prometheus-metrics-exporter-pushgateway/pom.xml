@@ -16,6 +16,10 @@
         Exporter for pushing metrics to a pushgateway.
     </description>
 
+    <properties>
+        <automatic.module.name>io.prometheus.metrics.exporter.pushgateway</automatic.module.name>
+    </properties>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -37,18 +41,11 @@
         </developer>
     </developers>
 
-
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>prometheus-metrics-exporter-common</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.4.0-b180830.0359</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
