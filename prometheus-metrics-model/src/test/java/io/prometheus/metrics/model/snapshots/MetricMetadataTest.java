@@ -54,4 +54,19 @@ public class MetricMetadataTest {
     public void testSanitizeEmptyString() {
         sanitizeMetricName("");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnitSuffixRequired() {
+        new MetricMetadata("my_counter", "help", Unit.SECONDS);
+    }
+
+    @Test
+    public void testUnitSuffixAdded() {
+        new MetricMetadata(sanitizeMetricName("my_counter", Unit.SECONDS), "help", Unit.SECONDS);
+    }
+
+    @Test
+    public void testUnitNotDuplicated() {
+        Assert.assertEquals("my_counter_bytes", sanitizeMetricName("my_counter_bytes", Unit.BYTES));
+    }
 }

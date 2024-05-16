@@ -107,7 +107,7 @@ public final class MetricMetadata {
         }
         if (hasUnit()) {
             if (!name.endsWith("_" + unit) && !name.endsWith("." + unit)) {
-                throw new IllegalArgumentException("'" + name + "': Illegal metric name. The name must end with _" + unit + "."
+                throw new IllegalArgumentException("'" + name + "': Illegal metric name. If the unit is non-null, the name must end with the unit: _" + unit + "."
                         + " Call " + PrometheusNaming.class.getSimpleName() + ".sanitizeMetricName(name, unit) to avoid this error.");
             }
         }
