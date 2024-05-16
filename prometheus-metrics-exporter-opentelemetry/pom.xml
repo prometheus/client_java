@@ -17,7 +17,7 @@
     </description>
 
     <properties>
-        <otel.version>1.36.0</otel.version>
+        <otel.version>1.38.0</otel.version>
         <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry</automatic.module.name>
     </properties>
 
@@ -46,8 +46,8 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>prometheus-metrics-shaded-opentelemetry</artifactId>
-            <version>1.2.1</version>
-            <!-- <version>${project.version}</version> -->
+            <!-- <version>1.2.1</version> -->
+            <version>${project.version}</version>
         </dependency>
 
         <!-- test dependencies -->
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock</artifactId>
-            <version>3.4.2</version>
+            <version>3.5.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>

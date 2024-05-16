@@ -1,6 +1,6 @@
 package io.prometheus.metrics.exporter.opentelemetry.otelmodel;
 
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.metrics.data.ExponentialHistogramBuckets;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.ExponentialHistogramBuckets;
 
 import java.util.ArrayList;
 import java.util.List;

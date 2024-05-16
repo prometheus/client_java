@@ -1,6 +1,6 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.common.InstrumentationScopeInfo;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.common.InstrumentationScopeInfo;
 
 import java.util.Properties;
 

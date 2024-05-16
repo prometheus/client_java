@@ -37,7 +37,7 @@
       <dependency>
         <groupId>io.opentelemetry</groupId>
         <artifactId>opentelemetry-api</artifactId>
-        <version>1.36.0</version>
+        <version>1.38.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

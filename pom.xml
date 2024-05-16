@@ -67,7 +67,7 @@
         <module>prometheus-metrics-instrumentation-jvm</module>
         <module>prometheus-metrics-instrumentation-dropwizard5</module>
         <module>prometheus-metrics-simpleclient-bridge</module>
-        <!-- <module>prometheus-metrics-shaded-dependencies</module> -->
+        <module>prometheus-metrics-shaded-dependencies</module>
         <module>examples</module>
         <module>benchmarks</module>
         <module>integration-tests</module>

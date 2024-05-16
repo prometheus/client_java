@@ -1,16 +1,16 @@
 package io.prometheus.metrics.exporter.opentelemetry.otelmodel;
 
 import io.prometheus.metrics.model.snapshots.*;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.api.common.Attributes;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.api.common.AttributesBuilder;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.api.trace.SpanContext;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.api.trace.TraceFlags;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.api.trace.TraceState;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.metrics.data.Data;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.metrics.data.DoubleExemplarData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.metrics.data.MetricDataType;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.metrics.data.PointData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_36_0.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.api.common.Attributes;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.api.common.AttributesBuilder;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.api.trace.SpanContext;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.api.trace.TraceFlags;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.api.trace.TraceState;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.Data;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.DoubleExemplarData;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.MetricDataType;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.PointData;
+import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.internal.data.ImmutableDoubleExemplarData;
 
 import java.util.Collections;
 import java.util.List;
