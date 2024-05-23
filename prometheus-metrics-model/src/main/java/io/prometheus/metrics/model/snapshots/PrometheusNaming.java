@@ -21,6 +21,11 @@ public class PrometheusNaming {
     private static final Pattern LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
 
     /**
+     * Legal characters for unit names, including dot.
+     */
+    private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
+
+    /**
      * According to OpenMetrics {@code _count} and {@code _sum} (and {@code _gcount}, {@code _gsum}) should also be
      * reserved metric name suffixes. However, popular instrumentation libraries have Gauges with names
      * ending in {@code _count}.
@@ -81,6 +86,32 @@ public class PrometheusNaming {
     public static boolean isValidLabelName(String name) {
         return LABEL_NAME_PATTERN.matcher(name).matches() &&
                 !(name.startsWith("__") || name.startsWith("._") || name.startsWith("..") || name.startsWith("_."));
+    }
+
+    /**
+     * Units may not have illegal characters, and they may not end with a reserved suffix like 'total'.
+     */
+    public static boolean isValidUnitName(String name) {
+        return validateUnitName(name) == null;
+    }
+
+    /**
+     * Same as {@link #isValidUnitName(String)} but returns an error message.
+     */
+    public static String validateUnitName(String name) {
+        if (name.isEmpty()) {
+            return "The unit name must not be empty.";
+        }
+        for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
+            String suffixName = reservedSuffix.substring(1);
+            if (name.endsWith(suffixName)) {
+                return suffixName + " is a reserved suffix in Prometheus";
+            }
+        }
+        if (!UNIT_NAME_PATTERN.matcher(name).matches()) {
+            return "The unit name contains unsupported characters";
+        }
+        return null;
     }
 
     /**
@@ -150,6 +181,42 @@ public class PrometheusNaming {
     }
 
     /**
+     * Convert an arbitrary string to a name where {@link #isValidUnitName(String) isValidUnitName(name)} is true.
+     *
+     * @throws IllegalArgumentException if the {@code unitName} cannot be converted, for example if you call {@code sanitizeUnitName("total")} or {@code sanitizeUnitName("")}.
+     * @throws NullPointerException if {@code unitName} is null.
+     */
+    public static String sanitizeUnitName(String unitName) {
+        if (unitName.isEmpty()) {
+            throw new IllegalArgumentException("Cannot convert an empty string to a valid unit name.");
+        }
+        String sanitizedName = replaceIllegalCharsInUnitName(unitName);
+        boolean modified = true;
+        while (modified) {
+            modified = false;
+            while (sanitizedName.startsWith("_") || sanitizedName.startsWith(".")) {
+                sanitizedName = sanitizedName.substring(1);
+                modified = true;
+            }
+            while (sanitizedName.endsWith(".") || sanitizedName.endsWith("_")) {
+                sanitizedName = sanitizedName.substring(0, sanitizedName.length()-1);
+                modified = true;
+            }
+            for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
+                String suffixName = reservedSuffix.substring(1);
+                if (sanitizedName.endsWith(suffixName)) {
+                    sanitizedName = sanitizedName.substring(0, sanitizedName.length() - suffixName.length());
+                    modified = true;
+                }
+            }
+        }
+        if (sanitizedName.isEmpty()) {
+            throw new IllegalArgumentException("Cannot convert '" + unitName + "' into a valid unit name.");
+        }
+        return sanitizedName;
+    }
+
+    /**
      * Returns a string that matches {@link #METRIC_NAME_PATTERN}.
      */
     private static String replaceIllegalCharsInMetricName(String name) {
@@ -182,6 +249,27 @@ public class PrometheusNaming {
                     (ch >= 'a' && ch <= 'z') ||
                     (ch >= 'A' && ch <= 'Z') ||
                     (i > 0 && ch >= '0' && ch <= '9')) {
+                sanitized[i] = ch;
+            } else {
+                sanitized[i] = '_';
+            }
+        }
+        return new String(sanitized);
+    }
+
+    /**
+     * Returns a string that matches {@link #UNIT_NAME_PATTERN}.
+     */
+    private static String replaceIllegalCharsInUnitName(String name) {
+        int length = name.length();
+        char[] sanitized = new char[length];
+        for (int i = 0; i < length; i++) {
+            char ch = name.charAt(i);
+            if (ch == ':' ||
+                    ch == '.' ||
+                    (ch >= 'a' && ch <= 'z') ||
+                    (ch >= 'A' && ch <= 'Z') ||
+                    (ch >= '0' && ch <= '9')) {
                 sanitized[i] = ch;
             } else {
                 sanitized[i] = '_';

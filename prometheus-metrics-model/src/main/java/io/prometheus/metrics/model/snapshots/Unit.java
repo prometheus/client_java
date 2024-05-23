@@ -28,10 +28,12 @@ public class Unit {
         if (name == null) {
             throw new NullPointerException("Unit name cannot be null.");
         }
-        if (name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Unit name cannot be empty.");
+        name = name.trim();
+        String error = PrometheusNaming.validateUnitName(name);
+        if (error != null) {
+            throw new IllegalArgumentException(name + ": Illegal unit name: " + error);
         }
-        this.name = name.trim();
+        this.name = name;
     }
 
     @Override
