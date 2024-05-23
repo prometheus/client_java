@@ -79,8 +79,12 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
         }
 
         public boolean containsMetricName(String name) {
+            if (name == null) {
+                return false;
+            }
+            String prometheusName = prometheusName(name);
             for (MetricSnapshot snapshot : snapshots) {
-                if (snapshot.getMetadata().getPrometheusName().equals(prometheusName(name))) {
+                if (snapshot.getMetadata().getPrometheusName().equals(prometheusName)) {
                     return true;
                 }
             }
