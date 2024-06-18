@@ -73,6 +73,16 @@ public class PushGatewayTestApp {
         System.out.println("Push successful.");
     }
 
+    private static void runBearerTokenTest() throws IOException {
+        makeMetrics();
+        PushGateway pg = PushGateway.builder()
+                .bearerToken("xxx")
+                .build();
+        System.out.println("Pushing metrics...");
+        pg.push();
+        System.out.println("Push successful.");
+    }
+
     private static void runSslTest() throws IOException {
         makeMetrics();
         PushGateway pg = PushGateway.builder()
