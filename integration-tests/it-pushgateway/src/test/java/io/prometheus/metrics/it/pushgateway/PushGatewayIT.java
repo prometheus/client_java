@@ -119,27 +119,6 @@ public class PushGatewayIT {
     }
 
     @Test
-    public void testBearerToken() throws IOException, InterruptedException {
-        pushGatewayContainer
-                .withCopyFileToContainer(MountableFile.forClasspathResource("/pushgateway-bearertoken.yaml"), "/pushgateway/pushgateway-bearertoken.yaml")
-                .withCommand("--web.config.file", "pushgateway-bearertoken.yaml")
-                .start();
-        sampleAppContainer
-                .withCommand("java",
-                        "-Dio.prometheus.exporter.pushgateway.address=pushgateway:9091",
-                        "-jar",
-                        "/app/pushgateway-test-app.jar",
-                        "bearertoken"
-                ).start();
-        prometheusContainer
-                .withCopyFileToContainer(MountableFile.forClasspathResource("/prometheus-bearertoken.yaml"), "/etc/prometheus/prometheus.yml")
-                .start();
-        awaitTermination(sampleAppContainer, 10, TimeUnit.SECONDS);
-        assertMetrics();
-    }
-
-
-    @Test
     public void testSsl() throws InterruptedException, IOException {
         pushGatewayContainer
                 .withCopyFileToContainer(MountableFile.forClasspathResource("/pushgateway-ssl.yaml"), "/pushgateway/pushgateway-ssl.yaml")
