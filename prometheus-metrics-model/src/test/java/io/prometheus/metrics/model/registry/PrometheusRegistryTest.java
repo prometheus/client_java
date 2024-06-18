@@ -101,4 +101,18 @@ public class PrometheusRegistryTest {
         snapshots = registry.scrape();
         Assert.assertEquals(3, snapshots.size());
     }
+
+    @Test
+    public void clearOk() {
+        PrometheusRegistry registry = new PrometheusRegistry();
+        registry.register(counterA1);
+        registry.register(counterB);
+        registry.register(gaugeA);
+        MetricSnapshots snapshots = registry.scrape();
+        Assert.assertEquals(3, snapshots.size());
+
+        registry.clear();
+        snapshots = registry.scrape();
+        Assert.assertEquals(0, snapshots.size());
+    }
 }
