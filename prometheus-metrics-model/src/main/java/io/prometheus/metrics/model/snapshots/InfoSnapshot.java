@@ -95,6 +95,7 @@ public final class InfoSnapshot extends MetricSnapshot {
             throw new IllegalArgumentException("Info metric cannot have a unit.");
         }
 
+        @Override
         public InfoSnapshot build() {
             return new InfoSnapshot(buildMetadata(), dataPoints);
         }

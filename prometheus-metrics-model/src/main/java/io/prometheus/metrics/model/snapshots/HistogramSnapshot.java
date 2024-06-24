@@ -389,6 +389,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
             return this;
         }
 
+        @Override
         public HistogramSnapshot build() {
             return new HistogramSnapshot(isGaugeHistogram, buildMetadata(), dataPoints);
         }
