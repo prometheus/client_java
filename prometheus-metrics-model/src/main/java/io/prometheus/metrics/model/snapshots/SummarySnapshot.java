@@ -127,6 +127,7 @@ public final class SummarySnapshot extends MetricSnapshot {
             return this;
         }
 
+        @Override
         public SummarySnapshot build() {
             return new SummarySnapshot(buildMetadata(), dataPoints);
         }

@@ -219,6 +219,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
             throw new IllegalArgumentException("StateSet metric cannot have a unit.");
         }
 
+        @Override
         public StateSetSnapshot build() {
             return new StateSetSnapshot(buildMetadata(), dataPoints);
         }
