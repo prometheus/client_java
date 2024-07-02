@@ -41,6 +41,8 @@ class Buffer {
             }
             observationBuffer[bufferPos] = amount;
             bufferPos++;
+
+            appendLock.notifyAll();
         }
     }
 
@@ -68,13 +70,20 @@ class Buffer {
             } else {
                 expectedBufferSize = (int) (observationCount.addAndGet(signBit) - count);
             }
-            while (bufferPos != expectedBufferSize) {
-                Thread.yield();
+
+            synchronized (appendLock) {
+                while (bufferPos < expectedBufferSize) {
+                    try {
+                        appendLock.wait(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                buffer = observationBuffer;
+                bufferSize = bufferPos;
+                observationBuffer = new double[0];
+                bufferPos = 0;
             }
-            buffer = observationBuffer;
-            bufferSize = bufferPos;
-            observationBuffer = new double[0];
-            bufferPos = 0;
         }
         for (int i = 0; i < bufferSize; i++) {
             observeFunction.accept(buffer[i]);
