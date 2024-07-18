@@ -279,6 +279,17 @@ public class PushGateway {
         }
 
         /**
+         * Bearer token authorization when pushing to the Pushgateway.
+         */
+        public Builder bearerToken(String token) {
+            if (token == null)  {
+                throw new NullPointerException();
+            }
+            requestHeaders.put("Authorization", String.format("Bearer %s", token));
+            return this;
+        }
+
+        /**
          * Specify if metrics should be pushed using HTTP or HTTPS. Default is HTTP.
          * Can be overwritten at runtime with the {@code io.prometheus.exporter.pushgateway.scheme} property.
          */

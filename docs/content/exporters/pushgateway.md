@@ -80,6 +80,21 @@ PushGateway pushGateway = PushGateway.builder()
 
 The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
 
+Bearer token
+----------
+
+The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports Bearer token authentication.
+
+```java
+PushGateway pushGateway = PushGateway.builder()
+    .job("example")
+    .bearerToken("my_token")
+    .build();
+```
+
+The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
+
+
 SSL
 ---
 
