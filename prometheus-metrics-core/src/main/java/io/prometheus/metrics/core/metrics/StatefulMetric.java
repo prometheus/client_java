@@ -114,6 +114,7 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
      */
     public void clear() {
         data.clear();
+        noLabels = null;
     }
 
     protected abstract T newDataPoint();
