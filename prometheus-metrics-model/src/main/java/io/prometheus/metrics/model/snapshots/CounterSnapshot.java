@@ -139,6 +139,7 @@ public class CounterSnapshot extends MetricSnapshot {
             return this;
         }
 
+        @Override
         public CounterSnapshot build() {
             return new CounterSnapshot(buildMetadata(), dataPoints);
         }

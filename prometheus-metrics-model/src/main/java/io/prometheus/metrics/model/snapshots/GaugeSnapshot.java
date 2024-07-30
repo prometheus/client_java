@@ -118,13 +118,14 @@ public final class GaugeSnapshot extends MetricSnapshot {
         }
 
         /**
-         * Add a data point. This can be alled multiple times to add multiple data points.
+         * Add a data point. This can be called multiple times to add multiple data points.
          */
         public Builder dataPoint(GaugeDataPointSnapshot dataPoint) {
             dataPoints.add(dataPoint);
             return this;
         }
 
+        @Override
         public GaugeSnapshot build() {
             return new GaugeSnapshot(buildMetadata(), dataPoints);
         }
