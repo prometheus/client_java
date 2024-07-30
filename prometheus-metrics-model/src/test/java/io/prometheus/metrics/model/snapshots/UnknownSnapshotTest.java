@@ -68,4 +68,20 @@ public class UnknownSnapshotTest {
     public void testValueMissing() {
         UnknownSnapshot.UnknownDataPointSnapshot.builder().build();
     }
+
+    @Test
+    public void testUnknownDataPointSnapshot() {
+        Labels labels = Labels.of("k1", "v1");
+        Exemplar exemplar = Exemplar.builder().value(2.0).build();
+
+        UnknownSnapshot.UnknownDataPointSnapshot data = new UnknownSnapshot.UnknownDataPointSnapshot(1.0, labels, exemplar);
+        Assert.assertEquals(1.0, data.getValue(), 0.1);
+        Assert.assertEquals(labels, data.getLabels());
+        Assert.assertEquals(exemplar, data.getExemplar());
+
+        data = new UnknownSnapshot.UnknownDataPointSnapshot(1.0, labels, exemplar, 0L);
+        Assert.assertEquals(1.0, data.getValue(), 0.1);
+        Assert.assertEquals(labels, data.getLabels());
+        Assert.assertEquals(exemplar, data.getExemplar());
+    }
 }

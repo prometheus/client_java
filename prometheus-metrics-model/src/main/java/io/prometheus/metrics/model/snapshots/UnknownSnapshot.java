@@ -40,7 +40,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
          * @param exemplar may be null.
          */
         public UnknownDataPointSnapshot(double value, Labels labels, Exemplar exemplar) {
-            this(value, Labels.EMPTY, exemplar, 0);
+            this(value, labels, exemplar, 0);
         }
 
         /**
