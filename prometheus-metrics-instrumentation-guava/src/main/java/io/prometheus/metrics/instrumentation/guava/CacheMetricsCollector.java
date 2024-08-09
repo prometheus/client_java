@@ -1,14 +1,15 @@
-package io.prometheus.client.guava.cache;
+package io.prometheus.metrics.instrumentation.guava;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
-import io.prometheus.client.Collector;
-import io.prometheus.client.CounterMetricFamily;
-import io.prometheus.client.GaugeMetricFamily;
-import io.prometheus.client.SummaryMetricFamily;
+import io.prometheus.metrics.model.registry.MultiCollector;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ import java.util.concurrent.ConcurrentMap;
  *     guava_cache_size{cache="mycache"} 5.0
  * </pre>
  *
- * Additionally if the cache includes a loader, the following metrics would be provided:
+ * Additionally, if the cache includes a loader, the following metrics would be provided:
  * <pre>
  *     guava_cache_load_failure_total{cache="mycache"} 2.0
  *     guava_cache_loads_total{cache="mycache"} 7.0
@@ -47,9 +48,11 @@ import java.util.concurrent.ConcurrentMap;
  * </pre>
  *
  */
-public class CacheMetricsCollector extends Collector {
+public class CacheMetricsCollector implements MultiCollector {
 
-    protected final ConcurrentMap<String, Cache> children = new ConcurrentHashMap<String, Cache>();
+    private static final double NANOSECONDS_PER_SECOND = 1_000_000_000.0;
+
+    protected final ConcurrentMap<String, Cache> children = new ConcurrentHashMap<>();
 
     /**
      * Add or replace the cache with the given name.
@@ -84,59 +87,117 @@ public class CacheMetricsCollector extends Collector {
     }
 
     @Override
-    public List<MetricFamilySamples> collect() {
-        List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
-        List<String> labelNames = Arrays.asList("cache");
+    public MetricSnapshots collect() {
+        final MetricSnapshots.Builder metricSnapshotsBuilder = MetricSnapshots.builder();
+        final List<String> labelNames = Arrays.asList("cache");
 
-        CounterMetricFamily cacheHitTotal = new CounterMetricFamily("guava_cache_hit_total",
-                "Cache hit totals", labelNames);
-        mfs.add(cacheHitTotal);
+        final CounterSnapshot.Builder cacheHitTotal = CounterSnapshot.builder()
+            .name("guava_cache_hit")
+            .help("Cache hit totals");
 
-        CounterMetricFamily cacheMissTotal = new CounterMetricFamily("guava_cache_miss_total",
-                "Cache miss totals", labelNames);
-        mfs.add(cacheMissTotal);
+        final CounterSnapshot.Builder cacheMissTotal = CounterSnapshot.builder()
+            .name("guava_cache_miss")
+            .help("Cache miss totals");
 
-        CounterMetricFamily cacheRequestsTotal = new CounterMetricFamily("guava_cache_requests_total",
-                "Cache request totals, hits + misses", labelNames);
-        mfs.add(cacheRequestsTotal);
+        final CounterSnapshot.Builder cacheRequestsTotal = CounterSnapshot.builder()
+            .name("guava_cache_requests")
+            .help("Cache request totals");
 
-        CounterMetricFamily cacheEvictionTotal = new CounterMetricFamily("guava_cache_eviction_total",
-                "Cache eviction totals, doesn't include manually removed entries", labelNames);
-        mfs.add(cacheEvictionTotal);
+        final CounterSnapshot.Builder cacheEvictionTotal = CounterSnapshot.builder()
+            .name("guava_cache_eviction")
+            .help("Cache eviction totals, doesn't include manually removed entries");
 
-        CounterMetricFamily cacheLoadFailure = new CounterMetricFamily("guava_cache_load_failure_total",
-                "Cache load failures", labelNames);
-        mfs.add(cacheLoadFailure);
+        final CounterSnapshot.Builder cacheLoadFailure = CounterSnapshot.builder()
+            .name("guava_cache_load_failure")
+            .help("Cache load failures");
 
-        CounterMetricFamily cacheLoadTotal = new CounterMetricFamily("guava_cache_loads_total",
-                "Cache loads: both success and failures", labelNames);
-        mfs.add(cacheLoadTotal);
+        final CounterSnapshot.Builder cacheLoadTotal = CounterSnapshot.builder()
+            .name("guava_cache_loads")
+            .help("Cache loads: both success and failures");
 
-        GaugeMetricFamily cacheSize = new GaugeMetricFamily("guava_cache_size",
-                "Cache size", labelNames);
-        mfs.add(cacheSize);
+        final GaugeSnapshot.Builder cacheSize = GaugeSnapshot.builder()
+            .name("guava_cache_size")
+            .help("Cache size");
 
-        SummaryMetricFamily cacheLoadSummary = new SummaryMetricFamily("guava_cache_load_duration_seconds",
-                "Cache load duration: both success and failures", labelNames);
-        mfs.add(cacheLoadSummary);
+        final SummarySnapshot.Builder cacheLoadSummary = SummarySnapshot.builder()
+            .name("guava_cache_load_duration_seconds")
+            .help("Cache load duration: both success and failures");
 
-        for(Map.Entry<String, Cache> c: children.entrySet()) {
-            List<String> cacheName = Arrays.asList(c.getKey());
-            CacheStats stats = c.getValue().stats();
+        for (final Map.Entry<String, Cache> c: children.entrySet()) {
+            final List<String> cacheName = Arrays.asList(c.getKey());
+            final Labels labels = Labels.of(labelNames, cacheName);
 
-            cacheHitTotal.addMetric(cacheName, stats.hitCount());
-            cacheMissTotal.addMetric(cacheName, stats.missCount());
-            cacheRequestsTotal.addMetric(cacheName, stats.requestCount());
-            cacheEvictionTotal.addMetric(cacheName, stats.evictionCount());
-            cacheSize.addMetric(cacheName, c.getValue().size());
+            final CacheStats stats = c.getValue().stats();
 
-            if(c.getValue() instanceof LoadingCache) {
-                cacheLoadFailure.addMetric(cacheName, stats.loadExceptionCount());
-                cacheLoadTotal.addMetric(cacheName, stats.loadCount());
+            cacheHitTotal.dataPoint(
+                CounterSnapshot.CounterDataPointSnapshot.builder()
+                    .labels(labels)
+                    .value(stats.hitCount())
+                    .build()
+            );
 
-                cacheLoadSummary.addMetric(cacheName, stats.loadCount(), stats.totalLoadTime() / Collector.NANOSECONDS_PER_SECOND);
+            cacheMissTotal.dataPoint(
+                CounterSnapshot.CounterDataPointSnapshot.builder()
+                    .labels(labels)
+                    .value(stats.missCount())
+                    .build()
+            );
+
+            cacheRequestsTotal.dataPoint(
+                CounterSnapshot.CounterDataPointSnapshot.builder()
+                    .labels(labels)
+                    .value(stats.requestCount())
+                    .build()
+            );
+
+            cacheEvictionTotal.dataPoint(
+                CounterSnapshot.CounterDataPointSnapshot.builder()
+                    .labels(labels)
+                    .value(stats.evictionCount())
+                    .build()
+            );
+
+            cacheSize.dataPoint(
+                GaugeSnapshot.GaugeDataPointSnapshot.builder()
+                    .labels(labels)
+                    .value(c.getValue().size())
+                    .build()
+            );
+
+            if (c.getValue() instanceof LoadingCache) {
+                cacheLoadFailure.dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(labels)
+                        .value(stats.loadExceptionCount())
+                        .build()
+                );
+
+                cacheLoadTotal.dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(labels)
+                        .value(stats.loadCount())
+                        .build()
+                );
+
+                cacheLoadSummary.dataPoint(
+                    SummarySnapshot.SummaryDataPointSnapshot.builder()
+                        .labels(labels)
+                        .count(stats.loadCount())
+                        .sum(stats.totalLoadTime() / NANOSECONDS_PER_SECOND)
+                        .build()
+                );
             }
         }
-        return mfs;
+
+        metricSnapshotsBuilder.metricSnapshot(cacheHitTotal.build());
+        metricSnapshotsBuilder.metricSnapshot(cacheMissTotal.build());
+        metricSnapshotsBuilder.metricSnapshot(cacheRequestsTotal.build());
+        metricSnapshotsBuilder.metricSnapshot(cacheEvictionTotal.build());
+        metricSnapshotsBuilder.metricSnapshot(cacheLoadFailure.build());
+        metricSnapshotsBuilder.metricSnapshot(cacheLoadTotal.build());
+        metricSnapshotsBuilder.metricSnapshot(cacheSize.build());
+        metricSnapshotsBuilder.metricSnapshot(cacheLoadSummary.build());
+
+        return metricSnapshotsBuilder.build();
     }
 }
