@@ -3,7 +3,7 @@ machine: true
 jobs:
   build:
     machine:
-      image: ubuntu-2204:2023.07.2
+      image: ubuntu-2204:current
     working_directory: ~/circleci-java
     steps:
       - run:
