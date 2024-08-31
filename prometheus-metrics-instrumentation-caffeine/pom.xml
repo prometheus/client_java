@@ -5,16 +5,20 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>client_java</artifactId>
-        <version>1.0.0-beta-2-SNAPSHOT</version>
+        <version>1.4.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>simpleclient_caffeine</artifactId>
+    <artifactId>prometheus-metrics-instrumentation-caffeine</artifactId>
     <packaging>bundle</packaging>
 
-    <name>Prometheus Java Simpleclient Caffeine</name>
+    <name>Prometheus Metrics Instrumentation - Caffeine</name>
     <description>
-        Metrics collector for caffeine based caches
+        Instrumentation library for caffeine based caches
     </description>
+
+    <properties>
+        <automatic.module.name>io.prometheus.metrics.instrumentation.caffeine</automatic.module.name>
+    </properties>
 
     <licenses>
         <license>
@@ -30,18 +34,25 @@
             <name>Clint Checketts</name>
             <email>checketts@gmail.com</email>
         </developer>
+
+        <developer>
+            <id>pheyken</id>
+            <name>Petar Heyken</name>
+            <email>mail@petar-heyken.de</email>
+        </developer>
     </developers>
 
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient</artifactId>
+            <artifactId>prometheus-metrics-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>3.1.1</version>
+            <version>3.1.8</version>
+            <scope>provided</scope>
         </dependency>
         
 
@@ -55,13 +66,20 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.6.1</version>
+            <version>5.12.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.23.1</version>
+            <version>3.26.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-exposition-formats</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
