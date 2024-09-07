@@ -60,5 +60,10 @@ public class StatefulMetricTest {
         // No labels is always present, but as no value has been observed after clear() the value should be 0.0
         Assert.assertEquals(1, counter.collect().getDataPoints().size());
         Assert.assertEquals(0.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
+
+        // Making inc() works correctly after clear()
+        counter.inc();
+        Assert.assertEquals(1, counter.collect().getDataPoints().size());
+        Assert.assertEquals(1.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
     }
 }
