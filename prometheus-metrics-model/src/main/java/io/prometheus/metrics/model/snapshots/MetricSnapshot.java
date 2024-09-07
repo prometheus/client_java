@@ -76,6 +76,8 @@ public abstract class MetricSnapshot {
             return self();
         }
 
+        public abstract MetricSnapshot build();
+
         protected MetricMetadata buildMetadata() {
             return new MetricMetadata(name, help, unit);
         }

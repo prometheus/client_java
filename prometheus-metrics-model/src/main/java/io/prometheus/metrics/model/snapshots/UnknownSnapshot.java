@@ -126,6 +126,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
             return this;
         }
 
+        @Override
         public UnknownSnapshot build() {
             return new UnknownSnapshot(buildMetadata(), dataPoints);
         }
