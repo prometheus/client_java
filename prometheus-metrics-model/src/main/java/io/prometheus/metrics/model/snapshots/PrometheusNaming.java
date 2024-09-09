@@ -157,7 +157,7 @@ public class PrometheusNaming {
      * as a suffix if the unit is not {@code null}.
      */
     public static String sanitizeMetricName(String metricName, Unit unit) {
-        String result = sanitizeLabelName(metricName);
+        String result = sanitizeMetricName(metricName);
         if (unit != null) {
             if (!result.endsWith("_" + unit) && !result.endsWith("." + unit)) {
                 result += "_" + unit;
@@ -224,8 +224,7 @@ public class PrometheusNaming {
         char[] sanitized = new char[length];
         for (int i = 0; i < length; i++) {
             char ch = name.charAt(i);
-            if (ch == ':' ||
-                    ch == '.' ||
+            if (ch == '.' ||
                     (ch >= 'a' && ch <= 'z') ||
                     (ch >= 'A' && ch <= 'Z') ||
                     (i > 0 && ch >= '0' && ch <= '9')) {
