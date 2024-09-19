@@ -3,8 +3,10 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
@@ -74,6 +76,7 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
     public static class Builder {
 
         private final List<MetricSnapshot> snapshots = new ArrayList<>();
+        private final Set<String> prometheusNames = new HashSet<>();
 
         private Builder() {
         }
@@ -83,12 +86,7 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
                 return false;
             }
             String prometheusName = prometheusName(name);
-            for (MetricSnapshot snapshot : snapshots) {
-                if (snapshot.getMetadata().getPrometheusName().equals(prometheusName)) {
-                    return true;
-                }
-            }
-            return false;
+            return prometheusNames.contains(prometheusName);
         }
 
         /**
@@ -96,6 +94,7 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
          */
         public Builder metricSnapshot(MetricSnapshot snapshot) {
             snapshots.add(snapshot);
+            prometheusNames.add(snapshot.getMetadata().getPrometheusName());
             return this;
         }
 
