@@ -42,17 +42,26 @@ public class JvmMetrics {
          */
         public void register() {
             if (!registeredWithTheDefaultRegistry.getAndSet(true)) {
-                register(PrometheusRegistry.defaultRegistry);
+                doRegister(PrometheusRegistry.defaultRegistry);
             }
         }
 
         /**
          * Register all JVM metrics with the {@code registry}.
          * <p>
-         * You must make sure to call this only once per {@code registry}, otherwise it will
+         * It's safe to call this multiple times if the specified {@code registry} is the default registry.
+         * For any other {@code registry}, you must make sure to call this only once, otherwise it will
          * throw an Exception because you are trying to register duplicate metrics.
          */
         public void register(PrometheusRegistry registry) {
+            if (registry == PrometheusRegistry.defaultRegistry) {
+                register();
+            } else {
+                doRegister(registry);
+            }
+        }
+
+        private void doRegister(PrometheusRegistry registry) {
             JvmThreadsMetrics.builder(config).register(registry);
             JvmBufferPoolMetrics.builder(config).register(registry);
             JvmClassLoadingMetrics.builder(config).register(registry);
