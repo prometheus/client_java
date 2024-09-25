@@ -17,8 +17,9 @@ java -jar ./benchmarks/target/benchmarks.jar CounterBenchmark
 
 See Javadoc of the benchmark classes:
 
-* [CounterBenchmark](https://github.com/prometheus/client_java/blob/1.0.x/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/CounterBenchmark.java)
-* [HistogramBenchmark](https://github.com/prometheus/client_java/blob/1.0.x/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/HistogramBenchmark.java)
+* [CounterBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/CounterBenchmark.java)
+* [GaugeBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/GaugeBenchmark.java)
+* [HistogramBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/HistogramBenchmark.java)
 
 ## What Prometheus Java client optimizes for
 
