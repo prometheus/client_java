@@ -3,18 +3,11 @@ package io.prometheus.metrics.model.snapshots;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
-
 public class UnitTest {
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testEmpty() {
-        try {
-            new Unit(" ");
-            fail("Expected IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-            // Expected
-        }
+        new Unit(" ");
     }
 
     @Test

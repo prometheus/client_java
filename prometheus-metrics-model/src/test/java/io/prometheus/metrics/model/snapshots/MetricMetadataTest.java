@@ -3,7 +3,6 @@ package io.prometheus.metrics.model.snapshots;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
 
 public class MetricMetadataTest {

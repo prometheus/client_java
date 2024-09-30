@@ -10,7 +10,7 @@ public class Quantile {
 
     /**
      * @param quantile expecting 0.0 &lt;= quantile &lt;= 1.0, otherwise an {@link IllegalArgumentException} will be thrown.
-     * @param value
+     * @param value the quantile value
      */
     public Quantile(double quantile, double value) {
         this.quantile = quantile;

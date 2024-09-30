@@ -1,6 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import org.junit.Assert;
 
 public class SnapshotTestUtil {

@@ -17,10 +17,10 @@ import java.util.function.Predicate;
 
 public class MultiCollectorNameFilterTest {
 
+    private final boolean[] collectCalled = {false};
     private PrometheusRegistry registry;
-    private boolean[] collectCalled = {false};
     private Predicate<String> includedNames = null;
-    List<String> prometheusNames = new ArrayList<>();
+    private List<String> prometheusNames = new ArrayList<>();
 
     @Before
     public void setUp() {

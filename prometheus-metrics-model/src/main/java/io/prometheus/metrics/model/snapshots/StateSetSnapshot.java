@@ -95,7 +95,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
 
         private void validate() {
             for (int i = 0; i < names.length; i++) {
-                if (names[i].length() == 0) {
+                if (names[i].isEmpty()) {
                     throw new IllegalArgumentException("Empty string as state name");
                 }
                 if (i > 0 && names[i - 1].equals(names[i])) {
@@ -148,13 +148,13 @@ public final class StateSetSnapshot extends MetricSnapshot {
 
         public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
-            private final ArrayList<String> names = new ArrayList<>();
-            private final ArrayList<Boolean> values = new ArrayList<>();
+            private final List<String> names = new ArrayList<>();
+            private final List<Boolean> values = new ArrayList<>();
 
             private Builder() {}
 
             /**
-             * Add a state. Call multple times to add multiple states.
+             * Add a state. Call multiple times to add multiple states.
              */
             public Builder state(String name, boolean value) {
                 names.add(name);

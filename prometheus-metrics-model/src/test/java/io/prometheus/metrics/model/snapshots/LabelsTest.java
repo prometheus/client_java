@@ -1,11 +1,8 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.model.snapshots.Labels;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeLabelName;
 import static org.junit.Assert.assertNotEquals;
 
 public class LabelsTest {

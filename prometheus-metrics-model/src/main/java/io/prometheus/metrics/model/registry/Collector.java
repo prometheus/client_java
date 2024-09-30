@@ -4,8 +4,6 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 
 import java.util.function.Predicate;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
-
 /**
  * To be registered with the Prometheus collector registry.
  * See <i>Overall Structure</i> on

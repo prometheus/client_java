@@ -99,7 +99,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
         if (names.size() != values.size()) {
             throw new IllegalArgumentException("Names and values must have the same size.");
         }
-        if (names.size() == 0) {
+        if (names.isEmpty()) {
             return EMPTY;
         }
         String[] namesCopy = names.toArray(new String[0]);

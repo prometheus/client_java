@@ -7,6 +7,9 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class PrometheusRegistryTest {
 
     Collector noName = () -> GaugeSnapshot.builder()
@@ -61,13 +64,25 @@ public class PrometheusRegistryTest {
         }
     };
 
+    MultiCollector multiCollector = new MultiCollector() {
+        @Override
+        public MetricSnapshots collect() {
+            return new MetricSnapshots(gaugeA.collect(), counterB.collect());
+        }
+
+        @Override
+        public List<String> getPrometheusNames() {
+            return Arrays.asList(gaugeA.getPrometheusName(), counterB.getPrometheusName());
+        }
+    };
+
     @Test
     public void registerNoName() {
         PrometheusRegistry registry = new PrometheusRegistry();
         // If the collector does not have a name at registration time, there is no conflict during registration.
         registry.register(noName);
         registry.register(noName);
-        // However, at scrape time the collector has to provide a metric name, and then we'll get a duplicat name error.
+        // However, at scrape time the collector has to provide a metric name, and then we'll get a duplicate name error.
         try {
             registry.scrape();
         } catch (IllegalStateException e) {
@@ -100,5 +115,24 @@ public class PrometheusRegistryTest {
         registry.register(counterB);
         snapshots = registry.scrape();
         Assert.assertEquals(3, snapshots.size());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void registerDuplicateMultiCollector() {
+        PrometheusRegistry registry = new PrometheusRegistry();
+        registry.register(multiCollector);
+        registry.register(multiCollector);
+    }
+
+    @Test
+    public void registerOkMultiCollector() {
+        PrometheusRegistry registry = new PrometheusRegistry();
+        registry.register(multiCollector);
+        MetricSnapshots snapshots = registry.scrape();
+        Assert.assertEquals(2, snapshots.size());
+
+        registry.unregister(multiCollector);
+        snapshots = registry.scrape();
+        Assert.assertEquals(0, snapshots.size());
     }
 }

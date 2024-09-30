@@ -21,7 +21,7 @@ public class Exemplars implements Iterable<Exemplar> {
     private final List<Exemplar> exemplars;
 
     private Exemplars(Collection<Exemplar> exemplars) {
-        ArrayList<Exemplar> copy = new ArrayList<>(exemplars.size());
+        List<Exemplar> copy = new ArrayList<>(exemplars.size());
         for (Exemplar exemplar : exemplars) {
             if (exemplar == null) {
                 throw new NullPointerException("Illegal null value in Exemplars");
@@ -72,16 +72,15 @@ public class Exemplars implements Iterable<Exemplar> {
      */
     public Exemplar get(double lowerBound, double upperBound) {
         Exemplar result = null;
-        for (int i = 0; i < exemplars.size(); i++) {
-            Exemplar exemplar = exemplars.get(i);
+        for (Exemplar exemplar : exemplars) {
             double value = exemplar.getValue();
             if (value > lowerBound && value <= upperBound) {
                 if (result == null) {
                     result = exemplar;
                 } else if (result.hasTimestamp() && exemplar.hasTimestamp()) {
-                   if (exemplar.getTimestampMillis() > result.getTimestampMillis()) {
-                       result = exemplar;
-                   }
+                    if (exemplar.getTimestampMillis() > result.getTimestampMillis()) {
+                        result = exemplar;
+                    }
                 }
             }
         }
@@ -93,8 +92,7 @@ public class Exemplars implements Iterable<Exemplar> {
      */
     public Exemplar getLatest() {
         Exemplar latest = null;
-        for (int i=0; i<exemplars.size(); i++) {
-            Exemplar candidate = exemplars.get(i);
+        for (Exemplar candidate : exemplars) {
             if (candidate == null) {
                 continue;
             }

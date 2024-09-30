@@ -101,7 +101,7 @@ public class StateSetSnapshotTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testDuplicateState() {
-        StateSetSnapshot.StateSetDataPointSnapshot data = StateSetSnapshot.StateSetDataPointSnapshot.builder()
+        StateSetSnapshot.StateSetDataPointSnapshot.builder()
                 .state("a", true)
                 .state("b", true)
                 .state("a", true)

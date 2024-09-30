@@ -2,19 +2,11 @@ package io.prometheus.metrics.model.registry;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
-import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
 
 public class MetricNameFilterTest {
 

@@ -69,8 +69,8 @@ public class PrometheusRegistry {
 			}
 		}
 		for (MultiCollector collector : multiCollectors) {
-			MetricSnapshots snaphots = scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
-			for (MetricSnapshot snapshot : snaphots) {
+			MetricSnapshots snapshots = scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
+			for (MetricSnapshot snapshot : snapshots) {
 				if (result.containsMetricName(snapshot.getMetadata().getName())) {
 					throw new IllegalStateException(snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
 				}
