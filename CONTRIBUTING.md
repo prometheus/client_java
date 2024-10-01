@@ -10,3 +10,9 @@ Prometheus uses GitHub to manage reviews of pull requests.
   on our [mailing list](https://groups.google.com/forum/?fromgroups#!forum/prometheus-developers).
   This will avoid unnecessary work and surely give you and us a good deal
   of inspiration.
+
+## Formatting
+
+This repository uses [Google Java Format](https://github.com/google/google-java-format) to format the code.
+
+Run `./mvnw spotless:apply` to format the code (only changed files) before committing.
