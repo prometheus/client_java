@@ -18,11 +18,11 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 public class JvmCompilationMetricsTest {
 
-    private CompilationMXBean mockCompilationBean = Mockito.mock(CompilationMXBean.class);
+    private final CompilationMXBean mockCompilationBean = Mockito.mock(CompilationMXBean.class);
 
     @Before
     public void setUp() {
-        when(mockCompilationBean.getTotalCompilationTime()).thenReturn(10000l);
+        when(mockCompilationBean.getTotalCompilationTime()).thenReturn(10000L);
         when(mockCompilationBean.isCompilationTimeMonitoringSupported()).thenReturn(true);
     }
 
@@ -34,7 +34,7 @@ public class JvmCompilationMetricsTest {
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
-        String expected = "" +
+        String expected =
                 "# TYPE jvm_compilation_time_seconds counter\n" +
                 "# UNIT jvm_compilation_time_seconds seconds\n" +
                 "# HELP jvm_compilation_time_seconds The total time in seconds taken for HotSpot class compilation\n" +

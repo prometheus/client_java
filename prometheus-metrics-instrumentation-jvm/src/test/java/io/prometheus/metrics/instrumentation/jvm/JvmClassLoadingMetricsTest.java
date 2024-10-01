@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 public class JvmClassLoadingMetricsTest {
 
-    private ClassLoadingMXBean mockClassLoadingBean = Mockito.mock(ClassLoadingMXBean.class);
+    private final ClassLoadingMXBean mockClassLoadingBean = Mockito.mock(ClassLoadingMXBean.class);
 
     @Before
     public void setUp() {
@@ -35,7 +35,7 @@ public class JvmClassLoadingMetricsTest {
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
-        String expected = "" +
+        String expected =
                 "# TYPE jvm_classes_currently_loaded gauge\n" +
                 "# HELP jvm_classes_currently_loaded The number of classes that are currently loaded in the JVM\n" +
                 "jvm_classes_currently_loaded 1000.0\n" +

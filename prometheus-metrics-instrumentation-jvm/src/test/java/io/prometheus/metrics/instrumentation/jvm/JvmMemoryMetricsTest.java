@@ -21,15 +21,15 @@ import static org.mockito.Mockito.when;
 
 public class JvmMemoryMetricsTest {
 
-    private MemoryMXBean mockMemoryBean = Mockito.mock(MemoryMXBean.class);
-    private MemoryPoolMXBean mockPoolsBeanEdenSpace = Mockito.mock(MemoryPoolMXBean.class);
-    private MemoryPoolMXBean mockPoolsBeanOldGen = Mockito.mock(MemoryPoolMXBean.class);
-    private MemoryUsage memoryUsageHeap = Mockito.mock(MemoryUsage.class);
-    private MemoryUsage memoryUsageNonHeap = Mockito.mock(MemoryUsage.class);
-    private MemoryUsage memoryUsagePoolEdenSpace = Mockito.mock(MemoryUsage.class);
-    private MemoryUsage memoryUsagePoolOldGen = Mockito.mock(MemoryUsage.class);
-    private MemoryUsage memoryUsagePoolCollectionEdenSpace = Mockito.mock(MemoryUsage.class);
-    private MemoryUsage memoryUsagePoolCollectionOldGen = Mockito.mock(MemoryUsage.class);
+    private final MemoryMXBean mockMemoryBean = Mockito.mock(MemoryMXBean.class);
+    private final MemoryPoolMXBean mockPoolsBeanEdenSpace = Mockito.mock(MemoryPoolMXBean.class);
+    private final MemoryPoolMXBean mockPoolsBeanOldGen = Mockito.mock(MemoryPoolMXBean.class);
+    private final MemoryUsage memoryUsageHeap = Mockito.mock(MemoryUsage.class);
+    private final MemoryUsage memoryUsageNonHeap = Mockito.mock(MemoryUsage.class);
+    private final MemoryUsage memoryUsagePoolEdenSpace = Mockito.mock(MemoryUsage.class);
+    private final MemoryUsage memoryUsagePoolOldGen = Mockito.mock(MemoryUsage.class);
+    private final MemoryUsage memoryUsagePoolCollectionEdenSpace = Mockito.mock(MemoryUsage.class);
+    private final MemoryUsage memoryUsagePoolCollectionOldGen = Mockito.mock(MemoryUsage.class);
 
     @Before
     public void setUp() {
@@ -87,7 +87,7 @@ public class JvmMemoryMetricsTest {
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
-        String expected = "" +
+        String expected =
                 "# TYPE jvm_memory_committed_bytes gauge\n" +
                 "# UNIT jvm_memory_committed_bytes bytes\n" +
                 "# HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.\n" +

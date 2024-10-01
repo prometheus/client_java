@@ -21,7 +21,7 @@ public class JvmRuntimeInfoMetricTest {
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
-        String expected = "" +
+        String expected =
                 "# TYPE jvm_runtime info\n" +
                 "# HELP jvm_runtime JVM runtime info\n" +
                 "jvm_runtime_info{runtime=\"OpenJDK Runtime Environment\",vendor=\"Oracle Corporation\",version=\"1.8.0_382-b05\"} 1\n" +

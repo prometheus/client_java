@@ -125,12 +125,7 @@ public class JvmNativeMemoryMetrics {
         Matcher matcher = pattern.matcher(summary);
         while (matcher.find()) {
           String category = matcher.group(1);
-          long value;
-          if (reserved) {
-            value = Long.parseLong(matcher.group(2));
-          } else {
-            value = Long.parseLong(matcher.group(3));
-          }
+          long value = reserved ? Long.parseLong(matcher.group(2)) : Long.parseLong(matcher.group(3));
           callback.call(value, category);
         }
       }

@@ -42,7 +42,7 @@ public class JvmBufferPoolMetricsTest {
                                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
-        String expected = "" +
+        String expected =
                 "# TYPE jvm_buffer_pool_capacity_bytes gauge\n" +
                 "# UNIT jvm_buffer_pool_capacity_bytes bytes\n" +
                 "# HELP jvm_buffer_pool_capacity_bytes Bytes capacity of a given JVM buffer pool.\n" +

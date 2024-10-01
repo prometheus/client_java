@@ -24,10 +24,10 @@ import static org.mockito.Mockito.when;
 
 public class JvmThreadsMetricsTest {
 
-    private ThreadMXBean mockThreadsBean = Mockito.mock(ThreadMXBean.class);
-    private ThreadInfo mockThreadInfoBlocked = Mockito.mock(ThreadInfo.class);
-    private ThreadInfo mockThreadInfoRunnable1 = Mockito.mock(ThreadInfo.class);
-    private ThreadInfo mockThreadInfoRunnable2 = Mockito.mock(ThreadInfo.class);
+    private final ThreadMXBean mockThreadsBean = Mockito.mock(ThreadMXBean.class);
+    private final ThreadInfo mockThreadInfoBlocked = Mockito.mock(ThreadInfo.class);
+    private final ThreadInfo mockThreadInfoRunnable1 = Mockito.mock(ThreadInfo.class);
+    private final ThreadInfo mockThreadInfoRunnable2 = Mockito.mock(ThreadInfo.class);
 
     @Before
     public void setUp() {
@@ -55,7 +55,7 @@ public class JvmThreadsMetricsTest {
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
-        String expected = "" +
+        String expected =
                 "# TYPE jvm_threads_current gauge\n" +
                 "# HELP jvm_threads_current Current thread count of a JVM\n" +
                 "jvm_threads_current 300.0\n" +

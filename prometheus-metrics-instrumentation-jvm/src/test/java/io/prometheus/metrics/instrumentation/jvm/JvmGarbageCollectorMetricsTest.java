@@ -21,8 +21,8 @@ import static org.mockito.Mockito.when;
 
 public class JvmGarbageCollectorMetricsTest {
 
-    private GarbageCollectorMXBean mockGcBean1 = Mockito.mock(GarbageCollectorMXBean.class);
-    private GarbageCollectorMXBean mockGcBean2 = Mockito.mock(GarbageCollectorMXBean.class);
+    private final GarbageCollectorMXBean mockGcBean1 = Mockito.mock(GarbageCollectorMXBean.class);
+    private final GarbageCollectorMXBean mockGcBean2 = Mockito.mock(GarbageCollectorMXBean.class);
 
     @Before
     public void setUp() {
@@ -42,7 +42,7 @@ public class JvmGarbageCollectorMetricsTest {
                 .register(registry);
         MetricSnapshots snapshots = registry.scrape();
 
-        String expected = "" +
+        String expected =
                 "# TYPE jvm_gc_collection_seconds summary\n" +
                 "# UNIT jvm_gc_collection_seconds seconds\n" +
                 "# HELP jvm_gc_collection_seconds Time spent in a given JVM garbage collector in seconds.\n" +

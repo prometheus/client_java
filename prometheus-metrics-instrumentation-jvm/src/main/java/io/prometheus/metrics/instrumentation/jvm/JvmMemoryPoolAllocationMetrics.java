@@ -42,12 +42,10 @@ public class JvmMemoryPoolAllocationMetrics {
 
     private static final String JVM_MEMORY_POOL_ALLOCATED_BYTES_TOTAL = "jvm_memory_pool_allocated_bytes_total";
 
-    private final PrometheusProperties config;
     private final List<GarbageCollectorMXBean> garbageCollectorBeans;
 
     private JvmMemoryPoolAllocationMetrics(List<GarbageCollectorMXBean> garbageCollectorBeans, PrometheusProperties config) {
         this.garbageCollectorBeans = garbageCollectorBeans;
-        this.config = config;
     }
 
     private void register(PrometheusRegistry registry) {
@@ -68,7 +66,7 @@ public class JvmMemoryPoolAllocationMetrics {
 
     static class AllocationCountingNotificationListener implements NotificationListener {
 
-        private final Map<String, Long> lastMemoryUsage = new HashMap<String, Long>();
+        private final Map<String, Long> lastMemoryUsage = new HashMap<>();
         private final Counter counter;
 
         AllocationCountingNotificationListener(Counter counter) {

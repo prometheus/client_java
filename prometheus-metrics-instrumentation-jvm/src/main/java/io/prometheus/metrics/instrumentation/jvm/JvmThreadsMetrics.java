@@ -145,7 +145,7 @@ public class JvmThreadsMetrics {
         ThreadInfo[] allThreads = threadBean.getThreadInfo(threadIds, 0);
 
         // Initialize the map with all thread states
-        HashMap<String, Integer> threadCounts = new HashMap<String, Integer>();
+        HashMap<String, Integer> threadCounts = new HashMap<>();
         for (Thread.State state : Thread.State.values()) {
             threadCounts.put(state.name(), 0);
         }

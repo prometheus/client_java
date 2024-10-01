@@ -3,7 +3,6 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -13,7 +12,7 @@ import java.io.IOException;
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
 import static org.mockito.Mockito.when;
 
-public class JvmNativeMemoryMetricsTest extends TestCase {
+public class JvmNativeMemoryMetricsTest {
 
   @Test
   public void testNativeMemoryTrackingFail() throws IOException {
@@ -168,7 +167,7 @@ public class JvmNativeMemoryMetricsTest extends TestCase {
     new JvmNativeMemoryMetrics.Builder(PrometheusProperties.get(), adapter).register(registry);
     MetricSnapshots snapshots = registry.scrape();
 
-    String expected = "" +
+    String expected =
         "# TYPE jvm_native_memory_committed_bytes gauge\n" +
         "# UNIT jvm_native_memory_committed_bytes bytes\n" +
         "# HELP jvm_native_memory_committed_bytes Committed bytes of a given JVM. Committed memory represents the amount of memory the JVM is using right now.\n" +
