@@ -1,11 +1,11 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.junit.Assert.assertEquals;
 
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class JvmRuntimeInfoMetricTest {
@@ -27,6 +27,6 @@ public class JvmRuntimeInfoMetricTest {
             + "jvm_runtime_info{runtime=\"OpenJDK Runtime Environment\",vendor=\"Oracle Corporation\",version=\"1.8.0_382-b05\"} 1\n"
             + "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 }
