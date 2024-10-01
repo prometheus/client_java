@@ -20,7 +20,7 @@
     <properties>
         <!-- Must be the same as the version of the protoc command that generated Metrics.java -->
         <!-- in the Prometheus protobuf exposition format. -->
-        <protobuf.version>3.25.3</protobuf.version>
+        <protobuf.version>3.25.5</protobuf.version>
         <!-- The version string is part of the relocated package name to make it safe to update in the future. -->
         <protobuf.version.string>3_25_3</protobuf.version.string>
     </properties>
