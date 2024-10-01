@@ -55,7 +55,7 @@ jobs:
       #- name: Install Dart Sass
       #  run: sudo snap install dart-sass
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
