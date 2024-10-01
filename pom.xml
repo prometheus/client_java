@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
 
@@ -156,9 +157,32 @@
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>1.4.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.43.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <configuration>
+                    <ratchetFrom>origin/main</ratchetFrom>
+                    <java>
+                        <googleJavaFormat/>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -217,7 +241,9 @@
                     <linksource>true</linksource>
                     <noqualifier>all</noqualifier>
                     <show>public</show>
-                    <skippedModules>benchmarks,examples,integration-tests,integration_tests,,simpleclient,simpleclient_bom,simpleclient_caffeine,simpleclient_common,simpleclient_dropwizard,simpleclient_graphite_bridge,simpleclient_guava,simpleclient_hibernate,simpleclient_hotspot,simpleclient_httpserver,simpleclient_jetty,simpleclient_jetty_jdk8,simpleclient_log4j,simpleclient_log4j2,simpleclient_logback,simpleclient_pushgateway,simpleclient_servlet,simpleclient_servlet_common,simpleclient_servlet_jakarta,simpleclient_spring_boot,simpleclient_spring_web,simpleclient_tracer,simpleclient_vertx,simpleclient_vertx4</skippedModules>
+                    <skippedModules>
+                        benchmarks,examples,integration-tests,integration_tests,,simpleclient,simpleclient_bom,simpleclient_caffeine,simpleclient_common,simpleclient_dropwizard,simpleclient_graphite_bridge,simpleclient_guava,simpleclient_hibernate,simpleclient_hotspot,simpleclient_httpserver,simpleclient_jetty,simpleclient_jetty_jdk8,simpleclient_log4j,simpleclient_log4j2,simpleclient_logback,simpleclient_pushgateway,simpleclient_servlet,simpleclient_servlet_common,simpleclient_servlet_jakarta,simpleclient_spring_boot,simpleclient_spring_web,simpleclient_tracer,simpleclient_vertx,simpleclient_vertx4
+                    </skippedModules>
                     <excludePackageNames>io.prometheus.metrics.expositionformats.generated.*</excludePackageNames>
                 </configuration>
             </plugin>

@@ -1,0 +1,25 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: 'maven'
+      - name: Shaded dependencies
+        run: |
+          cd prometheus-metrics-shaded-dependencies
+          ../mvnw clean install
+      - name: Run the Maven verify phase
+        run: |
+          ./mvnw clean install
+          ./mvnw javadoc:jar
