@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
+import io.prometheus.client.Metrics;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
+import com.google.protobuf.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

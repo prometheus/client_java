@@ -7,13 +7,13 @@ import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
+import io.prometheus.client.Metrics;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
-import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
+import com.google.protobuf.TextFormat;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import java.util.Arrays;

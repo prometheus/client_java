@@ -4,9 +4,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import io.prometheus.client.Metrics;
 import io.prometheus.client.it.common.LogConsumer;
 import io.prometheus.client.it.common.Volume;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
