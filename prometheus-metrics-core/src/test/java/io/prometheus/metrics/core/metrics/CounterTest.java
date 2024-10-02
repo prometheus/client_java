@@ -2,6 +2,8 @@ package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.rules.ExpectedException.none;
 
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
@@ -14,9 +16,9 @@ import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
+import java.util.Arrays;
 import java.util.Iterator;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,11 +26,11 @@ import org.junit.rules.ExpectedException;
 
 public class CounterTest {
 
-  Counter noLabels;
-  Counter labels;
+  private Counter noLabels;
+  private Counter labels;
   private static final long exemplarSampleIntervalMillis = 10;
   private static final long exemplarMinAgeMillis = 100;
-  SpanContext origSpanContext;
+  private SpanContext origSpanContext;
 
   @Rule public final ExpectedException thrown = none();
 
@@ -53,7 +55,10 @@ public class CounterTest {
     return counter.collect().getDataPoints().stream()
         .filter(d -> d.getLabels().equals(Labels.of(labels)))
         .findAny()
-        .orElseThrow(() -> new RuntimeException("counter with labels " + labels + " not found"));
+        .orElseThrow(
+            () ->
+                new RuntimeException(
+                    "counter with labels " + Arrays.toString(labels) + " not found"));
   }
 
   private double getValue(Counter counter, String... labels) {
@@ -61,7 +66,7 @@ public class CounterTest {
   }
 
   private int getNumberOfLabels(Counter counter) {
-    return ((CounterSnapshot) counter.collect()).getDataPoints().size();
+    return counter.collect().getDataPoints().size();
   }
 
   @Test
@@ -131,30 +136,30 @@ public class CounterTest {
             .build();
     counter.labelValues("/", "200").inc(2);
     counter.labelValues("/", "500").inc();
-    CounterSnapshot snapshot = (CounterSnapshot) counter.collect();
-    Assert.assertEquals("test_seconds", snapshot.getMetadata().getName());
-    Assert.assertEquals("seconds", snapshot.getMetadata().getUnit().toString());
-    Assert.assertEquals("help message", snapshot.getMetadata().getHelp());
-    Assert.assertEquals(2, snapshot.getDataPoints().size());
+    CounterSnapshot snapshot = counter.collect();
+    assertEquals("test_seconds", snapshot.getMetadata().getName());
+    assertEquals("seconds", snapshot.getMetadata().getUnit().toString());
+    assertEquals("help message", snapshot.getMetadata().getHelp());
+    assertEquals(2, snapshot.getDataPoints().size());
     Iterator<CounterSnapshot.CounterDataPointSnapshot> iter = snapshot.getDataPoints().iterator();
     // data is ordered by labels, so 200 comes before 500
     CounterSnapshot.CounterDataPointSnapshot data = iter.next();
-    Assert.assertEquals(
+    assertEquals(
         Labels.of(
             "const1name", "const1value", "const2name", "const2value", "path", "/", "status", "200"),
         data.getLabels());
-    Assert.assertEquals(2, data.getValue(), 0.0001);
-    Assert.assertTrue(data.getCreatedTimestampMillis() >= before);
-    Assert.assertTrue(data.getCreatedTimestampMillis() <= System.currentTimeMillis());
+    assertEquals(2, data.getValue(), 0.0001);
+    assertTrue(data.getCreatedTimestampMillis() >= before);
+    assertTrue(data.getCreatedTimestampMillis() <= System.currentTimeMillis());
     // 500
     data = iter.next();
-    Assert.assertEquals(
+    assertEquals(
         Labels.of(
             "const1name", "const1value", "const2name", "const2value", "path", "/", "status", "500"),
         data.getLabels());
-    Assert.assertEquals(1, data.getValue(), 0.0001);
-    Assert.assertTrue(data.getCreatedTimestampMillis() >= before);
-    Assert.assertTrue(data.getCreatedTimestampMillis() <= System.currentTimeMillis());
+    assertEquals(1, data.getValue(), 0.0001);
+    assertTrue(data.getCreatedTimestampMillis() >= before);
+    assertTrue(data.getCreatedTimestampMillis() <= System.currentTimeMillis());
   }
 
   @Test
@@ -175,7 +180,7 @@ public class CounterTest {
 
   private void assertExemplar(Counter counter, double value, String... labels) {
     Exemplar exemplar = getData(counter).getExemplar();
-    Assert.assertEquals(value, exemplar.getValue(), 0.0001);
+    assertEquals(value, exemplar.getValue(), 0.0001);
     assertEquals(Labels.of(labels), exemplar.getLabels());
   }
 
@@ -230,10 +235,7 @@ public class CounterTest {
           @Override
           public boolean isCurrentSpanSampled() {
             callNumber++;
-            if (callNumber == 2) {
-              return false;
-            }
-            return true;
+            return callNumber != 2;
           }
 
           @Override
@@ -289,9 +291,9 @@ public class CounterTest {
             .withoutExemplars()
             .build();
     counter.incWithExemplar(3.0, Labels.of("a", "b"));
-    Assert.assertNull(getData(counter).getExemplar());
+    assertNull(getData(counter).getExemplar());
     counter.inc(2.0);
-    Assert.assertNull(getData(counter).getExemplar());
+    assertNull(getData(counter).getExemplar());
   }
 
   @Test(expected = IllegalArgumentException.class)

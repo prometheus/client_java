@@ -48,7 +48,7 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
   protected abstract MetricSnapshot collect(List<Labels> labels, List<T> metricData);
 
   public MetricSnapshot collect() {
-    if (labelNames.length == 0 && data.size() == 0) {
+    if (labelNames.length == 0 && data.isEmpty()) {
       // This is a metric without labels that has not been used yet. Initialize the data on the fly.
       labelValues();
     }
@@ -138,7 +138,7 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
   }
 
   protected MetricsProperties[] getMetricProperties(
-      Builder builder, PrometheusProperties prometheusProperties) {
+      Builder<?, ?> builder, PrometheusProperties prometheusProperties) {
     String metricName = getMetadata().getName();
     if (prometheusProperties.getMetricProperties(metricName) != null) {
       return new MetricsProperties[] {

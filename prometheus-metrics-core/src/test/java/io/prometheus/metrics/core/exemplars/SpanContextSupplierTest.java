@@ -42,7 +42,7 @@ public class SpanContextSupplierTest {
       new ExemplarSamplerConfig(
           10, // min retention period in milliseconds
           20, // max retention period in milliseconds
-          5, // sample interval in millisecnods
+          5, // sample interval in milliseconds
           1, // number of exemplars
           null // histogram upper bounds
           );

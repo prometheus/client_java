@@ -1,8 +1,10 @@
 package io.prometheus.metrics.core.metrics;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.lang.reflect.Field;
 import java.util.Map;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class StatefulMetricTest {
@@ -28,8 +30,8 @@ public class StatefulMetricTest {
         counter.remove("c", "d");
         counter.remove("e", "f");
       }
-      Assert.assertNotNull(entry.getKey());
-      Assert.assertNotNull(entry.getValue());
+      assertNotNull(entry.getKey());
+      assertNotNull(entry.getValue());
     }
   }
 
@@ -39,31 +41,31 @@ public class StatefulMetricTest {
     counter.labelValues("a", "b").inc(3.0);
     counter.labelValues("c", "d").inc(3.0);
     counter.labelValues("a", "b").inc();
-    Assert.assertEquals(2, counter.collect().getDataPoints().size());
+    assertEquals(2, counter.collect().getDataPoints().size());
 
     counter.clear();
-    Assert.assertEquals(0, counter.collect().getDataPoints().size());
+    assertEquals(0, counter.collect().getDataPoints().size());
 
     counter.labelValues("a", "b").inc();
-    Assert.assertEquals(1, counter.collect().getDataPoints().size());
+    assertEquals(1, counter.collect().getDataPoints().size());
   }
 
   @Test
   public void testClearNoLabels() {
     Counter counter = Counter.builder().name("test").build();
     counter.inc();
-    Assert.assertEquals(1, counter.collect().getDataPoints().size());
-    Assert.assertEquals(1.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
+    assertEquals(1, counter.collect().getDataPoints().size());
+    assertEquals(1.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
 
     counter.clear();
     // No labels is always present, but as no value has been observed after clear() the value should
     // be 0.0
-    Assert.assertEquals(1, counter.collect().getDataPoints().size());
-    Assert.assertEquals(0.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
+    assertEquals(1, counter.collect().getDataPoints().size());
+    assertEquals(0.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
 
     // Making inc() works correctly after clear()
     counter.inc();
-    Assert.assertEquals(1, counter.collect().getDataPoints().size());
-    Assert.assertEquals(1.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
+    assertEquals(1, counter.collect().getDataPoints().size());
+    assertEquals(1.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
   }
 }

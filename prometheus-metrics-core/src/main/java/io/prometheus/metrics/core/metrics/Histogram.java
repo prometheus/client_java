@@ -481,8 +481,8 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       nativeZeroCount.reset();
       count.reset();
       sum.reset();
-      for (int i = 0; i < classicBuckets.length; i++) {
-        classicBuckets[i].reset();
+      for (LongAdder classicBucket : classicBuckets) {
+        classicBucket.reset();
       }
       nativeZeroThreshold = nativeMinZeroThreshold;
       nativeSchema = Histogram.this.nativeInitialSchema;
@@ -592,11 +592,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       buckets.clear();
       for (i = 0; i < keys.length; i++) {
         int index = (keys[i] + 1) / 2;
-        LongAdder count = buckets.get(index);
-        if (count == null) {
-          count = new LongAdder();
-          buckets.put(index, count);
-        }
+        LongAdder count = buckets.computeIfAbsent(index, k -> new LongAdder());
         count.add(values[i]);
       }
     }
@@ -789,9 +785,9 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     }
 
     /**
-     * Create classic histogram bucxkets with exponential boundaries.
+     * Create classic histogram buckets with exponential boundaries.
      *
-     * <p>Example: {@code withClassicExponentialBuckets(1.0, 2.0, 10)} creates bucket bounaries
+     * <p>Example: {@code withClassicExponentialBuckets(1.0, 2.0, 10)} creates bucket boundaries
      * {@code [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0]}
      *
      * @param start is the first bucket boundary

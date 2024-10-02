@@ -11,7 +11,6 @@ import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class InfoTest {
@@ -35,21 +34,21 @@ public class InfoTest {
   }
 
   @Test
-  public void testAddAndRemove() throws IOException {
+  public void testAddAndRemove() {
     Info info = Info.builder().name("test_info").labelNames("a", "b").build();
-    Assert.assertEquals(0, info.collect().getDataPoints().size());
+    assertEquals(0, info.collect().getDataPoints().size());
     info.addLabelValues("val1", "val2");
-    Assert.assertEquals(1, info.collect().getDataPoints().size());
+    assertEquals(1, info.collect().getDataPoints().size());
     info.addLabelValues("val1", "val2"); // already exist, so no change
-    Assert.assertEquals(1, info.collect().getDataPoints().size());
+    assertEquals(1, info.collect().getDataPoints().size());
     info.addLabelValues("val2", "val2");
-    Assert.assertEquals(2, info.collect().getDataPoints().size());
+    assertEquals(2, info.collect().getDataPoints().size());
     info.remove("val1", "val3"); // does not exist, so no change
-    Assert.assertEquals(2, info.collect().getDataPoints().size());
+    assertEquals(2, info.collect().getDataPoints().size());
     info.remove("val1", "val2");
-    Assert.assertEquals(1, info.collect().getDataPoints().size());
+    assertEquals(1, info.collect().getDataPoints().size());
     info.remove("val2", "val2");
-    Assert.assertEquals(0, info.collect().getDataPoints().size());
+    assertEquals(0, info.collect().getDataPoints().size());
   }
 
   @Test
@@ -61,9 +60,9 @@ public class InfoTest {
             .labelNames("service.version")
             .build();
     info.setLabelValues("1.0.0");
-    Assert.assertEquals(1, info.collect().getDataPoints().size());
+    assertEquals(1, info.collect().getDataPoints().size());
     info.setLabelValues("2.0.0");
-    Assert.assertEquals(1, info.collect().getDataPoints().size());
+    assertEquals(1, info.collect().getDataPoints().size());
     assertTextFormat(
         "target_info{service_instance_id=\"123\",service_name=\"test\",service_version=\"2.0.0\"} 1\n",
         info);
@@ -76,7 +75,7 @@ public class InfoTest {
             .name("target_info")
             .constLabels(Labels.of("service.name", "test", "service.instance.id", "123"))
             .build();
-    Assert.assertEquals(1, info.collect().getDataPoints().size());
+    assertEquals(1, info.collect().getDataPoints().size());
     assertTextFormat("target_info{service_instance_id=\"123\",service_name=\"test\"} 1\n", info);
   }
 
