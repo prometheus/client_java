@@ -1,17 +1,17 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.resources.ResourceBuilder;
 import io.prometheus.metrics.config.ExporterOpenTelemetryProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.exporter.otlp.metrics.OtlpGrpcMetricExporter;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.common.InstrumentationScopeInfo;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.export.MetricExporter;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.export.PeriodicMetricReader;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.resources.Resource;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.resources.ResourceBuilder;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;

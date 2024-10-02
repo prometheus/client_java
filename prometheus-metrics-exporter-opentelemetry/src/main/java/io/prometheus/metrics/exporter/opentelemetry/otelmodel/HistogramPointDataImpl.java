@@ -1,8 +1,8 @@
 package io.prometheus.metrics.exporter.opentelemetry.otelmodel;
 
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.api.common.Attributes;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.DoubleExemplarData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.HistogramPointData;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.sdk.metrics.data.DoubleExemplarData;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import java.util.List;
 
 public class HistogramPointDataImpl extends PointDataImpl implements HistogramPointData {

@@ -1,11 +1,11 @@
 package io.prometheus.metrics.exporter.opentelemetry.otelmodel;
 
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.sdk.metrics.data.HistogramData;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
+import io.opentelemetry.sdk.metrics.data.MetricDataType;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.AggregationTemporality;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.HistogramData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.HistogramPointData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.MetricDataType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
