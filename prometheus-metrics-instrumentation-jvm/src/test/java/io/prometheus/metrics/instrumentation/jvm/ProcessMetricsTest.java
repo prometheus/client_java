@@ -63,6 +63,7 @@ public class ProcessMetricsTest {
             + "# TYPE process_open_fds gauge\n"
             + "# HELP process_open_fds Number of open file descriptors.\n"
             + "process_open_fds 127.0\n";
+    // To allow running this test in non-linux environments
     if (ProcessMetrics.PROC_SELF_STATUS.canRead()) {
       expected +=
           ""
@@ -77,6 +78,7 @@ public class ProcessMetricsTest {
             + "# UNIT process_start_time_seconds seconds\n"
             + "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n"
             + "process_start_time_seconds 37.1\n";
+    // To allow running this test in non-linux environments
     if (ProcessMetrics.PROC_SELF_STATUS.canRead()) {
       expected +=
           ""
