@@ -3,16 +3,15 @@ package io.prometheus.metrics.core.metrics;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import io.prometheus.client.Metrics;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
-import io.prometheus.client.Metrics;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.shaded.com_google_protobuf.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
-import io.prometheus.metrics.shaded.com_google_protobuf.TextFormat;
 import org.junit.jupiter.api.Test;
 
 class InfoTest {
