@@ -5,6 +5,26 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: maven
-    directory: "/"
+    directories:
+      - prometheus-metrics-bom
+      - prometheus-metrics-core
+      - prometheus-metrics-config
+      - prometheus-metrics-model
+      - prometheus-metrics-tracer
+      - prometheus-metrics-exposition-formats
+      - prometheus-metrics-exporter-common
+      - prometheus-metrics-exporter-servlet-jakarta
+      - prometheus-metrics-exporter-servlet-javax
+      - prometheus-metrics-exporter-httpserver
+      - prometheus-metrics-exporter-opentelemetry
+      - prometheus-metrics-exporter-pushgateway
+      - prometheus-metrics-instrumentation-caffeine
+      - prometheus-metrics-instrumentation-jvm
+      - prometheus-metrics-instrumentation-dropwizard5
+      - prometheus-metrics-instrumentation-guava
+      - prometheus-metrics-simpleclient-bridge
+      - examples
+      - benchmarks
+      - integration-tests
     schedule:
       interval: daily
