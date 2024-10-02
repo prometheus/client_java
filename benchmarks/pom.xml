@@ -19,7 +19,7 @@
         <jmh.version>1.37</jmh.version>
         <simpleclient.version>0.16.0</simpleclient.version>
         <codahale.version>3.0.2</codahale.version>
-        <opentelemetry.version>1.30.1</opentelemetry.version>
+        <opentelemetry.version>1.42.1</opentelemetry.version>
     </properties>
 
     <licenses>
