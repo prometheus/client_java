@@ -1,6 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,14 +11,13 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
 import java.lang.management.ClassLoadingMXBean;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class JvmClassLoadingMetricsTest {
 
-  private ClassLoadingMXBean mockClassLoadingBean = Mockito.mock(ClassLoadingMXBean.class);
+  private final ClassLoadingMXBean mockClassLoadingBean = Mockito.mock(ClassLoadingMXBean.class);
 
   @Before
   public void setUp() {
@@ -45,7 +45,7 @@ public class JvmClassLoadingMetricsTest {
             + "jvm_classes_unloaded_total 500.0\n"
             + "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 
   @Test

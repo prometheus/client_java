@@ -1,6 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,22 +14,21 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.Arrays;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class JvmMemoryMetricsTest {
 
-  private MemoryMXBean mockMemoryBean = Mockito.mock(MemoryMXBean.class);
-  private MemoryPoolMXBean mockPoolsBeanEdenSpace = Mockito.mock(MemoryPoolMXBean.class);
-  private MemoryPoolMXBean mockPoolsBeanOldGen = Mockito.mock(MemoryPoolMXBean.class);
-  private MemoryUsage memoryUsageHeap = Mockito.mock(MemoryUsage.class);
-  private MemoryUsage memoryUsageNonHeap = Mockito.mock(MemoryUsage.class);
-  private MemoryUsage memoryUsagePoolEdenSpace = Mockito.mock(MemoryUsage.class);
-  private MemoryUsage memoryUsagePoolOldGen = Mockito.mock(MemoryUsage.class);
-  private MemoryUsage memoryUsagePoolCollectionEdenSpace = Mockito.mock(MemoryUsage.class);
-  private MemoryUsage memoryUsagePoolCollectionOldGen = Mockito.mock(MemoryUsage.class);
+  private final MemoryMXBean mockMemoryBean = Mockito.mock(MemoryMXBean.class);
+  private final MemoryPoolMXBean mockPoolsBeanEdenSpace = Mockito.mock(MemoryPoolMXBean.class);
+  private final MemoryPoolMXBean mockPoolsBeanOldGen = Mockito.mock(MemoryPoolMXBean.class);
+  private final MemoryUsage memoryUsageHeap = Mockito.mock(MemoryUsage.class);
+  private final MemoryUsage memoryUsageNonHeap = Mockito.mock(MemoryUsage.class);
+  private final MemoryUsage memoryUsagePoolEdenSpace = Mockito.mock(MemoryUsage.class);
+  private final MemoryUsage memoryUsagePoolOldGen = Mockito.mock(MemoryUsage.class);
+  private final MemoryUsage memoryUsagePoolCollectionEdenSpace = Mockito.mock(MemoryUsage.class);
+  private final MemoryUsage memoryUsagePoolCollectionOldGen = Mockito.mock(MemoryUsage.class);
 
   @Before
   public void setUp() {
@@ -154,7 +154,7 @@ public class JvmMemoryMetricsTest {
             + "jvm_memory_used_bytes{area=\"nonheap\"} 6.0\n"
             + "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 
   @Test
