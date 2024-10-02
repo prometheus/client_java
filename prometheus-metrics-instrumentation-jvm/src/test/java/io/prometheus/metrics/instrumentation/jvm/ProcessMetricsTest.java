@@ -1,6 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -14,20 +15,19 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.RuntimeMXBean;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class ProcessMetricsTest {
 
-  private com.sun.management.UnixOperatingSystemMXBean sunOsBean =
+  private final com.sun.management.UnixOperatingSystemMXBean sunOsBean =
       Mockito.mock(com.sun.management.UnixOperatingSystemMXBean.class);
-  private java.lang.management.OperatingSystemMXBean javaOsBean =
+  private final java.lang.management.OperatingSystemMXBean javaOsBean =
       Mockito.mock(java.lang.management.OperatingSystemMXBean.class);
-  private ProcessMetrics.Grepper linuxGrepper = Mockito.mock(ProcessMetrics.Grepper.class);
-  private ProcessMetrics.Grepper windowsGrepper = Mockito.mock(ProcessMetrics.Grepper.class);
-  private RuntimeMXBean runtimeBean = Mockito.mock(RuntimeMXBean.class);
+  private final ProcessMetrics.Grepper linuxGrepper = Mockito.mock(ProcessMetrics.Grepper.class);
+  private final ProcessMetrics.Grepper windowsGrepper = Mockito.mock(ProcessMetrics.Grepper.class);
+  private final RuntimeMXBean runtimeBean = Mockito.mock(RuntimeMXBean.class);
 
   @Before
   public void setUp() throws IOException {
@@ -62,22 +62,34 @@ public class ProcessMetricsTest {
             + "process_max_fds 244.0\n"
             + "# TYPE process_open_fds gauge\n"
             + "# HELP process_open_fds Number of open file descriptors.\n"
-            + "process_open_fds 127.0\n"
-            + "# TYPE process_resident_memory_bytes gauge\n"
-            + "# UNIT process_resident_memory_bytes bytes\n"
-            + "# HELP process_resident_memory_bytes Resident memory size in bytes.\n"
-            + "process_resident_memory_bytes 1036288.0\n"
+            + "process_open_fds 127.0\n";
+    // To allow running this test in non-linux environments
+    if (ProcessMetrics.PROC_SELF_STATUS.canRead()) {
+      expected +=
+          ""
+              + "# TYPE process_resident_memory_bytes gauge\n"
+              + "# UNIT process_resident_memory_bytes bytes\n"
+              + "# HELP process_resident_memory_bytes Resident memory size in bytes.\n"
+              + "process_resident_memory_bytes 1036288.0\n";
+    }
+    expected +=
+        ""
             + "# TYPE process_start_time_seconds gauge\n"
             + "# UNIT process_start_time_seconds seconds\n"
             + "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n"
-            + "process_start_time_seconds 37.1\n"
-            + "# TYPE process_virtual_memory_bytes gauge\n"
-            + "# UNIT process_virtual_memory_bytes bytes\n"
-            + "# HELP process_virtual_memory_bytes Virtual memory size in bytes.\n"
-            + "process_virtual_memory_bytes 6180864.0\n"
-            + "# EOF\n";
+            + "process_start_time_seconds 37.1\n";
+    // To allow running this test in non-linux environments
+    if (ProcessMetrics.PROC_SELF_STATUS.canRead()) {
+      expected +=
+          ""
+              + "# TYPE process_virtual_memory_bytes gauge\n"
+              + "# UNIT process_virtual_memory_bytes bytes\n"
+              + "# HELP process_virtual_memory_bytes Virtual memory size in bytes.\n"
+              + "process_virtual_memory_bytes 6180864.0\n";
+    }
+    expected += "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 
   @Test
@@ -98,7 +110,7 @@ public class ProcessMetricsTest {
             + "process_start_time_seconds 37.1\n"
             + "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 
   @Test

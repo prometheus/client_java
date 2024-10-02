@@ -5,6 +5,28 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: maven
-    directory: "/"
+    open-pull-requests-limit: 1 # Limit to 1 open PR at a time until https://github.com/dependabot/dependabot-core/issues/10415 is fixed
+    # excluding simpleclient_archive from the update is not possible, only includes are supported
+    directories:
+      - prometheus-metrics-bom
+      - prometheus-metrics-core
+      - prometheus-metrics-config
+      - prometheus-metrics-model
+      - prometheus-metrics-tracer
+      - prometheus-metrics-exposition-formats
+      - prometheus-metrics-exporter-common
+      - prometheus-metrics-exporter-servlet-jakarta
+      - prometheus-metrics-exporter-servlet-javax
+      - prometheus-metrics-exporter-httpserver
+      - prometheus-metrics-exporter-opentelemetry
+      - prometheus-metrics-exporter-pushgateway
+      - prometheus-metrics-instrumentation-caffeine
+      - prometheus-metrics-instrumentation-jvm
+      - prometheus-metrics-instrumentation-dropwizard5
+      - prometheus-metrics-instrumentation-guava
+      - prometheus-metrics-simpleclient-bridge
+      - examples
+      - benchmarks
+      - integration-tests
     schedule:
       interval: daily
