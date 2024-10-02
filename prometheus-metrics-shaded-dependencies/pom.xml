@@ -17,7 +17,6 @@
     </description>
 
     <modules>
-        <module>prometheus-metrics-shaded-opentelemetry</module>
         <module>prometheus-metrics-shaded-protobuf</module>
     </modules>
 

@@ -13,7 +13,6 @@ The versions plugin does not catch the `otel.version` in `prometheus-metrics-exp
 ## Update Shaded Dependencies
 
 There are two modules for shaded dependencies:
-* `prometheus-metrics-shaded-opentelemetry`: OpenTelemetry data model.
 * `prometheus-metrics-shaded-protobuf`: Google's protobuf library.
 
 The shaded modules are commented out in the root `pom.xml`. Instead of using the shaded dependencies from the project, we use the latest shaded dependencies from Maven central (or from the local Maven repository in `~/.m2/repository/`). This way we can `include` the shaded package name directly. We find this easier than importing the original package name and have it renamed at build time.
