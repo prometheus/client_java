@@ -1,6 +1,8 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,17 +18,16 @@ import java.lang.management.ThreadMXBean;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class JvmThreadsMetricsTest {
 
-  private ThreadMXBean mockThreadsBean = Mockito.mock(ThreadMXBean.class);
-  private ThreadInfo mockThreadInfoBlocked = Mockito.mock(ThreadInfo.class);
-  private ThreadInfo mockThreadInfoRunnable1 = Mockito.mock(ThreadInfo.class);
-  private ThreadInfo mockThreadInfoRunnable2 = Mockito.mock(ThreadInfo.class);
+  private final ThreadMXBean mockThreadsBean = Mockito.mock(ThreadMXBean.class);
+  private final ThreadInfo mockThreadInfoBlocked = Mockito.mock(ThreadInfo.class);
+  private final ThreadInfo mockThreadInfoRunnable1 = Mockito.mock(ThreadInfo.class);
+  private final ThreadInfo mockThreadInfoRunnable2 = Mockito.mock(ThreadInfo.class);
 
   @Before
   public void setUp() {
@@ -84,7 +85,7 @@ public class JvmThreadsMetricsTest {
             + "jvm_threads_state{state=\"WAITING\"} 0.0\n"
             + "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 
   @Test
@@ -133,9 +134,9 @@ public class JvmThreadsMetricsTest {
 
       Map<String, Double> actual = getCountByState(registry.scrape());
 
-      Assert.assertEquals(expected.size(), actual.size());
+      assertEquals(expected.size(), actual.size());
       for (String threadState : expected.keySet()) {
-        Assert.assertEquals(expected.get(threadState), actual.get(threadState), 0.0);
+        assertEquals(expected.get(threadState), actual.get(threadState), 0.0);
       }
     } finally {
       for (int i = 0; i < numberOfInvalidThreadIds; i++) {
@@ -151,7 +152,7 @@ public class JvmThreadsMetricsTest {
         for (GaugeSnapshot.GaugeDataPointSnapshot data :
             ((GaugeSnapshot) snapshot).getDataPoints()) {
           String state = data.getLabels().get("state");
-          Assert.assertNotNull(state);
+          assertNotNull(state);
           result.put(state, data.getValue());
         }
       }

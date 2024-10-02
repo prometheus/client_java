@@ -72,7 +72,7 @@ public class ProcessMetrics {
   private static final String PROCESS_VIRTUAL_MEMORY_BYTES = "process_virtual_memory_bytes";
   private static final String PROCESS_RESIDENT_MEMORY_BYTES = "process_resident_memory_bytes";
 
-  private static final File PROC_SELF_STATUS = new File("/proc/self/status");
+  static final File PROC_SELF_STATUS = new File("/proc/self/status");
 
   private final PrometheusProperties config;
   private final OperatingSystemMXBean osBean;
