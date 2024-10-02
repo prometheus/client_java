@@ -1,6 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.instrumentation.jvm.JvmMemoryPoolAllocationMetrics.AllocationCountingNotificationListener;
@@ -8,7 +9,6 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class JvmMemoryPoolAllocationMetricsTest {
@@ -60,7 +60,7 @@ public class JvmMemoryPoolAllocationMetricsTest {
         }
       }
     }
-    Assert.fail("pool " + poolName + " not found.");
+    fail("pool " + poolName + " not found.");
     return 0.0;
   }
 }
