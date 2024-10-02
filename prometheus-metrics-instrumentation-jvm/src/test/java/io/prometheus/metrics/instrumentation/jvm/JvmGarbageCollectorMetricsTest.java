@@ -1,6 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,15 +13,14 @@ import java.io.IOException;
 import java.lang.management.GarbageCollectorMXBean;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class JvmGarbageCollectorMetricsTest {
 
-  private GarbageCollectorMXBean mockGcBean1 = Mockito.mock(GarbageCollectorMXBean.class);
-  private GarbageCollectorMXBean mockGcBean2 = Mockito.mock(GarbageCollectorMXBean.class);
+  private final GarbageCollectorMXBean mockGcBean1 = Mockito.mock(GarbageCollectorMXBean.class);
+  private final GarbageCollectorMXBean mockGcBean2 = Mockito.mock(GarbageCollectorMXBean.class);
 
   @Before
   public void setUp() {
@@ -51,7 +51,7 @@ public class JvmGarbageCollectorMetricsTest {
             + "jvm_gc_collection_seconds_sum{gc=\"MyGC2\"} 20.0\n"
             + "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 
   @Test
@@ -67,6 +67,6 @@ public class JvmGarbageCollectorMetricsTest {
 
     verify(mockGcBean1, times(0)).getCollectionTime();
     verify(mockGcBean1, times(0)).getCollectionCount();
-    Assert.assertEquals(0, snapshots.size());
+    assertEquals(0, snapshots.size());
   }
 }

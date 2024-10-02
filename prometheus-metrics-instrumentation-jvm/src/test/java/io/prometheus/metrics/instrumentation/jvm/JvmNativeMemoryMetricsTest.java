@@ -1,18 +1,17 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
-import junit.framework.TestCase;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class JvmNativeMemoryMetricsTest extends TestCase {
+public class JvmNativeMemoryMetricsTest {
 
   @Test
   public void testNativeMemoryTrackingFail() throws IOException {
@@ -28,7 +27,7 @@ public class JvmNativeMemoryMetricsTest extends TestCase {
 
     String expected = "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 
   @Test
@@ -45,7 +44,7 @@ public class JvmNativeMemoryMetricsTest extends TestCase {
 
     String expected = "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 
   @Test
@@ -63,7 +62,7 @@ public class JvmNativeMemoryMetricsTest extends TestCase {
 
     String expected = "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 
   @Test
@@ -226,6 +225,6 @@ public class JvmNativeMemoryMetricsTest extends TestCase {
             + "jvm_native_memory_reserved_bytes{pool=\"Tracing\"} 33097.0\n"
             + "# EOF\n";
 
-    Assert.assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
   }
 }
