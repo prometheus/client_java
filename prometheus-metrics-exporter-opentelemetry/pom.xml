@@ -17,7 +17,7 @@
     </description>
 
     <properties>
-        <otel.version>1.38.0</otel.version>
+        <otel.version>1.42.1</otel.version>
         <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry</automatic.module.name>
     </properties>
 
