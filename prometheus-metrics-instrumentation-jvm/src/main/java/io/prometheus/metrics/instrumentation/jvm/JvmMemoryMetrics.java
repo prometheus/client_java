@@ -4,7 +4,6 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Unit;
-
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
@@ -14,15 +13,21 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * JVM memory metrics. The {@link JvmMemoryMetrics} are registered as part of the {@link JvmMetrics} like this:
+ * JVM memory metrics. The {@link JvmMemoryMetrics} are registered as part of the {@link JvmMetrics}
+ * like this:
+ *
  * <pre>{@code
- *   JvmMetrics.builder().register();
+ * JvmMetrics.builder().register();
  * }</pre>
+ *
  * However, if you want only the {@link JvmMemoryMetrics} you can also register them directly:
+ *
  * <pre>{@code
- *   JvmMemoryMetrics.builder().register();
+ * JvmMemoryMetrics.builder().register();
  * }</pre>
+ *
  * Example metrics being exported:
+ *
  * <pre>
  * # HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.
  * # TYPE jvm_memory_committed_bytes gauge
@@ -99,200 +104,216 @@ import java.util.function.Function;
  */
 public class JvmMemoryMetrics {
 
-    private static final String JVM_MEMORY_OBJECTS_PENDING_FINALIZATION = "jvm_memory_objects_pending_finalization";
-    private static final String JVM_MEMORY_USED_BYTES = "jvm_memory_used_bytes";
-    private static final String JVM_MEMORY_COMMITTED_BYTES = "jvm_memory_committed_bytes";
-    private static final String JVM_MEMORY_MAX_BYTES = "jvm_memory_max_bytes";
-    private static final String JVM_MEMORY_INIT_BYTES = "jvm_memory_init_bytes";
-    private static final String JVM_MEMORY_POOL_USED_BYTES = "jvm_memory_pool_used_bytes";
-    private static final String JVM_MEMORY_POOL_COMMITTED_BYTES = "jvm_memory_pool_committed_bytes";
-    private static final String JVM_MEMORY_POOL_MAX_BYTES = "jvm_memory_pool_max_bytes";
-    private static final String JVM_MEMORY_POOL_INIT_BYTES = "jvm_memory_pool_init_bytes";
-    private static final String JVM_MEMORY_POOL_COLLECTION_USED_BYTES = "jvm_memory_pool_collection_used_bytes";
-    private static final String JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES = "jvm_memory_pool_collection_committed_bytes";
-    private static final String JVM_MEMORY_POOL_COLLECTION_MAX_BYTES = "jvm_memory_pool_collection_max_bytes";
-    private static final String JVM_MEMORY_POOL_COLLECTION_INIT_BYTES = "jvm_memory_pool_collection_init_bytes";
+  private static final String JVM_MEMORY_OBJECTS_PENDING_FINALIZATION =
+      "jvm_memory_objects_pending_finalization";
+  private static final String JVM_MEMORY_USED_BYTES = "jvm_memory_used_bytes";
+  private static final String JVM_MEMORY_COMMITTED_BYTES = "jvm_memory_committed_bytes";
+  private static final String JVM_MEMORY_MAX_BYTES = "jvm_memory_max_bytes";
+  private static final String JVM_MEMORY_INIT_BYTES = "jvm_memory_init_bytes";
+  private static final String JVM_MEMORY_POOL_USED_BYTES = "jvm_memory_pool_used_bytes";
+  private static final String JVM_MEMORY_POOL_COMMITTED_BYTES = "jvm_memory_pool_committed_bytes";
+  private static final String JVM_MEMORY_POOL_MAX_BYTES = "jvm_memory_pool_max_bytes";
+  private static final String JVM_MEMORY_POOL_INIT_BYTES = "jvm_memory_pool_init_bytes";
+  private static final String JVM_MEMORY_POOL_COLLECTION_USED_BYTES =
+      "jvm_memory_pool_collection_used_bytes";
+  private static final String JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES =
+      "jvm_memory_pool_collection_committed_bytes";
+  private static final String JVM_MEMORY_POOL_COLLECTION_MAX_BYTES =
+      "jvm_memory_pool_collection_max_bytes";
+  private static final String JVM_MEMORY_POOL_COLLECTION_INIT_BYTES =
+      "jvm_memory_pool_collection_init_bytes";
+
+  private final PrometheusProperties config;
+  private final MemoryMXBean memoryBean;
+  private final List<MemoryPoolMXBean> poolBeans;
+
+  private JvmMemoryMetrics(
+      List<MemoryPoolMXBean> poolBeans, MemoryMXBean memoryBean, PrometheusProperties config) {
+    this.config = config;
+    this.poolBeans = poolBeans;
+    this.memoryBean = memoryBean;
+  }
+
+  private void register(PrometheusRegistry registry) {
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_OBJECTS_PENDING_FINALIZATION)
+        .help("The number of objects waiting in the finalizer queue.")
+        .callback(callback -> callback.call(memoryBean.getObjectPendingFinalizationCount()))
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_USED_BYTES)
+        .help("Used bytes of a given JVM memory area.")
+        .unit(Unit.BYTES)
+        .labelNames("area")
+        .callback(
+            callback -> {
+              callback.call(memoryBean.getHeapMemoryUsage().getUsed(), "heap");
+              callback.call(memoryBean.getNonHeapMemoryUsage().getUsed(), "nonheap");
+            })
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_COMMITTED_BYTES)
+        .help("Committed (bytes) of a given JVM memory area.")
+        .unit(Unit.BYTES)
+        .labelNames("area")
+        .callback(
+            callback -> {
+              callback.call(memoryBean.getHeapMemoryUsage().getCommitted(), "heap");
+              callback.call(memoryBean.getNonHeapMemoryUsage().getCommitted(), "nonheap");
+            })
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_MAX_BYTES)
+        .help("Max (bytes) of a given JVM memory area.")
+        .unit(Unit.BYTES)
+        .labelNames("area")
+        .callback(
+            callback -> {
+              callback.call(memoryBean.getHeapMemoryUsage().getMax(), "heap");
+              callback.call(memoryBean.getNonHeapMemoryUsage().getMax(), "nonheap");
+            })
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_INIT_BYTES)
+        .help("Initial bytes of a given JVM memory area.")
+        .unit(Unit.BYTES)
+        .labelNames("area")
+        .callback(
+            callback -> {
+              callback.call(memoryBean.getHeapMemoryUsage().getInit(), "heap");
+              callback.call(memoryBean.getNonHeapMemoryUsage().getInit(), "nonheap");
+            })
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_POOL_USED_BYTES)
+        .help("Used bytes of a given JVM memory pool.")
+        .unit(Unit.BYTES)
+        .labelNames("pool")
+        .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getUsed))
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_POOL_COMMITTED_BYTES)
+        .help("Committed bytes of a given JVM memory pool.")
+        .unit(Unit.BYTES)
+        .labelNames("pool")
+        .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getCommitted))
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_POOL_MAX_BYTES)
+        .help("Max bytes of a given JVM memory pool.")
+        .unit(Unit.BYTES)
+        .labelNames("pool")
+        .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getMax))
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_POOL_INIT_BYTES)
+        .help("Initial bytes of a given JVM memory pool.")
+        .unit(Unit.BYTES)
+        .labelNames("pool")
+        .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getInit))
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_POOL_COLLECTION_USED_BYTES)
+        .help("Used bytes after last collection of a given JVM memory pool.")
+        .unit(Unit.BYTES)
+        .labelNames("pool")
+        .callback(
+            makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getUsed))
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES)
+        .help("Committed after last collection bytes of a given JVM memory pool.")
+        .unit(Unit.BYTES)
+        .labelNames("pool")
+        .callback(
+            makeCallback(
+                poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getCommitted))
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_POOL_COLLECTION_MAX_BYTES)
+        .help("Max bytes after last collection of a given JVM memory pool.")
+        .unit(Unit.BYTES)
+        .labelNames("pool")
+        .callback(
+            makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getMax))
+        .register(registry);
+
+    GaugeWithCallback.builder(config)
+        .name(JVM_MEMORY_POOL_COLLECTION_INIT_BYTES)
+        .help("Initial after last collection bytes of a given JVM memory pool.")
+        .unit(Unit.BYTES)
+        .labelNames("pool")
+        .callback(
+            makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getInit))
+        .register(registry);
+  }
+
+  private Consumer<GaugeWithCallback.Callback> makeCallback(
+      List<MemoryPoolMXBean> poolBeans,
+      Function<MemoryPoolMXBean, MemoryUsage> memoryUsageFunc,
+      Function<MemoryUsage, Long> valueFunc) {
+    return callback -> {
+      for (MemoryPoolMXBean pool : poolBeans) {
+        MemoryUsage poolUsage = memoryUsageFunc.apply(pool);
+        if (poolUsage != null) {
+          callback.call(valueFunc.apply(poolUsage), pool.getName());
+        }
+      }
+    };
+  }
+
+  public static Builder builder() {
+    return new Builder(PrometheusProperties.get());
+  }
+
+  public static Builder builder(PrometheusProperties config) {
+    return new Builder(config);
+  }
+
+  public static class Builder {
 
     private final PrometheusProperties config;
-    private final MemoryMXBean memoryBean;
-    private final List<MemoryPoolMXBean> poolBeans;
+    private MemoryMXBean memoryBean;
+    private List<MemoryPoolMXBean> poolBeans;
 
-    private JvmMemoryMetrics(List<MemoryPoolMXBean> poolBeans, MemoryMXBean memoryBean, PrometheusProperties config) {
-        this.config = config;
-        this.poolBeans = poolBeans;
-        this.memoryBean = memoryBean;
+    private Builder(PrometheusProperties config) {
+      this.config = config;
     }
 
-    private void register(PrometheusRegistry registry) {
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_OBJECTS_PENDING_FINALIZATION)
-                .help("The number of objects waiting in the finalizer queue.")
-                .callback(callback -> callback.call(memoryBean.getObjectPendingFinalizationCount()))
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_USED_BYTES)
-                .help("Used bytes of a given JVM memory area.")
-                .unit(Unit.BYTES)
-                .labelNames("area")
-                .callback(callback -> {
-                    callback.call(memoryBean.getHeapMemoryUsage().getUsed(), "heap");
-                    callback.call(memoryBean.getNonHeapMemoryUsage().getUsed(), "nonheap");
-                })
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_COMMITTED_BYTES)
-                .help("Committed (bytes) of a given JVM memory area.")
-                .unit(Unit.BYTES)
-                .labelNames("area")
-                .callback(callback -> {
-                    callback.call(memoryBean.getHeapMemoryUsage().getCommitted(), "heap");
-                    callback.call(memoryBean.getNonHeapMemoryUsage().getCommitted(), "nonheap");
-                })
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_MAX_BYTES)
-                .help("Max (bytes) of a given JVM memory area.")
-                .unit(Unit.BYTES)
-                .labelNames("area")
-                .callback(callback -> {
-                    callback.call(memoryBean.getHeapMemoryUsage().getMax(), "heap");
-                    callback.call(memoryBean.getNonHeapMemoryUsage().getMax(), "nonheap");
-                })
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_INIT_BYTES)
-                .help("Initial bytes of a given JVM memory area.")
-                .unit(Unit.BYTES)
-                .labelNames("area")
-                .callback(callback -> {
-                    callback.call(memoryBean.getHeapMemoryUsage().getInit(), "heap");
-                    callback.call(memoryBean.getNonHeapMemoryUsage().getInit(), "nonheap");
-                })
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_POOL_USED_BYTES)
-                .help("Used bytes of a given JVM memory pool.")
-                .unit(Unit.BYTES)
-                .labelNames("pool")
-                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getUsed))
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_POOL_COMMITTED_BYTES)
-                .help("Committed bytes of a given JVM memory pool.")
-                .unit(Unit.BYTES)
-                .labelNames("pool")
-                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getCommitted))
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_POOL_MAX_BYTES)
-                .help("Max bytes of a given JVM memory pool.")
-                .unit(Unit.BYTES)
-                .labelNames("pool")
-                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getMax))
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_POOL_INIT_BYTES)
-                .help("Initial bytes of a given JVM memory pool.")
-                .unit(Unit.BYTES)
-                .labelNames("pool")
-                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getInit))
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_POOL_COLLECTION_USED_BYTES)
-                .help("Used bytes after last collection of a given JVM memory pool.")
-                .unit(Unit.BYTES)
-                .labelNames("pool")
-                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getUsed))
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_POOL_COLLECTION_COMMITTED_BYTES)
-                .help("Committed after last collection bytes of a given JVM memory pool.")
-                .unit(Unit.BYTES)
-                .labelNames("pool")
-                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getCommitted))
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_POOL_COLLECTION_MAX_BYTES)
-                .help("Max bytes after last collection of a given JVM memory pool.")
-                .unit(Unit.BYTES)
-                .labelNames("pool")
-                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getMax))
-                .register(registry);
-
-        GaugeWithCallback.builder(config)
-                .name(JVM_MEMORY_POOL_COLLECTION_INIT_BYTES)
-                .help("Initial after last collection bytes of a given JVM memory pool.")
-                .unit(Unit.BYTES)
-                .labelNames("pool")
-                .callback(makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getInit))
-                .register(registry);
+    /** Package private. For testing only. */
+    Builder withMemoryBean(MemoryMXBean memoryBean) {
+      this.memoryBean = memoryBean;
+      return this;
     }
 
-    private Consumer<GaugeWithCallback.Callback> makeCallback(List<MemoryPoolMXBean> poolBeans, Function<MemoryPoolMXBean, MemoryUsage> memoryUsageFunc, Function<MemoryUsage, Long> valueFunc) {
-        return callback -> {
-            for (MemoryPoolMXBean pool : poolBeans) {
-                MemoryUsage poolUsage = memoryUsageFunc.apply(pool);
-                if (poolUsage != null) {
-                    callback.call(valueFunc.apply(poolUsage), pool.getName());
-                }
-            }
-        };
+    /** Package private. For testing only. */
+    Builder withMemoryPoolBeans(List<MemoryPoolMXBean> memoryPoolBeans) {
+      this.poolBeans = memoryPoolBeans;
+      return this;
     }
 
-    public static Builder builder() {
-        return new Builder(PrometheusProperties.get());
+    public void register() {
+      register(PrometheusRegistry.defaultRegistry);
     }
 
-    public static Builder builder(PrometheusProperties config) {
-        return new Builder(config);
+    public void register(PrometheusRegistry registry) {
+      MemoryMXBean memoryMXBean =
+          this.memoryBean != null ? this.memoryBean : ManagementFactory.getMemoryMXBean();
+      List<MemoryPoolMXBean> poolBeans =
+          this.poolBeans != null ? this.poolBeans : ManagementFactory.getMemoryPoolMXBeans();
+      new JvmMemoryMetrics(poolBeans, memoryMXBean, config).register(registry);
     }
-
-    public static class Builder {
-
-        private final PrometheusProperties config;
-        private MemoryMXBean memoryBean;
-        private List<MemoryPoolMXBean> poolBeans;
-
-        private Builder(PrometheusProperties config) {
-            this.config = config;
-        }
-
-        /**
-         * Package private. For testing only.
-         */
-        Builder withMemoryBean(MemoryMXBean memoryBean) {
-            this.memoryBean = memoryBean;
-            return this;
-        }
-
-        /**
-         * Package private. For testing only.
-         */
-        Builder withMemoryPoolBeans(List<MemoryPoolMXBean> memoryPoolBeans) {
-            this.poolBeans = memoryPoolBeans;
-            return this;
-        }
-
-        public void register() {
-            register(PrometheusRegistry.defaultRegistry);
-        }
-
-        public void register(PrometheusRegistry registry) {
-            MemoryMXBean memoryMXBean = this.memoryBean != null ? this.memoryBean : ManagementFactory.getMemoryMXBean();
-            List<MemoryPoolMXBean> poolBeans = this.poolBeans != null ? this.poolBeans : ManagementFactory.getMemoryPoolMXBeans();
-            new JvmMemoryMetrics(poolBeans, memoryMXBean, config).register(registry);
-        }
-    }
+  }
 }

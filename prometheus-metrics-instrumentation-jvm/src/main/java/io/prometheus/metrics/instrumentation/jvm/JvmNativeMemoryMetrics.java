@@ -4,34 +4,41 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Unit;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 /**
- * JVM native memory. JVM native memory tracking is disabled by default. You need to enable it by starting your JVM with this flag:
+ * JVM native memory. JVM native memory tracking is disabled by default. You need to enable it by
+ * starting your JVM with this flag:
+ *
  * <pre>-XX:NativeMemoryTracking=summary</pre>
+ *
+ * <p>When native memory tracking is disabled the metrics are not registered either.
+ *
  * <p>
- * When native memory tracking is disabled the metrics are not registered either.
- * <p>
- * <p>
- * The {@link JvmNativeMemoryMetrics} are registered as part of the {@link JvmMetrics} like this:
+ *
+ * <p>The {@link JvmNativeMemoryMetrics} are registered as part of the {@link JvmMetrics} like this:
+ *
  * <pre>{@code
- *   JvmMetrics.builder().register();
+ * JvmMetrics.builder().register();
  * }</pre>
+ *
  * However, if you want only the {@link JvmNativeMemoryMetrics} you can also register them directly:
+ *
  * <pre>{@code
- *   JvmNativeMemoryMetrics.builder().register();
+ * JvmNativeMemoryMetrics.builder().register();
  * }</pre>
+ *
  * Example metrics being exported:
+ *
  * <pre>
  * # HELP jvm_native_memory_committed_bytes Committed bytes of a given JVM. Committed memory represents the amount of memory the JVM is using right now.
  * # TYPE jvm_native_memory_committed_bytes gauge
@@ -79,13 +86,13 @@ import java.util.regex.Pattern;
  */
 public class JvmNativeMemoryMetrics {
   private static final String JVM_NATIVE_MEMORY_RESERVED_BYTES = "jvm_native_memory_reserved_bytes";
-  private static final String JVM_NATIVE_MEMORY_COMMITTED_BYTES = "jvm_native_memory_committed_bytes";
+  private static final String JVM_NATIVE_MEMORY_COMMITTED_BYTES =
+      "jvm_native_memory_committed_bytes";
 
-  private static final Pattern pattern = Pattern.compile("\\s*([A-Z][A-Za-z\\s]*[A-Za-z]+).*reserved=(\\d+), committed=(\\d+)");
+  private static final Pattern pattern =
+      Pattern.compile("\\s*([A-Z][A-Za-z\\s]*[A-Za-z]+).*reserved=(\\d+), committed=(\\d+)");
 
-  /**
-   * Package private. For testing only.
-   */
+  /** Package private. For testing only. */
   static final AtomicBoolean isEnabled = new AtomicBoolean(true);
 
   private final PrometheusProperties config;
@@ -102,7 +109,8 @@ public class JvmNativeMemoryMetrics {
     if (isEnabled.get()) {
       GaugeWithCallback.builder(config)
           .name(JVM_NATIVE_MEMORY_RESERVED_BYTES)
-          .help("Reserved bytes of a given JVM. Reserved memory represents the total amount of memory the JVM can potentially use.")
+          .help(
+              "Reserved bytes of a given JVM. Reserved memory represents the total amount of memory the JVM can potentially use.")
           .unit(Unit.BYTES)
           .labelNames("pool")
           .callback(makeCallback(true))
@@ -110,7 +118,8 @@ public class JvmNativeMemoryMetrics {
 
       GaugeWithCallback.builder(config)
           .name(JVM_NATIVE_MEMORY_COMMITTED_BYTES)
-          .help("Committed bytes of a given JVM. Committed memory represents the amount of memory the JVM is using right now.")
+          .help(
+              "Committed bytes of a given JVM. Committed memory represents the amount of memory the JVM is using right now.")
           .unit(Unit.BYTES)
           .labelNames("pool")
           .callback(makeCallback(false))
@@ -165,12 +174,17 @@ public class JvmNativeMemoryMetrics {
     @Override
     public String vmNativeMemorySummaryInBytes() {
       try {
-        return (String) ManagementFactory.getPlatformMBeanServer().invoke(
-            new ObjectName("com.sun.management:type=DiagnosticCommand"),
-            "vmNativeMemory",
-            new Object[]{new String[]{"summary", "scale=B"}},
-            new String[]{"[Ljava.lang.String;"});
-      } catch (ReflectionException | MalformedObjectNameException | InstanceNotFoundException | MBeanException e) {
+        return (String)
+            ManagementFactory.getPlatformMBeanServer()
+                .invoke(
+                    new ObjectName("com.sun.management:type=DiagnosticCommand"),
+                    "vmNativeMemory",
+                    new Object[] {new String[] {"summary", "scale=B"}},
+                    new String[] {"[Ljava.lang.String;"});
+      } catch (ReflectionException
+          | MalformedObjectNameException
+          | InstanceNotFoundException
+          | MBeanException e) {
         throw new IllegalStateException("Native memory tracking is not enabled", e);
       }
     }
@@ -193,9 +207,7 @@ public class JvmNativeMemoryMetrics {
       this(config, new DefaultPlatformMBeanServerAdapter());
     }
 
-    /**
-     * Package private. For testing only.
-     */
+    /** Package private. For testing only. */
     Builder(PrometheusProperties config, PlatformMBeanServerAdapter adapter) {
       this.config = config;
       this.adapter = adapter;
