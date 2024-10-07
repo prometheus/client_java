@@ -6,17 +6,11 @@ import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MetricNameFilterTest {
 
-  private PrometheusRegistry registry;
-
-  @BeforeEach
-  public void setUp() {
-    registry = new PrometheusRegistry();
-  }
+  private final PrometheusRegistry registry = new PrometheusRegistry();
 
   @Test
   public void testCounter() {
@@ -49,12 +43,12 @@ public class MetricNameFilterTest {
 
     filter = MetricNameFilter.builder().nameMustStartWith("counter1").build();
     MetricSnapshots snapshots = registry.scrape(filter);
-    assertThat(snapshots.size()).isEqualTo(1);
+    assertThat(snapshots.size()).isOne();
     assertThat(snapshots.get(0).getMetadata().getName()).isEqualTo("counter1");
 
     filter = MetricNameFilter.builder().nameMustNotStartWith("counter1").build();
     snapshots = registry.scrape(filter);
-    assertThat(snapshots.size()).isEqualTo(1);
+    assertThat(snapshots.size()).isOne();
     assertThat(snapshots.get(0).getMetadata().getName()).isEqualTo("counter2");
 
     filter =
@@ -67,6 +61,6 @@ public class MetricNameFilterTest {
             .nameMustBeEqualTo("counter1_total")
             .nameMustNotBeEqualTo("counter1_total")
             .build();
-    assertThat(registry.scrape(filter).size()).isEqualTo(0);
+    assertThat(registry.scrape(filter).size()).isZero();
   }
 }

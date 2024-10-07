@@ -18,13 +18,12 @@ import org.junit.jupiter.api.Test;
 public class MultiCollectorNameFilterTest {
 
   private final boolean[] collectCalled = {false};
-  private PrometheusRegistry registry;
+  private final PrometheusRegistry registry = new PrometheusRegistry();
   private Predicate<String> includedNames = null;
   private List<String> prometheusNames = new ArrayList<>();
 
   @BeforeEach
   public void setUp() {
-    registry = new PrometheusRegistry();
     collectCalled[0] = false;
     includedNames = null;
     prometheusNames = Collections.emptyList();
@@ -57,7 +56,6 @@ public class MultiCollectorNameFilterTest {
 
   @Test
   public void testPartialFilter() {
-
     includedNames = name -> name.equals("counter_1");
 
     MetricSnapshots snapshots = registry.scrape(includedNames);
