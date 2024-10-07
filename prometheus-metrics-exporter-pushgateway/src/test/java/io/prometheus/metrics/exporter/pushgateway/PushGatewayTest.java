@@ -1,6 +1,7 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -10,7 +11,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URL;
-import org.junit.Assert;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,8 +44,7 @@ public class PushGatewayTest {
       throws NoSuchFieldException, IllegalAccessException {
     final PushGateway pushGateway =
         PushGateway.builder().address("example.com:1234/context///path//").job("test").build();
-    Assert.assertEquals(
-        "http://example.com:1234/context/path/metrics/job/test", getUrl(pushGateway).toString());
+    assertThat(getUrl(pushGateway)).hasToString("http://example.com:1234/context/path/metrics/job/test");
   }
 
   private URL getUrl(PushGateway pushGateway) throws IllegalAccessException, NoSuchFieldException {
@@ -82,7 +82,7 @@ public class PushGatewayTest {
   }
 
   @Test
-  public void testNon202ResponseThrows() throws IOException {
+  public void testNon202ResponseThrows() {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j"))
         .respond(response().withStatusCode(500));
@@ -277,7 +277,7 @@ public class PushGatewayTest {
   @Test
   public void testInstanceIpGroupingKey() throws IOException {
     String ip = InetAddress.getLocalHost().getHostAddress();
-    Assert.assertFalse(ip.isEmpty());
+    assertThat(ip).isNotEmpty();
     mockServerClient
         .when(request().withMethod("DELETE").withPath("/metrics/job/j/instance/" + ip + "/l/v"))
         .respond(response().withStatusCode(202));
