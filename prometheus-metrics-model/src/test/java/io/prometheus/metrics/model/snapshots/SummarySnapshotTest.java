@@ -1,8 +1,11 @@
 package io.prometheus.metrics.model.snapshots;
 
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 public class SummarySnapshotTest {
 
@@ -55,28 +58,28 @@ public class SummarySnapshotTest {
                     .build())
             .build();
     SnapshotTestUtil.assertMetadata(snapshot, "latency_seconds", "latency in seconds", "seconds");
-    Assert.assertEquals(2, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).hasSize(2);
     SummarySnapshot.SummaryDataPointSnapshot data = snapshot.getDataPoints().get(0);
-    Assert.assertEquals(Labels.of("endpoint", "/"), data.getLabels());
-    Assert.assertTrue(data.hasCount());
-    Assert.assertEquals(1093, data.getCount());
-    Assert.assertTrue(data.hasSum());
-    Assert.assertEquals(218.6, data.getSum(), 0);
-    Assert.assertTrue(data.hasCreatedTimestamp());
-    Assert.assertEquals(createdTimestamp, data.getCreatedTimestampMillis());
-    Assert.assertTrue(data.hasScrapeTimestamp());
-    Assert.assertEquals(scrapeTimestamp, data.getScrapeTimestampMillis());
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("endpoint", "/"));
+    assertThat(data.hasCount()).isTrue();
+    assertThat(data.getCount()).isEqualTo(1093);
+    assertThat(data.hasSum()).isTrue();
+    assertThat(data.getSum()).isCloseTo(218.6, offset(0.0));
+    assertThat(data.hasCreatedTimestamp()).isTrue();
+    assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp);
+    assertThat(data.hasScrapeTimestamp()).isTrue();
+    assertThat(data.getScrapeTimestampMillis()).isEqualTo(scrapeTimestamp);
     Quantiles quantiles = data.getQuantiles();
-    Assert.assertEquals(3, quantiles.size());
+    assertThat(quantiles.size()).isEqualTo(3);
     // quantiles are tested in QuantilesTest already, skipping here.
-    Assert.assertEquals(2, data.getExemplars().size());
+    assertThat(data.getExemplars().size()).isEqualTo(2);
     // exemplars are tested in ExemplarsTest already, skipping here.
 
     data = snapshot.getDataPoints().get(1);
-    Assert.assertFalse(data.hasCreatedTimestamp());
-    Assert.assertFalse(data.hasScrapeTimestamp());
-    Assert.assertTrue(data.hasCount());
-    Assert.assertTrue(data.hasSum());
+    assertThat(data.hasCreatedTimestamp()).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isFalse();
+    assertThat(data.hasCount()).isTrue();
+    assertThat(data.hasSum()).isTrue();
   }
 
   @Test
@@ -87,25 +90,25 @@ public class SummarySnapshotTest {
             .dataPoint(
                 SummarySnapshot.SummaryDataPointSnapshot.builder().count(10).sum(12.0).build())
             .build();
-    Assert.assertEquals(1, snapshot.getDataPoints().size());
-    Assert.assertEquals(Labels.EMPTY, snapshot.getDataPoints().get(0).getLabels());
+    assertThat(snapshot.getDataPoints()).hasSize(1);
+    assertThat((Iterable<? extends Label>) snapshot.getDataPoints().get(0).getLabels()).isEqualTo(Labels.EMPTY);
   }
 
   @Test
   public void testEmptySnapshot() {
     SummarySnapshot snapshot = SummarySnapshot.builder().name("empty_summary").build();
-    Assert.assertEquals(0, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
   @Test
   public void testEmptyData() {
     SummarySnapshot.SummaryDataPointSnapshot data =
         SummarySnapshot.SummaryDataPointSnapshot.builder().build();
-    Assert.assertEquals(0, data.getQuantiles().size());
-    Assert.assertFalse(data.hasCount());
-    Assert.assertFalse(data.hasSum());
-    Assert.assertFalse(data.hasCreatedTimestamp());
-    Assert.assertFalse(data.hasScrapeTimestamp());
-    Assert.assertEquals(0, data.getExemplars().size());
+    assertThat(data.getQuantiles().size()).isZero();
+    assertThat(data.hasCount()).isFalse();
+    assertThat(data.hasSum()).isFalse();
+    assertThat(data.hasCreatedTimestamp()).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isFalse();
+    assertThat(data.getExemplars().size()).isZero();
   }
 }

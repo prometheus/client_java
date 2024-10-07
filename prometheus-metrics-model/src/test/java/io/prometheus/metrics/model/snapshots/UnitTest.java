@@ -1,7 +1,8 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class UnitTest {
 
@@ -15,7 +16,7 @@ public class UnitTest {
     Unit unit1 = Unit.BYTES;
     Unit unit2 = new Unit("bytes");
 
-    Assert.assertEquals(unit2, unit1);
+    assertThat(unit1).isEqualTo(unit2);
   }
 
   @Test
@@ -23,7 +24,7 @@ public class UnitTest {
     Unit unit1 = new Unit("bytes ");
     Unit unit2 = new Unit("bytes");
 
-    Assert.assertEquals(unit2, unit1);
+    assertThat(unit1).isEqualTo(unit2);
   }
 
   @Test
@@ -31,7 +32,7 @@ public class UnitTest {
     Unit unit1 = new Unit(" bytes");
     Unit unit2 = new Unit("bytes");
 
-    Assert.assertEquals(unit2, unit1);
+    assertThat(unit1).isEqualTo(unit2);
   }
 
   @Test
@@ -39,6 +40,6 @@ public class UnitTest {
     Unit unit1 = new Unit(" bytes ");
     Unit unit2 = new Unit("bytes");
 
-    Assert.assertEquals(unit2, unit1);
+    assertThat(unit1).isEqualTo(unit2);
   }
 }
