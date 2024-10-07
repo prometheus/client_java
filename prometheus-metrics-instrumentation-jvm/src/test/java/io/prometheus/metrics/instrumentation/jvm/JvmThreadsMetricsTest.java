@@ -18,8 +18,8 @@ import java.lang.management.ThreadMXBean;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class JvmThreadsMetricsTest {
@@ -29,7 +29,7 @@ public class JvmThreadsMetricsTest {
   private final ThreadInfo mockThreadInfoRunnable1 = Mockito.mock(ThreadInfo.class);
   private final ThreadInfo mockThreadInfoRunnable2 = Mockito.mock(ThreadInfo.class);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     when(mockThreadsBean.getThreadCount()).thenReturn(300);
     when(mockThreadsBean.getDaemonThreadCount()).thenReturn(200);

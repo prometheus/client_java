@@ -11,13 +11,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class CustomLabelMapperTest {
   private MetricRegistry metricRegistry;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     metricRegistry = new MetricRegistry();
   }

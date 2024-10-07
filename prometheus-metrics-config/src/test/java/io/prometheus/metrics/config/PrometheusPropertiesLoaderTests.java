@@ -3,7 +3,7 @@ package io.prometheus.metrics.config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Properties;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Tests for {@link PrometheusPropertiesLoader}. */
 public class PrometheusPropertiesLoaderTests {

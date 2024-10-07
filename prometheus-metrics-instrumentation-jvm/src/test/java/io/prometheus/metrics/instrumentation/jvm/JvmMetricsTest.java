@@ -3,7 +3,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JvmMetricsTest {
 

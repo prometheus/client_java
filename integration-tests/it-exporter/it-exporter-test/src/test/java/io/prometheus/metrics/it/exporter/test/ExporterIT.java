@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.testcontainers.containers.BindMode;
@@ -58,7 +58,7 @@ public class ExporterIT {
             .withExposedPorts(9400);
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws IOException {
     sampleAppContainer.stop();
     sampleAppVolume.remove();

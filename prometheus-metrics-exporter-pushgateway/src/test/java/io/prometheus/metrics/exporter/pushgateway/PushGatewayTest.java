@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URL;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
@@ -25,7 +25,7 @@ public class PushGatewayTest {
   PrometheusRegistry registry;
   Gauge gauge;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     registry = new PrometheusRegistry();
     gauge = Gauge.builder().name("g").help("help").build();

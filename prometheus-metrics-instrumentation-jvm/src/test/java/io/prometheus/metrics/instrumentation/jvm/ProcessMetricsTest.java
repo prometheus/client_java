@@ -15,8 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.RuntimeMXBean;
 import java.util.concurrent.TimeUnit;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class ProcessMetricsTest {
@@ -29,7 +29,7 @@ public class ProcessMetricsTest {
   private final ProcessMetrics.Grepper windowsGrepper = Mockito.mock(ProcessMetrics.Grepper.class);
   private final RuntimeMXBean runtimeBean = Mockito.mock(RuntimeMXBean.class);
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException {
     when(sunOsBean.getProcessCpuTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(72));
     when(sunOsBean.getOpenFileDescriptorCount()).thenReturn(127L);

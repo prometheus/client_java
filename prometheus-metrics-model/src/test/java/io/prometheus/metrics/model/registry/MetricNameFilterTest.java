@@ -6,14 +6,14 @@ import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class MetricNameFilterTest {
 
   private PrometheusRegistry registry;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     registry = new PrometheusRegistry();
   }

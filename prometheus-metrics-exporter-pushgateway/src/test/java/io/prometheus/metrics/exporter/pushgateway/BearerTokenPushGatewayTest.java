@@ -6,9 +6,9 @@ import static org.mockserver.model.HttpResponse.response;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.IOException;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
@@ -21,7 +21,7 @@ public class BearerTokenPushGatewayTest {
   Gauge gauge;
   PushGateway pushGateway;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     registry = new PrometheusRegistry();
     gauge = Gauge.builder().name("g").help("help").build();

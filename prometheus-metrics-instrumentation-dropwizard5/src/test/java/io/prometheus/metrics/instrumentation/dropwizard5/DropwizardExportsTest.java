@@ -13,15 +13,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class DropwizardExportsTest {
 
   private PrometheusRegistry registry = new PrometheusRegistry();
   private MetricRegistry metricRegistry;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     metricRegistry = new MetricRegistry();
     DropwizardExports.builder().dropwizardRegistry(metricRegistry).register(registry);

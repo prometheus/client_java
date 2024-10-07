@@ -9,7 +9,7 @@ import java.util.*;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CKMSQuantilesTest {
 

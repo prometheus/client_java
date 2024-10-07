@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SlidingWindowTest {
 
@@ -42,7 +42,7 @@ public class SlidingWindowTest {
   private final int ageBuckets = 5;
   private final long timeBetweenRotateMillis = maxAgeSeconds * 1000 / ageBuckets + 2;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     startTime = System.currentTimeMillis();
     currentTimeMillis.set(startTime);

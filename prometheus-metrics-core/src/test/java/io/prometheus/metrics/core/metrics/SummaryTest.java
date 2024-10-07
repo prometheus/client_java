@@ -13,8 +13,8 @@ import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SummaryTest {
 
@@ -27,7 +27,7 @@ public class SummaryTest {
   private Summary withLabelsAndQuantiles;
   private Summary noLabelsAndQuantiles;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     registry = new PrometheusRegistry();
     noLabels =

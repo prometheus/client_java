@@ -14,8 +14,8 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.Arrays;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class JvmMemoryMetricsTest {
@@ -30,7 +30,7 @@ public class JvmMemoryMetricsTest {
   private final MemoryUsage memoryUsagePoolCollectionEdenSpace = Mockito.mock(MemoryUsage.class);
   private final MemoryUsage memoryUsagePoolCollectionOldGen = Mockito.mock(MemoryUsage.class);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     when(mockMemoryBean.getHeapMemoryUsage()).thenReturn(memoryUsageHeap);
     when(mockMemoryBean.getNonHeapMemoryUsage()).thenReturn(memoryUsageNonHeap);

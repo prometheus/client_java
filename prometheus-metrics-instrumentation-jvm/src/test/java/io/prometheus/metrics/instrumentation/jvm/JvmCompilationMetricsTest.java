@@ -11,15 +11,15 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
 import java.lang.management.CompilationMXBean;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class JvmCompilationMetricsTest {
 
   private final CompilationMXBean mockCompilationBean = Mockito.mock(CompilationMXBean.class);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     when(mockCompilationBean.getTotalCompilationTime()).thenReturn(10000L);
     when(mockCompilationBean.isCompilationTimeMonitoringSupported()).thenReturn(true);

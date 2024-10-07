@@ -39,9 +39,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class HistogramTest {
 
@@ -51,12 +51,12 @@ public class HistogramTest {
 
   private SpanContext origSpanContext;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     origSpanContext = SpanContextSupplier.getSpanContext();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     SpanContextSupplier.setSpanContext(origSpanContext);
   }

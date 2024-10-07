@@ -18,9 +18,9 @@ import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import java.util.Arrays;
 import java.util.Iterator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class CounterTest {
 
@@ -30,7 +30,7 @@ public class CounterTest {
   private static final long exemplarMinAgeMillis = 100;
   private SpanContext origSpanContext;
 
-  @Before
+  @BeforeEach
   public void setUp() throws NoSuchFieldException, IllegalAccessException {
     noLabels = Counter.builder().name("nolabels").build();
     labels =
@@ -42,7 +42,7 @@ public class CounterTest {
     ExemplarSamplerConfigTestUtil.setMinRetentionPeriodMillis(labels, exemplarMinAgeMillis);
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     SpanContextSupplier.setSpanContext(origSpanContext);
   }
@@ -308,8 +308,16 @@ public class CounterTest {
     assertThat(getData(counter).getExemplar()).isNull();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testConstLabelsFirst() {
+    assentThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                Counter.builder()
+                    .name("test_total")
+                    .constLabels(Labels.of("const_a", "const_b"))
+                    .labelNames("const.a")
+                    .build());
     Counter.builder()
         .name("test_total")
         .constLabels(Labels.of("const_a", "const_b"))

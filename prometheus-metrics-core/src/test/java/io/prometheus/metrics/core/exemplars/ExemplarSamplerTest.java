@@ -7,9 +7,9 @@ import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ExemplarSamplerTest {
 
@@ -61,12 +61,12 @@ public class ExemplarSamplerTest {
 
   private io.prometheus.metrics.tracer.common.SpanContext origContext;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     origContext = SpanContextSupplier.getSpanContext();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     SpanContextSupplier.setSpanContext(origContext);
   }

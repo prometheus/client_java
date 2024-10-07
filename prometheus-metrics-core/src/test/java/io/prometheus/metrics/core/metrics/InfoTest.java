@@ -11,7 +11,7 @@ import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class InfoTest {
 

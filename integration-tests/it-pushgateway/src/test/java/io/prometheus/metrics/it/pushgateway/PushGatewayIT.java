@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 import net.minidev.json.JSONArray;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -30,7 +30,7 @@ public class PushGatewayIT {
   private GenericContainer<?> prometheusContainer;
   private Volume sampleAppVolume;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException, URISyntaxException {
     Network network = Network.newNetwork();
     sampleAppVolume = Volume.create("it-pushgateway").copy("pushgateway-test-app.jar");
@@ -56,7 +56,7 @@ public class PushGatewayIT {
             .withLogConsumer(LogConsumer.withPrefix("prometheus"));
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws IOException {
     prometheusContainer.stop();
     pushGatewayContainer.stop();

@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class MultiCollectorNameFilterTest {
 
@@ -22,7 +22,7 @@ public class MultiCollectorNameFilterTest {
   private Predicate<String> includedNames = null;
   private List<String> prometheusNames = new ArrayList<>();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     registry = new PrometheusRegistry();
     collectCalled[0] = false;

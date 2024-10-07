@@ -28,10 +28,10 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import org.awaitility.core.ConditionTimeoutException;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ExemplarTest {
   private static final String ENDPOINT_PATH = "/v1/metrics";
@@ -43,7 +43,7 @@ public class ExemplarTest {
   private OpenTelemetryExporter openTelemetryExporter;
   @Rule public WireMockRule wireMockRule = new WireMockRule(4317);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     openTelemetryExporter =
         OpenTelemetryExporter.builder()
@@ -62,7 +62,7 @@ public class ExemplarTest {
                     .withBody("{\"partialSuccess\":{}}")));
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     PrometheusRegistry.defaultRegistry.unregister(testCounter);
     openTelemetryExporter.close();

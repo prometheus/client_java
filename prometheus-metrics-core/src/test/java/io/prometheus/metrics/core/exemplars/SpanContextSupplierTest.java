@@ -8,7 +8,9 @@ import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import org.junit.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SpanContextSupplierTest {
 
@@ -48,12 +50,12 @@ public class SpanContextSupplierTest {
           null // histogram upper bounds
           );
 
-  @Before
+  @BeforeEach
   public void setUp() {
     origSpanContext = SpanContextSupplier.getSpanContext();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     SpanContextSupplier.setSpanContext(origSpanContext);
   }

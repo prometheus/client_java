@@ -12,8 +12,8 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
 import java.lang.management.BufferPoolMXBean;
 import java.util.Arrays;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class JvmBufferPoolMetricsTest {
@@ -21,7 +21,7 @@ public class JvmBufferPoolMetricsTest {
   private final BufferPoolMXBean directBuffer = Mockito.mock(BufferPoolMXBean.class);
   private final BufferPoolMXBean mappedBuffer = Mockito.mock(BufferPoolMXBean.class);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     when(directBuffer.getName()).thenReturn("direct");
     when(directBuffer.getCount()).thenReturn(2L);

@@ -11,9 +11,9 @@ import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class GaugeTest {
 
@@ -24,14 +24,14 @@ public class GaugeTest {
 
   private SpanContext origSpanContext;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     noLabels = Gauge.builder().name("nolabels").build();
     labels = Gauge.builder().name("labels").labelNames("l").build();
     origSpanContext = SpanContextSupplier.getSpanContext();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     SpanContextSupplier.setSpanContext(origSpanContext);
   }

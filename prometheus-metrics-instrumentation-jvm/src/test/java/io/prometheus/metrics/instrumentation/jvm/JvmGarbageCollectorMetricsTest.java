@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.lang.management.GarbageCollectorMXBean;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class JvmGarbageCollectorMetricsTest {
@@ -22,7 +22,7 @@ public class JvmGarbageCollectorMetricsTest {
   private final GarbageCollectorMXBean mockGcBean1 = Mockito.mock(GarbageCollectorMXBean.class);
   private final GarbageCollectorMXBean mockGcBean2 = Mockito.mock(GarbageCollectorMXBean.class);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     when(mockGcBean1.getName()).thenReturn("MyGC1");
     when(mockGcBean1.getCollectionCount()).thenReturn(100L);

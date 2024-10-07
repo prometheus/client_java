@@ -5,7 +5,7 @@ import static org.assertj.core.data.Offset.offset;
 
 import java.lang.reflect.Field;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class StatefulMetricTest {
 

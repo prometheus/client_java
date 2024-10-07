@@ -3,7 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.assertj.core.api.IterableAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class LabelsTest {
 

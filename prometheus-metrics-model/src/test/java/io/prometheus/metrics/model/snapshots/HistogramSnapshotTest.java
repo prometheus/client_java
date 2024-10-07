@@ -6,7 +6,7 @@ import static org.assertj.core.data.Offset.offset;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot.HistogramDataPointSnapshot;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HistogramSnapshotTest {
 
