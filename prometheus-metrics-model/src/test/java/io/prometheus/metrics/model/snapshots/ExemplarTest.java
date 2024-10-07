@@ -2,7 +2,6 @@ package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.data.Offset.offset;
 
 import org.assertj.core.api.IterableAssert;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,7 @@ class ExemplarTest {
             .timestampMillis(timestamp)
             .labels(Labels.of("path", "/", "error", "none"))
             .build();
-    assertThat(exemplar.getValue()).isCloseTo(2.2, offset(0.0));
+    assertThat(exemplar.getValue()).isEqualTo(2.2);
     assertLabels(exemplar.getLabels())
         .isEqualTo(
             Labels.of(
@@ -45,7 +44,7 @@ class ExemplarTest {
   @Test
   public void testMinimal() {
     Exemplar exemplar = Exemplar.builder().value(0.0).build();
-    assertThat(exemplar.getValue()).isCloseTo(0.0, offset(0.0));
+    assertThat(exemplar.getValue()).isEqualTo(0.0);
     assertLabels(exemplar.getLabels()).isEqualTo(Labels.EMPTY);
     assertThat(exemplar.hasTimestamp()).isFalse();
   }

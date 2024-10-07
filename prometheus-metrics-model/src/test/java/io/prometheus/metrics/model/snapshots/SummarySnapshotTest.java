@@ -1,7 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Offset.offset;
 
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -63,7 +62,7 @@ class SummarySnapshotTest {
     assertThat(data.hasCount()).isTrue();
     assertThat(data.getCount()).isEqualTo(1093);
     assertThat(data.hasSum()).isTrue();
-    assertThat(data.getSum()).isCloseTo(218.6, offset(0.0));
+    assertThat(data.getSum()).isEqualTo(218.6);
     assertThat(data.hasCreatedTimestamp()).isTrue();
     assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp);
     assertThat(data.hasScrapeTimestamp()).isTrue();

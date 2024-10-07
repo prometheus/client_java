@@ -2,7 +2,6 @@ package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
@@ -51,14 +50,14 @@ class GaugeSnapshotTest {
             .getDataPoints()
             .get(0); // data is sorted by labels, so the first one should be path="/hello"
     assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("env", "dev"));
-    assertThat(data.getValue()).isCloseTo(128.0, offset(0.0));
-    assertThat(data.getExemplar().getValue()).isCloseTo(128.0, offset(0.0));
+    assertThat(data.getValue()).isEqualTo(128.0);
+    assertThat(data.getExemplar().getValue()).isEqualTo(128.0);
     assertThat(data.hasCreatedTimestamp()).isFalse();
     assertThat(data.hasScrapeTimestamp()).isFalse();
     data = snapshot.getDataPoints().get(1);
     assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("env", "prod"));
-    assertThat(data.getValue()).isCloseTo(1024.0, offset(0.0));
-    assertThat(data.getExemplar().getValue()).isCloseTo(1024.0, offset(0.0));
+    assertThat(data.getValue()).isEqualTo(1024.0);
+    assertThat(data.getExemplar().getValue()).isEqualTo(1024.0);
     assertThat(data.hasCreatedTimestamp()).isFalse();
     assertThat(data.hasScrapeTimestamp()).isFalse();
   }
@@ -74,7 +73,7 @@ class GaugeSnapshotTest {
     assertThat(snapshot.getDataPoints().size()).isOne();
     GaugeDataPointSnapshot data = snapshot.getDataPoints().get(0);
     assertThat((Iterable<? extends Label>) data.getLabels()).isEmpty();
-    assertThat(data.getValue()).isCloseTo(23.0, offset(0.0));
+    assertThat(data.getValue()).isEqualTo(23.0);
     assertThat(data.getExemplar()).isNull();
     assertThat(data.hasCreatedTimestamp()).isFalse();
     assertThat(data.hasScrapeTimestamp()).isFalse();

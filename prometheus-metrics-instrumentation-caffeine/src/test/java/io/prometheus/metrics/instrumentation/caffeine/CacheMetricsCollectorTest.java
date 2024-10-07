@@ -1,7 +1,6 @@
 package io.prometheus.metrics.instrumentation.caffeine;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Offset.offset;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -120,7 +119,7 @@ class CacheMetricsCollectorTest {
     final CounterSnapshot.CounterDataPointSnapshot dataPointSnapshot =
         (CounterSnapshot.CounterDataPointSnapshot) getDataPointSnapshot(registry, name, cacheName);
 
-    assertThat(dataPointSnapshot.getValue()).isCloseTo(value, offset(0.0));
+    assertThat(dataPointSnapshot.getValue()).isEqualTo(value);
   }
 
   private DataPointSnapshot getDataPointSnapshot(

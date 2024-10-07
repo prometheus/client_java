@@ -182,17 +182,17 @@ class DropwizardExportsTest {
     assertThat(dataPoint.hasSum()).isFalse();
     Quantiles quantiles = dataPoint.getQuantiles();
     assertThat(quantiles.size()).isEqualTo(6);
-    assertThat(quantiles.get(0).getQuantile()).isCloseTo(0.5, offset(0.0));
+    assertThat(quantiles.get(0).getQuantile()).isEqualTo(0.5);
     assertThat(quantiles.get(0).getValue()).isCloseTo(49.0, offset(1.0));
-    assertThat(quantiles.get(1).getQuantile()).isCloseTo(0.75, offset(0.0));
+    assertThat(quantiles.get(1).getQuantile()).isEqualTo(0.75);
     assertThat(quantiles.get(1).getValue()).isCloseTo(74.0, offset(1.0));
-    assertThat(quantiles.get(2).getQuantile()).isCloseTo(0.95, offset(0.0));
+    assertThat(quantiles.get(2).getQuantile()).isEqualTo(0.95);
     assertThat(quantiles.get(2).getValue()).isCloseTo(94.0, offset(1.0));
-    assertThat(quantiles.get(3).getQuantile()).isCloseTo(0.98, offset(0.0));
+    assertThat(quantiles.get(3).getQuantile()).isEqualTo(0.98);
     assertThat(quantiles.get(3).getValue()).isCloseTo(97.0, offset(1.0));
-    assertThat(quantiles.get(4).getQuantile()).isCloseTo(0.99, offset(0.0));
+    assertThat(quantiles.get(4).getQuantile()).isEqualTo(0.99);
     assertThat(quantiles.get(4).getValue()).isCloseTo(98.0, offset(1.0));
-    assertThat(quantiles.get(5).getQuantile()).isCloseTo(0.999, offset(0.0));
+    assertThat(quantiles.get(5).getQuantile()).isEqualTo(0.999);
     assertThat(quantiles.get(5).getValue()).isCloseTo(99.0, offset(1.0));
   }
 

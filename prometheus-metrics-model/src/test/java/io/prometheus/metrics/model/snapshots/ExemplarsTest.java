@@ -2,7 +2,6 @@ package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.data.Offset.offset;
 
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
@@ -17,14 +16,14 @@ class ExemplarsTest {
             Exemplar.builder().value(3.0).build(),
             Exemplar.builder().value(2.0).build());
     assertThat(exemplars.size()).isEqualTo(3);
-    assertThat(exemplars.get(0).getValue()).isCloseTo(1.0, offset(0.0));
-    assertThat(exemplars.get(1).getValue()).isCloseTo(3.0, offset(0.0));
-    assertThat(exemplars.get(2).getValue()).isCloseTo(2.0, offset(0.0));
-    assertThat(exemplars.get(0.0, Double.POSITIVE_INFINITY).getValue()).isCloseTo(1.0, offset(0.0));
-    assertThat(exemplars.get(0.0, 1.0).getValue()).isCloseTo(1.0, offset(0.0));
-    assertThat(exemplars.get(1.0, 4.0).getValue()).isCloseTo(3.0, offset(0.0));
-    assertThat(exemplars.get(2.0, 3.0).getValue()).isCloseTo(3.0, offset(0.0));
-    assertThat(exemplars.get(1.0, 2.1).getValue()).isCloseTo(2.0, offset(0.0));
+    assertThat(exemplars.get(0).getValue()).isEqualTo(1.0);
+    assertThat(exemplars.get(1).getValue()).isEqualTo(3.0);
+    assertThat(exemplars.get(2).getValue()).isEqualTo(2.0);
+    assertThat(exemplars.get(0.0, Double.POSITIVE_INFINITY).getValue()).isEqualTo(1.0);
+    assertThat(exemplars.get(0.0, 1.0).getValue()).isEqualTo(1.0);
+    assertThat(exemplars.get(1.0, 4.0).getValue()).isEqualTo(3.0);
+    assertThat(exemplars.get(2.0, 3.0).getValue()).isEqualTo(3.0);
+    assertThat(exemplars.get(1.0, 2.1).getValue()).isEqualTo(2.0);
     assertThat(exemplars.get(2.0, 2.1)).isNull();
   }
 

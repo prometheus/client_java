@@ -2,7 +2,6 @@ package io.prometheus.metrics.instrumentation.jvm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.instrumentation.jvm.JvmMemoryPoolAllocationMetrics.AllocationCountingNotificationListener;
@@ -23,31 +22,31 @@ class JvmMemoryPoolAllocationMetricsTest {
 
     // Increase by 123
     listener.handleMemoryPool("TestPool", 0, 123);
-    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isCloseTo(123, offset(0.0));
+    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isEqualTo(123);
 
     // No increase
     listener.handleMemoryPool("TestPool", 123, 123);
-    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isCloseTo(123, offset(0.0));
+    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isEqualTo(123);
 
     // No increase, then decrease to 0
     listener.handleMemoryPool("TestPool", 123, 0);
-    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isCloseTo(123, offset(0.0));
+    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isEqualTo(123);
 
     // No increase, then increase by 7
     listener.handleMemoryPool("TestPool", 0, 7);
-    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isCloseTo(130, offset(0.0));
+    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isEqualTo(130);
 
     // Increase by 10, then decrease to 10
     listener.handleMemoryPool("TestPool", 17, 10);
-    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isCloseTo(140, offset(0.0));
+    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isEqualTo(140);
 
     // Increase by 7, then increase by 3
     listener.handleMemoryPool("TestPool", 17, 20);
-    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isCloseTo(150, offset(0.0));
+    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isEqualTo(150);
 
     // Decrease to 17, then increase by 3
     listener.handleMemoryPool("TestPool", 17, 20);
-    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isCloseTo(153, offset(0.0));
+    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isEqualTo(153);
   }
 
   private double getCountByPool(String metricName, String poolName, MetricSnapshots snapshots) {

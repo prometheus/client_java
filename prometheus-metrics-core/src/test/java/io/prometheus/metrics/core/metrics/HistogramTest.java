@@ -1152,7 +1152,7 @@ class HistogramTest {
     assertThat(exemplar)
         .as("No exemplar found in bucket [" + lowerBound + ", " + upperBound + "]")
         .isNotNull();
-    assertThat(exemplar.getValue()).isCloseTo(value, offset(0.0));
+    assertThat(exemplar.getValue()).isEqualTo(value);
     assertThat(exemplar.getLabels().size())
         .as("" + exemplar.getLabels())
         .isEqualTo(labels.length / 2);
@@ -1354,7 +1354,7 @@ class HistogramTest {
     Histogram noLabels = Histogram.builder().name("test").build();
     assertThat(getBucket(noLabels, 0.005).getCount()).isZero();
     assertThat(getData(noLabels).getCount()).isZero();
-    assertThat(getData(noLabels).getSum()).isCloseTo(0.0, offset(0.0));
+    assertThat(getData(noLabels).getSum()).isEqualTo(0.0);
   }
 
   private ClassicHistogramBucket getBucket(Histogram histogram, double le, String... labels) {

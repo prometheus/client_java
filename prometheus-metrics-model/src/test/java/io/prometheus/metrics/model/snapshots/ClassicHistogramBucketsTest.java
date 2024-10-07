@@ -2,7 +2,6 @@ package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.data.Offset.offset;
 
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
@@ -30,9 +29,9 @@ class ClassicHistogramBucketsTest {
             .bucket(Double.POSITIVE_INFINITY, 3)
             .build();
     assertThat(buckets.size()).isEqualTo(3);
-    assertThat(buckets.getUpperBound(0)).isCloseTo(2, offset(0.0));
-    assertThat(buckets.getUpperBound(1)).isCloseTo(7, offset(0.0));
-    assertThat(buckets.getUpperBound(2)).isCloseTo(Double.POSITIVE_INFINITY, offset(0.0));
+    assertThat(buckets.getUpperBound(0)).isEqualTo(2);
+    assertThat(buckets.getUpperBound(1)).isEqualTo(7);
+    assertThat(buckets.getUpperBound(2)).isEqualTo(Double.POSITIVE_INFINITY);
     assertThat(buckets.getCount(0)).isZero();
     assertThat(buckets.getCount(1)).isEqualTo(2);
     assertThat(buckets.getCount(2)).isEqualTo(3);

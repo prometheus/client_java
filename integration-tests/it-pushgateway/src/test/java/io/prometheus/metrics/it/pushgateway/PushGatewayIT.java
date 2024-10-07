@@ -2,7 +2,6 @@ package io.prometheus.metrics.it.pushgateway;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.data.Offset.offset;
 
 import com.jayway.jsonpath.Criteria;
 import com.jayway.jsonpath.Filter;
@@ -180,13 +179,13 @@ public class PushGatewayIT {
 
   private void assertMetrics() throws IOException, InterruptedException {
     double value = getValue("my_batch_job_duration_seconds", "job", "pushgateway-test-app");
-    assertThat(value).isCloseTo(0.5, offset(0.0));
+    assertThat(value).isEqualTo(0.5);
     value = getValue("file_sizes_bytes_bucket", "job", "pushgateway-test-app", "le", "512");
-    assertThat(value).isCloseTo(0.0, offset(0.0));
+    assertThat(value).isEqualTo(0.0);
     value = getValue("file_sizes_bytes_bucket", "job", "pushgateway-test-app", "le", "1024");
-    assertThat(value).isCloseTo(2.0, offset(0.0));
+    assertThat(value).isEqualTo(2.0);
     value = getValue("file_sizes_bytes_bucket", "job", "pushgateway-test-app", "le", "+Inf");
-    assertThat(value).isCloseTo(3.0, offset(0.0));
+    assertThat(value).isEqualTo(3.0);
   }
 
   private double getValue(String name, String... labels) throws IOException, InterruptedException {
@@ -204,7 +203,7 @@ public class PushGatewayIT {
 
   private void assertNativeHistogram() throws IOException, InterruptedException {
     double count = getNativeHistogramCount("file_sizes_bytes", "pushgateway-test-app");
-    assertThat(count).isCloseTo(3, offset(0.0));
+    assertThat(count).isEqualTo(3);
   }
 
   private double getNativeHistogramCount(String name, String job)
