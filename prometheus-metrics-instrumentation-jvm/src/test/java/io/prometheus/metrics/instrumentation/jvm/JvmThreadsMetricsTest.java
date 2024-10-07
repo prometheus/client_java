@@ -1,8 +1,8 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,18 +18,18 @@ import java.lang.management.ThreadMXBean;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class JvmThreadsMetricsTest {
+class JvmThreadsMetricsTest {
 
   private final ThreadMXBean mockThreadsBean = Mockito.mock(ThreadMXBean.class);
   private final ThreadInfo mockThreadInfoBlocked = Mockito.mock(ThreadInfo.class);
   private final ThreadInfo mockThreadInfoRunnable1 = Mockito.mock(ThreadInfo.class);
   private final ThreadInfo mockThreadInfoRunnable2 = Mockito.mock(ThreadInfo.class);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     when(mockThreadsBean.getThreadCount()).thenReturn(300);
     when(mockThreadsBean.getDaemonThreadCount()).thenReturn(200);
@@ -55,8 +55,7 @@ public class JvmThreadsMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE jvm_threads_current gauge\n"
+        "# TYPE jvm_threads_current gauge\n"
             + "# HELP jvm_threads_current Current thread count of a JVM\n"
             + "jvm_threads_current 300.0\n"
             + "# TYPE jvm_threads_daemon gauge\n"
@@ -85,7 +84,7 @@ public class JvmThreadsMetricsTest {
             + "jvm_threads_state{state=\"WAITING\"} 0.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test
@@ -134,9 +133,9 @@ public class JvmThreadsMetricsTest {
 
       Map<String, Double> actual = getCountByState(registry.scrape());
 
-      assertEquals(expected.size(), actual.size());
+      assertThat(actual).hasSameSizeAs(expected);
       for (String threadState : expected.keySet()) {
-        assertEquals(expected.get(threadState), actual.get(threadState), 0.0);
+        assertThat(actual.get(threadState)).isCloseTo(expected.get(threadState), offset(0.0));
       }
     } finally {
       for (int i = 0; i < numberOfInvalidThreadIds; i++) {
@@ -152,7 +151,7 @@ public class JvmThreadsMetricsTest {
         for (GaugeSnapshot.GaugeDataPointSnapshot data :
             ((GaugeSnapshot) snapshot).getDataPoints()) {
           String state = data.getLabels().get("state");
-          assertNotNull(state);
+          assertThat(state).isNotNull();
           result.put(state, data.getValue());
         }
       }

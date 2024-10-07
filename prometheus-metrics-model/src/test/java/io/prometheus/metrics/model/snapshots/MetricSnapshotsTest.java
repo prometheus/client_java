@@ -1,15 +1,17 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.Iterator;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class MetricSnapshotsTest {
+import java.util.Iterator;
+import org.junit.jupiter.api.Test;
+
+class MetricSnapshotsTest {
 
   @Test
   public void testEmpty() {
     MetricSnapshots snapshots = MetricSnapshots.builder().build();
-    Assert.assertFalse(snapshots.stream().findAny().isPresent());
+    assertThat(snapshots.stream().findAny().isPresent()).isFalse();
   }
 
   @Test
@@ -30,13 +32,13 @@ public class MetricSnapshotsTest {
             .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1.0).build())
             .build();
     MetricSnapshots snapshots = new MetricSnapshots(c2, c3, c1);
-    Assert.assertEquals(3, snapshots.size());
-    Assert.assertEquals("counter1", snapshots.get(0).getMetadata().getName());
-    Assert.assertEquals("counter2", snapshots.get(1).getMetadata().getName());
-    Assert.assertEquals("counter3", snapshots.get(2).getMetadata().getName());
+    assertThat(snapshots.size()).isEqualTo(3);
+    assertThat(snapshots.get(0).getMetadata().getName()).isEqualTo("counter1");
+    assertThat(snapshots.get(1).getMetadata().getName()).isEqualTo("counter2");
+    assertThat(snapshots.get(2).getMetadata().getName()).isEqualTo("counter3");
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicateName() {
     // Q: What if you have a counter named "foo" and a gauge named "foo"?
     // A: Great question. You might think this is a valid scenario, because the counter will produce
@@ -55,7 +57,8 @@ public class MetricSnapshotsTest {
             .name("my_metric")
             .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(1.0).build())
             .build();
-    new MetricSnapshots(c, g);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MetricSnapshots(c, g));
   }
 
   @Test
@@ -66,12 +69,12 @@ public class MetricSnapshotsTest {
             .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1.0).build())
             .build();
     MetricSnapshots.Builder builder = MetricSnapshots.builder();
-    Assert.assertFalse(builder.containsMetricName("my_metric"));
+    assertThat(builder.containsMetricName("my_metric")).isFalse();
     builder.metricSnapshot(counter);
-    Assert.assertTrue(builder.containsMetricName("my_metric"));
+    assertThat(builder.containsMetricName("my_metric")).isTrue();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testImmutable() {
     CounterSnapshot c1 =
         CounterSnapshot.builder()
@@ -91,6 +94,6 @@ public class MetricSnapshotsTest {
     MetricSnapshots snapshots = new MetricSnapshots(c2, c3, c1);
     Iterator<MetricSnapshot> iterator = snapshots.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 }

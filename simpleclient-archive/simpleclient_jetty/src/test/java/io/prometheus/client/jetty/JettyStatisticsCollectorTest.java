@@ -19,7 +19,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class JettyStatisticsCollectorTest {
+class JettyStatisticsCollectorTest {
 
   private final Server server = new Server();
   private final ServerConnector connector = new ServerConnector(server);

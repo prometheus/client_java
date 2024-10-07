@@ -1,14 +1,16 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class GaugeWithCallbackTest {
+class GaugeWithCallbackTest {
 
   @Test
   public void testGauge() {
@@ -23,20 +25,21 @@ public class GaugeWithCallbackTest {
             .build();
     GaugeSnapshot snapshot = gauge.collect();
 
-    assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints().size()).isOne();
     GaugeSnapshot.GaugeDataPointSnapshot datapoint = snapshot.getDataPoints().get(0);
-    assertEquals(value.doubleValue(), datapoint.getValue(), 0.1);
-    assertEquals(labelValues.size(), datapoint.getLabels().size());
+    assertThat(datapoint.getValue()).isCloseTo(value.doubleValue(), offset(0.1));
+    assertThat(datapoint.getLabels().size()).isEqualTo(labelValues.size());
 
     value.incrementAndGet();
     snapshot = gauge.collect();
-    assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints().size()).isOne();
     datapoint = snapshot.getDataPoints().get(0);
-    assertEquals(value.doubleValue(), datapoint.getValue(), 0.1);
+    assertThat(datapoint.getValue()).isCloseTo(value.doubleValue(), offset(0.1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testGaugeNoCallback() {
-    GaugeWithCallback.builder().name("gauge").labelNames("l1", "l2").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> GaugeWithCallback.builder().name("gauge").labelNames("l1", "l2").build());
   }
 }

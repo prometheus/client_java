@@ -40,7 +40,7 @@ import org.hibernate.stat.Statistics;
  *
  * @author Christian Kaltepoth
  */
-public class HibernateStatisticsCollector extends Collector {
+class HibernaTestatisticsCollector extends Collector {
 
   private static final List<String> LABEL_NAMES = Collections.singletonList("unit");
 

@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class GraphiteTest {
+class GraphiteTest {
   @Test
   public void testPush() throws Exception {
     // Create a metric.

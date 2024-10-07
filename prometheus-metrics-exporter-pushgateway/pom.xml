@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -29,12 +30,12 @@
     </licenses>
 
     <developers>
-       <developer>
+        <developer>
             <id>brian-brazil</id>
             <name>Brian Brazil</name>
             <email>brian.brazil@boxever.com</email>
-       </developer>
-       <developer>
+        </developer>
+        <developer>
             <id>fstab</id>
             <name>Fabian Stäber</name>
             <email>fabian@fstab.de</email>
@@ -48,20 +49,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-           <groupId>org.mock-server</groupId>
-           <artifactId>mockserver-netty</artifactId>
-           <version>5.15.0</version>
-           <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-junit-rule-no-dependencies</artifactId>
+            <artifactId>mockserver-netty-no-dependencies</artifactId>
             <version>5.15.0</version>
             <scope>test</scope>
         </dependency>

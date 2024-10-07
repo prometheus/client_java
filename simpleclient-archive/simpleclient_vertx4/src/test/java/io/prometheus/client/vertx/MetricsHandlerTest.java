@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MetricsHandlerTest {
+class MetricsHandlerTest {
 
   private static Vertx vertx;
   private static Integer port;

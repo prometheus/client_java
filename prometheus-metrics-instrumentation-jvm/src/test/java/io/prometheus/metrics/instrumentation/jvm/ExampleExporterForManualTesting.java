@@ -3,7 +3,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import java.io.IOException;
 
-public class ExampleExporterForManualTesting {
+class ExampleExporterForManualTesting {
 
   public static void main(String[] args) throws IOException, InterruptedException {
 

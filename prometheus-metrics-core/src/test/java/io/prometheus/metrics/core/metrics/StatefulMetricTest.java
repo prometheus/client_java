@@ -1,13 +1,13 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 import java.lang.reflect.Field;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class StatefulMetricTest {
+class StatefulMetricTest {
 
   @Test
   public void testLabelRemoveWhileCollecting() throws Exception {
@@ -30,8 +30,8 @@ public class StatefulMetricTest {
         counter.remove("c", "d");
         counter.remove("e", "f");
       }
-      assertNotNull(entry.getKey());
-      assertNotNull(entry.getValue());
+      assertThat(entry.getKey()).isNotNull();
+      assertThat(entry.getValue()).isNotNull();
     }
   }
 
@@ -41,31 +41,31 @@ public class StatefulMetricTest {
     counter.labelValues("a", "b").inc(3.0);
     counter.labelValues("c", "d").inc(3.0);
     counter.labelValues("a", "b").inc();
-    assertEquals(2, counter.collect().getDataPoints().size());
+    assertThat(counter.collect().getDataPoints()).hasSize(2);
 
     counter.clear();
-    assertEquals(0, counter.collect().getDataPoints().size());
+    assertThat(counter.collect().getDataPoints()).isEmpty();
 
     counter.labelValues("a", "b").inc();
-    assertEquals(1, counter.collect().getDataPoints().size());
+    assertThat(counter.collect().getDataPoints()).hasSize(1);
   }
 
   @Test
   public void testClearNoLabels() {
     Counter counter = Counter.builder().name("test").build();
     counter.inc();
-    assertEquals(1, counter.collect().getDataPoints().size());
-    assertEquals(1.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
+    assertThat(counter.collect().getDataPoints()).hasSize(1);
+    assertThat(counter.collect().getDataPoints().get(0).getValue()).isCloseTo(1.0, offset(0.0));
 
     counter.clear();
     // No labels is always present, but as no value has been observed after clear() the value should
     // be 0.0
-    assertEquals(1, counter.collect().getDataPoints().size());
-    assertEquals(0.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
+    assertThat(counter.collect().getDataPoints()).hasSize(1);
+    assertThat(counter.collect().getDataPoints().get(0).getValue()).isCloseTo(0.0, offset(0.0));
 
     // Making inc() works correctly after clear()
     counter.inc();
-    assertEquals(1, counter.collect().getDataPoints().size());
-    assertEquals(1.0, counter.collect().getDataPoints().get(0).getValue(), 0.0);
+    assertThat(counter.collect().getDataPoints()).hasSize(1);
+    assertThat(counter.collect().getDataPoints().get(0).getValue()).isCloseTo(1.0, offset(0.0));
   }
 }

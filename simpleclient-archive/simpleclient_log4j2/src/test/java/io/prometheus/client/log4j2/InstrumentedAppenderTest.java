@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import static org.apache.logging.log4j.Level.*;
 
-public class InstrumentedAppenderTest {
+class InstrumentedAppenderTest {
 
     private InstrumentedAppender appender;
     private LogEvent event;

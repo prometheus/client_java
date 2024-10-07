@@ -1,6 +1,7 @@
 package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.dropwizard.metrics5.MetricFilter;
 import io.dropwizard.metrics5.MetricRegistry;
@@ -11,21 +12,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class CustomLabelMapperTest {
+class CustomLabelMapperTest {
   private MetricRegistry metricRegistry;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     metricRegistry = new MetricRegistry();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void test_WHEN_EmptyConfig_THEN_Fail() {
-    final CustomLabelMapper converter =
-        new CustomLabelMapper(Collections.<MapperConfig>emptyList());
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new CustomLabelMapper(Collections.emptyList()));
   }
 
   @Test
@@ -48,7 +49,7 @@ public class CustomLabelMapperTest {
             + "app_okhttpclient_client_HttpClient_service_total 1.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
+    assertThat(convertToOpenMetricsFormat(dropwizardExports.collect())).isEqualTo(expected);
   }
 
   @Test
@@ -76,12 +77,12 @@ public class CustomLabelMapperTest {
             + "# HELP app_okhttpclient_client_HttpClient Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.total, type=io.dropwizard.metrics5.Counter)\n"
             + "app_okhttpclient_client_HttpClient_total{service=\"greatService\"} 1.0\n"
             + "# EOF\n";
-    assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
+    assertThat(convertToOpenMetricsFormat(dropwizardExports.collect())).isEqualTo(expected);
   }
 
   @Test
   public void test_WHEN_MoreMatches_THEN_ShouldReturnFirstOne() {
-    final Map<String, String> labels = new HashMap<String, String>();
+    final Map<String, String> labels = new HashMap<>();
     labels.put("service", "${0}");
     final MapperConfig mapperConfig =
         new MapperConfig(
@@ -105,12 +106,12 @@ public class CustomLabelMapperTest {
             + "# HELP app_okhttpclient_client_HttpClient Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.total, type=io.dropwizard.metrics5.Counter)\n"
             + "app_okhttpclient_client_HttpClient_total{service=\"greatService\"} 1.0\n"
             + "# EOF\n";
-    assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
+    assertThat(convertToOpenMetricsFormat(dropwizardExports.collect())).isEqualTo(expected);
   }
 
   @Test
   public void test_WHEN_MoreMatchesReverseOrder_THEN_ShouldReturnFirstOne() {
-    final Map<String, String> labels = new LinkedHashMap<String, String>();
+    final Map<String, String> labels = new LinkedHashMap<>();
     labels.put("service", "${0}");
     labels.put("status", "${1}");
     final MapperConfig mapperConfig =
@@ -140,12 +141,12 @@ public class CustomLabelMapperTest {
             + "# HELP app_okhttpclient_client_HttpClient Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Counter)\n"
             + "app_okhttpclient_client_HttpClient_total{service=\"greatService\",status=\"400\"} 1.0\n"
             + "# EOF\n";
-    assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
+    assertThat(convertToOpenMetricsFormat(dropwizardExports.collect())).isEqualTo(expected);
   }
 
   @Test
   public void test_WHEN_MoreToFormatInLabelsAndName_THEN_ShouldReturnCorrectSample() {
-    final Map<String, String> labels = new LinkedHashMap<String, String>();
+    final Map<String, String> labels = new LinkedHashMap<>();
     labels.put("service", "${0}_${1}");
     labels.put("status", "s_${1}");
     final MapperConfig mapperConfig =
@@ -171,12 +172,12 @@ public class CustomLabelMapperTest {
             + "# HELP app_okhttpclient_client_HttpClient_greatService Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Counter)\n"
             + "app_okhttpclient_client_HttpClient_greatService_total{service=\"greatService_400\",status=\"s_400\"} 1.0\n"
             + "# EOF\n";
-    assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
+    assertThat(convertToOpenMetricsFormat(dropwizardExports.collect())).isEqualTo(expected);
   }
 
   @Test
   public void test_WHEN_AdditionalLabels_THEN_ShouldReturnCorrectSample() {
-    final Map<String, String> labels = new LinkedHashMap<String, String>();
+    final Map<String, String> labels = new LinkedHashMap<>();
     labels.put("service", "${0}");
     labels.put("status", "s_${1}");
     labels.put("client", "sampleClient");
@@ -198,7 +199,7 @@ public class CustomLabelMapperTest {
             + "# HELP app_okhttpclient_client_HttpClient_greatService Generated from Dropwizard metric import (metric=app.okhttpclient.client.HttpClient.greatService.400, type=io.dropwizard.metrics5.Counter)\n"
             + "app_okhttpclient_client_HttpClient_greatService_total{client=\"sampleClient\",service=\"greatService\",status=\"s_400\"} 1.0\n"
             + "# EOF\n";
-    assertEquals(expected, convertToOpenMetricsFormat(dropwizardExports.collect()));
+    assertThat(convertToOpenMetricsFormat(dropwizardExports.collect())).isEqualTo(expected);
   }
 
   private String convertToOpenMetricsFormat(MetricSnapshots snapshots) {

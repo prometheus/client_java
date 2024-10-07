@@ -11,7 +11,7 @@ import io.prometheus.client.CollectorRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InstrumentedAppenderTest {
+class InstrumentedAppenderTest {
   private CollectorRegistry registry;
   private InstrumentedAppender appender;
   private InstrumentedAppender defaultAppender;

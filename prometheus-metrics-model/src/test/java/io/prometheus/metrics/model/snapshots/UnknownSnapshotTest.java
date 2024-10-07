@@ -1,9 +1,12 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.data.Offset.offset;
 
-public class UnknownSnapshotTest {
+import org.junit.jupiter.api.Test;
+
+class UnknownSnapshotTest {
 
   @Test
   public void testCompleteGoodCase() {
@@ -33,13 +36,13 @@ public class UnknownSnapshotTest {
             .build();
     SnapshotTestUtil.assertMetadata(
         snapshot, "my_unknown_seconds", "something in seconds", "seconds");
-    Assert.assertEquals(2, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).hasSize(2);
     UnknownSnapshot.UnknownDataPointSnapshot data = snapshot.getDataPoints().get(1); // env="prod"
-    Assert.assertEquals(Labels.of("env", "prod"), data.getLabels());
-    Assert.assertEquals(0.3, data.getValue(), 0.0);
-    Assert.assertEquals(0.12, data.getExemplar().getValue(), 0.0);
-    Assert.assertFalse(data.hasCreatedTimestamp());
-    Assert.assertFalse(data.hasScrapeTimestamp());
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("env", "prod"));
+    assertThat(data.getValue()).isCloseTo(0.3, offset(0.0));
+    assertThat(data.getExemplar().getValue()).isCloseTo(0.12, offset(0.0));
+    assertThat(data.hasCreatedTimestamp()).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isFalse();
   }
 
   @Test
@@ -49,23 +52,25 @@ public class UnknownSnapshotTest {
             .name("test")
             .dataPoint(UnknownSnapshot.UnknownDataPointSnapshot.builder().value(1.0).build())
             .build();
-    Assert.assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).hasSize(1);
   }
 
   @Test
   public void testEmpty() {
     UnknownSnapshot snapshot = UnknownSnapshot.builder().name("test").build();
-    Assert.assertEquals(0, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNameMissing() {
-    UnknownSnapshot.builder().build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> UnknownSnapshot.builder().build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testValueMissing() {
-    UnknownSnapshot.UnknownDataPointSnapshot.builder().build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> UnknownSnapshot.UnknownDataPointSnapshot.builder().build());
   }
 
   @Test
@@ -75,13 +80,13 @@ public class UnknownSnapshotTest {
 
     UnknownSnapshot.UnknownDataPointSnapshot data =
         new UnknownSnapshot.UnknownDataPointSnapshot(1.0, labels, exemplar);
-    Assert.assertEquals(1.0, data.getValue(), 0.1);
-    Assert.assertEquals(labels, data.getLabels());
-    Assert.assertEquals(exemplar, data.getExemplar());
+    assertThat(data.getValue()).isCloseTo(1.0, offset(0.1));
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(labels);
+    assertThat(data.getExemplar()).isEqualTo(exemplar);
 
     data = new UnknownSnapshot.UnknownDataPointSnapshot(1.0, labels, exemplar, 0L);
-    Assert.assertEquals(1.0, data.getValue(), 0.1);
-    Assert.assertEquals(labels, data.getLabels());
-    Assert.assertEquals(exemplar, data.getExemplar());
+    assertThat(data.getValue()).isCloseTo(1.0, offset(0.1));
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(labels);
+    assertThat(data.getExemplar()).isEqualTo(exemplar);
   }
 }

@@ -1,18 +1,19 @@
 package io.prometheus.metrics.model.snapshots;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.assertj.core.api.IterableAssert;
+import org.junit.jupiter.api.Test;
 
-public class LabelsTest {
+class LabelsTest {
 
   private <T extends Comparable<T>> void assertLessThan(T a, T b) {
-    Assert.assertTrue(a.compareTo(b) < 0);
+    assertThat(a).isLessThan(b);
   }
 
   private <T extends Comparable<T>> void assertGreaterThan(T a, T b) {
-    Assert.assertTrue(a.compareTo(b) > 0);
+    assertThat(a).isGreaterThan(b);
   }
 
   @Test
@@ -21,8 +22,12 @@ public class LabelsTest {
     Labels labels2 = Labels.of("env", "prod", "status1", "200");
     assertGreaterThan(labels1, labels2);
     assertLessThan(labels2, labels1);
-    assertNotEquals(labels1, labels2);
-    assertNotEquals(labels2, labels1);
+    assertLabels(labels2).isNotEqualTo(labels1);
+    assertLabels(labels1).isNotEqualTo(labels2);
+  }
+
+  private static IterableAssert<? extends Label> assertLabels(Labels labels) {
+    return assertThat((Iterable<? extends Label>) labels);
   }
 
   @Test
@@ -32,8 +37,8 @@ public class LabelsTest {
     Labels labels2 = Labels.of("env", "prod", "status", "500");
     assertLessThan(labels1, labels2);
     assertGreaterThan(labels2, labels1);
-    assertNotEquals(labels1, labels2);
-    assertNotEquals(labels2, labels1);
+    assertLabels(labels2).isNotEqualTo(labels1);
+    assertLabels(labels1).isNotEqualTo(labels2);
   }
 
   @Test
@@ -42,8 +47,8 @@ public class LabelsTest {
     Labels labels2 = Labels.of("env", "prod", "status", "200", "x_code", "none");
     assertLessThan(labels1, labels2);
     assertGreaterThan(labels2, labels1);
-    assertNotEquals(labels1, labels2);
-    assertNotEquals(labels2, labels1);
+    assertLabels(labels2).isNotEqualTo(labels1);
+    assertLabels(labels1).isNotEqualTo(labels2);
   }
 
   @Test
@@ -57,51 +62,54 @@ public class LabelsTest {
   public void testEqualsHashcodeDots() {
     Labels labels1 = Labels.of("my_a", "val");
     Labels labels2 = Labels.of("my.a", "val");
-    Assert.assertEquals(labels1, labels2);
-    Assert.assertEquals(labels1.hashCode(), labels2.hashCode());
+    assertLabels(labels2).isEqualTo(labels1).hasSameHashCodeAs(labels1);
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
   public void testCompareEquals() {
     Labels labels1 = Labels.of("env", "prod", "status", "200");
     Labels labels2 = Labels.of("env", "prod", "status", "200");
-    Assert.assertEquals(0, labels1.compareTo(labels2));
-    Assert.assertEquals(0, labels2.compareTo(labels1));
-    Assert.assertEquals(labels1, labels2);
-    Assert.assertEquals(labels2, labels1);
+    assertThat((Comparable) labels1).isEqualByComparingTo(labels2);
+    assertThat((Comparable) labels2).isEqualByComparingTo(labels1);
+    assertLabels(labels2).isEqualTo(labels1);
+    assertLabels(labels1).isEqualTo(labels2);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalLabelName() {
-    Labels.of("my_service/status", "200");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Labels.of("my_service/status", "200"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testReservedLabelName() {
-    Labels.of("__name__", "requests_total");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Labels.of("__name__", "requests_total"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicateLabelName() {
-    Labels.of("name1", "value1", "name2", "value2", "name1", "value3");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Labels.of("name1", "value1", "name2", "value2", "name1", "value3"));
   }
 
   @Test
   public void testMakePrometheusNames() {
     String[] names = new String[] {};
     String[] prometheusNames = Labels.makePrometheusNames(names);
-    Assert.assertSame(names, prometheusNames);
+    assertThat(prometheusNames).isSameAs(names);
 
     names = new String[] {"no_dots", "at_all"};
     prometheusNames = Labels.makePrometheusNames(names);
-    Assert.assertSame(names, prometheusNames);
+    assertThat(prometheusNames).isSameAs(names);
 
     names = new String[] {"dots", "here.it.is"};
     prometheusNames = Labels.makePrometheusNames(names);
-    Assert.assertNotSame(names, prometheusNames);
-    Assert.assertSame(names[0], prometheusNames[0]);
-    Assert.assertEquals("here.it.is", names[1]);
-    Assert.assertEquals("here_it_is", prometheusNames[1]);
+    assertThat(prometheusNames).isNotSameAs(names);
+    assertThat(prometheusNames[0]).isSameAs(names[0]);
+    assertThat(names[1]).isEqualTo("here.it.is");
+    assertThat(prometheusNames[1]).isEqualTo("here_it_is");
   }
 
   @Test
@@ -109,20 +117,22 @@ public class LabelsTest {
     Labels labels1 = Labels.of("key.1", "value 1", "key.3", "value 3");
     Labels labels2 = Labels.of("key_2", "value 2");
     Labels merged = labels2.merge(labels1);
-    Assert.assertEquals("key.1", merged.getName(0));
-    Assert.assertEquals("key_2", merged.getName(1));
-    Assert.assertEquals("key.3", merged.getName(2));
+    assertThat(merged.getName(0)).isEqualTo("key.1");
+    assertThat(merged.getName(1)).isEqualTo("key_2");
+    assertThat(merged.getName(2)).isEqualTo("key.3");
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testMergeDuplicateName() {
     Labels labels1 = Labels.of("key_one", "v1");
     Labels labels2 = Labels.of("key.one", "v2");
-    labels2.merge(labels1);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> labels2.merge(labels1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicateName() {
-    Labels.of("key_one", "v1", "key.one", "v2");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Labels.of("key_one", "v1", "key.one", "v2"));
   }
 }

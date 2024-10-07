@@ -9,7 +9,7 @@ import java.util.concurrent.FutureTask;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
-public class TestDaemonFlags {
+class TestDaemonFlags {
 
     @Test
     public void testDefaultIsNotDaemon() throws IOException, ExecutionException, InterruptedException {

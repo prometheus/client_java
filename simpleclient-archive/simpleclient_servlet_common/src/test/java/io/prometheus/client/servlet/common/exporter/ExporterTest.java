@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.assertj.core.api.Java6Assertions.fail;
 
-public class ExporterTest {
+class ExporterTest {
 
   private HttpServletRequestAdapter mockHttpServletRequest() {
     return mockHttpServletRequest(null, false);

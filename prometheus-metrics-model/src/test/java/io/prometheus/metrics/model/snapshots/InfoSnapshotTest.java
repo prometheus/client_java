@@ -1,10 +1,12 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.Iterator;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class InfoSnapshotTest {
+import java.util.Iterator;
+import org.junit.jupiter.api.Test;
+
+class InfoSnapshotTest {
 
   @Test
   public void testCompleteGoodCase() {
@@ -17,19 +19,19 @@ public class InfoSnapshotTest {
                     .labels(Labels.of("instance_id", "127.0.0.1:9100", "service_name", "gateway"))
                     .build())
             .build();
-    Assert.assertEquals("target", snapshot.getMetadata().getName());
-    Assert.assertEquals("Target info", snapshot.getMetadata().getHelp());
-    Assert.assertFalse(snapshot.getMetadata().hasUnit());
-    Assert.assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getMetadata().getName()).isEqualTo("target");
+    assertThat(snapshot.getMetadata().getHelp()).isEqualTo("Target info");
+    assertThat(snapshot.getMetadata().hasUnit()).isFalse();
+    assertThat(snapshot.getDataPoints().size()).isOne();
   }
 
   @Test
   public void testEmptyInfo() {
     InfoSnapshot snapshot = InfoSnapshot.builder().name("target").build();
-    Assert.assertEquals(0, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testDataImmutable() {
     InfoSnapshot snapshot =
         InfoSnapshot.builder()
@@ -47,16 +49,18 @@ public class InfoSnapshotTest {
             .build();
     Iterator<InfoSnapshot.InfoDataPointSnapshot> iterator = snapshot.getDataPoints().iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNameMustNotIncludeSuffix() {
-    InfoSnapshot.builder().name("jvm_info").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> InfoSnapshot.builder().name("jvm_info").build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNameMustNotIncludeSuffixDot() {
-    InfoSnapshot.builder().name("jvm.info").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> InfoSnapshot.builder().name("jvm.info").build());
   }
 }

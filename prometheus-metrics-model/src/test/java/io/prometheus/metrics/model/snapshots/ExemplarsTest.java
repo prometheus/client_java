@@ -1,10 +1,13 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.Iterator;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.data.Offset.offset;
 
-public class ExemplarsTest {
+import java.util.Iterator;
+import org.junit.jupiter.api.Test;
+
+class ExemplarsTest {
 
   @Test
   public void testUpperBound() {
@@ -13,19 +16,19 @@ public class ExemplarsTest {
             Exemplar.builder().value(1.0).build(),
             Exemplar.builder().value(3.0).build(),
             Exemplar.builder().value(2.0).build());
-    Assert.assertEquals(3, exemplars.size());
-    Assert.assertEquals(1.0, exemplars.get(0).getValue(), 0.0);
-    Assert.assertEquals(3.0, exemplars.get(1).getValue(), 0.0);
-    Assert.assertEquals(2.0, exemplars.get(2).getValue(), 0.0);
-    Assert.assertEquals(1.0, exemplars.get(0.0, Double.POSITIVE_INFINITY).getValue(), 0.0);
-    Assert.assertEquals(1.0, exemplars.get(0.0, 1.0).getValue(), 0.0);
-    Assert.assertEquals(3.0, exemplars.get(1.0, 4.0).getValue(), 0.0);
-    Assert.assertEquals(3.0, exemplars.get(2.0, 3.0).getValue(), 0.0);
-    Assert.assertEquals(2.0, exemplars.get(1.0, 2.1).getValue(), 0.0);
-    Assert.assertNull(exemplars.get(2.0, 2.1));
+    assertThat(exemplars.size()).isEqualTo(3);
+    assertThat(exemplars.get(0).getValue()).isCloseTo(1.0, offset(0.0));
+    assertThat(exemplars.get(1).getValue()).isCloseTo(3.0, offset(0.0));
+    assertThat(exemplars.get(2).getValue()).isCloseTo(2.0, offset(0.0));
+    assertThat(exemplars.get(0.0, Double.POSITIVE_INFINITY).getValue()).isCloseTo(1.0, offset(0.0));
+    assertThat(exemplars.get(0.0, 1.0).getValue()).isCloseTo(1.0, offset(0.0));
+    assertThat(exemplars.get(1.0, 4.0).getValue()).isCloseTo(3.0, offset(0.0));
+    assertThat(exemplars.get(2.0, 3.0).getValue()).isCloseTo(3.0, offset(0.0));
+    assertThat(exemplars.get(1.0, 2.1).getValue()).isCloseTo(2.0, offset(0.0));
+    assertThat(exemplars.get(2.0, 2.1)).isNull();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testImmutable() {
     Exemplars exemplars =
         Exemplars.of(
@@ -34,7 +37,7 @@ public class ExemplarsTest {
             Exemplar.builder().value(2.0).build());
     Iterator<Exemplar> iterator = exemplars.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
   @Test
@@ -47,8 +50,8 @@ public class ExemplarsTest {
         Exemplar.builder().timestampMillis(System.currentTimeMillis()).value(1.0).build();
     Exemplars exemplars = Exemplars.of(oldest, newest, middle);
     Exemplar result = exemplars.get(1.1, 1.9); // newest is not within these bounds
-    Assert.assertSame(result, middle);
+    assertThat(middle).isSameAs(result);
     result = exemplars.get(0.9, Double.POSITIVE_INFINITY);
-    Assert.assertSame(result, newest);
+    assertThat(newest).isSameAs(result);
   }
 }

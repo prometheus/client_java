@@ -1,6 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.Quantile;
 import io.prometheus.metrics.model.snapshots.Quantiles;
@@ -8,9 +10,9 @@ import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class SummaryWithCallbackTest {
+class SummaryWithCallbackTest {
 
   @Test
   public void testGauge() {
@@ -30,24 +32,26 @@ public class SummaryWithCallbackTest {
             .build();
     SummarySnapshot snapshot = gauge.collect();
 
-    assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints().size()).isOne();
     SummarySnapshot.SummaryDataPointSnapshot datapoint = snapshot.getDataPoints().get(0);
-    assertEquals(count.get(), datapoint.getCount());
-    assertEquals(sum.doubleValue(), datapoint.getSum(), 0.1);
-    assertEquals(quantiles, datapoint.getQuantiles());
-    assertEquals(labelValues.size(), datapoint.getLabels().size());
+    assertThat(datapoint.getCount()).isEqualTo(count.get());
+    assertThat(datapoint.getSum()).isCloseTo(sum.doubleValue(), offset(0.1));
+    assertThat(datapoint.getQuantiles()).isEqualTo(quantiles);
+    assertThat(datapoint.getLabels().size()).isEqualTo(labelValues.size());
 
     count.incrementAndGet();
     sum.incrementAndGet();
     snapshot = gauge.collect();
-    assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints().size()).isOne();
     datapoint = snapshot.getDataPoints().get(0);
-    assertEquals(count.get(), datapoint.getCount());
-    assertEquals(sum.doubleValue(), datapoint.getSum(), 0.1);
+    assertThat(datapoint.getCount()).isEqualTo(count.get());
+    assertThat(datapoint.getSum()).isCloseTo(sum.doubleValue(), offset(0.1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testSummaryNoCallback() {
-    SummaryWithCallback.builder().name("summary").labelNames("l1", "l2").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () -> SummaryWithCallback.builder().name("summary").labelNames("l1", "l2").build());
   }
 }

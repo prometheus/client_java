@@ -1,5 +1,9 @@
 package io.prometheus.metrics.it.pushgateway;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.data.Offset.offset;
+
 import com.jayway.jsonpath.Criteria;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
@@ -10,10 +14,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 import net.minidev.json.JSONArray;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -27,7 +30,7 @@ public class PushGatewayIT {
   private GenericContainer<?> prometheusContainer;
   private Volume sampleAppVolume;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException, URISyntaxException {
     Network network = Network.newNetwork();
     sampleAppVolume = Volume.create("it-pushgateway").copy("pushgateway-test-app.jar");
@@ -53,7 +56,7 @@ public class PushGatewayIT {
             .withLogConsumer(LogConsumer.withPrefix("prometheus"));
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws IOException {
     prometheusContainer.stop();
     pushGatewayContainer.stop();
@@ -177,13 +180,13 @@ public class PushGatewayIT {
 
   private void assertMetrics() throws IOException, InterruptedException {
     double value = getValue("my_batch_job_duration_seconds", "job", "pushgateway-test-app");
-    Assert.assertEquals(0.5, value, 0.0);
+    assertThat(value).isCloseTo(0.5, offset(0.0));
     value = getValue("file_sizes_bytes_bucket", "job", "pushgateway-test-app", "le", "512");
-    Assert.assertEquals(0.0, value, 0.0);
+    assertThat(value).isCloseTo(0.0, offset(0.0));
     value = getValue("file_sizes_bytes_bucket", "job", "pushgateway-test-app", "le", "1024");
-    Assert.assertEquals(2.0, value, 0.0);
+    assertThat(value).isCloseTo(2.0, offset(0.0));
     value = getValue("file_sizes_bytes_bucket", "job", "pushgateway-test-app", "le", "+Inf");
-    Assert.assertEquals(3.0, value, 0.0);
+    assertThat(value).isCloseTo(3.0, offset(0.0));
   }
 
   private double getValue(String name, String... labels) throws IOException, InterruptedException {
@@ -195,13 +198,13 @@ public class PushGatewayIT {
     JSONArray result =
         JsonPath.parse(scrapeResponseJson)
             .read("$.data.result" + Filter.filter(criteria) + ".value[1]");
-    Assert.assertEquals(1, result.size());
-    return Double.valueOf(result.get(0).toString());
+    assertThat(result.size()).isOne();
+    return Double.parseDouble(result.get(0).toString());
   }
 
   private void assertNativeHistogram() throws IOException, InterruptedException {
     double count = getNativeHistogramCount("file_sizes_bytes", "pushgateway-test-app");
-    Assert.assertEquals(3, count, 0.0);
+    assertThat(count).isCloseTo(3, offset(0.0));
   }
 
   private double getNativeHistogramCount(String name, String job)
@@ -211,7 +214,7 @@ public class PushGatewayIT {
     JSONArray result =
         JsonPath.parse(scrapeResponseJson)
             .read("$.data.result" + Filter.filter(criteria) + ".value[1]");
-    return Double.valueOf(result.get(0).toString());
+    return Double.parseDouble(result.get(0).toString());
   }
 
   private String scrape(String query) throws IOException, InterruptedException {
@@ -242,7 +245,7 @@ public class PushGatewayIT {
       Thread.sleep(250);
       timeRemaining -= 250;
     }
-    Assert.fail("timeout while scraping " + url);
+    fail("timeout while scraping " + url);
     return null;
   }
 
@@ -251,7 +254,7 @@ public class PushGatewayIT {
     long waitTimeMillis = 0;
     while (container.isRunning()) {
       if (waitTimeMillis > unit.toMillis(timeout)) {
-        Assert.fail(
+        fail(
             container.getContainerName()
                 + " did not terminate after "
                 + timeout

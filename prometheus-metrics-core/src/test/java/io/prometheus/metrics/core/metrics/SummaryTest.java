@@ -1,7 +1,9 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.datapoints.Timer;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -12,10 +14,10 @@ import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class SummaryTest {
+class SummaryTest {
 
   private final Label label = new Label("name", "value");
   private final Labels labels = Labels.builder().label(label.getName(), label.getValue()).build();
@@ -26,7 +28,7 @@ public class SummaryTest {
   private Summary withLabelsAndQuantiles;
   private Summary noLabelsAndQuantiles;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     registry = new PrometheusRegistry();
     noLabels =
@@ -62,27 +64,27 @@ public class SummaryTest {
   @Test
   public void testObserve() {
     noLabels.observe(2);
-    assertEquals(1, getCount(noLabels, Labels.EMPTY));
-    assertEquals(2.0, getSum(noLabels, Labels.EMPTY), .001);
+    assertThat(getCount(noLabels, Labels.EMPTY)).isOne();
+    assertThat(getSum(noLabels, Labels.EMPTY)).isCloseTo(2.0, offset(.001));
     noLabels.observe(3);
-    assertEquals(2, getCount(noLabels, Labels.EMPTY));
-    assertEquals(5.0, getSum(noLabels, Labels.EMPTY), .001);
+    assertThat(getCount(noLabels, Labels.EMPTY)).isEqualTo(2);
+    assertThat(getSum(noLabels, Labels.EMPTY)).isCloseTo(5.0, offset(.001));
 
     withLabels.labelValues(label.getValue()).observe(4);
-    assertEquals(1, getCount(withLabels, labels));
-    assertEquals(4.0, getSum(withLabels, labels), .001);
+    assertThat(getCount(withLabels, labels)).isOne();
+    assertThat(getSum(withLabels, labels)).isCloseTo(4.0, offset(.001));
 
     withLabels.labelValues(label.getValue()).observeWithExemplar(6, labels);
-    assertEquals(2, getCount(withLabels, labels));
-    assertEquals(10.0, getSum(withLabels, labels), .001);
+    assertThat(getCount(withLabels, labels)).isEqualTo(2);
+    assertThat(getSum(withLabels, labels)).isCloseTo(10.0, offset(.001));
   }
 
   @Test
   public void testNegativeAmount() {
     noLabels.observe(-1);
     noLabels.observe(-3);
-    assertEquals(2, getCount(noLabels, Labels.EMPTY));
-    assertEquals(-4.0, getSum(noLabels, Labels.EMPTY), .001);
+    assertThat(getCount(noLabels, Labels.EMPTY)).isEqualTo(2);
+    assertThat(getSum(noLabels, Labels.EMPTY)).isCloseTo(-4.0, offset(.001));
   }
 
   @Test
@@ -95,17 +97,19 @@ public class SummaryTest {
       withLabelsAndQuantiles.labelValues(label.getValue()).observe(i);
       noLabelsAndQuantiles.observe(i);
     }
-    assertEquals(
-        getQuantile(noLabelsAndQuantiles, 0.5, Labels.EMPTY), 0.5 * nSamples, 0.05 * nSamples);
-    assertEquals(
-        getQuantile(noLabelsAndQuantiles, 0.9, Labels.EMPTY), 0.9 * nSamples, 0.01 * nSamples);
-    assertEquals(
-        getQuantile(noLabelsAndQuantiles, 0.99, Labels.EMPTY), 0.99 * nSamples, 0.001 * nSamples);
+    assertThat(0.5 * nSamples)
+        .isCloseTo(getQuantile(noLabelsAndQuantiles, 0.5, Labels.EMPTY), offset(0.05 * nSamples));
+    assertThat(0.9 * nSamples)
+        .isCloseTo(getQuantile(noLabelsAndQuantiles, 0.9, Labels.EMPTY), offset(0.01 * nSamples));
+    assertThat(0.99 * nSamples)
+        .isCloseTo(getQuantile(noLabelsAndQuantiles, 0.99, Labels.EMPTY), offset(0.001 * nSamples));
 
-    assertEquals(getQuantile(withLabelsAndQuantiles, 0.5, labels), 0.5 * nSamples, 0.05 * nSamples);
-    assertEquals(getQuantile(withLabelsAndQuantiles, 0.9, labels), 0.9 * nSamples, 0.01 * nSamples);
-    assertEquals(
-        getQuantile(withLabelsAndQuantiles, 0.99, labels), 0.99 * nSamples, 0.001 * nSamples);
+    assertThat(0.5 * nSamples)
+        .isCloseTo(getQuantile(withLabelsAndQuantiles, 0.5, labels), offset(0.05 * nSamples));
+    assertThat(0.9 * nSamples)
+        .isCloseTo(getQuantile(withLabelsAndQuantiles, 0.9, labels), offset(0.01 * nSamples));
+    assertThat(0.99 * nSamples)
+        .isCloseTo(getQuantile(withLabelsAndQuantiles, 0.99, labels), offset(0.001 * nSamples));
   }
 
   @Test
@@ -119,52 +123,56 @@ public class SummaryTest {
             .help("help")
             .register(registry);
     summary.observe(8.0);
-    assertEquals(8.0, getQuantile(summary, 0.99, Labels.EMPTY), 0.0); // From bucket 1.
+    assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
+        .isCloseTo(8.0, offset(0.0)); // From bucket 1.
     Thread.sleep(600);
-    assertEquals(8.0, getQuantile(summary, 0.99, Labels.EMPTY), 0.0); // From bucket 2.
+    assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
+        .isCloseTo(8.0, offset(0.0)); // From bucket 2.
     Thread.sleep(600);
-    assertEquals(
-        Double.NaN,
-        getQuantile(summary, 0.99, Labels.EMPTY),
-        0.0); // Bucket 1 again, now it is empty.
+    assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
+        .isCloseTo(Double.NaN, offset(0.0)); // Bucket 1 again, now it is empty.
   }
 
   @Test
   public void testTimer() {
     int result = noLabels.time(() -> 123);
-    assertEquals(123, result);
-    assertEquals(1, getCount(noLabels, Labels.EMPTY));
+    assertThat(result).isEqualTo(123);
+    assertThat(getCount(noLabels, Labels.EMPTY)).isOne();
 
     try (Timer timer = noLabels.startTimer()) {
       timer.observeDuration();
-      assertEquals(2, getCount(noLabels, Labels.EMPTY), .001);
+      assertThat(getCount(noLabels, Labels.EMPTY)).isEqualTo(2);
     }
   }
 
   @Test
   public void noLabelsDefaultZeroValue() {
-    assertEquals(0.0, getCount(noLabels, Labels.EMPTY), .001);
-    assertEquals(0.0, getSum(noLabels, Labels.EMPTY), .001);
+    assertThat(getCount(noLabels, Labels.EMPTY)).isZero();
+    assertThat(getSum(noLabels, Labels.EMPTY)).isCloseTo(0.0, offset(.001));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testBuilderInvalidNumberOfAgeBuckets() {
-    Summary.builder().name("name").numberOfAgeBuckets(-1).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Summary.builder().name("name").numberOfAgeBuckets(-1).build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testBuilderInvalidMaxAge() {
-    Summary.builder().name("name").maxAgeSeconds(-1).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Summary.builder().name("name").maxAgeSeconds(-1).build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testBuilderInvalidQuantile() {
-    Summary.builder().name("name").quantile(42).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Summary.builder().name("name").quantile(42).build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testBuilderInvalidQuantileError() {
-    Summary.builder().name("name").quantile(0.5, 20).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Summary.builder().name("name").quantile(0.5, 20).build());
   }
 
   private double getQuantile(Summary summary, double quantile, Labels labels) {
@@ -182,9 +190,9 @@ public class SummaryTest {
   private SummarySnapshot.SummaryDataPointSnapshot getDatapoint(Summary summary, Labels labels) {
     SummarySnapshot snapshot = summary.collect();
     List<SummarySnapshot.SummaryDataPointSnapshot> datapoints = snapshot.getDataPoints();
-    assertEquals(1, datapoints.size());
+    assertThat(datapoints.size()).isOne();
     SummarySnapshot.SummaryDataPointSnapshot datapoint = datapoints.get(0);
-    assertEquals(labels, datapoint.getLabels());
+    assertThat((Iterable<? extends Label>) datapoint.getLabels()).isEqualTo(labels);
     return datapoint;
   }
 

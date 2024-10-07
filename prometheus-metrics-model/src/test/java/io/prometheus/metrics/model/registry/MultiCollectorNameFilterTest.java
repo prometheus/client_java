@@ -1,100 +1,89 @@
 package io.prometheus.metrics.model.registry;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.junit.jupiter.api.Test;
 
-public class MultiCollectorNameFilterTest {
+class MultiCollectorNameFilterTest {
 
-  private final boolean[] collectCalled = {false};
-  private PrometheusRegistry registry;
-  private Predicate<String> includedNames = null;
-  private List<String> prometheusNames = new ArrayList<>();
+  private static class Registry extends PrometheusRegistry {
+    private final AtomicBoolean collectCalled = new AtomicBoolean();
 
-  @Before
-  public void setUp() {
-    registry = new PrometheusRegistry();
-    collectCalled[0] = false;
-    includedNames = null;
-    prometheusNames = Collections.emptyList();
+    public Registry(List<String> prometheusNames) {
+      register(
+          new MultiCollector() {
+            @Override
+            public MetricSnapshots collect() {
+              collectCalled.set(true);
+              return MetricSnapshots.builder()
+                  .metricSnapshot(
+                      CounterSnapshot.builder()
+                          .name("counter_1")
+                          .dataPoint(CounterDataPointSnapshot.builder().value(1.0).build())
+                          .build())
+                  .metricSnapshot(
+                      GaugeSnapshot.builder()
+                          .name("gauge_2")
+                          .dataPoint(GaugeDataPointSnapshot.builder().value(1.0).build())
+                          .build())
+                  .build();
+            }
 
-    registry.register(
-        new MultiCollector() {
-          @Override
-          public MetricSnapshots collect() {
-            collectCalled[0] = true;
-            return MetricSnapshots.builder()
-                .metricSnapshot(
-                    CounterSnapshot.builder()
-                        .name("counter_1")
-                        .dataPoint(CounterDataPointSnapshot.builder().value(1.0).build())
-                        .build())
-                .metricSnapshot(
-                    GaugeSnapshot.builder()
-                        .name("gauge_2")
-                        .dataPoint(GaugeDataPointSnapshot.builder().value(1.0).build())
-                        .build())
-                .build();
-          }
+            @Override
+            public List<String> getPrometheusNames() {
+              return prometheusNames;
+            }
+          });
+    }
 
-          @Override
-          public List<String> getPrometheusNames() {
-            return prometheusNames;
-          }
-        });
+    public boolean collectCalled() {
+      return collectCalled.get();
+    }
   }
 
   @Test
   public void testPartialFilter() {
-
-    includedNames = name -> name.equals("counter_1");
-
-    MetricSnapshots snapshots = registry.scrape(includedNames);
-    Assert.assertTrue(collectCalled[0]);
-    Assert.assertEquals(1, snapshots.size());
-    Assert.assertEquals("counter_1", snapshots.get(0).getMetadata().getName());
+    Registry registry = new Registry(Collections.emptyList());
+    MetricSnapshots snapshots = registry.scrape(name -> name.equals("counter_1"));
+    assertThat(registry.collectCalled()).isTrue();
+    assertThat(snapshots.size()).isOne();
+    assertThat(snapshots.get(0).getMetadata().getName()).isEqualTo("counter_1");
   }
 
   @Test
   public void testPartialFilterWithPrometheusNames() {
+    Registry registry = new Registry(Arrays.asList("counter_1", "gauge_2"));
 
-    includedNames = name -> name.equals("counter_1");
-    prometheusNames = Arrays.asList("counter_1", "gauge_2");
-
-    MetricSnapshots snapshots = registry.scrape(includedNames);
-    Assert.assertTrue(collectCalled[0]);
-    Assert.assertEquals(1, snapshots.size());
-    Assert.assertEquals("counter_1", snapshots.get(0).getMetadata().getName());
+    MetricSnapshots snapshots = registry.scrape(name -> name.equals("counter_1"));
+    assertThat(registry.collectCalled()).isTrue();
+    assertThat(snapshots.size()).isOne();
+    assertThat(snapshots.get(0).getMetadata().getName()).isEqualTo("counter_1");
   }
 
   @Test
   public void testCompleteFilter_CollectCalled() {
-
-    includedNames = name -> !name.equals("counter_1") && !name.equals("gauge_2");
-
-    MetricSnapshots snapshots = registry.scrape(includedNames);
-    Assert.assertTrue(collectCalled[0]);
-    Assert.assertEquals(0, snapshots.size());
+    Registry registry = new Registry(Collections.emptyList());
+    MetricSnapshots snapshots =
+        registry.scrape(name -> !name.equals("counter_1") && !name.equals("gauge_2"));
+    assertThat(registry.collectCalled()).isTrue();
+    assertThat(snapshots.size()).isZero();
   }
 
   @Test
   public void testCompleteFilter_CollectNotCalled() {
-
-    includedNames = name -> !name.equals("counter_1") && !name.equals("gauge_2");
-    prometheusNames = Arrays.asList("counter_1", "gauge_2");
-
-    MetricSnapshots snapshots = registry.scrape(includedNames);
-    Assert.assertFalse(collectCalled[0]);
-    Assert.assertEquals(0, snapshots.size());
+    Registry registry = new Registry(Arrays.asList("counter_1", "gauge_2"));
+    MetricSnapshots snapshots =
+        registry.scrape(name -> !name.equals("counter_1") && !name.equals("gauge_2"));
+    assertThat(registry.collectCalled()).isFalse();
+    assertThat(snapshots.size()).isZero();
   }
 }

@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,16 +12,16 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
 import java.lang.management.BufferPoolMXBean;
 import java.util.Arrays;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class JvmBufferPoolMetricsTest {
+class JvmBufferPoolMetricsTest {
 
   private final BufferPoolMXBean directBuffer = Mockito.mock(BufferPoolMXBean.class);
   private final BufferPoolMXBean mappedBuffer = Mockito.mock(BufferPoolMXBean.class);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     when(directBuffer.getName()).thenReturn("direct");
     when(directBuffer.getCount()).thenReturn(2L);
@@ -42,8 +42,7 @@ public class JvmBufferPoolMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE jvm_buffer_pool_capacity_bytes gauge\n"
+        "# TYPE jvm_buffer_pool_capacity_bytes gauge\n"
             + "# UNIT jvm_buffer_pool_capacity_bytes bytes\n"
             + "# HELP jvm_buffer_pool_capacity_bytes Bytes capacity of a given JVM buffer pool.\n"
             + "jvm_buffer_pool_capacity_bytes{pool=\"direct\"} 3456.0\n"
@@ -59,7 +58,7 @@ public class JvmBufferPoolMetricsTest {
             + "jvm_buffer_pool_used_bytes{pool=\"mapped\"} 2345.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test

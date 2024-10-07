@@ -1,17 +1,17 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.metrics.CKMSQuantiles.Quantile;
 import java.util.*;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CKMSQuantilesTest {
+class CKMSQuantilesTest {
 
   private final Quantile qMin = new Quantile(0.0, 0.00);
   private final Quantile q50 = new Quantile(0.5, 0.01);
@@ -22,7 +22,7 @@ public class CKMSQuantilesTest {
   @Test
   public void testGetOnEmptyValues() {
     CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
-    assertTrue(Double.isNaN(ckms.get(q95.quantile)));
+    assertThat(Double.isNaN(ckms.get(q95.quantile))).isTrue();
   }
 
   @Test
@@ -95,7 +95,7 @@ public class CKMSQuantilesTest {
       ckms.insert(v);
     }
     validateResults(ckms);
-    assertTrue("sample size should be way below 1_000_000", ckms.samples.size() < 1000);
+    assertThat(ckms.samples).as("sample size should be way below 1_000_000").hasSizeLessThan(1000);
   }
 
   @Test
@@ -108,7 +108,7 @@ public class CKMSQuantilesTest {
     }
     validateResults(ckms);
     ckms.compress();
-    assertEquals(2, ckms.samples.size());
+    assertThat(ckms.samples).hasSize(2);
   }
 
   @Test
@@ -121,7 +121,7 @@ public class CKMSQuantilesTest {
     }
     validateResults(ckms);
     ckms.compress();
-    assertEquals(2, ckms.samples.size());
+    assertThat(ckms.samples).hasSize(2);
   }
 
   @Test
@@ -134,7 +134,7 @@ public class CKMSQuantilesTest {
     }
     validateResults(ckms);
     ckms.compress();
-    assertEquals(2, ckms.samples.size());
+    assertThat(ckms.samples).hasSize(2);
   }
 
   @Test
@@ -146,7 +146,7 @@ public class CKMSQuantilesTest {
       ckms.insert(v);
     }
     validateResults(ckms);
-    assertTrue(ckms.samples.size() < 200); // should be a lot less than input.size()
+    assertThat(ckms.samples).hasSizeLessThan(200); // should be a lot less than input.size()
   }
 
   @Test
@@ -158,7 +158,7 @@ public class CKMSQuantilesTest {
       ckms.insert(v);
     }
     validateResults(ckms);
-    assertTrue(ckms.samples.size() < 200); // should be a lot less than input.size()
+    assertThat(ckms.samples).hasSizeLessThan(200); // should be a lot less than input.size()
   }
 
   @Test
@@ -170,7 +170,7 @@ public class CKMSQuantilesTest {
       ckms.insert(v);
     }
     validateResults(ckms);
-    assertTrue(ckms.samples.size() < 200); // should be a lot less than input.size()
+    assertThat(ckms.samples).hasSizeLessThan(200); // should be a lot less than input.size()
   }
 
   @Test
@@ -183,7 +183,7 @@ public class CKMSQuantilesTest {
     }
     validateResults(ckms);
     // With epsilon == 0 we need to keep all inputs in samples.
-    assertEquals(input.size(), ckms.samples.size());
+    assertThat(ckms.samples).hasSameSizeAs(input);
   }
 
   @Test
@@ -196,7 +196,7 @@ public class CKMSQuantilesTest {
     }
     validateResults(ckms);
     // With epsilon == 0 we need to keep all inputs in samples.
-    assertEquals(input.size(), ckms.samples.size());
+    assertThat(ckms.samples).hasSameSizeAs(input);
   }
 
   @Test
@@ -209,7 +209,7 @@ public class CKMSQuantilesTest {
     }
     validateResults(ckms);
     // With epsilon == 0 we need to keep all inputs in samples.
-    assertEquals(input.size(), ckms.samples.size());
+    assertThat(ckms.samples).hasSameSizeAs(input);
   }
 
   @Test
@@ -260,15 +260,18 @@ public class CKMSQuantilesTest {
 
     // ε-approximate quantiles relaxes the requirement
     // to finding an item with rank between (φ−ε)n and (φ+ε)n.
-    assertEquals(p10, ckms.get(0.1), errorBoundsNormalDistribution(0.1, 0.001, normalDistribution));
-    assertEquals(mean, ckms.get(0.5), errorBoundsNormalDistribution(0.5, 0.01, normalDistribution));
-    assertEquals(p90, ckms.get(0.9), errorBoundsNormalDistribution(0.9, 0.001, normalDistribution));
-    assertEquals(
-        p95, ckms.get(0.95), errorBoundsNormalDistribution(0.95, 0.001, normalDistribution));
-    assertEquals(
-        p99, ckms.get(0.99), errorBoundsNormalDistribution(0.99, 0.001, normalDistribution));
+    assertThat(ckms.get(0.1))
+        .isCloseTo(p10, offset(errorBoundsNormalDistribution(0.1, 0.001, normalDistribution)));
+    assertThat(ckms.get(0.5))
+        .isCloseTo(mean, offset(errorBoundsNormalDistribution(0.5, 0.01, normalDistribution)));
+    assertThat(ckms.get(0.9))
+        .isCloseTo(p90, offset(errorBoundsNormalDistribution(0.9, 0.001, normalDistribution)));
+    assertThat(ckms.get(0.95))
+        .isCloseTo(p95, offset(errorBoundsNormalDistribution(0.95, 0.001, normalDistribution)));
+    assertThat(ckms.get(0.99))
+        .isCloseTo(p99, offset(errorBoundsNormalDistribution(0.99, 0.001, normalDistribution)));
 
-    assertTrue("sample size should be below 1000", ckms.samples.size() < 1000);
+    assertThat(ckms.samples).as("sample size should be below 1000").hasSizeLessThan(1000);
   }
 
   double errorBoundsNormalDistribution(double p, double epsilon, NormalDistribution nd) {
@@ -285,14 +288,14 @@ public class CKMSQuantilesTest {
     try {
       new Quantile(-1, 0);
     } catch (IllegalArgumentException e) {
-      assertEquals("Quantile must be between 0 and 1", e.getMessage());
+      assertThat(e.getMessage()).isEqualTo("Quantile must be between 0 and 1");
     } catch (Exception e) {
       fail("Wrong exception thrown" + e);
     }
     try {
       new Quantile(0.95, 2);
     } catch (IllegalArgumentException e) {
-      assertEquals("Epsilon must be between 0 and 1", e.getMessage());
+      assertThat(e.getMessage()).isEqualTo("Epsilon must be between 0 and 1");
     } catch (Exception e) {
       fail("Wrong exception thrown" + e);
     }
@@ -314,14 +317,17 @@ public class CKMSQuantilesTest {
     for (CKMSQuantiles.Sample sample : ckms.samples) {
       String msg =
           "invalid sample " + sample + ": count=" + ckms.n + " r=" + r + " f(r)=" + ckms.f(r);
-      assertTrue(msg, sample.g + sample.delta <= ckms.f(r));
-      assertTrue(
-          "Samples not ordered. Keep in mind that insertBatch() takes a sorted array as parameter.",
-          prev <= sample.value);
+      assertThat(sample.g + sample.delta).as(msg).isLessThanOrEqualTo(ckms.f(r));
+      assertThat(prev)
+          .as(
+              "Samples not ordered. Keep in mind that insertBatch() takes a sorted array as parameter.")
+          .isLessThanOrEqualTo(sample.value);
       prev = sample.value;
       r += sample.g;
     }
-    assertEquals("the sum of all g's must be the total number of observations", r, ckms.n);
+    assertThat(ckms.n)
+        .as("the sum of all g's must be the total number of observations")
+        .isEqualTo(r);
   }
 
   /**
@@ -365,7 +371,7 @@ public class CKMSQuantilesTest {
               + ckms.n
               + "="
               + (q.quantile * ckms.n);
-      assertTrue(errorMessage, ok);
+      assertThat(ok).as(errorMessage).isTrue();
     }
   }
 }

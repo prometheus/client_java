@@ -11,7 +11,7 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InstrumentedAppenderTest {
+class InstrumentedAppenderTest {
 
   private InstrumentedAppender appender;
   private LoggingEvent event;

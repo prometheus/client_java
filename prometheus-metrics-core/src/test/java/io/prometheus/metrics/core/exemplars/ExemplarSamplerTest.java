@@ -1,16 +1,17 @@
 package io.prometheus.metrics.core.exemplars;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.metrics.core.util.Scheduler;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ExemplarSamplerTest {
+class ExemplarSamplerTest {
 
   private final int tick = 10; // Time step in milliseconds. Make this larger if the test is flaky.
   private final int sampleInterval = 10 * tick; // do not change this
@@ -60,12 +61,12 @@ public class ExemplarSamplerTest {
 
   private io.prometheus.metrics.tracer.common.SpanContext origContext;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     origContext = SpanContextSupplier.getSpanContext();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     SpanContextSupplier.setSpanContext(origContext);
   }
@@ -185,7 +186,7 @@ public class ExemplarSamplerTest {
 
   private void assertExemplars(ExemplarSampler sampler, double... values) {
     Exemplars exemplars = sampler.collect();
-    Assert.assertEquals(values.length, exemplars.size());
+    assertThat(exemplars.size()).isEqualTo(values.length);
     for (double value : values) {
       boolean found = false;
       for (Exemplar exemplar : exemplars) {
@@ -194,7 +195,7 @@ public class ExemplarSamplerTest {
           break;
         }
       }
-      Assert.assertTrue(value + " not found", found);
+      assertThat(found).as(value + " not found").isTrue();
     }
   }
 

@@ -1,14 +1,16 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CounterWithCallbackTest {
+class CounterWithCallbackTest {
 
   @Test
   public void testCounter() {
@@ -23,20 +25,22 @@ public class CounterWithCallbackTest {
             .build();
     CounterSnapshot snapshot = counter.collect();
 
-    assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints().size()).isOne();
     CounterSnapshot.CounterDataPointSnapshot datapoint = snapshot.getDataPoints().get(0);
-    assertEquals(value.doubleValue(), datapoint.getValue(), 0.1);
-    assertEquals(labelValues.size(), datapoint.getLabels().size());
+    assertThat(datapoint.getValue()).isCloseTo(value.doubleValue(), offset(0.1));
+    assertThat(datapoint.getLabels().size()).isEqualTo(labelValues.size());
 
     value.incrementAndGet();
     snapshot = counter.collect();
-    assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints().size()).isOne();
     datapoint = snapshot.getDataPoints().get(0);
-    assertEquals(value.doubleValue(), datapoint.getValue(), 0.1);
+    assertThat(datapoint.getValue()).isCloseTo(value.doubleValue(), offset(0.1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testCounterNoCallback() {
-    CounterWithCallback.builder().name("counter").labelNames("l1", "l2").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () -> CounterWithCallback.builder().name("counter").labelNames("l1", "l2").build());
   }
 }

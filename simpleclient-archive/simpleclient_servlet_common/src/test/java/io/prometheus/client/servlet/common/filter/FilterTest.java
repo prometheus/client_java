@@ -17,7 +17,7 @@ import java.util.Enumeration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class FilterTest {
+class FilterTest {
 	
 	public static final String GET = "GET";
 	public static final String POST = "POST";

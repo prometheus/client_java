@@ -11,7 +11,7 @@ import java.util.Enumeration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class MethodTimerTest {
+class MethodTimerTest {
     private interface Timeable {
         void timeMe() throws Exception;
     }

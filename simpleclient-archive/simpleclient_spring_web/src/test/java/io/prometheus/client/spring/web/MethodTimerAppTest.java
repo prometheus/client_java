@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 
 @ContextConfiguration
 @EnablePrometheusTiming
-public class MethodTimerAppTest {
+class MethodTimerAppTest {
 
     @Controller
     public static class MyController {

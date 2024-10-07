@@ -1,8 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.datapoints.Timer;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
@@ -11,11 +11,11 @@ import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class GaugeTest {
+class GaugeTest {
 
   private static final long exemplarSampleIntervalMillis = 10;
   private static final long exemplarMinAgeMillis = 100;
@@ -24,14 +24,14 @@ public class GaugeTest {
 
   private SpanContext origSpanContext;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     noLabels = Gauge.builder().name("nolabels").build();
     labels = Gauge.builder().name("labels").labelNames("l").build();
     origSpanContext = SpanContextSupplier.getSpanContext();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     SpanContextSupplier.setSpanContext(origSpanContext);
   }
@@ -50,33 +50,33 @@ public class GaugeTest {
   @Test
   public void testIncrement() {
     noLabels.inc();
-    assertEquals(1.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(1.0, offset(.001));
     noLabels.inc(2);
-    assertEquals(3.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(3.0, offset(.001));
     noLabels.inc(4);
-    assertEquals(7.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(7.0, offset(.001));
     noLabels.inc();
-    assertEquals(8.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(8.0, offset(.001));
   }
 
   @Test
   public void testDecrement() {
     noLabels.dec();
-    assertEquals(-1.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(-1.0, offset(.001));
     noLabels.dec(2);
-    assertEquals(-3.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(-3.0, offset(.001));
     noLabels.dec(4);
-    assertEquals(-7.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(-7.0, offset(.001));
     noLabels.dec();
-    assertEquals(-8.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(-8.0, offset(.001));
   }
 
   @Test
   public void testSet() {
     noLabels.set(42);
-    assertEquals(42, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(42, offset(.001));
     noLabels.set(7);
-    assertEquals(7.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(7.0, offset(.001));
   }
 
   @Test
@@ -84,21 +84,21 @@ public class GaugeTest {
     try (Timer timer = noLabels.startTimer()) {
       Thread.sleep(12);
     }
-    assertEquals(
-        0.012, getValue(noLabels), 0.005); // 5ms delta should be enough so this isn't flaky
+    assertThat(getValue(noLabels))
+        .isCloseTo(0.012, offset(0.005)); // 5ms delta should be enough so this isn't flaky
   }
 
   @Test
   public void noLabelsDefaultZeroValue() {
-    assertEquals(0.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(0.0, offset(.001));
   }
 
   @Test
   public void testLabels() {
     labels.labelValues("a").inc();
     labels.labelValues("b").inc(3);
-    assertEquals(1.0, getValue(labels, "l", "a"), .001);
-    assertEquals(3.0, getValue(labels, "l", "b"), .001);
+    assertThat(getValue(labels, "l", "a")).isCloseTo(1.0, offset(.001));
+    assertThat(getValue(labels, "l", "b")).isCloseTo(3.0, offset(.001));
   }
 
   @Test
@@ -202,8 +202,8 @@ public class GaugeTest {
   public void testExemplarSamplerDisabled() {
     Gauge gauge = Gauge.builder().name("test").withoutExemplars().build();
     gauge.setWithExemplar(3.0, Labels.of("a", "b"));
-    assertNull(getData(gauge).getExemplar());
+    assertThat(getData(gauge).getExemplar()).isNull();
     gauge.inc(2.0);
-    assertNull(getData(gauge).getExemplar());
+    assertThat(getData(gauge).getExemplar()).isNull();
   }
 }

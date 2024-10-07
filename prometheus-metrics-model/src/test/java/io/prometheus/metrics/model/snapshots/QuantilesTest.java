@@ -1,40 +1,50 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.Iterator;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.data.Offset.offset;
 
-public class QuantilesTest {
+import java.util.Iterator;
+import org.junit.jupiter.api.Test;
+
+class QuantilesTest {
 
   @Test
   public void testSort() {
     Quantiles quantiles =
         Quantiles.builder().quantile(0.99, 0.23).quantile(0.5, 0.2).quantile(0.95, 0.22).build();
-    Assert.assertEquals(3, quantiles.size());
-    Assert.assertEquals(0.5, quantiles.get(0).getQuantile(), 0);
-    Assert.assertEquals(0.2, quantiles.get(0).getValue(), 0);
-    Assert.assertEquals(0.95, quantiles.get(1).getQuantile(), 0);
-    Assert.assertEquals(0.22, quantiles.get(1).getValue(), 0);
-    Assert.assertEquals(0.99, quantiles.get(2).getQuantile(), 0);
-    Assert.assertEquals(0.23, quantiles.get(2).getValue(), 0);
+    assertThat(quantiles.size()).isEqualTo(3);
+    assertThat(quantiles.get(0).getQuantile()).isCloseTo(0.5, offset(0.0));
+    assertThat(quantiles.get(0).getValue()).isCloseTo(0.2, offset(0.0));
+    assertThat(quantiles.get(1).getQuantile()).isCloseTo(0.95, offset(0.0));
+    assertThat(quantiles.get(1).getValue()).isCloseTo(0.22, offset(0.0));
+    assertThat(quantiles.get(2).getQuantile()).isCloseTo(0.99, offset(0.0));
+    assertThat(quantiles.get(2).getValue()).isCloseTo(0.23, offset(0.0));
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testImmutable() {
     Quantiles quantiles =
         Quantiles.builder().quantile(0.99, 0.23).quantile(0.5, 0.2).quantile(0.95, 0.22).build();
     Iterator<Quantile> iterator = quantiles.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
   @Test
   public void testEmpty() {
-    Assert.assertEquals(0, Quantiles.EMPTY.size());
+    assertThat(Quantiles.EMPTY.size()).isZero();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicate() {
-    Quantiles.builder().quantile(0.95, 0.23).quantile(0.5, 0.2).quantile(0.95, 0.22).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                Quantiles.builder()
+                    .quantile(0.95, 0.23)
+                    .quantile(0.5, 0.2)
+                    .quantile(0.95, 0.22)
+                    .build());
   }
 }

@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.caffeine;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,26 +20,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CacheMetricsCollectorTest {
+class CacheMetricsCollectorTest {
 
   @Test
   public void cacheExposesMetricsForHitMissAndEviction() {
+    // Run cleanup in same thread, to remove async behavior with evictions
     final Cache<String, String> cache =
-        Caffeine.newBuilder()
-            .maximumSize(2)
-            .recordStats()
-            .executor(
-                new Executor() {
-                  @Override
-                  public void execute(Runnable command) {
-                    // Run cleanup in same thread, to remove async behavior with evictions
-                    command.run();
-                  }
-                })
-            .build();
+        Caffeine.newBuilder().maximumSize(2).recordStats().executor(Runnable::run).build();
 
     final CacheMetricsCollector collector = new CacheMetricsCollector();
     collector.addCache("users", cache);
@@ -83,7 +72,7 @@ public class CacheMetricsCollectorTest {
             + "caffeine_cache_requests_total{cache=\"users\"} 3.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(registry));
+    assertThat(convertToOpenMetricsFormat(registry)).isEqualTo(expected);
   }
 
   @SuppressWarnings("unchecked")
@@ -122,7 +111,7 @@ public class CacheMetricsCollectorTest {
         (SummarySnapshot.SummaryDataPointSnapshot)
             getDataPointSnapshot(registry, "caffeine_cache_load_duration_seconds", "loadingusers");
 
-    assertEquals(3, loadDuration.getCount());
+    assertThat(loadDuration.getCount()).isEqualTo(3);
     assertThat(loadDuration.getSum()).isGreaterThan(0);
   }
 
@@ -131,7 +120,7 @@ public class CacheMetricsCollectorTest {
     final CounterSnapshot.CounterDataPointSnapshot dataPointSnapshot =
         (CounterSnapshot.CounterDataPointSnapshot) getDataPointSnapshot(registry, name, cacheName);
 
-    assertEquals(value, dataPointSnapshot.getValue(), 0);
+    assertThat(dataPointSnapshot.getValue()).isCloseTo(value, offset(0.0));
   }
 
   private DataPointSnapshot getDataPointSnapshot(

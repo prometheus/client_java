@@ -1,13 +1,15 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class UnitTest {
+import org.junit.jupiter.api.Test;
 
-  @Test(expected = IllegalArgumentException.class)
+class UnitTest {
+
+  @Test
   public void testEmpty() {
-    new Unit(" ");
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> new Unit(" "));
   }
 
   @Test
@@ -15,7 +17,7 @@ public class UnitTest {
     Unit unit1 = Unit.BYTES;
     Unit unit2 = new Unit("bytes");
 
-    Assert.assertEquals(unit2, unit1);
+    assertThat(unit1).isEqualTo(unit2);
   }
 
   @Test
@@ -23,7 +25,7 @@ public class UnitTest {
     Unit unit1 = new Unit("bytes ");
     Unit unit2 = new Unit("bytes");
 
-    Assert.assertEquals(unit2, unit1);
+    assertThat(unit1).isEqualTo(unit2);
   }
 
   @Test
@@ -31,7 +33,7 @@ public class UnitTest {
     Unit unit1 = new Unit(" bytes");
     Unit unit2 = new Unit("bytes");
 
-    Assert.assertEquals(unit2, unit1);
+    assertThat(unit1).isEqualTo(unit2);
   }
 
   @Test
@@ -39,6 +41,6 @@ public class UnitTest {
     Unit unit1 = new Unit(" bytes ");
     Unit unit2 = new Unit("bytes");
 
-    Assert.assertEquals(unit2, unit1);
+    assertThat(unit1).isEqualTo(unit2);
   }
 }

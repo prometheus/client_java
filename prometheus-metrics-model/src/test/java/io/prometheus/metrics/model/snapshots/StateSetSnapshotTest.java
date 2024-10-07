@@ -1,11 +1,13 @@
 package io.prometheus.metrics.model.snapshots;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class StateSetSnapshotTest {
+class StateSetSnapshotTest {
 
   @Test
   public void testCompleteGoodCase() {
@@ -29,20 +31,21 @@ public class StateSetSnapshotTest {
                     .build())
             .build();
     SnapshotTestUtil.assertMetadata(snapshot, "my_feature_flags", "Feature Flags", null);
-    Assert.assertEquals(2, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).hasSize(2);
     StateSetSnapshot.StateSetDataPointSnapshot data =
         snapshot
             .getDataPoints()
             .get(1); // data is sorted by labels, so the second one should be entity="controller"
-    Assert.assertEquals(Labels.of("entity", "controller"), data.getLabels());
-    Assert.assertEquals(2, data.size());
-    Assert.assertEquals("feature1", data.getName(0));
-    Assert.assertTrue(data.isTrue(0));
-    Assert.assertEquals("feature2", data.getName(1));
-    Assert.assertFalse(data.isTrue(1));
-    Assert.assertTrue(data.hasScrapeTimestamp());
-    Assert.assertEquals(scrapeTimestamp, data.getScrapeTimestampMillis());
-    Assert.assertFalse(data.hasCreatedTimestamp());
+    assertThat((Iterable<? extends Label>) data.getLabels())
+        .isEqualTo(Labels.of("entity", "controller"));
+    assertThat(data.size()).isEqualTo(2);
+    assertThat(data.getName(0)).isEqualTo("feature1");
+    assertThat(data.isTrue(0)).isTrue();
+    assertThat(data.getName(1)).isEqualTo("feature2");
+    assertThat(data.isTrue(1)).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isTrue();
+    assertThat(data.getScrapeTimestampMillis()).isEqualTo(scrapeTimestamp);
+    assertThat(data.hasCreatedTimestamp()).isFalse();
   }
 
   @Test
@@ -54,21 +57,22 @@ public class StateSetSnapshotTest {
             .state("c", true)
             .state("a", false)
             .build();
-    Assert.assertEquals(4, data.size());
-    Assert.assertEquals("a", data.getName(0));
-    Assert.assertFalse(data.isTrue(0));
-    Assert.assertEquals("b", data.getName(1));
-    Assert.assertTrue(data.isTrue(1));
-    Assert.assertEquals("c", data.getName(2));
-    Assert.assertTrue(data.isTrue(2));
-    Assert.assertEquals("d", data.getName(3));
-    Assert.assertFalse(data.isTrue(3));
+    assertThat(data.size()).isEqualTo(4);
+    assertThat(data.getName(0)).isEqualTo("a");
+    assertThat(data.isTrue(0)).isFalse();
+    assertThat(data.getName(1)).isEqualTo("b");
+    assertThat(data.isTrue(1)).isTrue();
+    assertThat(data.getName(2)).isEqualTo("c");
+    assertThat(data.isTrue(2)).isTrue();
+    assertThat(data.getName(3)).isEqualTo("d");
+    assertThat(data.isTrue(3)).isFalse();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testMustHaveState() {
     // Must have at least one state.
-    StateSetSnapshot.StateSetDataPointSnapshot.builder().build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> StateSetSnapshot.StateSetDataPointSnapshot.builder().build());
   }
 
   @Test
@@ -79,16 +83,16 @@ public class StateSetSnapshotTest {
             .dataPoint(
                 StateSetSnapshot.StateSetDataPointSnapshot.builder().state("flag", true).build())
             .build();
-    Assert.assertEquals(1, snapshot.dataPoints.size());
+    assertThat(snapshot.dataPoints.size()).isOne();
   }
 
   @Test
   public void testEmpty() {
     StateSetSnapshot snapshot = StateSetSnapshot.builder().name("my_flag").build();
-    Assert.assertEquals(0, snapshot.dataPoints.size());
+    assertThat(snapshot.dataPoints).isEmpty();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testDataImmutable() {
     StateSetSnapshot.StateSetDataPointSnapshot data =
         StateSetSnapshot.StateSetDataPointSnapshot.builder()
@@ -98,19 +102,22 @@ public class StateSetSnapshotTest {
             .build();
     Iterator<StateSetSnapshot.State> iterator = data.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicateState() {
-    StateSetSnapshot.StateSetDataPointSnapshot.builder()
-        .state("a", true)
-        .state("b", true)
-        .state("a", true)
-        .build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                StateSetSnapshot.StateSetDataPointSnapshot.builder()
+                    .state("a", true)
+                    .state("b", true)
+                    .state("a", true)
+                    .build());
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testStateSetImmutable() {
     StateSetSnapshot snapshot =
         StateSetSnapshot.builder()
@@ -129,17 +136,24 @@ public class StateSetSnapshotTest {
     Iterator<StateSetSnapshot.StateSetDataPointSnapshot> iterator =
         snapshot.getDataPoints().iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testLabelsUnique() {
-    StateSetSnapshot.builder()
-        .name("flags")
-        .dataPoint(
-            StateSetSnapshot.StateSetDataPointSnapshot.builder().state("feature", true).build())
-        .dataPoint(
-            StateSetSnapshot.StateSetDataPointSnapshot.builder().state("feature", true).build())
-        .build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                StateSetSnapshot.builder()
+                    .name("flags")
+                    .dataPoint(
+                        StateSetSnapshot.StateSetDataPointSnapshot.builder()
+                            .state("feature", true)
+                            .build())
+                    .dataPoint(
+                        StateSetSnapshot.StateSetDataPointSnapshot.builder()
+                            .state("feature", true)
+                            .build())
+                    .build());
   }
 }

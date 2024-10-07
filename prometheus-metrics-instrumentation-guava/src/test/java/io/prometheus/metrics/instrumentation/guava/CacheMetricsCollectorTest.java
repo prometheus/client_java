@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.guava;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,9 +20,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CacheMetricsCollectorTest {
+class CacheMetricsCollectorTest {
 
   @Test
   public void cacheExposesMetricsForHitMissAndEviction() {
@@ -68,7 +68,7 @@ public class CacheMetricsCollectorTest {
             + "guava_cache_size{cache=\"users\"} 2.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(registry));
+    assertThat(convertToOpenMetricsFormat(registry)).isEqualTo(expected);
   }
 
   @SuppressWarnings("unchecked")
@@ -107,7 +107,7 @@ public class CacheMetricsCollectorTest {
         (SummarySnapshot.SummaryDataPointSnapshot)
             getDataPointSnapshot(registry, "guava_cache_load_duration_seconds", "loadingusers");
 
-    assertEquals(3, loadDuration.getCount());
+    assertThat(loadDuration.getCount()).isEqualTo(3);
     assertThat(loadDuration.getSum()).isGreaterThan(0);
   }
 
@@ -116,7 +116,7 @@ public class CacheMetricsCollectorTest {
     final CounterSnapshot.CounterDataPointSnapshot dataPointSnapshot =
         (CounterSnapshot.CounterDataPointSnapshot) getDataPointSnapshot(registry, name, cacheName);
 
-    assertEquals(value, dataPointSnapshot.getValue(), 0);
+    assertThat(dataPointSnapshot.getValue()).isCloseTo(value, offset(0.0));
   }
 
   private DataPointSnapshot getDataPointSnapshot(

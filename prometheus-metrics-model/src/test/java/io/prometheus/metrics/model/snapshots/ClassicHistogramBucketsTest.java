@@ -1,10 +1,13 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.Iterator;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.data.Offset.offset;
 
-public class ClassicHistogramBucketsTest {
+import java.util.Iterator;
+import org.junit.jupiter.api.Test;
+
+class ClassicHistogramBucketsTest {
 
   @Test
   public void testGoodCase() {
@@ -15,7 +18,7 @@ public class ClassicHistogramBucketsTest {
             .bucket(1024, 3)
             .bucket(Double.POSITIVE_INFINITY, 8)
             .build();
-    Assert.assertEquals(4, buckets.size());
+    assertThat(buckets.size()).isEqualTo(4);
   }
 
   @Test
@@ -26,64 +29,80 @@ public class ClassicHistogramBucketsTest {
             .bucket(2, 0)
             .bucket(Double.POSITIVE_INFINITY, 3)
             .build();
-    Assert.assertEquals(3, buckets.size());
-    Assert.assertEquals(2, buckets.getUpperBound(0), 0.0);
-    Assert.assertEquals(7, buckets.getUpperBound(1), 0.0);
-    Assert.assertEquals(Double.POSITIVE_INFINITY, buckets.getUpperBound(2), 0.0);
-    Assert.assertEquals(0, buckets.getCount(0));
-    Assert.assertEquals(2, buckets.getCount(1));
-    Assert.assertEquals(3, buckets.getCount(2));
+    assertThat(buckets.size()).isEqualTo(3);
+    assertThat(buckets.getUpperBound(0)).isCloseTo(2, offset(0.0));
+    assertThat(buckets.getUpperBound(1)).isCloseTo(7, offset(0.0));
+    assertThat(buckets.getUpperBound(2)).isCloseTo(Double.POSITIVE_INFINITY, offset(0.0));
+    assertThat(buckets.getCount(0)).isZero();
+    assertThat(buckets.getCount(1)).isEqualTo(2);
+    assertThat(buckets.getCount(2)).isEqualTo(3);
   }
 
   @Test
   public void testMinimalBuckets() {
     ClassicHistogramBuckets buckets =
         ClassicHistogramBuckets.builder().bucket(Double.POSITIVE_INFINITY, 0).build();
-    Assert.assertEquals(1, buckets.size());
+    assertThat(buckets.size()).isOne();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInfBucketMissing() {
-    ClassicHistogramBuckets.builder().bucket(Double.NEGATIVE_INFINITY, 0).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () -> ClassicHistogramBuckets.builder().bucket(Double.NEGATIVE_INFINITY, 0).build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNegativeCount() {
-    ClassicHistogramBuckets.builder().bucket(0.0, 10).bucket(Double.POSITIVE_INFINITY, -1).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                ClassicHistogramBuckets.builder()
+                    .bucket(0.0, 10)
+                    .bucket(Double.POSITIVE_INFINITY, -1)
+                    .build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNaNBoundary() {
-    ClassicHistogramBuckets.builder()
-        .bucket(0.0, 1)
-        .bucket(Double.NaN, 2)
-        .bucket(Double.POSITIVE_INFINITY, 0)
-        .build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                ClassicHistogramBuckets.builder()
+                    .bucket(0.0, 1)
+                    .bucket(Double.NaN, 2)
+                    .bucket(Double.POSITIVE_INFINITY, 0)
+                    .build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicateBoundary() {
-    ClassicHistogramBuckets.builder()
-        .bucket(1.0, 1)
-        .bucket(2.0, 2)
-        .bucket(1.0, 2)
-        .bucket(Double.POSITIVE_INFINITY, 0)
-        .build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                ClassicHistogramBuckets.builder()
+                    .bucket(1.0, 1)
+                    .bucket(2.0, 2)
+                    .bucket(1.0, 2)
+                    .bucket(Double.POSITIVE_INFINITY, 0)
+                    .build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testEmptyBuckets() {
-    ClassicHistogramBuckets.builder().build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> ClassicHistogramBuckets.builder().build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDifferentLength() {
     double[] upperBounds = new double[] {0.7, 1.3, Double.POSITIVE_INFINITY};
     long[] counts = new long[] {13, 178, 1024, 3000};
-    ClassicHistogramBuckets.of(upperBounds, counts);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> ClassicHistogramBuckets.of(upperBounds, counts));
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testImmutable() {
     ClassicHistogramBuckets buckets =
         ClassicHistogramBuckets.builder()
@@ -93,6 +112,6 @@ public class ClassicHistogramBucketsTest {
             .build();
     Iterator<ClassicHistogramBucket> iterator = buckets.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 }

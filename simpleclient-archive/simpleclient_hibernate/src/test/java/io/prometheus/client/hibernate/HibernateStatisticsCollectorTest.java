@@ -16,7 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class HibernateStatisticsCollectorTest {
+class HibernateStatisticsCollectorTest {
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
