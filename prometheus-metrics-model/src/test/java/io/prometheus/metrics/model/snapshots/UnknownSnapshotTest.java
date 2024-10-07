@@ -39,8 +39,8 @@ class UnknownSnapshotTest {
     assertThat(snapshot.getDataPoints()).hasSize(2);
     UnknownSnapshot.UnknownDataPointSnapshot data = snapshot.getDataPoints().get(1); // env="prod"
     assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("env", "prod"));
-    assertThat(data.getValue()).isCloseTo(0.3, offset(0.0));
-    assertThat(data.getExemplar().getValue()).isCloseTo(0.12, offset(0.0));
+    assertThat(data.getValue()).isEqualTo(0.3);
+    assertThat(data.getExemplar().getValue()).isEqualTo(0.12);
     assertThat(data.hasCreatedTimestamp()).isFalse();
     assertThat(data.hasScrapeTimestamp()).isFalse();
   }

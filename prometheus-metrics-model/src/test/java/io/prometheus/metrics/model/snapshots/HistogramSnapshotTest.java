@@ -95,10 +95,9 @@ class HistogramSnapshotTest {
     assertThat(data.hasCreatedTimestamp()).isTrue();
     assertThat(data.hasScrapeTimestamp()).isTrue();
     assertThat(data.getCount()).isEqualTo(22);
-    assertThat(data.getSum()).isCloseTo(27000.0, offset(0.0));
+    assertThat(data.getSum()).isEqualTo(27000.0);
     assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("path", "/"));
-    assertThat(data.getExemplars().get(128.0, 1024.0).getValue())
-        .isCloseTo(exemplar1.getValue(), offset(0.0));
+    assertThat(data.getExemplars().get(128.0, 1024.0).getValue()).isEqualTo(exemplar1.getValue());
     assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp);
     assertThat(data.getScrapeTimestampMillis()).isEqualTo(scrapeTimestamp);
     // classic histogram 1
@@ -106,15 +105,15 @@ class HistogramSnapshotTest {
     for (ClassicHistogramBucket bucket : data.getClassicBuckets()) {
       switch (i++) {
         case 0:
-          assertThat(bucket.getUpperBound()).isCloseTo(128.0, offset(0.0));
+          assertThat(bucket.getUpperBound()).isEqualTo(128.0);
           assertThat(bucket.getCount()).isEqualTo(7);
           break;
         case 1:
-          assertThat(bucket.getUpperBound()).isCloseTo(1024.0, offset(0.0));
+          assertThat(bucket.getUpperBound()).isEqualTo(1024.0);
           assertThat(bucket.getCount()).isEqualTo(15);
           break;
         case 2:
-          assertThat(bucket.getUpperBound()).isCloseTo(Double.POSITIVE_INFINITY, offset(0.0));
+          assertThat(bucket.getUpperBound()).isEqualTo(Double.POSITIVE_INFINITY);
           assertThat(bucket.getCount()).isZero();
           break;
       }

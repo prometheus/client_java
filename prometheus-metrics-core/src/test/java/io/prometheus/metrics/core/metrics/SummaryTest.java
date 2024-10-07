@@ -123,14 +123,12 @@ class SummaryTest {
             .help("help")
             .register(registry);
     summary.observe(8.0);
-    assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
-        .isCloseTo(8.0, offset(0.0)); // From bucket 1.
+    assertThat(getQuantile(summary, 0.99, Labels.EMPTY)).isEqualTo(8.0); // From bucket 1.
+    Thread.sleep(600);
+    assertThat(getQuantile(summary, 0.99, Labels.EMPTY)).isEqualTo(8.0); // From bucket 2.
     Thread.sleep(600);
     assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
-        .isCloseTo(8.0, offset(0.0)); // From bucket 2.
-    Thread.sleep(600);
-    assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
-        .isCloseTo(Double.NaN, offset(0.0)); // Bucket 1 again, now it is empty.
+        .isEqualTo(Double.NaN); // Bucket 1 again, now it is empty.
   }
 
   @Test

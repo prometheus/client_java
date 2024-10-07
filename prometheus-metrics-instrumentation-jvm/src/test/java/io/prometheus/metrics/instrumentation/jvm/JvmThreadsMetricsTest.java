@@ -2,7 +2,6 @@ package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Offset.offset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -135,7 +134,7 @@ class JvmThreadsMetricsTest {
 
       assertThat(actual).hasSameSizeAs(expected);
       for (String threadState : expected.keySet()) {
-        assertThat(actual.get(threadState)).isCloseTo(expected.get(threadState), offset(0.0));
+        assertThat(actual.get(threadState)).isEqualTo(expected.get(threadState));
       }
     } finally {
       for (int i = 0; i < numberOfInvalidThreadIds; i++) {

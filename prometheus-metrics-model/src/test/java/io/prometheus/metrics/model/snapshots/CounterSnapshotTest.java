@@ -2,7 +2,6 @@ package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import java.util.Iterator;
@@ -56,14 +55,14 @@ class CounterSnapshotTest {
             .getDataPoints()
             .get(0); // data is sorted by labels, so the first one should be path="/hello"
     assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("path", "/hello"));
-    assertThat(data.getValue()).isCloseTo(2.0, offset(0.0));
-    assertThat(data.getExemplar().getValue()).isCloseTo(4.0, offset(0.0));
+    assertThat(data.getValue()).isEqualTo(2.0);
+    assertThat(data.getExemplar().getValue()).isEqualTo(4.0);
     assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp2);
     assertThat(data.hasScrapeTimestamp()).isFalse();
     data = snapshot.getDataPoints().get(1);
     assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("path", "/world"));
-    assertThat(data.getValue()).isCloseTo(1.0, offset(0.0));
-    assertThat(data.getExemplar().getValue()).isCloseTo(3.0, offset(0.0));
+    assertThat(data.getValue()).isEqualTo(1.0);
+    assertThat(data.getExemplar().getValue()).isEqualTo(3.0);
     assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp1);
     assertThat(data.hasScrapeTimestamp()).isFalse();
   }
@@ -79,7 +78,7 @@ class CounterSnapshotTest {
     assertThat(snapshot.getDataPoints()).hasSize(1);
     CounterDataPointSnapshot data = snapshot.getDataPoints().get(0);
     assertThat((Iterable<? extends Label>) data.getLabels()).isEmpty();
-    assertThat(data.getValue()).isCloseTo(1.0, offset(0.0));
+    assertThat(data.getValue()).isEqualTo(1.0);
     assertThat(data.getExemplar()).isNull();
     assertThat(data.hasCreatedTimestamp()).isFalse();
     assertThat(data.hasScrapeTimestamp()).isFalse();

@@ -1,7 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Offset.offset;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -55,17 +54,17 @@ class StatefulMetricTest {
     Counter counter = Counter.builder().name("test").build();
     counter.inc();
     assertThat(counter.collect().getDataPoints()).hasSize(1);
-    assertThat(counter.collect().getDataPoints().get(0).getValue()).isCloseTo(1.0, offset(0.0));
+    assertThat(counter.collect().getDataPoints().get(0).getValue()).isEqualTo(1.0);
 
     counter.clear();
     // No labels is always present, but as no value has been observed after clear() the value should
     // be 0.0
     assertThat(counter.collect().getDataPoints()).hasSize(1);
-    assertThat(counter.collect().getDataPoints().get(0).getValue()).isCloseTo(0.0, offset(0.0));
+    assertThat(counter.collect().getDataPoints().get(0).getValue()).isEqualTo(0.0);
 
     // Making inc() works correctly after clear()
     counter.inc();
     assertThat(counter.collect().getDataPoints()).hasSize(1);
-    assertThat(counter.collect().getDataPoints().get(0).getValue()).isCloseTo(1.0, offset(0.0));
+    assertThat(counter.collect().getDataPoints().get(0).getValue()).isEqualTo(1.0);
   }
 }
