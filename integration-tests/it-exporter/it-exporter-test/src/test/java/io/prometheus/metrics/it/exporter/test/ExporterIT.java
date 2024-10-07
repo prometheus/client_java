@@ -1,6 +1,8 @@
 package io.prometheus.metrics.it.exporter.test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import io.prometheus.client.it.common.LogConsumer;
 import io.prometheus.client.it.common.Volume;
@@ -21,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -70,22 +71,20 @@ public class ExporterIT {
         .start();
     Response response =
         scrape("GET", "", "Accept", "application/openmetrics-text; version=1.0.0; charset=utf-8");
-    Assert.assertEquals(200, response.status);
+    assertThat(response.status).isEqualTo(200);
     assertContentType(
         "application/openmetrics-text; version=1.0.0; charset=utf-8",
         response.getHeader("Content-Type"));
-    Assert.assertNull(response.getHeader("Content-Encoding"));
-    Assert.assertNull(response.getHeader("Transfer-Encoding"));
-    Assert.assertEquals(
-        Integer.toString(response.body.length), response.getHeader("Content-Length"));
+    assertThat(response.getHeader("Content-Encoding")).isNull();
+    assertThat(response.getHeader("Transfer-Encoding")).isNull();
+    assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
     String bodyString = new String(response.body);
-    Assert.assertTrue(
-        bodyString.contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1"));
-    Assert.assertTrue(bodyString.contains("temperature_celsius{location=\"inside\"} 23.0"));
-    Assert.assertTrue(bodyString.contains("temperature_celsius{location=\"outside\"} 27.0"));
-    Assert.assertTrue(bodyString.contains("uptime_seconds_total 17.0"));
-    // OpenMetrics text format has a UNIT.
-    Assert.assertTrue(bodyString.contains("# UNIT uptime_seconds seconds"));
+    assertThat(bodyString).contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
+            .contains("temperature_celsius{location=\"inside\"} 23.0")
+            .contains("temperature_celsius{location=\"outside\"} 27.0")
+            .contains("uptime_seconds_total 17.0")
+            // OpenMetrics text format has a UNIT.
+            .contains("# UNIT uptime_seconds seconds");
   }
 
   @Test
@@ -94,21 +93,19 @@ public class ExporterIT {
         .withCommand("java", "-jar", "/app/" + sampleApp + ".jar", "9400", "success")
         .start();
     Response response = scrape("GET", "");
-    Assert.assertEquals(200, response.status);
+    assertThat(response.status).isEqualTo(200);
     assertContentType(
         "text/plain; version=0.0.4; charset=utf-8", response.getHeader("Content-Type"));
-    Assert.assertNull(response.getHeader("Content-Encoding"));
-    Assert.assertNull(response.getHeader("Transfer-Encoding"));
-    Assert.assertEquals(
-        Integer.toString(response.body.length), response.getHeader("Content-Length"));
+    assertThat(response.getHeader("Content-Encoding")).isNull();
+    assertThat(response.getHeader("Transfer-Encoding")).isNull();
+    assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
     String bodyString = new String(response.body);
-    Assert.assertTrue(
-        bodyString.contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1"));
-    Assert.assertTrue(bodyString.contains("temperature_celsius{location=\"inside\"} 23.0"));
-    Assert.assertTrue(bodyString.contains("temperature_celsius{location=\"outside\"} 27.0"));
-    Assert.assertTrue(bodyString.contains("uptime_seconds_total 17.0"));
-    // Prometheus text format does not have a UNIT.
-    Assert.assertFalse(bodyString.contains("# UNIT uptime_seconds seconds"));
+    assertThat(bodyString).contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
+            .contains("temperature_celsius{location=\"inside\"} 23.0")
+            .contains("temperature_celsius{location=\"outside\"} 27.0")
+            .contains("uptime_seconds_total 17.0")
+            // Prometheus text format does not have a UNIT.
+            .doesNotContain("# UNIT uptime_seconds seconds");
   }
 
   @Test
@@ -122,24 +119,23 @@ public class ExporterIT {
             "",
             "Accept",
             "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited");
-    Assert.assertEquals(200, response.status);
+    assertThat(response.status).isEqualTo(200);
     assertContentType(
         "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited",
         response.getHeader("Content-Type"));
-    Assert.assertNull(response.getHeader("Content-Encoding"));
-    Assert.assertNull(response.getHeader("Transfer-Encoding"));
-    Assert.assertEquals(
-        Integer.toString(response.body.length), response.getHeader("Content-Length"));
+    assertThat(response.getHeader("Content-Encoding")).isNull();
+    assertThat(response.getHeader("Transfer-Encoding")).isNull();
+    assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
     List<Metrics.MetricFamily> metrics = new ArrayList<>();
     InputStream in = new ByteArrayInputStream(response.body);
     while (in.available() > 0) {
       metrics.add(Metrics.MetricFamily.parseDelimitedFrom(in));
     }
-    Assert.assertEquals(3, metrics.size());
+    assertThat(metrics.size()).isEqualTo(3);
     // metrics are sorted by name
-    Assert.assertEquals("integration_test_info", metrics.get(0).getName());
-    Assert.assertEquals("temperature_celsius", metrics.get(1).getName());
-    Assert.assertEquals("uptime_seconds_total", metrics.get(2).getName());
+    assertThat(metrics.get(0).getName()).isEqualTo("integration_test_info");
+    assertThat(metrics.get(1).getName()).isEqualTo("temperature_celsius");
+    assertThat(metrics.get(2).getName()).isEqualTo("uptime_seconds_total");
   }
 
   @Test
@@ -155,16 +151,15 @@ public class ExporterIT {
             "application/openmetrics-text; version=1.0.0; charset=utf-8",
             "Accept-Encoding",
             "gzip");
-    Assert.assertEquals(200, response.status);
-    Assert.assertEquals("gzip", response.getHeader("Content-Encoding"));
+    assertThat(response.status).isEqualTo(200);
+    assertThat(response.getHeader("Content-Encoding")).isEqualTo("gzip");
     if (response.getHeader("Content-Length") != null) {
       // The servlet container might set a content length as the body is very small.
-      Assert.assertEquals(
-          Integer.toString(response.body.length), response.getHeader("Content-Length"));
-      Assert.assertNull(response.getHeader("Transfer-Encoding"));
+      assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
+      assertThat(response.getHeader("Transfer-Encoding")).isNull();
     } else {
       // If no content length is set, transfer-encoding chunked must be used.
-      Assert.assertEquals("chunked", response.getHeader("Transfer-Encoding"));
+      assertThat(response.getHeader("Transfer-Encoding")).isEqualTo("chunked");
     }
     assertContentType(
         "application/openmetrics-text; version=1.0.0; charset=utf-8",
@@ -173,7 +168,7 @@ public class ExporterIT {
         new String(
             IOUtils.toByteArray(new GZIPInputStream(new ByteArrayInputStream(response.body))),
             UTF_8);
-    Assert.assertTrue(body.contains("uptime_seconds_total 17.0"));
+    assertThat(body).contains("uptime_seconds_total 17.0");
   }
 
   @Test
@@ -182,8 +177,8 @@ public class ExporterIT {
         .withCommand("java", "-jar", "/app/" + sampleApp + ".jar", "9400", "error")
         .start();
     Response response = scrape("GET", "");
-    Assert.assertEquals(500, response.status);
-    Assert.assertTrue(new String(response.body, UTF_8).contains("Simulating an error."));
+    assertThat(response.status).isEqualTo(500);
+    assertThat(new String(response.body, UTF_8)).contains("Simulating an error.");
   }
 
   @Test
@@ -193,11 +188,11 @@ public class ExporterIT {
         .start();
     Response fullResponse = scrape("GET", "");
     int size = fullResponse.body.length;
-    Assert.assertTrue(size > 0);
+    assertThat(size > 0).isTrue();
     Response headResponse = scrape("HEAD", "");
-    Assert.assertEquals(200, headResponse.status);
-    Assert.assertEquals(Integer.toString(size), headResponse.getHeader("Content-Length"));
-    Assert.assertEquals(0, headResponse.body.length);
+    assertThat(headResponse.status).isEqualTo(200);
+    assertThat(headResponse.getHeader("Content-Length")).isEqualTo(Integer.toString(size));
+    assertThat(headResponse.body.length).isZero();
   }
 
   @Test
@@ -206,11 +201,11 @@ public class ExporterIT {
         .withCommand("java", "-jar", "/app/" + sampleApp + ".jar", "9400", "success")
         .start();
     Response response = scrape("GET", "debug=openmetrics");
-    Assert.assertEquals(200, response.status);
+    assertThat(response.status).isEqualTo(200);
     assertContentType("text/plain; charset=utf-8", response.getHeader("Content-Type"));
     String bodyString = new String(response.body, UTF_8);
-    Assert.assertTrue(bodyString.contains("uptime_seconds_total 17.0"));
-    Assert.assertTrue(bodyString.contains("# UNIT uptime_seconds seconds"));
+    assertThat(bodyString).contains("uptime_seconds_total 17.0")
+            .contains("# UNIT uptime_seconds seconds");
   }
 
   @Test
@@ -224,15 +219,14 @@ public class ExporterIT {
             nameParam("integration_test_info") + "&" + nameParam("uptime_seconds_total"),
             "Accept",
             "application/openmetrics-text; version=1.0.0; charset=utf-8");
-    Assert.assertEquals(200, response.status);
+    assertThat(response.status).isEqualTo(200);
     assertContentType(
         "application/openmetrics-text; version=1.0.0; charset=utf-8",
         response.getHeader("Content-Type"));
     String bodyString = new String(response.body, UTF_8);
-    Assert.assertTrue(
-        bodyString.contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1"));
-    Assert.assertTrue(bodyString.contains("uptime_seconds_total 17.0"));
-    Assert.assertFalse(bodyString.contains("temperature_celsius"));
+    assertThat(bodyString).contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
+            .contains("uptime_seconds_total 17.0")
+            .doesNotContain("temperature_celsius");
   }
 
   @Test
@@ -246,13 +240,12 @@ public class ExporterIT {
             nameParam("none_existing"),
             "Accept",
             "application/openmetrics-text; version=1.0.0; charset=utf-8");
-    Assert.assertEquals(200, response.status);
+    assertThat(response.status).isEqualTo(200);
     assertContentType(
         "application/openmetrics-text; version=1.0.0; charset=utf-8",
         response.getHeader("Content-Type"));
-    Assert.assertEquals(
-        Integer.toString(response.body.length), response.getHeader("Content-Length"));
-    Assert.assertEquals("# EOF\n", new String(response.body, UTF_8));
+    assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
+    assertThat(new String(response.body, UTF_8)).isEqualTo("# EOF\n");
   }
 
   @Test
@@ -261,14 +254,14 @@ public class ExporterIT {
         .withCommand("java", "-jar", "/app/" + sampleApp + ".jar", "9400", "success")
         .start();
     Response response = scrape("GET", nameParam("none_existing"));
-    Assert.assertEquals(200, response.status);
+    assertThat(response.status).isEqualTo(200);
     assertContentType(
         "text/plain; version=0.0.4; charset=utf-8", response.getHeader("Content-Type"));
     if (response.getHeader("Content-Length")
         != null) { // HTTPServer does not send a zero content length, which is ok
-      Assert.assertEquals("0", response.getHeader("Content-Length"));
+      assertThat(response.getHeader("Content-Length")).isEqualTo("0");
     }
-    Assert.assertEquals(0, response.body.length);
+    assertThat(response.body.length).isZero();
   }
 
   @Test
@@ -282,11 +275,11 @@ public class ExporterIT {
             nameParam("none_existing"),
             "Accept",
             "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited");
-    Assert.assertEquals(200, response.status);
+    assertThat(response.status).isEqualTo(200);
     assertContentType(
         "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited",
         response.getHeader("Content-Type"));
-    Assert.assertEquals(0, response.body.length);
+    assertThat(response.body.length).isZero();
   }
 
   @Test
@@ -302,13 +295,13 @@ public class ExporterIT {
             "application/openmetrics-text; version=1.0.0; charset=utf-8",
             "Accept-Encoding",
             "gzip");
-    Assert.assertEquals(200, response.status);
-    Assert.assertEquals("gzip", response.getHeader("Content-Encoding"));
+    assertThat(response.status).isEqualTo(200);
+    assertThat(response.getHeader("Content-Encoding")).isEqualTo("gzip");
     String body =
         new String(
             IOUtils.toByteArray(new GZIPInputStream(new ByteArrayInputStream(response.body))),
             UTF_8);
-    Assert.assertEquals("# EOF\n", body);
+    assertThat(body).isEqualTo("# EOF\n");
   }
 
   @Test
@@ -317,13 +310,13 @@ public class ExporterIT {
         .withCommand("java", "-jar", "/app/" + sampleApp + ".jar", "9400", "success")
         .start();
     Response response = scrape("GET", nameParam("none_existing"), "Accept-Encoding", "gzip");
-    Assert.assertEquals(200, response.status);
-    Assert.assertEquals("gzip", response.getHeader("Content-Encoding"));
+    assertThat(response.status).isEqualTo(200);
+    assertThat(response.getHeader("Content-Encoding")).isEqualTo("gzip");
     String body =
         new String(
             IOUtils.toByteArray(new GZIPInputStream(new ByteArrayInputStream(response.body))),
             UTF_8);
-    Assert.assertEquals(0, body.length());
+    assertThat(body.length()).isZero();
   }
 
   private String nameParam(String name) throws UnsupportedEncodingException {
@@ -336,13 +329,13 @@ public class ExporterIT {
         .withCommand("java", "-jar", "/app/" + sampleApp + ".jar", "9400", "success")
         .start();
     Response response = scrape("GET", "debug=unknown");
-    Assert.assertEquals(500, response.status);
+    assertThat(response.status).isEqualTo(500);
     assertContentType("text/plain; charset=utf-8", response.getHeader("Content-Type"));
   }
 
   private void assertContentType(String expected, String actual) {
     if (!expected.replace(" ", "").equals(actual)) {
-      Assert.assertEquals(expected, actual);
+      assertThat(actual).isEqualTo(expected);
     }
   }
 
@@ -386,7 +379,7 @@ public class ExporterIT {
     if (exception != null) {
       exception.printStackTrace();
     }
-    Assert.fail("timeout while getting metrics from " + url);
+    fail("timeout while getting metrics from " + url);
     return null; // will not happen
   }
 

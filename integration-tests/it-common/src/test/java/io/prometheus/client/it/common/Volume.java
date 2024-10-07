@@ -1,6 +1,8 @@
 package io.prometheus.client.it.common;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +10,6 @@ import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.Predicate;
-import org.junit.Assert;
 
 /** Temporary directory in ./target/ to be mounted as a volume in Docker containers. */
 public class Volume {
@@ -21,8 +22,7 @@ public class Volume {
 
   public static Volume create(String prefix) throws IOException, URISyntaxException {
     Path targetDir = Paths.get(Volume.class.getResource("/").toURI()).getParent();
-    Assert.assertEquals(
-        "failed to locate target/ directory", "target", targetDir.getFileName().toString());
+    assertThat(targetDir.getFileName().toString()).as("failed to locate target/ directory").isEqualTo("target");
     return new Volume(Files.createTempDirectory(targetDir, prefix + "-"));
   }
 
@@ -59,7 +59,7 @@ public class Volume {
             }
           });
     } else {
-      Assert.fail(src + ": No such file or directory");
+      fail(src + ": No such file or directory");
     }
     return this;
   }

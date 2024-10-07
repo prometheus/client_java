@@ -20,6 +20,9 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
+
 public class PushGatewayIT {
 
   private GenericContainer<?> sampleAppContainer;
@@ -177,13 +180,13 @@ public class PushGatewayIT {
 
   private void assertMetrics() throws IOException, InterruptedException {
     double value = getValue("my_batch_job_duration_seconds", "job", "pushgateway-test-app");
-    Assert.assertEquals(0.5, value, 0.0);
+    assertThat(value).isCloseTo(0.5, offset(0.0));
     value = getValue("file_sizes_bytes_bucket", "job", "pushgateway-test-app", "le", "512");
-    Assert.assertEquals(0.0, value, 0.0);
+    assertThat(value).isCloseTo(0.0, offset(0.0));
     value = getValue("file_sizes_bytes_bucket", "job", "pushgateway-test-app", "le", "1024");
-    Assert.assertEquals(2.0, value, 0.0);
+    assertThat(value).isCloseTo(2.0, offset(0.0));
     value = getValue("file_sizes_bytes_bucket", "job", "pushgateway-test-app", "le", "+Inf");
-    Assert.assertEquals(3.0, value, 0.0);
+    assertThat(value).isCloseTo(3.0, offset(0.0));
   }
 
   private double getValue(String name, String... labels) throws IOException, InterruptedException {
@@ -195,13 +198,13 @@ public class PushGatewayIT {
     JSONArray result =
         JsonPath.parse(scrapeResponseJson)
             .read("$.data.result" + Filter.filter(criteria) + ".value[1]");
-    Assert.assertEquals(1, result.size());
-    return Double.valueOf(result.get(0).toString());
+    assertThat(result.size()).isOne();
+    return Double.parseDouble(result.get(0).toString());
   }
 
   private void assertNativeHistogram() throws IOException, InterruptedException {
     double count = getNativeHistogramCount("file_sizes_bytes", "pushgateway-test-app");
-    Assert.assertEquals(3, count, 0.0);
+    assertThat(count).isCloseTo(3, offset(0.0));
   }
 
   private double getNativeHistogramCount(String name, String job)
@@ -211,7 +214,7 @@ public class PushGatewayIT {
     JSONArray result =
         JsonPath.parse(scrapeResponseJson)
             .read("$.data.result" + Filter.filter(criteria) + ".value[1]");
-    return Double.valueOf(result.get(0).toString());
+    return Double.parseDouble(result.get(0).toString());
   }
 
   private String scrape(String query) throws IOException, InterruptedException {

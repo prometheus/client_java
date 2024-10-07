@@ -3,22 +3,20 @@ package io.prometheus.metrics.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import org.junit.Assert;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PrometheusPropertiesTest {
 
   @Test
   public void testPrometheusConfig() {
     PrometheusProperties result = PrometheusProperties.get();
-    Assert.assertEquals(
-        11, result.getDefaultMetricProperties().getHistogramClassicUpperBounds().size());
-    Assert.assertEquals(
-        4,
-        result
+    assertThat(result.getDefaultMetricProperties().getHistogramClassicUpperBounds()).hasSize(11);
+    assertThat(result
             .getMetricProperties("http_duration_seconds")
-            .getHistogramClassicUpperBounds()
-            .size());
+            .getHistogramClassicUpperBounds()).hasSize(4);
   }
 
   @Test
@@ -30,8 +28,8 @@ public class PrometheusPropertiesTest {
             .getResourceAsStream("emptyUpperBounds.properties")) {
       properties.load(stream);
     }
-    Assert.assertEquals(1, properties.size());
+    assertThat(properties).hasSize(1);
     MetricsProperties.load("io.prometheus.metrics", properties);
-    Assert.assertEquals(0, properties.size());
+    assertThat(properties).isEmpty();
   }
 }
