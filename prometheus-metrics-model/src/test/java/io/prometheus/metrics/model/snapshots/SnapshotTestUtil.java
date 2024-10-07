@@ -1,17 +1,17 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SnapshotTestUtil {
 
   public static void assertMetadata(
       MetricSnapshot snapshot, String name, String help, String unit) {
-    Assert.assertEquals(name, snapshot.getMetadata().getName());
-    Assert.assertEquals(help, snapshot.getMetadata().getHelp());
+    assertThat(snapshot.getMetadata().getName()).isEqualTo(name);
+    assertThat(snapshot.getMetadata().getHelp()).isEqualTo(help);
     if (unit != null) {
-      Assert.assertEquals(unit, snapshot.getMetadata().getUnit().toString());
+      assertThat(snapshot.getMetadata().getUnit().toString()).isEqualTo(unit);
     } else {
-      Assert.assertNull(snapshot.getMetadata().getUnit());
+      assertThat(snapshot.getMetadata().getUnit()).isNull();
     }
   }
 }
