@@ -1,14 +1,16 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.junit.Assert.assertEquals;
-
 import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Label;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 public class TestUtil {
 
   public static void assertExemplarEquals(Exemplar expected, Exemplar actual) {
     // ignore timestamp
-    assertEquals(expected.getValue(), actual.getValue(), 0.00001);
-    assertEquals(expected.getLabels(), actual.getLabels());
+    assertThat(actual.getValue()).isCloseTo(expected.getValue(), offset(0.00001));
+    assertThat((Iterable<? extends Label>) actual.getLabels()).isEqualTo(expected.getLabels());
   }
 }
