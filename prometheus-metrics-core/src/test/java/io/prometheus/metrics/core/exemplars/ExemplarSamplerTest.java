@@ -6,9 +6,10 @@ import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExemplarSamplerTest {
 
@@ -185,7 +186,7 @@ public class ExemplarSamplerTest {
 
   private void assertExemplars(ExemplarSampler sampler, double... values) {
     Exemplars exemplars = sampler.collect();
-    Assert.assertEquals(values.length, exemplars.size());
+    assertThat(exemplars.size()).isEqualTo(values.length);
     for (double value : values) {
       boolean found = false;
       for (Exemplar exemplar : exemplars) {
@@ -194,7 +195,7 @@ public class ExemplarSamplerTest {
           break;
         }
       }
-      Assert.assertTrue(value + " not found", found);
+      assertThat(found).as(value + " not found").isTrue();
     }
   }
 
