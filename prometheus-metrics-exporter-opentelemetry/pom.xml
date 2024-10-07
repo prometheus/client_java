@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -56,12 +57,24 @@
             <artifactId>wiremock</artifactId>
             <version>3.5.4</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>4.2.2</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
@@ -88,37 +101,37 @@
             </resource>
         </resources>
         <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.6.0</version>
-            <executions>
-                <execution>
-                    <id>copy</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>copy</goal>
-                    </goals>
-                </execution>
-            </executions>
-            <configuration>
-                <artifactItems>
-                    <artifactItem>
-                        <groupId>io.opentelemetry</groupId>
-                        <artifactId>opentelemetry-api</artifactId>
-                        <version>${otel.version}</version>
-                        <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
-                    </artifactItem>
-                    <artifactItem>
-                        <groupId>io.opentelemetry</groupId>
-                        <artifactId>opentelemetry-context</artifactId>
-                        <version>${otel.version}</version>
-                        <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
-                    </artifactItem>
-                </artifactItems>
-                <!-- other configurations here -->
-            </configuration>
-        </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>io.opentelemetry</groupId>
+                            <artifactId>opentelemetry-api</artifactId>
+                            <version>${otel.version}</version>
+                            <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.opentelemetry</groupId>
+                            <artifactId>opentelemetry-context</artifactId>
+                            <version>${otel.version}</version>
+                            <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
+                        </artifactItem>
+                    </artifactItems>
+                    <!-- other configurations here -->
+                </configuration>
+            </plugin>
             <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
