@@ -1,9 +1,9 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class JvmMetricsTest {
 

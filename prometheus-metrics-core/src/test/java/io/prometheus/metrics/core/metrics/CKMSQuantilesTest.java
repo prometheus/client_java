@@ -1,5 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 import static org.junit.Assert.fail;
 
 import io.prometheus.metrics.core.metrics.CKMSQuantiles.Quantile;
@@ -8,9 +10,6 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Offset.offset;
 
 public class CKMSQuantilesTest {
 
@@ -261,11 +260,16 @@ public class CKMSQuantilesTest {
 
     // ε-approximate quantiles relaxes the requirement
     // to finding an item with rank between (φ−ε)n and (φ+ε)n.
-    assertThat(ckms.get(0.1)).isCloseTo(p10, offset(errorBoundsNormalDistribution(0.1, 0.001, normalDistribution)));
-    assertThat(ckms.get(0.5)).isCloseTo(mean, offset(errorBoundsNormalDistribution(0.5, 0.01, normalDistribution)));
-    assertThat(ckms.get(0.9)).isCloseTo(p90, offset(errorBoundsNormalDistribution(0.9, 0.001, normalDistribution)));
-    assertThat(ckms.get(0.95)).isCloseTo(p95, offset(errorBoundsNormalDistribution(0.95, 0.001, normalDistribution)));
-    assertThat(ckms.get(0.99)).isCloseTo(p99, offset(errorBoundsNormalDistribution(0.99, 0.001, normalDistribution)));
+    assertThat(ckms.get(0.1))
+        .isCloseTo(p10, offset(errorBoundsNormalDistribution(0.1, 0.001, normalDistribution)));
+    assertThat(ckms.get(0.5))
+        .isCloseTo(mean, offset(errorBoundsNormalDistribution(0.5, 0.01, normalDistribution)));
+    assertThat(ckms.get(0.9))
+        .isCloseTo(p90, offset(errorBoundsNormalDistribution(0.9, 0.001, normalDistribution)));
+    assertThat(ckms.get(0.95))
+        .isCloseTo(p95, offset(errorBoundsNormalDistribution(0.95, 0.001, normalDistribution)));
+    assertThat(ckms.get(0.99))
+        .isCloseTo(p99, offset(errorBoundsNormalDistribution(0.99, 0.001, normalDistribution)));
 
     assertThat(ckms.samples).as("sample size should be below 1000").hasSizeLessThan(1000);
   }
@@ -314,11 +318,16 @@ public class CKMSQuantilesTest {
       String msg =
           "invalid sample " + sample + ": count=" + ckms.n + " r=" + r + " f(r)=" + ckms.f(r);
       assertThat(sample.g + sample.delta).as(msg).isLessThanOrEqualTo(ckms.f(r));
-      assertThat(prev).as("Samples not ordered. Keep in mind that insertBatch() takes a sorted array as parameter.").isLessThanOrEqualTo(sample.value);
+      assertThat(prev)
+          .as(
+              "Samples not ordered. Keep in mind that insertBatch() takes a sorted array as parameter.")
+          .isLessThanOrEqualTo(sample.value);
       prev = sample.value;
       r += sample.g;
     }
-    assertThat(ckms.n).as("the sum of all g's must be the total number of observations").isEqualTo(r);
+    assertThat(ckms.n)
+        .as("the sum of all g's must be the total number of observations")
+        .isEqualTo(r);
   }
 
   /**

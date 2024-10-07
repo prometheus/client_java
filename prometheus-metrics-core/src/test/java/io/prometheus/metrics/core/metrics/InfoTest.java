@@ -1,5 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
@@ -9,10 +11,7 @@ import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class InfoTest {
 
@@ -27,7 +26,9 @@ public class InfoTest {
         Info info = Info.builder().name(name).labelNames(labelName).build();
         info.addLabelValues("value");
         Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(info.collect());
-        assertThat(TextFormat.printer().shortDebugString(protobufData)).isEqualTo("name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value: \"value\" } gauge { value: 1.0 } }");
+        assertThat(TextFormat.printer().shortDebugString(protobufData))
+            .isEqualTo(
+                "name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value: \"value\" } gauge { value: 1.0 } }");
       }
     }
   }

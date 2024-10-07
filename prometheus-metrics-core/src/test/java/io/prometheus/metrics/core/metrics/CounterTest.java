@@ -1,27 +1,25 @@
 package io.prometheus.metrics.core.metrics;
 
-import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
-import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.Exemplar;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.Unit;
-import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
-import io.prometheus.metrics.tracer.common.SpanContext;
-import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import org.junit.After;
-import org.junit.Before;
-
-import java.util.Arrays;
-import java.util.Iterator;
-
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
 
+import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
+import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Label;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Unit;
+import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
+import io.prometheus.metrics.tracer.common.SpanContext;
+import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
+import java.util.Arrays;
+import java.util.Iterator;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public class CounterTest {
@@ -115,7 +113,9 @@ public class CounterTest {
         }) {
       Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
       Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(counter.collect());
-      assertThat(TextFormat.printer().shortDebugString(protobufData)).isEqualTo("name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");
+      assertThat(TextFormat.printer().shortDebugString(protobufData))
+          .isEqualTo(
+              "name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");
     }
   }
 
@@ -140,18 +140,38 @@ public class CounterTest {
     Iterator<CounterSnapshot.CounterDataPointSnapshot> iter = snapshot.getDataPoints().iterator();
     // data is ordered by labels, so 200 comes before 500
     CounterSnapshot.CounterDataPointSnapshot data = iter.next();
-    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of(
-            "const1name", "const1value", "const2name", "const2value", "path", "/", "status", "200"));
+    assertThat((Iterable<? extends Label>) data.getLabels())
+        .isEqualTo(
+            Labels.of(
+                "const1name",
+                "const1value",
+                "const2name",
+                "const2value",
+                "path",
+                "/",
+                "status",
+                "200"));
     assertThat(data.getValue()).isCloseTo(2, offset(0.0001));
-    assertThat(data.getCreatedTimestampMillis()).isGreaterThanOrEqualTo(before)
-            .isLessThanOrEqualTo(System.currentTimeMillis());
+    assertThat(data.getCreatedTimestampMillis())
+        .isGreaterThanOrEqualTo(before)
+        .isLessThanOrEqualTo(System.currentTimeMillis());
     // 500
     data = iter.next();
-    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of(
-            "const1name", "const1value", "const2name", "const2value", "path", "/", "status", "500"));
+    assertThat((Iterable<? extends Label>) data.getLabels())
+        .isEqualTo(
+            Labels.of(
+                "const1name",
+                "const1value",
+                "const2name",
+                "const2value",
+                "path",
+                "/",
+                "status",
+                "500"));
     assertThat(data.getValue()).isCloseTo(1, offset(0.0001));
-    assertThat(data.getCreatedTimestampMillis()).isGreaterThanOrEqualTo(before)
-            .isLessThanOrEqualTo(System.currentTimeMillis());
+    assertThat(data.getCreatedTimestampMillis())
+        .isGreaterThanOrEqualTo(before)
+        .isLessThanOrEqualTo(System.currentTimeMillis());
   }
 
   @Test

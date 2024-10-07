@@ -91,7 +91,9 @@ public class HistogramTest {
           new PrometheusProtobufWriter().convert(histogram.collect());
       String expectedWithMetadata =
           "name: \"test\" type: HISTOGRAM metric { histogram { " + expected + " } }";
-      assertThat(TextFormat.printer().shortDebugString(protobufData)).as("test \"" + name + "\" failed").isEqualTo(expectedWithMetadata);
+      assertThat(TextFormat.printer().shortDebugString(protobufData))
+          .as("test \"" + name + "\" failed")
+          .isEqualTo(expectedWithMetadata);
     }
   }
 
@@ -824,7 +826,9 @@ public class HistogramTest {
           Histogram.builder().name("test").nativeInitialSchema(schemas[i]).build();
       Histogram.DataPoint histogramData = histogram.newDataPoint();
       double result = (double) method.invoke(histogramData, schemas[i], indexes[i]);
-      assertThat(result).as("index=" + indexes[i] + ", schema=" + schemas[i]).isCloseTo(expectedUpperBounds[i], offset(0.0000000000001));
+      assertThat(result)
+          .as("index=" + indexes[i] + ", schema=" + schemas[i])
+          .isCloseTo(expectedUpperBounds[i], offset(0.0000000000001));
     }
   }
 
@@ -858,17 +862,20 @@ public class HistogramTest {
               (double)
                   nativeBucketIndexToUpperBound.invoke(
                       histogram.getNoLabels(), schema, bucketIndex);
-          assertThat(lowerBound < value && upperBound >= value).as("Bucket index "
-                  + bucketIndex
-                  + " with schema "
-                  + schema
-                  + " has range ["
-                  + lowerBound
-                  + ", "
-                  + upperBound
-                  + "]. Value "
-                  + value
-                  + " is outside of that range.").isTrue();
+          assertThat(lowerBound < value && upperBound >= value)
+              .as(
+                  "Bucket index "
+                      + bucketIndex
+                      + " with schema "
+                      + schema
+                      + " has range ["
+                      + lowerBound
+                      + ", "
+                      + upperBound
+                      + "]. Value "
+                      + value
+                      + " is outside of that range.")
+              .isTrue();
         }
       }
     }
@@ -913,8 +920,8 @@ public class HistogramTest {
             + "positive_delta: 1 "
             + "} }";
     String expectedTextFormat =
-            // default classic buckets
-            "# TYPE test histogram\n"
+        // default classic buckets
+        "# TYPE test histogram\n"
             + "test_bucket{le=\"0.005\"} 0\n"
             + "test_bucket{le=\"0.01\"} 0\n"
             + "test_bucket{le=\"0.025\"} 0\n"
@@ -1141,9 +1148,13 @@ public class HistogramTest {
       }
     }
     Exemplar exemplar = data.getExemplars().get(lowerBound, upperBound);
-    assertThat(exemplar).as("No exemplar found in bucket [" + lowerBound + ", " + upperBound + "]").isNotNull();
+    assertThat(exemplar)
+        .as("No exemplar found in bucket [" + lowerBound + ", " + upperBound + "]")
+        .isNotNull();
     assertThat(exemplar.getValue()).isCloseTo(value, offset(0.0));
-    assertThat(exemplar.getLabels().size()).as("" + exemplar.getLabels()).isEqualTo(labels.length / 2);
+    assertThat(exemplar.getLabels().size())
+        .as("" + exemplar.getLabels())
+        .isEqualTo(labels.length / 2);
     for (int i = 0; i < labels.length; i += 2) {
       assertThat(exemplar.getLabels().getName(i / 2)).isEqualTo(labels[i]);
       assertThat(exemplar.getLabels().getValue(i / 2)).isEqualTo(labels[i + 1]);
@@ -1257,7 +1268,8 @@ public class HistogramTest {
         getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
-    assertThat(upperBounds).isEqualTo(Arrays.asList(0.0, 3.0, 17.0, 21.0, Double.POSITIVE_INFINITY));
+    assertThat(upperBounds)
+        .isEqualTo(Arrays.asList(0.0, 3.0, 17.0, 21.0, Double.POSITIVE_INFINITY));
   }
 
   @Test
@@ -1302,7 +1314,10 @@ public class HistogramTest {
         getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
-    assertThat(upperBounds).isEqualTo(Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, Double.POSITIVE_INFINITY));
+    assertThat(upperBounds)
+        .isEqualTo(
+            Arrays.asList(
+                0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, Double.POSITIVE_INFINITY));
   }
 
   @Test
@@ -1460,14 +1475,17 @@ public class HistogramTest {
         assertThat(snapshot.getDataPoints().size()).isOne();
         HistogramSnapshot.HistogramDataPointSnapshot data =
             snapshot.getDataPoints().stream().findFirst().orElseThrow(RuntimeException::new);
-        assertThat(data.getCount()).isGreaterThanOrEqualTo((count + 1000)); // 1000 own observations plus the ones from other threads
+        assertThat(data.getCount())
+            .isGreaterThanOrEqualTo(
+                (count + 1000)); // 1000 own observations plus the ones from other threads
         count = data.getCount();
       }
       if (count > maxCount) {
         maxCount = count;
       }
     }
-    assertThat(maxCount).isEqualTo(nThreads * 10_000); // the last collect() has seen all observations
+    assertThat(maxCount)
+        .isEqualTo(nThreads * 10_000); // the last collect() has seen all observations
     assertThat(nThreads * 10_000).isEqualTo(getBucket(histogram, 2.5, "status", "200").getCount());
     executor.shutdown();
     assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
