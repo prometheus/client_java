@@ -20,6 +20,7 @@
         <simpleclient.version>0.16.0</simpleclient.version>
         <codahale.version>3.0.2</codahale.version>
         <opentelemetry.version>1.42.1</opentelemetry.version>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <licenses>
