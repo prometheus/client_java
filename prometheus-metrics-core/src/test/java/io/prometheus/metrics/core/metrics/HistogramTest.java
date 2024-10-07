@@ -1,10 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
@@ -93,10 +91,7 @@ public class HistogramTest {
           new PrometheusProtobufWriter().convert(histogram.collect());
       String expectedWithMetadata =
           "name: \"test\" type: HISTOGRAM metric { histogram { " + expected + " } }";
-      assertEquals(
-          "test \"" + name + "\" failed",
-          expectedWithMetadata,
-          TextFormat.printer().shortDebugString(protobufData));
+      assertThat(TextFormat.printer().shortDebugString(protobufData)).as("test \"" + name + "\" failed").isEqualTo(expectedWithMetadata);
     }
   }
 
@@ -829,11 +824,7 @@ public class HistogramTest {
           Histogram.builder().name("test").nativeInitialSchema(schemas[i]).build();
       Histogram.DataPoint histogramData = histogram.newDataPoint();
       double result = (double) method.invoke(histogramData, schemas[i], indexes[i]);
-      assertEquals(
-          "index=" + indexes[i] + ", schema=" + schemas[i],
-          expectedUpperBounds[i],
-          result,
-          0.0000000000001);
+      assertThat(result).as("index=" + indexes[i] + ", schema=" + schemas[i]).isCloseTo(expectedUpperBounds[i], offset(0.0000000000001));
     }
   }
 
@@ -867,8 +858,7 @@ public class HistogramTest {
               (double)
                   nativeBucketIndexToUpperBound.invoke(
                       histogram.getNoLabels(), schema, bucketIndex);
-          assertTrue(
-              "Bucket index "
+          assertThat(lowerBound < value && upperBound >= value).as("Bucket index "
                   + bucketIndex
                   + " with schema "
                   + schema
@@ -878,8 +868,7 @@ public class HistogramTest {
                   + upperBound
                   + "]. Value "
                   + value
-                  + " is outside of that range.",
-              lowerBound < value && upperBound >= value);
+                  + " is outside of that range.").isTrue();
         }
       }
     }
@@ -891,8 +880,7 @@ public class HistogramTest {
     histogram.observe(0.5);
     HistogramSnapshot snapshot = histogram.collect();
     String expectedProtobuf =
-        ""
-            + "name: \"test\" "
+        "name: \"test\" "
             + "type: HISTOGRAM "
             + "metric { "
             + "histogram { "
@@ -925,9 +913,8 @@ public class HistogramTest {
             + "positive_delta: 1 "
             + "} }";
     String expectedTextFormat =
-        ""
             // default classic buckets
-            + "# TYPE test histogram\n"
+            "# TYPE test histogram\n"
             + "test_bucket{le=\"0.005\"} 0\n"
             + "test_bucket{le=\"0.01\"} 0\n"
             + "test_bucket{le=\"0.025\"} 0\n"
@@ -946,13 +933,13 @@ public class HistogramTest {
 
     // protobuf
     Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(snapshot);
-    assertEquals(expectedProtobuf, TextFormat.printer().shortDebugString(protobufData));
+    assertThat(TextFormat.printer().shortDebugString(protobufData)).isEqualTo(expectedProtobuf);
 
     // text
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
     writer.write(out, MetricSnapshots.of(snapshot));
-    assertEquals(expectedTextFormat, out.toString());
+    assertThat(out).hasToString(expectedTextFormat);
   }
 
   @Test
@@ -1012,14 +999,14 @@ public class HistogramTest {
     HistogramSnapshot snapshot = histogram.collect();
     assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
     assertExemplarEquals(ex1b, getExemplar(snapshot, 1.0, "path", "/world"));
-    assertNull(getExemplar(snapshot, 2.0, "path", "/hello"));
-    assertNull(getExemplar(snapshot, 2.0, "path", "/world"));
-    assertNull(getExemplar(snapshot, 3.0, "path", "/hello"));
-    assertNull(getExemplar(snapshot, 3.0, "path", "/world"));
-    assertNull(getExemplar(snapshot, 4.0, "path", "/hello"));
-    assertNull(getExemplar(snapshot, 4.0, "path", "/world"));
-    assertNull(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello"));
-    assertNull(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
+    assertThat(getExemplar(snapshot, 2.0, "path", "/hello")).isNull();
+    assertThat(getExemplar(snapshot, 2.0, "path", "/world")).isNull();
+    assertThat(getExemplar(snapshot, 3.0, "path", "/hello")).isNull();
+    assertThat(getExemplar(snapshot, 3.0, "path", "/world")).isNull();
+    assertThat(getExemplar(snapshot, 4.0, "path", "/hello")).isNull();
+    assertThat(getExemplar(snapshot, 4.0, "path", "/world")).isNull();
+    assertThat(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello")).isNull();
+    assertThat(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world")).isNull();
 
     Thread.sleep(sampleIntervalMillis + 1);
     histogram.labelValues("/hello").observe(4.5);
@@ -1028,12 +1015,12 @@ public class HistogramTest {
     snapshot = histogram.collect();
     assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
     assertExemplarEquals(ex1b, getExemplar(snapshot, 1.0, "path", "/world"));
-    assertNull(getExemplar(snapshot, 2.0, "path", "/hello"));
-    assertNull(getExemplar(snapshot, 2.0, "path", "/world"));
-    assertNull(getExemplar(snapshot, 3.0, "path", "/hello"));
-    assertNull(getExemplar(snapshot, 3.0, "path", "/world"));
-    assertNull(getExemplar(snapshot, 4.0, "path", "/hello"));
-    assertNull(getExemplar(snapshot, 4.0, "path", "/world"));
+    assertThat(getExemplar(snapshot, 2.0, "path", "/hello")).isNull();
+    assertThat(getExemplar(snapshot, 2.0, "path", "/world")).isNull();
+    assertThat(getExemplar(snapshot, 3.0, "path", "/hello")).isNull();
+    assertThat(getExemplar(snapshot, 3.0, "path", "/world")).isNull();
+    assertThat(getExemplar(snapshot, 4.0, "path", "/hello")).isNull();
+    assertThat(getExemplar(snapshot, 4.0, "path", "/world")).isNull();
     assertExemplarEquals(ex2a, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello"));
     assertExemplarEquals(ex2b, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
@@ -1154,12 +1141,12 @@ public class HistogramTest {
       }
     }
     Exemplar exemplar = data.getExemplars().get(lowerBound, upperBound);
-    assertNotNull("No exemplar found in bucket [" + lowerBound + ", " + upperBound + "]", exemplar);
-    assertEquals(value, exemplar.getValue(), 0.0);
-    assertEquals("" + exemplar.getLabels(), labels.length / 2, exemplar.getLabels().size());
+    assertThat(exemplar).as("No exemplar found in bucket [" + lowerBound + ", " + upperBound + "]").isNotNull();
+    assertThat(exemplar.getValue()).isCloseTo(value, offset(0.0));
+    assertThat(exemplar.getLabels().size()).as("" + exemplar.getLabels()).isEqualTo(labels.length / 2);
     for (int i = 0; i < labels.length; i += 2) {
-      assertEquals(labels[i], exemplar.getLabels().getName(i / 2));
-      assertEquals(labels[i + 1], exemplar.getLabels().getValue(i / 2));
+      assertThat(exemplar.getLabels().getName(i / 2)).isEqualTo(labels[i]);
+      assertThat(exemplar.getLabels().getValue(i / 2)).isEqualTo(labels[i + 1]);
     }
   }
 
@@ -1207,27 +1194,27 @@ public class HistogramTest {
 
     histogram.labelValues("/hello").observe(3.11);
     histogram.labelValues("/world").observe(3.12);
-    assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
+    assertThat(getData(histogram, "path", "/hello").getExemplars().size()).isOne();
     assertExemplarEquals(
         ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
-    assertEquals(1, getData(histogram, "path", "/world").getExemplars().size());
+    assertThat(getData(histogram, "path", "/world").getExemplars().size()).isOne();
     assertExemplarEquals(
         ex2, getData(histogram, "path", "/world").getExemplars().iterator().next());
 
     histogram
         .labelValues("/world")
         .observeWithExemplar(3.13, Labels.of("key1", "value1", "key2", "value2"));
-    assertEquals(1, getData(histogram, "path", "/hello").getExemplars().size());
+    assertThat(getData(histogram, "path", "/hello").getExemplars().size()).isOne();
     assertExemplarEquals(
         ex1, getData(histogram, "path", "/hello").getExemplars().iterator().next());
-    assertEquals(2, getData(histogram, "path", "/world").getExemplars().size());
+    assertThat(getData(histogram, "path", "/world").getExemplars().size()).isEqualTo(2);
     Exemplars exemplars = getData(histogram, "path", "/world").getExemplars();
     List<Exemplar> exemplarList = new ArrayList<>(exemplars.size());
     for (Exemplar exemplar : exemplars) {
       exemplarList.add(exemplar);
     }
     exemplarList.sort(Comparator.comparingDouble(Exemplar::getValue));
-    assertEquals(2, exemplars.size());
+    assertThat(exemplars.size()).isEqualTo(2);
     assertExemplarEquals(ex2, exemplarList.get(0));
     assertExemplarEquals(ex3, exemplarList.get(1));
   }
@@ -1270,7 +1257,7 @@ public class HistogramTest {
         getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
-    assertEquals(Arrays.asList(0.0, 3.0, 17.0, 21.0, Double.POSITIVE_INFINITY), upperBounds);
+    assertThat(upperBounds).isEqualTo(Arrays.asList(0.0, 3.0, 17.0, 21.0, Double.POSITIVE_INFINITY));
   }
 
   @Test
@@ -1280,7 +1267,7 @@ public class HistogramTest {
         getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
-    assertEquals(Arrays.asList(0.1, 0.2, Double.POSITIVE_INFINITY), upperBounds);
+    assertThat(upperBounds).isEqualTo(Arrays.asList(0.1, 0.2, Double.POSITIVE_INFINITY));
   }
 
   @Test
@@ -1290,7 +1277,7 @@ public class HistogramTest {
         getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
-    assertEquals(Collections.singletonList(Double.POSITIVE_INFINITY), upperBounds);
+    assertThat(upperBounds).isEqualTo(Collections.singletonList(Double.POSITIVE_INFINITY));
   }
 
   @Test
@@ -1304,7 +1291,7 @@ public class HistogramTest {
         getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
-    assertEquals(Arrays.asList(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY), upperBounds);
+    assertThat(upperBounds).isEqualTo(Arrays.asList(0.01, 0.1, 1.0, Double.POSITIVE_INFINITY));
   }
 
   @Test
@@ -1315,9 +1302,7 @@ public class HistogramTest {
         getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
-    assertEquals(
-        Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, Double.POSITIVE_INFINITY),
-        upperBounds);
+    assertThat(upperBounds).isEqualTo(Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, Double.POSITIVE_INFINITY));
   }
 
   @Test
@@ -1328,7 +1313,7 @@ public class HistogramTest {
         getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getUpperBound)
             .collect(Collectors.toList());
-    assertEquals(Arrays.asList(2.0, 5.0, 12.5, Double.POSITIVE_INFINITY), upperBounds);
+    assertThat(upperBounds).isEqualTo(Arrays.asList(2.0, 5.0, 12.5, Double.POSITIVE_INFINITY));
   }
 
   @Test(expected = RuntimeException.class)
@@ -1339,9 +1324,9 @@ public class HistogramTest {
   @Test
   public void testNoLabelsDefaultZeroValue() {
     Histogram noLabels = Histogram.builder().name("test").build();
-    assertEquals(0.0, getBucket(noLabels, 0.005).getCount(), 0.0);
-    assertEquals(0, getData(noLabels).getCount());
-    assertEquals(0.0, getData(noLabels).getSum(), 0.0);
+    assertThat(getBucket(noLabels, 0.005).getCount()).isZero();
+    assertThat(getData(noLabels).getCount()).isZero();
+    assertThat(getData(noLabels).getSum()).isCloseTo(0.0, offset(0.0));
   }
 
   private ClassicHistogramBucket getBucket(Histogram histogram, double le, String... labels) {
@@ -1355,18 +1340,18 @@ public class HistogramTest {
   public void testObserve() {
     Histogram noLabels = Histogram.builder().name("test").build();
     noLabels.observe(2);
-    assertEquals(1, getData(noLabels).getCount());
-    assertEquals(2.0, getData(noLabels).getSum(), .0);
-    assertEquals(0.0, getBucket(noLabels, 1).getCount(), .0);
-    assertEquals(1.0, getBucket(noLabels, 2.5).getCount(), .0);
+    assertThat(getData(noLabels).getCount()).isOne();
+    assertThat(getData(noLabels).getSum()).isCloseTo(2.0, offset(.0));
+    assertThat(getBucket(noLabels, 1).getCount()).isZero();
+    assertThat(getBucket(noLabels, 2.5).getCount()).isOne();
     noLabels.observe(4);
-    assertEquals(2.0, getData(noLabels).getCount(), .0);
-    assertEquals(6.0, getData(noLabels).getSum(), .0);
-    assertEquals(0.0, getBucket(noLabels, 1).getCount(), .0);
-    assertEquals(1.0, getBucket(noLabels, 2.5).getCount(), .0);
-    assertEquals(1.0, getBucket(noLabels, 5).getCount(), .0);
-    assertEquals(0.0, getBucket(noLabels, 10).getCount(), .0);
-    assertEquals(0.0, getBucket(noLabels, Double.POSITIVE_INFINITY).getCount(), .0);
+    assertThat(getData(noLabels).getCount()).isEqualTo(2);
+    assertThat(getData(noLabels).getSum()).isCloseTo(6.0, offset(.0));
+    assertThat(getBucket(noLabels, 1).getCount()).isZero();
+    assertThat(getBucket(noLabels, 2.5).getCount()).isOne();
+    assertThat(getBucket(noLabels, 5).getCount()).isOne();
+    assertThat(getBucket(noLabels, 10).getCount()).isZero();
+    assertThat(getBucket(noLabels, Double.POSITIVE_INFINITY).getCount()).isZero();
   }
 
   @Test
@@ -1384,8 +1369,8 @@ public class HistogramTest {
       histogram.observe(i);
       expectedCount++;
       expectedSum += i;
-      assertEquals(expectedSum, getData(histogram).getSum(), .001);
-      assertEquals(expectedCount, getData(histogram).getCount(), .001);
+      assertThat(getData(histogram).getSum()).isCloseTo(expectedSum, offset(.001));
+      assertThat(getData(histogram).getCount()).isEqualTo((long) expectedCount);
     }
     List<Long> expectedBucketCounts =
         Arrays.asList(2L, 5L, 5L, 5L, 5L, 0L); // buckets -10, -5, 0, 5, 10, +Inf
@@ -1393,22 +1378,22 @@ public class HistogramTest {
         getData(histogram).getClassicBuckets().stream()
             .map(ClassicHistogramBucket::getCount)
             .collect(Collectors.toList());
-    assertEquals(expectedBucketCounts, actualBucketCounts);
+    assertThat(actualBucketCounts).isEqualTo(expectedBucketCounts);
   }
 
   @Test
   public void testBoundaryConditions() {
     Histogram histogram = Histogram.builder().name("test").build();
     histogram.observe(2.5);
-    assertEquals(0, getBucket(histogram, 1).getCount());
-    assertEquals(1, getBucket(histogram, 2.5).getCount());
+    assertThat(getBucket(histogram, 1).getCount()).isZero();
+    assertThat(getBucket(histogram, 2.5).getCount()).isOne();
 
     histogram.observe(Double.POSITIVE_INFINITY);
-    assertEquals(0, getBucket(histogram, 1).getCount());
-    assertEquals(1, getBucket(histogram, 2.5).getCount());
-    assertEquals(0, getBucket(histogram, 5).getCount());
-    assertEquals(0, getBucket(histogram, 10).getCount());
-    assertEquals(1, getBucket(histogram, Double.POSITIVE_INFINITY).getCount());
+    assertThat(getBucket(histogram, 1).getCount()).isZero();
+    assertThat(getBucket(histogram, 2.5).getCount()).isOne();
+    assertThat(getBucket(histogram, 5).getCount()).isZero();
+    assertThat(getBucket(histogram, 10).getCount()).isZero();
+    assertThat(getBucket(histogram, Double.POSITIVE_INFINITY).getCount()).isOne();
   }
 
   @Test
@@ -1426,17 +1411,17 @@ public class HistogramTest {
         getData(histogram, "env", "prod", "path", "/hello", "status", "200");
     HistogramSnapshot.HistogramDataPointSnapshot data500 =
         getData(histogram, "env", "prod", "path", "/hello", "status", "500");
-    assertEquals(2, data200.getCount());
-    assertEquals(0.31, data200.getSum(), 0.0000001);
-    assertEquals(1, data500.getCount());
-    assertEquals(0.19, data500.getSum(), 0.0000001);
+    assertThat(data200.getCount()).isEqualTo(2);
+    assertThat(data200.getSum()).isCloseTo(0.31, offset(0.0000001));
+    assertThat(data500.getCount()).isOne();
+    assertThat(data500.getSum()).isCloseTo(0.19, offset(0.0000001));
     histogram.labelValues("/hello", "200").observe(0.13);
     data200 = getData(histogram, "env", "prod", "path", "/hello", "status", "200");
     data500 = getData(histogram, "env", "prod", "path", "/hello", "status", "500");
-    assertEquals(3, data200.getCount());
-    assertEquals(0.44, data200.getSum(), 0.0000001);
-    assertEquals(1, data500.getCount());
-    assertEquals(0.19, data500.getSum(), 0.0000001);
+    assertThat(data200.getCount()).isEqualTo(3);
+    assertThat(data200.getSum()).isCloseTo(0.44, offset(0.0000001));
+    assertThat(data500.getCount()).isOne();
+    assertThat(data500.getSum()).isCloseTo(0.19, offset(0.0000001));
   }
 
   @Test
@@ -1472,22 +1457,20 @@ public class HistogramTest {
       List<HistogramSnapshot> snapshots = future.get(5, TimeUnit.SECONDS);
       long count = 0;
       for (HistogramSnapshot snapshot : snapshots) {
-        assertEquals(1, snapshot.getDataPoints().size());
+        assertThat(snapshot.getDataPoints().size()).isOne();
         HistogramSnapshot.HistogramDataPointSnapshot data =
             snapshot.getDataPoints().stream().findFirst().orElseThrow(RuntimeException::new);
-        assertTrue(
-            data.getCount()
-                >= (count + 1000)); // 1000 own observations plus the ones from other threads
+        assertThat(data.getCount()).isGreaterThanOrEqualTo((count + 1000)); // 1000 own observations plus the ones from other threads
         count = data.getCount();
       }
       if (count > maxCount) {
         maxCount = count;
       }
     }
-    assertEquals(nThreads * 10_000, maxCount); // the last collect() has seen all observations
-    assertEquals(getBucket(histogram, 2.5, "status", "200").getCount(), nThreads * 10_000);
+    assertThat(maxCount).isEqualTo(nThreads * 10_000); // the last collect() has seen all observations
+    assertThat(nThreads * 10_000).isEqualTo(getBucket(histogram, 2.5, "status", "200").getCount());
     executor.shutdown();
-    assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+    assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
   }
 
   private HistogramSnapshot.HistogramDataPointSnapshot getData(
@@ -1495,9 +1478,6 @@ public class HistogramTest {
     return histogram.collect().getDataPoints().stream()
         .filter(d -> d.getLabels().equals(Labels.of(labels)))
         .findAny()
-        .orElseThrow(
-            () ->
-                new RuntimeException(
-                    "histogram with labels " + Arrays.toString(labels) + " not found"));
+        .orElseThrow(() -> new RuntimeException("histogram with labels " + labels + " not found"));
   }
 }
