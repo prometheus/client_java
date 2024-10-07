@@ -3,7 +3,7 @@ package io.prometheus.metrics.it.exporter.test;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public class TomcatIT extends ExporterIT {
+class TomcatIT extends ExporterIT {
   public TomcatIT() throws IOException, URISyntaxException {
     super("exporter-servlet-tomcat-sample");
   }
