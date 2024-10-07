@@ -24,26 +24,14 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 
-@RunWith(Parameterized.class)
-public class ExporterIT {
+abstract class ExporterIT {
 
   private final GenericContainer<?> sampleAppContainer;
   private final Volume sampleAppVolume;
   private final String sampleApp;
-
-  @Parameterized.Parameters(name = "{0}")
-  public static String[] sampleApps() {
-    return new String[] {
-      "exporter-httpserver-sample",
-      "exporter-servlet-tomcat-sample",
-      "exporter-servlet-jetty-sample",
-    };
-  }
 
   public ExporterIT(String sampleApp) throws IOException, URISyntaxException {
     this.sampleApp = sampleApp;
