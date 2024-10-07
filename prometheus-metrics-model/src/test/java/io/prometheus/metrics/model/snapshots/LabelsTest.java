@@ -1,9 +1,9 @@
 package io.prometheus.metrics.model.snapshots;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.assertj.core.api.IterableAssert;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class LabelsTest {
 
@@ -61,8 +61,7 @@ public class LabelsTest {
   public void testEqualsHashcodeDots() {
     Labels labels1 = Labels.of("my_a", "val");
     Labels labels2 = Labels.of("my.a", "val");
-    assertLabels(labels2).isEqualTo(labels1)
-            .hasSameHashCodeAs(labels1);
+    assertLabels(labels2).isEqualTo(labels1).hasSameHashCodeAs(labels1);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -70,8 +69,8 @@ public class LabelsTest {
   public void testCompareEquals() {
     Labels labels1 = Labels.of("env", "prod", "status", "200");
     Labels labels2 = Labels.of("env", "prod", "status", "200");
-    assertThat((Comparable)labels1).isEqualByComparingTo(labels2);
-    assertThat((Comparable)labels2).isEqualByComparingTo(labels1);
+    assertThat((Comparable) labels1).isEqualByComparingTo(labels2);
+    assertThat((Comparable) labels2).isEqualByComparingTo(labels1);
     assertLabels(labels2).isEqualTo(labels1);
     assertLabels(labels1).isEqualTo(labels2);
   }

@@ -1,8 +1,10 @@
 package io.prometheus.metrics.model.snapshots;
 
 import java.util.Iterator;
-import org.junit.Assert;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NativeHistogramBucketsTest {
 
@@ -10,30 +12,30 @@ public class NativeHistogramBucketsTest {
   public void testGoodCase() {
     NativeHistogramBuckets buckets =
         NativeHistogramBuckets.builder().bucket(-10, 12).bucket(120, 17).build();
-    Assert.assertEquals(2, buckets.size());
-    Assert.assertEquals(-10, buckets.getBucketIndex(0));
-    Assert.assertEquals(12, buckets.getCount(0));
-    Assert.assertEquals(120, buckets.getBucketIndex(1));
-    Assert.assertEquals(17, buckets.getCount(1));
+    assertThat(buckets.size()).isEqualTo(2);
+    assertThat(buckets.getBucketIndex(0)).isEqualTo(-10);
+    assertThat(buckets.getCount(0)).isEqualTo(12);
+    assertThat(buckets.getBucketIndex(1)).isEqualTo(120);
+    assertThat(buckets.getCount(1)).isEqualTo(17);
   }
 
   @Test
   public void testEmpty() {
     NativeHistogramBuckets buckets = NativeHistogramBuckets.builder().build();
-    Assert.assertEquals(0, buckets.size());
+    assertThat(buckets.size()).isZero();
   }
 
   @Test
   public void testSort() {
     NativeHistogramBuckets buckets =
         NativeHistogramBuckets.builder().bucket(7, 4).bucket(2, 0).bucket(5, 3).build();
-    Assert.assertEquals(3, buckets.size());
-    Assert.assertEquals(2, buckets.getBucketIndex(0));
-    Assert.assertEquals(5, buckets.getBucketIndex(1));
-    Assert.assertEquals(7, buckets.getBucketIndex(2));
-    Assert.assertEquals(0, buckets.getCount(0));
-    Assert.assertEquals(3, buckets.getCount(1));
-    Assert.assertEquals(4, buckets.getCount(2));
+    assertThat(buckets.size()).isEqualTo(3);
+    assertThat(buckets.getBucketIndex(0)).isEqualTo(2);
+    assertThat(buckets.getBucketIndex(1)).isEqualTo(5);
+    assertThat(buckets.getBucketIndex(2)).isEqualTo(7);
+    assertThat(buckets.getCount(0)).isZero();
+    assertThat(buckets.getCount(1)).isEqualTo(3);
+    assertThat(buckets.getCount(2)).isEqualTo(4);
   }
 
   @Test(expected = IllegalArgumentException.class)

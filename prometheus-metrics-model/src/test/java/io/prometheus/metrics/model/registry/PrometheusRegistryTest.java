@@ -1,16 +1,15 @@
 package io.prometheus.metrics.model.registry;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.Arrays;
 import java.util.List;
-
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 public class PrometheusRegistryTest {
 
@@ -93,7 +92,8 @@ public class PrometheusRegistryTest {
     try {
       registry.scrape();
     } catch (IllegalStateException e) {
-      assertThat(e.getMessage().contains("duplicate") && e.getMessage().contains("no_name_gauge")).isTrue();
+      assertThat(e.getMessage().contains("duplicate") && e.getMessage().contains("no_name_gauge"))
+          .isTrue();
       return;
     }
     fail("Expected duplicate name exception");

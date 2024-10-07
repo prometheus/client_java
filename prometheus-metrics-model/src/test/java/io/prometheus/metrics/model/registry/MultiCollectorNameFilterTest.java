@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.registry;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
@@ -10,11 +12,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class MultiCollectorNameFilterTest {
 

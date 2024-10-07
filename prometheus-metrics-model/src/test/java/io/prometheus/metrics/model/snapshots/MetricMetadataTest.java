@@ -1,8 +1,8 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 public class MetricMetadataTest {
@@ -30,28 +30,28 @@ public class MetricMetadataTest {
             sanitizeMetricName("my_namespace/http.server.duration", Unit.SECONDS),
             "help string",
             Unit.SECONDS);
-    Assert.assertEquals("my_namespace_http.server.duration_seconds", metadata.getName());
-    Assert.assertEquals("my_namespace_http_server_duration_seconds", metadata.getPrometheusName());
-    Assert.assertEquals("help string", metadata.getHelp());
-    Assert.assertEquals("seconds", metadata.getUnit().toString());
+    assertThat(metadata.getName()).isEqualTo("my_namespace_http.server.duration_seconds");
+    assertThat(metadata.getPrometheusName()).isEqualTo("my_namespace_http_server_duration_seconds");
+    assertThat(metadata.getHelp()).isEqualTo("help string");
+    assertThat(metadata.getUnit().toString()).isEqualTo("seconds");
   }
 
   @Test
   public void testSanitizationCounter() {
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_events_total"));
-    Assert.assertEquals("my_events", metadata.getName());
+    assertThat(metadata.getName()).isEqualTo("my_events");
   }
 
   @Test
   public void testSanitizationInfo() {
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("target_info"));
-    Assert.assertEquals("target", metadata.getName());
+    assertThat(metadata.getName()).isEqualTo("target");
   }
 
   @Test
   public void testSanitizationWeirdCornerCase() {
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("_total_created"));
-    Assert.assertEquals("total", metadata.getName());
+    assertThat(metadata.getName()).isEqualTo("total");
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -71,6 +71,6 @@ public class MetricMetadataTest {
 
   @Test
   public void testUnitNotDuplicated() {
-    Assert.assertEquals("my_counter_bytes", sanitizeMetricName("my_counter_bytes", Unit.BYTES));
+    assertThat(sanitizeMetricName("my_counter_bytes", Unit.BYTES)).isEqualTo("my_counter_bytes");
   }
 }

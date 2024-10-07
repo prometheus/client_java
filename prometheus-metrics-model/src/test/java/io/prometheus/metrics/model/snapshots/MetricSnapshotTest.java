@@ -1,7 +1,8 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MetricSnapshotTest {
 
@@ -30,7 +31,7 @@ public class MetricSnapshotTest {
   @Test
   public void testNoData() {
     MetricSnapshot snapshot = CounterSnapshot.builder().name("test").build();
-    Assert.assertEquals(0, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints().size()).isEqualTo(0);
   }
 
   @Test(expected = NullPointerException.class)

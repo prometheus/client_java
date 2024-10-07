@@ -1,13 +1,12 @@
 package io.prometheus.metrics.model.snapshots;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
+
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot.HistogramDataPointSnapshot;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Offset.offset;
 
 public class HistogramSnapshotTest {
 
@@ -97,7 +96,8 @@ public class HistogramSnapshotTest {
     assertThat(data.getCount()).isEqualTo(22);
     assertThat(data.getSum()).isCloseTo(27000.0, offset(0.0));
     assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("path", "/"));
-    assertThat(data.getExemplars().get(128.0, 1024.0).getValue()).isCloseTo(exemplar1.getValue(), offset(0.0));
+    assertThat(data.getExemplars().get(128.0, 1024.0).getValue())
+        .isCloseTo(exemplar1.getValue(), offset(0.0));
     assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp);
     assertThat(data.getScrapeTimestampMillis()).isEqualTo(scrapeTimestamp);
     // classic histogram 1

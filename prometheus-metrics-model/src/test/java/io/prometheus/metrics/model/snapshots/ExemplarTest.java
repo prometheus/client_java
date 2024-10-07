@@ -1,10 +1,10 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.assertj.core.api.IterableAssert;
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
+
+import org.assertj.core.api.IterableAssert;
+import org.junit.Test;
 
 public class ExemplarTest {
 
@@ -20,15 +20,17 @@ public class ExemplarTest {
             .labels(Labels.of("path", "/", "error", "none"))
             .build();
     assertThat(exemplar.getValue()).isCloseTo(2.2, offset(0.0));
-    assertLabels(exemplar.getLabels()).isEqualTo(Labels.of(
-            Exemplar.TRACE_ID,
-            "abc123abc123",
-            Exemplar.SPAN_ID,
-            "def456def456",
-            "path",
-            "/",
-            "error",
-            "none"));
+    assertLabels(exemplar.getLabels())
+        .isEqualTo(
+            Labels.of(
+                Exemplar.TRACE_ID,
+                "abc123abc123",
+                Exemplar.SPAN_ID,
+                "def456def456",
+                "path",
+                "/",
+                "error",
+                "none"));
     assertThat(exemplar.hasTimestamp()).isTrue();
     assertThat(exemplar.getTimestampMillis()).isEqualTo(timestamp);
   }
@@ -73,7 +75,8 @@ public class ExemplarTest {
             .spanId("abc")
             .traceId("def")
             .build();
-    assertLabels(exemplar.getLabels()).isEqualTo(Labels.of("span_id", "abc", "a", "b", "trace_id", "def"));
+    assertLabels(exemplar.getLabels())
+        .isEqualTo(Labels.of("span_id", "abc", "a", "b", "trace_id", "def"));
   }
 
   @Test
