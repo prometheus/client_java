@@ -269,7 +269,6 @@
                     <noqualifier>all</noqualifier>
                     <show>public</show>
                     <excludePackageNames>io.prometheus.metrics.expositionformats.generated.*</excludePackageNames>
-                    <sourcepath>${project.build.sourceDirectory}</sourcepath>
                 </configuration>
             </plugin>
             <plugin>
