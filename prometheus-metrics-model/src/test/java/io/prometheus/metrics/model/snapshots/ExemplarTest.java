@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import org.assertj.core.api.IterableAssert;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +20,7 @@ public class ExemplarTest {
             .labels(Labels.of("path", "/", "error", "none"))
             .build();
     assertThat(exemplar.getValue()).isCloseTo(2.2, offset(0.0));
-    assertThat((Iterable<? extends Label>) exemplar.getLabels()).isEqualTo(Labels.of(
+    assertLabels(exemplar.getLabels()).isEqualTo(Labels.of(
             Exemplar.TRACE_ID,
             "abc123abc123",
             Exemplar.SPAN_ID,
@@ -41,7 +42,7 @@ public class ExemplarTest {
   public void testMinimal() {
     Exemplar exemplar = Exemplar.builder().value(0.0).build();
     assertThat(exemplar.getValue()).isCloseTo(0.0, offset(0.0));
-    assertThat((Iterable<? extends Label>) exemplar.getLabels()).isEqualTo(Labels.EMPTY);
+    assertLabels(exemplar.getLabels()).isEqualTo(Labels.EMPTY);
     assertThat(exemplar.hasTimestamp()).isFalse();
   }
 
@@ -49,14 +50,18 @@ public class ExemplarTest {
   public void testLabelsMergeTraceId() {
     Exemplar exemplar =
         Exemplar.builder().value(0.0).labels(Labels.of("a", "b")).traceId("abc").build();
-    assertThat((Iterable<? extends Label>) exemplar.getLabels()).isEqualTo(Labels.of("a", "b", "trace_id", "abc"));
+    assertLabels(exemplar.getLabels()).isEqualTo(Labels.of("a", "b", "trace_id", "abc"));
+  }
+
+  private static IterableAssert<? extends Label> assertLabels(Labels labels) {
+    return assertThat((Iterable<? extends Label>) labels);
   }
 
   @Test
   public void testLabelsMergeSpanId() {
     Exemplar exemplar =
         Exemplar.builder().value(0.0).labels(Labels.of("a", "b")).spanId("abc").build();
-    assertThat((Iterable<? extends Label>) exemplar.getLabels()).isEqualTo(Labels.of("a", "b", "span_id", "abc"));
+    assertLabels(exemplar.getLabels()).isEqualTo(Labels.of("a", "b", "span_id", "abc"));
   }
 
   @Test
@@ -68,12 +73,12 @@ public class ExemplarTest {
             .spanId("abc")
             .traceId("def")
             .build();
-    assertThat((Iterable<? extends Label>) exemplar.getLabels()).isEqualTo(Labels.of("span_id", "abc", "a", "b", "trace_id", "def"));
+    assertLabels(exemplar.getLabels()).isEqualTo(Labels.of("span_id", "abc", "a", "b", "trace_id", "def"));
   }
 
   @Test
   public void testLabelsMergeNone() {
     Exemplar exemplar = Exemplar.builder().value(0.0).labels(Labels.of("a", "b")).build();
-    assertThat((Iterable<? extends Label>) exemplar.getLabels()).isEqualTo(Labels.of("a", "b"));
+    assertLabels(exemplar.getLabels()).isEqualTo(Labels.of("a", "b"));
   }
 }

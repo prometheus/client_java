@@ -74,7 +74,7 @@ public class GaugeSnapshotTest {
     SnapshotTestUtil.assertMetadata(snapshot, "temperature", null, null);
     assertThat(snapshot.getDataPoints().size()).isOne();
     GaugeDataPointSnapshot data = snapshot.getDataPoints().get(0);
-    assertThat(Optional.ofNullable(data.getLabels())).isEqualTo(Labels.EMPTY);
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEmpty();
     assertThat(data.getValue()).isCloseTo(23.0, offset(0.0));
     assertThat(data.getExemplar()).isNull();
     assertThat(data.hasCreatedTimestamp()).isFalse();

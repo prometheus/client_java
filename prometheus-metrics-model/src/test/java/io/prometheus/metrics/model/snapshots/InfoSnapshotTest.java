@@ -1,8 +1,10 @@
 package io.prometheus.metrics.model.snapshots;
 
 import java.util.Iterator;
-import org.junit.Assert;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class InfoSnapshotTest {
 
@@ -17,16 +19,16 @@ public class InfoSnapshotTest {
                     .labels(Labels.of("instance_id", "127.0.0.1:9100", "service_name", "gateway"))
                     .build())
             .build();
-    Assert.assertEquals("target", snapshot.getMetadata().getName());
-    Assert.assertEquals("Target info", snapshot.getMetadata().getHelp());
-    Assert.assertFalse(snapshot.getMetadata().hasUnit());
-    Assert.assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getMetadata().getName()).isEqualTo("target");
+    assertThat(snapshot.getMetadata().getHelp()).isEqualTo("Target info");
+    assertThat(snapshot.getMetadata().hasUnit()).isFalse();
+    assertThat(snapshot.getDataPoints().size()).isOne();
   }
 
   @Test
   public void testEmptyInfo() {
     InfoSnapshot snapshot = InfoSnapshot.builder().name("target").build();
-    Assert.assertEquals(0, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
   @Test(expected = UnsupportedOperationException.class)
