@@ -1,10 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.rules.ExpectedException.none;
 
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
@@ -20,9 +18,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class CounterTest {
 
@@ -31,8 +27,6 @@ public class CounterTest {
   private static final long exemplarSampleIntervalMillis = 10;
   private static final long exemplarMinAgeMillis = 100;
   private SpanContext origSpanContext;
-
-  @Rule public final ExpectedException thrown = none();
 
   @Before
   public void setUp() throws NoSuchFieldException, IllegalAccessException {
@@ -83,9 +77,9 @@ public class CounterTest {
 
   @Test
   public void testNegativeIncrementFails() {
-    thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("Negative increment -1 is illegal for Counter metrics.");
-    noLabels.inc(-1);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> noLabels.inc(-1))
+        .withMessage("Negative increment -1 is illegal for Counter metrics.");
   }
 
   @Test

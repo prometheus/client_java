@@ -47,18 +47,5 @@
             <artifactId>simpleclient_common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- Test Dependencies Follow -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.23.1</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

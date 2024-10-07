@@ -1,6 +1,6 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
-import static org.junit.rules.ExpectedException.none;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -14,13 +14,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 public class PushGatewayTest {
-
-  @Rule public final ExpectedException thrown = none();
 
   @Rule public MockServerRule mockServerRule = new MockServerRule(this);
   private MockServerClient mockServerClient;
@@ -89,18 +86,21 @@ public class PushGatewayTest {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j"))
         .respond(response().withStatusCode(500));
-    thrown.expect(IOException.class);
-    thrown.expectMessage(
-        "Response code from http://localhost:"
-            + mockServerRule.getPort()
-            + "/metrics/job/j was 500");
-    PushGateway pg =
-        PushGateway.builder()
-            .address("localhost:" + mockServerRule.getPort())
-            .registry(registry)
-            .job("j")
-            .build();
-    pg.push();
+    assertThatExceptionOfType(IOException.class)
+        .isThrownBy(
+            () -> {
+              PushGateway pg =
+                  PushGateway.builder()
+                      .address("localhost:" + mockServerRule.getPort())
+                      .registry(registry)
+                      .job("j")
+                      .build();
+              pg.push();
+            })
+        .withMessageContaining(
+            "Response code from http://localhost:"
+                + mockServerRule.getPort()
+                + "/metrics/job/j was 500");
   }
 
   @Test
