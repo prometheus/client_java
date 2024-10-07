@@ -18,9 +18,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SimpleclientCollectorTest {
 
@@ -46,14 +48,14 @@ public class SimpleclientCollectorTest {
     Thread.sleep(3); // make timestamps a bit different
     counter.labels("/hello", "500").incWithExemplar(2.4, "trace_id", "23446", "span_id", "bcdef");
 
-    Assert.assertEquals(fixTimestamps(sort(origOpenMetrics())), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(fixTimestamps(sort(origOpenMetrics())));
   }
 
   @Test
   public void testCounterMinimal() throws IOException {
     Counter.build().name("events").help("total number of events").register(origRegistry);
 
-    Assert.assertEquals(fixTimestamps(sort(origOpenMetrics())), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(fixTimestamps(sort(origOpenMetrics())));
   }
 
   @Test
@@ -69,7 +71,7 @@ public class SimpleclientCollectorTest {
     Thread.sleep(3);
     gauge.labels("/dev/sda2").set(0.7);
 
-    Assert.assertEquals(sort(origOpenMetrics()), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(sort(origOpenMetrics()));
   }
 
   @Test
@@ -82,7 +84,7 @@ public class SimpleclientCollectorTest {
             .register(origRegistry);
     gauge.set(22.3);
 
-    Assert.assertEquals(sort(origOpenMetrics()), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(sort(origOpenMetrics()));
   }
 
   @Test
@@ -102,14 +104,14 @@ public class SimpleclientCollectorTest {
     Thread.sleep(3); // make timestamps a bit different
     histogram.labels("500").observeWithExemplar(10000, "trace_id", "11", "span_id", "12");
 
-    Assert.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(fixCounts(fixTimestamps(sort(origOpenMetrics()))));
   }
 
   @Test
   public void testHistogramMinimal() throws IOException, InterruptedException {
     Histogram.build().name("request_latency").help("request latency").register(origRegistry);
 
-    Assert.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(fixCounts(fixTimestamps(sort(origOpenMetrics()))));
   }
 
   @Test
@@ -133,7 +135,7 @@ public class SimpleclientCollectorTest {
     summary.labels("/", "500").observe(0.31);
     summary.labels("/", "500").observe(0.32);
 
-    Assert.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(fixCounts(fixTimestamps(sort(origOpenMetrics()))));
   }
 
   @Test
@@ -141,7 +143,7 @@ public class SimpleclientCollectorTest {
     Summary summary =
         Summary.build().name("request_size").help("request size").register(origRegistry);
 
-    Assert.assertEquals(fixCounts(fixTimestamps(sort(origOpenMetrics()))), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(fixCounts(fixTimestamps(sort(origOpenMetrics()))));
   }
 
   @Test
@@ -156,7 +158,7 @@ public class SimpleclientCollectorTest {
     Thread.sleep(3);
     info.labels("dev").info("major_version", "13", "minor_version", "1");
 
-    Assert.assertEquals(fixBoolean(sort(origOpenMetrics())), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(fixBoolean(sort(origOpenMetrics())));
   }
 
   @Test
@@ -164,7 +166,7 @@ public class SimpleclientCollectorTest {
     Info info = Info.build().name("jvm").help("JVM info").register(origRegistry);
     info.info("version", "17");
 
-    Assert.assertEquals(fixBoolean(sort(origOpenMetrics())), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(fixBoolean(sort(origOpenMetrics())));
   }
 
   @Test
@@ -187,7 +189,7 @@ public class SimpleclientCollectorTest {
         };
     origRegistry.register(stateSet);
 
-    Assert.assertEquals(fixBoolean(sort(origOpenMetrics())), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(fixBoolean(sort(origOpenMetrics())));
   }
 
   @Test
@@ -220,7 +222,7 @@ public class SimpleclientCollectorTest {
         };
     origRegistry.register(unknown);
 
-    Assert.assertEquals(sort(origOpenMetrics()), sort(newOpenMetrics()));
+    assertThat(sort(newOpenMetrics())).isEqualTo(sort(origOpenMetrics()));
   }
 
   private String fixBoolean(String s) {
