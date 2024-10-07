@@ -1,8 +1,11 @@
 package io.prometheus.metrics.model.snapshots;
 
 import java.util.Iterator;
-import org.junit.Assert;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 public class ClassicHistogramBucketsTest {
 
@@ -15,7 +18,7 @@ public class ClassicHistogramBucketsTest {
             .bucket(1024, 3)
             .bucket(Double.POSITIVE_INFINITY, 8)
             .build();
-    Assert.assertEquals(4, buckets.size());
+    assertThat(buckets.size()).isEqualTo(4);
   }
 
   @Test
@@ -26,20 +29,20 @@ public class ClassicHistogramBucketsTest {
             .bucket(2, 0)
             .bucket(Double.POSITIVE_INFINITY, 3)
             .build();
-    Assert.assertEquals(3, buckets.size());
-    Assert.assertEquals(2, buckets.getUpperBound(0), 0.0);
-    Assert.assertEquals(7, buckets.getUpperBound(1), 0.0);
-    Assert.assertEquals(Double.POSITIVE_INFINITY, buckets.getUpperBound(2), 0.0);
-    Assert.assertEquals(0, buckets.getCount(0));
-    Assert.assertEquals(2, buckets.getCount(1));
-    Assert.assertEquals(3, buckets.getCount(2));
+    assertThat(buckets.size()).isEqualTo(3);
+    assertThat(buckets.getUpperBound(0)).isCloseTo(2, offset(0.0));
+    assertThat(buckets.getUpperBound(1)).isCloseTo(7, offset(0.0));
+    assertThat(buckets.getUpperBound(2)).isCloseTo(Double.POSITIVE_INFINITY, offset(0.0));
+    assertThat(buckets.getCount(0)).isZero();
+    assertThat(buckets.getCount(1)).isEqualTo(2);
+    assertThat(buckets.getCount(2)).isEqualTo(3);
   }
 
   @Test
   public void testMinimalBuckets() {
     ClassicHistogramBuckets buckets =
         ClassicHistogramBuckets.builder().bucket(Double.POSITIVE_INFINITY, 0).build();
-    Assert.assertEquals(1, buckets.size());
+    assertThat(buckets.size()).isOne();
   }
 
   @Test(expected = IllegalArgumentException.class)

@@ -3,8 +3,11 @@ package io.prometheus.metrics.model.snapshots;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 public class CounterSnapshotTest {
 
@@ -47,22 +50,22 @@ public class CounterSnapshotTest {
             .build();
     SnapshotTestUtil.assertMetadata(
         snapshot, "http_server_requests_seconds", "total time spent serving requests", "seconds");
-    Assert.assertEquals(2, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).hasSize(2);
     CounterDataPointSnapshot data =
         snapshot
             .getDataPoints()
             .get(0); // data is sorted by labels, so the first one should be path="/hello"
-    Assert.assertEquals(Labels.of("path", "/hello"), data.getLabels());
-    Assert.assertEquals(2.0, data.getValue(), 0.0);
-    Assert.assertEquals(4.0, data.getExemplar().getValue(), 0.0);
-    Assert.assertEquals(createdTimestamp2, data.getCreatedTimestampMillis());
-    Assert.assertFalse(data.hasScrapeTimestamp());
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("path", "/hello"));
+    assertThat(data.getValue()).isCloseTo(2.0, offset(0.0));
+    assertThat(data.getExemplar().getValue()).isCloseTo(4.0, offset(0.0));
+    assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp2);
+    assertThat(data.hasScrapeTimestamp()).isFalse();
     data = snapshot.getDataPoints().get(1);
-    Assert.assertEquals(Labels.of("path", "/world"), data.getLabels());
-    Assert.assertEquals(1.0, data.getValue(), 0.0);
-    Assert.assertEquals(3.0, data.getExemplar().getValue(), 0.0);
-    Assert.assertEquals(createdTimestamp1, data.getCreatedTimestampMillis());
-    Assert.assertFalse(data.hasScrapeTimestamp());
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("path", "/world"));
+    assertThat(data.getValue()).isCloseTo(1.0, offset(0.0));
+    assertThat(data.getExemplar().getValue()).isCloseTo(3.0, offset(0.0));
+    assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp1);
+    assertThat(data.hasScrapeTimestamp()).isFalse();
   }
 
   @Test
@@ -73,19 +76,19 @@ public class CounterSnapshotTest {
             .dataPoint(CounterDataPointSnapshot.builder().value(1.0).build())
             .build();
     SnapshotTestUtil.assertMetadata(snapshot, "events", null, null);
-    Assert.assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).hasSize(1);
     CounterDataPointSnapshot data = snapshot.getDataPoints().get(0);
-    Assert.assertEquals(Labels.EMPTY, data.getLabels());
-    Assert.assertEquals(1.0, data.getValue(), 0.0);
-    Assert.assertNull(data.getExemplar());
-    Assert.assertFalse(data.hasCreatedTimestamp());
-    Assert.assertFalse(data.hasScrapeTimestamp());
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.EMPTY);
+    assertThat(data.getValue()).isCloseTo(1.0, offset(0.0));
+    assertThat(data.getExemplar()).isNull();
+    assertThat(data.hasCreatedTimestamp()).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isFalse();
   }
 
   @Test
   public void testEmptyCounter() {
     CounterSnapshot snapshot = CounterSnapshot.builder().name("events").build();
-    Assert.assertEquals(0, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
   @Test(expected = IllegalArgumentException.class)
