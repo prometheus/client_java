@@ -1,6 +1,7 @@
 package io.prometheus.metrics.it.pushgateway;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.data.Offset.offset;
 
 import com.jayway.jsonpath.Criteria;
@@ -14,7 +15,6 @@ import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 import net.minidev.json.JSONArray;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.testcontainers.containers.BindMode;
@@ -245,7 +245,7 @@ public class PushGatewayIT {
       Thread.sleep(250);
       timeRemaining -= 250;
     }
-    Assert.fail("timeout while scraping " + url);
+    fail("timeout while scraping " + url);
     return null;
   }
 
@@ -254,7 +254,7 @@ public class PushGatewayIT {
     long waitTimeMillis = 0;
     while (container.isRunning()) {
       if (waitTimeMillis > unit.toMillis(timeout)) {
-        Assert.fail(
+        fail(
             container.getContainerName()
                 + " did not terminate after "
                 + timeout
