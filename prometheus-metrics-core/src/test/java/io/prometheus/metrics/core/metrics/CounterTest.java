@@ -310,7 +310,7 @@ public class CounterTest {
 
   @Test
   public void testConstLabelsFirst() {
-    assentThatExceptionOfType(IllegalArgumentException.class)
+    assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
                 Counter.builder()
@@ -318,19 +318,17 @@ public class CounterTest {
                     .constLabels(Labels.of("const_a", "const_b"))
                     .labelNames("const.a")
                     .build());
-    Counter.builder()
-        .name("test_total")
-        .constLabels(Labels.of("const_a", "const_b"))
-        .labelNames("const.a")
-        .build();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testConstLabelsSecond() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
     Counter.builder()
         .name("test_total")
         .labelNames("const.a")
         .constLabels(Labels.of("const_a", "const_b"))
-        .build();
+        .build());
   }
 }

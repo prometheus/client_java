@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
@@ -36,8 +37,11 @@ public class GaugeWithCallbackTest {
     assertThat(datapoint.getValue()).isCloseTo(value.doubleValue(), offset(0.1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testGaugeNoCallback() {
-    GaugeWithCallback.builder().name("gauge").labelNames("l1", "l2").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    GaugeWithCallback.builder().name("gauge").labelNames("l1", "l2").build());
   }
 }

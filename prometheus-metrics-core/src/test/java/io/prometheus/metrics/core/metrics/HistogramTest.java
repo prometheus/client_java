@@ -2,6 +2,7 @@ package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
@@ -1230,34 +1231,51 @@ public class HistogramTest {
     assertExemplarEquals(ex3, exemplarList.get(1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testIllegalLabelName() {
-    Histogram.builder().name("test").labelNames("label", "le");
+  @Test
+  public void testIllegalLabelName() {   assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+    Histogram.builder().name("test").labelNames("label", "le"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalLabelNameConstLabels() {
-    Histogram.builder().name("test").constLabels(Labels.of("label1", "value1", "le", "0.3"));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    Histogram.builder().name("test").constLabels(Labels.of("label1", "value1", "le", "0.3")));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalLabelNamePrefix() {
-    Histogram.builder().name("test").labelNames("__hello");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    Histogram.builder().name("test").labelNames("__hello"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalName() {
-    Histogram.builder().name("my_namespace/server.durations");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    Histogram.builder().name("my_namespace/server.durations"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNoName() {
-    Histogram.builder().build();
+    assertThatExceptionOfType(NullPointerException.class)
+            .isThrownBy(
+                () ->
+    Histogram.builder().build());
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testNullName() {
-    Histogram.builder().name(null);
+    assertThatExceptionOfType(NullPointerException.class)
+            .isThrownBy(
+                () ->
+    Histogram.builder().name(null));
   }
 
   @Test
@@ -1331,9 +1349,12 @@ public class HistogramTest {
     assertThat(upperBounds).isEqualTo(Arrays.asList(2.0, 5.0, 12.5, Double.POSITIVE_INFINITY));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testBucketsIncludeNaN() {
-    Histogram.builder().name("test").classicUpperBounds(0.01, 0.1, 1.0, Double.NaN);
+    assertThatExceptionOfType(RuntimeException.class)
+            .isThrownBy(
+                () ->
+    Histogram.builder().name("test").classicUpperBounds(0.01, 0.1, 1.0, Double.NaN));
   }
 
   @Test
