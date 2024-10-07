@@ -3,8 +3,11 @@ package io.prometheus.metrics.model.snapshots;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot.HistogramDataPointSnapshot;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 public class HistogramSnapshotTest {
 
@@ -82,94 +85,93 @@ public class HistogramSnapshotTest {
     SnapshotTestUtil.assertMetadata(
         snapshot, "request_size_bytes", "request sizes in bytes", "bytes");
 
-    Assert.assertEquals(2, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).hasSize(2);
     HistogramDataPointSnapshot data =
         snapshot
             .getDataPoints()
             .get(0); // data is sorted by labels, so the first one should be path="/"
-    Assert.assertTrue(data.hasSum());
-    Assert.assertTrue(data.hasCount());
-    Assert.assertTrue(data.hasCreatedTimestamp());
-    Assert.assertTrue(data.hasScrapeTimestamp());
-    Assert.assertEquals(22, data.getCount());
-    Assert.assertEquals(27000.0, data.getSum(), 0.0);
-    Assert.assertEquals(Labels.of("path", "/"), data.getLabels());
-    Assert.assertEquals(
-        exemplar1.getValue(), data.getExemplars().get(128.0, 1024.0).getValue(), 0.0);
-    Assert.assertEquals(createdTimestamp, data.getCreatedTimestampMillis());
-    Assert.assertEquals(scrapeTimestamp, data.getScrapeTimestampMillis());
+    assertThat(data.hasSum()).isTrue();
+    assertThat(data.hasCount()).isTrue();
+    assertThat(data.hasCreatedTimestamp()).isTrue();
+    assertThat(data.hasScrapeTimestamp()).isTrue();
+    assertThat(data.getCount()).isEqualTo(22);
+    assertThat(data.getSum()).isCloseTo(27000.0, offset(0.0));
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("path", "/"));
+    assertThat(data.getExemplars().get(128.0, 1024.0).getValue()).isCloseTo(exemplar1.getValue(), offset(0.0));
+    assertThat(data.getCreatedTimestampMillis()).isEqualTo(createdTimestamp);
+    assertThat(data.getScrapeTimestampMillis()).isEqualTo(scrapeTimestamp);
     // classic histogram 1
     int i = 0;
     for (ClassicHistogramBucket bucket : data.getClassicBuckets()) {
       switch (i++) {
         case 0:
-          Assert.assertEquals(128.0, bucket.getUpperBound(), 0.0);
-          Assert.assertEquals(7, bucket.getCount());
+          assertThat(bucket.getUpperBound()).isCloseTo(128.0, offset(0.0));
+          assertThat(bucket.getCount()).isEqualTo(7);
           break;
         case 1:
-          Assert.assertEquals(1024.0, bucket.getUpperBound(), 0.0);
-          Assert.assertEquals(15, bucket.getCount());
+          assertThat(bucket.getUpperBound()).isCloseTo(1024.0, offset(0.0));
+          assertThat(bucket.getCount()).isEqualTo(15);
           break;
         case 2:
-          Assert.assertEquals(Double.POSITIVE_INFINITY, bucket.getUpperBound(), 0.0);
-          Assert.assertEquals(0, bucket.getCount());
+          assertThat(bucket.getUpperBound()).isCloseTo(Double.POSITIVE_INFINITY, offset(0.0));
+          assertThat(bucket.getCount()).isZero();
           break;
       }
     }
-    Assert.assertEquals("expecting 3 classic histogram buckets", 3, i);
+    assertThat(i).as("expecting 3 classic histogram buckets").isEqualTo(3);
     // native histogram 1
-    Assert.assertEquals(5, data.getNativeSchema());
-    Assert.assertEquals(2, data.getNativeZeroCount());
-    Assert.assertEquals(0.0000001, data.getNativeZeroThreshold(), 0.0000001);
-    Assert.assertEquals(3, data.getNativeBucketsForPositiveValues().size());
+    assertThat(data.getNativeSchema()).isEqualTo(5);
+    assertThat(data.getNativeZeroCount()).isEqualTo(2);
+    assertThat(data.getNativeZeroThreshold()).isCloseTo(0.0000001, offset(0.0000001));
+    assertThat(data.getNativeBucketsForPositiveValues().size()).isEqualTo(3);
     i = 0;
     for (NativeHistogramBucket bucket : data.getNativeBucketsForPositiveValues()) {
       switch (i++) {
         case 0:
-          Assert.assertEquals(1, bucket.getBucketIndex());
-          Assert.assertEquals(12, bucket.getCount());
+          assertThat(bucket.getBucketIndex()).isOne();
+          assertThat(bucket.getCount()).isEqualTo(12);
           break;
         case 1:
-          Assert.assertEquals(2, bucket.getBucketIndex());
-          Assert.assertEquals(3, bucket.getCount());
+          assertThat(bucket.getBucketIndex()).isEqualTo(2);
+          assertThat(bucket.getCount()).isEqualTo(3);
           break;
         case 2:
-          Assert.assertEquals(4, bucket.getBucketIndex());
-          Assert.assertEquals(2, bucket.getCount());
+          assertThat(bucket.getBucketIndex()).isEqualTo(4);
+          assertThat(bucket.getCount()).isEqualTo(2);
           break;
       }
     }
-    Assert.assertEquals("expecting 3 native buckets for positive values", 3, i);
+    assertThat(i).as("expecting 3 native buckets for positive values").isEqualTo(3);
     i = 0;
-    Assert.assertEquals(2, data.getNativeBucketsForNegativeValues().size());
+    assertThat(data.getNativeBucketsForNegativeValues().size()).isEqualTo(2);
     for (NativeHistogramBucket bucket : data.getNativeBucketsForNegativeValues()) {
       switch (i++) {
         case 0:
-          Assert.assertEquals(-1, bucket.getBucketIndex());
-          Assert.assertEquals(1, bucket.getCount());
+          assertThat(bucket.getBucketIndex()).isEqualTo(-1);
+          assertThat(bucket.getCount()).isOne();
           break;
         case 1:
-          Assert.assertEquals(0, bucket.getBucketIndex());
-          Assert.assertEquals(2, bucket.getCount());
+          assertThat(bucket.getBucketIndex()).isZero();
+          assertThat(bucket.getCount()).isEqualTo(2);
           break;
       }
     }
-    Assert.assertEquals("expecting 2 native buckets for positive values", 2, i);
+    assertThat(i).as("expecting 2 native buckets for positive values").isEqualTo(2);
     // classic histogram 2 (it's ok that this is incomplete, because we covered it with the other
     // tests)
     data = snapshot.getDataPoints().get(1);
-    Assert.assertEquals(6, data.getCount());
+    assertThat(data.getCount()).isEqualTo(6);
     // native histogram 2 (it's ok that this is incomplete, because we covered it with the other
     // tests)
-    Assert.assertEquals(5, data.getNativeSchema());
-    Assert.assertEquals(0, data.getNativeZeroCount());
-    Assert.assertEquals(0, data.getNativeZeroThreshold(), 0);
+    assertThat(data.getNativeSchema()).isEqualTo(5);
+    assertThat(data.getNativeZeroCount()).isZero();
+    assertThat(data.getNativeZeroThreshold()).isZero();
   }
 
   @Test
   public void testEmptyHistogram() {
     HistogramSnapshot snapshot = HistogramSnapshot.builder().name("empty_histogram").build();
-    Assert.assertEquals(0, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
   @Test
@@ -185,8 +187,8 @@ public class HistogramSnapshotTest {
                     .build())
             .build();
     HistogramDataPointSnapshot data = snapshot.getDataPoints().get(0);
-    Assert.assertFalse(data.hasSum());
-    Assert.assertEquals(1, snapshot.getDataPoints().get(0).getClassicBuckets().size());
+    assertThat(data.hasSum()).isFalse();
+    assertThat(snapshot.getDataPoints().get(0).getClassicBuckets().size()).isOne();
   }
 
   @Test
@@ -196,17 +198,17 @@ public class HistogramSnapshotTest {
             .name("hist")
             .dataPoint(HistogramDataPointSnapshot.builder().nativeSchema(5).build())
             .build();
-    Assert.assertEquals("hist", snapshot.getMetadata().getName());
-    Assert.assertFalse(snapshot.getMetadata().hasUnit());
-    Assert.assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getMetadata().getName()).isEqualTo("hist");
+    assertThat(snapshot.getMetadata().hasUnit()).isFalse();
+    assertThat(snapshot.getDataPoints().size()).isOne();
     HistogramDataPointSnapshot data = snapshot.getDataPoints().get(0);
-    Assert.assertFalse(data.hasCreatedTimestamp());
-    Assert.assertFalse(data.hasScrapeTimestamp());
-    Assert.assertTrue(data.hasCount());
-    Assert.assertEquals(0, data.getCount());
-    Assert.assertFalse(data.hasSum());
-    Assert.assertEquals(0, data.getNativeBucketsForNegativeValues().size());
-    Assert.assertEquals(0, data.getNativeBucketsForPositiveValues().size());
+    assertThat(data.hasCreatedTimestamp()).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isFalse();
+    assertThat(data.hasCount()).isTrue();
+    assertThat(data.getCount()).isZero();
+    assertThat(data.hasSum()).isFalse();
+    assertThat(data.getNativeBucketsForNegativeValues().size()).isZero();
+    assertThat(data.getNativeBucketsForPositiveValues().size()).isZero();
   }
 
   @Test
@@ -225,9 +227,9 @@ public class HistogramSnapshotTest {
                     .build())
             .build();
     HistogramDataPointSnapshot data = snapshot.getDataPoints().get(0);
-    Assert.assertFalse(data.hasSum());
-    Assert.assertTrue(data.hasCount());
-    Assert.assertEquals(5, data.getCount());
+    assertThat(data.hasSum()).isFalse();
+    assertThat(data.hasCount()).isTrue();
+    assertThat(data.getCount()).isEqualTo(5);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -239,8 +241,8 @@ public class HistogramSnapshotTest {
   @Test
   public void testEmptyNativeData() {
     HistogramDataPointSnapshot data = HistogramDataPointSnapshot.builder().nativeSchema(5).build();
-    Assert.assertEquals(0, data.getNativeBucketsForNegativeValues().size());
-    Assert.assertEquals(0, data.getNativeBucketsForPositiveValues().size());
+    assertThat(data.getNativeBucketsForNegativeValues().size()).isZero();
+    assertThat(data.getNativeBucketsForPositiveValues().size()).isZero();
   }
 
   @Test(expected = UnsupportedOperationException.class)
