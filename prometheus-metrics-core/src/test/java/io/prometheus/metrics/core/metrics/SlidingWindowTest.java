@@ -1,9 +1,10 @@
 package io.prometheus.metrics.core.metrics;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,11 +19,11 @@ public class SlidingWindowTest {
     }
 
     void assertValues(double... expectedValues) {
-      ArrayList<Double> expectedList = new ArrayList<>();
+      List<Double> expectedList = new ArrayList<>();
       for (double expectedValue : expectedValues) {
         expectedList.add(expectedValue);
       }
-      Assert.assertEquals(
+      assertEquals(
           "Start time: "
               + startTime
               + ", current time: "

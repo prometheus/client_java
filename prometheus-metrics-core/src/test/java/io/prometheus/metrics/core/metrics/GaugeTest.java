@@ -2,6 +2,7 @@ package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import io.prometheus.metrics.core.datapoints.Timer;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
@@ -11,7 +12,6 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,11 +37,10 @@ public class GaugeTest {
   }
 
   private GaugeSnapshot.GaugeDataPointSnapshot getData(Gauge gauge, String... labels) {
-    return ((GaugeSnapshot) gauge.collect())
-        .getDataPoints().stream()
-            .filter(data -> data.getLabels().equals(Labels.of(labels)))
-            .findAny()
-            .orElseThrow(RuntimeException::new);
+    return gauge.collect().getDataPoints().stream()
+        .filter(data -> data.getLabels().equals(Labels.of(labels)))
+        .findAny()
+        .orElseThrow(RuntimeException::new);
   }
 
   private double getValue(Gauge gauge, String... labels) {
@@ -153,10 +152,7 @@ public class GaugeTest {
           @Override
           public boolean isCurrentSpanSampled() {
             callNumber++;
-            if (callNumber == 2) {
-              return false;
-            }
-            return true;
+            return callNumber != 2;
           }
 
           @Override
@@ -206,8 +202,8 @@ public class GaugeTest {
   public void testExemplarSamplerDisabled() {
     Gauge gauge = Gauge.builder().name("test").withoutExemplars().build();
     gauge.setWithExemplar(3.0, Labels.of("a", "b"));
-    Assert.assertNull(getData(gauge).getExemplar());
+    assertNull(getData(gauge).getExemplar());
     gauge.inc(2.0);
-    Assert.assertNull(getData(gauge).getExemplar());
+    assertNull(getData(gauge).getExemplar());
   }
 }

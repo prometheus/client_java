@@ -54,7 +54,7 @@ class Buffer {
     int bufferSize;
     T result;
     synchronized (runLock) {
-      Long count = observationCount.getAndAdd(signBit);
+      long count = observationCount.getAndAdd(signBit);
       while (!complete.apply(count)) {
         Thread.yield();
       }

@@ -1,6 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import io.prometheus.metrics.core.metrics.CKMSQuantiles.Quantile;
 import java.util.*;
@@ -233,7 +235,7 @@ public class CKMSQuantilesTest {
         new NormalDistribution(
             rand, mean, stddev, NormalDistribution.DEFAULT_INVERSE_ABSOLUTE_ACCURACY);
 
-    List<Quantile> quantiles = new ArrayList<Quantile>();
+    List<Quantile> quantiles = new ArrayList<>();
     quantiles.add(new Quantile(0.10, 0.001));
     quantiles.add(new Quantile(0.50, 0.01));
     quantiles.add(new Quantile(0.90, 0.001));
@@ -297,7 +299,7 @@ public class CKMSQuantilesTest {
   }
 
   private List<Double> shuffledValues(int n, Random random) {
-    List<Double> result = new ArrayList<Double>(n);
+    List<Double> result = new ArrayList<>(n);
     for (int i = 0; i < n; i++) {
       result.add(i + 1.0);
     }

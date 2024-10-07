@@ -38,7 +38,7 @@ final class CKMSQuantiles {
   int n = 0;
 
   /** List of sampled observations, ordered by Sample.value. */
-  final LinkedList<Sample> samples = new LinkedList<Sample>();
+  final LinkedList<Sample> samples = new LinkedList<>();
 
   /**
    * Compress is called every compressInterval inserts. Note that the buffer is flushed whenever
@@ -127,7 +127,7 @@ final class CKMSQuantiles {
   public double get(double q) {
     flush();
 
-    if (samples.size() == 0) {
+    if (samples.isEmpty()) {
       return Double.NaN;
     }
 

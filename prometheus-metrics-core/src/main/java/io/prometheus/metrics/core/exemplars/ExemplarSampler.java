@@ -34,7 +34,7 @@ public class ExemplarSampler {
   private final Exemplar[] exemplars;
   private final Exemplar[]
       customExemplars; // Separate from exemplars, because we don't want custom exemplars
-  // to be overwritten by automatic exemplar sampling. exemplars.lengt == customExemplars.length
+  // to be overwritten by automatic exemplar sampling. exemplars.length == customExemplars.length
   private final AtomicBoolean acceptingNewExemplars = new AtomicBoolean(true);
   private final AtomicBoolean acceptingNewCustomExemplars = new AtomicBoolean(true);
   private final SpanContext
