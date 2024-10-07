@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -52,8 +52,7 @@ public class ProcessMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE process_cpu_seconds counter\n"
+        "# TYPE process_cpu_seconds counter\n"
             + "# UNIT process_cpu_seconds seconds\n"
             + "# HELP process_cpu_seconds Total user and system CPU time spent in seconds.\n"
             + "process_cpu_seconds_total 0.072\n"
@@ -66,30 +65,27 @@ public class ProcessMetricsTest {
     // To allow running this test in non-linux environments
     if (ProcessMetrics.PROC_SELF_STATUS.canRead()) {
       expected +=
-          ""
-              + "# TYPE process_resident_memory_bytes gauge\n"
+          "# TYPE process_resident_memory_bytes gauge\n"
               + "# UNIT process_resident_memory_bytes bytes\n"
               + "# HELP process_resident_memory_bytes Resident memory size in bytes.\n"
               + "process_resident_memory_bytes 1036288.0\n";
     }
     expected +=
-        ""
-            + "# TYPE process_start_time_seconds gauge\n"
+        "# TYPE process_start_time_seconds gauge\n"
             + "# UNIT process_start_time_seconds seconds\n"
             + "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n"
             + "process_start_time_seconds 37.1\n";
     // To allow running this test in non-linux environments
     if (ProcessMetrics.PROC_SELF_STATUS.canRead()) {
       expected +=
-          ""
-              + "# TYPE process_virtual_memory_bytes gauge\n"
+          "# TYPE process_virtual_memory_bytes gauge\n"
               + "# UNIT process_virtual_memory_bytes bytes\n"
               + "# HELP process_virtual_memory_bytes Virtual memory size in bytes.\n"
               + "process_virtual_memory_bytes 6180864.0\n";
     }
     expected += "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test
@@ -103,14 +99,13 @@ public class ProcessMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE process_start_time_seconds gauge\n"
+        "# TYPE process_start_time_seconds gauge\n"
             + "# UNIT process_start_time_seconds seconds\n"
             + "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n"
             + "process_start_time_seconds 37.1\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test

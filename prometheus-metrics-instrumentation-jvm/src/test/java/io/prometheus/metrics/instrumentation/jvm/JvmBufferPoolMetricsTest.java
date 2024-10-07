@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,8 +42,7 @@ public class JvmBufferPoolMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE jvm_buffer_pool_capacity_bytes gauge\n"
+        "# TYPE jvm_buffer_pool_capacity_bytes gauge\n"
             + "# UNIT jvm_buffer_pool_capacity_bytes bytes\n"
             + "# HELP jvm_buffer_pool_capacity_bytes Bytes capacity of a given JVM buffer pool.\n"
             + "jvm_buffer_pool_capacity_bytes{pool=\"direct\"} 3456.0\n"
@@ -59,7 +58,7 @@ public class JvmBufferPoolMetricsTest {
             + "jvm_buffer_pool_used_bytes{pool=\"mapped\"} 2345.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test

@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import io.prometheus.metrics.config.PrometheusProperties;
@@ -27,7 +27,7 @@ public class JvmNativeMemoryMetricsTest {
 
     String expected = "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test
@@ -44,7 +44,7 @@ public class JvmNativeMemoryMetricsTest {
 
     String expected = "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test
@@ -62,7 +62,7 @@ public class JvmNativeMemoryMetricsTest {
 
     String expected = "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test
@@ -172,8 +172,7 @@ public class JvmNativeMemoryMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE jvm_native_memory_committed_bytes gauge\n"
+        "# TYPE jvm_native_memory_committed_bytes gauge\n"
             + "# UNIT jvm_native_memory_committed_bytes bytes\n"
             + "# HELP jvm_native_memory_committed_bytes Committed bytes of a given JVM. Committed memory represents the amount of memory the JVM is using right now.\n"
             + "jvm_native_memory_committed_bytes{pool=\"Arena Chunk\"} 503216.0\n"
@@ -225,6 +224,6 @@ public class JvmNativeMemoryMetricsTest {
             + "jvm_native_memory_reserved_bytes{pool=\"Tracing\"} 33097.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 }

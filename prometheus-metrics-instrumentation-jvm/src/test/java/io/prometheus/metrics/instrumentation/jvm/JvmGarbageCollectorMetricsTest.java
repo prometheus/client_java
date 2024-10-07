@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,8 +41,7 @@ public class JvmGarbageCollectorMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE jvm_gc_collection_seconds summary\n"
+        "# TYPE jvm_gc_collection_seconds summary\n"
             + "# UNIT jvm_gc_collection_seconds seconds\n"
             + "# HELP jvm_gc_collection_seconds Time spent in a given JVM garbage collector in seconds.\n"
             + "jvm_gc_collection_seconds_count{gc=\"MyGC1\"} 100\n"
@@ -51,7 +50,7 @@ public class JvmGarbageCollectorMetricsTest {
             + "jvm_gc_collection_seconds_sum{gc=\"MyGC2\"} 20.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test
@@ -67,6 +66,6 @@ public class JvmGarbageCollectorMetricsTest {
 
     verify(mockGcBean1, times(0)).getCollectionTime();
     verify(mockGcBean1, times(0)).getCollectionCount();
-    assertEquals(0, snapshots.size());
+    assertThat(snapshots.size()).isZero();
   }
 }

@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,8 +33,7 @@ public class JvmClassLoadingMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE jvm_classes_currently_loaded gauge\n"
+        "# TYPE jvm_classes_currently_loaded gauge\n"
             + "# HELP jvm_classes_currently_loaded The number of classes that are currently loaded in the JVM\n"
             + "jvm_classes_currently_loaded 1000.0\n"
             + "# TYPE jvm_classes_loaded counter\n"
@@ -45,7 +44,7 @@ public class JvmClassLoadingMetricsTest {
             + "jvm_classes_unloaded_total 500.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test

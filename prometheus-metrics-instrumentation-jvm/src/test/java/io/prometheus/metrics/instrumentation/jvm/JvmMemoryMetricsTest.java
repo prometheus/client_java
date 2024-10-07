@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -88,8 +88,7 @@ public class JvmMemoryMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE jvm_memory_committed_bytes gauge\n"
+        "# TYPE jvm_memory_committed_bytes gauge\n"
             + "# UNIT jvm_memory_committed_bytes bytes\n"
             + "# HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.\n"
             + "jvm_memory_committed_bytes{area=\"heap\"} 4.0\n"
@@ -154,7 +153,7 @@ public class JvmMemoryMetricsTest {
             + "jvm_memory_used_bytes{area=\"nonheap\"} 6.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test

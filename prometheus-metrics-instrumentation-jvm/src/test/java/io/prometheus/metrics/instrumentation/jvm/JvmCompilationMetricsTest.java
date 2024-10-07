@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -32,14 +32,13 @@ public class JvmCompilationMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        ""
-            + "# TYPE jvm_compilation_time_seconds counter\n"
+        "# TYPE jvm_compilation_time_seconds counter\n"
             + "# UNIT jvm_compilation_time_seconds seconds\n"
             + "# HELP jvm_compilation_time_seconds The total time in seconds taken for HotSpot class compilation\n"
             + "jvm_compilation_time_seconds_total 10.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat(snapshots));
+    assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
 
   @Test
@@ -54,6 +53,6 @@ public class JvmCompilationMetricsTest {
     MetricSnapshots snapshots = registry.scrape(filter);
 
     verify(mockCompilationBean, times(0)).getTotalCompilationTime();
-    assertEquals(0, snapshots.size());
+    assertThat(snapshots.size()).isZero();
   }
 }
