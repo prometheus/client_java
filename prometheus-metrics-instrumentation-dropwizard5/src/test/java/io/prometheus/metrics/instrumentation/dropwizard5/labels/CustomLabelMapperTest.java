@@ -1,5 +1,7 @@
 package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.dropwizard.metrics5.MetricFilter;
 import io.dropwizard.metrics5.MetricRegistry;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
@@ -11,8 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class CustomLabelMapperTest {
   private MetricRegistry metricRegistry;

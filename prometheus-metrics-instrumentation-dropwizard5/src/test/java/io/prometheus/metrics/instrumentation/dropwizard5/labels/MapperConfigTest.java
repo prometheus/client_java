@@ -1,11 +1,11 @@
 package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class MapperConfigTest {
   @Test
@@ -51,6 +51,7 @@ public class MapperConfigTest {
     mapperConfig.setMatch("com.company.meter.*.foo");
     mapperConfig.setName("foo");
     mapperConfig.setLabels(Collections.singletonMap("type", "${0}"));
-    assertThat(mapperConfig).hasToString("MapperConfig{match=com.company.meter.*.foo, name=foo, labels={type=${0}}}");
+    assertThat(mapperConfig)
+        .hasToString("MapperConfig{match=com.company.meter.*.foo, name=foo, labels={type=${0}}}");
   }
 }

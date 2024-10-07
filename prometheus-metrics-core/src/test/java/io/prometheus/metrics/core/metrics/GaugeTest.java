@@ -84,7 +84,8 @@ public class GaugeTest {
     try (Timer timer = noLabels.startTimer()) {
       Thread.sleep(12);
     }
-    assertThat(getValue(noLabels)).isCloseTo(0.012, offset(0.005)); // 5ms delta should be enough so this isn't flaky
+    assertThat(getValue(noLabels))
+        .isCloseTo(0.012, offset(0.005)); // 5ms delta should be enough so this isn't flaky
   }
 
   @Test

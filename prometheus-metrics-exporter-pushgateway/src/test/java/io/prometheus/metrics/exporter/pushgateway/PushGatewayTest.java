@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URL;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,7 +43,8 @@ public class PushGatewayTest {
       throws NoSuchFieldException, IllegalAccessException {
     final PushGateway pushGateway =
         PushGateway.builder().address("example.com:1234/context///path//").job("test").build();
-    assertThat(getUrl(pushGateway)).hasToString("http://example.com:1234/context/path/metrics/job/test");
+    assertThat(getUrl(pushGateway))
+        .hasToString("http://example.com:1234/context/path/metrics/job/test");
   }
 
   private URL getUrl(PushGateway pushGateway) throws IllegalAccessException, NoSuchFieldException {

@@ -1,5 +1,8 @@
 package io.prometheus.metrics.instrumentation.dropwizard5;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
+
 import io.dropwizard.metrics5.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -10,12 +13,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Offset.offset;
 
 public class DropwizardExportsTest {
 
@@ -42,16 +41,11 @@ public class DropwizardExportsTest {
 
   @Test
   public void testGauge() {
-    Gauge<Integer> integerGauge =
-            () -> 1234;
-    Gauge<Double> doubleGauge =
-            () -> 1.234D;
-    Gauge<Long> longGauge =
-            () -> 1234L;
-    Gauge<Float> floatGauge =
-            () -> 0.1234F;
-    Gauge<Boolean> booleanGauge =
-            () -> true;
+    Gauge<Integer> integerGauge = () -> 1234;
+    Gauge<Double> doubleGauge = () -> 1.234D;
+    Gauge<Long> longGauge = () -> 1234L;
+    Gauge<Float> floatGauge = () -> 0.1234F;
+    Gauge<Boolean> booleanGauge = () -> true;
 
     metricRegistry.register("double.gauge", doubleGauge);
     metricRegistry.register("long.gauge", longGauge);
@@ -82,8 +76,7 @@ public class DropwizardExportsTest {
 
   @Test
   public void testInvalidGaugeType() {
-    Gauge<String> invalidGauge =
-            () -> "foobar";
+    Gauge<String> invalidGauge = () -> "foobar";
 
     metricRegistry.register("invalid_gauge", invalidGauge);
 
@@ -93,8 +86,7 @@ public class DropwizardExportsTest {
 
   @Test
   public void testGaugeReturningNullValue() {
-    Gauge<String> invalidGauge =
-            () -> null;
+    Gauge<String> invalidGauge = () -> null;
     metricRegistry.register("invalid_gauge", invalidGauge);
     String expected = "# EOF\n";
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
@@ -149,7 +141,9 @@ public class DropwizardExportsTest {
     assertThat(snapshots.size()).isOne();
     SummarySnapshot snapshot = (SummarySnapshot) snapshots.get(0);
     assertThat(snapshot.getMetadata().getName()).isEqualTo("hist");
-    assertThat(snapshot.getMetadata().getHelp()).isEqualTo("Generated from Dropwizard metric import (metric=hist, type=io.dropwizard.metrics5.Histogram)");
+    assertThat(snapshot.getMetadata().getHelp())
+        .isEqualTo(
+            "Generated from Dropwizard metric import (metric=hist, type=io.dropwizard.metrics5.Histogram)");
     assertThat(snapshot.getDataPoints().size()).isOne();
     SummarySnapshot.SummaryDataPointSnapshot dataPoint = snapshot.getDataPoints().get(0);
     assertThat(dataPoint.hasCount()).isTrue();

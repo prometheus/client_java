@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import java.util.Arrays;
-
 import org.junit.Test;
 
 public class StateSetTest {

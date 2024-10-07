@@ -1,5 +1,7 @@
 package io.prometheus.metrics.expositionformats;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
 import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
@@ -9,10 +11,7 @@ import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSna
 import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExpositionFormatsTest {
 
@@ -152,7 +151,7 @@ public class ExpositionFormatsTest {
             + scrapeTimestamp2s
             + "\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"service_time_seconds_total\" "
             + "help: \"total time spent serving\" "
             + "type: COUNTER "
@@ -209,11 +208,10 @@ public class ExpositionFormatsTest {
 
   @Test
   public void testCounterMinimal() throws IOException {
-    String openMetricsText =
-        "# TYPE my_counter counter\n" + "my_counter_total 1.1\n" + "# EOF\n";
+    String openMetricsText = "# TYPE my_counter counter\n" + "my_counter_total 1.1\n" + "# EOF\n";
     String prometheusText = "# TYPE my_counter_total counter\n" + "my_counter_total 1.1\n";
     String prometheusProtobuf =
-            "name: \"my_counter_total\" type: COUNTER metric { counter { value: 1.1 } }";
+        "name: \"my_counter_total\" type: COUNTER metric { counter { value: 1.1 } }";
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("my_counter")
@@ -238,7 +236,7 @@ public class ExpositionFormatsTest {
         "# TYPE my_request_count_total counter\n"
             + "my_request_count_total{http_path=\"/hello\"} 3.0\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"my_request_count_total\" "
             + "type: COUNTER "
             + "metric { "
@@ -304,7 +302,7 @@ public class ExpositionFormatsTest {
             + scrapeTimestamp2s
             + "\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"disk_usage_ratio\" "
             + "help: \"percentage used\" "
             + "type: GAUGE "
@@ -354,7 +352,7 @@ public class ExpositionFormatsTest {
     String prometheusText =
         "# TYPE temperature_centigrade gauge\n" + "temperature_centigrade 22.3\n";
     String prometheusProtobuf =
-            "name: \"temperature_centigrade\" type: GAUGE metric { gauge { value: 22.3 } }";
+        "name: \"temperature_centigrade\" type: GAUGE metric { gauge { value: 22.3 } }";
     GaugeSnapshot gauge =
         GaugeSnapshot.builder()
             .name("temperature_centigrade")
@@ -388,7 +386,7 @@ public class ExpositionFormatsTest {
             + "# TYPE my_temperature_celsius gauge\n"
             + "my_temperature_celsius{location_id=\"data-center-1\"} 23.0\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"my_temperature_celsius\" "
             + "help: \"Temperature\" "
             + "type: GAUGE "
@@ -641,7 +639,7 @@ public class ExpositionFormatsTest {
             + scrapeTimestamp2s
             + "\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"http_request_duration_seconds\" "
             + "help: \"request duration\" "
             + "type: SUMMARY "
@@ -727,7 +725,7 @@ public class ExpositionFormatsTest {
             + "latency_seconds_count 3\n"
             + "latency_seconds_sum 1.2\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"latency_seconds\" "
             + "help: \"latency\" "
             + "type: SUMMARY "
@@ -761,7 +759,7 @@ public class ExpositionFormatsTest {
     String prometheusText =
         "# TYPE latency_seconds summary\n" + "latency_seconds{quantile=\"0.95\"} 200.0\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"latency_seconds\" "
             + "type: SUMMARY "
             + "metric { "
@@ -791,7 +789,7 @@ public class ExpositionFormatsTest {
         "# TYPE latency_seconds summary\n" + "latency_seconds_count 1\n" + "# EOF\n";
     String prometheusText = "# TYPE latency_seconds summary\n" + "latency_seconds_count 1\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"latency_seconds\" "
             + "type: SUMMARY "
             + "metric { "
@@ -818,7 +816,7 @@ public class ExpositionFormatsTest {
         "# TYPE latency_seconds summary\n" + "latency_seconds_sum 12.3\n" + "# EOF\n";
     String prometheusText = "# TYPE latency_seconds summary\n" + "latency_seconds_sum 12.3\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"latency_seconds\" "
             + "type: SUMMARY "
             + "metric { "
@@ -869,7 +867,7 @@ public class ExpositionFormatsTest {
             + "latency_seconds_count{path=\"/v2\"} 2\n"
             + "latency_seconds_sum{path=\"/v2\"} 10.7\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"latency_seconds\" "
             + "type: SUMMARY "
             + "metric { "
@@ -923,7 +921,7 @@ public class ExpositionFormatsTest {
             + "my_request_duration_seconds_count{http_path=\"/hello\"} 1\n"
             + "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.03\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"my_request_duration_seconds\" "
             + "help: \"Request duration in seconds\" "
             + "type: SUMMARY "
@@ -1172,7 +1170,7 @@ public class ExpositionFormatsTest {
             + scrapeTimestamp2s
             + "\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"response_size_bytes\" "
             + "help: \"help\" "
             + "type: HISTOGRAM "
@@ -1272,7 +1270,7 @@ public class ExpositionFormatsTest {
             + "request_latency_seconds_bucket{le=\"+Inf\"} 2\n"
             + "request_latency_seconds_count 2\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"request_latency_seconds\" "
             + "type: HISTOGRAM "
             + "metric { "
@@ -1317,7 +1315,7 @@ public class ExpositionFormatsTest {
             + "request_latency_seconds_count 2\n"
             + "request_latency_seconds_sum 3.2\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"request_latency_seconds\" "
             + "type: HISTOGRAM "
             + "metric { "
@@ -1562,7 +1560,7 @@ public class ExpositionFormatsTest {
             + scrapeTimestamp2s
             + "\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"cache_size_bytes\" "
             + "help: \"number of bytes in the cache\" "
             + "type: GAUGE_HISTOGRAM "
@@ -1660,7 +1658,7 @@ public class ExpositionFormatsTest {
             + "# TYPE queue_size_bytes_gcount gauge\n"
             + "queue_size_bytes_gcount 130\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"queue_size_bytes\" "
             + "type: GAUGE_HISTOGRAM "
             + "metric { "
@@ -1708,7 +1706,7 @@ public class ExpositionFormatsTest {
             + "# TYPE queue_size_bytes_gsum gauge\n"
             + "queue_size_bytes_gsum 27000.0\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"queue_size_bytes\" "
             + "type: GAUGE_HISTOGRAM "
             + "metric { "
@@ -1773,7 +1771,7 @@ public class ExpositionFormatsTest {
             + "my_request_duration_seconds_count{http_path=\"/hello\"} 130\n"
             + "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.01\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"my_request_duration_seconds\" "
             + "help: \"Request duration in seconds\" "
             + "type: HISTOGRAM "
@@ -1974,7 +1972,7 @@ public class ExpositionFormatsTest {
             + scrapeTimestamp2s
             + "\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"response_size_bytes\" "
             + "help: \"help\" "
             + "type: HISTOGRAM "
@@ -2134,7 +2132,7 @@ public class ExpositionFormatsTest {
             + "latency_seconds_bucket{le=\"+Inf\"} 0\n"
             + "latency_seconds_count 0\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"latency_seconds\" "
             + "type: HISTOGRAM "
             + "metric { "
@@ -2188,7 +2186,7 @@ public class ExpositionFormatsTest {
             + "my_request_duration_seconds_count{http_path=\"/hello\"} 4\n"
             + "my_request_duration_seconds_sum{http_path=\"/hello\"} 3.2\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"my_request_duration_seconds\" "
             + "help: \"Request duration in seconds\" "
             + "type: HISTOGRAM "
@@ -2272,7 +2270,7 @@ public class ExpositionFormatsTest {
             + "# TYPE jvm_status_info gauge\n"
             + "jvm_status_info{jvm_version=\"1.2.3\"} 1\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"jvm_status_info\" "
             + "help: \"JVM status info\" "
             + "type: GAUGE "
@@ -2391,7 +2389,7 @@ public class ExpositionFormatsTest {
             + "my_application_state{data_center=\"us east\",my_application_state=\"feature.enabled\"} 1\n"
             + "my_application_state{data_center=\"us east\",my_application_state=\"is.alpha.version\"} 0\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"my_application_state\" "
             + "help: \"My application state\" "
             + "type: GAUGE "
@@ -2522,7 +2520,7 @@ public class ExpositionFormatsTest {
             + "# TYPE some_unknown_metric_bytes untyped\n"
             + "some_unknown_metric_bytes{test_env=\"7\"} 0.7\n";
     String prometheusProtobuf =
-            // @formatter:off
+        // @formatter:off
         "name: \"some_unknown_metric_bytes\" "
             + "help: \"help message\" "
             + "type: UNTYPED "
@@ -2580,8 +2578,7 @@ public class ExpositionFormatsTest {
             + "test_total{a=\"x\",b=\"escaping\\\" example \\n \"} 1.0\n"
             + "# EOF\n";
     String prometheus =
-        "# TYPE test_total counter\n"
-            + "test_total{a=\"x\",b=\"escaping\\\" example \\n \"} 1.0\n";
+        "# TYPE test_total counter\n" + "test_total{a=\"x\",b=\"escaping\\\" example \\n \"} 1.0\n";
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("test")
