@@ -6,8 +6,11 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Assert;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class PrometheusRegistryTest {
 
@@ -90,11 +93,10 @@ public class PrometheusRegistryTest {
     try {
       registry.scrape();
     } catch (IllegalStateException e) {
-      Assert.assertTrue(
-          e.getMessage().contains("duplicate") && e.getMessage().contains("no_name_gauge"));
+      assertThat(e.getMessage().contains("duplicate") && e.getMessage().contains("no_name_gauge")).isTrue();
       return;
     }
-    Assert.fail("Expected duplicate name exception");
+    fail("Expected duplicate name exception");
   }
 
   @Test(expected = IllegalStateException.class)
@@ -111,15 +113,15 @@ public class PrometheusRegistryTest {
     registry.register(counterB);
     registry.register(gaugeA);
     MetricSnapshots snapshots = registry.scrape();
-    Assert.assertEquals(3, snapshots.size());
+    assertThat(snapshots.size()).isEqualTo(3);
 
     registry.unregister(counterB);
     snapshots = registry.scrape();
-    Assert.assertEquals(2, snapshots.size());
+    assertThat(snapshots.size()).isEqualTo(2);
 
     registry.register(counterB);
     snapshots = registry.scrape();
-    Assert.assertEquals(3, snapshots.size());
+    assertThat(snapshots.size()).isEqualTo(3);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -134,10 +136,10 @@ public class PrometheusRegistryTest {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(multiCollector);
     MetricSnapshots snapshots = registry.scrape();
-    Assert.assertEquals(2, snapshots.size());
+    assertThat(snapshots.size()).isEqualTo(2);
 
     registry.unregister(multiCollector);
     snapshots = registry.scrape();
-    Assert.assertEquals(0, snapshots.size());
+    assertThat(snapshots.size()).isZero();
   }
 }

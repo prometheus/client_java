@@ -10,9 +10,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-import org.junit.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MultiCollectorNameFilterTest {
 
@@ -60,9 +62,9 @@ public class MultiCollectorNameFilterTest {
     includedNames = name -> name.equals("counter_1");
 
     MetricSnapshots snapshots = registry.scrape(includedNames);
-    Assert.assertTrue(collectCalled[0]);
-    Assert.assertEquals(1, snapshots.size());
-    Assert.assertEquals("counter_1", snapshots.get(0).getMetadata().getName());
+    assertThat(collectCalled[0]).isTrue();
+    assertThat(snapshots.size()).isOne();
+    assertThat(snapshots.get(0).getMetadata().getName()).isEqualTo("counter_1");
   }
 
   @Test
@@ -72,9 +74,9 @@ public class MultiCollectorNameFilterTest {
     prometheusNames = Arrays.asList("counter_1", "gauge_2");
 
     MetricSnapshots snapshots = registry.scrape(includedNames);
-    Assert.assertTrue(collectCalled[0]);
-    Assert.assertEquals(1, snapshots.size());
-    Assert.assertEquals("counter_1", snapshots.get(0).getMetadata().getName());
+    assertThat(collectCalled[0]).isTrue();
+    assertThat(snapshots.size()).isOne();
+    assertThat(snapshots.get(0).getMetadata().getName()).isEqualTo("counter_1");
   }
 
   @Test
@@ -83,8 +85,8 @@ public class MultiCollectorNameFilterTest {
     includedNames = name -> !name.equals("counter_1") && !name.equals("gauge_2");
 
     MetricSnapshots snapshots = registry.scrape(includedNames);
-    Assert.assertTrue(collectCalled[0]);
-    Assert.assertEquals(0, snapshots.size());
+    assertThat(collectCalled[0]).isTrue();
+    assertThat(snapshots.size()).isZero();
   }
 
   @Test
@@ -94,7 +96,7 @@ public class MultiCollectorNameFilterTest {
     prometheusNames = Arrays.asList("counter_1", "gauge_2");
 
     MetricSnapshots snapshots = registry.scrape(includedNames);
-    Assert.assertFalse(collectCalled[0]);
-    Assert.assertEquals(0, snapshots.size());
+    assertThat(collectCalled[0]).isFalse();
+    assertThat(snapshots.size()).isZero();
   }
 }

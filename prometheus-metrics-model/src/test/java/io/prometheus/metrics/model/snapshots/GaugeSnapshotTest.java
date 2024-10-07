@@ -3,8 +3,12 @@ package io.prometheus.metrics.model.snapshots;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
 import java.util.Iterator;
-import org.junit.Assert;
+import java.util.Optional;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 public class GaugeSnapshotTest {
 
@@ -42,22 +46,22 @@ public class GaugeSnapshotTest {
                     .build())
             .build();
     SnapshotTestUtil.assertMetadata(snapshot, "cache_size_bytes", "cache size in Bytes", "bytes");
-    Assert.assertEquals(2, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints()).hasSize(2);
     GaugeDataPointSnapshot data =
         snapshot
             .getDataPoints()
             .get(0); // data is sorted by labels, so the first one should be path="/hello"
-    Assert.assertEquals(Labels.of("env", "dev"), data.getLabels());
-    Assert.assertEquals(128.0, data.getValue(), 0.0);
-    Assert.assertEquals(128.0, data.getExemplar().getValue(), 0.0);
-    Assert.assertFalse(data.hasCreatedTimestamp());
-    Assert.assertFalse(data.hasScrapeTimestamp());
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("env", "dev"));
+    assertThat(data.getValue()).isCloseTo(128.0, offset(0.0));
+    assertThat(data.getExemplar().getValue()).isCloseTo(128.0, offset(0.0));
+    assertThat(data.hasCreatedTimestamp()).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isFalse();
     data = snapshot.getDataPoints().get(1);
-    Assert.assertEquals(Labels.of("env", "prod"), data.getLabels());
-    Assert.assertEquals(1024.0, data.getValue(), 0.0);
-    Assert.assertEquals(1024.0, data.getExemplar().getValue(), 0.0);
-    Assert.assertFalse(data.hasCreatedTimestamp());
-    Assert.assertFalse(data.hasScrapeTimestamp());
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("env", "prod"));
+    assertThat(data.getValue()).isCloseTo(1024.0, offset(0.0));
+    assertThat(data.getExemplar().getValue()).isCloseTo(1024.0, offset(0.0));
+    assertThat(data.hasCreatedTimestamp()).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isFalse();
   }
 
   @Test
@@ -68,19 +72,19 @@ public class GaugeSnapshotTest {
             .dataPoint(GaugeDataPointSnapshot.builder().value(23.0).build())
             .build();
     SnapshotTestUtil.assertMetadata(snapshot, "temperature", null, null);
-    Assert.assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints().size()).isOne();
     GaugeDataPointSnapshot data = snapshot.getDataPoints().get(0);
-    Assert.assertEquals(Labels.EMPTY, data.getLabels());
-    Assert.assertEquals(23.0, data.getValue(), 0.0);
-    Assert.assertNull(data.getExemplar());
-    Assert.assertFalse(data.hasCreatedTimestamp());
-    Assert.assertFalse(data.hasScrapeTimestamp());
+    assertThat(Optional.ofNullable(data.getLabels())).isEqualTo(Labels.EMPTY);
+    assertThat(data.getValue()).isCloseTo(23.0, offset(0.0));
+    assertThat(data.getExemplar()).isNull();
+    assertThat(data.hasCreatedTimestamp()).isFalse();
+    assertThat(data.hasScrapeTimestamp()).isFalse();
   }
 
   @Test
   public void testEmptyGauge() {
     GaugeSnapshot snapshot = GaugeSnapshot.builder().name("temperature").build();
-    Assert.assertEquals(0, snapshot.getDataPoints().size());
+    assertThat(snapshot.getDataPoints().size()).isZero();
   }
 
   @Test(expected = IllegalArgumentException.class)
