@@ -1,7 +1,5 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.junit.Assert.assertEquals;
-
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
@@ -11,7 +9,10 @@ import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class InfoTest {
 
@@ -26,9 +27,7 @@ public class InfoTest {
         Info info = Info.builder().name(name).labelNames(labelName).build();
         info.addLabelValues("value");
         Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(info.collect());
-        assertEquals(
-            "name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value: \"value\" } gauge { value: 1.0 } }",
-            TextFormat.printer().shortDebugString(protobufData));
+        assertThat(TextFormat.printer().shortDebugString(protobufData)).isEqualTo("name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value: \"value\" } gauge { value: 1.0 } }");
       }
     }
   }
@@ -36,19 +35,19 @@ public class InfoTest {
   @Test
   public void testAddAndRemove() {
     Info info = Info.builder().name("test_info").labelNames("a", "b").build();
-    assertEquals(0, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).isEmpty();
     info.addLabelValues("val1", "val2");
-    assertEquals(1, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).hasSize(1);
     info.addLabelValues("val1", "val2"); // already exist, so no change
-    assertEquals(1, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).hasSize(1);
     info.addLabelValues("val2", "val2");
-    assertEquals(2, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).hasSize(2);
     info.remove("val1", "val3"); // does not exist, so no change
-    assertEquals(2, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).hasSize(2);
     info.remove("val1", "val2");
-    assertEquals(1, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).hasSize(1);
     info.remove("val2", "val2");
-    assertEquals(0, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).isEmpty();
   }
 
   @Test
@@ -60,9 +59,9 @@ public class InfoTest {
             .labelNames("service.version")
             .build();
     info.setLabelValues("1.0.0");
-    assertEquals(1, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).hasSize(1);
     info.setLabelValues("2.0.0");
-    assertEquals(1, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).hasSize(1);
     assertTextFormat(
         "target_info{service_instance_id=\"123\",service_name=\"test\",service_version=\"2.0.0\"} 1\n",
         info);
@@ -75,7 +74,7 @@ public class InfoTest {
             .name("target_info")
             .constLabels(Labels.of("service.name", "test", "service.instance.id", "123"))
             .build();
-    assertEquals(1, info.collect().getDataPoints().size());
+    assertThat(info.collect().getDataPoints()).hasSize(1);
     assertTextFormat("target_info{service_instance_id=\"123\",service_name=\"test\"} 1\n", info);
   }
 
