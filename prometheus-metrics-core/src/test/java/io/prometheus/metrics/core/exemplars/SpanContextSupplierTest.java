@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.exemplars;
 
 import static io.prometheus.metrics.model.snapshots.Exemplar.TRACE_ID;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.prometheus.metrics.config.ExemplarsProperties;
 import io.prometheus.metrics.model.snapshots.Exemplar;
@@ -71,9 +72,9 @@ public class SpanContextSupplierTest {
     SpanContextSupplier.setSpanContext(spanContextB);
     exemplarSampler.observe(1.0);
     Exemplars exemplars = exemplarSampler.collect();
-    Assert.assertEquals(1, exemplars.size());
+    assertThat(exemplars.size()).isOne();
     Exemplar exemplar = exemplars.get(0);
-    Assert.assertEquals("A", exemplar.getLabels().get(TRACE_ID));
+    assertThat(exemplar.getLabels().get(TRACE_ID)).isEqualTo("A");
   }
 
   /**
@@ -89,17 +90,17 @@ public class SpanContextSupplierTest {
     SpanContextSupplier.setSpanContext(spanContextB);
     exemplarSampler.observe(1.0);
     Exemplars exemplars = exemplarSampler.collect();
-    Assert.assertEquals(1, exemplars.size());
+    assertThat(exemplars.size()).isOne();
     Exemplar exemplar = exemplars.get(0);
-    Assert.assertEquals("B", exemplar.getLabels().get(TRACE_ID));
+    assertThat(exemplar.getLabels().get(TRACE_ID)).isEqualTo("B");
 
     Thread.sleep(15); // more than the minimum retention period defined in config above.
 
     SpanContextSupplier.setSpanContext(spanContextA);
     exemplarSampler.observe(1.0);
     exemplars = exemplarSampler.collect();
-    Assert.assertEquals(1, exemplars.size());
+    assertThat(exemplars.size()).isOne();
     exemplar = exemplars.get(0);
-    Assert.assertEquals("A", exemplar.getLabels().get(TRACE_ID));
+    assertThat(exemplar.getLabels().get(TRACE_ID)).isEqualTo("A");
   }
 }
