@@ -1,9 +1,5 @@
 package io.prometheus.metrics.core.metrics;
 
-import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assert.assertEquals;
-
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
@@ -14,10 +10,18 @@ import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
-import java.util.Arrays;
-import java.util.Iterator;
 import org.junit.After;
 import org.junit.Before;
+
+import java.util.Arrays;
+import java.util.Iterator;
+
+import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
+
+import io.prometheus.metrics.model.snapshots.Label;
 import org.junit.Test;
 
 public class CounterTest {
@@ -66,13 +70,13 @@ public class CounterTest {
   @Test
   public void testIncrement() {
     noLabels.inc();
-    assertEquals(1.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(1.0, offset(.001));
     noLabels.inc(2);
-    assertEquals(3.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(3.0, offset(.001));
     noLabels.labelValues().inc(4);
-    assertEquals(7.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(7.0, offset(.001));
     noLabels.labelValues().inc();
-    assertEquals(8.0, getValue(noLabels), .001);
+    assertThat(getValue(noLabels)).isCloseTo(8.0, offset(.001));
   }
 
   @Test
@@ -84,20 +88,20 @@ public class CounterTest {
 
   @Test
   public void testEmptyCountersHaveNoLabels() {
-    assertEquals(1, getNumberOfLabels(noLabels));
-    assertEquals(0, getNumberOfLabels(labels));
+    assertThat(getNumberOfLabels(noLabels)).isOne();
+    assertThat(getNumberOfLabels(labels)).isZero();
   }
 
   @Test
   public void testLabels() {
-    assertEquals(0, getNumberOfLabels(labels));
+    assertThat(getNumberOfLabels(labels)).isZero();
     labels.labelValues("a").inc();
-    assertEquals(1, getNumberOfLabels(labels));
-    assertEquals(1.0, getValue(labels, "l", "a"), .001);
+    assertThat(getNumberOfLabels(labels)).isOne();
+    assertThat(getValue(labels, "l", "a")).isCloseTo(1.0, offset(.001));
     labels.labelValues("b").inc(3);
-    assertEquals(2, getNumberOfLabels(labels));
-    assertEquals(1.0, getValue(labels, "l", "a"), .001);
-    assertEquals(3.0, getValue(labels, "l", "b"), .001);
+    assertThat(getNumberOfLabels(labels)).isEqualTo(2);
+    assertThat(getValue(labels, "l", "a")).isCloseTo(1.0, offset(.001));
+    assertThat(getValue(labels, "l", "b")).isCloseTo(3.0, offset(.001));
   }
 
   @Test
@@ -111,9 +115,7 @@ public class CounterTest {
         }) {
       Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
       Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(counter.collect());
-      assertEquals(
-          "name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }",
-          TextFormat.printer().shortDebugString(protobufData));
+      assertThat(TextFormat.printer().shortDebugString(protobufData)).isEqualTo("name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");
     }
   }
 
@@ -131,29 +133,25 @@ public class CounterTest {
     counter.labelValues("/", "200").inc(2);
     counter.labelValues("/", "500").inc();
     CounterSnapshot snapshot = counter.collect();
-    assertEquals("test_seconds", snapshot.getMetadata().getName());
-    assertEquals("seconds", snapshot.getMetadata().getUnit().toString());
-    assertEquals("help message", snapshot.getMetadata().getHelp());
-    assertEquals(2, snapshot.getDataPoints().size());
+    assertThat(snapshot.getMetadata().getName()).isEqualTo("test_seconds");
+    assertThat(snapshot.getMetadata().getUnit()).hasToString("seconds");
+    assertThat(snapshot.getMetadata().getHelp()).isEqualTo("help message");
+    assertThat(snapshot.getDataPoints()).hasSize(2);
     Iterator<CounterSnapshot.CounterDataPointSnapshot> iter = snapshot.getDataPoints().iterator();
     // data is ordered by labels, so 200 comes before 500
     CounterSnapshot.CounterDataPointSnapshot data = iter.next();
-    assertEquals(
-        Labels.of(
-            "const1name", "const1value", "const2name", "const2value", "path", "/", "status", "200"),
-        data.getLabels());
-    assertEquals(2, data.getValue(), 0.0001);
-    assertTrue(data.getCreatedTimestampMillis() >= before);
-    assertTrue(data.getCreatedTimestampMillis() <= System.currentTimeMillis());
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of(
+            "const1name", "const1value", "const2name", "const2value", "path", "/", "status", "200"));
+    assertThat(data.getValue()).isCloseTo(2, offset(0.0001));
+    assertThat(data.getCreatedTimestampMillis()).isGreaterThanOrEqualTo(before)
+            .isLessThanOrEqualTo(System.currentTimeMillis());
     // 500
     data = iter.next();
-    assertEquals(
-        Labels.of(
-            "const1name", "const1value", "const2name", "const2value", "path", "/", "status", "500"),
-        data.getLabels());
-    assertEquals(1, data.getValue(), 0.0001);
-    assertTrue(data.getCreatedTimestampMillis() >= before);
-    assertTrue(data.getCreatedTimestampMillis() <= System.currentTimeMillis());
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of(
+            "const1name", "const1value", "const2name", "const2value", "path", "/", "status", "500"));
+    assertThat(data.getValue()).isCloseTo(1, offset(0.0001));
+    assertThat(data.getCreatedTimestampMillis()).isGreaterThanOrEqualTo(before)
+            .isLessThanOrEqualTo(System.currentTimeMillis());
   }
 
   @Test
@@ -174,8 +172,8 @@ public class CounterTest {
 
   private void assertExemplar(Counter counter, double value, String... labels) {
     Exemplar exemplar = getData(counter).getExemplar();
-    assertEquals(value, exemplar.getValue(), 0.0001);
-    assertEquals(Labels.of(labels), exemplar.getLabels());
+    assertThat(exemplar.getValue()).isCloseTo(value, offset(0.0001));
+    assertThat((Iterable<? extends Label>) exemplar.getLabels()).isEqualTo(Labels.of(labels));
   }
 
   @Test
@@ -285,9 +283,9 @@ public class CounterTest {
             .withoutExemplars()
             .build();
     counter.incWithExemplar(3.0, Labels.of("a", "b"));
-    assertNull(getData(counter).getExemplar());
+    assertThat(getData(counter).getExemplar()).isNull();
     counter.inc(2.0);
-    assertNull(getData(counter).getExemplar());
+    assertThat(getData(counter).getExemplar()).isNull();
   }
 
   @Test(expected = IllegalArgumentException.class)
