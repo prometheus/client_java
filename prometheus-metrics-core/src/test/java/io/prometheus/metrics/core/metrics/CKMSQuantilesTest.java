@@ -1,8 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.data.Offset.offset;
-import static org.junit.Assert.fail;
 
 import io.prometheus.metrics.core.metrics.CKMSQuantiles.Quantile;
 import java.util.*;
