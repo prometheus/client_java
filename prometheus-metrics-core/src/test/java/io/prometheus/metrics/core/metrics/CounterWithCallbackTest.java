@@ -1,13 +1,13 @@
 package io.prometheus.metrics.core.metrics;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
+
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Offset.offset;
 
 public class CounterWithCallbackTest {
 

@@ -20,21 +20,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executor;
 import org.junit.Test;
 
 public class CacheMetricsCollectorTest {
 
   @Test
   public void cacheExposesMetricsForHitMissAndEviction() {
-      // Run cleanup in same thread, to remove async behavior with evictions
-      final Cache<String, String> cache =
-        Caffeine.newBuilder()
-            .maximumSize(2)
-            .recordStats()
-            .executor(
-                    Runnable::run)
-            .build();
+    // Run cleanup in same thread, to remove async behavior with evictions
+    final Cache<String, String> cache =
+        Caffeine.newBuilder().maximumSize(2).recordStats().executor(Runnable::run).build();
 
     final CacheMetricsCollector collector = new CacheMetricsCollector();
     collector.addCache("users", cache);

@@ -1,5 +1,7 @@
 package io.prometheus.metrics.core.exemplars;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.metrics.core.util.Scheduler;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
@@ -8,8 +10,6 @@ import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExemplarSamplerTest {
 

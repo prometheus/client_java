@@ -1,12 +1,11 @@
 package io.prometheus.metrics.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class PrometheusPropertiesTest {
 
@@ -14,9 +13,8 @@ public class PrometheusPropertiesTest {
   public void testPrometheusConfig() {
     PrometheusProperties result = PrometheusProperties.get();
     assertThat(result.getDefaultMetricProperties().getHistogramClassicUpperBounds()).hasSize(11);
-    assertThat(result
-            .getMetricProperties("http_duration_seconds")
-            .getHistogramClassicUpperBounds()).hasSize(4);
+    assertThat(result.getMetricProperties("http_duration_seconds").getHistogramClassicUpperBounds())
+        .hasSize(4);
   }
 
   @Test

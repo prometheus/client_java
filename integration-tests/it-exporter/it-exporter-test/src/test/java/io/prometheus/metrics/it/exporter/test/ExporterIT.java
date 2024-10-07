@@ -77,14 +77,16 @@ public class ExporterIT {
         response.getHeader("Content-Type"));
     assertThat(response.getHeader("Content-Encoding")).isNull();
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
-    assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
+    assertThat(response.getHeader("Content-Length"))
+        .isEqualTo(Integer.toString(response.body.length));
     String bodyString = new String(response.body);
-    assertThat(bodyString).contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
-            .contains("temperature_celsius{location=\"inside\"} 23.0")
-            .contains("temperature_celsius{location=\"outside\"} 27.0")
-            .contains("uptime_seconds_total 17.0")
-            // OpenMetrics text format has a UNIT.
-            .contains("# UNIT uptime_seconds seconds");
+    assertThat(bodyString)
+        .contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
+        .contains("temperature_celsius{location=\"inside\"} 23.0")
+        .contains("temperature_celsius{location=\"outside\"} 27.0")
+        .contains("uptime_seconds_total 17.0")
+        // OpenMetrics text format has a UNIT.
+        .contains("# UNIT uptime_seconds seconds");
   }
 
   @Test
@@ -98,14 +100,16 @@ public class ExporterIT {
         "text/plain; version=0.0.4; charset=utf-8", response.getHeader("Content-Type"));
     assertThat(response.getHeader("Content-Encoding")).isNull();
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
-    assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
+    assertThat(response.getHeader("Content-Length"))
+        .isEqualTo(Integer.toString(response.body.length));
     String bodyString = new String(response.body);
-    assertThat(bodyString).contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
-            .contains("temperature_celsius{location=\"inside\"} 23.0")
-            .contains("temperature_celsius{location=\"outside\"} 27.0")
-            .contains("uptime_seconds_total 17.0")
-            // Prometheus text format does not have a UNIT.
-            .doesNotContain("# UNIT uptime_seconds seconds");
+    assertThat(bodyString)
+        .contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
+        .contains("temperature_celsius{location=\"inside\"} 23.0")
+        .contains("temperature_celsius{location=\"outside\"} 27.0")
+        .contains("uptime_seconds_total 17.0")
+        // Prometheus text format does not have a UNIT.
+        .doesNotContain("# UNIT uptime_seconds seconds");
   }
 
   @Test
@@ -125,7 +129,8 @@ public class ExporterIT {
         response.getHeader("Content-Type"));
     assertThat(response.getHeader("Content-Encoding")).isNull();
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
-    assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
+    assertThat(response.getHeader("Content-Length"))
+        .isEqualTo(Integer.toString(response.body.length));
     List<Metrics.MetricFamily> metrics = new ArrayList<>();
     InputStream in = new ByteArrayInputStream(response.body);
     while (in.available() > 0) {
@@ -155,7 +160,8 @@ public class ExporterIT {
     assertThat(response.getHeader("Content-Encoding")).isEqualTo("gzip");
     if (response.getHeader("Content-Length") != null) {
       // The servlet container might set a content length as the body is very small.
-      assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
+      assertThat(response.getHeader("Content-Length"))
+          .isEqualTo(Integer.toString(response.body.length));
       assertThat(response.getHeader("Transfer-Encoding")).isNull();
     } else {
       // If no content length is set, transfer-encoding chunked must be used.
@@ -204,8 +210,9 @@ public class ExporterIT {
     assertThat(response.status).isEqualTo(200);
     assertContentType("text/plain; charset=utf-8", response.getHeader("Content-Type"));
     String bodyString = new String(response.body, UTF_8);
-    assertThat(bodyString).contains("uptime_seconds_total 17.0")
-            .contains("# UNIT uptime_seconds seconds");
+    assertThat(bodyString)
+        .contains("uptime_seconds_total 17.0")
+        .contains("# UNIT uptime_seconds seconds");
   }
 
   @Test
@@ -224,9 +231,10 @@ public class ExporterIT {
         "application/openmetrics-text; version=1.0.0; charset=utf-8",
         response.getHeader("Content-Type"));
     String bodyString = new String(response.body, UTF_8);
-    assertThat(bodyString).contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
-            .contains("uptime_seconds_total 17.0")
-            .doesNotContain("temperature_celsius");
+    assertThat(bodyString)
+        .contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
+        .contains("uptime_seconds_total 17.0")
+        .doesNotContain("temperature_celsius");
   }
 
   @Test
@@ -244,7 +252,8 @@ public class ExporterIT {
     assertContentType(
         "application/openmetrics-text; version=1.0.0; charset=utf-8",
         response.getHeader("Content-Type"));
-    assertThat(response.getHeader("Content-Length")).isEqualTo(Integer.toString(response.body.length));
+    assertThat(response.getHeader("Content-Length"))
+        .isEqualTo(Integer.toString(response.body.length));
     assertThat(new String(response.body, UTF_8)).isEqualTo("# EOF\n");
   }
 

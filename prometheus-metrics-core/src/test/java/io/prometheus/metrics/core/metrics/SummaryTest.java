@@ -1,5 +1,9 @@
 package io.prometheus.metrics.core.metrics;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.data.Offset.offset;
+
 import io.prometheus.metrics.core.datapoints.Timer;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Label;
@@ -11,10 +15,6 @@ import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.data.Offset.offset;
 
 public class SummaryTest {
 
@@ -96,13 +96,19 @@ public class SummaryTest {
       withLabelsAndQuantiles.labelValues(label.getValue()).observe(i);
       noLabelsAndQuantiles.observe(i);
     }
-    assertThat(0.5 * nSamples).isCloseTo(getQuantile(noLabelsAndQuantiles, 0.5, Labels.EMPTY), offset(0.05 * nSamples));
-    assertThat(0.9 * nSamples).isCloseTo(getQuantile(noLabelsAndQuantiles, 0.9, Labels.EMPTY), offset(0.01 * nSamples));
-    assertThat(0.99 * nSamples).isCloseTo(getQuantile(noLabelsAndQuantiles, 0.99, Labels.EMPTY), offset(0.001 * nSamples));
+    assertThat(0.5 * nSamples)
+        .isCloseTo(getQuantile(noLabelsAndQuantiles, 0.5, Labels.EMPTY), offset(0.05 * nSamples));
+    assertThat(0.9 * nSamples)
+        .isCloseTo(getQuantile(noLabelsAndQuantiles, 0.9, Labels.EMPTY), offset(0.01 * nSamples));
+    assertThat(0.99 * nSamples)
+        .isCloseTo(getQuantile(noLabelsAndQuantiles, 0.99, Labels.EMPTY), offset(0.001 * nSamples));
 
-    assertThat(0.5 * nSamples).isCloseTo(getQuantile(withLabelsAndQuantiles, 0.5, labels), offset(0.05 * nSamples));
-    assertThat(0.9 * nSamples).isCloseTo(getQuantile(withLabelsAndQuantiles, 0.9, labels), offset(0.01 * nSamples));
-    assertThat(0.99 * nSamples).isCloseTo(getQuantile(withLabelsAndQuantiles, 0.99, labels), offset(0.001 * nSamples));
+    assertThat(0.5 * nSamples)
+        .isCloseTo(getQuantile(withLabelsAndQuantiles, 0.5, labels), offset(0.05 * nSamples));
+    assertThat(0.9 * nSamples)
+        .isCloseTo(getQuantile(withLabelsAndQuantiles, 0.9, labels), offset(0.01 * nSamples));
+    assertThat(0.99 * nSamples)
+        .isCloseTo(getQuantile(withLabelsAndQuantiles, 0.99, labels), offset(0.001 * nSamples));
   }
 
   @Test
@@ -116,11 +122,14 @@ public class SummaryTest {
             .help("help")
             .register(registry);
     summary.observe(8.0);
-    assertThat(getQuantile(summary, 0.99, Labels.EMPTY)).isCloseTo(8.0, offset(0.0)); // From bucket 1.
+    assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
+        .isCloseTo(8.0, offset(0.0)); // From bucket 1.
     Thread.sleep(600);
-    assertThat(getQuantile(summary, 0.99, Labels.EMPTY)).isCloseTo(8.0, offset(0.0)); // From bucket 2.
+    assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
+        .isCloseTo(8.0, offset(0.0)); // From bucket 2.
     Thread.sleep(600);
-    assertThat(getQuantile(summary, 0.99, Labels.EMPTY)).isCloseTo(Double.NaN, offset(0.0)); // Bucket 1 again, now it is empty.
+    assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
+        .isCloseTo(Double.NaN, offset(0.0)); // Bucket 1 again, now it is empty.
   }
 
   @Test

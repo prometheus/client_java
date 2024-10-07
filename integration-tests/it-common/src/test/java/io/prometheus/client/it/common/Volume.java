@@ -22,7 +22,9 @@ public class Volume {
 
   public static Volume create(String prefix) throws IOException, URISyntaxException {
     Path targetDir = Paths.get(Volume.class.getResource("/").toURI()).getParent();
-    assertThat(targetDir.getFileName().toString()).as("failed to locate target/ directory").isEqualTo("target");
+    assertThat(targetDir.getFileName().toString())
+        .as("failed to locate target/ directory")
+        .isEqualTo("target");
     return new Volume(Files.createTempDirectory(targetDir, prefix + "-"));
   }
 

@@ -1,13 +1,12 @@
 package io.prometheus.metrics.model.snapshots;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
+
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Offset.offset;
 
 public class CounterSnapshotTest {
 
