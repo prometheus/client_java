@@ -78,7 +78,7 @@ public class CounterSnapshotTest {
     SnapshotTestUtil.assertMetadata(snapshot, "events", null, null);
     assertThat(snapshot.getDataPoints()).hasSize(1);
     CounterDataPointSnapshot data = snapshot.getDataPoints().get(0);
-    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.EMPTY);
+    assertThat((Iterable<? extends Label>) data.getLabels()).isEmpty();
     assertThat(data.getValue()).isCloseTo(1.0, offset(0.0));
     assertThat(data.getExemplar()).isNull();
     assertThat(data.hasCreatedTimestamp()).isFalse();
