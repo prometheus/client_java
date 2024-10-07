@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
@@ -79,14 +80,20 @@ public class InfoTest {
     assertTextFormat("target_info{service_instance_id=\"123\",service_name=\"test\"} 1\n", info);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testConstLabelsDuplicate1() {
-    Info.builder().constLabels(Labels.of("a_1", "val1")).labelNames("a.1").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    Info.builder().constLabels(Labels.of("a_1", "val1")).labelNames("a.1").build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testConstLabelsDuplicate2() {
-    Info.builder().labelNames("a_1").constLabels(Labels.of("a.1", "val1")).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    Info.builder().labelNames("a_1").constLabels(Labels.of("a.1", "val1")).build());
   }
 
   private void assertTextFormat(String expected, Info info) throws IOException {

@@ -31,11 +31,15 @@ public class PushGatewayTest {
     gauge = Gauge.builder().name("g").help("help").build();
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testInvalidURLThrowsRuntimeException() {
-    PushGateway.builder()
-        .address("::")
-        .build(); // ":" is interpreted as port number, so parsing fails
+    assertThatExceptionOfType(RuntimeException.class)
+        .isThrownBy(
+            ()-> {
+              PushGateway.builder()
+                  .address("::")
+                  .build(); // ":" is interpreted as port number, so parsing fails
+            });
   }
 
   @Test

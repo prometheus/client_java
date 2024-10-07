@@ -8,6 +8,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
 
 import com.github.tomakehurst.wiremock.http.Request;
@@ -93,7 +94,7 @@ public class ExemplarTest {
             });
   }
 
-  @Test(expected = ConditionTimeoutException.class)
+  @Test
   public void notSampledExemplarIsNotForwarded() {
     try (SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder().setSampler(Sampler.alwaysOff()).build()) {
@@ -105,6 +106,9 @@ public class ExemplarTest {
       }
     }
 
+    assertThatExceptionOfType(ConditionTimeoutException.class)
+            .isThrownBy(
+                () ->
     await()
         .atMost(TIMEOUT, SECONDS)
         .ignoreException(com.github.tomakehurst.wiremock.client.VerificationException.class)
@@ -115,7 +119,7 @@ public class ExemplarTest {
                       .withHeader("Content-Type", equalTo("application/x-protobuf"))
                       .andMatching(getExemplarCountMatcher(1)));
               return true;
-            });
+            }));
   }
 
   private static ValueMatcher<Request> getExemplarCountMatcher(int expectedCount) {

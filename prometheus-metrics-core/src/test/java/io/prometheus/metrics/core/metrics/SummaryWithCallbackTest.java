@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.Quantile;
@@ -47,8 +48,10 @@ public class SummaryWithCallbackTest {
     assertThat(datapoint.getSum()).isCloseTo(sum.doubleValue(), offset(0.1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testSummaryNoCallback() {
-    SummaryWithCallback.builder().name("summary").labelNames("l1", "l2").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() ->
+    SummaryWithCallback.builder().name("summary").labelNames("l1", "l2").build());
   }
 }

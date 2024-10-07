@@ -1,6 +1,7 @@
 package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.dropwizard.metrics5.MetricFilter;
 import io.dropwizard.metrics5.MetricRegistry;
@@ -22,10 +23,10 @@ public class CustomLabelMapperTest {
     metricRegistry = new MetricRegistry();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void test_WHEN_EmptyConfig_THEN_Fail() {
-    final CustomLabelMapper converter =
-        new CustomLabelMapper(Collections.<MapperConfig>emptyList());
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new CustomLabelMapper(Collections.emptyList()));
   }
 
   @Test

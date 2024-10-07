@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.data.Offset.offset;
 
@@ -150,24 +151,36 @@ public class SummaryTest {
     assertThat(getSum(noLabels, Labels.EMPTY)).isCloseTo(0.0, offset(.001));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testBuilderInvalidNumberOfAgeBuckets() {
-    Summary.builder().name("name").numberOfAgeBuckets(-1).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    Summary.builder().name("name").numberOfAgeBuckets(-1).build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testBuilderInvalidMaxAge() {
-    Summary.builder().name("name").maxAgeSeconds(-1).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    Summary.builder().name("name").maxAgeSeconds(-1).build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testBuilderInvalidQuantile() {
-    Summary.builder().name("name").quantile(42).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    Summary.builder().name("name").quantile(42).build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testBuilderInvalidQuantileError() {
-    Summary.builder().name("name").quantile(0.5, 20).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    Summary.builder().name("name").quantile(0.5, 20).build());
   }
 
   private double getQuantile(Summary summary, double quantile, Labels labels) {

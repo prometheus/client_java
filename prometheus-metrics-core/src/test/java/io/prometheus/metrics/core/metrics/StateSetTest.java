@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
@@ -72,8 +73,11 @@ public class StateSetTest {
                     "stateset with labels " + Arrays.toString(labels) + " not found"));
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testStatesCannotBeEmpty() {
-    StateSet.builder().name("invalid").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(
+                () ->
+    StateSet.builder().name("invalid").build());
   }
 }
