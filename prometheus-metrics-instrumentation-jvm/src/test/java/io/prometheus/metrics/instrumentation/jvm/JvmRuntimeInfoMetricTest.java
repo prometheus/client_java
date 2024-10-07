@@ -8,7 +8,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
-public class JvmRuntimeInfoMetricTest {
+class JvmRuntimeInfoMetricTest {
 
   @Test
   public void testGoodCase() throws IOException {

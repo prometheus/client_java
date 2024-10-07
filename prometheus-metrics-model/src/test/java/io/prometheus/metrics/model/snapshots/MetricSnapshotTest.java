@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
-public class MetricSnapshotTest {
+class MetricSnapshotTest {
 
   @Test
   public void testDuplicateLabels() {

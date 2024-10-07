@@ -14,7 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class QueuedThreadPoolStatisticsCollectorTest {
+class QueuedThreadPoolStatisticsCollectorTest {
 
   private static final String[] LABEL_NAMES = {"unit"};
 

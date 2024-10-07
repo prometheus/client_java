@@ -15,7 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class GaugeTest {
+class GaugeTest {
 
   private static final long exemplarSampleIntervalMillis = 10;
   private static final long exemplarMinAgeMillis = 100;

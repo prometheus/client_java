@@ -8,7 +8,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.jupiter.api.Test;
 
-public class MetricNameFilterTest {
+class MetricNameFilterTest {
 
   private final PrometheusRegistry registry = new PrometheusRegistry();
 

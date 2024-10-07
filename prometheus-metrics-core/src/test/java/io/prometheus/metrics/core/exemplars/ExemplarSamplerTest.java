@@ -11,7 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ExemplarSamplerTest {
+class ExemplarSamplerTest {
 
   private final int tick = 10; // Time step in milliseconds. Make this larger if the test is flaky.
   private final int sampleInterval = 10 * tick; // do not change this

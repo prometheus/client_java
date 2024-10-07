@@ -22,7 +22,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
-public class CacheMetricsCollectorTest {
+class CacheMetricsCollectorTest {
 
   @Test
   public void cacheExposesMetricsForHitMissAndEviction() {

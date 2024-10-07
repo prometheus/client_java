@@ -8,7 +8,7 @@ import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
-public class StateSetTest {
+class StateSetTest {
 
   enum MyFeatureFlag {
     EXPERIMENTAL_FEATURE_1 {
@@ -75,7 +75,7 @@ public class StateSetTest {
 
   @Test
   public void testStatesCannotBeEmpty() {
-    assertThatExceptionOfType(IllegalArgumentException.class)
+    assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(() -> StateSet.builder().name("invalid").build());
   }
 }

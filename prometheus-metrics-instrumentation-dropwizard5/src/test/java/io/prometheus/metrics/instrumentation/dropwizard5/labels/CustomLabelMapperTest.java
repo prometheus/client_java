@@ -15,7 +15,7 @@ import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class CustomLabelMapperTest {
+class CustomLabelMapperTest {
   private MetricRegistry metricRegistry;
 
   @BeforeEach

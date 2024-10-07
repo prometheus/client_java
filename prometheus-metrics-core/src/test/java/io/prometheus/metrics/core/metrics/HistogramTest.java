@@ -44,7 +44,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class HistogramTest {
+class HistogramTest {
 
   private static final double RESET_DURATION_REACHED =
       -123.456; // just a random value indicating that we should simulate that the reset duration
@@ -1261,7 +1261,7 @@ public class HistogramTest {
 
   @Test
   public void testNoName() {
-    assertThatExceptionOfType(NullPointerException.class)
+    assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> Histogram.builder().build());
   }
 

@@ -7,7 +7,7 @@ import static org.assertj.core.data.Offset.offset;
 import org.assertj.core.api.IterableAssert;
 import org.junit.jupiter.api.Test;
 
-public class ExemplarTest {
+class ExemplarTest {
 
   @Test
   public void testGoodCaseComplete() {

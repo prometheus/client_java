@@ -7,7 +7,7 @@ import static org.assertj.core.data.Offset.offset;
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
 
-public class ClassicHistogramBucketsTest {
+class ClassicHistogramBucketsTest {
 
   @Test
   public void testGoodCase() {

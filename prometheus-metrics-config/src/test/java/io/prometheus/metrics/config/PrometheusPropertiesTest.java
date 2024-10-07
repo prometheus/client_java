@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
-public class PrometheusPropertiesTest {
+class PrometheusPropertiesTest {
 
   @Test
   public void testPrometheusConfig() {

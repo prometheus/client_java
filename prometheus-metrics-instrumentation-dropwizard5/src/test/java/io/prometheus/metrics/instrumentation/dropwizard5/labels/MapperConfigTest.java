@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-public class MapperConfigTest {
+class MapperConfigTest {
   @Test
   public void setMatch_WHEN_ExpressionMatchesPattern_AllGood() {
     final MapperConfig mapperConfig = new MapperConfig();

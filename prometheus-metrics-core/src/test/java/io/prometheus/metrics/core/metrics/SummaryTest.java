@@ -17,7 +17,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SummaryTest {
+class SummaryTest {
 
   private final Label label = new Label("name", "value");
   private final Labels labels = Labels.builder().label(label.getName(), label.getValue()).build();

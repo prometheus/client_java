@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class ProcessMetricsTest {
+class ProcessMetricsTest {
 
   private final com.sun.management.UnixOperatingSystemMXBean sunOsBean =
       Mockito.mock(com.sun.management.UnixOperatingSystemMXBean.class);

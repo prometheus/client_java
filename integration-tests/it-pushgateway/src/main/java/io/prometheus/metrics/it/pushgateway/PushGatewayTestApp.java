@@ -18,7 +18,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 /** Example application using the {@link PushGateway}. */
-public class PushGatewayTestApp {
+class PushGatewayTestApp {
 
   public static void main(String[] args) throws IOException {
     if (args.length != 1) {

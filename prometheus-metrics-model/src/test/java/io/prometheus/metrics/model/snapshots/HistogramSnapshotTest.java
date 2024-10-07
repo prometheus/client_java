@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
-public class HistogramSnapshotTest {
+class HistogramSnapshotTest {
 
   @Test
   public void testGoodCaseComplete() {

@@ -18,7 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class JvmMemoryMetricsTest {
+class JvmMemoryMetricsTest {
 
   private final MemoryMXBean mockMemoryBean = Mockito.mock(MemoryMXBean.class);
   private final MemoryPoolMXBean mockPoolsBeanEdenSpace = Mockito.mock(MemoryPoolMXBean.class);

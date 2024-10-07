@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-public class StatefulMetricTest {
+class StatefulMetricTest {
 
   @Test
   public void testLabelRemoveWhileCollecting() throws Exception {

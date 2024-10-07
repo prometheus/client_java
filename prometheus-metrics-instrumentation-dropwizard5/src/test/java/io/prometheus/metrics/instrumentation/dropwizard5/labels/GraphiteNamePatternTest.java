@@ -10,7 +10,7 @@ import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class GraphiteNamePatternTest {
+class GraphiteNamePatternTest {
 
   @Test
   public void createNew_WHEN_InvalidPattern_THEN_ShouldThrowException() {

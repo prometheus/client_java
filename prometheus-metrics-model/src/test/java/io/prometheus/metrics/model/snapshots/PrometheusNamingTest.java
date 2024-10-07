@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
-public class PrometheusNamingTest {
+class PrometheusNamingTest {
 
   @Test
   public void testSanitizeMetricName() {

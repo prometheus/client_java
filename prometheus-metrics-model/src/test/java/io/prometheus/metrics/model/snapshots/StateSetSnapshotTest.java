@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
-public class StateSetSnapshotTest {
+class StateSetSnapshotTest {
 
   @Test
   public void testCompleteGoodCase() {

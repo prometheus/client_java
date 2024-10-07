@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
 
-public class InfoSnapshotTest {
+class InfoSnapshotTest {
 
   @Test
   public void testCompleteGoodCase() {

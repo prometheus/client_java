@@ -34,7 +34,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class ExemplarTest {
+class ExemplarTest {
   private static final String ENDPOINT_PATH = "/v1/metrics";
   private static final int TIMEOUT = 3;
   private static final String INSTRUMENTATION_SCOPE_NAME = "testInstrumentationScope";

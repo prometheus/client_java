@@ -12,7 +12,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.jupiter.api.Test;
 
-public class JvmMemoryPoolAllocationMetricsTest {
+class JvmMemoryPoolAllocationMetricsTest {
 
   @Test
   public void testListenerLogic() {

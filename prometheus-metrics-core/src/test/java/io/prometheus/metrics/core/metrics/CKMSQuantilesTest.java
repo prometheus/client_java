@@ -11,7 +11,7 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.jupiter.api.Test;
 
-public class CKMSQuantilesTest {
+class CKMSQuantilesTest {
 
   private final Quantile qMin = new Quantile(0.0, 0.00);
   private final Quantile q50 = new Quantile(0.5, 0.01);

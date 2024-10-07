@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import org.assertj.core.api.IterableAssert;
 import org.junit.jupiter.api.Test;
 
-public class LabelsTest {
+class LabelsTest {
 
   private <T extends Comparable<T>> void assertLessThan(T a, T b) {
     assertThat(a).isLessThan(b);

@@ -2,7 +2,7 @@ package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SnapshotTestUtil {
+class SnapshotTestUtil {
 
   public static void assertMetadata(
       MetricSnapshot snapshot, String name, String help, String unit) {

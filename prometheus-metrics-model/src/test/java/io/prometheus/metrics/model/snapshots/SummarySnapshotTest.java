@@ -6,7 +6,7 @@ import static org.assertj.core.data.Offset.offset;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
-public class SummarySnapshotTest {
+class SummarySnapshotTest {
 
   @Test
   public void testCompleteGoodCase() {

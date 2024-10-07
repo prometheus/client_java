@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
-public class TodoTest {
+class TodoTest {
 
   // if a metric with labels is created but never used it has no data.
   // The registry's collect() method should skip those metrics to avoid illegal protobuf or text

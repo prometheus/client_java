@@ -11,7 +11,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class JvmNativeMemoryMetricsTest {
+class JvmNativeMemoryMetricsTest {
 
   @Test
   public void testNativeMemoryTrackingFail() throws IOException {

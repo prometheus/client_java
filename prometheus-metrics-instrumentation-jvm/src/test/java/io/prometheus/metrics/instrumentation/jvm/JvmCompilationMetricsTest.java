@@ -15,7 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class JvmCompilationMetricsTest {
+class JvmCompilationMetricsTest {
 
   private final CompilationMXBean mockCompilationBean = Mockito.mock(CompilationMXBean.class);
 

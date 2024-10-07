@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class JvmThreadsMetricsTest {
+class JvmThreadsMetricsTest {
 
   private final ThreadMXBean mockThreadsBean = Mockito.mock(ThreadMXBean.class);
   private final ThreadInfo mockThreadInfoBlocked = Mockito.mock(ThreadInfo.class);

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
-public class CounterWithCallbackTest {
+class CounterWithCallbackTest {
 
   @Test
   public void testCounter() {

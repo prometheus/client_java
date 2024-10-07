@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class DropwizardExportsTest {
+class DropwizardExportsTest {
 
   private PrometheusRegistry registry = new PrometheusRegistry();
   private MetricRegistry metricRegistry;

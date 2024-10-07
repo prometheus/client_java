@@ -9,7 +9,7 @@ import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapsho
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
 
-public class GaugeSnapshotTest {
+class GaugeSnapshotTest {
 
   @Test
   public void testCompleteGoodCase() {

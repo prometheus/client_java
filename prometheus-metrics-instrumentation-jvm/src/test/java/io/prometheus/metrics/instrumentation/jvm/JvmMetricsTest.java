@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import org.junit.jupiter.api.Test;
 
-public class JvmMetricsTest {
+class JvmMetricsTest {
 
   @Test
   public void testRegisterIdempotent() {

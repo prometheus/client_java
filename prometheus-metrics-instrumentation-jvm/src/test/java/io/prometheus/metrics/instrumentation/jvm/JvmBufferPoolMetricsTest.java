@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class JvmBufferPoolMetricsTest {
+class JvmBufferPoolMetricsTest {
 
   private final BufferPoolMXBean directBuffer = Mockito.mock(BufferPoolMXBean.class);
   private final BufferPoolMXBean mappedBuffer = Mockito.mock(BufferPoolMXBean.class);

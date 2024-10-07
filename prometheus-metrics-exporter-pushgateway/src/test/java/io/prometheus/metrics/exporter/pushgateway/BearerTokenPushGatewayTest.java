@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
-public class BearerTokenPushGatewayTest {
+class BearerTokenPushGatewayTest {
 
   @Rule public MockServerRule mockServerRule = new MockServerRule(this);
   private MockServerClient mockServerClient;
