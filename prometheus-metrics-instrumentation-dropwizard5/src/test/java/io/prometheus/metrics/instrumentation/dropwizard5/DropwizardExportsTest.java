@@ -41,11 +41,42 @@ public class DropwizardExportsTest {
 
   @Test
   public void testGauge() {
-    Gauge<Integer> integerGauge = () -> 1234;
-    Gauge<Double> doubleGauge = () -> 1.234D;
-    Gauge<Long> longGauge = () -> 1234L;
-    Gauge<Float> floatGauge = () -> 0.1234F;
-    Gauge<Boolean> booleanGauge = () -> true;
+    // don't convert to lambda, as we need to test the type
+    Gauge<Integer> integerGauge =
+        new Gauge<Integer>() {
+          @Override
+          public Integer getValue() {
+            return 1234;
+          }
+        };
+    Gauge<Double> doubleGauge =
+        new Gauge<Double>() {
+          @Override
+          public Double getValue() {
+            return 1.234D;
+          }
+        };
+    Gauge<Long> longGauge =
+        new Gauge<Long>() {
+          @Override
+          public Long getValue() {
+            return 1234L;
+          }
+        };
+    Gauge<Float> floatGauge =
+        new Gauge<Float>() {
+          @Override
+          public Float getValue() {
+            return 0.1234F;
+          }
+        };
+    Gauge<Boolean> booleanGauge =
+        new Gauge<Boolean>() {
+          @Override
+          public Boolean getValue() {
+            return true;
+          }
+        };
 
     metricRegistry.register("double.gauge", doubleGauge);
     metricRegistry.register("long.gauge", longGauge);
