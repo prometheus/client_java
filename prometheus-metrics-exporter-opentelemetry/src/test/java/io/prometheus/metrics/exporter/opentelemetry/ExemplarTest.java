@@ -5,6 +5,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -12,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.ValueMatcher;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -29,11 +30,11 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import org.awaitility.core.ConditionTimeoutException;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@WireMockTest(httpPort = 4317)
 class ExemplarTest {
   private static final String ENDPOINT_PATH = "/v1/metrics";
   private static final int TIMEOUT = 3;
@@ -42,7 +43,6 @@ class ExemplarTest {
   public static final String TEST_COUNTER_NAME = "test_counter";
   private Counter testCounter;
   private OpenTelemetryExporter openTelemetryExporter;
-  @Rule public WireMockRule wireMockRule = new WireMockRule(4317);
 
   @BeforeEach
   public void setUp() {
@@ -55,7 +55,7 @@ class ExemplarTest {
 
     testCounter = Counter.builder().name(TEST_COUNTER_NAME).withExemplars().register();
 
-    wireMockRule.stubFor(
+    stubFor(
         post(ENDPOINT_PATH)
             .withHeader("Content-Type", containing("application/x-protobuf"))
             .willReturn(

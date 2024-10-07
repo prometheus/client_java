@@ -9,7 +9,7 @@ class SnapshotTestUtil {
     assertThat(snapshot.getMetadata().getName()).isEqualTo(name);
     assertThat(snapshot.getMetadata().getHelp()).isEqualTo(help);
     if (unit != null) {
-      assertThat(snapshot.getMetadata().getUnit().toString()).isEqualTo(unit);
+      assertThat(snapshot.getMetadata().getUnit()).hasToString(unit);
     } else {
       assertThat(snapshot.getMetadata().getUnit()).isNull();
     }

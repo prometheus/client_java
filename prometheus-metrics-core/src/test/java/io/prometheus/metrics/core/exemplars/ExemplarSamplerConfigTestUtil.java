@@ -2,7 +2,7 @@ package io.prometheus.metrics.core.exemplars;
 
 import java.lang.reflect.Field;
 
-class ExemplarSamplerConfigTestUtil {
+public class ExemplarSamplerConfigTestUtil {
 
   private static ExemplarSamplerConfig getConfig(Object metric, String fieldName)
       throws NoSuchFieldException, IllegalAccessException {

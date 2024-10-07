@@ -6,15 +6,13 @@ import static org.mockserver.model.HttpResponse.response;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.IOException;
-import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
-import org.mockserver.junit.MockServerRule;
+import org.mockserver.integration.ClientAndServer;
 
 class BasicAuthPushGatewayTest {
-
-  @Rule public MockServerRule mockServerRule = new MockServerRule(this);
   private MockServerClient mockServerClient;
 
   PrometheusRegistry registry;
@@ -23,15 +21,21 @@ class BasicAuthPushGatewayTest {
 
   @BeforeEach
   public void setUp() {
+    mockServerClient = ClientAndServer.startClientAndServer(0);
     registry = new PrometheusRegistry();
     gauge = Gauge.builder().name("g").help("help").build();
     pushGateway =
         PushGateway.builder()
-            .address("localhost:" + mockServerRule.getPort())
+            .address("localhost:" + mockServerClient.getPort())
             .basicAuth("testUser", "testPwd")
             .registry(registry)
             .job("j")
             .build();
+  }
+
+  @AfterEach
+  void tearDown() {
+    mockServerClient.stop();
   }
 
   @Test
