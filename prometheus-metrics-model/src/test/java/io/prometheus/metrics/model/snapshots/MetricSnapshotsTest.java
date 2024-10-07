@@ -1,10 +1,9 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.Iterator;
-
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Iterator;
+import org.junit.Test;
 
 public class MetricSnapshotsTest {
 

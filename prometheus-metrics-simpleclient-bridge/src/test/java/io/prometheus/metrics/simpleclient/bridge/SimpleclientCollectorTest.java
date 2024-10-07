@@ -1,5 +1,7 @@
 package io.prometheus.metrics.simpleclient.bridge;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
@@ -18,11 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class SimpleclientCollectorTest {
 

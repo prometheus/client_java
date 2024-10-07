@@ -1,11 +1,10 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
+
+import java.util.concurrent.TimeUnit;
+import org.junit.Test;
 
 public class SummarySnapshotTest {
 
@@ -91,7 +90,8 @@ public class SummarySnapshotTest {
                 SummarySnapshot.SummaryDataPointSnapshot.builder().count(10).sum(12.0).build())
             .build();
     assertThat(snapshot.getDataPoints()).hasSize(1);
-    assertThat((Iterable<? extends Label>) snapshot.getDataPoints().get(0).getLabels()).isEqualTo(Labels.EMPTY);
+    assertThat((Iterable<? extends Label>) snapshot.getDataPoints().get(0).getLabels())
+        .isEqualTo(Labels.EMPTY);
   }
 
   @Test

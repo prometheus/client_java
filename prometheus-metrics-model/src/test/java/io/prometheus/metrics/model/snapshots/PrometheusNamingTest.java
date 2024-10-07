@@ -23,10 +23,14 @@ public class PrometheusNamingTest {
 
   @Test
   public void testSanitizeMetricNameWithUnit() {
-    assertThat(prometheusName(sanitizeMetricName("0abc.def", Unit.RATIO))).isEqualTo("_abc_def_" + Unit.RATIO);
-    assertThat(prometheusName(sanitizeMetricName("___ab.:c0", Unit.RATIO))).isEqualTo("___ab__c0_" + Unit.RATIO);
-    assertThat(sanitizeMetricName("my_prefix/my_metric", Unit.RATIO)).isEqualTo("my_prefix_my_metric_" + Unit.RATIO);
-    assertThat(prometheusName(sanitizeMetricName("my_counter_total", Unit.RATIO))).isEqualTo("my_counter_" + Unit.RATIO);
+    assertThat(prometheusName(sanitizeMetricName("0abc.def", Unit.RATIO)))
+        .isEqualTo("_abc_def_" + Unit.RATIO);
+    assertThat(prometheusName(sanitizeMetricName("___ab.:c0", Unit.RATIO)))
+        .isEqualTo("___ab__c0_" + Unit.RATIO);
+    assertThat(sanitizeMetricName("my_prefix/my_metric", Unit.RATIO))
+        .isEqualTo("my_prefix_my_metric_" + Unit.RATIO);
+    assertThat(prometheusName(sanitizeMetricName("my_counter_total", Unit.RATIO)))
+        .isEqualTo("my_counter_" + Unit.RATIO);
     assertThat(sanitizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm_" + Unit.RATIO);
     assertThat(sanitizeMetricName("jvm_info", Unit.RATIO)).isEqualTo("jvm_" + Unit.RATIO);
     assertThat(sanitizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm_" + Unit.RATIO);

@@ -1,9 +1,9 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
+
+import org.junit.Test;
 
 public class UnknownSnapshotTest {
 
@@ -35,7 +35,7 @@ public class UnknownSnapshotTest {
             .build();
     SnapshotTestUtil.assertMetadata(
         snapshot, "my_unknown_seconds", "something in seconds", "seconds");
-    assertThat(snapshot.getDataPoints()) .hasSize(2);
+    assertThat(snapshot.getDataPoints()).hasSize(2);
     UnknownSnapshot.UnknownDataPointSnapshot data = snapshot.getDataPoints().get(1); // env="prod"
     assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("env", "prod"));
     assertThat(data.getValue()).isCloseTo(0.3, offset(0.0));

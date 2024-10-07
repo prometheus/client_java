@@ -1,11 +1,10 @@
 package io.prometheus.metrics.model.snapshots;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class StateSetSnapshotTest {
 
@@ -36,7 +35,8 @@ public class StateSetSnapshotTest {
         snapshot
             .getDataPoints()
             .get(1); // data is sorted by labels, so the second one should be entity="controller"
-    assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.of("entity", "controller"));
+    assertThat((Iterable<? extends Label>) data.getLabels())
+        .isEqualTo(Labels.of("entity", "controller"));
     assertThat(data.size()).isEqualTo(2);
     assertThat(data.getName(0)).isEqualTo("feature1");
     assertThat(data.isTrue(0)).isTrue();
