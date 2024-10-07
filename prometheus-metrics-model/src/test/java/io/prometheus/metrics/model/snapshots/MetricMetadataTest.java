@@ -2,25 +2,32 @@ package io.prometheus.metrics.model.snapshots;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
 public class MetricMetadataTest {
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testEmptyName() {
-    new MetricMetadata("");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MetricMetadata(""));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNullName() {
-    new MetricMetadata(null);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MetricMetadata(null));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalName() {
-    new MetricMetadata(
-        "my_namespace/http_server_duration"); // let's see when we decide to allow slashes :)
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                new MetricMetadata(
+                    "my_namespace/http_server_duration")); // let's see when we decide to allow
+    // slashes :)
   }
 
   @Test
@@ -54,14 +61,16 @@ public class MetricMetadataTest {
     assertThat(metadata.getName()).isEqualTo("total");
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testSanitizeEmptyString() {
-    sanitizeMetricName("");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> sanitizeMetricName(""));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testUnitSuffixRequired() {
-    new MetricMetadata("my_counter", "help", Unit.SECONDS);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MetricMetadata("my_counter", "help", Unit.SECONDS));
   }
 
   @Test

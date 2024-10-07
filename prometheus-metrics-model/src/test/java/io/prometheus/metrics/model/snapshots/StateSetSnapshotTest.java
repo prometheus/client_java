@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -67,10 +68,11 @@ public class StateSetSnapshotTest {
     assertThat(data.isTrue(3)).isFalse();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testMustHaveState() {
     // Must have at least one state.
-    StateSetSnapshot.StateSetDataPointSnapshot.builder().build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> StateSetSnapshot.StateSetDataPointSnapshot.builder().build());
   }
 
   @Test
@@ -90,7 +92,7 @@ public class StateSetSnapshotTest {
     assertThat(snapshot.dataPoints).isEmpty();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testDataImmutable() {
     StateSetSnapshot.StateSetDataPointSnapshot data =
         StateSetSnapshot.StateSetDataPointSnapshot.builder()
@@ -100,19 +102,22 @@ public class StateSetSnapshotTest {
             .build();
     Iterator<StateSetSnapshot.State> iterator = data.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicateState() {
-    StateSetSnapshot.StateSetDataPointSnapshot.builder()
-        .state("a", true)
-        .state("b", true)
-        .state("a", true)
-        .build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                StateSetSnapshot.StateSetDataPointSnapshot.builder()
+                    .state("a", true)
+                    .state("b", true)
+                    .state("a", true)
+                    .build());
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testStateSetImmutable() {
     StateSetSnapshot snapshot =
         StateSetSnapshot.builder()
@@ -131,17 +136,24 @@ public class StateSetSnapshotTest {
     Iterator<StateSetSnapshot.StateSetDataPointSnapshot> iterator =
         snapshot.getDataPoints().iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testLabelsUnique() {
-    StateSetSnapshot.builder()
-        .name("flags")
-        .dataPoint(
-            StateSetSnapshot.StateSetDataPointSnapshot.builder().state("feature", true).build())
-        .dataPoint(
-            StateSetSnapshot.StateSetDataPointSnapshot.builder().state("feature", true).build())
-        .build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                StateSetSnapshot.builder()
+                    .name("flags")
+                    .dataPoint(
+                        StateSetSnapshot.StateSetDataPointSnapshot.builder()
+                            .state("feature", true)
+                            .build())
+                    .dataPoint(
+                        StateSetSnapshot.StateSetDataPointSnapshot.builder()
+                            .state("feature", true)
+                            .build())
+                    .build());
   }
 }

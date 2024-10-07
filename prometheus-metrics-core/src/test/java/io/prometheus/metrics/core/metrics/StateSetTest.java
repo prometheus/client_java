@@ -76,8 +76,6 @@ public class StateSetTest {
   @Test
   public void testStatesCannotBeEmpty() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    StateSet.builder().name("invalid").build());
+        .isThrownBy(() -> StateSet.builder().name("invalid").build());
   }
 }

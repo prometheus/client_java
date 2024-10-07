@@ -1,5 +1,7 @@
 package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,9 +12,9 @@ import org.junit.jupiter.api.Test;
 
 public class GraphiteNamePatternTest {
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void createNew_WHEN_InvalidPattern_THEN_ShouldThrowException() {
-    final List<String> invalidPatterns =
+    List<String> invalidPatterns =
         Arrays.asList(
             "",
             "a",
@@ -29,15 +31,10 @@ public class GraphiteNamePatternTest {
             "org.com*pany.*",
             "org.test.contr.oller.gather.status..400",
             "org.test.controller.gather.status..400");
-    final GraphiteNamePattern graphiteNamePattern = new GraphiteNamePattern("");
     for (String pattern : invalidPatterns) {
-      try {
-        new GraphiteNamePattern(pattern);
-
-        Assertions.failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
-      } catch (IllegalArgumentException e) {
-        Assertions.assertThat(e).hasMessageContaining(pattern);
-      }
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> new GraphiteNamePattern(pattern))
+          .withMessageContaining(pattern);
     }
   }
 

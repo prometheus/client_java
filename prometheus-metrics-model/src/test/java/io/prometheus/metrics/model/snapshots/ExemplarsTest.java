@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import java.util.Iterator;
@@ -27,7 +28,7 @@ public class ExemplarsTest {
     assertThat(exemplars.get(2.0, 2.1)).isNull();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testImmutable() {
     Exemplars exemplars =
         Exemplars.of(
@@ -36,7 +37,7 @@ public class ExemplarsTest {
             Exemplar.builder().value(2.0).build());
     Iterator<Exemplar> iterator = exemplars.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
   @Test

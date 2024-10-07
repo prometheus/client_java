@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import java.util.Iterator;
@@ -21,13 +22,13 @@ public class QuantilesTest {
     assertThat(quantiles.get(2).getValue()).isCloseTo(0.23, offset(0.0));
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testImmutable() {
     Quantiles quantiles =
         Quantiles.builder().quantile(0.99, 0.23).quantile(0.5, 0.2).quantile(0.95, 0.22).build();
     Iterator<Quantile> iterator = quantiles.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
   @Test
@@ -35,8 +36,15 @@ public class QuantilesTest {
     assertThat(Quantiles.EMPTY.size()).isZero();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicate() {
-    Quantiles.builder().quantile(0.95, 0.23).quantile(0.5, 0.2).quantile(0.95, 0.22).build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                Quantiles.builder()
+                    .quantile(0.95, 0.23)
+                    .quantile(0.5, 0.2)
+                    .quantile(0.95, 0.22)
+                    .build());
   }
 }

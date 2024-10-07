@@ -323,12 +323,12 @@ public class CounterTest {
   @Test
   public void testConstLabelsSecond() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Counter.builder()
-        .name("test_total")
-        .labelNames("const.a")
-        .constLabels(Labels.of("const_a", "const_b"))
-        .build());
+        .isThrownBy(
+            () ->
+                Counter.builder()
+                    .name("test_total")
+                    .labelNames("const.a")
+                    .constLabels(Labels.of("const_a", "const_b"))
+                    .build());
   }
 }

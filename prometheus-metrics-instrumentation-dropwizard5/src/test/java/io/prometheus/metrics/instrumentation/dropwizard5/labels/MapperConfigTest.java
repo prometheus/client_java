@@ -1,6 +1,7 @@
 package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,10 +16,10 @@ public class MapperConfigTest {
     assertThat(mapperConfig.getMatch()).isEqualTo("com.company.meter.*");
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void setMatch_WHEN_ExpressionDoesnNotMatchPattern_ThrowException() {
-    final MapperConfig mapperConfig = new MapperConfig();
-    mapperConfig.setMatch("com.company.meter.**.yay");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MapperConfig().setMatch("com.company.meter.**.yay"));
   }
 
   @Test
@@ -30,13 +31,14 @@ public class MapperConfigTest {
     assertThat(mapperConfig.getLabels()).isEqualTo(labels);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void setLabels_WHEN_ExpressionDoesnNotMatchPattern_ThrowException() {
     final MapperConfig mapperConfig = new MapperConfig();
     final Map<String, String> labels = new HashMap<>();
     labels.put("valid", "${0}");
     labels.put("not valid", "${0}");
-    mapperConfig.setLabels(labels);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> mapperConfig.setLabels(labels));
   }
 
   @Test

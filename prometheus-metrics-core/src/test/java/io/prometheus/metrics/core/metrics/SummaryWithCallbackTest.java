@@ -51,7 +51,7 @@ public class SummaryWithCallbackTest {
   @Test
   public void testSummaryNoCallback() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() ->
-    SummaryWithCallback.builder().name("summary").labelNames("l1", "l2").build());
+        .isThrownBy(
+            () -> SummaryWithCallback.builder().name("summary").labelNames("l1", "l2").build());
   }
 }

@@ -35,7 +35,7 @@ public class PushGatewayTest {
   public void testInvalidURLThrowsRuntimeException() {
     assertThatExceptionOfType(RuntimeException.class)
         .isThrownBy(
-            ()-> {
+            () -> {
               PushGateway.builder()
                   .address("::")
                   .build(); // ":" is interpreted as port number, so parsing fails

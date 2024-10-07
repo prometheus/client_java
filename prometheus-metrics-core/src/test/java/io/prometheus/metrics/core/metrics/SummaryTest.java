@@ -154,33 +154,25 @@ public class SummaryTest {
   @Test
   public void testBuilderInvalidNumberOfAgeBuckets() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Summary.builder().name("name").numberOfAgeBuckets(-1).build());
+        .isThrownBy(() -> Summary.builder().name("name").numberOfAgeBuckets(-1).build());
   }
 
   @Test
   public void testBuilderInvalidMaxAge() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Summary.builder().name("name").maxAgeSeconds(-1).build());
+        .isThrownBy(() -> Summary.builder().name("name").maxAgeSeconds(-1).build());
   }
 
   @Test
   public void testBuilderInvalidQuantile() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Summary.builder().name("name").quantile(42).build());
+        .isThrownBy(() -> Summary.builder().name("name").quantile(42).build());
   }
 
   @Test
   public void testBuilderInvalidQuantileError() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Summary.builder().name("name").quantile(0.5, 20).build());
+        .isThrownBy(() -> Summary.builder().name("name").quantile(0.5, 20).build());
   }
 
   private double getQuantile(Summary summary, double quantile, Labels labels) {

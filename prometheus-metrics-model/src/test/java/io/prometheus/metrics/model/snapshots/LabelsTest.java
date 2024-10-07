@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.assertj.core.api.IterableAssert;
 import org.junit.jupiter.api.Test;
@@ -75,19 +76,22 @@ public class LabelsTest {
     assertLabels(labels1).isEqualTo(labels2);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalLabelName() {
-    Labels.of("my_service/status", "200");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Labels.of("my_service/status", "200"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testReservedLabelName() {
-    Labels.of("__name__", "requests_total");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Labels.of("__name__", "requests_total"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicateLabelName() {
-    Labels.of("name1", "value1", "name2", "value2", "name1", "value3");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Labels.of("name1", "value1", "name2", "value2", "name1", "value3"));
   }
 
   @Test
@@ -118,15 +122,17 @@ public class LabelsTest {
     assertThat(merged.getName(2)).isEqualTo("key.3");
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testMergeDuplicateName() {
     Labels labels1 = Labels.of("key_one", "v1");
     Labels labels2 = Labels.of("key.one", "v2");
-    labels2.merge(labels1);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> labels2.merge(labels1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicateName() {
-    Labels.of("key_one", "v1", "key.one", "v2");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Labels.of("key_one", "v1", "key.one", "v2"));
   }
 }

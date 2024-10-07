@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.registry;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -99,11 +100,12 @@ public class PrometheusRegistryTest {
     fail("Expected duplicate name exception");
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void registerDuplicateName() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counterA1);
-    registry.register(counterA2);
+    assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> registry.register(counterA2));
   }
 
   @Test
@@ -124,11 +126,12 @@ public class PrometheusRegistryTest {
     assertThat(snapshots.size()).isEqualTo(3);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void registerDuplicateMultiCollector() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(multiCollector);
-    registry.register(multiCollector);
+    assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> registry.register(multiCollector));
   }
 
   @Test

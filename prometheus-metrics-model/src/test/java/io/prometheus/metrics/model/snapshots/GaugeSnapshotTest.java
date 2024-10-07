@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
@@ -85,22 +86,25 @@ public class GaugeSnapshotTest {
     assertThat(snapshot.getDataPoints().size()).isZero();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testTotalSuffixPresent() {
-    CounterSnapshot.builder().name("test_total").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> CounterSnapshot.builder().name("test_total").build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testTotalSuffixPresentDot() {
-    CounterSnapshot.builder().name("test.total").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> CounterSnapshot.builder().name("test.total").build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testValueMissing() {
-    CounterDataPointSnapshot.builder().build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> CounterDataPointSnapshot.builder().build());
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testDataImmutable() {
     GaugeSnapshot snapshot =
         GaugeSnapshot.builder()
@@ -112,6 +116,6 @@ public class GaugeSnapshotTest {
             .build();
     Iterator<GaugeDataPointSnapshot> iterator = snapshot.getDataPoints().iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 }

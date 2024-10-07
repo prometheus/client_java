@@ -107,19 +107,20 @@ public class ExemplarTest {
     }
 
     assertThatExceptionOfType(ConditionTimeoutException.class)
-            .isThrownBy(
-                () ->
-    await()
-        .atMost(TIMEOUT, SECONDS)
-        .ignoreException(com.github.tomakehurst.wiremock.client.VerificationException.class)
-        .until(
-            () -> {
-              verify(
-                  postRequestedFor(urlEqualTo(ENDPOINT_PATH))
-                      .withHeader("Content-Type", equalTo("application/x-protobuf"))
-                      .andMatching(getExemplarCountMatcher(1)));
-              return true;
-            }));
+        .isThrownBy(
+            () ->
+                await()
+                    .atMost(TIMEOUT, SECONDS)
+                    .ignoreException(
+                        com.github.tomakehurst.wiremock.client.VerificationException.class)
+                    .until(
+                        () -> {
+                          verify(
+                              postRequestedFor(urlEqualTo(ENDPOINT_PATH))
+                                  .withHeader("Content-Type", equalTo("application/x-protobuf"))
+                                  .andMatching(getExemplarCountMatcher(1)));
+                          return true;
+                        }));
   }
 
   private static ValueMatcher<Request> getExemplarCountMatcher(int expectedCount) {

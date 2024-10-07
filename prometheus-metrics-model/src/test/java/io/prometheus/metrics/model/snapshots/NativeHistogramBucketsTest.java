@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
@@ -37,19 +38,20 @@ public class NativeHistogramBucketsTest {
     assertThat(buckets.getCount(2)).isEqualTo(4);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDifferentLength() {
     int[] bucketIndexes = new int[] {0, 1, 2};
     long[] cumulativeCounts = new long[] {13, 178, 1024, 3000};
-    NativeHistogramBuckets.of(bucketIndexes, cumulativeCounts);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> NativeHistogramBuckets.of(bucketIndexes, cumulativeCounts));
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testImmutable() {
     NativeHistogramBuckets buckets =
         NativeHistogramBuckets.builder().bucket(1, 1).bucket(2, 1).build();
     Iterator<NativeHistogramBucket> iterator = buckets.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 }

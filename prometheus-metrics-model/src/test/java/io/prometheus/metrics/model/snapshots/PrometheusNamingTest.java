@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.snapshots;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
@@ -72,23 +73,27 @@ public class PrometheusNamingTest {
     assertThat(sanitizeUnitName("2")).isEqualTo("2");
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidUnitName1() {
-    sanitizeUnitName("total");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> sanitizeUnitName("total"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidUnitName2() {
-    sanitizeUnitName("_total");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> sanitizeUnitName("_total"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidUnitName3() {
-    sanitizeUnitName("%");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> sanitizeUnitName("%"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testEmptyUnitName() {
-    sanitizeUnitName("");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> sanitizeUnitName(""));
   }
 }

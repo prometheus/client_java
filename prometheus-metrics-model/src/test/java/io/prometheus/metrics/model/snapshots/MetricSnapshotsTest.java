@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ public class MetricSnapshotsTest {
     assertThat(snapshots.get(2).getMetadata().getName()).isEqualTo("counter3");
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDuplicateName() {
     // Q: What if you have a counter named "foo" and a gauge named "foo"?
     // A: Great question. You might think this is a valid scenario, because the counter will produce
@@ -56,7 +57,8 @@ public class MetricSnapshotsTest {
             .name("my_metric")
             .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(1.0).build())
             .build();
-    new MetricSnapshots(c, g);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MetricSnapshots(c, g));
   }
 
   @Test
@@ -72,7 +74,7 @@ public class MetricSnapshotsTest {
     assertThat(builder.containsMetricName("my_metric")).isTrue();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testImmutable() {
     CounterSnapshot c1 =
         CounterSnapshot.builder()
@@ -92,6 +94,6 @@ public class MetricSnapshotsTest {
     MetricSnapshots snapshots = new MetricSnapshots(c2, c3, c1);
     Iterator<MetricSnapshot> iterator = snapshots.iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 }

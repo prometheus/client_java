@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import org.assertj.core.api.IterableAssert;
@@ -35,9 +36,10 @@ public class ExemplarTest {
     assertThat(exemplar.getTimestampMillis()).isEqualTo(timestamp);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testValueMissing() {
-    Exemplar.builder().build();
+    assertThatExceptionOfType(IllegalStateException.class)
+        .isThrownBy(() -> Exemplar.builder().build());
   }
 
   @Test

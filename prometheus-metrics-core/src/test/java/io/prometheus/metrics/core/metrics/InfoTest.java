@@ -83,17 +83,15 @@ public class InfoTest {
   @Test
   public void testConstLabelsDuplicate1() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Info.builder().constLabels(Labels.of("a_1", "val1")).labelNames("a.1").build());
+        .isThrownBy(
+            () -> Info.builder().constLabels(Labels.of("a_1", "val1")).labelNames("a.1").build());
   }
 
   @Test
   public void testConstLabelsDuplicate2() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Info.builder().labelNames("a_1").constLabels(Labels.of("a.1", "val1")).build());
+        .isThrownBy(
+            () -> Info.builder().labelNames("a_1").constLabels(Labels.of("a.1", "val1")).build());
   }
 
   private void assertTextFormat(String expected, Info info) throws IOException {

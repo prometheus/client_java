@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ public class InfoSnapshotTest {
     assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testDataImmutable() {
     InfoSnapshot snapshot =
         InfoSnapshot.builder()
@@ -48,16 +49,18 @@ public class InfoSnapshotTest {
             .build();
     Iterator<InfoSnapshot.InfoDataPointSnapshot> iterator = snapshot.getDataPoints().iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNameMustNotIncludeSuffix() {
-    InfoSnapshot.builder().name("jvm_info").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> InfoSnapshot.builder().name("jvm_info").build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNameMustNotIncludeSuffixDot() {
-    InfoSnapshot.builder().name("jvm.info").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> InfoSnapshot.builder().name("jvm.info").build());
   }
 }

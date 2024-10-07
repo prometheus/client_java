@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import org.junit.jupiter.api.Test;
@@ -60,14 +61,16 @@ public class UnknownSnapshotTest {
     assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNameMissing() {
-    UnknownSnapshot.builder().build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> UnknownSnapshot.builder().build());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testValueMissing() {
-    UnknownSnapshot.UnknownDataPointSnapshot.builder().build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> UnknownSnapshot.UnknownDataPointSnapshot.builder().build());
   }
 
   @Test

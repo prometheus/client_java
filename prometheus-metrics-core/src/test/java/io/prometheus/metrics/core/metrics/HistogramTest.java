@@ -1232,50 +1232,43 @@ public class HistogramTest {
   }
 
   @Test
-  public void testIllegalLabelName() {   assertThatExceptionOfType(IllegalArgumentException.class)
-          .isThrownBy(
-              () ->
-    Histogram.builder().name("test").labelNames("label", "le"));
+  public void testIllegalLabelName() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Histogram.builder().name("test").labelNames("label", "le"));
   }
 
   @Test
   public void testIllegalLabelNameConstLabels() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Histogram.builder().name("test").constLabels(Labels.of("label1", "value1", "le", "0.3")));
+        .isThrownBy(
+            () ->
+                Histogram.builder()
+                    .name("test")
+                    .constLabels(Labels.of("label1", "value1", "le", "0.3")));
   }
 
   @Test
   public void testIllegalLabelNamePrefix() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Histogram.builder().name("test").labelNames("__hello"));
+        .isThrownBy(() -> Histogram.builder().name("test").labelNames("__hello"));
   }
 
   @Test
   public void testIllegalName() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    Histogram.builder().name("my_namespace/server.durations"));
+        .isThrownBy(() -> Histogram.builder().name("my_namespace/server.durations"));
   }
 
   @Test
   public void testNoName() {
     assertThatExceptionOfType(NullPointerException.class)
-            .isThrownBy(
-                () ->
-    Histogram.builder().build());
+        .isThrownBy(() -> Histogram.builder().build());
   }
 
   @Test
   public void testNullName() {
     assertThatExceptionOfType(NullPointerException.class)
-            .isThrownBy(
-                () ->
-    Histogram.builder().name(null));
+        .isThrownBy(() -> Histogram.builder().name(null));
   }
 
   @Test
@@ -1352,9 +1345,8 @@ public class HistogramTest {
   @Test
   public void testBucketsIncludeNaN() {
     assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(
-                () ->
-    Histogram.builder().name("test").classicUpperBounds(0.01, 0.1, 1.0, Double.NaN));
+        .isThrownBy(
+            () -> Histogram.builder().name("test").classicUpperBounds(0.01, 0.1, 1.0, Double.NaN));
   }
 
   @Test

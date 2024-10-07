@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot.HistogramDataPointSnapshot;
@@ -232,10 +233,11 @@ public class HistogramSnapshotTest {
     assertThat(data.getCount()).isEqualTo(5);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testEmptyData() {
     // This will fail because one of nativeSchema and classicHistogramBuckets is required
-    HistogramDataPointSnapshot.builder().build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> HistogramDataPointSnapshot.builder().build());
   }
 
   @Test
@@ -245,7 +247,7 @@ public class HistogramSnapshotTest {
     assertThat(data.getNativeBucketsForPositiveValues().size()).isZero();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testDataImmutable() {
     HistogramSnapshot snapshot =
         HistogramSnapshot.builder()
@@ -267,13 +269,16 @@ public class HistogramSnapshotTest {
             .build();
     Iterator<HistogramDataPointSnapshot> iterator = snapshot.getDataPoints().iterator();
     iterator.next();
-    iterator.remove();
+    assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testEmptyClassicBuckets() {
-    new HistogramDataPointSnapshot(
-        ClassicHistogramBuckets.EMPTY, Double.NaN, Labels.EMPTY, Exemplars.EMPTY, 0L);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                new HistogramDataPointSnapshot(
+                    ClassicHistogramBuckets.EMPTY, Double.NaN, Labels.EMPTY, Exemplars.EMPTY, 0L));
   }
 
   @Test

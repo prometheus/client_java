@@ -1,14 +1,15 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
 public class UnitTest {
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testEmpty() {
-    new Unit(" ");
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> new Unit(" "));
   }
 
   @Test

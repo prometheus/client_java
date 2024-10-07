@@ -40,8 +40,6 @@ public class GaugeWithCallbackTest {
   @Test
   public void testGaugeNoCallback() {
     assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(
-                () ->
-    GaugeWithCallback.builder().name("gauge").labelNames("l1", "l2").build());
+        .isThrownBy(() -> GaugeWithCallback.builder().name("gauge").labelNames("l1", "l2").build());
   }
 }
