@@ -1,8 +1,5 @@
 package io.prometheus.metrics.instrumentation.dropwizard5;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import io.dropwizard.metrics5.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -13,9 +10,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 public class DropwizardExportsTest {
 
@@ -37,46 +37,21 @@ public class DropwizardExportsTest {
             + "foo_bar_total 1.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat());
+    assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 
   @Test
   public void testGauge() {
     Gauge<Integer> integerGauge =
-        new Gauge<Integer>() {
-          @Override
-          public Integer getValue() {
-            return 1234;
-          }
-        };
+            () -> 1234;
     Gauge<Double> doubleGauge =
-        new Gauge<Double>() {
-          @Override
-          public Double getValue() {
-            return 1.234D;
-          }
-        };
+            () -> 1.234D;
     Gauge<Long> longGauge =
-        new Gauge<Long>() {
-          @Override
-          public Long getValue() {
-            return 1234L;
-          }
-        };
+            () -> 1234L;
     Gauge<Float> floatGauge =
-        new Gauge<Float>() {
-          @Override
-          public Float getValue() {
-            return 0.1234F;
-          }
-        };
+            () -> 0.1234F;
     Gauge<Boolean> booleanGauge =
-        new Gauge<Boolean>() {
-          @Override
-          public Boolean getValue() {
-            return true;
-          }
-        };
+            () -> true;
 
     metricRegistry.register("double.gauge", doubleGauge);
     metricRegistry.register("long.gauge", longGauge);
@@ -102,41 +77,31 @@ public class DropwizardExportsTest {
             + "long_gauge 1234.0\n"
             + "# EOF\n";
 
-    assertEquals(expected, convertToOpenMetricsFormat());
+    assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 
   @Test
   public void testInvalidGaugeType() {
     Gauge<String> invalidGauge =
-        new Gauge<String>() {
-          @Override
-          public String getValue() {
-            return "foobar";
-          }
-        };
+            () -> "foobar";
 
     metricRegistry.register("invalid_gauge", invalidGauge);
 
     String expected = "# EOF\n";
-    assertEquals(expected, convertToOpenMetricsFormat());
+    assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 
   @Test
   public void testGaugeReturningNullValue() {
     Gauge<String> invalidGauge =
-        new Gauge<String>() {
-          @Override
-          public String getValue() {
-            return null;
-          }
-        };
+            () -> null;
     metricRegistry.register("invalid_gauge", invalidGauge);
     String expected = "# EOF\n";
-    assertEquals(expected, convertToOpenMetricsFormat());
+    assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 
   @Test
-  public void testHistogram() throws IOException {
+  public void testHistogram() {
     // just test the standard mapper
     final MetricRegistry metricRegistry = new MetricRegistry();
     PrometheusRegistry pmRegistry = new PrometheusRegistry();
@@ -181,31 +146,29 @@ public class DropwizardExportsTest {
     // The following asserts the values, but allows an error of 1.0 for quantile values.
 
     MetricSnapshots snapshots = pmRegistry.scrape(name -> name.equals("hist"));
-    Assert.assertEquals(1, snapshots.size());
+    assertThat(snapshots.size()).isOne();
     SummarySnapshot snapshot = (SummarySnapshot) snapshots.get(0);
-    Assert.assertEquals("hist", snapshot.getMetadata().getName());
-    Assert.assertEquals(
-        "Generated from Dropwizard metric import (metric=hist, type=io.dropwizard.metrics5.Histogram)",
-        snapshot.getMetadata().getHelp());
-    Assert.assertEquals(1, snapshot.getDataPoints().size());
+    assertThat(snapshot.getMetadata().getName()).isEqualTo("hist");
+    assertThat(snapshot.getMetadata().getHelp()).isEqualTo("Generated from Dropwizard metric import (metric=hist, type=io.dropwizard.metrics5.Histogram)");
+    assertThat(snapshot.getDataPoints().size()).isOne();
     SummarySnapshot.SummaryDataPointSnapshot dataPoint = snapshot.getDataPoints().get(0);
-    Assert.assertTrue(dataPoint.hasCount());
-    Assert.assertEquals(100, dataPoint.getCount());
-    Assert.assertFalse(dataPoint.hasSum());
+    assertThat(dataPoint.hasCount()).isTrue();
+    assertThat(dataPoint.getCount()).isEqualTo(100);
+    assertThat(dataPoint.hasSum()).isFalse();
     Quantiles quantiles = dataPoint.getQuantiles();
-    Assert.assertEquals(6, quantiles.size());
-    Assert.assertEquals(0.5, quantiles.get(0).getQuantile(), 0.0);
-    Assert.assertEquals(49.0, quantiles.get(0).getValue(), 1.0);
-    Assert.assertEquals(0.75, quantiles.get(1).getQuantile(), 0.0);
-    Assert.assertEquals(74.0, quantiles.get(1).getValue(), 1.0);
-    Assert.assertEquals(0.95, quantiles.get(2).getQuantile(), 0.0);
-    Assert.assertEquals(94.0, quantiles.get(2).getValue(), 1.0);
-    Assert.assertEquals(0.98, quantiles.get(3).getQuantile(), 0.0);
-    Assert.assertEquals(97.0, quantiles.get(3).getValue(), 1.0);
-    Assert.assertEquals(0.99, quantiles.get(4).getQuantile(), 0.0);
-    Assert.assertEquals(98.0, quantiles.get(4).getValue(), 1.0);
-    Assert.assertEquals(0.999, quantiles.get(5).getQuantile(), 0.0);
-    Assert.assertEquals(99.0, quantiles.get(5).getValue(), 1.0);
+    assertThat(quantiles.size()).isEqualTo(6);
+    assertThat(quantiles.get(0).getQuantile()).isCloseTo(0.5, offset(0.0));
+    assertThat(quantiles.get(0).getValue()).isCloseTo(49.0, offset(1.0));
+    assertThat(quantiles.get(1).getQuantile()).isCloseTo(0.75, offset(0.0));
+    assertThat(quantiles.get(1).getValue()).isCloseTo(74.0, offset(1.0));
+    assertThat(quantiles.get(2).getQuantile()).isCloseTo(0.95, offset(0.0));
+    assertThat(quantiles.get(2).getValue()).isCloseTo(94.0, offset(1.0));
+    assertThat(quantiles.get(3).getQuantile()).isCloseTo(0.98, offset(0.0));
+    assertThat(quantiles.get(3).getValue()).isCloseTo(97.0, offset(1.0));
+    assertThat(quantiles.get(4).getQuantile()).isCloseTo(0.99, offset(0.0));
+    assertThat(quantiles.get(4).getValue()).isCloseTo(98.0, offset(1.0));
+    assertThat(quantiles.get(5).getQuantile()).isCloseTo(0.999, offset(0.0));
+    assertThat(quantiles.get(5).getValue()).isCloseTo(99.0, offset(1.0));
   }
 
   @Test
@@ -219,7 +182,7 @@ public class DropwizardExportsTest {
             + "# HELP meter Generated from Dropwizard metric import (metric=meter_total, type=io.dropwizard.metrics5.Meter)\n"
             + "meter_total 2.0\n"
             + "# EOF\n";
-    assertEquals(expected, convertToOpenMetricsFormat());
+    assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 
   @Test
@@ -237,15 +200,15 @@ public class DropwizardExportsTest {
         (SummarySnapshot.SummaryDataPointSnapshot)
             exports.collect().stream().flatMap(i -> i.getDataPoints().stream()).findFirst().get();
     // We slept for 1Ms so we ensure that all timers are above 1ms:
-    assertTrue(dataPointSnapshot.getQuantiles().size() > 1);
+    assertThat(dataPointSnapshot.getQuantiles().size()).isGreaterThan(1);
     dataPointSnapshot
         .getQuantiles()
         .forEach(
             i -> {
               System.out.println(i.getQuantile() + " : " + i.getValue());
-              assertTrue(i.getValue() > timeSpentMillis / 1000d);
+              assertThat(i.getValue()).isGreaterThan(timeSpentMillis / 1000d);
             });
-    assertEquals(1, dataPointSnapshot.getCount());
+    assertThat(dataPointSnapshot.getCount()).isOne();
   }
 
   @Test
@@ -286,7 +249,7 @@ public class DropwizardExportsTest {
             + "my_application_namedTimer1{quantile=\"0.999\"} 0.0\n"
             + "my_application_namedTimer1_count 0\n"
             + "# EOF\n";
-    assertEquals(expected, convertToOpenMetricsFormat());
+    assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 
   private static class ExampleDoubleGauge implements Gauge<Double> {
