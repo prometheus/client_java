@@ -1,12 +1,19 @@
 package io.prometheus.metrics.model.snapshots;
 
 public abstract class DataPointSnapshot {
+  private final String metricName;
   private final Labels labels;
   private final long createdTimestampMillis;
   private final long scrapeTimestampMillis;
 
   protected DataPointSnapshot(
-      Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
+          Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
+    this(null, labels, createdTimestampMillis, scrapeTimestampMillis);
+  }
+
+  protected DataPointSnapshot(
+          String metricName, Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
+    this.metricName = metricName;
     this.labels = labels;
     this.createdTimestampMillis = createdTimestampMillis;
     this.scrapeTimestampMillis = scrapeTimestampMillis;
@@ -14,6 +21,10 @@ public abstract class DataPointSnapshot {
   }
 
   private void validate() {
+    if (metricName != null && metricName.trim().isEmpty()) {
+      throw new IllegalArgumentException("Metric name cannot be an empty string");
+    }
+
     if (labels == null) {
       throw new IllegalArgumentException(
           "Labels cannot be null. Use Labels.EMPTY if there are no labels.");
@@ -58,6 +69,10 @@ public abstract class DataPointSnapshot {
    */
   public long getCreatedTimestampMillis() {
     return createdTimestampMillis;
+  }
+
+  public String getMetricName() {
+    return metricName;
   }
 
   public abstract static class Builder<T extends Builder<T>> {
