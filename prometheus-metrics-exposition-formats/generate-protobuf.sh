@@ -11,8 +11,10 @@ PROTOBUF_VERSION_STRING=$2
 
 echo "Generating protobuf sources for version $PROTOBUF_VERSION_STRING in $TARGET_DIR"
 
-rm -rf TARGET_DIR/*
-rm -rf $PROTO_DIR/*
+rm -rf TARGET_DIR || true
+mkdir -p $TARGET_DIR
+rm -rf $PROTO_DIR || true
+mkdir -p $PROTO_DIR
 
 curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/prometheus/client/metrics.proto -o $PROTO_DIR/metrics.proto
 sed -i "s/java_package = \"io.prometheus.client\"/java_package = \"io.prometheus.metrics.expositionformats.generated.com_google_protobuf_${PROTOBUF_VERSION_STRING}\"/" $PROTO_DIR/metrics.proto
