@@ -20,28 +20,6 @@
         <automatic.module.name>io.prometheus.metrics.instrumentation.dropwizard5</automatic.module.name>
     </properties>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>francois-visconte</id>
-            <name>Francois Visconte</name>
-            <email>f.visconte@gmail.com</email>
-        </developer>
-
-        <developer>
-            <id>kingster</id>
-            <name>Kinshuk Bairagi</name>
-            <email>hi@kinsh.uk</email>
-        </developer>
-
-    </developers>
-
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
@@ -69,5 +47,13 @@
         </dependency>
 
     </dependencies>
+    <developers>
+        <developer>
+            <id>kingster</id>
+            <name>Kinshuk Bairagi</name>
+            <email>hi@kinsh.uk</email>
+        </developer>
 
+
+    </developers>
 </project>

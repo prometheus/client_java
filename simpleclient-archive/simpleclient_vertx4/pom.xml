@@ -16,22 +16,6 @@
         Vert.x 4 Web Handler exporter for the simpleclient.
     </description>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <id>pmlopes</id>
-            <name>Paulo Lopes</name>
-            <email>paulo@mlopes.net</email>
-        </developer>
-    </developers>
-
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

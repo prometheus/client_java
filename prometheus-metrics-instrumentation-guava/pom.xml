@@ -20,21 +20,7 @@
         <automatic.module.name>io.prometheus.metrics.instrumentation.guava</automatic.module.name>
     </properties>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
     <developers>
-        <developer>
-            <id>checketts</id>
-            <name>Clint Checketts</name>
-            <email>checketts@gmail.com</email>
-        </developer>
-
         <developer>
             <id>pheyken</id>
             <name>Petar Heyken</name>

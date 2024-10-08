@@ -16,22 +16,6 @@
         Metrics collector for logback appender logging
     </description>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <id>willfleury</id>
-            <name>Will Fleury</name>
-            <email>will.fleury@boxever.com</email>
-        </developer>
-    </developers>
-
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
