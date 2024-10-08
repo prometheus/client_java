@@ -17,6 +17,8 @@ jobs:
           java-version: 17
           distribution: temurin
           cache: 'maven'
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
       - name: Run the Maven verify phase
         run: |
           ./mvnw clean install
