@@ -64,7 +64,7 @@ jobs:
       - name: Make Javadoc
         run: ./mvnw -B clean compile javadoc:javadoc javadoc:aggregate
       - name: Move the Javadoc to docs/static/api/
-        run: mv ./target/site/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api
+        run: mv ./target/reports/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5

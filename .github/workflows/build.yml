@@ -24,4 +24,4 @@ jobs:
       - name: Run the Maven verify phase
         run: |
           ./mvnw clean install
-          ./mvnw javadoc:jar
+          ./mvnw javadoc:javadoc

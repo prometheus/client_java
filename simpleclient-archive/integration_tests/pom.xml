@@ -13,14 +13,6 @@
 
     <name>Prometheus Java Suit - Integration Tests</name>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
     <modules>
         <module>it_exemplars_otel_sdk</module>
         <module>it_exemplars_otel_agent</module>

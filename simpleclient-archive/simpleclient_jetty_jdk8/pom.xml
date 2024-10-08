@@ -16,20 +16,6 @@
         Collector of data from Jetty Statistics for Jetty versions which require JDK 8.
     </description>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>cenkakin</id>
-            <name>Cenk Akin</name>
-            <email>cenk.akin91@gmail.com</email>
-        </developer>
-    </developers>
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>

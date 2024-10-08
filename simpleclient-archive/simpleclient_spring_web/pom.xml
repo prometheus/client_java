@@ -16,33 +16,6 @@
         Spring-specific metrics helpers
     </description>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <id>tokuhirom</id>
-            <name>Tokuhiro Matsuno</name>
-            <email>tokuhirom@gmail.com</email>
-        </developer>
-        <developer>
-            <name>Marco Aust</name>
-            <email>github@marcoaust.de</email>
-            <organization>private</organization>
-            <organizationUrl>https://github.com/maust</organizationUrl>
-        </developer>
-        <developer>
-            <id>eliezio</id>
-            <name>Eliezio Oliveira</name>
-            <email>eliezio.oliveira@gmail.com</email>
-        </developer>
-    </developers>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

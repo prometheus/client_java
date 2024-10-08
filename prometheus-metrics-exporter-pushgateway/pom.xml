@@ -21,27 +21,6 @@
         <automatic.module.name>io.prometheus.metrics.exporter.pushgateway</automatic.module.name>
     </properties>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <id>brian-brazil</id>
-            <name>Brian Brazil</name>
-            <email>brian.brazil@boxever.com</email>
-        </developer>
-        <developer>
-            <id>fstab</id>
-            <name>Fabian Stäber</name>
-            <email>fabian@fstab.de</email>
-        </developer>
-    </developers>
-
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
