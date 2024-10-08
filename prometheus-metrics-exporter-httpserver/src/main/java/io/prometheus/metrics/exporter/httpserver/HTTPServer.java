@@ -2,6 +2,7 @@ package io.prometheus.metrics.exporter.httpserver;
 
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
@@ -10,14 +11,18 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.security.auth.Subject;
 
 /**
  * Expose Prometheus metrics using a plain Java HttpServer.
@@ -51,6 +56,7 @@ public class HTTPServer implements Closeable {
       HttpServer httpServer,
       PrometheusRegistry registry,
       Authenticator authenticator,
+      String authenticatedSubjectAttributeName,
       HttpHandler defaultHandler) {
     if (httpServer.getAddress() == null) {
       throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
@@ -58,9 +64,17 @@ public class HTTPServer implements Closeable {
     this.server = httpServer;
     this.executorService = executorService;
     registerHandler(
-        "/", defaultHandler == null ? new DefaultHandler() : defaultHandler, authenticator);
-    registerHandler("/metrics", new MetricsHandler(config, registry), authenticator);
-    registerHandler("/-/healthy", new HealthyHandler(), authenticator);
+        "/",
+        defaultHandler == null ? new DefaultHandler() : defaultHandler,
+        authenticator,
+        authenticatedSubjectAttributeName);
+    registerHandler(
+        "/metrics",
+        new MetricsHandler(config, registry),
+        authenticator,
+        authenticatedSubjectAttributeName);
+    registerHandler(
+        "/-/healthy", new HealthyHandler(), authenticator, authenticatedSubjectAttributeName);
     try {
       // HttpServer.start() starts the HttpServer in a new background thread.
       // If we call HttpServer.start() from a thread of the executorService,
@@ -74,11 +88,52 @@ public class HTTPServer implements Closeable {
     }
   }
 
-  private void registerHandler(String path, HttpHandler handler, Authenticator authenticator) {
-    HttpContext context = server.createContext(path, handler);
+  private void registerHandler(
+      String path, HttpHandler handler, Authenticator authenticator, String subjectAttributeName) {
+    HttpContext context = server.createContext(path, wrapWithDoAs(handler, subjectAttributeName));
     if (authenticator != null) {
       context.setAuthenticator(authenticator);
     }
+  }
+
+  private HttpHandler wrapWithDoAs(HttpHandler handler, String subjectAttributeName) {
+    if (subjectAttributeName == null) {
+      return handler;
+    }
+
+    // invoke handler using the subject.doAs from the named attribute
+    return new HttpHandler() {
+      @Override
+      public void handle(HttpExchange exchange) throws IOException {
+        Object authSubject = exchange.getAttribute(subjectAttributeName);
+        if (authSubject instanceof Subject) {
+          try {
+            Subject.doAs(
+                (Subject) authSubject,
+                (PrivilegedExceptionAction<IOException>)
+                    () -> {
+                      handler.handle(exchange);
+                      return null;
+                    });
+          } catch (PrivilegedActionException e) {
+            if (e.getException() != null) {
+              throw new IOException(e.getException());
+            } else throw new IOException(e);
+          }
+        } else {
+          drainInputAndClose(exchange);
+          exchange.sendResponseHeaders(403, -1);
+        }
+      }
+    };
+  }
+
+  private void drainInputAndClose(HttpExchange httpExchange) throws IOException {
+    InputStream inputStream = httpExchange.getRequestBody();
+    byte[] b = new byte[4096];
+    while (inputStream.read(b) != -1)
+      ;
+    inputStream.close();
   }
 
   /** Stop the HTTP server. Same as {@link #close()}. */
@@ -120,6 +175,7 @@ public class HTTPServer implements Closeable {
     private Authenticator authenticator = null;
     private HttpsConfigurator httpsConfigurator = null;
     private HttpHandler defaultHandler = null;
+    private String authenticatedSubjectAttributeName = null;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -171,6 +227,12 @@ public class HTTPServer implements Closeable {
       return this;
     }
 
+    /** Optional: the attribute name of a Subject from a custom authenticator. */
+    public Builder authenticatedSubjectAttributeName(String authenticatedSubjectAttributeName) {
+      this.authenticatedSubjectAttributeName = authenticatedSubjectAttributeName;
+      return this;
+    }
+
     /** Optional: {@link HttpsConfigurator} for TLS/SSL */
     public Builder httpsConfigurator(HttpsConfigurator configurator) {
       this.httpsConfigurator = configurator;
@@ -201,7 +263,13 @@ public class HTTPServer implements Closeable {
       ExecutorService executorService = makeExecutorService();
       httpServer.setExecutor(executorService);
       return new HTTPServer(
-          config, executorService, httpServer, registry, authenticator, defaultHandler);
+          config,
+          executorService,
+          httpServer,
+          registry,
+          authenticator,
+          authenticatedSubjectAttributeName,
+          defaultHandler);
     }
 
     private InetSocketAddress makeInetSocketAddress() {
