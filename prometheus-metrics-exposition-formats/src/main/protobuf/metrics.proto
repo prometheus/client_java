@@ -14,7 +14,7 @@
 syntax = "proto2";
 
 package io.prometheus.client;
-option java_package = "io.prometheus.client";
+option java_package = "io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3";
 option go_package = "github.com/prometheus/client_model/go;io_prometheus_client";
 
 import "google/protobuf/timestamp.proto";

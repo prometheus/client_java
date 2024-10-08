@@ -19,6 +19,7 @@
 
     <properties>
         <automatic.module.name>io.prometheus.metrics.expositionformats</automatic.module.name>
+        <protobuf-java.version>3.25.3</protobuf-java.version>
     </properties>
 
     <dependencies>
@@ -35,12 +36,53 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.25.3</version>
+            <version>${protobuf-java.version}</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>regex-property</id>
+                        <goals>
+                            <goal>regex-property</goal>
+                        </goals>
+                        <configuration>
+                            <name>protobuf-java.string-version</name>
+                            <value>${protobuf-java.version}</value>
+                            <regex>\.</regex>
+                            <replacement>_</replacement>
+                            <failIfNoMatch>true</failIfNoMatch>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <id>Generate Protobuf</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${project.basedir}/generate-protobuf.sh</executable>
+                            <arguments>
+                                <argument>${project.basedir}/src/main/generated</argument>
+                                <argument>${protobuf-java.string-version}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -81,7 +123,9 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.google.protobuf</pattern>
-                                    <shadedPattern>io.prometheus.metrics.shaded.com_google_protobuf</shadedPattern>
+                                    <shadedPattern>
+                                        io.prometheus.metrics.shaded.com_google_protobuf_${protobuf-java.string-version}
+                                    </shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
