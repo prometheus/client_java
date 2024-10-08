@@ -269,6 +269,7 @@
                     <noqualifier>all</noqualifier>
                     <show>public</show>
                     <excludePackageNames>io.prometheus.metrics.expositionformats.generated.*</excludePackageNames>
+                    <source>8</source>
                 </configuration>
             </plugin>
             <plugin>
