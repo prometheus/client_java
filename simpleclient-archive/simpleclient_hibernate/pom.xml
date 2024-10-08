@@ -16,22 +16,6 @@
         Collectors of data from Hibernate.
     </description>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <id>chkal</id>
-            <name>Christian Kaltepoth</name>
-            <email>christian@kaltepoth.de</email>
-        </developer>
-    </developers>
-
     <dependencies>
 
         <dependency>

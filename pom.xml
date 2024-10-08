@@ -37,19 +37,14 @@
 
     <developers>
         <developer>
-            <id>mtp</id>
-            <name>Matt T. Proud</name>
-            <email>matt.proud@gmail.com</email>
-        </developer>
-        <developer>
-            <id>brian-brazil</id>
-            <name>Brian Brazil</name>
-            <email>brian.brazil@boxever.com</email>
-        </developer>
-        <developer>
             <id>fstab</id>
             <name>Fabian Stäber</name>
             <email>fabian@fstab.de</email>
+        </developer>
+        <developer>
+            <id>zeitlinger</id>
+            <name>Gregor Zeitlinger</name>
+            <email>gregor.zeitlinger@grafana.com</email>
         </developer>
     </developers>
 

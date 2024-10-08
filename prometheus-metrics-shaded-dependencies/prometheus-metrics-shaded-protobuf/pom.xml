@@ -25,22 +25,6 @@
         <protobuf.version.string>3_25_3</protobuf.version.string>
     </properties>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <id>fstab</id>
-            <name>Fabian Stäber</name>
-            <email>fabian@fstab.de</email>
-        </developer>
-    </developers>
-
     <dependencies>
         <dependency>
             <groupId>com.google.protobuf</groupId>
