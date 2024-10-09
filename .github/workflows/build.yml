@@ -19,6 +19,8 @@ jobs:
           cache: 'maven'
       - name: Install Protoc
         uses: zchee/setup-protoc@v1
+        with:
+          version: 'v28.2'
       - name: Run the Maven verify phase
         env:
           PROTO_GENERATION: true
