@@ -18,9 +18,10 @@ jobs:
           distribution: temurin
           cache: 'maven'
       - name: Install Protoc
-        uses: zchee/setup-protoc@v1
-        with:
-          version: '28.2'
+        run: |    
+          VERSION=28.2
+          curl -sL -o protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v$VERSION/protoc-$VERSION-linux-x86_64.zip
+          sudo unzip protoc.zip -d /usr/local
       - name: Run the Maven verify phase
         env:
           PROTO_GENERATION: true
