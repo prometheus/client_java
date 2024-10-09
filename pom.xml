@@ -47,6 +47,11 @@
             <name>Gregor Zeitlinger</name>
             <email>gregor.zeitlinger@grafana.com</email>
         </developer>
+        <developer>
+            <id>dhoard</id>
+            <name>Doug Hoard</name>
+            <email>doug.hoard@gmail.com</email>
+        </developer>
     </developers>
 
     <modules>

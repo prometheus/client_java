@@ -23,16 +23,16 @@ import org.openjdk.jmh.annotations.Threads;
  * <pre>
  *
  * Benchmark                                     Mode  Cnt      Score     Error  Units
- * CounterBenchmark.codahaleIncNoLabels         thrpt   25  25761.677 ± 122.947  ops/s
- * CounterBenchmark.openTelemetryAdd            thrpt   25    545.026 ±  33.913  ops/s
- * CounterBenchmark.openTelemetryInc            thrpt   25    550.577 ±  45.415  ops/s
- * CounterBenchmark.openTelemetryIncNoLabels    thrpt   25    527.638 ±  32.020  ops/s
- * CounterBenchmark.prometheusAdd               thrpt   25  20341.474 ±  40.973  ops/s
- * CounterBenchmark.prometheusInc               thrpt   25  26414.616 ±  96.666  ops/s
- * CounterBenchmark.prometheusNoLabelsInc       thrpt   25  26177.676 ± 120.342  ops/s
- * CounterBenchmark.simpleclientAdd             thrpt   25   5503.867 ± 161.313  ops/s
- * CounterBenchmark.simpleclientInc             thrpt   25   5568.125 ±  53.291  ops/s
- * CounterBenchmark.simpleclientNoLabelsInc     thrpt   25   5394.692 ± 130.531  ops/s
+ * CounterBenchmark.codahaleIncNoLabels         thrpt   25  21300.752 ± 3867.708  ops/s
+ * CounterBenchmark.openTelemetryAdd            thrpt   25    299.712 ±   22.742  ops/s
+ * CounterBenchmark.openTelemetryInc            thrpt   25    315.111 ±   22.887  ops/s
+ * CounterBenchmark.openTelemetryIncNoLabels    thrpt   25    350.879 ±   22.652  ops/s
+ * CounterBenchmark.prometheusAdd               thrpt   25  16192.724 ± 4284.309  ops/s
+ * CounterBenchmark.prometheusInc               thrpt   25  39449.763 ± 6379.600  ops/s
+ * CounterBenchmark.prometheusNoLabelsInc       thrpt   25  33968.719 ± 1857.390  ops/s
+ * CounterBenchmark.simpleclientAdd             thrpt   25   6002.535 ±  308.764  ops/s
+ * CounterBenchmark.simpleclientInc             thrpt   25   5726.206 ±  584.231  ops/s
+ * CounterBenchmark.simpleclientNoLabelsInc     thrpt   25   6119.148 ±  195.583  ops/s
  * </pre>
  *
  * Prometheus counters are faster than counters of other libraries. For example, incrementing a
