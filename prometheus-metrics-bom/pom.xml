@@ -112,12 +112,6 @@
                 <artifactId>prometheus-metrics-tracer-otel-agent</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.prometheus</groupId>
-                <artifactId>prometheus-metrics-shaded-dependencies</artifactId>
-                <version>${prometheus.metrics.shaded.dependencies.version}</version>
-                <!-- <version>${project.version}</version> -->
-            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
