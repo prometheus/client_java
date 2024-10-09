@@ -3,7 +3,7 @@ package io.prometheus.metrics.expositionformats;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.protobuf.TextFormat;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
 import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
