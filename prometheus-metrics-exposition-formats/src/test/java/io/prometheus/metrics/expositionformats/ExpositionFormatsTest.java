@@ -2634,7 +2634,7 @@ class ExpositionFormatsTest {
   private void assertPrometheusProtobuf(String expected, MetricSnapshot snapshot) {
     PrometheusProtobufWriter writer = new PrometheusProtobufWriter();
     Metrics.MetricFamily protobufData = writer.convert(snapshot);
-    String actual = TextFormat.printer().printToString(protobufData);
+    String actual = TextFormat.printer().shortDebugString(protobufData);
     assertThat(actual).isEqualTo(expected);
   }
 }
