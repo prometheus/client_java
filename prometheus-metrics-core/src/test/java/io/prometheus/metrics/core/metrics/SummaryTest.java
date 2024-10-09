@@ -128,7 +128,7 @@ class SummaryTest {
     assertThat(getQuantile(summary, 0.99, Labels.EMPTY)).isEqualTo(8.0); // From bucket 2.
     Thread.sleep(600);
     assertThat(getQuantile(summary, 0.99, Labels.EMPTY))
-        .isEqualTo(Double.NaN); // Bucket 1 again, now it is empty.
+        .isNaN(); // Bucket 1 again, now it is empty.
   }
 
   @Test
