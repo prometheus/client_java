@@ -65,3 +65,7 @@ Create a commit to remove dependencies from the build (undoing the first step):
 
 * Comment out the `prometheus-metrics-shaded-dependencies` module to the root `pom.xml`.
 * Change the versions of the shaded dependencies to the latest released version on Maven Central in `prometheus-metrics-exporter-opentelemetry`, `prometheus-metrics-exposition-formats`, and `prometheus-metrics-bom`.
+    
+## Notes
+
+- `PROTO_GENERATION=true mvn clean install` to generate protobuf classes.

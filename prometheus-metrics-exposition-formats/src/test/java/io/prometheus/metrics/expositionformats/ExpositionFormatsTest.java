@@ -2,13 +2,13 @@ package io.prometheus.metrics.expositionformats;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
+import com.google.protobuf.TextFormat;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
 import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
-import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;

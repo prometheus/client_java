@@ -2,7 +2,8 @@ package io.prometheus.metrics.expositionformats;
 
 import static io.prometheus.metrics.expositionformats.ProtobufUtil.timestampFromMillis;
 
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_3_25_3.Metrics;
+import com.google.protobuf.TextFormat;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
@@ -20,7 +21,6 @@ import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
-import io.prometheus.metrics.shaded.com_google_protobuf_3_25_3.TextFormat;
 import java.io.IOException;
 import java.io.OutputStream;
 

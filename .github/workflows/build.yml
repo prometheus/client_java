@@ -17,11 +17,15 @@ jobs:
           java-version: 17
           distribution: temurin
           cache: 'maven'
-      - name: Shaded dependencies
-        run: |
-          cd prometheus-metrics-shaded-dependencies
-          ../mvnw clean install
+      - name: Install Protoc
+        run: |    
+          VERSION=28.2
+          curl -sL -o protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v$VERSION/protoc-$VERSION-linux-x86_64.zip
+          sudo unzip protoc.zip -d /usr/local
       - name: Run the Maven verify phase
+        env:
+          PROTO_GENERATION: true
+          REQUIRE_PROTO_UP_TO_DATE: true
         run: |
           ./mvnw clean install
           ./mvnw javadoc:javadoc
