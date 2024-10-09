@@ -20,12 +20,12 @@ import org.openjdk.jmh.annotations.Threads;
  * Results on a machine with dedicated 8 vCPU cores:
  *
  * <pre>
- * Benchmark                                                                  Mode  Cnt      Score     Error  Units
- * i.p.metrics.benchmarks.HistogramBenchmark.openTelemetryClassic            thrpt   25   1908.715 ± 114.050  ops/s
- * i.p.metrics.benchmarks.HistogramBenchmark.openTelemetryExponential        thrpt   25   1009.785 ±  12.965  ops/s
- * i.p.metrics.benchmarks.HistogramBenchmark.prometheusClassic               thrpt   25   6451.533 ± 326.265  ops/s
- * i.p.metrics.benchmarks.HistogramBenchmark.prometheusNative                thrpt   25   3372.789 ± 339.328  ops/s
- * i.p.metrics.benchmarks.HistogramBenchmark.simpleclient                    thrpt   25   6488.252 ±  96.737  ops/s
+ * Benchmark                                     Mode  Cnt      Score     Error  Units
+ * HistogramBenchmark.openTelemetryClassic      thrpt   25    258.660 ±   6.736  ops/s
+ * HistogramBenchmark.openTelemetryExponential  thrpt   25    210.963 ±  11.288  ops/s
+ * HistogramBenchmark.prometheusClassic         thrpt   25   1528.871 ±  43.598  ops/s
+ * HistogramBenchmark.prometheusNative          thrpt   25   1282.643 ± 110.210  ops/s
+ * HistogramBenchmark.simpleclient              thrpt   25   3376.016 ± 173.545  ops/s
  * </pre>
  *
  * The simpleclient (i.e. client_java version 0.16.0 and older) histograms perform about the same as
