@@ -19,7 +19,6 @@
         <jmh.version>1.37</jmh.version>
         <simpleclient.version>0.16.0</simpleclient.version>
         <codahale.version>3.0.2</codahale.version>
-        <opentelemetry.version>1.42.1</opentelemetry.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
@@ -59,17 +58,17 @@
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-api</artifactId>
-            <version>${opentelemetry.version}</version>
+            <version>${otel.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-sdk</artifactId>
-            <version>${opentelemetry.version}</version>
+            <version>${otel.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-sdk-testing</artifactId>
-            <version>${opentelemetry.version}</version>
+            <version>${otel.version}</version>
         </dependency>
     </dependencies>
     <build>

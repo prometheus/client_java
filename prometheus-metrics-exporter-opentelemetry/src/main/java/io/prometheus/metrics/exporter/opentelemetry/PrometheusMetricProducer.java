@@ -1,5 +1,12 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.export.CollectionRegistration;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.resources.ResourceBuilder;
 import io.prometheus.metrics.exporter.opentelemetry.otelmodel.MetricDataFactory;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -12,13 +19,6 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.api.common.Attributes;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.api.common.AttributesBuilder;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.common.InstrumentationScopeInfo;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.MetricData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.export.CollectionRegistration;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.resources.Resource;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.resources.ResourceBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

@@ -1,10 +1,10 @@
 package io.prometheus.metrics.exporter.opentelemetry.otelmodel;
 
+import io.opentelemetry.sdk.metrics.data.MetricDataType;
+import io.opentelemetry.sdk.metrics.data.SummaryData;
+import io.opentelemetry.sdk.metrics.data.SummaryPointData;
 import io.prometheus.metrics.model.snapshots.Quantile;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.MetricDataType;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.SummaryData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.SummaryPointData;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;

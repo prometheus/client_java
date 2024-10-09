@@ -1,5 +1,8 @@
 package io.prometheus.metrics.exporter.opentelemetry.otelmodel;
 
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.resources.Resource;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
@@ -7,9 +10,6 @@ import io.prometheus.metrics.model.snapshots.InfoSnapshot;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.common.InstrumentationScopeInfo;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.metrics.data.MetricData;
-import io.prometheus.metrics.shaded.io_opentelemetry_1_38_0.sdk.resources.Resource;
 
 public class MetricDataFactory {
 
