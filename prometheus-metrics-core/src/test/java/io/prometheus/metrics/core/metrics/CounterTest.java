@@ -113,7 +113,7 @@ class CounterTest {
         }) {
       Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
       Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(counter.collect());
-      assertThat(TextFormat.printer().shortDebugString(protobufData))
+      assertThat(TextFormat.printer().printToString(protobufData))
           .isEqualTo(
               "name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");
     }

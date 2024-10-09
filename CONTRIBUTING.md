@@ -16,3 +16,9 @@ Prometheus uses GitHub to manage reviews of pull requests.
 This repository uses [Google Java Format](https://github.com/google/google-java-format) to format the code.
 
 Run `./mvnw spotless:apply` to format the code (only changed files) before committing.
+
+## Running Tests
+
+If you're getting errors when running tests:
+
+- Make sure that the IDE uses only the "Maven Shade" dependency of "prometheus-metrics-exposition-formats" and the "prometheus-metrics-tracer*" dependencies.
