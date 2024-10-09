@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
 
 # We use the shaded protobuf JAR from the protobuf-shaded module.
 # I could not figure out how to use a protoc Maven plugin to use the shaded module, so I ran this command to generate the sources manually.
@@ -21,7 +21,11 @@ sed -i "s/java_package = \"io.prometheus.client\"/java_package = \"io.prometheus
 protoc --java_out $TARGET_DIR $PROTO_DIR/metrics.proto
 
 # stop the build if there class is not up-to-date
-if [ $REQUIRE_PROTO_UP_TO_DATE == "true" && -n "$(git status --porcelain)" ]; then
-  echo "Generated protobuf sources are not up-to-date. Please run 'generate-protobuf.sh' and commit the changes."
+# show local changes
+DIFF=$(git diff)
+if [[ ${REQUIRE_PROTO_UP_TO_DATE:-false} == "true" && -n "$DIFF" ]]; then
+  echo "Generated protobuf sources are not up-to-date. Please run 'PROTO_GENERATION=true mvn clean install' and commit the changes."
+  echo "Local changes:"
+  echo "$DIFF"
   exit 1
 fi
