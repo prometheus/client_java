@@ -60,6 +60,19 @@
                             <failIfNoMatch>true</failIfNoMatch>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>negate-prop</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>bsh-property</goal>
+                        </goals>
+                        <configuration>
+                            <source>skip.protobuf.generation = !"true".equals(System.getenv("PROTO_GENERATION"));</source>
+                            <properties>
+                                <property>skip.protobuf.generation</property>
+                            </properties>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -74,6 +87,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
+                            <skip>${skip.protobuf.generation}</skip>
                             <executable>${project.basedir}/generate-protobuf.sh</executable>
                             <arguments>
                                 <argument>${project.basedir}/src/main/generated</argument>

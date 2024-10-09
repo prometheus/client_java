@@ -20,3 +20,8 @@ curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/pro
 sed -i "s/java_package = \"io.prometheus.client\"/java_package = \"io.prometheus.metrics.expositionformats.generated.com_google_protobuf_${PROTOBUF_VERSION_STRING}\"/" $PROTO_DIR/metrics.proto
 protoc --java_out $TARGET_DIR $PROTO_DIR/metrics.proto
 
+# stop the build if there class is not up-to-date
+if [ $REQUIRE_PROTO_UP_TO_DATE == "true" && -n "$(git status --porcelain)" ]; then
+  echo "Generated protobuf sources are not up-to-date. Please run 'generate-protobuf.sh' and commit the changes."
+  exit 1
+fi
