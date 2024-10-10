@@ -47,41 +47,36 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void inc(long amount) {
     getNoLabels().inc(amount);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void inc(double amount) {
     getNoLabels().inc(amount);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void incWithExemplar(long amount, Labels labels) {
     getNoLabels().incWithExemplar(amount, labels);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void incWithExemplar(double amount, Labels labels) {
     getNoLabels().incWithExemplar(amount, labels);
   }
 
-  /** {@inheritDoc} */
+  @Override
   public double get() {
     return getNoLabels().get();
   }
 
-  /** {@inheritDoc} */
+  @Override
   public long getLongValue() {
     return getNoLabels().getLongValue();
   }
 
-  /** {@inheritDoc} */
   @Override
   public CounterSnapshot collect() {
     return (CounterSnapshot) super.collect();
@@ -131,17 +126,16 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       this.exemplarSampler = exemplarSampler;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public double get() {
       return longValue.sum() + doubleValue.sum();
     }
 
-    /** {@inheritDoc} */
+    @Override
     public long getLongValue() {
       return longValue.sum() + (long) doubleValue.sum();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void inc(long amount) {
       validateAndAdd(amount);
@@ -150,7 +144,6 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void inc(double amount) {
       validateAndAdd(amount);
@@ -159,7 +152,6 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void incWithExemplar(long amount, Labels labels) {
       validateAndAdd(amount);
@@ -168,7 +160,6 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void incWithExemplar(double amount, Labels labels) {
       validateAndAdd(amount);

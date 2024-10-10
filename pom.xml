@@ -282,6 +282,7 @@
                             -Xplugin:ErrorProne
                             -Xep:AlmostJavadoc:OFF
                             -Xep:MissingSummary:OFF
+                            -XepExcludedPaths:.*/generated/.*
                         </arg>
                     </compilerArgs>
                     <annotationProcessorPaths>

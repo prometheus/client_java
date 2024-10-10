@@ -113,6 +113,7 @@ public class PrometheusPropertiesLoader {
             .getResourceAsStream("prometheus.properties")) {
       properties.load(stream);
     } catch (Exception ignored) {
+      // No properties file found on the classpath.
     }
     return properties;
   }

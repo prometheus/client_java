@@ -165,13 +165,11 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
             : new ExemplarSamplerConfig(exemplarsProperties, classicUpperBounds);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void observe(double amount) {
     getNoLabels().observe(amount);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void observeWithExemplar(double amount, Labels labels) {
     getNoLabels().observeWithExemplar(amount, labels);
@@ -212,7 +210,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       maybeScheduleNextReset();
     }
 
-    /** {@inheritDoc} */
     @Override
     public void observe(double value) {
       if (Double.isNaN(value)) {
@@ -227,7 +224,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void observeWithExemplar(double value, Labels labels) {
       if (Double.isNaN(value)) {
@@ -617,7 +613,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public HistogramSnapshot collect() {
     return (HistogramSnapshot) super.collect();

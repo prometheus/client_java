@@ -82,19 +82,16 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
     return exemplarsEnabled;
   }
 
-  /** {@inheritDoc} */
   @Override
   public void observe(double amount) {
     getNoLabels().observe(amount);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void observeWithExemplar(double amount, Labels labels) {
     getNoLabels().observeWithExemplar(amount, labels);
   }
 
-  /** {@inheritDoc} */
   @Override
   public SummarySnapshot collect() {
     return (SummarySnapshot) super.collect();
@@ -144,7 +141,6 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void observe(double value) {
       if (Double.isNaN(value)) {
@@ -158,7 +154,6 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void observeWithExemplar(double value, Labels labels) {
       if (Double.isNaN(value)) {

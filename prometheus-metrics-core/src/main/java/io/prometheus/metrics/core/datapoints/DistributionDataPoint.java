@@ -25,7 +25,7 @@ public interface DistributionDataPoint extends DataPoint, TimerApi {
   /** Observe {@code value}, and create a custom exemplar with the given labels. */
   void observeWithExemplar(double value, Labels labels);
 
-  /** {@inheritDoc} */
+  @Override
   default Timer startTimer() {
     return new Timer(this::observe);
   }

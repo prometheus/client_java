@@ -59,6 +59,7 @@ class Util {
       throws PrometheusPropertiesException {
     String property = getProperty(name, properties);
     if (property != null) {
+      @SuppressWarnings("StringSplitter")
       String[] numbers = property.split("\\s*,\\s*");
       Double[] result = new Double[numbers.length];
       for (int i = 0; i < numbers.length; i++) {
@@ -84,6 +85,7 @@ class Util {
     Map<String, String> result = new HashMap<>();
     String property = getProperty(name, properties);
     if (property != null) {
+      @SuppressWarnings("StringSplitter")
       String[] pairs = property.split(",");
       for (String pair : pairs) {
         if (pair.contains("=")) {
@@ -91,7 +93,7 @@ class Util {
           if (keyValue.length == 2) {
             String key = keyValue[0].trim();
             String value = keyValue[1].trim();
-            if (key.length() > 0 && value.length() > 0) {
+            if (!key.isEmpty() && !value.isEmpty()) {
               result.putIfAbsent(key, value);
             }
           }
