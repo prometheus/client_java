@@ -11,6 +11,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,7 +54,7 @@ import java.util.concurrent.ConcurrentMap;
 public class CacheMetricsCollector implements MultiCollector {
   private static final double NANOSECONDS_PER_SECOND = 1_000_000_000.0;
 
-  protected final ConcurrentMap<String, Cache> children = new ConcurrentHashMap<>();
+  protected final ConcurrentMap<String, Cache<?, ?>> children = new ConcurrentHashMap<>();
 
   /**
    * Add or replace the cache with the given name.
@@ -63,7 +64,7 @@ public class CacheMetricsCollector implements MultiCollector {
    * @param cacheName The name of the cache, will be the metrics label value
    * @param cache The cache being monitored
    */
-  public void addCache(String cacheName, Cache cache) {
+  public void addCache(String cacheName, Cache<?, ?> cache) {
     children.put(cacheName, cache);
   }
 
@@ -75,7 +76,7 @@ public class CacheMetricsCollector implements MultiCollector {
    * @param cacheName The name of the cache, will be the metrics label value
    * @param cache The cache being monitored
    */
-  public void addCache(String cacheName, AsyncCache cache) {
+  public void addCache(String cacheName, AsyncCache<?, ?> cache) {
     children.put(cacheName, cache.synchronous());
   }
 
@@ -86,7 +87,7 @@ public class CacheMetricsCollector implements MultiCollector {
    *
    * @param cacheName cache to be removed
    */
-  public Cache nremoveCache(String cacheName) {
+  public Cache<?, ?> nremoveCache(String cacheName) {
     return children.remove(cacheName);
   }
 
@@ -141,8 +142,8 @@ public class CacheMetricsCollector implements MultiCollector {
             .name("caffeine_cache_load_duration_seconds")
             .help("Cache load duration: both success and failures");
 
-    for (final Map.Entry<String, Cache> c : children.entrySet()) {
-      final List<String> cacheName = Arrays.asList(c.getKey());
+    for (final Map.Entry<String, Cache<?, ?>> c : children.entrySet()) {
+      final List<String> cacheName = Collections.singletonList(c.getKey());
       final Labels labels = Labels.of(labelNames, cacheName);
 
       final CacheStats stats = c.getValue().stats();
