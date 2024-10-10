@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
@@ -67,7 +68,7 @@ abstract class ExporterIT {
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
     assertThat(response.getHeader("Content-Length"))
         .isEqualTo(Integer.toString(response.body.length));
-    String bodyString = new String(response.body);
+    String bodyString = new String(response.body, UTF_8);
     assertThat(bodyString)
         .contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
         .contains("temperature_celsius{location=\"inside\"} 23.0")
@@ -90,7 +91,7 @@ abstract class ExporterIT {
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
     assertThat(response.getHeader("Content-Length"))
         .isEqualTo(Integer.toString(response.body.length));
-    String bodyString = new String(response.body);
+    String bodyString = new String(response.body, UTF_8);
     assertThat(bodyString)
         .contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
         .contains("temperature_celsius{location=\"inside\"} 23.0")
@@ -370,6 +371,7 @@ abstract class ExporterIT {
         try {
           Thread.sleep(100);
         } catch (InterruptedException ignored) {
+          // ignore
         }
       }
     }
@@ -392,14 +394,14 @@ abstract class ExporterIT {
       for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
         if (entry.getKey()
             != null) { // HttpUrlConnection uses pseudo key "null" for the status line
-          this.headers.put(entry.getKey().toLowerCase(), entry.getValue().get(0));
+          this.headers.put(entry.getKey().toLowerCase(Locale.ROOT), entry.getValue().get(0));
         }
       }
     }
 
     private String getHeader(String name) {
       // HTTP headers are case-insensitive
-      return headers.get(name.toLowerCase());
+      return headers.get(name.toLowerCase(Locale.ROOT));
     }
   }
 }
