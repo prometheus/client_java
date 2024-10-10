@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /** Immutable snapshot of a StateSet metric. */
-public final class StateSetSnapshot extends MetricSnapshot {
+public final class StateSetSnapshot
+    extends MetricSnapshot<StateSetSnapshot.StateSetDataPointSnapshot> {
 
   /**
    * To create a new {@link StateSetSnapshot}, you can either call the constructor directly or use
@@ -37,7 +38,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
 
   @Override
   public List<StateSetDataPointSnapshot> getDataPoints() {
-    return (List<StateSetDataPointSnapshot>) dataPoints;
+    return dataPoints;
   }
 
   public static class StateSetDataPointSnapshot extends DataPointSnapshot

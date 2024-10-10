@@ -70,13 +70,14 @@ class ExemplarTest {
   }
 
   @Test
+  @SuppressWarnings("try")
   public void sampledExemplarIsForwarded() {
     try (SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder().setSampler(Sampler.alwaysOn()).build()) {
 
       Tracer test = sdkTracerProvider.get(INSTRUMENTATION_SCOPE_NAME);
       Span span = test.spanBuilder(SPAN_NAME).startSpan();
-      try (Scope scope = span.makeCurrent()) {
+      try (Scope ignored = span.makeCurrent()) {
         testCounter.inc(2);
       }
     }
@@ -95,13 +96,14 @@ class ExemplarTest {
   }
 
   @Test
+  @SuppressWarnings("try")
   public void notSampledExemplarIsNotForwarded() {
     try (SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder().setSampler(Sampler.alwaysOff()).build()) {
 
       Tracer test = sdkTracerProvider.get(INSTRUMENTATION_SCOPE_NAME);
       Span span = test.spanBuilder(SPAN_NAME).startSpan();
-      try (Scope scope = span.makeCurrent()) {
+      try (Scope ignored = span.makeCurrent()) {
         testCounter.inc(2);
       }
     }

@@ -92,7 +92,7 @@ class MetricSnapshotsTest {
             .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1.0).build())
             .build();
     MetricSnapshots snapshots = new MetricSnapshots(c2, c3, c1);
-    Iterator<MetricSnapshot> iterator = snapshots.iterator();
+    Iterator<MetricSnapshot<?>> iterator = snapshots.iterator();
     iterator.next();
     assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }

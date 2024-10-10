@@ -6,6 +6,8 @@ package io.prometheus.metrics.model.snapshots;
  */
 public class DuplicateLabelsException extends IllegalArgumentException {
 
+  private static final long serialVersionUID = 0L;
+
   private final MetricMetadata metadata;
   private final Labels labels;
 

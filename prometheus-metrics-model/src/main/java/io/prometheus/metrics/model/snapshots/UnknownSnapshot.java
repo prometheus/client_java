@@ -5,7 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 /** Immutable snapshot of an Unknown (Untyped) metric. */
-public final class UnknownSnapshot extends MetricSnapshot {
+public final class UnknownSnapshot
+    extends MetricSnapshot<UnknownSnapshot.UnknownDataPointSnapshot> {
 
   /**
    * To create a new {@link UnknownSnapshot}, you can either call the constructor directly or use
@@ -21,7 +22,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
 
   @Override
   public List<UnknownDataPointSnapshot> getDataPoints() {
-    return (List<UnknownDataPointSnapshot>) dataPoints;
+    return dataPoints;
   }
 
   public static final class UnknownDataPointSnapshot extends DataPointSnapshot {

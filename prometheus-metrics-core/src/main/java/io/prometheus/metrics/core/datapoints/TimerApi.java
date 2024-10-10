@@ -57,22 +57,25 @@ public interface TimerApi {
    * must use base units (e.g. seconds, bytes) and leave converting them to something more readable
    * to graphing tools".</i>
    */
+  @SuppressWarnings("try")
   default void time(Runnable func) {
-    try (Timer timer = startTimer()) {
+    try (Timer ignored = startTimer()) {
       func.run();
     }
   }
 
   /** Like {@link #time(Runnable)}, but returns the return value of {@code func}. */
+  @SuppressWarnings("try")
   default <T> T time(Supplier<T> func) {
-    try (Timer timer = startTimer()) {
+    try (Timer ignored = startTimer()) {
       return func.get();
     }
   }
 
   /** Like {@link #time(Supplier)}, but {@code func} may throw a checked {@code Exception}. */
+  @SuppressWarnings("try")
   default <T> T timeChecked(Callable<T> func) throws Exception {
-    try (Timer timer = startTimer()) {
+    try (Timer ignored = startTimer()) {
       return func.call();
     }
   }

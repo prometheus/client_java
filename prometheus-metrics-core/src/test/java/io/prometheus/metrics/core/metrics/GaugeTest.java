@@ -80,8 +80,9 @@ class GaugeTest {
   }
 
   @Test
+  @SuppressWarnings("try")
   public void testTimer() throws InterruptedException {
-    try (Timer timer = noLabels.startTimer()) {
+    try (Timer ignored = noLabels.startTimer()) {
       Thread.sleep(12);
     }
     assertThat(getValue(noLabels))

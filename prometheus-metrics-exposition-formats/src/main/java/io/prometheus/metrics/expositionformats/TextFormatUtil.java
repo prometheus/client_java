@@ -85,6 +85,6 @@ public class TextFormatUtil {
   }
 
   public static String shortDebugString(MessageOrBuilder protobufData) {
-    return TextFormat.printer().shortDebugString(protobufData);
+    return TextFormat.printer().emittingSingleLine(true).printToString(protobufData);
   }
 }

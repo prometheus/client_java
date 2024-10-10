@@ -71,11 +71,10 @@ public class SampleMultiCollector implements MultiCollector {
         gaugeBuilder.dataPoint(gaugeDataPointBuilder.build());
       }
     }
-    Collection<MetricSnapshot> snaps = new ArrayList<MetricSnapshot>();
+    Collection<MetricSnapshot<?>> snaps = new ArrayList<>();
     snaps.add(counterBuilder.build());
     snaps.add(gaugeBuilder.build());
-    MetricSnapshots msnaps = new MetricSnapshots(snaps);
-    return msnaps;
+    return new MetricSnapshots(snaps);
   }
 
   public List<String> getPrometheusNames() {

@@ -14,12 +14,12 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /** Immutable list of metric snapshots. */
-public class MetricSnapshots implements Iterable<MetricSnapshot> {
+public class MetricSnapshots implements Iterable<MetricSnapshot<?>> {
 
-  private final List<MetricSnapshot> snapshots;
+  private final List<MetricSnapshot<?>> snapshots;
 
   /** See {@link #MetricSnapshots(Collection)} */
-  public MetricSnapshots(MetricSnapshot... snapshots) {
+  public MetricSnapshots(MetricSnapshot<?>... snapshots) {
     this(Arrays.asList(snapshots));
   }
 
@@ -33,8 +33,8 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    *     Builder#containsMetricName(String)} before calling {@link
    *     Builder#metricSnapshot(MetricSnapshot)}.
    */
-  public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
-    List<MetricSnapshot> list = new ArrayList<>(snapshots);
+  public MetricSnapshots(Collection<MetricSnapshot<?>> snapshots) {
+    List<MetricSnapshot<?>> list = new ArrayList<>(snapshots);
     list.sort(comparing(s -> s.getMetadata().getPrometheusName()));
     for (int i = 0; i < snapshots.size() - 1; i++) {
       if (list.get(i)
@@ -48,12 +48,12 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
     this.snapshots = unmodifiableList(list);
   }
 
-  public static MetricSnapshots of(MetricSnapshot... snapshots) {
+  public static MetricSnapshots of(MetricSnapshot<?>... snapshots) {
     return new MetricSnapshots(snapshots);
   }
 
   @Override
-  public Iterator<MetricSnapshot> iterator() {
+  public Iterator<MetricSnapshot<?>> iterator() {
     return snapshots.iterator();
   }
 
@@ -61,11 +61,11 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
     return snapshots.size();
   }
 
-  public MetricSnapshot get(int i) {
+  public MetricSnapshot<?> get(int i) {
     return snapshots.get(i);
   }
 
-  public Stream<MetricSnapshot> stream() {
+  public Stream<MetricSnapshot<?>> stream() {
     return snapshots.stream();
   }
 
@@ -75,7 +75,7 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
 
   public static class Builder {
 
-    private final List<MetricSnapshot> snapshots = new ArrayList<>();
+    private final List<MetricSnapshot<?>> snapshots = new ArrayList<>();
     private final Set<String> prometheusNames = new HashSet<>();
 
     private Builder() {}
@@ -89,7 +89,7 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
     }
 
     /** Add a metric snapshot. Call multiple times to add multiple metric snapshots. */
-    public Builder metricSnapshot(MetricSnapshot snapshot) {
+    public Builder metricSnapshot(MetricSnapshot<?> snapshot) {
       snapshots.add(snapshot);
       prometheusNames.add(snapshot.getMetadata().getPrometheusName());
       return this;
