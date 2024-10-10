@@ -326,6 +326,7 @@ public class HTTPServer implements Closeable {
         try {
           threadPoolExecutor.getQueue().put(runnable);
         } catch (InterruptedException ignored) {
+          // ignore
         }
       }
     }

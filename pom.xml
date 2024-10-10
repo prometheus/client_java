@@ -283,6 +283,7 @@
                             -Xep:AlmostJavadoc:OFF
                             -Xep:MissingSummary:OFF
                             -Xep:LongDoubleConversion:OFF
+                            -Xep:StringSplitter:OFF
                             -XepExcludedPaths:.*/generated/.*
                         </arg>
                     </compilerArgs>
