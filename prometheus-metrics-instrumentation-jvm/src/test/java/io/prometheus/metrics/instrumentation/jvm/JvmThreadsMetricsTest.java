@@ -109,6 +109,7 @@ class JvmThreadsMetricsTest {
         return;
       }
     } catch (NumberFormatException ignored) {
+      // ignore
     }
     PrometheusRegistry registry = new PrometheusRegistry();
     JvmThreadsMetrics.builder().register(registry);

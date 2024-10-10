@@ -58,7 +58,7 @@ class PrometheusClassicHistogram extends PrometheusData<HistogramPointData>
   }
 
   private long calculateCount(ClassicHistogramBuckets buckets) {
-    int result = 0;
+    long result = 0;
     for (int i = 0; i < buckets.size(); i++) {
       result += buckets.getCount(i);
     }

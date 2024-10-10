@@ -54,6 +54,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     return CONTENT_TYPE;
   }
 
+  @Override
   public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
     // See https://prometheus.io/docs/instrumenting/exposition_formats/
     // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and

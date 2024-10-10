@@ -54,37 +54,31 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public void inc(double amount) {
     getNoLabels().inc(amount);
   }
 
-  /** {@inheritDoc} */
   @Override
   public double get() {
     return getNoLabels().get();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void incWithExemplar(double amount, Labels labels) {
     getNoLabels().incWithExemplar(amount, labels);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void set(double value) {
     getNoLabels().set(value);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setWithExemplar(double value, Labels labels) {
     getNoLabels().setWithExemplar(value, labels);
   }
 
-  /** {@inheritDoc} */
   @Override
   public GaugeSnapshot collect() {
     return (GaugeSnapshot) super.collect();
@@ -123,7 +117,6 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
 
     private final AtomicLong value = new AtomicLong(Double.doubleToRawLongBits(0));
 
-    /** {@inheritDoc} */
     @Override
     public void inc(double amount) {
       long next =
@@ -133,7 +126,6 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void incWithExemplar(double amount, Labels labels) {
       long next =
@@ -143,7 +135,6 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public void set(double value) {
       this.value.set(Double.doubleToRawLongBits(value));
@@ -152,13 +143,11 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
       }
     }
 
-    /** {@inheritDoc} */
     @Override
     public double get() {
       return Double.longBitsToDouble(value.get());
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setWithExemplar(double value, Labels labels) {
       this.value.set(Double.doubleToRawLongBits(value));

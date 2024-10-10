@@ -22,7 +22,7 @@ public class HTTPServerTest {
 
     final String user = "joe";
     final Subject subject = new Subject();
-    subject.getPrincipals().add(() -> (user));
+    subject.getPrincipals().add(() -> user);
 
     Authenticator authenticator =
         new Authenticator() {
@@ -68,7 +68,7 @@ public class HTTPServerTest {
       byte[] resp = new byte[500];
       int read = socket.getInputStream().read(resp, 0, resp.length);
       if (read > 0) {
-        actualResponse = new String(resp, 0, read);
+        actualResponse = new String(resp, 0, read, StandardCharsets.UTF_8);
       }
       assertThat(actualResponse).contains("204");
 

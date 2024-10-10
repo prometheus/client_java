@@ -35,7 +35,7 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
    *     contain at least {@link Double#POSITIVE_INFINITY} for the {@code +Inf} bucket. An upper
    *     bound must not be {@link Double#NaN}. The upperBounds array does not need to be sorted.
    * @param counts must have the same length as {@code upperBounds}. The entry at index {@code i} is
-   *     the count for the {@code upperBound} at index {@code i}. For each count, {@link
+   *     the count for the {@code upperBounds} at index {@code i}. For each count, {@link
    *     Number#longValue()} is called to get the value. Counts are <i>not</i> cumulative. Counts
    *     must not be negative.
    */
@@ -63,7 +63,7 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
    *     contain at least {@link Double#POSITIVE_INFINITY} for the {@code +Inf} bucket. An upper
    *     bound must not be {@link Double#NaN}. The upperBounds array does not need to be sorted.
    * @param counts must have the same length as {@code upperBounds}. The entry at index {@code i} is
-   *     the count for the {@code upperBound} at index {@code i}. For each count, {@link
+   *     the count for the {@code upperBounds} at index {@code i}. For each count, {@link
    *     Number#longValue()} is called to get the value. Counts are <i>not</i> cumulative. Counts
    *     must not be negative.
    */
@@ -87,7 +87,7 @@ public class ClassicHistogramBuckets implements Iterable<ClassicHistogramBucket>
    *     contain at least {@link Double#POSITIVE_INFINITY} for the {@code +Inf} bucket. An upper
    *     bound must not be {@link Double#NaN}. The upperBounds array does not need to be sorted.
    * @param counts must have the same length as {@code upperBounds}. The entry at index {@code i} is
-   *     the count for the {@code upperBound} at index {@code i}. Counts are <i>not</i> cumulative.
+   *     the count for the {@code upperBounds} at index {@code i}. Counts are <i>not</i> cumulative.
    *     Counts must not be negative.
    */
   public static ClassicHistogramBuckets of(double[] upperBounds, long[] counts) {

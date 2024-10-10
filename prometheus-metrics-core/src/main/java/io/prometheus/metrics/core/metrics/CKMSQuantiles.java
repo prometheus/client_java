@@ -38,6 +38,7 @@ final class CKMSQuantiles {
   int n = 0;
 
   /** List of sampled observations, ordered by Sample.value. */
+  @SuppressWarnings("JdkObsolete")
   final LinkedList<Sample> samples = new LinkedList<>();
 
   /**

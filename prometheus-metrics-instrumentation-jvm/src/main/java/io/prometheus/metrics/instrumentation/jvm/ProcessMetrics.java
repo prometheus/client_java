@@ -7,13 +7,15 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 /**
  * Process metrics.
@@ -112,6 +114,7 @@ public class ProcessMetrics {
                   callback.call(Unit.nanosToSeconds(processCpuTime));
                 }
               } catch (Exception ignored) {
+                // Ignored
               }
             })
         .register(registry);
@@ -134,6 +137,7 @@ public class ProcessMetrics {
                   callback.call(openFds);
                 }
               } catch (Exception ignored) {
+                // Ignored
               }
             })
         .register(registry);
@@ -149,6 +153,7 @@ public class ProcessMetrics {
                   callback.call(maxFds);
                 }
               } catch (Exception ignored) {
+                // Ignored
               }
             })
         .register(registry);
@@ -165,6 +170,7 @@ public class ProcessMetrics {
                   String line = grepper.lineStartingWith(PROC_SELF_STATUS, "VmSize:");
                   callback.call(Unit.kiloBytesToBytes(Double.parseDouble(line.split("\\s+")[1])));
                 } catch (Exception ignored) {
+                  // Ignored
                 }
               })
           .register(registry);
@@ -179,6 +185,7 @@ public class ProcessMetrics {
                   String line = grepper.lineStartingWith(PROC_SELF_STATUS, "VmRSS:");
                   callback.call(Unit.kiloBytesToBytes(Double.parseDouble(line.split("\\s+")[1])));
                 } catch (Exception ignored) {
+                  // Ignored
                 }
               })
           .register(registry);
@@ -235,7 +242,9 @@ public class ProcessMetrics {
 
     @Override
     public String lineStartingWith(File file, String prefix) throws IOException {
-      try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+      try (BufferedReader reader =
+          new BufferedReader(
+              new InputStreamReader(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8))) {
         String line = reader.readLine();
         while (line != null) {
           if (line.startsWith(prefix)) {

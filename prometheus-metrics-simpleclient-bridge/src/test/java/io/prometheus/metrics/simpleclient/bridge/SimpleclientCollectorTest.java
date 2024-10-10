@@ -74,7 +74,7 @@ class SimpleclientCollectorTest {
   }
 
   @Test
-  public void testGaugeMinimal() throws IOException, InterruptedException {
+  public void testGaugeMinimal() throws IOException {
     Gauge gauge =
         Gauge.build()
             .name("temperature_centigrade")
@@ -107,7 +107,7 @@ class SimpleclientCollectorTest {
   }
 
   @Test
-  public void testHistogramMinimal() throws IOException, InterruptedException {
+  public void testHistogramMinimal() throws IOException {
     Histogram.build().name("request_latency").help("request latency").register(origRegistry);
 
     assertThat(sort(newOpenMetrics())).isEqualTo(fixCounts(fixTimestamps(sort(origOpenMetrics()))));
@@ -138,9 +138,8 @@ class SimpleclientCollectorTest {
   }
 
   @Test
-  public void testSummaryMinimal() throws IOException, InterruptedException {
-    Summary summary =
-        Summary.build().name("request_size").help("request size").register(origRegistry);
+  public void testSummaryMinimal() throws IOException {
+    Summary.build().name("request_size").help("request size").register(origRegistry);
 
     assertThat(sort(newOpenMetrics())).isEqualTo(fixCounts(fixTimestamps(sort(origOpenMetrics()))));
   }
@@ -161,7 +160,7 @@ class SimpleclientCollectorTest {
   }
 
   @Test
-  public void testInfoMinimal() throws IOException, InterruptedException {
+  public void testInfoMinimal() throws IOException {
     Info info = Info.build().name("jvm").help("JVM info").register(origRegistry);
     info.info("version", "17");
 

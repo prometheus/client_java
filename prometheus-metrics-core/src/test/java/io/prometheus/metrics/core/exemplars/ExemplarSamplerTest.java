@@ -31,11 +31,10 @@ class ExemplarSamplerTest {
 
     int callCount = 0;
     boolean isSampled = true;
-    boolean isExemplar = false;
 
     @Override
     public String getCurrentTraceId() {
-      return "" + (callCount++);
+      return "" + callCount++;
     }
 
     @Override
@@ -49,9 +48,7 @@ class ExemplarSamplerTest {
     }
 
     @Override
-    public void markCurrentSpanAsExemplar() {
-      isExemplar = true;
-    }
+    public void markCurrentSpanAsExemplar() {}
   }
 
   @Test

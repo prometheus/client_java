@@ -51,8 +51,7 @@ public class JvmMemoryPoolAllocationMetrics {
 
   private final List<GarbageCollectorMXBean> garbageCollectorBeans;
 
-  private JvmMemoryPoolAllocationMetrics(
-      List<GarbageCollectorMXBean> garbageCollectorBeans, PrometheusProperties config) {
+  private JvmMemoryPoolAllocationMetrics(List<GarbageCollectorMXBean> garbageCollectorBeans) {
     this.garbageCollectorBeans = garbageCollectorBeans;
   }
 
@@ -142,21 +141,18 @@ public class JvmMemoryPoolAllocationMetrics {
   }
 
   public static Builder builder() {
-    return new Builder(PrometheusProperties.get());
+    return new Builder();
   }
 
+  @SuppressWarnings("unused")
   public static Builder builder(PrometheusProperties config) {
-    return new Builder(config);
+    return new Builder();
   }
 
   public static class Builder {
-
-    private final PrometheusProperties config;
     private List<GarbageCollectorMXBean> garbageCollectorBeans;
 
-    private Builder(PrometheusProperties config) {
-      this.config = config;
-    }
+    private Builder() {}
 
     /** Package private. For testing only. */
     Builder withGarbageCollectorBeans(List<GarbageCollectorMXBean> garbageCollectorBeans) {
@@ -173,7 +169,7 @@ public class JvmMemoryPoolAllocationMetrics {
       if (garbageCollectorBeans == null) {
         garbageCollectorBeans = ManagementFactory.getGarbageCollectorMXBeans();
       }
-      new JvmMemoryPoolAllocationMetrics(garbageCollectorBeans, config).register(registry);
+      new JvmMemoryPoolAllocationMetrics(garbageCollectorBeans).register(registry);
     }
   }
 }

@@ -71,19 +71,16 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public StateSetSnapshot collect() {
     return (StateSetSnapshot) super.collect();
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setTrue(String state) {
     getNoLabels().setTrue(state);
   }
 
-  /** {@inheritDoc} */
   @Override
   public void setFalse(String state) {
     getNoLabels().setFalse(state);
@@ -116,13 +113,11 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
 
     private DataPoint() {}
 
-    /** {@inheritDoc} */
     @Override
     public void setTrue(String state) {
       set(state, true);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setFalse(String state) {
       set(state, false);

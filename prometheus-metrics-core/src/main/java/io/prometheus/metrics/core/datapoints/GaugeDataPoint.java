@@ -56,7 +56,7 @@ public interface GaugeDataPoint extends DataPoint, TimerApi {
   /** Set the gauge to {@code value}, and create a custom exemplar with the given labels. */
   void setWithExemplar(double value, Labels labels);
 
-  /** {@inheritDoc} */
+  @Override
   default Timer startTimer() {
     return new Timer(this::set);
   }

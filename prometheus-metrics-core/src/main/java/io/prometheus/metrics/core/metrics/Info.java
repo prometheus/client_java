@@ -91,7 +91,6 @@ public class Info extends MetricWithFixedMetadata {
     labels.remove(toBeRemoved);
   }
 
-  /** {@inheritDoc} */
   @Override
   public InfoSnapshot collect() {
     List<InfoSnapshot.InfoDataPointSnapshot> data = new ArrayList<>(labels.size());

@@ -10,9 +10,9 @@ import java.util.Objects;
  * </pre>
  *
  * Note that in Prometheus, units are largely based on SI base units (seconds, bytes, joules, grams,
- * meters, ratio, volts, amperes, and celsius).
+ * meters, ratio, volts, amperes, and Celsius).
  */
-public class Unit {
+public final class Unit {
 
   private final String name;
 

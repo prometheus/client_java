@@ -391,7 +391,7 @@ public class PushGateway {
       }
     }
 
-    private Format getFormat(ExporterPushgatewayProperties properties) {
+    private Format getFormat() {
       // currently not configurable via properties
       if (this.format != null) {
         return this.format;
@@ -434,11 +434,7 @@ public class PushGateway {
           config == null ? null : config.getExporterPushgatewayProperties();
       try {
         return new PushGateway(
-            registry,
-            getFormat(properties),
-            makeUrl(properties),
-            connectionFactory,
-            requestHeaders);
+            registry, getFormat(), makeUrl(properties), connectionFactory, requestHeaders);
       } catch (MalformedURLException e) {
         throw new PrometheusPropertiesException(
             address + ": Invalid address. Expecting <host>:<port>");
