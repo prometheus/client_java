@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /** Immutable set of name/value pairs, sorted by name. */
-public class Labels implements Comparable<Labels>, Iterable<Label> {
+public final class Labels implements Comparable<Labels>, Iterable<Label> {
 
   public static final Labels EMPTY;
 
@@ -37,6 +37,7 @@ public class Labels implements Comparable<Labels>, Iterable<Label> {
     this.values = values;
   }
 
+  @SuppressWarnings("ReferenceEquality")
   public boolean isEmpty() {
     return this == EMPTY || this.equals(EMPTY);
   }

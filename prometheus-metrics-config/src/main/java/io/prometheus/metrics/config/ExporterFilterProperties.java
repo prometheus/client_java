@@ -24,15 +24,6 @@ public class ExporterFilterProperties {
       List<String> excludedNames,
       List<String> allowedPrefixes,
       List<String> excludedPrefixes) {
-    this(allowedNames, excludedNames, allowedPrefixes, excludedPrefixes, "");
-  }
-
-  private ExporterFilterProperties(
-      List<String> allowedNames,
-      List<String> excludedNames,
-      List<String> allowedPrefixes,
-      List<String> excludedPrefixes,
-      String prefix) {
     this.allowedNames =
         allowedNames == null ? null : Collections.unmodifiableList(new ArrayList<>(allowedNames));
     this.excludedNames =
@@ -45,7 +36,6 @@ public class ExporterFilterProperties {
         excludedPrefixes == null
             ? null
             : Collections.unmodifiableList(new ArrayList<>(excludedPrefixes));
-    validate(prefix);
   }
 
   public List<String> getAllowedMetricNames() {
@@ -64,8 +54,6 @@ public class ExporterFilterProperties {
     return excludedPrefixes;
   }
 
-  private void validate(String prefix) throws PrometheusPropertiesException {}
-
   /**
    * Note that this will remove entries from {@code properties}. This is because we want to know if
    * there are unused properties remaining after all properties have been loaded.
@@ -81,7 +69,7 @@ public class ExporterFilterProperties {
     List<String> excludedPrefixes =
         Util.loadStringList(prefix + "." + METRIC_NAME_MUST_NOT_START_WITH, properties);
     return new ExporterFilterProperties(
-        allowedNames, excludedNames, allowedPrefixes, excludedPrefixes, prefix);
+        allowedNames, excludedNames, allowedPrefixes, excludedPrefixes);
   }
 
   public static Builder builder() {
