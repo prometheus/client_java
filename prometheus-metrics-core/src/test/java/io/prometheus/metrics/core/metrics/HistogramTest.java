@@ -9,6 +9,7 @@ import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
+import io.prometheus.metrics.expositionformats.TextFormatUtil;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
 import io.prometheus.metrics.model.snapshots.Exemplar;
@@ -16,7 +17,6 @@ import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.shaded.com_google_protobuf_4_28_2.TextFormat;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import java.io.ByteArrayOutputStream;
@@ -92,7 +92,7 @@ class HistogramTest {
           new PrometheusProtobufWriter().convert(histogram.collect());
       String expectedWithMetadata =
           "name: \"test\" type: HISTOGRAM metric { histogram { " + expected + " } }";
-      assertThat(TextFormat.printer().shortDebugString(protobufData))
+      assertThat(TextFormatUtil.shortDebugString(protobufData))
           .as("test \"" + name + "\" failed")
           .isEqualTo(expectedWithMetadata);
     }
@@ -941,7 +941,7 @@ class HistogramTest {
 
     // protobuf
     Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(snapshot);
-    assertThat(TextFormat.printer().shortDebugString(protobufData)).isEqualTo(expectedProtobuf);
+    assertThat(TextFormatUtil.shortDebugString(protobufData)).isEqualTo(expectedProtobuf);
 
     // text
     ByteArrayOutputStream out = new ByteArrayOutputStream();

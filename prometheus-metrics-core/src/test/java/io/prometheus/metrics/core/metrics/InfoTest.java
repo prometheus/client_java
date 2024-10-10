@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
+import io.prometheus.metrics.expositionformats.TextFormatUtil;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.shaded.com_google_protobuf_4_28_2.TextFormat;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +27,7 @@ class InfoTest {
         Info info = Info.builder().name(name).labelNames(labelName).build();
         info.addLabelValues("value");
         Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(info.collect());
-        assertThat(TextFormat.printer().shortDebugString(protobufData))
+        assertThat(TextFormatUtil.shortDebugString(protobufData))
             .isEqualTo(
                 "name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value: \"value\" } gauge { value: 1.0 } }");
       }

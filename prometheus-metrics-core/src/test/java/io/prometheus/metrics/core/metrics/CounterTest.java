@@ -7,13 +7,13 @@ import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
+import io.prometheus.metrics.expositionformats.TextFormatUtil;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
-import io.prometheus.metrics.shaded.com_google_protobuf_4_28_2.TextFormat;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import java.util.Arrays;
@@ -113,7 +113,7 @@ class CounterTest {
         }) {
       Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
       Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(counter.collect());
-      assertThat(TextFormat.printer().shortDebugString(protobufData))
+      assertThat(TextFormatUtil.shortDebugString(protobufData))
           .isEqualTo(
               "name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");
     }
