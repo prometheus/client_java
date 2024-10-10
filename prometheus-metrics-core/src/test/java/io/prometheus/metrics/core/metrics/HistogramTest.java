@@ -1498,7 +1498,7 @@ class HistogramTest {
       }
     }
     assertThat(maxCount)
-        .isEqualTo(nThreads * 10_000); // the last collect() has seen all observations
+        .isEqualTo(nThreads * 10_000L); // the last collect() has seen all observations
     assertThat(nThreads * 10_000).isEqualTo(getBucket(histogram, 2.5, "status", "200").getCount());
     executor.shutdown();
     assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
@@ -1509,6 +1509,6 @@ class HistogramTest {
     return histogram.collect().getDataPoints().stream()
         .filter(d -> d.getLabels().equals(Labels.of(labels)))
         .findAny()
-        .orElseThrow(() -> new RuntimeException("histogram with labels " + labels + " not found"));
+        .orElseThrow(() -> new RuntimeException("histogram with labels " + Arrays.toString(labels) + " not found"));
   }
 }

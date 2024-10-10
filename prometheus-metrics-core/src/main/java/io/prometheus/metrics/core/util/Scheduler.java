@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class Scheduler {
 
   private static class DaemonThreadFactory implements ThreadFactory {
+    @Override
     public Thread newThread(Runnable runnable) {
       Thread thread = new Thread(runnable);
       thread.setDaemon(true);
@@ -29,6 +30,7 @@ public class Scheduler {
   }
 
   /** For unit test. Wait until the executor Thread is running. */
+  @SuppressWarnings("FutureReturnValueIgnored")
   public static void awaitInitialization() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
     Scheduler.schedule(latch::countDown, 0, TimeUnit.MILLISECONDS);

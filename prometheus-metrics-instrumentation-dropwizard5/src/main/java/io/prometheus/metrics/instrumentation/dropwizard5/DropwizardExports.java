@@ -75,7 +75,7 @@ public class DropwizardExports implements MultiCollector {
     CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder =
         CounterSnapshot.CounterDataPointSnapshot.builder()
             .value(Long.valueOf(counter.getCount()).doubleValue());
-    labelMapper.map(
+    labelMapper.ifPresent(
         mapper ->
             dataPointBuilder.labels(
                 mapper.getLabels(
@@ -103,7 +103,7 @@ public class DropwizardExports implements MultiCollector {
     MetricMetadata metadata = getMetricMetaData(dropwizardName, gauge);
     GaugeSnapshot.GaugeDataPointSnapshot.Builder dataPointBuilder =
         GaugeSnapshot.GaugeDataPointSnapshot.builder().value(value);
-    labelMapper.map(
+    labelMapper.ifPresent(
         mapper ->
             dataPointBuilder.labels(
                 mapper.getLabels(
@@ -135,7 +135,7 @@ public class DropwizardExports implements MultiCollector {
         new MetricMetadata(PrometheusNaming.sanitizeMetricName(dropwizardName), helpMessage);
     SummarySnapshot.SummaryDataPointSnapshot.Builder dataPointBuilder =
         SummarySnapshot.SummaryDataPointSnapshot.builder().quantiles(quantiles).count(count);
-    labelMapper.map(
+    labelMapper.ifPresent(
         mapper ->
             dataPointBuilder.labels(
                 mapper.getLabels(
@@ -168,7 +168,7 @@ public class DropwizardExports implements MultiCollector {
     MetricMetadata metadata = getMetricMetaData(dropwizardName + "_total", meter);
     CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder =
         CounterSnapshot.CounterDataPointSnapshot.builder().value(meter.getCount());
-    labelMapper.map(
+    labelMapper.ifPresent(
         mapper ->
             dataPointBuilder.labels(
                 mapper.getLabels(
@@ -180,22 +180,22 @@ public class DropwizardExports implements MultiCollector {
   public MetricSnapshots collect() {
     MetricSnapshots.Builder metricSnapshots = MetricSnapshots.builder();
     for (@SuppressWarnings("rawtypes")
-    SortedMap.Entry<MetricName, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
+    Map.Entry<MetricName, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
       Optional.ofNullable(fromGauge(entry.getKey().getKey(), entry.getValue()))
-          .map(metricSnapshots::metricSnapshot);
+          .ifPresent(metricSnapshots::metricSnapshot);
     }
-    for (SortedMap.Entry<MetricName, Counter> entry :
+    for (Map.Entry<MetricName, Counter> entry :
         registry.getCounters(metricFilter).entrySet()) {
       metricSnapshots.metricSnapshot(fromCounter(entry.getKey().getKey(), entry.getValue()));
     }
-    for (SortedMap.Entry<MetricName, Histogram> entry :
+    for (Map.Entry<MetricName, Histogram> entry :
         registry.getHistograms(metricFilter).entrySet()) {
       metricSnapshots.metricSnapshot(fromHistogram(entry.getKey().getKey(), entry.getValue()));
     }
-    for (SortedMap.Entry<MetricName, Timer> entry : registry.getTimers(metricFilter).entrySet()) {
+    for (Map.Entry<MetricName, Timer> entry : registry.getTimers(metricFilter).entrySet()) {
       metricSnapshots.metricSnapshot(fromTimer(entry.getKey().getKey(), entry.getValue()));
     }
-    for (SortedMap.Entry<MetricName, Meter> entry : registry.getMeters(metricFilter).entrySet()) {
+    for (Map.Entry<MetricName, Meter> entry : registry.getMeters(metricFilter).entrySet()) {
       metricSnapshots.metricSnapshot(fromMeter(entry.getKey().getKey(), entry.getValue()));
     }
     return metricSnapshots.build();

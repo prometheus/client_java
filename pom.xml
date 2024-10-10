@@ -282,6 +282,7 @@
                             -Xplugin:ErrorProne
                             -Xep:AlmostJavadoc:OFF
                             -Xep:MissingSummary:OFF
+                            -Xep:LongDoubleConversion:OFF
                             -XepExcludedPaths:.*/generated/.*
                         </arg>
                     </compilerArgs>

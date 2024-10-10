@@ -570,6 +570,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
     // doubleBucketWidth is called in the synchronized block while new observations go into the
     // buffer.
+    @SuppressWarnings("NonAtomicVolatileUpdate")
     private void doubleBucketWidth() {
       doubleBucketWidth(nativeBucketsForPositiveValues);
       doubleBucketWidth(nativeBucketsForNegativeValues);
@@ -605,6 +606,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       return NativeHistogramBuckets.of(bucketIndexes, counts);
     }
 
+    @SuppressWarnings("FutureReturnValueIgnored")
     private void maybeScheduleNextReset() {
       if (nativeResetDurationSeconds > 0) {
         Scheduler.schedule(
@@ -662,8 +664,10 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
   public static class Builder extends StatefulMetric.Builder<Histogram.Builder, Histogram> {
 
+    @SuppressWarnings("MutablePublicArray")
     public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS =
         new double[] {.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10};
+
     private final double DEFAULT_NATIVE_MIN_ZERO_THRESHOLD = Math.pow(2.0, -128);
     private final double DEFAULT_NATIVE_MAX_ZERO_THRESHOLD = Math.pow(2.0, -128);
     private final int DEFAULT_NATIVE_INITIAL_SCHEMA = 5;

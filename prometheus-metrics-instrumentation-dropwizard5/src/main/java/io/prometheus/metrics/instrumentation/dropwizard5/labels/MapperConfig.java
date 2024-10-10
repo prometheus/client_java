@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * <p>Dropwizard metrics that match the "match" pattern will be further processed to have a new name
  * and new labels based on this config.
  */
-public class MapperConfig {
+public final class MapperConfig {
   // each part of the metric name between dots
   private static final String METRIC_PART_REGEX = "[a-zA-Z_0-9](-?[a-zA-Z0-9_])+";
   // Simplified GLOB: we can have "*." at the beginning and "*" only at the end

@@ -107,9 +107,7 @@ public class ExemplarSampler {
       // possible.
     }
     rateLimitedObserve(
-        acceptingNewCustomExemplars,
-        value,
-            () -> doObserveWithExemplar(value, labels));
+        acceptingNewCustomExemplars, value, () -> doObserveWithExemplar(value, labels));
   }
 
   private long doObserve(double value) {
@@ -278,8 +276,7 @@ public class ExemplarSampler {
    * ExemplarSamplerConfig#getSampleIntervalMillis()} milliseconds.
    */
   @SuppressWarnings("FutureReturnValueIgnored")
-  private void rateLimitedObserve(
-          AtomicBoolean accepting, double value, LongSupplier observeFunc) {
+  private void rateLimitedObserve(AtomicBoolean accepting, double value, LongSupplier observeFunc) {
     if (Double.isNaN(value)) {
       return;
     }
