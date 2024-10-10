@@ -38,8 +38,8 @@ class Buffer {
   }
 
   private void doAppend(double amount) {
+    appendLock.lock();
     try {
-      appendLock.lock();
       if (bufferPos >= observationBuffer.length) {
         observationBuffer = Arrays.copyOf(observationBuffer, observationBuffer.length + 128);
       }
@@ -64,14 +64,14 @@ class Buffer {
     double[] buffer;
     int bufferSize;
     T result;
-    try {
-      runLock.lock();
 
+    runLock.lock();
+    try {
       // Signal that the buffer is active.
       Long expectedCount = observationCount.getAndAdd(bufferActiveBit);
-      try {
-        appendLock.lock();
 
+      appendLock.lock();
+      try {
         while (!complete.apply(expectedCount)) {
           // Wait until all in-flight threads have added their observations to the buffer.
           bufferFilled.await();
