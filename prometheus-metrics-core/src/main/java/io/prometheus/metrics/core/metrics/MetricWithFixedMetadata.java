@@ -91,6 +91,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
       return self();
     }
 
+    @Override
     public B constLabels(Labels constLabels) {
       for (String labelName : labelNames) {
         if (constLabels.contains(labelName)) { // Labels.contains() treats dots like underscores

@@ -98,7 +98,7 @@ public class ExemplarSampler {
       return; // This is the hot path in a high-throughput application and should be as efficient as
       // possible.
     }
-    rateLimitedObserve(acceptingNewExemplars, value, exemplars, () -> doObserve(value));
+    rateLimitedObserve(acceptingNewExemplars, value, () -> doObserve(value));
   }
 
   public void observeWithExemplar(double value, Labels labels) {
@@ -109,8 +109,7 @@ public class ExemplarSampler {
     rateLimitedObserve(
         acceptingNewCustomExemplars,
         value,
-        customExemplars,
-        () -> doObserveWithExemplar(value, labels));
+            () -> doObserveWithExemplar(value, labels));
   }
 
   private long doObserve(double value) {
@@ -278,8 +277,9 @@ public class ExemplarSampler {
    * <p>To avoid performance issues, we rate limit observing exemplars to {@link
    * ExemplarSamplerConfig#getSampleIntervalMillis()} milliseconds.
    */
+  @SuppressWarnings("FutureReturnValueIgnored")
   private void rateLimitedObserve(
-      AtomicBoolean accepting, double value, Exemplar[] exemplars, LongSupplier observeFunc) {
+          AtomicBoolean accepting, double value, LongSupplier observeFunc) {
     if (Double.isNaN(value)) {
       return;
     }
@@ -352,6 +352,7 @@ public class ExemplarSampler {
         }
       }
     } catch (NoClassDefFoundError ignored) {
+      // ignore
     }
     return Labels.EMPTY;
   }

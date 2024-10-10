@@ -47,6 +47,7 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
    */
   protected abstract MetricSnapshot<?> collect(List<Labels> labels, List<T> metricData);
 
+  @Override
   public MetricSnapshot<?> collect() {
     if (labelNames.length == 0 && data.isEmpty()) {
       // This is a metric without labels that has not been used yet. Initialize the data on the fly.
@@ -157,9 +158,9 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
     }
   }
 
-  protected <T> T getConfigProperty(
-      MetricsProperties[] properties, Function<MetricsProperties, T> getter) {
-    T result;
+  protected <P> P getConfigProperty(
+      MetricsProperties[] properties, Function<MetricsProperties, P> getter) {
+    P result;
     for (MetricsProperties props : properties) {
       result = getter.apply(props);
       if (result != null) {

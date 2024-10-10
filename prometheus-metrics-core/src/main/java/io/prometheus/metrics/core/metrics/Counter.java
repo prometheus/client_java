@@ -140,7 +140,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     public void inc(long amount) {
       validateAndAdd(amount);
       if (isExemplarsEnabled()) {
-        exemplarSampler.observe(amount);
+        exemplarSampler.observe((double) amount);
       }
     }
 
@@ -156,7 +156,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     public void incWithExemplar(long amount, Labels labels) {
       validateAndAdd(amount);
       if (isExemplarsEnabled()) {
-        exemplarSampler.observeWithExemplar(amount, labels);
+        exemplarSampler.observeWithExemplar((double) amount, labels);
       }
     }
 

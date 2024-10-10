@@ -48,6 +48,7 @@ class Buffer {
     reset = true;
   }
 
+  @SuppressWarnings("ThreadPriorityCheck")
   <T extends DataPointSnapshot> T run(
       Function<Long, Boolean> complete, Supplier<T> runnable, Consumer<Double> observeFunction) {
     double[] buffer;
