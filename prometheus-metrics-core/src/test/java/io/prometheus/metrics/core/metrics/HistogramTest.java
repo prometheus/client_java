@@ -1509,6 +1509,9 @@ class HistogramTest {
     return histogram.collect().getDataPoints().stream()
         .filter(d -> d.getLabels().equals(Labels.of(labels)))
         .findAny()
-        .orElseThrow(() -> new RuntimeException("histogram with labels " + Arrays.toString(labels) + " not found"));
+        .orElseThrow(
+            () ->
+                new RuntimeException(
+                    "histogram with labels " + Arrays.toString(labels) + " not found"));
   }
 }

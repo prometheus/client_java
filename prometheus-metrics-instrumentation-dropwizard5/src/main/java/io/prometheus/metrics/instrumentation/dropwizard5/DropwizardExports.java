@@ -184,12 +184,10 @@ public class DropwizardExports implements MultiCollector {
       Optional.ofNullable(fromGauge(entry.getKey().getKey(), entry.getValue()))
           .ifPresent(metricSnapshots::metricSnapshot);
     }
-    for (Map.Entry<MetricName, Counter> entry :
-        registry.getCounters(metricFilter).entrySet()) {
+    for (Map.Entry<MetricName, Counter> entry : registry.getCounters(metricFilter).entrySet()) {
       metricSnapshots.metricSnapshot(fromCounter(entry.getKey().getKey(), entry.getValue()));
     }
-    for (Map.Entry<MetricName, Histogram> entry :
-        registry.getHistograms(metricFilter).entrySet()) {
+    for (Map.Entry<MetricName, Histogram> entry : registry.getHistograms(metricFilter).entrySet()) {
       metricSnapshots.metricSnapshot(fromHistogram(entry.getKey().getKey(), entry.getValue()));
     }
     for (Map.Entry<MetricName, Timer> entry : registry.getTimers(metricFilter).entrySet()) {

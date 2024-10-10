@@ -3,7 +3,6 @@ package io.prometheus.metrics.examples.multitarget;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot.Builder;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
@@ -46,7 +45,8 @@ public class SampleMultiCollector implements MultiCollector {
     } else {
       targetName = targetNames[0];
     }
-    Builder counterDataPointBuilder = CounterSnapshot.CounterDataPointSnapshot.builder();
+    CounterSnapshot.CounterDataPointSnapshot.Builder counterDataPointBuilder =
+        CounterSnapshot.CounterDataPointSnapshot.builder();
     io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot.Builder
         gaugeDataPointBuilder = GaugeSnapshot.GaugeDataPointSnapshot.builder();
     Labels lbls = Labels.of("target", targetName);
@@ -77,6 +77,7 @@ public class SampleMultiCollector implements MultiCollector {
     return new MetricSnapshots(snaps);
   }
 
+  @Override
   public List<String> getPrometheusNames() {
     List<String> names = new ArrayList<String>();
     names.add("x_calls_total");

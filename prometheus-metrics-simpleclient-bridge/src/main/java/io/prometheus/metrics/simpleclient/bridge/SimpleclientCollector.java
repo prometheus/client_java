@@ -291,14 +291,6 @@ public class SimpleclientCollector implements MultiCollector {
     return unknown.build();
   }
 
-  private String stripSuffix(String name, String suffix) {
-    if (name.endsWith(suffix)) {
-      return name.substring(0, name.length() - suffix.length());
-    } else {
-      return name;
-    }
-  }
-
   private Unit convertUnit(Collector.MetricFamilySamples samples) {
     if (samples.unit != null && !samples.unit.isEmpty()) {
       return new Unit(samples.unit);
@@ -385,8 +377,9 @@ public class SimpleclientCollector implements MultiCollector {
    * follow the pattern to pass the config everywhere so that we can introduce config options later
    * without the need for API changes.
    */
+  @SuppressWarnings("unused")
   public static Builder builder(PrometheusProperties config) {
-    return new Builder(config);
+    return new Builder();
   }
 
   public static Builder builder() {
@@ -395,12 +388,9 @@ public class SimpleclientCollector implements MultiCollector {
 
   public static class Builder {
 
-    private final PrometheusProperties config;
     private CollectorRegistry collectorRegistry;
 
-    private Builder(PrometheusProperties config) {
-      this.config = config;
-    }
+    private Builder() {}
 
     public Builder collectorRegistry(CollectorRegistry registry) {
       this.collectorRegistry = registry;
