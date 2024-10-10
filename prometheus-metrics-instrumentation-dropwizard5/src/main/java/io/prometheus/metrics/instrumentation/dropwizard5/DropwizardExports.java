@@ -84,7 +84,7 @@ public class DropwizardExports implements MultiCollector {
   }
 
   /** Export gauge as a prometheus gauge. */
-  MetricSnapshot<?> fromGauge(String dropwizardName, Gauge gauge) {
+  MetricSnapshot<?> fromGauge(String dropwizardName, Gauge<?> gauge) {
     Object obj = gauge.getValue();
     double value;
     if (obj instanceof Number) {
@@ -179,7 +179,8 @@ public class DropwizardExports implements MultiCollector {
   @Override
   public MetricSnapshots collect() {
     MetricSnapshots.Builder metricSnapshots = MetricSnapshots.builder();
-    for (SortedMap.Entry<MetricName, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
+    for (@SuppressWarnings("rawtypes")
+    SortedMap.Entry<MetricName, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
       Optional.ofNullable(fromGauge(entry.getKey().getKey(), entry.getValue()))
           .map(metricSnapshots::metricSnapshot);
     }

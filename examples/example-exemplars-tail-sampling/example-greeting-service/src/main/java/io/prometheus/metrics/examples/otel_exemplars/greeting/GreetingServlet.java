@@ -13,6 +13,8 @@ import java.util.Random;
 /** Hello World REST servlet, with an example counter and an example histogram. */
 public class GreetingServlet extends HttpServlet {
 
+  private static final long serialVersionUID = 0L;
+
   private final Random random = new Random(0);
 
   private final Histogram histogram;
