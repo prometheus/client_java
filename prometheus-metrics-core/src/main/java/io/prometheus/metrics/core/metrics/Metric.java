@@ -19,7 +19,7 @@ public abstract class Metric implements Collector {
   }
 
   @Override
-  public abstract MetricSnapshot collect();
+  public abstract MetricSnapshot<?> collect();
 
   protected abstract static class Builder<B extends Builder<B, M>, M extends Metric> {
 

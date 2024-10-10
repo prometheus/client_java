@@ -5,7 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 /** Immutable snapshot of a Summary metric. */
-public final class SummarySnapshot extends MetricSnapshot {
+public final class SummarySnapshot
+    extends MetricSnapshot<SummarySnapshot.SummaryDataPointSnapshot> {
 
   /**
    * To create a new {@link SummarySnapshot}, you can either call the constructor directly or use
@@ -20,7 +21,7 @@ public final class SummarySnapshot extends MetricSnapshot {
 
   @Override
   public List<SummaryDataPointSnapshot> getDataPoints() {
-    return (List<SummaryDataPointSnapshot>) dataPoints;
+    return dataPoints;
   }
 
   public static final class SummaryDataPointSnapshot extends DistributionDataPointSnapshot {

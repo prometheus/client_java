@@ -1,24 +1,18 @@
 package io.prometheus.metrics.model.snapshots;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 /** Base class for metric snapshots. */
-public abstract class MetricSnapshot {
+public abstract class MetricSnapshot<T extends DataPointSnapshot> {
 
   private final MetricMetadata metadata;
-  protected final List<? extends DataPointSnapshot> dataPoints;
+  protected final List<T> dataPoints;
 
-  protected MetricSnapshot(MetricMetadata metadata, DataPointSnapshot... dataPoints) {
-    this(metadata, Arrays.asList(dataPoints));
-  }
-
-  protected MetricSnapshot(
-      MetricMetadata metadata, Collection<? extends DataPointSnapshot> dataPoints) {
+  protected MetricSnapshot(MetricMetadata metadata, Collection<T> dataPoints) {
     if (metadata == null) {
       throw new NullPointerException("metadata");
     }
@@ -26,7 +20,7 @@ public abstract class MetricSnapshot {
       throw new NullPointerException("dataPoints");
     }
     this.metadata = metadata;
-    List<? extends DataPointSnapshot> dataCopy = new ArrayList<>(dataPoints);
+    List<T> dataCopy = new ArrayList<>(dataPoints);
     dataCopy.sort(Comparator.comparing(DataPointSnapshot::getLabels));
     this.dataPoints = Collections.unmodifiableList(dataCopy);
     validateLabels();
@@ -36,7 +30,7 @@ public abstract class MetricSnapshot {
     return metadata;
   }
 
-  public abstract List<? extends DataPointSnapshot> getDataPoints();
+  public abstract List<T> getDataPoints();
 
   protected void validateLabels() {
     // Verify that labels are unique (the same set of names/values must not be used multiple times
@@ -76,7 +70,7 @@ public abstract class MetricSnapshot {
       return self();
     }
 
-    public abstract MetricSnapshot build();
+    public abstract MetricSnapshot<?> build();
 
     protected MetricMetadata buildMetadata() {
       return new MetricMetadata(name, help, unit);

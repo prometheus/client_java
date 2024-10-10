@@ -70,7 +70,7 @@ public class DropwizardExports implements MultiCollector {
    * Export counter as Prometheus <a
    * href="https://prometheus.io/docs/concepts/metric_types/#gauge">Gauge</a>.
    */
-  MetricSnapshot fromCounter(String dropwizardName, Counter counter) {
+  MetricSnapshot<?> fromCounter(String dropwizardName, Counter counter) {
     MetricMetadata metadata = getMetricMetaData(dropwizardName, counter);
     CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder =
         CounterSnapshot.CounterDataPointSnapshot.builder()
@@ -84,7 +84,7 @@ public class DropwizardExports implements MultiCollector {
   }
 
   /** Export gauge as a prometheus gauge. */
-  MetricSnapshot fromGauge(String dropwizardName, Gauge gauge) {
+  MetricSnapshot<?> fromGauge(String dropwizardName, Gauge gauge) {
     Object obj = gauge.getValue();
     double value;
     if (obj instanceof Number) {
@@ -119,7 +119,7 @@ public class DropwizardExports implements MultiCollector {
    * @param count the total sample count for this snapshot.
    * @param factor a factor to apply to histogram values.
    */
-  MetricSnapshot fromSnapshotAndCount(
+  MetricSnapshot<?> fromSnapshotAndCount(
       String dropwizardName, Snapshot snapshot, long count, double factor, String helpMessage) {
     Quantiles quantiles =
         Quantiles.builder()
@@ -144,7 +144,7 @@ public class DropwizardExports implements MultiCollector {
   }
 
   /** Convert histogram snapshot. */
-  MetricSnapshot fromHistogram(String dropwizardName, Histogram histogram) {
+  MetricSnapshot<?> fromHistogram(String dropwizardName, Histogram histogram) {
     return fromSnapshotAndCount(
         dropwizardName,
         histogram.getSnapshot(),
@@ -154,7 +154,7 @@ public class DropwizardExports implements MultiCollector {
   }
 
   /** Export Dropwizard Timer as a histogram. Use TIME_UNIT as time unit. */
-  MetricSnapshot fromTimer(String dropwizardName, Timer timer) {
+  MetricSnapshot<?> fromTimer(String dropwizardName, Timer timer) {
     return fromSnapshotAndCount(
         dropwizardName,
         timer.getSnapshot(),
@@ -164,7 +164,7 @@ public class DropwizardExports implements MultiCollector {
   }
 
   /** Export a Meter as a prometheus COUNTER. */
-  MetricSnapshot fromMeter(String dropwizardName, Meter meter) {
+  MetricSnapshot<?> fromMeter(String dropwizardName, Meter meter) {
     MetricMetadata metadata = getMetricMetaData(dropwizardName + "_total", meter);
     CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder =
         CounterSnapshot.CounterDataPointSnapshot.builder().value(meter.getCount());

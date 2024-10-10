@@ -42,7 +42,7 @@ public interface MultiCollector {
       Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
     MetricSnapshots allSnapshots = scrapeRequest == null ? collect() : collect(scrapeRequest);
     MetricSnapshots.Builder result = MetricSnapshots.builder();
-    for (MetricSnapshot snapshot : allSnapshots) {
+    for (MetricSnapshot<?> snapshot : allSnapshots) {
       if (includedNames.test(snapshot.getMetadata().getPrometheusName())) {
         result.metricSnapshot(snapshot);
       }

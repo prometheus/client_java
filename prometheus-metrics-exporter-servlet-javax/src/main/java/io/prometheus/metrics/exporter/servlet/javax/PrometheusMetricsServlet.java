@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PrometheusMetricsServlet extends HttpServlet {
 
+  private static final long serialVersionUID = 0L;
+
   private final PrometheusScrapeHandler handler;
 
   /** Default constructor. Uses the default PrometheusProperties and PrometheusRegistry. */

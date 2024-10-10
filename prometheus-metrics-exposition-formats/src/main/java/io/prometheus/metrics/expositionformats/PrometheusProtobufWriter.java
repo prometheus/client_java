@@ -52,7 +52,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
   public String toDebugString(MetricSnapshots metricSnapshots) {
     StringBuilder stringBuilder = new StringBuilder();
-    for (MetricSnapshot snapshot : metricSnapshots) {
+    for (MetricSnapshot<?> snapshot : metricSnapshots) {
       if (snapshot.getDataPoints().size() > 0) {
         stringBuilder.append(TextFormat.printer().printToString(convert(snapshot)));
       }
@@ -62,14 +62,14 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
   @Override
   public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
-    for (MetricSnapshot snapshot : metricSnapshots) {
+    for (MetricSnapshot<?> snapshot : metricSnapshots) {
       if (snapshot.getDataPoints().size() > 0) {
         convert(snapshot).writeDelimitedTo(out);
       }
     }
   }
 
-  public Metrics.MetricFamily convert(MetricSnapshot snapshot) {
+  public Metrics.MetricFamily convert(MetricSnapshot<?> snapshot) {
     Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
     if (snapshot instanceof CounterSnapshot) {
       for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getDataPoints()) {

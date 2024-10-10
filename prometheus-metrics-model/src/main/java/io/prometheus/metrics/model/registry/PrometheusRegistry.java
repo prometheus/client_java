@@ -63,7 +63,7 @@ public class PrometheusRegistry {
   public MetricSnapshots scrape(PrometheusScrapeRequest scrapeRequest) {
     MetricSnapshots.Builder result = MetricSnapshots.builder();
     for (Collector collector : collectors) {
-      MetricSnapshot snapshot =
+      MetricSnapshot<?> snapshot =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
       if (snapshot != null) {
         if (result.containsMetricName(snapshot.getMetadata().getName())) {
@@ -76,7 +76,7 @@ public class PrometheusRegistry {
     for (MultiCollector collector : multiCollectors) {
       MetricSnapshots snapshots =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
-      for (MetricSnapshot snapshot : snapshots) {
+      for (MetricSnapshot<?> snapshot : snapshots) {
         if (result.containsMetricName(snapshot.getMetadata().getName())) {
           throw new IllegalStateException(
               snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
@@ -105,7 +105,7 @@ public class PrometheusRegistry {
       // prometheusName == null means the name is unknown, and we have to scrape to learn the name.
       // prometheusName != null means we can skip the scrape if the name is excluded.
       if (prometheusName == null || includedNames.test(prometheusName)) {
-        MetricSnapshot snapshot =
+        MetricSnapshot<?> snapshot =
             scrapeRequest == null
                 ? collector.collect(includedNames)
                 : collector.collect(includedNames, scrapeRequest);
@@ -132,7 +132,7 @@ public class PrometheusRegistry {
             scrapeRequest == null
                 ? collector.collect(includedNames)
                 : collector.collect(includedNames, scrapeRequest);
-        for (MetricSnapshot snapshot : snapshots) {
+        for (MetricSnapshot<?> snapshot : snapshots) {
           if (snapshot != null) {
             result.metricSnapshot(snapshot);
           }

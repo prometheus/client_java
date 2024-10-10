@@ -53,7 +53,7 @@ import java.util.concurrent.ConcurrentMap;
 public class CacheMetricsCollector implements MultiCollector {
   private static final double NANOSECONDS_PER_SECOND = 1_000_000_000.0;
 
-  protected final ConcurrentMap<String, Cache> children = new ConcurrentHashMap<String, Cache>();
+  protected final ConcurrentMap<String, Cache> children = new ConcurrentHashMap<>();
 
   /**
    * Add or replace the cache with the given name.
@@ -86,7 +86,7 @@ public class CacheMetricsCollector implements MultiCollector {
    *
    * @param cacheName cache to be removed
    */
-  public Cache removeCache(String cacheName) {
+  public Cache nremoveCache(String cacheName) {
     return children.remove(cacheName);
   }
 

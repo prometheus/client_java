@@ -39,6 +39,7 @@ public class SlidingWindow<T> {
    * @param maxAgeSeconds after this amount of time an instance of T gets evicted.
    * @param ageBuckets number of age buckets.
    */
+  @SuppressWarnings("unchecked")
   public SlidingWindow(
       Class<T> clazz,
       Supplier<T> constructor,

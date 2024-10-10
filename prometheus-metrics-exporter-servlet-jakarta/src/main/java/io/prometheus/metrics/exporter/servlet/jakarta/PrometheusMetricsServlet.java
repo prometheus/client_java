@@ -16,6 +16,8 @@ import java.io.IOException;
  */
 public class PrometheusMetricsServlet extends HttpServlet {
 
+  private static final long serialVersionUID = 0L;
+
   private final PrometheusScrapeHandler handler;
 
   public PrometheusMetricsServlet() {

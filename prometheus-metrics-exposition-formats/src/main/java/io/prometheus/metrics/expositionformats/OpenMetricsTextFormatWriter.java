@@ -65,7 +65,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
   public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
     OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
-    for (MetricSnapshot snapshot : metricSnapshots) {
+    for (MetricSnapshot<?> snapshot : metricSnapshots) {
       if (snapshot.getDataPoints().size() > 0) {
         if (snapshot instanceof CounterSnapshot) {
           writeCounter(writer, (CounterSnapshot) snapshot);
