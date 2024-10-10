@@ -63,6 +63,7 @@ public class ResourceAttributesFromOtelAgent {
         deleteTempDir(tmpDir.toFile());
       }
     } catch (Exception ignored) {
+      // ignore
     }
   }
 

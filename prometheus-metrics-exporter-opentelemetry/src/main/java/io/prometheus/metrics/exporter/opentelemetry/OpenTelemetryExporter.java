@@ -14,6 +14,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -58,6 +59,7 @@ public class OpenTelemetryExporter implements AutoCloseable {
     reader.register(prometheusMetricProducer);
   }
 
+  @Override
   public void close() {
     reader.shutdown();
   }
@@ -445,7 +447,8 @@ public class OpenTelemetryExporter implements AutoCloseable {
     }
 
     private static String getString(String otelPropertyName) {
-      String otelEnvVarName = otelPropertyName.replace(".", "_").replace("-", "_").toUpperCase();
+      String otelEnvVarName =
+          otelPropertyName.replace(".", "_").replace("-", "_").toUpperCase(Locale.ROOT);
       if (System.getenv(otelEnvVarName) != null) {
         return System.getenv(otelEnvVarName);
       }

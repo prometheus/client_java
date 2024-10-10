@@ -79,6 +79,7 @@ class PushGatewayTestApp {
 
   static TrustManager insecureTrustManager =
       new X509TrustManager() {
+        @Override
         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
           return null;
         }
