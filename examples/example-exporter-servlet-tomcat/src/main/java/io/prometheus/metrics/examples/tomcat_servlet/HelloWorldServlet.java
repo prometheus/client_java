@@ -14,6 +14,8 @@ import java.util.Random;
 /** Hello World REST servlet, with an example counter and an example histogram. */
 public class HelloWorldServlet extends HttpServlet {
 
+  private static final long serialVersionUID = 0L;
+
   private final Random random = new Random(0);
 
   // Note: The requests_total counter is not a great example, because the
