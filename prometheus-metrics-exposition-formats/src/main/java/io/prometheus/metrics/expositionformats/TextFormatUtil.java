@@ -1,5 +1,7 @@
 package io.prometheus.metrics.expositionformats;
 
+import com.google.protobuf.MessageOrBuilder;
+import com.google.protobuf.TextFormat;
 import io.prometheus.metrics.model.snapshots.Labels;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -80,5 +82,9 @@ public class TextFormatUtil {
       writer.write("\"");
     }
     writer.write('}');
+  }
+
+  public static String shortDebugString(MessageOrBuilder protobufData) {
+    return TextFormat.printer().shortDebugString(protobufData);
   }
 }
