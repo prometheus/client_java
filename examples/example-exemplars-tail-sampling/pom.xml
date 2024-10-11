@@ -16,20 +16,12 @@
         Example project showing Examplars with OpenTelemetry's Tail Sampling.
     </description>
 
+    <properties>
+        <java.version>11</java.version>
+    </properties>
+
     <modules>
         <module>example-greeting-service</module>
         <module>example-hello-world-app</module>
     </modules>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

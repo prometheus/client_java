@@ -19,6 +19,7 @@
         <automatic.module.name>--module-name-need-to-be-overriden--</automatic.module.name>
         <junit-jupiter.version>5.11.2</junit-jupiter.version>
         <otel.version>1.42.1</otel.version>
+        <java.version>8</java.version>
     </properties>
 
     <licenses>
@@ -270,9 +271,9 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <release>8</release>
-                    <source>8</source>
-                    <target>8</target>
+                    <release>${java.version}</release>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                     <showWarnings>true</showWarnings>
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
