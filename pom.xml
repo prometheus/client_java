@@ -20,6 +20,7 @@
         <junit-jupiter.version>5.11.2</junit-jupiter.version>
         <otel.version>1.42.1</otel.version>
         <java.version>8</java.version>
+        <skip.release>false</skip.release>
     </properties>
 
     <licenses>
@@ -245,6 +246,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>${skip.release}</skip>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -271,6 +275,7 @@
                     <show>public</show>
                     <excludePackageNames>io.prometheus.metrics.expositionformats.generated.*</excludePackageNames>
                     <source>8</source>
+                    <skip>${skip.release}</skip>
                 </configuration>
             </plugin>
             <plugin>

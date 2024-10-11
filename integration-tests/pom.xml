@@ -19,7 +19,7 @@
     </description>
 
     <properties>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <skip.release>true</skip.release>
     </properties>
 
     <modules>

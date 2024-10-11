@@ -16,10 +16,6 @@
         Integration Tests for Exporters
     </description>
 
-    <properties>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
