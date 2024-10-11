@@ -14,6 +14,10 @@
     <description>
         Jetty Sample for the Exporter Integration Test
     </description>
+    <properties>
+        <jetty-server.version>12.0.14</jetty-server.version>
+        <java.version>17</java.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -29,12 +33,12 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>11.0.21</version>
+            <version>${jetty-server.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>11.0.21</version>
+          <groupId>org.eclipse.jetty.ee10</groupId>
+          <artifactId>jetty-ee10-servlet</artifactId>
+          <version>${jetty-server.version}</version>
         </dependency>
     </dependencies>
 
