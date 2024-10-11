@@ -34,7 +34,7 @@ public class GreetingServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     long start = System.nanoTime();
     try {
-      Thread.sleep((long) (Math.abs((random.nextGaussian() + 1.0) * 100.0)));
+      Thread.sleep((long) Math.abs((random.nextGaussian() + 1.0) * 100.0));
       resp.setStatus(200);
       resp.setContentType("text/plain");
       resp.getWriter().println("Hello, World!");
