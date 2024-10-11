@@ -11,3 +11,5 @@ After that, manually verify the uploaded artifacts on [https://oss.sonatype.org/
 
 Create a commit to remove dependencies from the build (undoing the first step):
 
+1. Trigger the release process at https://github.com/prometheus/client_java/actions/workflows/release.yml
+2. Create a GitHub release at https://github.com/prometheus/client_java/releases matching the version you selected in the first step
