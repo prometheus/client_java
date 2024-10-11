@@ -7,10 +7,10 @@ import io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Unit;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletHandler;
 
 /** Sample application using the {@link PrometheusMetricsServlet} in Jetty. */
 public class ExporterServletJettySample {
@@ -73,8 +73,8 @@ public class ExporterServletJettySample {
     server.setConnectors(new Connector[] {connector});
 
     // register servlet
-    ServletHandler servletHandler = new ServletHandler();
-    servletHandler.addServletWithMapping(PrometheusMetricsServlet.class, "/metrics");
+    ServletContextHandler servletHandler = new ServletContextHandler("/");
+    servletHandler.addServlet(PrometheusMetricsServlet.class, "/metrics");
     server.setHandler(servletHandler);
 
     System.out.println("Running on http://localhost:" + port + "/metrics");
