@@ -2,7 +2,7 @@
 docker-compose:
   generator: docker-lgtm
   files:
-    - ./docker-compose.oats.yml
+    - ./docker-compose.yml
 expected:
   metrics:
     - promql: 'uptime_seconds_total{}'

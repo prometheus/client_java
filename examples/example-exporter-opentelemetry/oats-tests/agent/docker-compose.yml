@@ -4,7 +4,8 @@ version: '3.4'
 services:
   java:
     build:
-      dockerfile: oats.Dockerfile
+      context: ../..
+      dockerfile: oats-tests/agent/Dockerfile
     environment:
       OTEL_SERVICE_NAME: "rolldice"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://lgtm:4317
