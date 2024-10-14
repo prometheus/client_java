@@ -38,4 +38,4 @@ jobs:
         if: failure()
         with:
           name: docker-compose.log
-          path: oats/yaml/build/**/output.log
+          path: oats/yaml/build/**/*.log
