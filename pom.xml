@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <automatic.module.name>--module-name-need-to-be-overriden--</automatic.module.name>
         <junit-jupiter.version>5.11.2</junit-jupiter.version>
-        <otel.version>1.42.1</otel.version>
+        <otel.version>1.43.0</otel.version>
         <java.version>8</java.version>
     </properties>
 
