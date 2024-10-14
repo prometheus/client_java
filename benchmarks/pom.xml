@@ -22,6 +22,18 @@
         <codahale.version>3.0.2</codahale.version>
     </properties>
 
+    <dependencyManagement>
+         <dependencies>
+             <dependency>
+                 <groupId>io.opentelemetry.instrumentation</groupId>
+                 <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+                 <version>${otel.instrumentation.version}</version>
+                 <type>pom</type>
+                 <scope>import</scope>
+             </dependency>
+         </dependencies>
+     </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
@@ -58,17 +70,14 @@
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-api</artifactId>
-            <version>${otel.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-sdk</artifactId>
-            <version>${otel.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-sdk-testing</artifactId>
-            <version>${otel.version}</version>
         </dependency>
     </dependencies>
     <build>

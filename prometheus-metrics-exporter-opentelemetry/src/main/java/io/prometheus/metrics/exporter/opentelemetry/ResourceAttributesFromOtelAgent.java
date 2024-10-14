@@ -2,6 +2,7 @@ package io.prometheus.metrics.exporter.opentelemetry;
 
 import static java.nio.file.Files.createTempDirectory;
 
+import io.opentelemetry.sdk.resources.Resource;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -11,7 +12,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Map;
 
 public class ResourceAttributesFromOtelAgent {
 
@@ -32,7 +32,7 @@ public class ResourceAttributesFromOtelAgent {
    * <p>After that we discard the class loader so that all OTel specific classes are unloaded. No
    * runtime dependency on any OTel version remains.
    */
-  public static void addIfAbsent(Map<String, String> result, String instrumentationScopeName) {
+  public static Resource get(String instrumentationScopeName) {
     try {
       Path tmpDir = createTempDirectory(instrumentationScopeName + "-");
       try {
@@ -43,20 +43,13 @@ public class ResourceAttributesFromOtelAgent {
               classLoader.loadClass("io.opentelemetry.api.GlobalOpenTelemetry");
           Object globalOpenTelemetry = globalOpenTelemetryClass.getMethod("get").invoke(null);
           if (globalOpenTelemetry.getClass().getSimpleName().contains("ApplicationOpenTelemetry")) {
-            // GlobalOpenTelemetry is injected by the OTel Java aqent
+            // GlobalOpenTelemetry is injected by the OTel Java agent
             Object applicationMeterProvider = callMethod("getMeterProvider", globalOpenTelemetry);
             Object agentMeterProvider = getField("agentMeterProvider", applicationMeterProvider);
             Object sdkMeterProvider = getField("delegate", agentMeterProvider);
             Object sharedState = getField("sharedState", sdkMeterProvider);
             Object resource = callMethod("getResource", sharedState);
-            Object attributes = callMethod("getAttributes", resource);
-            Map<?, ?> attributeMap = (Map<?, ?>) callMethod("asMap", attributes);
-
-            for (Map.Entry<?, ?> entry : attributeMap.entrySet()) {
-              if (entry.getKey() != null && entry.getValue() != null) {
-                result.putIfAbsent(entry.getKey().toString(), entry.getValue().toString());
-              }
-            }
+            return (Resource) resource;
           }
         }
       } finally {
@@ -65,6 +58,7 @@ public class ResourceAttributesFromOtelAgent {
     } catch (Exception ignored) {
       // ignore
     }
+    return Resource.empty();
   }
 
   private static Object getField(String name, Object obj) throws Exception {

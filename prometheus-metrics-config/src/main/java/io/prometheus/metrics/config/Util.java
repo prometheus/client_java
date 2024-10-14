@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 
 class Util {
 
-  private static String getProperty(String name, Map<Object, Object> properties) {
+  static String getProperty(String name, Map<Object, Object> properties) {
     Object object = properties.remove(name);
     if (object != null) {
       return object.toString();
@@ -44,6 +44,14 @@ class Util {
   static String loadString(String name, Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     return getProperty(name, properties);
+  }
+
+  static String loadStringAddSuffix(String name, Map<Object, Object> properties, String suffix) {
+    Object object = properties.remove(name);
+    if (object != null) {
+      return object + suffix;
+    }
+    return null;
   }
 
   static List<String> loadStringList(String name, Map<Object, Object> properties)
