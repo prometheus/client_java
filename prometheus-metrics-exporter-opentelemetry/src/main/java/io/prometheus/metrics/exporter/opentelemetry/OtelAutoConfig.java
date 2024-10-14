@@ -1,6 +1,8 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.ResourceConfiguration;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.resources.Resource;
@@ -20,7 +22,11 @@ public class OtelAutoConfig {
         PrometheusInstrumentationScope.loadInstrumentationScopeInfo();
 
     AutoConfiguredOpenTelemetrySdk sdk =
-        createAutoConfiguredOpenTelemetrySdk(builder, config, readerRef, instrumentationScopeInfo);
+        createAutoConfiguredOpenTelemetrySdk(
+            builder,
+            readerRef,
+            config.getExporterOpenTelemetryProperties(),
+            instrumentationScopeInfo);
 
     MetricReader reader = readerRef.get();
     reader.register(
@@ -30,11 +36,10 @@ public class OtelAutoConfig {
 
   static AutoConfiguredOpenTelemetrySdk createAutoConfiguredOpenTelemetrySdk(
       OpenTelemetryExporter.Builder builder,
-      PrometheusProperties config,
       AtomicReference<MetricReader> readerRef,
+      ExporterOpenTelemetryProperties properties,
       InstrumentationScopeInfo instrumentationScopeInfo) {
-    PropertyMapper propertyMapper =
-        PropertyMapper.create(config.getExporterOpenTelemetryProperties(), builder);
+    PropertyMapper propertyMapper = PropertyMapper.create(properties, builder);
 
     return AutoConfiguredOpenTelemetrySdk.builder()
         .addPropertiesSupplier(() -> propertyMapper.configLowPriority)
@@ -46,16 +51,17 @@ public class OtelAutoConfig {
               return reader;
             })
         .addResourceCustomizer(
-            (resource, unused) -> getResource(builder, config, resource, instrumentationScopeInfo))
+            (resource, c) ->
+                getResource(builder, resource, instrumentationScopeInfo, c, properties))
         .build();
   }
 
   private static Resource getResource(
       OpenTelemetryExporter.Builder builder,
-      PrometheusProperties config,
       Resource resource,
-      InstrumentationScopeInfo instrumentationScopeInfo) {
-    ExporterOpenTelemetryProperties properties = config.getExporterOpenTelemetryProperties();
+      InstrumentationScopeInfo instrumentationScopeInfo,
+      ConfigProperties configProperties,
+      ExporterOpenTelemetryProperties properties) {
     return resource
         .merge(
             PropertiesResourceProvider.mergeResource(
@@ -64,6 +70,7 @@ public class OtelAutoConfig {
                 builder.serviceNamespace,
                 builder.serviceInstanceId,
                 builder.serviceVersion))
+        .merge(ResourceConfiguration.createEnvironmentResource(configProperties))
         .merge(
             PropertiesResourceProvider.mergeResource(
                 properties.getResourceAttributes(),
