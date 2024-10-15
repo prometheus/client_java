@@ -57,6 +57,7 @@ class Buffer {
     reset = true;
   }
 
+  @SuppressWarnings("ThreadPriorityCheck")
   <T extends DataPointSnapshot> T run(
       Function<Long, Boolean> complete,
       Supplier<T> createResult,
@@ -70,24 +71,25 @@ class Buffer {
       // Signal that the buffer is active.
       Long expectedCount = observationCount.getAndAdd(bufferActiveBit);
 
+      while (!complete.apply(expectedCount)) {
+        // Wait until all in-flight threads have added their observations to the histogram
+        // we can't use a condition here, because the other thread doesn't have a lock as it's on the fast path.
+        Thread.yield();
+      }
+      result = createResult.get();
+
+      // Signal that the buffer is inactive.
+      int expectedBufferSize;
+      if (reset) {
+        expectedBufferSize =
+            (int) ((observationCount.getAndSet(0) & ~bufferActiveBit) - expectedCount);
+        reset = false;
+      } else {
+        expectedBufferSize = (int) (observationCount.addAndGet(bufferActiveBit) - expectedCount);
+      }
+
       appendLock.lock();
       try {
-        while (!complete.apply(expectedCount)) {
-          // Wait until all in-flight threads have added their observations to the buffer.
-          bufferFilled.await();
-        }
-        result = createResult.get();
-
-        // Signal that the buffer is inactive.
-        int expectedBufferSize;
-        if (reset) {
-          expectedBufferSize =
-              (int) ((observationCount.getAndSet(0) & ~bufferActiveBit) - expectedCount);
-          reset = false;
-        } else {
-          expectedBufferSize = (int) (observationCount.addAndGet(bufferActiveBit) - expectedCount);
-        }
-
         while (bufferPos < expectedBufferSize) {
           // Wait until all in-flight threads have added their observations to the buffer.
           bufferFilled.await();
