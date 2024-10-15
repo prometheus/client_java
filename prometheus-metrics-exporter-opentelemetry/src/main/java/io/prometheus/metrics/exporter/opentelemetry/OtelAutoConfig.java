@@ -13,9 +13,13 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.otelagent.ResourceAttributesFromOtelAgent;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class OtelAutoConfig {
+
+  private static final String SERVICE_INSTANCE_ID = "service.instance.id";
+
   static MetricReader createReader(
       OpenTelemetryExporter.Builder builder,
       PrometheusProperties config,
@@ -65,9 +69,6 @@ public class OtelAutoConfig {
       InstrumentationScopeInfo instrumentationScopeInfo,
       ConfigProperties configProperties,
       ExporterOpenTelemetryProperties properties) {
-    AttributesBuilder agentAttributesBuilder = Attributes.builder();
-    ResourceAttributesFromOtelAgent.getResourceAttributes(instrumentationScopeInfo.getName())
-        .forEach(agentAttributesBuilder::put);
     return resource
         .merge(
             PropertiesResourceProvider.mergeResource(
@@ -84,7 +85,24 @@ public class OtelAutoConfig {
                 properties.getServiceNamespace(),
                 properties.getServiceInstanceId(),
                 properties.getServiceVersion()))
-        .merge(Resource.create(agentAttributesBuilder.build()));
+        .merge(Resource.create(otelResourceAttributes(instrumentationScopeInfo)));
+  }
+
+  /**
+   * Only copy the service instance id from the Otel agent resource attributes.
+   *
+   * <p>All other attributes are calculated from the configuration using OTel SDK AutoConfig.
+   */
+  private static Attributes otelResourceAttributes(
+      InstrumentationScopeInfo instrumentationScopeInfo) {
+    AttributesBuilder builder = Attributes.builder();
+    Map<String, String> attributes =
+        ResourceAttributesFromOtelAgent.getResourceAttributes(instrumentationScopeInfo.getName());
+    String id = attributes.get(SERVICE_INSTANCE_ID);
+    if (id != null) {
+      builder.put(SERVICE_INSTANCE_ID, id);
+    }
+    return builder.build();
   }
 
   private static Resource getResourceField(AutoConfiguredOpenTelemetrySdk sdk) {

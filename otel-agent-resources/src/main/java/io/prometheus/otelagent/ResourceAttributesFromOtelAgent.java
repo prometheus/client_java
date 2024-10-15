@@ -33,6 +33,9 @@ public class ResourceAttributesFromOtelAgent {
    *
    * <p>After that we discard the class loader so that all OTel specific classes are unloaded. No
    * runtime dependency on any OTel version remains.
+   *
+   * <p>The test for this class is in
+   * examples/example-exporter-opentelemetry/oats-tests/agent/service-instance-id-check.py
    */
   public static Map<String, String> getResourceAttributes(String instrumentationScopeName) {
     try {
