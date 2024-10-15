@@ -73,7 +73,8 @@ class Buffer {
 
       while (!complete.apply(expectedCount)) {
         // Wait until all in-flight threads have added their observations to the histogram
-        // we can't use a condition here, because the other thread doesn't have a lock as it's on the fast path.
+        // we can't use a condition here, because the other thread doesn't have a lock as it's on
+        // the fast path.
         Thread.yield();
       }
       result = createResult.get();
