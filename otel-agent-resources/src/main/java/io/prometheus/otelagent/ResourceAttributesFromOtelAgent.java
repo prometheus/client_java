@@ -60,7 +60,7 @@ public class ResourceAttributesFromOtelAgent {
                 result.put(entry.getKey().toString(), entry.getValue().toString());
               }
             }
-            return result;
+            return Collections.unmodifiableMap(result);
           }
         }
       } finally {
