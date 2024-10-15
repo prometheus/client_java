@@ -40,6 +40,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>otel-agent-resources</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-api</artifactId>
         </dependency>
@@ -94,9 +99,6 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
                 <directory>src/main/resources-filtered</directory>
                 <filtering>true</filtering>
             </resource>
@@ -121,34 +123,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <artifactItems>
-                        <artifactItem>
-                            <groupId>io.opentelemetry</groupId>
-                            <artifactId>opentelemetry-api</artifactId>
-                            <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>io.opentelemetry</groupId>
-                            <artifactId>opentelemetry-context</artifactId>
-                            <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
-                        </artifactItem>
-                    </artifactItems>
-                    <!-- other configurations here -->
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -1,8 +1,7 @@
-package io.prometheus.metrics.exporter.opentelemetry;
+package io.prometheus.otelagent;
 
 import static java.nio.file.Files.createTempDirectory;
 
-import io.opentelemetry.sdk.resources.Resource;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -12,6 +11,9 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ResourceAttributesFromOtelAgent {
 
@@ -32,7 +34,7 @@ public class ResourceAttributesFromOtelAgent {
    * <p>After that we discard the class loader so that all OTel specific classes are unloaded. No
    * runtime dependency on any OTel version remains.
    */
-  public static Resource get(String instrumentationScopeName) {
+  public static Map<String, String> getResourceAttributes(String instrumentationScopeName) {
     try {
       Path tmpDir = createTempDirectory(instrumentationScopeName + "-");
       try {
@@ -49,7 +51,16 @@ public class ResourceAttributesFromOtelAgent {
             Object sdkMeterProvider = getField("delegate", agentMeterProvider);
             Object sharedState = getField("sharedState", sdkMeterProvider);
             Object resource = callMethod("getResource", sharedState);
-            return (Resource) resource;
+            Object attributes = callMethod("getAttributes", resource);
+            Map<?, ?> attributeMap = (Map<?, ?>) callMethod("asMap", attributes);
+
+            Map<String, String> result = new HashMap<>();
+            for (Map.Entry<?, ?> entry : attributeMap.entrySet()) {
+              if (entry.getKey() != null && entry.getValue() != null) {
+                result.put(entry.getKey().toString(), entry.getValue().toString());
+              }
+            }
+            return result;
           }
         }
       } finally {
@@ -58,7 +69,7 @@ public class ResourceAttributesFromOtelAgent {
     } catch (Exception ignored) {
       // ignore
     }
-    return Resource.empty();
+    return Collections.emptyMap();
   }
 
   private static Object getField(String name, Object obj) throws Exception {

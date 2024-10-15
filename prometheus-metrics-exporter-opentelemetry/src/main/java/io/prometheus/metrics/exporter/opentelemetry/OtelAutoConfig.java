@@ -1,5 +1,7 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.ResourceConfiguration;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -9,6 +11,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.prometheus.metrics.config.ExporterOpenTelemetryProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.otelagent.ResourceAttributesFromOtelAgent;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -62,6 +65,9 @@ public class OtelAutoConfig {
       InstrumentationScopeInfo instrumentationScopeInfo,
       ConfigProperties configProperties,
       ExporterOpenTelemetryProperties properties) {
+    AttributesBuilder agentAttributesBuilder = Attributes.builder();
+    ResourceAttributesFromOtelAgent.getResourceAttributes(instrumentationScopeInfo.getName())
+        .forEach(agentAttributesBuilder::put);
     return resource
         .merge(
             PropertiesResourceProvider.mergeResource(
@@ -78,7 +84,7 @@ public class OtelAutoConfig {
                 properties.getServiceNamespace(),
                 properties.getServiceInstanceId(),
                 properties.getServiceVersion()))
-        .merge(ResourceAttributesFromOtelAgent.get(instrumentationScopeInfo.getName()));
+        .merge(Resource.create(agentAttributesBuilder.build()));
   }
 
   private static Resource getResourceField(AutoConfiguredOpenTelemetrySdk sdk) {

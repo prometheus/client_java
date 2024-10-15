@@ -73,6 +73,7 @@
         <module>prometheus-metrics-instrumentation-dropwizard5</module>
         <module>prometheus-metrics-instrumentation-guava</module>
         <module>prometheus-metrics-simpleclient-bridge</module>
+        <module>otel-agent-resources</module>
     </modules>
 
     <dependencies>
