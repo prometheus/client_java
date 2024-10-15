@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -58,44 +57,34 @@ class Buffer {
   }
 
   <T extends DataPointSnapshot> T run(
-      Function<Long, Boolean> complete,
-      Supplier<T> createResult,
-      Consumer<Double> observeFunction) {
+      Supplier<Long> getCount, Supplier<T> createResult, Consumer<Double> observeFunction) {
     double[] buffer;
     int bufferSize;
     T result;
 
     runLock.lock();
     try {
-      // Signal that the buffer is active.
-      Long expectedCount = observationCount.getAndAdd(bufferActiveBit);
-
       appendLock.lock();
       try {
-        while (!complete.apply(expectedCount)) {
+        // Signal that the buffer is active.
+        long expectedCount = observationCount.getAndAdd(bufferActiveBit);
+        long count = getCount.get();
+
+        while (count + bufferPos < expectedCount) {
           // Wait until all in-flight threads have added their observations to the buffer.
           bufferFilled.await();
         }
         result = createResult.get();
 
-        // Signal that the buffer is inactive.
-        int expectedBufferSize;
         if (reset) {
-          expectedBufferSize =
-              (int) ((observationCount.getAndSet(0) & ~bufferActiveBit) - expectedCount);
+          observationCount.getAndSet(0);
           reset = false;
         } else {
-          expectedBufferSize = (int) (observationCount.addAndGet(bufferActiveBit) - expectedCount);
-        }
-
-        while (bufferPos < expectedBufferSize) {
-          // Wait until all in-flight threads have added their observations to the buffer.
-          bufferFilled.await();
+          observationCount.addAndGet(bufferActiveBit);
         }
       } finally {
         appendLock.unlock();
       }
-
       buffer = observationBuffer;
       bufferSize = bufferPos;
       observationBuffer = new double[0];

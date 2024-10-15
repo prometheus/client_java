@@ -276,7 +276,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     private HistogramSnapshot.HistogramDataPointSnapshot collect(Labels labels) {
       Exemplars exemplars = exemplarSampler != null ? exemplarSampler.collect() : Exemplars.EMPTY;
       return buffer.run(
-          expectedCount -> count.sum() == expectedCount,
+          count::sum,
           () -> {
             if (classicUpperBounds.length == 0) {
               // native only
@@ -411,7 +411,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         // If nativeSchema < initialNativeSchema the histogram has been scaled down.
         // So if resetDurationExpired we will reset it to restore the original native schema.
         buffer.run(
-            expectedCount -> count.sum() == expectedCount,
+            count::sum,
             () -> {
               if (maybeReset()) {
                 wasReset.set(true);
@@ -442,7 +442,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         return;
       }
       buffer.run(
-          expectedCount -> count.sum() == expectedCount,
+          count::sum,
           () -> {
             // Now we are in the synchronized block while new observations go into the buffer.
             // Check again if we need to limit the bucket size, because another thread might

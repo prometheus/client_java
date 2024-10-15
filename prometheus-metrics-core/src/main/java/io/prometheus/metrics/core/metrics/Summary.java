@@ -179,7 +179,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
 
     private SummarySnapshot.SummaryDataPointSnapshot collect(Labels labels) {
       return buffer.run(
-          expectedCount -> count.sum() == expectedCount,
+          count::sum,
           // TODO Exemplars (are hard-coded as empty in the line below)
           () ->
               new SummarySnapshot.SummaryDataPointSnapshot(
