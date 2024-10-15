@@ -5,6 +5,7 @@ import io.prometheus.metrics.config.ExporterOpenTelemetryProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 class PropertyMapper {
 
@@ -15,14 +16,14 @@ class PropertyMapper {
   static PropertyMapper create(
       ExporterOpenTelemetryProperties properties, OpenTelemetryExporter.Builder builder)
       throws PrometheusPropertiesException {
-    String protocol = properties.getProtocol();
     return new PropertyMapper()
-        .addString(builder.protocol, protocol, "otel.exporter.otlp.metrics.protocol")
+        .addString(
+            builder.protocol, properties.getProtocol(), "otel.exporter.otlp.metrics.protocol")
         .addString(builder.endpoint, properties.getEndpoint(), METRICS_ENDPOINT)
         .addString(
             mapToOtelString(builder.headers),
             mapToOtelString(properties.getHeaders()),
-            "otel.exporter.otlp.metric.headers")
+            "otel.exporter.otlp.metrics.headers")
         .addString(builder.interval, properties.getInterval(), "otel.metric.export.interval")
         .addString(builder.timeout, properties.getTimeout(), "otel.exporter.otlp.metrics.timeout")
         .addString(builder.serviceName, properties.getServiceName(), "otel.service.name");
@@ -30,7 +31,10 @@ class PropertyMapper {
 
   PropertyMapper addString(String builderValue, String propertyValue, String otelKey) {
     if (builderValue != null) {
-      configLowPriority.put(otelKey, builderValue);
+      // the low priority config should not be used for the metrics settings, so that both general
+      // and metrics settings
+      // can be used to override the values
+      configLowPriority.put(otelKey.replace("otlp.metrics", "otlp"), builderValue);
     }
     if (propertyValue != null) {
       configHighPriority.put(otelKey, propertyValue);
@@ -50,16 +54,50 @@ class PropertyMapper {
   }
 
   static Map<String, String> customizeProperties(Map<String, String> result, ConfigProperties c) {
-    Map<String, String> map = addEndpointPath(result, c);
+    Map<String, String> map = fixEndpointPaths(result, c);
     map.put("otel.logs.exporter", "none");
     map.put("otel.traces.exporter", "none");
     return map;
   }
 
-  static Map<String, String> addEndpointPath(Map<String, String> result, ConfigProperties c) {
-    String endpoint = c.getString(METRICS_ENDPOINT);
+  static Map<String, String> fixEndpointPaths(Map<String, String> result, ConfigProperties c) {
+    transformEndpointPath(
+        result,
+        c,
+        METRICS_ENDPOINT,
+        endpoint -> {
+          if (!endpoint.endsWith("v1/metrics")) {
+            if (!endpoint.endsWith("/")) {
+              return endpoint + "/v1/metrics";
+            } else {
+              return endpoint + "v1/metrics";
+            }
+          }
+          return endpoint;
+        });
+
+    transformEndpointPath(
+        result,
+        c,
+        "otel.exporter.otlp.endpoint",
+        endpoint -> {
+          if (endpoint.endsWith("v1/metrics")) {
+            return endpoint.substring(0, endpoint.length() - "v1/metrics".length());
+          }
+          return endpoint;
+        });
+
+    return result;
+  }
+
+  static void transformEndpointPath(
+      Map<String, String> result,
+      ConfigProperties c,
+      String key,
+      Function<String, String> valueMapper) {
+    String endpoint = c.getString(key);
     if (endpoint == null) {
-      return result;
+      return;
     }
     String protocol = c.getString("otel.exporter.otlp.metrics.protocol");
     if (protocol == null) {
@@ -67,14 +105,8 @@ class PropertyMapper {
     }
 
     if (!"grpc".equals(protocol)) { // http/protobuf
-      if (!endpoint.endsWith("v1/metrics")) {
-        if (!endpoint.endsWith("/")) {
-          result.put(METRICS_ENDPOINT, endpoint + "/v1/metrics");
-        } else {
-          result.put(METRICS_ENDPOINT, endpoint + "v1/metrics");
-        }
-      }
+      endpoint = valueMapper.apply(endpoint);
+      result.put(key, endpoint);
     }
-    return result;
   }
 }

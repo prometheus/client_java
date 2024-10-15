@@ -95,7 +95,7 @@ class Util {
       String[] pairs = property.split(",");
       for (String pair : pairs) {
         if (pair.contains("=")) {
-          String[] keyValue = pair.split("=", 1);
+          String[] keyValue = pair.split("=", 2);
           if (keyValue.length == 2) {
             String key = keyValue[0].trim();
             String value = keyValue[1].trim();

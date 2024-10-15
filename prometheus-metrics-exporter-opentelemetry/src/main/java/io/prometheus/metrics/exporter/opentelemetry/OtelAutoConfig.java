@@ -105,7 +105,7 @@ public class OtelAutoConfig {
     return builder.build();
   }
 
-  private static Resource getResourceField(AutoConfiguredOpenTelemetrySdk sdk) {
+  static Resource getResourceField(AutoConfiguredOpenTelemetrySdk sdk) {
     try {
       Method method = AutoConfiguredOpenTelemetrySdk.class.getDeclaredMethod("getResource");
       method.setAccessible(true);

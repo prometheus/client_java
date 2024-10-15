@@ -199,7 +199,6 @@ public class ExporterOpenTelemetryProperties {
       return this;
     }
 
-    // todo add test
     public Builder resourceAttribute(String name, String value) {
       this.resourceAttributes.put(name, value);
       return this;
