@@ -5,12 +5,8 @@ name: Deploy to Maven Central
 #    tags:
 #      - v*
 on:
-  pull_request_target:
-    types:
-      - opened
-#on:
-#  push:
-#    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
 #  pull_request:
 #    branches: [ "main" ]
 
