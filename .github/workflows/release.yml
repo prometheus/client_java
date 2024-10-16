@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug gpg key - remove after debugging
+        run: |
+          echo "$GPG_SIGNING_KEY" | gpg --batch --import-options import-show --import
       - name: Checkout Plugin Repository
         uses: actions/checkout@v4
 
