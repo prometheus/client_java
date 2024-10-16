@@ -5,8 +5,12 @@ name: Deploy to Maven Central
 #    tags:
 #      - v*
 on:
-  push:
-    branches: [ "main" ]
+  pull_request_target:
+    types:
+      - opened
+#on:
+#  push:
+#    branches: [ "main" ]
 #  pull_request:
 #    branches: [ "main" ]
 
@@ -16,6 +20,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug gpg key - remove after debugging
+        run: |
+          echo "$GPG_SIGNING_KEY" | wc -c
+          echo "$GPG_SIGNING_KEY" | gpg --batch --import-options import-show --import
       - name: Checkout Plugin Repository
         uses: actions/checkout@v4
 
