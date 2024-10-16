@@ -314,7 +314,7 @@
             </modules>
         </profile>
         <profile>
-            <id>release</id>
+            <id>javadoc</id>
             <build>
                 <plugins>
                     <plugin>
@@ -329,6 +329,17 @@
                             </excludePackageNames>
                             <source>8</source>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
