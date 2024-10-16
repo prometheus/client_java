@@ -27,7 +27,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B package -Dmaven.test.skip=true
+        run: mvn -B package -P release -Dmaven.test.skip=true
 
       - name: Set up Apache Maven Central
         uses: actions/setup-java@v4
