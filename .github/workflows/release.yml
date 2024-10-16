@@ -7,8 +7,8 @@ name: Deploy to Maven Central
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
 
 jobs:
   deploy:
