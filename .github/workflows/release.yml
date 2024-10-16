@@ -17,6 +17,8 @@ jobs:
 
     steps:
       - name: Debug gpg key - remove after debugging
+        env:
+            GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
         run: |
           echo "$GPG_SIGNING_KEY" | wc -c
           echo "$GPG_SIGNING_KEY" | gpg --batch --import-options import-show --import
