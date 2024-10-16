@@ -72,7 +72,8 @@ class Buffer {
       Long expectedCount = observationCount.getAndAdd(bufferActiveBit);
 
       while (!complete.apply(expectedCount)) {
-        // Wait until all in-flight threads have added their observations to the histogram
+        // Wait until all in-flight threads have added their observations to the histogram /
+        // summary.
         // we can't use a condition here, because the other thread doesn't have a lock as it's on
         // the fast path.
         Thread.yield();
