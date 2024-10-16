@@ -22,3 +22,7 @@ Run `./mvnw spotless:apply` to format the code (only changed files) before commi
 If you're getting errors when running tests:
 
 - Make sure that the IDE uses only the "Maven Shade" dependency of "prometheus-metrics-exposition-formats" and the "prometheus-metrics-tracer*" dependencies.
+  
+## Updating the Protobuf Java Classes
+
+Use `PROTO_GENERATION=true mvn clean install` to generate protobuf classes.
