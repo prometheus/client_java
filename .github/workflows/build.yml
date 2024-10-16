@@ -28,4 +28,4 @@ jobs:
           REQUIRE_PROTO_UP_TO_DATE: true
         run: |
           ./mvnw clean install
-          ./mvnw javadoc:javadoc
+          ./mvnw javadoc:javadoc -P release # just to check if javadoc is generated

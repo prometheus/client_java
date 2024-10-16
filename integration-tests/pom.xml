@@ -18,10 +18,6 @@
         Integration tests for the Exporter modules
     </description>
 
-    <properties>
-        <skip.release>true</skip.release>
-    </properties>
-
     <modules>
         <module>it-common</module>
         <module>it-exporter</module>

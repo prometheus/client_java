@@ -27,7 +27,6 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-#        run: mvn -B package --file pom.xml -Dmaven.test.skip=true
         run: mvn -B package -Dmaven.test.skip=true
 
       - name: Set up Apache Maven Central
@@ -42,7 +41,7 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
       - name: Publish to Apache Maven Central
-        run: mvn deploy -P release -f pom.xml
+        run: mvn deploy -P release
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_MAVEN_REPOSITORY_PASSWORD }}

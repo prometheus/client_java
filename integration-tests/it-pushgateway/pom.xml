@@ -16,10 +16,6 @@
         Integration tests for the Pushgateway Exporter
     </description>
 
-    <properties>
-        <skip.release>true</skip.release>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
