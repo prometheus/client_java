@@ -56,11 +56,11 @@ public class PrometheusRegistry {
     }
   }
 
-    public void clear() {
-        collectors.clear();
-        multiCollectors.clear();
-        prometheusNames.clear();
-    }
+  public void clear() {
+    collectors.clear();
+    multiCollectors.clear();
+    prometheusNames.clear();
+  }
 
   public MetricSnapshots scrape() {
     return scrape((PrometheusScrapeRequest) null);
