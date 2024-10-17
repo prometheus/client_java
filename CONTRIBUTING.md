@@ -17,6 +17,8 @@ This repository uses [Google Java Format](https://github.com/google/google-java-
 
 Run `./mvnw spotless:apply` to format the code (only changed files) before committing.
 
+Use `-Dspotless.check.skip=true` to skip the formatting check during development.
+
 ## Running Tests
 
 If you're getting errors when running tests:

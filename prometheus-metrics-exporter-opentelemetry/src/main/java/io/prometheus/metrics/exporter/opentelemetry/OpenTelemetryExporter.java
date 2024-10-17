@@ -1,90 +1,21 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
-import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
-import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
-import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
-import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
-import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
-import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
-import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.resources.ResourceBuilder;
-import io.prometheus.metrics.config.ExporterOpenTelemetryProperties;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import java.time.Duration;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class OpenTelemetryExporter implements AutoCloseable {
-  private final PeriodicMetricReader reader;
+  private final MetricReader reader;
 
-  private OpenTelemetryExporter(
-      Builder builder, PrometheusProperties config, PrometheusRegistry registry) {
-    InstrumentationScopeInfo instrumentationScopeInfo =
-        PrometheusInstrumentationScope.loadInstrumentationScopeInfo();
-    ExporterOpenTelemetryProperties properties = config.getExporterOpenTelemetryProperties();
-    Resource resource = initResourceAttributes(builder, properties, instrumentationScopeInfo);
-    MetricExporter exporter;
-    if (ConfigHelper.getProtocol(builder, properties).equals("grpc")) {
-      OtlpGrpcMetricExporterBuilder exporterBuilder =
-          OtlpGrpcMetricExporter.builder()
-              .setTimeout(Duration.ofSeconds(ConfigHelper.getTimeoutSeconds(builder, properties)))
-              .setEndpoint(ConfigHelper.getEndpoint(builder, properties));
-      for (Map.Entry<String, String> header :
-          ConfigHelper.getHeaders(builder, properties).entrySet()) {
-        exporterBuilder.addHeader(header.getKey(), header.getValue());
-      }
-      exporter = exporterBuilder.build();
-    } else {
-      OtlpHttpMetricExporterBuilder exporterBuilder =
-          OtlpHttpMetricExporter.builder()
-              .setTimeout(Duration.ofSeconds(ConfigHelper.getTimeoutSeconds(builder, properties)))
-              .setEndpoint(ConfigHelper.getEndpoint(builder, properties));
-      for (Map.Entry<String, String> header :
-          ConfigHelper.getHeaders(builder, properties).entrySet()) {
-        exporterBuilder.addHeader(header.getKey(), header.getValue());
-      }
-      exporter = exporterBuilder.build();
-    }
-    reader =
-        PeriodicMetricReader.builder(exporter)
-            .setInterval(Duration.ofSeconds(ConfigHelper.getIntervalSeconds(builder, properties)))
-            .build();
-
-    PrometheusMetricProducer prometheusMetricProducer =
-        new PrometheusMetricProducer(registry, instrumentationScopeInfo, resource);
-    reader.register(prometheusMetricProducer);
+  public OpenTelemetryExporter(MetricReader reader) {
+    this.reader = reader;
   }
 
   @Override
   public void close() {
     reader.shutdown();
-  }
-
-  private Resource initResourceAttributes(
-      Builder builder,
-      ExporterOpenTelemetryProperties properties,
-      InstrumentationScopeInfo instrumentationScopeInfo) {
-    String serviceName = ConfigHelper.getServiceName(builder, properties);
-    String serviceNamespace = ConfigHelper.getServiceNamespace(builder, properties);
-    String serviceInstanceId = ConfigHelper.getServiceInstanceId(builder, properties);
-    String serviceVersion = ConfigHelper.getServiceVersion(builder, properties);
-    Map<String, String> resourceAttributes =
-        ResourceAttributes.get(
-            instrumentationScopeInfo.getName(),
-            serviceName,
-            serviceNamespace,
-            serviceInstanceId,
-            serviceVersion,
-            ConfigHelper.getResourceAttributes(builder, properties));
-    ResourceBuilder resourceBuilder = Resource.builder();
-    for (Map.Entry<String, String> entry : resourceAttributes.entrySet()) {
-      resourceBuilder.put(entry.getKey(), entry.getValue());
-    }
-    return resourceBuilder.build();
   }
 
   public static Builder builder() {
@@ -99,16 +30,16 @@ public class OpenTelemetryExporter implements AutoCloseable {
 
     private final PrometheusProperties config;
     private PrometheusRegistry registry = null;
-    private String protocol;
-    private String endpoint;
-    private final Map<String, String> headers = new HashMap<>();
-    private Integer intervalSeconds;
-    private Integer timeoutSeconds;
-    private String serviceName;
-    private String serviceNamespace;
-    private String serviceInstanceId;
-    private String serviceVersion;
-    private final Map<String, String> resourceAttributes = new HashMap<>();
+    String protocol;
+    String endpoint;
+    final Map<String, String> headers = new HashMap<>();
+    String interval;
+    String timeout;
+    String serviceName;
+    String serviceNamespace;
+    String serviceInstanceId;
+    String serviceVersion;
+    final Map<String, String> resourceAttributes = new HashMap<>();
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -181,7 +112,7 @@ public class OpenTelemetryExporter implements AutoCloseable {
       if (intervalSeconds <= 0) {
         throw new IllegalStateException(intervalSeconds + ": expecting a push interval > 0s");
       }
-      this.intervalSeconds = intervalSeconds;
+      this.interval = intervalSeconds + "s";
       return this;
     }
 
@@ -196,7 +127,7 @@ public class OpenTelemetryExporter implements AutoCloseable {
       if (timeoutSeconds <= 0) {
         throw new IllegalStateException(timeoutSeconds + ": expecting a push interval > 0s");
       }
-      this.timeoutSeconds = timeoutSeconds;
+      this.timeout = timeoutSeconds + "s";
       return this;
     }
 
@@ -266,241 +197,7 @@ public class OpenTelemetryExporter implements AutoCloseable {
       if (registry == null) {
         registry = PrometheusRegistry.defaultRegistry;
       }
-      return new OpenTelemetryExporter(this, config, registry);
-    }
-  }
-
-  private static class ConfigHelper {
-
-    private static String getProtocol(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      String protocol = config.getProtocol();
-      if (protocol != null) {
-        return protocol;
-      }
-      protocol = getString("otel.exporter.otlp.protocol");
-      if (protocol != null) {
-        if (!protocol.equals("grpc") && !protocol.equals("http/protobuf")) {
-          throw new IllegalStateException(
-              protocol
-                  + ": Unsupported OpenTelemetry exporter protocol. Expecting grpc or http/protobuf.");
-        }
-        return protocol;
-      }
-      if (builder.protocol != null) {
-        return builder.protocol;
-      }
-      return "grpc";
-    }
-
-    private static String getEndpoint(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      String endpoint = config.getEndpoint();
-      if (endpoint == null) {
-        endpoint = getString("otel.exporter.otlp.metrics.endpoint");
-      }
-      if (endpoint == null) {
-        endpoint = getString("otel.exporter.otlp.endpoint");
-      }
-      if (endpoint == null) {
-        endpoint = builder.endpoint;
-      }
-      if (endpoint == null) {
-        if (getProtocol(builder, config).equals("grpc")) {
-          endpoint = "http://localhost:4317";
-        } else { // http/protobuf
-          endpoint = "http://localhost:4318/v1/metrics";
-        }
-      }
-      if (getProtocol(builder, config).equals("grpc")) {
-        return endpoint;
-      } else { // http/protobuf
-        if (!endpoint.endsWith("v1/metrics")) {
-          if (!endpoint.endsWith("/")) {
-            return endpoint + "/v1/metrics";
-          } else {
-            return endpoint + "v1/metrics";
-          }
-        } else {
-          return endpoint;
-        }
-      }
-    }
-
-    private static Map<String, String> getHeaders(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      Map<String, String> headers = config.getHeaders();
-      if (!headers.isEmpty()) {
-        return headers;
-      }
-      headers = getMap("otel.exporter.otlp.headers");
-      if (!headers.isEmpty()) {
-        return headers;
-      }
-      if (!builder.headers.isEmpty()) {
-        return builder.headers;
-      }
-      return new HashMap<>();
-    }
-
-    private static int getIntervalSeconds(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      Integer intervalSeconds = config.getIntervalSeconds();
-      if (intervalSeconds != null) {
-        return intervalSeconds;
-      }
-      intervalSeconds = getPositiveInteger("otel.metric.export.interval");
-      if (intervalSeconds != null) {
-        return (int) TimeUnit.MILLISECONDS.toSeconds(intervalSeconds);
-      }
-      if (builder.intervalSeconds != null) {
-        return builder.intervalSeconds;
-      }
-      return 60;
-    }
-
-    private static int getTimeoutSeconds(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      Integer timeoutSeconds = config.getTimeoutSeconds();
-      if (timeoutSeconds != null) {
-        return timeoutSeconds;
-      }
-      Integer timeoutMilliseconds = getPositiveInteger("otel.exporter.otlp.metrics.timeout");
-      if (timeoutMilliseconds == null) {
-        timeoutMilliseconds = getPositiveInteger("otel.exporter.otlp.timeout");
-      }
-      if (timeoutMilliseconds != null) {
-        return (int) TimeUnit.MILLISECONDS.toSeconds(timeoutMilliseconds);
-      }
-      if (builder.timeoutSeconds != null) {
-        return builder.timeoutSeconds;
-      }
-      return 10;
-    }
-
-    private static String getServiceName(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      String serviceName = config.getServiceName();
-      if (serviceName != null) {
-        return serviceName;
-      }
-      serviceName = getString("otel.service.name");
-      if (serviceName != null) {
-        return serviceName;
-      }
-      if (builder.serviceName != null) {
-        return builder.serviceName;
-      }
-      return null;
-    }
-
-    private static String getServiceNamespace(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      String serviceNamespace = config.getServiceNamespace();
-      if (serviceNamespace != null) {
-        return serviceNamespace;
-      }
-      if (builder.serviceNamespace != null) {
-        return builder.serviceNamespace;
-      }
-      return null;
-    }
-
-    private static String getServiceInstanceId(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      String serviceInstanceId = config.getServiceInstanceId();
-      if (serviceInstanceId != null) {
-        return serviceInstanceId;
-      }
-      if (builder.serviceInstanceId != null) {
-        return builder.serviceInstanceId;
-      }
-      return null;
-    }
-
-    private static String getServiceVersion(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      String serviceVersion = config.getServiceVersion();
-      if (serviceVersion != null) {
-        return serviceVersion;
-      }
-      if (builder.serviceVersion != null) {
-        return builder.serviceVersion;
-      }
-      return null;
-    }
-
-    private static Map<String, String> getResourceAttributes(
-        OpenTelemetryExporter.Builder builder, ExporterOpenTelemetryProperties config) {
-      Map<String, String> resourceAttributes = config.getResourceAttributes();
-      if (!resourceAttributes.isEmpty()) {
-        return resourceAttributes;
-      }
-      resourceAttributes = getMap("otel.resource.attributes");
-      if (!resourceAttributes.isEmpty()) {
-        return resourceAttributes;
-      }
-      if (!builder.resourceAttributes.isEmpty()) {
-        return builder.resourceAttributes;
-      }
-      return new HashMap<>();
-    }
-
-    private static String getString(String otelPropertyName) {
-      String otelEnvVarName =
-          otelPropertyName.replace(".", "_").replace("-", "_").toUpperCase(Locale.ROOT);
-      if (System.getenv(otelEnvVarName) != null) {
-        return System.getenv(otelEnvVarName);
-      }
-      if (System.getProperty(otelPropertyName) != null) {
-        return System.getProperty(otelPropertyName);
-      }
-      return null;
-    }
-
-    private static Integer getInteger(String otelPropertyName) {
-      String result = getString(otelPropertyName);
-      if (result == null) {
-        return null;
-      } else {
-        try {
-          return Integer.parseInt(result);
-        } catch (NumberFormatException e) {
-          throw new IllegalStateException(otelPropertyName + "=" + result + " - illegal value.");
-        }
-      }
-    }
-
-    private static Integer getPositiveInteger(String otelPropertyName) {
-      Integer result = getInteger(otelPropertyName);
-      if (result == null) {
-        return null;
-      }
-      if (result <= 0) {
-        throw new IllegalStateException(otelPropertyName + "=" + result + ": Expecting value > 0.");
-      }
-      return result;
-    }
-
-    private static Map<String, String> getMap(String otelPropertyName) {
-      Map<String, String> result = new HashMap<>();
-      String property = getString(otelPropertyName);
-      if (property != null) {
-        String[] pairs = property.split(",");
-        for (String pair : pairs) {
-          if (pair.contains("=")) {
-            String[] keyValue = pair.split("=", 1);
-            if (keyValue.length == 2) {
-              String key = keyValue[0].trim();
-              String value = keyValue[1].trim();
-              if (key.length() > 0 && value.length() > 0) {
-                result.putIfAbsent(key, value);
-              }
-            }
-          }
-        }
-      }
-      return result;
+      return new OpenTelemetryExporter(OtelAutoConfig.createReader(this, config, registry));
     }
   }
 }

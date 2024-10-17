@@ -21,6 +21,18 @@
         <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry</automatic.module.name>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+                <version>${otel.instrumentation.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
@@ -28,19 +40,33 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>otel-agent-resources</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-api</artifactId>
-            <version>${otel.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-sdk</artifactId>
-            <version>${otel.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
-            <version>${otel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk-extension-incubator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-resources</artifactId>
         </dependency>
 
         <!-- test dependencies -->
@@ -68,19 +94,10 @@
             <version>1.7.1-alpha</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-sdk-trace</artifactId>
-            <version>${otel.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
         <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
             <resource>
                 <directory>src/main/resources-filtered</directory>
                 <filtering>true</filtering>
@@ -98,9 +115,9 @@
                             <goal>regex-property</goal>
                         </goals>
                         <configuration>
-                            <name>otel.string-version</name>
-                            <value>${otel.version}</value>
-                            <regex>\.</regex>
+                            <name>otel.instrumentation.string-version</name>
+                            <value>${otel.instrumentation.version}</value>
+                            <regex>[\.-]</regex>
                             <replacement>_</replacement>
                             <failIfNoMatch>true</failIfNoMatch>
                         </configuration>
@@ -120,6 +137,8 @@
                             <artifactSet>
                                 <includes>
                                     <include>io.opentelemetry:*</include>
+                                    <include>io.opentelemetry.semconv:*</include>
+                                    <include>io.opentelemetry.instrumentation:*</include>
                                     <include>com.squareup.*:*</include>
                                     <include>org.jetbrains:*</include>
                                     <include>org.jetbrains.*:*</include>
@@ -129,37 +148,49 @@
                                 <relocation>
                                     <pattern>io.opentelemetry</pattern>
                                     <shadedPattern>
-                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.string-version}
+                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.instrumentation.string-version}
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>io.opentelemetry.instrumentation</pattern>
+                                    <shadedPattern>
+                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.instrumentation.string-version}.instrumentation
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>io.opentelemetry.semconv</pattern>
+                                    <shadedPattern>
+                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.instrumentation.string-version}.semconv
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>okhttp3</pattern>
                                     <shadedPattern>
-                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.string-version}.okhttp3
+                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.instrumentation.string-version}.okhttp3
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>kotlin</pattern>
                                     <shadedPattern>
-                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.string-version}.kotlin
+                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.instrumentation.string-version}.kotlin
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.intellij</pattern>
                                     <shadedPattern>
-                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.string-version}.org.intellij
+                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.instrumentation.string-version}.org.intellij
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.jetbrains</pattern>
                                     <shadedPattern>
-                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.string-version}.org.jetbrains
+                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.instrumentation.string-version}.org.jetbrains
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>okio</pattern>
                                     <shadedPattern>
-                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.string-version}.okio
+                                        io.prometheus.metrics.shaded.io_opentelemetry_${otel.instrumentation.string-version}.okio
                                     </shadedPattern>
                                 </relocation>
                             </relocations>

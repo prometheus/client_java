@@ -9,6 +9,7 @@ import io.prometheus.metrics.model.snapshots.Unit;
 public class Main {
 
   public static void main(String[] args) throws Exception {
+    System.out.println("Starting example application");
 
     // Note: Some JVM metrics are also defined as OpenTelemetry's semantic conventions.
     // We have plans to implement a configuration option for JvmMetrics to use OpenTelemetry
@@ -34,6 +35,7 @@ public class Main {
 
     while (true) {
       Thread.sleep(1000);
+      System.out.println("Incrementing counter");
       counter.inc();
     }
   }
