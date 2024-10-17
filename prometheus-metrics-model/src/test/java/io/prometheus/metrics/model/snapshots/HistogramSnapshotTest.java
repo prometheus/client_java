@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot.HistogramDataPointSnapshot;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -170,8 +171,13 @@ class HistogramSnapshotTest {
 
   @Test
   public void testEmptyHistogram() {
-    HistogramSnapshot snapshot = HistogramSnapshot.builder().name("empty_histogram").build();
+    assertThat(HistogramSnapshot.builder().name("empty_histogram").build().getDataPoints())
+        .isEmpty();
+    HistogramSnapshot snapshot =
+        new HistogramSnapshot(
+            new MetricMetadata("empty_bytes", "help", Unit.BYTES), Collections.emptyList());
     assertThat(snapshot.getDataPoints()).isEmpty();
+    assertThat(snapshot.isGaugeHistogram()).isFalse();
   }
 
   @Test

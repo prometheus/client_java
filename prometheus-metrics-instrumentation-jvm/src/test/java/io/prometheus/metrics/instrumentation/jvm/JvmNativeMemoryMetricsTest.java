@@ -31,6 +31,14 @@ class JvmNativeMemoryMetricsTest {
   }
 
   @Test
+  void nativeMemoryTrackingNotEnabled() {
+    assertThat(
+            new JvmNativeMemoryMetrics.DefaultPlatformMBeanServerAdapter()
+                .vmNativeMemorySummaryInBytes())
+        .isEqualTo("Native memory tracking is not enabled\n");
+  }
+
+  @Test
   public void testNativeMemoryTrackingEmpty() throws IOException {
     JvmNativeMemoryMetrics.isEnabled.set(true);
 

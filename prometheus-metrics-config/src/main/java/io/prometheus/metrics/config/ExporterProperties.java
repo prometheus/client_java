@@ -7,6 +7,7 @@ public class ExporterProperties {
 
   private static final String INCLUDE_CREATED_TIMESTAMPS = "includeCreatedTimestamps";
   private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplarsOnAllMetricTypes";
+  private static final String PREFIX = "io.prometheus.exporter";
 
   private final Boolean includeCreatedTimestamps;
   private final Boolean exemplarsOnAllMetricTypes;
@@ -33,12 +34,12 @@ public class ExporterProperties {
    * Note that this will remove entries from {@code properties}. This is because we want to know if
    * there are unused properties remaining after all properties have been loaded.
    */
-  static ExporterProperties load(String prefix, Map<Object, Object> properties)
+  static ExporterProperties load(Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     Boolean includeCreatedTimestamps =
-        Util.loadBoolean(prefix + "." + INCLUDE_CREATED_TIMESTAMPS, properties);
+        Util.loadBoolean(PREFIX + "." + INCLUDE_CREATED_TIMESTAMPS, properties);
     Boolean exemplarsOnAllMetricTypes =
-        Util.loadBoolean(prefix + "." + EXEMPLARS_ON_ALL_METRIC_TYPES, properties);
+        Util.loadBoolean(PREFIX + "." + EXEMPLARS_ON_ALL_METRIC_TYPES, properties);
     return new ExporterProperties(includeCreatedTimestamps, exemplarsOnAllMetricTypes);
   }
 

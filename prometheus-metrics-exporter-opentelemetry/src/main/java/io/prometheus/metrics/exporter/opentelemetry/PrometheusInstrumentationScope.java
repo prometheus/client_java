@@ -11,28 +11,34 @@ class PrometheusInstrumentationScope {
   private static final String instrumentationScopeVersionKey = "instrumentationScope.version";
 
   public static InstrumentationScopeInfo loadInstrumentationScopeInfo() {
+    return loadInstrumentationScopeInfo(
+        instrumentationScopePropertiesFile,
+        instrumentationScopeNameKey,
+        instrumentationScopeVersionKey);
+  }
+
+  static InstrumentationScopeInfo loadInstrumentationScopeInfo(
+      String path, String nameKey, String versionKey) {
     try {
       Properties properties = new Properties();
       properties.load(
-          PrometheusInstrumentationScope.class
-              .getClassLoader()
-              .getResourceAsStream(instrumentationScopePropertiesFile));
-      String instrumentationScopeName = properties.getProperty(instrumentationScopeNameKey);
+          PrometheusInstrumentationScope.class.getClassLoader().getResourceAsStream(path));
+      String instrumentationScopeName = properties.getProperty(nameKey);
       if (instrumentationScopeName == null) {
         throw new IllegalStateException(
             "Prometheus metrics library initialization error: "
-                + instrumentationScopeNameKey
+                + nameKey
                 + " not found in "
-                + instrumentationScopePropertiesFile
+                + path
                 + " in classpath.");
       }
-      String instrumentationScopeVersion = properties.getProperty(instrumentationScopeVersionKey);
+      String instrumentationScopeVersion = properties.getProperty(versionKey);
       if (instrumentationScopeVersion == null) {
         throw new IllegalStateException(
             "Prometheus metrics library initialization error: "
-                + instrumentationScopeVersionKey
+                + versionKey
                 + " not found in "
-                + instrumentationScopePropertiesFile
+                + path
                 + " in classpath.");
       }
       return InstrumentationScopeInfo.builder(instrumentationScopeName)
@@ -41,7 +47,7 @@ class PrometheusInstrumentationScope {
     } catch (Exception e) {
       throw new IllegalStateException(
           "Prometheus metrics library initialization error: Failed to read "
-              + instrumentationScopePropertiesFile
+              + path
               + " from classpath.",
           e);
     }

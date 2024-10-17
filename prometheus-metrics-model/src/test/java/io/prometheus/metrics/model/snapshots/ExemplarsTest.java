@@ -52,5 +52,7 @@ class ExemplarsTest {
     assertThat(middle).isSameAs(result);
     result = exemplars.get(0.9, Double.POSITIVE_INFINITY);
     assertThat(newest).isSameAs(result);
+
+    assertThat(exemplars.getLatest()).isSameAs(newest);
   }
 }

@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 class ClassicHistogramBucketsTest {
@@ -112,5 +114,17 @@ class ClassicHistogramBucketsTest {
     Iterator<ClassicHistogramBucket> iterator = buckets.iterator();
     iterator.next();
     assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
+  }
+
+  @Test
+  public void compare() {
+    ClassicHistogramBuckets buckets =
+        ClassicHistogramBuckets.builder()
+            .bucket(1.0, 7)
+            .bucket(2.0, 8)
+            .bucket(Double.POSITIVE_INFINITY, 0)
+            .build();
+    List<ClassicHistogramBucket> list = buckets.stream().collect(Collectors.toList());
+    assertThat(list.get(0)).isNotEqualByComparingTo(list.get(1));
   }
 }

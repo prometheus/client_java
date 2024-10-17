@@ -104,10 +104,10 @@ class GaugeTest {
 
   @Test
   public void testExemplarSampler() throws Exception {
-    final Exemplar exemplar1 = Exemplar.builder().value(2.0).traceId("abc").spanId("123").build();
-    final Exemplar exemplar2 = Exemplar.builder().value(6.5).traceId("def").spanId("456").build();
-    final Exemplar exemplar3 = Exemplar.builder().value(7.0).traceId("123").spanId("abc").build();
-    final Exemplar customExemplar =
+    Exemplar exemplar1 = Exemplar.builder().value(2.0).traceId("abc").spanId("123").build();
+    Exemplar exemplar2 = Exemplar.builder().value(6.5).traceId("def").spanId("456").build();
+    Exemplar exemplar3 = Exemplar.builder().value(7.0).traceId("123").spanId("abc").build();
+    Exemplar customExemplar =
         Exemplar.builder()
             .value(8.0)
             .traceId("bab")
@@ -197,6 +197,36 @@ class GaugeTest {
             "test")); // custom exemplar sampled even though the automatic exemplar hasn't reached
     // min age yet
     assertExemplarEquals(customExemplar, getData(gauge).getExemplar());
+  }
+
+  @Test
+  void incWithExemplar() {
+    Gauge gauge = Gauge.builder().name("count").build();
+    gauge.incWithExemplar(1.0, Labels.of("test", "test2"));
+
+    assertExemplarEquals(
+        Exemplar.builder().value(1.0).labels(Labels.of("test", "test2")).build(),
+        getData(gauge).getExemplar());
+  }
+
+  @Test
+  void dec() {
+    Gauge gauge = Gauge.builder().name("count").build();
+    gauge.decWithExemplar(Labels.of("test", "test2"));
+
+    assertExemplarEquals(
+        Exemplar.builder().value(-1.0).labels(Labels.of("test", "test2")).build(),
+        getData(gauge).getExemplar());
+  }
+
+  @Test
+  void decWithExemplar() {
+    Gauge gauge = Gauge.builder().name("count").build();
+    gauge.decWithExemplar(1.0, Labels.of("test", "test2"));
+
+    assertExemplarEquals(
+        Exemplar.builder().value(-1.0).labels(Labels.of("test", "test2")).build(),
+        getData(gauge).getExemplar());
   }
 
   @Test

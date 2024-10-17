@@ -18,6 +18,10 @@
         Integration tests for the Exporter modules
     </description>
 
+    <properties>
+        <jacoco.line-coverage>0.0</jacoco.line-coverage>
+    </properties>
+
     <modules>
         <module>it-common</module>
         <module>it-exporter</module>

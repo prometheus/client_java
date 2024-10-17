@@ -19,6 +19,7 @@ public class ExporterOpenTelemetryProperties {
   private static final String SERVICE_VERSION = "serviceVersion";
   private static final String RESOURCE_ATTRIBUTES =
       "resourceAttributes"; // otel.resource.attributes
+  private static final String PREFIX = "io.prometheus.exporter.opentelemetry";
 
   private final String protocol;
   private final String endpoint;
@@ -98,19 +99,19 @@ public class ExporterOpenTelemetryProperties {
    * Note that this will remove entries from {@code properties}. This is because we want to know if
    * there are unused properties remaining after all properties have been loaded.
    */
-  static ExporterOpenTelemetryProperties load(String prefix, Map<Object, Object> properties)
+  static ExporterOpenTelemetryProperties load(Map<Object, Object> properties)
       throws PrometheusPropertiesException {
-    String protocol = Util.loadString(prefix + "." + PROTOCOL, properties);
-    String endpoint = Util.loadString(prefix + "." + ENDPOINT, properties);
-    Map<String, String> headers = Util.loadMap(prefix + "." + HEADERS, properties);
-    String interval = Util.loadStringAddSuffix(prefix + "." + INTERVAL_SECONDS, properties, "s");
-    String timeout = Util.loadStringAddSuffix(prefix + "." + TIMEOUT_SECONDS, properties, "s");
-    String serviceName = Util.loadString(prefix + "." + SERVICE_NAME, properties);
-    String serviceNamespace = Util.loadString(prefix + "." + SERVICE_NAMESPACE, properties);
-    String serviceInstanceId = Util.loadString(prefix + "." + SERVICE_INSTANCE_ID, properties);
-    String serviceVersion = Util.loadString(prefix + "." + SERVICE_VERSION, properties);
+    String protocol = Util.loadString(PREFIX + "." + PROTOCOL, properties);
+    String endpoint = Util.loadString(PREFIX + "." + ENDPOINT, properties);
+    Map<String, String> headers = Util.loadMap(PREFIX + "." + HEADERS, properties);
+    String interval = Util.loadStringAddSuffix(PREFIX + "." + INTERVAL_SECONDS, properties, "s");
+    String timeout = Util.loadStringAddSuffix(PREFIX + "." + TIMEOUT_SECONDS, properties, "s");
+    String serviceName = Util.loadString(PREFIX + "." + SERVICE_NAME, properties);
+    String serviceNamespace = Util.loadString(PREFIX + "." + SERVICE_NAMESPACE, properties);
+    String serviceInstanceId = Util.loadString(PREFIX + "." + SERVICE_INSTANCE_ID, properties);
+    String serviceVersion = Util.loadString(PREFIX + "." + SERVICE_VERSION, properties);
     Map<String, String> resourceAttributes =
-        Util.loadMap(prefix + "." + RESOURCE_ATTRIBUTES, properties);
+        Util.loadMap(PREFIX + "." + RESOURCE_ATTRIBUTES, properties);
     return new ExporterOpenTelemetryProperties(
         protocol,
         endpoint,

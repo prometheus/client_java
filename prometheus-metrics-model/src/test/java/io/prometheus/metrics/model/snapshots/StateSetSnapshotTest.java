@@ -100,8 +100,13 @@ class StateSetSnapshotTest {
             .state("b", true)
             .state("c", true)
             .build();
+    assertThat(data.iterator().next())
+        .usingRecursiveComparison()
+        .isEqualTo(data.stream().iterator().next());
     Iterator<StateSetSnapshot.State> iterator = data.iterator();
-    iterator.next();
+    StateSetSnapshot.State state = iterator.next();
+    assertThat(state.getName()).isEqualTo("a");
+    assertThat(state.isTrue()).isTrue();
     assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(iterator::remove);
   }
 
@@ -115,6 +120,12 @@ class StateSetSnapshotTest {
                     .state("b", true)
                     .state("a", true)
                     .build());
+  }
+
+  @Test
+  public void noUnit() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> StateSetSnapshot.builder().name("flags").unit(Unit.BYTES).build());
   }
 
   @Test

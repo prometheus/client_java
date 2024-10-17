@@ -18,6 +18,8 @@
 
     <properties>
         <automatic.module.name>io.prometheus.metrics.exporter.httpserver</automatic.module.name>
+        <!-- we have to set the line coverage to 0.0 because the module is tested with integration tests-->
+        <jacoco.line-coverage>0.0</jacoco.line-coverage>
     </properties>
 
     <dependencies>

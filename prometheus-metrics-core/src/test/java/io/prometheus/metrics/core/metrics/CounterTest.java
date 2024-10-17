@@ -1,8 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
@@ -198,16 +198,17 @@ class CounterTest {
 
   @Test
   public void testExemplarSampler() throws Exception {
-    final Exemplar exemplar1 = Exemplar.builder().value(2.0).traceId("abc").spanId("123").build();
-    final Exemplar exemplar2 = Exemplar.builder().value(1.0).traceId("def").spanId("456").build();
-    final Exemplar exemplar3 = Exemplar.builder().value(1.0).traceId("123").spanId("abc").build();
-    final Exemplar customExemplar =
+    Exemplar exemplar1 = Exemplar.builder().value(2.0).traceId("abc").spanId("123").build();
+    Exemplar exemplar2 = Exemplar.builder().value(1.0).traceId("def").spanId("456").build();
+    Exemplar exemplar3 = Exemplar.builder().value(1.0).traceId("123").spanId("abc").build();
+    Exemplar customExemplar =
         Exemplar.builder()
             .value(1.0)
             .traceId("bab")
             .spanId("cdc")
             .labels(Labels.of("test", "test"))
             .build();
+
     SpanContext spanContext =
         new SpanContext() {
           private int callNumber = 0;
@@ -291,6 +292,36 @@ class CounterTest {
             "test")); // custom exemplar sampled even though the automatic exemplar hasn't reached
     // min age yet
     assertExemplarEquals(customExemplar, getData(counter).getExemplar());
+  }
+
+  @Test
+  void inc() {
+    Counter counter = Counter.builder().name("count_total").build();
+    counter.inc(2.0);
+
+    assertThat(getData(counter).getValue()).isCloseTo(2.0, offset(0.0001));
+    assertThat(counter.get()).isEqualTo(2.0);
+    assertThat(counter.getLongValue()).isEqualTo(2L);
+  }
+
+  @Test
+  void incWithExemplar() {
+    Counter counter = Counter.builder().name("count_total").build();
+    counter.incWithExemplar(Labels.of("test", "test2"));
+
+    assertExemplarEquals(
+        Exemplar.builder().value(1.0).labels(Labels.of("test", "test2")).build(),
+        getData(counter).getExemplar());
+  }
+
+  @Test
+  void incWithExemplar2() {
+    Counter counter = Counter.builder().name("count_total").build();
+    counter.incWithExemplar(1.0, Labels.of("test", "test2"));
+
+    assertExemplarEquals(
+        Exemplar.builder().value(1.0).labels(Labels.of("test", "test2")).build(),
+        getData(counter).getExemplar());
   }
 
   @Test

@@ -23,9 +23,6 @@
         <otel-dynamic-load.version>1.29.0</otel-dynamic-load.version>
     </properties>
 
-    <dependencies>
-    </dependencies>
-
     <build>
         <resources>
             <resource>

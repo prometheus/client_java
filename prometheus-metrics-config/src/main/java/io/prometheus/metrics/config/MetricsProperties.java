@@ -164,11 +164,11 @@ public class MetricsProperties {
         prefix,
         HISTOGRAM_NATIVE_RESET_DURATION_SECONDS);
     Util.assertValue(
-        summaryMaxAgeSeconds, t -> t > 0, "Expecting value > 0", prefix, SUMMARY_MAX_AGE_SECONDS);
+        summaryMaxAgeSeconds, t -> t > 0, "Expecting value > 0.", prefix, SUMMARY_MAX_AGE_SECONDS);
     Util.assertValue(
         summaryNumberOfAgeBuckets,
         t -> t > 0,
-        "Expecting value > 0",
+        "Expecting value > 0.",
         prefix,
         SUMMARY_NUMBER_OF_AGE_BUCKETS);
 
@@ -201,7 +201,11 @@ public class MetricsProperties {
       for (double quantile : summaryQuantiles) {
         if (quantile < 0 || quantile > 1) {
           throw new PrometheusPropertiesException(
-              prefix + "." + SUMMARY_QUANTILES + ": Expecting 0.0 <= quantile <= 1.0");
+              prefix
+                  + "."
+                  + SUMMARY_QUANTILES
+                  + ": Expecting 0.0 <= quantile <= 1.0. Found: "
+                  + quantile);
         }
       }
     }
