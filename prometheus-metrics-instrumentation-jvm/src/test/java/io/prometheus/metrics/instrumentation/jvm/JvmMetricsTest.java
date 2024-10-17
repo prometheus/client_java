@@ -1,12 +1,19 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
-import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import java.lang.management.ManagementFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 class JvmMetricsTest {
+
+  @BeforeEach
+  void setUp() {
+    PrometheusRegistry.defaultRegistry.clear();
+  }
 
   @Test
   public void testRegisterIdempotent() {
@@ -19,8 +26,15 @@ class JvmMetricsTest {
 
   @Test
   void pool() {
-    JvmMemoryPoolAllocationMetrics.builder(PrometheusProperties.get()).register();
+    // for coverage
+    JvmMemoryPoolAllocationMetrics.builder(PrometheusProperties.get())
+        .withGarbageCollectorBeans(ManagementFactory.getGarbageCollectorMXBeans())
+        .register();
+  }
 
-    PrometheusRegistry.defaultRegistry.
+  @Test
+  void testJvmMetrics() {
+    JvmMetrics.builder(PrometheusProperties.get()).register();
+    JvmMetrics.builder().register();
   }
 }

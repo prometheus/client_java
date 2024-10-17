@@ -1,9 +1,9 @@
 package io.prometheus.metrics.core.datapoints;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.metrics.model.snapshots.Labels;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class CounterDataPointTest {
 
