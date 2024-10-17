@@ -70,7 +70,7 @@ public class PrometheusNaming {
    *
    * <p>The name is valid if the error message is {@code null}.
    */
-  static String validateMetricName(String name) {
+  public static String validateMetricName(String name) {
     for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
       if (name.endsWith(reservedSuffix)) {
         return "The metric name must not include the '" + reservedSuffix + "' suffix.";

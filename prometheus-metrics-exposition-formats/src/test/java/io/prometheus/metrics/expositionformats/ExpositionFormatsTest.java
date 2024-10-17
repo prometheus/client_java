@@ -3,10 +3,26 @@ package io.prometheus.metrics.expositionformats;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
-import io.prometheus.metrics.model.snapshots.*;
+import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Exemplars;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
+import io.prometheus.metrics.model.snapshots.InfoSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.Quantiles;
+import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryDataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.Unit;
+import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -76,6 +92,17 @@ class ExpositionFormatsTest {
           .value(3.0)
           .timestampMillis(1690298864383L)
           .build();
+
+  @Test
+  void init() {
+    ExpositionFormats formats = ExpositionFormats.init();
+    assertThat(formats.findWriter("application/openmetrics-text")).isNotNull();
+    assertThat(formats.findWriter("application/vnd.google.protobuf")).isNotNull();
+    assertThat(formats.findWriter("text/plain")).isNotNull();
+    assertThat(formats.getOpenMetricsTextFormatWriter()).isNotNull();
+    assertThat(formats.getPrometheusProtobufWriter()).isNotNull();
+    assertThat(formats.getPrometheusTextFormatWriter()).isNotNull();
+  }
 
   @Test
   public void testCounterComplete() throws IOException {

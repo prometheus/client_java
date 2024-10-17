@@ -225,6 +225,11 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/generated/**</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -304,6 +309,7 @@
                     <showWarnings>true</showWarnings>
                     <compilerArgs>
                         <arg>-Xlint:all,-serial,-processing</arg>
+                        <arg>-Werror</arg>
                         <arg>-XDcompilePolicy=simple</arg>
                         <arg>
                             -Xplugin:ErrorProne

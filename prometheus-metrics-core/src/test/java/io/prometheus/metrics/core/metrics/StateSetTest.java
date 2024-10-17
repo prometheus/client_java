@@ -63,6 +63,14 @@ class StateSetTest {
     assertThat(getData(stateSet).isTrue(2)).isFalse();
   }
 
+  @Test
+  void illegalName() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> StateSet.builder().name("state1").states("state1", "state2").build())
+        .withMessage(
+            "Label name state1 is illegal (can't use the metric name as label name in state set metrics)");
+  }
+
   private StateSetSnapshot.StateSetDataPointSnapshot getData(StateSet stateSet, String... labels) {
     return stateSet.collect().getDataPoints().stream()
         .filter(d -> d.getLabels().equals(Labels.of(labels)))

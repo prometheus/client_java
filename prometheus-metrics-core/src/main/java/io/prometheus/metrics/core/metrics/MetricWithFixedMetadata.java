@@ -57,8 +57,9 @@ public abstract class MetricWithFixedMetadata extends Metric {
     }
 
     public B name(String name) {
-      if (!PrometheusNaming.isValidMetricName(name)) {
-        throw new IllegalArgumentException("'" + name + "': Illegal metric name.");
+      String error = PrometheusNaming.validateMetricName(name);
+      if (error != null) {
+        throw new IllegalArgumentException("'" + name + "': Illegal metric name: " + error);
       }
       this.name = name;
       return self();
