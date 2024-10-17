@@ -44,6 +44,37 @@ class MetricsPropertiesTest {
                 .build()
                 .getSummaryNumberOfAgeBuckets())
         .isOne();
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(() -> MetricsProperties.builder().summaryNumberOfAgeBuckets(0).build())
+        .withMessage(".summaryNumberOfAgeBuckets: Expecting value > 0. Found: 0");
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(() -> MetricsProperties.builder().summaryQuantiles(2L).build())
+        .withMessage(".summaryQuantiles: Expecting 0.0 <= quantile <= 1.0. Found: 2.0");
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(() -> MetricsProperties.builder().summaryQuantileErrors(0.9).build())
+        .withMessage(
+            ".summaryQuantileErrors: Can't configure summaryQuantileErrors without configuring summaryQuantiles");
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(
+            () ->
+                MetricsProperties.builder()
+                    .summaryQuantiles(0.1)
+                    .summaryQuantileErrors(0.1, 0.9)
+                    .build())
+        .withMessage(".summaryQuantileErrors: must have the same length as summaryQuantiles");
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(
+            () ->
+                MetricsProperties.builder()
+                    .summaryQuantiles(0.1)
+                    .summaryQuantileErrors(-0.9)
+                    .build())
+        .withMessage(".summaryQuantileErrors: Expecting 0.0 <= error <= 1.0");
   }
 
   @Test
@@ -93,7 +124,31 @@ class MetricsPropertiesTest {
         .withMessage(".histogramNativeMaxZeroThreshold: Expecting value >= 0. Found: -1.0");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> MetricsProperties.builder().histogramNativeMaxNumberOfBuckets(0).build())
-        .withMessage(".histogramNativeMaxNumberOfBuckets: Expecting value > 0. Found: 0");
+        .isThrownBy(() -> MetricsProperties.builder().histogramNativeMaxNumberOfBuckets(-1).build())
+        .withMessage(".histogramNativeMaxNumberOfBuckets: Expecting value >= 0. Found: -1");
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(
+            () -> MetricsProperties.builder().histogramNativeResetDurationSeconds(-1L).build())
+        .withMessage(".histogramNativeResetDurationSeconds: Expecting value >= 0. Found: -1");
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(
+            () ->
+                MetricsProperties.builder()
+                    .histogramNativeOnly(true)
+                    .histogramClassicOnly(true)
+                    .build())
+        .withMessage(".histogramNativeOnly and .histogramClassicOnly cannot both be true");
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(
+            () ->
+                MetricsProperties.builder()
+                    .histogramNativeMinZeroThreshold(0.1)
+                    .histogramNativeMaxZeroThreshold(0.01)
+                    .build())
+        .withMessage(
+            ".histogramNativeMinZeroThreshold cannot be greater than .histogramNativeMaxZeroThreshold");
   }
 }

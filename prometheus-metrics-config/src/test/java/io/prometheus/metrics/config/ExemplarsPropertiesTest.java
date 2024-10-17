@@ -1,12 +1,13 @@
 package io.prometheus.metrics.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.Test;
+
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class ExemplarsPropertiesTest {
 
@@ -43,5 +44,18 @@ class ExemplarsPropertiesTest {
 
   private static ExemplarsProperties load(Map<String, String> map) {
     return ExemplarsProperties.load(new HashMap<>(map));
+  }
+
+  @Test
+  void builder() {
+    ExemplarsProperties properties =
+        ExemplarsProperties.builder()
+            .minRetentionPeriodSeconds(1)
+            .maxRetentionPeriodSeconds(2)
+            .sampleIntervalMilliseconds(3)
+            .build();
+    assertThat(properties.getMinRetentionPeriodSeconds()).isOne();
+    assertThat(properties.getMaxRetentionPeriodSeconds()).isEqualTo(2);
+    assertThat(properties.getSampleIntervalMilliseconds()).isEqualTo(3);
   }
 }

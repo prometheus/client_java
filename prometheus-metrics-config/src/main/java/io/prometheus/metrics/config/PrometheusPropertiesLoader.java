@@ -41,7 +41,7 @@ public class PrometheusPropertiesLoader {
     ExporterPushgatewayProperties exporterPushgatewayProperties =
         ExporterPushgatewayProperties.load(properties);
     ExporterOpenTelemetryProperties exporterOpenTelemetryProperties =
-        ExporterOpenTelemetryProperties.load("io.prometheus.exporter.opentelemetry", properties);
+        ExporterOpenTelemetryProperties.load(properties);
     validateAllPropertiesProcessed(properties);
     return new PrometheusProperties(
         defaultMetricsProperties,
