@@ -26,6 +26,13 @@ class InfoSnapshotTest {
   }
 
   @Test
+  void create() {
+    InfoSnapshot.InfoDataPointSnapshot snapshot =
+        new InfoSnapshot.InfoDataPointSnapshot(Labels.EMPTY);
+    assertThat(snapshot.getScrapeTimestampMillis()).isZero();
+  }
+
+  @Test
   public void testEmptyInfo() {
     InfoSnapshot snapshot = InfoSnapshot.builder().name("target").build();
     assertThat(snapshot.getDataPoints()).isEmpty();

@@ -9,7 +9,7 @@ class MetricSnapshotTest {
 
   @Test
   public void testDuplicateLabels() {
-    assertThatExceptionOfType(IllegalArgumentException.class)
+    assertThatExceptionOfType(DuplicateLabelsException.class)
         .isThrownBy(
             () ->
                 CounterSnapshot.builder()
@@ -29,7 +29,13 @@ class MetricSnapshotTest {
                             .labels(Labels.of("status", "200", "path", "/hello"))
                             .value(3.0)
                             .build())
-                    .build());
+                    .build())
+        .satisfies(
+            e -> {
+              assertThat(e.getMetadata().getName()).isEqualTo("events");
+              assertThat((Iterable<? extends Label>) e.getLabels())
+                  .isEqualTo(Labels.of("path", "/hello", "status", "200"));
+            });
   }
 
   @Test
