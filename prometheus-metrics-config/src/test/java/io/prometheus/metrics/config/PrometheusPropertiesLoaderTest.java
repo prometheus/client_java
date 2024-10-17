@@ -6,7 +6,7 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
 /** Tests for {@link PrometheusPropertiesLoader}. */
-class PrometheusPropertiesLoaderTests {
+class PrometheusPropertiesLoaderTest {
 
   @Test
   public void propertiesShouldBeLoadedFromPropertiesFile() {

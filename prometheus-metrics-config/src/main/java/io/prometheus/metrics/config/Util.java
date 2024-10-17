@@ -23,7 +23,7 @@ class Util {
     if (property != null) {
       if (!"true".equalsIgnoreCase(property) && !"false".equalsIgnoreCase(property)) {
         throw new PrometheusPropertiesException(
-            name + "=" + property + ": Expecting 'true' or 'false'");
+            String.format("%s: Expecting 'true' or 'false'. Found: %s", name, property));
       }
       return Boolean.parseBoolean(property);
     }
@@ -154,7 +154,9 @@ class Util {
       throws PrometheusPropertiesException {
     if (number != null && !predicate.test(number)) {
       String fullMessage =
-          prefix == null ? name + ": " + message : prefix + "." + name + ": " + message;
+          prefix == null
+              ? name + ": " + message
+              : String.format("%s.%s: %s Found: %s", prefix, name, message, number);
       throw new PrometheusPropertiesException(fullMessage);
     }
   }

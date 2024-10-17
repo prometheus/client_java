@@ -33,16 +33,13 @@ public class PrometheusPropertiesLoader {
     Map<String, MetricsProperties> metricsConfigs = loadMetricsConfigs(properties);
     MetricsProperties defaultMetricsProperties =
         MetricsProperties.load("io.prometheus.metrics", properties);
-    ExemplarsProperties exemplarConfig =
-        ExemplarsProperties.load("io.prometheus.exemplars", properties);
-    ExporterProperties exporterProperties =
-        ExporterProperties.load("io.prometheus.exporter", properties);
-    ExporterFilterProperties exporterFilterProperties =
-        ExporterFilterProperties.load("io.prometheus.exporter.filter", properties);
+    ExemplarsProperties exemplarConfig = ExemplarsProperties.load(properties);
+    ExporterProperties exporterProperties = ExporterProperties.load(properties);
+    ExporterFilterProperties exporterFilterProperties = ExporterFilterProperties.load(properties);
     ExporterHttpServerProperties exporterHttpServerProperties =
-        ExporterHttpServerProperties.load("io.prometheus.exporter.httpServer", properties);
+        ExporterHttpServerProperties.load(properties);
     ExporterPushgatewayProperties exporterPushgatewayProperties =
-        ExporterPushgatewayProperties.load("io.prometheus.exporter.pushgateway", properties);
+        ExporterPushgatewayProperties.load(properties);
     ExporterOpenTelemetryProperties exporterOpenTelemetryProperties =
         ExporterOpenTelemetryProperties.load("io.prometheus.exporter.opentelemetry", properties);
     validateAllPropertiesProcessed(properties);

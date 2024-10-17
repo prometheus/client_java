@@ -5,6 +5,7 @@ import java.util.Map;
 /** Properties starting with io.prometheus.exemplars */
 public class ExemplarsProperties {
 
+  private static final String PREFIX = "io.prometheus.exemplars";
   private static final String MIN_RETENTION_PERIOD_SECONDS = "minRetentionPeriodSeconds";
   private static final String MAX_RETENTION_PERIOD_SECONDS = "maxRetentionPeriodSeconds";
   private static final String SAMPLE_INTERVAL_MILLISECONDS = "sampleIntervalMilliseconds";
@@ -55,42 +56,42 @@ public class ExemplarsProperties {
    * Note that this will remove entries from {@code properties}. This is because we want to know if
    * there are unused properties remaining after all properties have been loaded.
    */
-  static ExemplarsProperties load(String prefix, Map<Object, Object> properties)
+  static ExemplarsProperties load(Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     Integer minRetentionPeriodSeconds =
-        Util.loadInteger(prefix + "." + MIN_RETENTION_PERIOD_SECONDS, properties);
+        Util.loadInteger(PREFIX + "." + MIN_RETENTION_PERIOD_SECONDS, properties);
     Integer maxRetentionPeriodSeconds =
-        Util.loadInteger(prefix + "." + MAX_RETENTION_PERIOD_SECONDS, properties);
+        Util.loadInteger(PREFIX + "." + MAX_RETENTION_PERIOD_SECONDS, properties);
     Integer sampleIntervalMilliseconds =
-        Util.loadInteger(prefix + "." + SAMPLE_INTERVAL_MILLISECONDS, properties);
+        Util.loadInteger(PREFIX + "." + SAMPLE_INTERVAL_MILLISECONDS, properties);
 
     Util.assertValue(
         minRetentionPeriodSeconds,
         t -> t > 0,
         "Expecting value > 0.",
-        prefix,
+        PREFIX,
         MIN_RETENTION_PERIOD_SECONDS);
     Util.assertValue(
-        minRetentionPeriodSeconds,
+        maxRetentionPeriodSeconds,
         t -> t > 0,
         "Expecting value > 0.",
-        prefix,
+        PREFIX,
         MAX_RETENTION_PERIOD_SECONDS);
     Util.assertValue(
         sampleIntervalMilliseconds,
         t -> t > 0,
         "Expecting value > 0.",
-        prefix,
+        PREFIX,
         SAMPLE_INTERVAL_MILLISECONDS);
 
     if (minRetentionPeriodSeconds != null && maxRetentionPeriodSeconds != null) {
       if (minRetentionPeriodSeconds > maxRetentionPeriodSeconds) {
         throw new PrometheusPropertiesException(
-            prefix
+            PREFIX
                 + "."
                 + MIN_RETENTION_PERIOD_SECONDS
                 + " must not be greater than "
-                + prefix
+                + PREFIX
                 + "."
                 + MAX_RETENTION_PERIOD_SECONDS
                 + ".");

@@ -13,6 +13,7 @@ public class ExporterFilterProperties {
   public static final String METRIC_NAME_MUST_NOT_BE_EQUAL_TO = "metricNameMustNotBeEqualTo";
   public static final String METRIC_NAME_MUST_START_WITH = "metricNameMustStartWith";
   public static final String METRIC_NAME_MUST_NOT_START_WITH = "metricNameMustNotStartWith";
+  private static final String PREFIX = "io.prometheus.exporter.filter";
 
   private final List<String> allowedNames;
   private final List<String> excludedNames;
@@ -58,16 +59,16 @@ public class ExporterFilterProperties {
    * Note that this will remove entries from {@code properties}. This is because we want to know if
    * there are unused properties remaining after all properties have been loaded.
    */
-  static ExporterFilterProperties load(String prefix, Map<Object, Object> properties)
+  static ExporterFilterProperties load(Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     List<String> allowedNames =
-        Util.loadStringList(prefix + "." + METRIC_NAME_MUST_BE_EQUAL_TO, properties);
+        Util.loadStringList(PREFIX + "." + METRIC_NAME_MUST_BE_EQUAL_TO, properties);
     List<String> excludedNames =
-        Util.loadStringList(prefix + "." + METRIC_NAME_MUST_NOT_BE_EQUAL_TO, properties);
+        Util.loadStringList(PREFIX + "." + METRIC_NAME_MUST_NOT_BE_EQUAL_TO, properties);
     List<String> allowedPrefixes =
-        Util.loadStringList(prefix + "." + METRIC_NAME_MUST_START_WITH, properties);
+        Util.loadStringList(PREFIX + "." + METRIC_NAME_MUST_START_WITH, properties);
     List<String> excludedPrefixes =
-        Util.loadStringList(prefix + "." + METRIC_NAME_MUST_NOT_START_WITH, properties);
+        Util.loadStringList(PREFIX + "." + METRIC_NAME_MUST_NOT_START_WITH, properties);
     return new ExporterFilterProperties(
         allowedNames, excludedNames, allowedPrefixes, excludedPrefixes);
   }

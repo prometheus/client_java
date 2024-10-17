@@ -1,11 +1,11 @@
 package io.prometheus.metrics.config;
 
-import static java.util.Collections.unmodifiableList;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Collections.unmodifiableList;
 
 /** Properties starting with io.prometheus.metrics */
 public class MetricsProperties {
@@ -164,7 +164,7 @@ public class MetricsProperties {
         prefix,
         HISTOGRAM_NATIVE_RESET_DURATION_SECONDS);
     Util.assertValue(
-        summaryMaxAgeSeconds, t -> t > 0, "Expecting value > 0", prefix, SUMMARY_MAX_AGE_SECONDS);
+        summaryMaxAgeSeconds, t -> t > 0, "Expecting value > 0.", prefix, SUMMARY_MAX_AGE_SECONDS);
     Util.assertValue(
         summaryNumberOfAgeBuckets,
         t -> t > 0,
