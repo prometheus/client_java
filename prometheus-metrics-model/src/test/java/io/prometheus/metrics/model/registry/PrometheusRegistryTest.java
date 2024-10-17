@@ -152,11 +152,9 @@ class PrometheusRegistryTest {
     registry.register(counterA1);
     registry.register(counterB);
     registry.register(gaugeA);
-    MetricSnapshots snapshots = registry.scrape();
-    Assert.assertEquals(3, snapshots.size());
+    assertThat(registry.scrape().size()).isEqualTo(3);
 
     registry.clear();
-    snapshots = registry.scrape();
-    Assert.assertEquals(0, snapshots.size());
+    assertThat(registry.scrape().size()).isZero();
   }
 }
