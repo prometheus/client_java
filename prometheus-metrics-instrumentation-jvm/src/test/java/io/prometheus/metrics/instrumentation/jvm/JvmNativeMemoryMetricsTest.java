@@ -1,15 +1,16 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
-import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+
+import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 class JvmNativeMemoryMetricsTest {
 
@@ -28,6 +29,11 @@ class JvmNativeMemoryMetricsTest {
     String expected = "# EOF\n";
 
     assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
+  }
+
+  @Test
+  void nativeMemoryTrackingNotEnabled() {
+      assertThat(new JvmNativeMemoryMetrics.DefaultPlatformMBeanServerAdapter().vmNativeMemorySummaryInBytes()).isEqualTo("Native memory tracking is not enabled\n");
   }
 
   @Test

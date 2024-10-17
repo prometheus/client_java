@@ -19,6 +19,8 @@
 
     <properties>
         <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry</automatic.module.name>
+        <!-- todo: add tests -->
+        <jacoco.line-coverage>0.0</jacoco.line-coverage>
     </properties>
 
     <dependencyManagement>
