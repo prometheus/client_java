@@ -48,7 +48,7 @@ class PrometheusMetricData<T extends PrometheusData<?>> implements MetricData {
 
   // See
   // https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6cf4dec6cb42d87d8840e9f67d4acf66d4eb8fda/pkg/translator/prometheus/normalize_name.go#L19
-  private String convertUnit(Unit unit) {
+  static String convertUnit(Unit unit) {
     if (unit == null) {
       return null;
     }

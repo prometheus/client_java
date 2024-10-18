@@ -21,6 +21,8 @@
         <otel.instrumentation.version>2.8.0-alpha</otel.instrumentation.version>
         <java.version>8</java.version>
         <jacoco.line-coverage>0.70</jacoco.line-coverage>
+        <coverage.skip>false</coverage.skip>
+        <warnings>-Werror</warnings>
     </properties>
 
     <licenses>
@@ -227,6 +229,7 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.12</version>
                 <configuration>
+                    <skip>${coverage.skip}</skip>
                     <excludes>
                         <exclude>**/generated/**</exclude>
                     </excludes>
@@ -309,8 +312,8 @@
                     <target>${java.version}</target>
                     <showWarnings>true</showWarnings>
                     <compilerArgs>
-                        <arg>-Xlint:all,-serial,-processing</arg>
-                        <arg>-Werror</arg>
+                        <arg>-Xlint:all,-serial,-processing,-options</arg>
+                        <arg>${warnings}</arg>
                         <arg>-XDcompilePolicy=simple</arg>
                         <arg>
                             -Xplugin:ErrorProne

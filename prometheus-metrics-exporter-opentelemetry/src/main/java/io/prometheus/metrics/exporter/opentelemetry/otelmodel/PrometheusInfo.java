@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("this-escape")
 public class PrometheusInfo extends PrometheusData<DoublePointData>
     implements SumData<DoublePointData> {
 
