@@ -3,7 +3,6 @@ package io.prometheus.metrics.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,7 @@ class ExemplarsPropertiesTest {
   void load() {
     ExemplarsProperties properties =
         load(
-            ImmutableMap.of(
+            Map.of(
                 "io.prometheus.exemplars.minRetentionPeriodSeconds", "1",
                 "io.prometheus.exemplars.maxRetentionPeriodSeconds", "2",
                 "io.prometheus.exemplars.sampleIntervalMilliseconds", "3"));
@@ -23,20 +22,17 @@ class ExemplarsPropertiesTest {
     assertThat(properties.getSampleIntervalMilliseconds()).isEqualTo(3);
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(
-            () -> load(ImmutableMap.of("io.prometheus.exemplars.minRetentionPeriodSeconds", "-1")))
+        .isThrownBy(() -> load(Map.of("io.prometheus.exemplars.minRetentionPeriodSeconds", "-1")))
         .withMessage(
             "io.prometheus.exemplars.minRetentionPeriodSeconds: Expecting value > 0. Found: -1");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(
-            () -> load(ImmutableMap.of("io.prometheus.exemplars.maxRetentionPeriodSeconds", "0")))
+        .isThrownBy(() -> load(Map.of("io.prometheus.exemplars.maxRetentionPeriodSeconds", "0")))
         .withMessage(
             "io.prometheus.exemplars.maxRetentionPeriodSeconds: Expecting value > 0. Found: 0");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(
-            () -> load(ImmutableMap.of("io.prometheus.exemplars.sampleIntervalMilliseconds", "-1")))
+        .isThrownBy(() -> load(Map.of("io.prometheus.exemplars.sampleIntervalMilliseconds", "-1")))
         .withMessage(
             "io.prometheus.exemplars.sampleIntervalMilliseconds: Expecting value > 0. Found: -1");
   }

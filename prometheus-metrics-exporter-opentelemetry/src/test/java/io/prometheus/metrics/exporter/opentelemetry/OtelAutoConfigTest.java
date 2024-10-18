@@ -65,16 +65,21 @@ class OtelAutoConfigTest {
             "values from builder",
             new TestCase()
                 .expectedProperties(
-                    ImmutableMap.<String, Optional<String>>builder()
-                        .put("otel.exporter.otlp.protocol", Optional.of("http/protobuf"))
-                        .put("otel.exporter.otlp.endpoint", Optional.of("http://builder:4318"))
-                        .put("otel.exporter.otlp.headers", Optional.of("h=builder-v"))
-                        .put("otel.metric.export.interval", Optional.of("2s"))
-                        .put("otel.exporter.otlp.timeout", Optional.of("3s"))
-                        .put("otel.service.name", Optional.of("builder-service"))
-                        .build())
+                    Map.of(
+                        "otel.exporter.otlp.protocol",
+                        Optional.of("http/protobuf"),
+                        "otel.exporter.otlp.endpoint",
+                        Optional.of("http://builder:4318"),
+                        "otel.exporter.otlp.headers",
+                        Optional.of("h=builder-v"),
+                        "otel.metric.export.interval",
+                        Optional.of("2s"),
+                        "otel.exporter.otlp.timeout",
+                        Optional.of("3s"),
+                        "otel.service.name",
+                        Optional.of("builder-service")))
                 .expectedResourceAttributes(
-                    ImmutableMap.of(
+                    Map.of(
                         "key",
                         "builder-value",
                         "service.name",

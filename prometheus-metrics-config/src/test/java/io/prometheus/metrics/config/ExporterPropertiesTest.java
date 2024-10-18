@@ -3,7 +3,6 @@ package io.prometheus.metrics.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,7 @@ class ExporterPropertiesTest {
     ExporterProperties properties =
         load(
             new HashMap<>(
-                ImmutableMap.of(
+                Map.of(
                     "io.prometheus.exporter.includeCreatedTimestamps", "true",
                     "io.prometheus.exporter.exemplarsOnAllMetricTypes", "true")));
     assertThat(properties.getIncludeCreatedTimestamps()).isTrue();
@@ -26,8 +25,7 @@ class ExporterPropertiesTest {
             () ->
                 load(
                     new HashMap<>(
-                        ImmutableMap.of(
-                            "io.prometheus.exporter.includeCreatedTimestamps", "invalid"))))
+                        Map.of("io.prometheus.exporter.includeCreatedTimestamps", "invalid"))))
         .withMessage(
             "io.prometheus.exporter.includeCreatedTimestamps: Expecting 'true' or 'false'. Found: invalid");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
@@ -35,8 +33,7 @@ class ExporterPropertiesTest {
             () ->
                 load(
                     new HashMap<>(
-                        ImmutableMap.of(
-                            "io.prometheus.exporter.exemplarsOnAllMetricTypes", "invalid"))))
+                        Map.of("io.prometheus.exporter.exemplarsOnAllMetricTypes", "invalid"))))
         .withMessage(
             "io.prometheus.exporter.exemplarsOnAllMetricTypes: Expecting 'true' or 'false'. Found: invalid");
   }

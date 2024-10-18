@@ -1,41 +1,41 @@
 package io.prometheus.metrics.exporter.opentelemetry.otelmodel;
 
+import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.google.common.collect.ImmutableMap;
 import io.prometheus.metrics.model.snapshots.Unit;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class PrometheusMetricDataTest {
 
-  ImmutableMap<Object, Object> translations =
-      ImmutableMap.builder()
-          .put("days", "d")
-          .put("hours", "h")
-          .put("minutes", "min")
-          .put("seconds", "s")
-          .put("milliseconds", "ms")
-          .put("microseconds", "us")
-          .put("nanoseconds", "ns")
-          .put("bytes", "By")
-          .put("kibibytes", "KiBy")
-          .put("mebibytes", "MiBy")
-          .put("gibibytes", "GiBy")
-          .put("tibibytes", "TiBy")
-          .put("kilobytes", "KBy")
-          .put("megabytes", "MBy")
-          .put("gigabytes", "GBy")
-          .put("terabytes", "TBy")
-          .put("meters", "m")
-          .put("volts", "V")
-          .put("amperes", "A")
-          .put("joules", "J")
-          .put("watts", "W")
-          .put("grams", "g")
-          .put("celsius", "Cel")
-          .put("hertz", "Hz")
-          .put("percent", "%")
-          .build();
+  Map<Object, Object> translations =
+      Map.ofEntries(
+          entry("days", "d"),
+          entry("hours", "h"),
+          entry("minutes", "min"),
+          entry("seconds", "s"),
+          entry("milliseconds", "ms"),
+          entry("microseconds", "us"),
+          entry("nanoseconds", "ns"),
+          entry("bytes", "By"),
+          entry("kibibytes", "KiBy"),
+          entry("mebibytes", "MiBy"),
+          entry("gibibytes", "GiBy"),
+          entry("tibibytes", "TiBy"),
+          entry("kilobytes", "KBy"),
+          entry("megabytes", "MBy"),
+          entry("gigabytes", "GBy"),
+          entry("terabytes", "TBy"),
+          entry("meters", "m"),
+          entry("volts", "V"),
+          entry("amperes", "A"),
+          entry("joules", "J"),
+          entry("watts", "W"),
+          entry("grams", "g"),
+          entry("celsius", "Cel"),
+          entry("hertz", "Hz"),
+          entry("percent", "%"));
 
   @Test
   void convertUnit() {
