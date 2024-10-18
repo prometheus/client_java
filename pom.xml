@@ -232,11 +232,12 @@
                 <configuration>
                     <consoleOutput>true</consoleOutput>
                     <configLocation>google_checks.xml</configLocation>
+                    <configLocation>checkstyle.xml</configLocation>
                     <violationSeverity>warning</violationSeverity>
                     <failOnViolation>true</failOnViolation>
                     <skip>${checkstyle.skip}</skip>
                     <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
-                    <excludes>**/generated/**,**CkmsQuantiles</excludes>
+                    <excludes>**/generated/**</excludes>
                 </configuration>
                 <executions>
                     <execution>
