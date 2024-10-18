@@ -23,7 +23,7 @@ public abstract class MetricSnapshot<T extends DataPointSnapshot> {
     List<T> dataCopy = new ArrayList<>(dataPoints);
     dataCopy.sort(Comparator.comparing(DataPointSnapshot::getLabels));
     this.dataPoints = Collections.unmodifiableList(dataCopy);
-    validateLabels();
+    validateLabels(this.dataPoints, metadata);
   }
 
   public MetricMetadata getMetadata() {
@@ -32,7 +32,8 @@ public abstract class MetricSnapshot<T extends DataPointSnapshot> {
 
   public abstract List<T> getDataPoints();
 
-  protected void validateLabels() {
+  private static <T extends DataPointSnapshot> void validateLabels(
+      List<T> dataPoints, MetricMetadata metadata) {
     // Verify that labels are unique (the same set of names/values must not be used multiple times
     // for the same metric).
     for (int i = 0; i < dataPoints.size() - 1; i++) {

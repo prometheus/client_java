@@ -16,6 +16,7 @@ public class PrometheusStateSet extends PrometheusData<DoublePointData>
 
   private final List<DoublePointData> points;
 
+  @SuppressWarnings("this-escape")
   public PrometheusStateSet(StateSetSnapshot snapshot, long currentTimeMillis) {
     super(MetricDataType.DOUBLE_SUM);
     this.points = new ArrayList<>();

@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+@SuppressWarnings("this-escape")
 public abstract class DataPointSnapshot {
   private final Labels labels;
   private final long createdTimestampMillis;

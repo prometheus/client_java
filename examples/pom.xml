@@ -17,7 +17,7 @@
     </description>
 
     <properties>
-        <jacoco.line-coverage>0.0</jacoco.line-coverage>
+        <coverage.skip>true</coverage.skip>
     </properties>
 
     <modules>
