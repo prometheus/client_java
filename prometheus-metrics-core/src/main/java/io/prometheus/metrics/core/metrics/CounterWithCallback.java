@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  *
  * CounterWithCallback.builder()
  *         .name("classes_loaded_total")
- *         .help("The total number of classes that have been loaded since the JVM has started execution")
+ *         .help("The total number of classes since the JVM has started execution")
  *         .callback(callback -> callback.call(classLoadingMXBean.getLoadedClassCount()))
  *         .register();
  * }</pre>

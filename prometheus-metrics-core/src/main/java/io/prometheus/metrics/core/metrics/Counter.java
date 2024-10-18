@@ -83,6 +83,15 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
   }
 
   @Override
+  protected CounterSnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
+    List<CounterSnapshot.CounterDataPointSnapshot> data = new ArrayList<>(labels.size());
+    for (int i = 0; i < labels.size(); i++) {
+      data.add(metricData.get(i).collect(labels.get(i)));
+    }
+    return new CounterSnapshot(getMetadata(), data);
+  }
+
+  @Override
   protected boolean isExemplarsEnabled() {
     return exemplarsEnabled;
   }
@@ -94,15 +103,6 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     } else {
       return new DataPoint(null);
     }
-  }
-
-  @Override
-  protected CounterSnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
-    List<CounterSnapshot.CounterDataPointSnapshot> data = new ArrayList<>(labels.size());
-    for (int i = 0; i < labels.size(); i++) {
-      data.add(metricData.get(i).collect(labels.get(i)));
-    }
-    return new CounterSnapshot(getMetadata(), data);
   }
 
   static String stripTotalSuffix(String name) {
