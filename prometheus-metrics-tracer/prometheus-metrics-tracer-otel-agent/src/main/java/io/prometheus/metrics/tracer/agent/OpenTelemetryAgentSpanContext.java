@@ -1,4 +1,4 @@
-package io.prometheus.metrics.tracer.otel_agent;
+package io.prometheus.metrics.tracer.agent;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanId;

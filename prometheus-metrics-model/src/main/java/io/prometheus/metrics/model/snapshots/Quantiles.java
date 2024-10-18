@@ -1,6 +1,11 @@
 package io.prometheus.metrics.model.snapshots;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 /** Immutable list of quantiles. */
 public class Quantiles implements Iterable<Quantile> {

@@ -1,8 +1,8 @@
 package io.prometheus.metrics.tracer.initializer;
 
+import io.prometheus.metrics.tracer.agent.OpenTelemetryAgentSpanContext;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.otel.OpenTelemetrySpanContext;
-import io.prometheus.metrics.tracer.otel_agent.OpenTelemetryAgentSpanContext;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SpanContextSupplier {

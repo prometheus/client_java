@@ -108,7 +108,8 @@ public final class MetricMetadata {
         throw new IllegalArgumentException(
             "'"
                 + name
-                + "': Illegal metric name. If the unit is non-null, the name must end with the unit: _"
+                + "': Illegal metric name. If the unit is non-null, "
+                + "the name must end with the unit: _"
                 + unit
                 + "."
                 + " Call "

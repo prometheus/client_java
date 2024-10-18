@@ -70,19 +70,6 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
   }
 
   // package private for testing
-  static String[] makePrometheusNames(String[] names) {
-    String[] prometheusNames = names;
-    for (int i = 0; i < names.length; i++) {
-      if (names[i].contains(".")) {
-        if (prometheusNames == names) {
-          prometheusNames = Arrays.copyOf(names, names.length);
-        }
-        prometheusNames[i] = PrometheusNaming.prometheusName(names[i]);
-      }
-    }
-    return prometheusNames;
-  }
-
   /**
    * Create a new Labels instance. You can either create Labels with one of the static {@code
    * Labels.of(...)} methods, or you can use the {@link Labels#builder()}.
@@ -127,6 +114,19 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
     String[] prometheusNames = makePrometheusNames(namesCopy);
     sortAndValidate(namesCopy, prometheusNames, valuesCopy);
     return new Labels(namesCopy, prometheusNames, valuesCopy);
+  }
+
+  static String[] makePrometheusNames(String[] names) {
+    String[] prometheusNames = names;
+    for (int i = 0; i < names.length; i++) {
+      if (names[i].contains(".")) {
+        if (prometheusNames == names) {
+          prometheusNames = Arrays.copyOf(names, names.length);
+        }
+        prometheusNames[i] = PrometheusNaming.prometheusName(names[i]);
+      }
+    }
+    return prometheusNames;
   }
 
   /**
@@ -287,14 +287,6 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
   }
 
   /**
-   * Create a new Labels instance containing the labels of this and the label passed as name and
-   * value. The label name must not already be contained in this Labels instance.
-   */
-  public Labels add(String name, String value) {
-    return merge(Labels.of(name, value));
-  }
-
-  /**
    * Create a new Labels instance containing the labels of this and the labels passed as names and
    * values. The new label names must not already be contained in this Labels instance.
    */
@@ -311,6 +303,14 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
     String[] prometheusNames = makePrometheusNames(mergedNames);
     sortAndValidate(mergedNames, prometheusNames, mergedValues);
     return new Labels(mergedNames, prometheusNames, mergedValues);
+  }
+
+  /**
+   * Create a new Labels instance containing the labels of this and the label passed as name and
+   * value. The label name must not already be contained in this Labels instance.
+   */
+  public Labels add(String name, String value) {
+    return merge(Labels.of(name, value));
   }
 
   public boolean hasSameNames(Labels other) {
@@ -400,8 +400,12 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     Labels labels = (Labels) o;
     return labels.hasSameNames(this) && labels.hasSameValues(this);
   }
