@@ -1,4 +1,4 @@
-package io.prometheus.metrics.examples.otel_exemplars.app;
+package io.prometheus.metrics.examples.otel.exemplars.greeting;
 
 import io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet;
 import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
@@ -15,11 +15,11 @@ public class Main {
     JvmMetrics.builder().register();
 
     Tomcat tomcat = new Tomcat();
-    tomcat.setPort(8080);
+    tomcat.setPort(8081);
 
     Context ctx = tomcat.addContext("", new File(".").getAbsolutePath());
 
-    Tomcat.addServlet(ctx, "hello", new HelloWorldServlet());
+    Tomcat.addServlet(ctx, "hello", new GreetingServlet());
     ctx.addServletMappingDecoded("/*", "hello");
 
     Tomcat.addServlet(ctx, "metrics", new PrometheusMetricsServlet());

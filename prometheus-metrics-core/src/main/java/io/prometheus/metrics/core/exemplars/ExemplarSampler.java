@@ -130,6 +130,16 @@ public class ExemplarSampler {
     return 0;
   }
 
+  private long doObserveSingleExemplar(double amount, Labels labels) {
+    long now = System.currentTimeMillis();
+    Exemplar current = customExemplars[0];
+    if (current == null
+        || now - current.getTimestampMillis() > config.getMinRetentionPeriodMillis()) {
+      return updateCustomExemplar(0, amount, labels, now);
+    }
+    return 0;
+  }
+
   private long doObserveWithUpperBounds(double value) {
     long now = System.currentTimeMillis();
     double[] upperBounds = config.getHistogramClassicUpperBounds();
@@ -210,16 +220,6 @@ public class ExemplarSampler {
     } else {
       return doObserveWithExemplarWithoutUpperBounds(amount, labels);
     }
-  }
-
-  private long doObserveSingleExemplar(double amount, Labels labels) {
-    long now = System.currentTimeMillis();
-    Exemplar current = customExemplars[0];
-    if (current == null
-        || now - current.getTimestampMillis() > config.getMinRetentionPeriodMillis()) {
-      return updateCustomExemplar(0, amount, labels, now);
-    }
-    return 0;
   }
 
   private long doObserveWithExemplarWithUpperBounds(double value, Labels labels) {

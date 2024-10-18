@@ -1,4 +1,4 @@
-package io.prometheus.metrics.examples.otel_exemplars.app;
+package io.prometheus.metrics.examples.otel.exemplars.app;
 
 import static io.prometheus.metrics.model.snapshots.Unit.nanosToSeconds;
 import static java.net.http.HttpResponse.BodyHandlers.ofString;

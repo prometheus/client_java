@@ -27,7 +27,9 @@ public class ExporterServletJettySample {
       System.exit(1);
     }
 
+    //noinspection CheckStyle
     int port = parsePortOrExit(args[0]);
+    //noinspection CheckStyle
     Mode mode = parseModeOrExit(args[1]);
 
     Counter counter =

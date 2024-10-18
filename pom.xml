@@ -21,6 +21,7 @@
         <otel.instrumentation.version>2.9.0-alpha</otel.instrumentation.version>
         <java.version>8</java.version>
         <jacoco.line-coverage>0.70</jacoco.line-coverage>
+        <checkstyle.skip>false</checkstyle.skip>
         <coverage.skip>false</coverage.skip>
         <warnings>-Werror</warnings>
     </properties>
@@ -218,6 +219,27 @@
                 <executions>
                     <execution>
                         <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <consoleOutput>true</consoleOutput>
+                    <configLocation>google_checks.xml</configLocation>
+                    <violationSeverity>warning</violationSeverity>
+                    <failOnViolation>true</failOnViolation>
+                    <skip>${checkstyle.skip}</skip>
+                    <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+                    <excludes>**/generated/**,**CkmsQuantiles</excludes>
+                </configuration>
+                <executions>
+                    <execution>
                         <goals>
                             <goal>check</goal>
                         </goals>
