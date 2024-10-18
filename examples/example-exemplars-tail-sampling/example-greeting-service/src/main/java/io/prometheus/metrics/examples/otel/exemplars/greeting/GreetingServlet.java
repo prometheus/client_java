@@ -1,15 +1,14 @@
 package io.prometheus.metrics.examples.otel.exemplars.greeting;
 
+import static io.prometheus.metrics.model.snapshots.Unit.nanosToSeconds;
+
 import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.model.snapshots.Unit;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.Random;
-
-import static io.prometheus.metrics.model.snapshots.Unit.nanosToSeconds;
 
 /** Hello World REST servlet, with an example counter and an example histogram. */
 public class GreetingServlet extends HttpServlet {
