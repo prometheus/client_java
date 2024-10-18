@@ -2,7 +2,6 @@ package io.prometheus.metrics.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ class ExporterOpenTelemetryPropertiesTest {
   void load() {
     ExporterOpenTelemetryProperties properties =
         load(
-            ImmutableMap.of(
+            Map.of(
                 "io.prometheus.exporter.opentelemetry.protocol", "grpc",
                 "io.prometheus.exporter.opentelemetry.endpoint", "http://localhost:8080",
                 "io.prometheus.exporter.opentelemetry.headers", "key1=value1,key2=value2",
@@ -33,7 +32,7 @@ class ExporterOpenTelemetryPropertiesTest {
     assertThat(properties.getProtocol()).isEqualTo("grpc");
     assertThat(properties.getEndpoint()).isEqualTo("http://localhost:8080");
     assertThat(properties.getHeaders())
-        .containsExactlyInAnyOrderEntriesOf(ImmutableMap.of("key1", "value1", "key2", "value2"));
+        .containsExactlyInAnyOrderEntriesOf(Map.of("key1", "value1", "key2", "value2"));
     assertThat(properties.getInterval()).isEqualTo("10s");
     assertThat(properties.getTimeout()).isEqualTo("5s");
     assertThat(properties.getServiceName()).isEqualTo("serviceName");
@@ -41,7 +40,7 @@ class ExporterOpenTelemetryPropertiesTest {
     assertThat(properties.getServiceInstanceId()).isEqualTo("serviceInstanceId");
     assertThat(properties.getServiceVersion()).isEqualTo("serviceVersion");
     assertThat(properties.getResourceAttributes())
-        .containsExactlyInAnyOrderEntriesOf(ImmutableMap.of("key1", "value1", "key2", "value2"));
+        .containsExactlyInAnyOrderEntriesOf(Map.of("key1", "value1", "key2", "value2"));
   }
 
   private static ExporterOpenTelemetryProperties load(Map<String, String> map) {

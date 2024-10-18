@@ -3,7 +3,6 @@ package io.prometheus.metrics.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,7 @@ class ExporterPushgatewayPropertiesTest {
   void load() {
     ExporterPushgatewayProperties properties =
         load(
-            ImmutableMap.of(
+            Map.of(
                 "io.prometheus.exporter.pushgateway.address", "http://localhost",
                 "io.prometheus.exporter.pushgateway.job", "job",
                 "io.prometheus.exporter.pushgateway.scheme", "http"));
@@ -24,7 +23,7 @@ class ExporterPushgatewayPropertiesTest {
     assertThat(properties.getScheme()).isEqualTo("http");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> load(ImmutableMap.of("io.prometheus.exporter.pushgateway.scheme", "foo")))
+        .isThrownBy(() -> load(Map.of("io.prometheus.exporter.pushgateway.scheme", "foo")))
         .withMessage(
             "io.prometheus.exporter.pushgateway.scheme: Illegal value. Expecting 'http' or 'https'. Found: foo");
   }

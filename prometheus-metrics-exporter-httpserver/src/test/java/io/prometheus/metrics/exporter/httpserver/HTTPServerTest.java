@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 public class HTTPServerTest {
 
   @Test
+  @SuppressWarnings({"removal"})
   public void testSubjectDoAs() throws Exception {
 
     final String user = "joe";

@@ -310,6 +310,9 @@
                     <release>${java.version}</release>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <testRelease>17</testRelease>
+                    <testSource>17</testSource>
+                    <testTarget>17</testTarget>
                     <showWarnings>true</showWarnings>
                     <compilerArgs>
                         <arg>-Xlint:all,-serial,-processing,-options</arg>

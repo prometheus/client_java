@@ -2,7 +2,6 @@ package io.prometheus.metrics.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ class ExporterFilterPropertiesTest {
   void load() {
     ExporterFilterProperties properties =
         load(
-            ImmutableMap.of(
+            Map.of(
                 "io.prometheus.exporter.filter.metricNameMustBeEqualTo", "a,b,c",
                 "io.prometheus.exporter.filter.metricNameMustNotBeEqualTo", "d,e,f",
                 "io.prometheus.exporter.filter.metricNameMustStartWith", "g,h,i",
