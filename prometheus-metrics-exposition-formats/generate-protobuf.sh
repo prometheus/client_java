@@ -29,6 +29,8 @@ curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/pro
 
 sed -i "s/java_package = \"io.prometheus.client\"/java_package = \"$PACKAGE\"/" $PROTO_DIR/metrics.proto
 protoc --java_out $TARGET_DIR $PROTO_DIR/metrics.proto
+sed -i '1 i\//CHECKSTYLE:OFF: checkstyle' $(find src/main/generated/io -type f)
+sed -i -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' $(find src/main/generated/io -type f)
 
 GENERATED_WITH=$(grep -oP '\/\/ Protobuf Java Version: \K.*' "$TARGET_DIR/${PACKAGE//\.//}"/Metrics.java)
 
