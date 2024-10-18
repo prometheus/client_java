@@ -18,7 +18,6 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -314,20 +313,6 @@ public class HTTPServer implements Closeable {
     private void assertNull(Object o, String msg) {
       if (o != null) {
         throw new IllegalStateException(msg);
-      }
-    }
-  }
-
-  private static class BlockingRejectedExecutionHandler implements RejectedExecutionHandler {
-
-    @Override
-    public void rejectedExecution(Runnable runnable, ThreadPoolExecutor threadPoolExecutor) {
-      if (!threadPoolExecutor.isShutdown()) {
-        try {
-          threadPoolExecutor.getQueue().put(runnable);
-        } catch (InterruptedException ignored) {
-          // ignore
-        }
       }
     }
   }

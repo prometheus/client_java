@@ -232,6 +232,7 @@
                     <skip>${coverage.skip}</skip>
                     <excludes>
                         <exclude>**/generated/**</exclude>
+                        <exclude>**/*BlockingRejectedExecutionHandler*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
