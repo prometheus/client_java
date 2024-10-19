@@ -17,6 +17,10 @@ git tag -a v<VERSION> -m "Release v<VERSION>"
 git push origin v<VERSION>
 ```
 
+This will trigger the release workflow which will deploy the release to Maven Central.
+
+Go to https://central.sonatype.com/publishing/deployments to publish the release to Maven Central.
+
 ## Create a Release 
 
 1. Go to https://github.com/prometheus/client_java/releases

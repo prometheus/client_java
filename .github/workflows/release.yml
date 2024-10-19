@@ -1,14 +1,9 @@
 name: Deploy to Maven Central
 
-#on:
-#  push:
-#    tags:
-#      - v*
 on:
   push:
-    branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
+    tags:
+      - "v*.*.*"
 
 jobs:
   deploy:
