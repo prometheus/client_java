@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>client_java</artifactId>
-        <version>0.0.1-releasetest1</version>
+        <version>1.3.2</version>
     </parent>
 
     <artifactId>prometheus-metrics-exposition-formats</artifactId>
