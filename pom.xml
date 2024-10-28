@@ -17,7 +17,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <automatic.module.name>--module-name-need-to-be-overriden--</automatic.module.name>
-        <junit-jupiter.version>5.11.2</junit-jupiter.version>
+        <junit-jupiter.version>5.11.3</junit-jupiter.version>
         <otel.instrumentation.version>2.8.0-alpha</otel.instrumentation.version>
         <java.version>8</java.version>
         <jacoco.line-coverage>0.70</jacoco.line-coverage>
@@ -168,7 +168,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.20.0</version>
+                    <version>3.21.0</version>
                 </plugin>
                 <!-- Plugins with groupId org.apache.maven.plugins that are not part of default bindings. -->
                 <plugin>
@@ -358,7 +358,7 @@
             <plugin>
                 <!-- maven-site-plugin 3.3 requires maven-project-info-reports-plugin < 3.0 -->
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.0</version>
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
