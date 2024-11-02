@@ -228,7 +228,6 @@ class ExpositionFormatsTest {
             + "}";
     // @formatter:on
 
-
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("service_time_seconds")
@@ -2232,8 +2231,7 @@ class ExpositionFormatsTest {
             "positive_delta: -1 "
             + // index 47, count 1
             "created_timestamp { seconds: 1672850285 } "
-            +
-            "} "
+            + "} "
             + "}";
     String prometheusProtobufWithoutCreated =
         // @formatter:off
