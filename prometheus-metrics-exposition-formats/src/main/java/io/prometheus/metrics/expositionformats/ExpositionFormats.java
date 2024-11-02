@@ -24,7 +24,7 @@ public class ExpositionFormats {
 
   public static ExpositionFormats init(ExporterProperties properties) {
     return new ExpositionFormats(
-        new PrometheusProtobufWriter(),
+        new PrometheusProtobufWriter(properties.getIncludeCreatedTimestamps()),
         new PrometheusTextFormatWriter(properties.getIncludeCreatedTimestamps()),
         new OpenMetricsTextFormatWriter(
             properties.getIncludeCreatedTimestamps(), properties.getExemplarsOnAllMetricTypes()));

@@ -187,6 +187,31 @@ class ExpositionFormatsTest {
             + "counter { "
             + "value: 0.8 "
             + exemplar1protoString
+            + " created_timestamp { seconds: 1672850385 nanos: 800000000 } "
+            + "} "
+            + "timestamp_ms: 1672850685829 "
+            + "} "
+            + "metric { "
+            + "label { name: \"path\" value: \"/hello\" } "
+            + "label { name: \"status\" value: \"500\" } "
+            + "counter { "
+            + "value: 0.9 "
+            + exemplar2protoString
+            + " created_timestamp { seconds: 1672850285 } "
+            + "} "
+            + "timestamp_ms: 1672850585820 "
+            + "}";
+    String prometheusProtobufWithoutCreated =
+        // @formatter:off
+        "name: \"service_time_seconds_total\" "
+            + "help: \"total time spent serving\" "
+            + "type: COUNTER "
+            + "metric { "
+            + "label { name: \"path\" value: \"/hello\" } "
+            + "label { name: \"status\" value: \"200\" } "
+            + "counter { "
+            + "value: 0.8 "
+            + exemplar1protoString
             + " "
             + "} "
             + "timestamp_ms: 1672850685829 "
@@ -202,6 +227,7 @@ class ExpositionFormatsTest {
             + "timestamp_ms: 1672850585820 "
             + "}";
     // @formatter:on
+
 
     CounterSnapshot counter =
         CounterSnapshot.builder()
@@ -230,6 +256,7 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, counter);
     assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, counter);
     assertPrometheusProtobuf(prometheusProtobuf, counter);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobufWithoutCreated, counter);
   }
 
   @Test
@@ -247,7 +274,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, counter);
     assertOpenMetricsTextWithoutCreated(openMetricsText, counter);
     assertPrometheusTextWithoutCreated(prometheusText, counter);
-    assertPrometheusProtobuf(prometheusProtobuf, counter);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, counter);
   }
 
   @Test
@@ -287,7 +314,7 @@ class ExpositionFormatsTest {
             .build();
     assertOpenMetricsText(openMetricsText, counter);
     assertPrometheusText(prometheusText, counter);
-    assertPrometheusProtobuf(prometheusProtobuf, counter);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, counter);
   }
 
   @Test
@@ -368,7 +395,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, gauge);
     assertOpenMetricsTextWithoutCreated(openMetricsText, gauge);
     assertPrometheusTextWithoutCreated(prometheusText, gauge);
-    assertPrometheusProtobuf(prometheusProtobuf, gauge);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, gauge);
   }
 
   @Test
@@ -388,7 +415,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, gauge);
     assertOpenMetricsTextWithoutCreated(openMetricsText, gauge);
     assertPrometheusTextWithoutCreated(prometheusText, gauge);
-    assertPrometheusProtobuf(prometheusProtobuf, gauge);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, gauge);
   }
 
   @Test
@@ -440,7 +467,7 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithExemplarsOnAllTimeSeries(
         openMetricsTextWithExemplarsOnAllTimeSeries, gauge);
     assertPrometheusText(prometheusText, gauge);
-    assertPrometheusProtobuf(prometheusProtobuf, gauge);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, gauge);
   }
 
   @Test
@@ -664,7 +691,7 @@ class ExpositionFormatsTest {
             + "http_request_duration_seconds_sum{status=\"500\"} 2.2 "
             + scrapeTimestamp2s
             + "\n";
-    String prometheusProtobuf =
+    String prometheusProtobufWithoutCreated =
         // @formatter:off
         "name: \"http_request_duration_seconds\" "
             + "help: \"request duration\" "
@@ -687,6 +714,34 @@ class ExpositionFormatsTest {
             + "quantile { quantile: 0.5 value: 225.3 } "
             + "quantile { quantile: 0.9 value: 240.7 } "
             + "quantile { quantile: 0.95 value: 245.1 } "
+            + "} "
+            + "timestamp_ms: 1672850585820 "
+            + "}";
+    String prometheusProtobuf =
+        // @formatter:off
+        "name: \"http_request_duration_seconds\" "
+            + "help: \"request duration\" "
+            + "type: SUMMARY "
+            + "metric { "
+            + "label { name: \"status\" value: \"200\" } "
+            + "summary { "
+            + "sample_count: 3 "
+            + "sample_sum: 1.2 "
+            + "quantile { quantile: 0.5 value: 225.3 } "
+            + "quantile { quantile: 0.9 value: 240.7 } "
+            + "quantile { quantile: 0.95 value: 245.1 } "
+            + "created_timestamp { seconds: 1672850385 nanos: 800000000 } "
+            + "} "
+            + "timestamp_ms: 1672850685829 "
+            + "} metric { "
+            + "label { name: \"status\" value: \"500\" } "
+            + "summary { "
+            + "sample_count: 7 "
+            + "sample_sum: 2.2 "
+            + "quantile { quantile: 0.5 value: 225.3 } "
+            + "quantile { quantile: 0.9 value: 240.7 } "
+            + "quantile { quantile: 0.95 value: 245.1 } "
+            + "created_timestamp { seconds: 1672850285 } "
             + "} "
             + "timestamp_ms: 1672850585820 "
             + "}";
@@ -733,6 +788,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, summary);
     assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, summary);
     assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, summary);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobufWithoutCreated, summary);
     assertPrometheusProtobuf(prometheusProtobuf, summary);
   }
 
@@ -773,7 +829,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, summary);
     assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
     assertPrometheusTextWithoutCreated(prometheusText, summary);
-    assertPrometheusProtobuf(prometheusProtobuf, summary);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, summary);
   }
 
   @Test
@@ -806,7 +862,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, summary);
     assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
     assertPrometheusTextWithoutCreated(prometheusText, summary);
-    assertPrometheusProtobuf(prometheusProtobuf, summary);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, summary);
   }
 
   @Test
@@ -833,7 +889,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, summary);
     assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
     assertPrometheusTextWithoutCreated(prometheusText, summary);
-    assertPrometheusProtobuf(prometheusProtobuf, summary);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, summary);
   }
 
   @Test
@@ -860,7 +916,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, summary);
     assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
     assertPrometheusTextWithoutCreated(prometheusText, summary);
-    assertPrometheusProtobuf(prometheusProtobuf, summary);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, summary);
   }
 
   @Test
@@ -878,7 +934,7 @@ class ExpositionFormatsTest {
     assertPrometheusText("", summary);
     assertOpenMetricsTextWithoutCreated("# EOF\n", summary);
     assertPrometheusTextWithoutCreated("", summary);
-    assertPrometheusProtobuf("", summary);
+    assertPrometheusProtobufWithoutCreated("", summary);
   }
 
   @Test
@@ -920,7 +976,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, summary);
     assertOpenMetricsTextWithoutCreated(openMetricsText, summary);
     assertPrometheusTextWithoutCreated(prometheusText, summary);
-    assertPrometheusProtobuf(prometheusProtobuf, summary);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, summary);
   }
 
   @Test
@@ -974,7 +1030,7 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithExemplarsOnAllTimeSeries(
         openMetricsTextWithExemplarsOnAllTimeSeries, summary);
     assertPrometheusText(prometheusText, summary);
-    assertPrometheusProtobuf(prometheusProtobuf, summary);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, summary);
   }
 
   @Test
@@ -1217,6 +1273,53 @@ class ExpositionFormatsTest {
             + exemplar2protoString
             + " "
             + "} "
+            + "created_timestamp { seconds: 1672850385 nanos: 800000000 } "
+            + "} "
+            + "} metric { "
+            + "label { name: \"status\" value: \"500\" } "
+            + "timestamp_ms: 1672850585820 "
+            + "histogram { "
+            + "sample_count: 5 "
+            + "sample_sum: 3.2 "
+            + "bucket { "
+            + "cumulative_count: 3 "
+            + "upper_bound: 1.0 "
+            + "} bucket { "
+            + "cumulative_count: 5 "
+            + "upper_bound: 2.2 "
+            + exemplar1protoString
+            + " "
+            + "} bucket { "
+            + "cumulative_count: 5 "
+            + "upper_bound: Infinity "
+            + exemplar2protoString
+            + " "
+            + "} "
+            + "created_timestamp { seconds: 1672850285 } "
+            + "} "
+            + "}";
+    String prometheusProtobufWithoutCreated =
+        // @formatter:off
+        "name: \"response_size_bytes\" "
+            + "help: \"help\" "
+            + "type: HISTOGRAM "
+            + "metric { "
+            + "label { name: \"status\" value: \"200\" } "
+            + "timestamp_ms: 1672850685829 "
+            + "histogram { "
+            + "sample_count: 3 "
+            + "sample_sum: 4.1 "
+            + "bucket { "
+            + "cumulative_count: 2 "
+            + "upper_bound: 2.2 "
+            + exemplar1protoString
+            + " "
+            + "} bucket { "
+            + "cumulative_count: 3 "
+            + "upper_bound: Infinity "
+            + exemplar2protoString
+            + " "
+            + "} "
             + "} "
             + "} metric { "
             + "label { name: \"status\" value: \"500\" } "
@@ -1281,6 +1384,7 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, histogram);
     assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, histogram);
     assertPrometheusProtobuf(prometheusProtobuf, histogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobufWithoutCreated, histogram);
   }
 
   @Test
@@ -1324,7 +1428,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, histogram);
     assertOpenMetricsTextWithoutCreated(openMetricsText, histogram);
     assertPrometheusTextWithoutCreated(prometheusText, histogram);
-    assertPrometheusProtobuf(prometheusProtobuf, histogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, histogram);
   }
 
   @Test
@@ -1371,7 +1475,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, histogram);
     assertOpenMetricsTextWithoutCreated(openMetricsText, histogram);
     assertPrometheusTextWithoutCreated(prometheusText, histogram);
-    assertPrometheusProtobuf(prometheusProtobuf, histogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, histogram);
   }
 
   @Test
@@ -1554,6 +1658,50 @@ class ExpositionFormatsTest {
             + scrapeTimestamp2s
             + "\n"
             + "# EOF\n";
+    String prometheusProtobuf =
+        // @formatter:off
+        "name: \"cache_size_bytes\" "
+            + "help: \"number of bytes in the cache\" "
+            + "type: GAUGE_HISTOGRAM "
+            + "metric { "
+            + "label { name: \"db\" value: \"items\" } "
+            + "timestamp_ms: 1672850685829 "
+            + "histogram { "
+            + "sample_count: 4 "
+            + "sample_sum: 17.0 "
+            + "bucket { "
+            + "cumulative_count: 3 "
+            + "upper_bound: 2.0 "
+            + exemplar1protoString
+            + " "
+            + "} bucket { "
+            + "cumulative_count: 4 "
+            + "upper_bound: Infinity "
+            + exemplar2protoString
+            + " "
+            + "} "
+            + "created_timestamp { seconds: 1672850385 nanos: 800000000 } "
+            + "} "
+            + "} metric { "
+            + "label { name: \"db\" value: \"options\" } "
+            + "timestamp_ms: 1672850585820 "
+            + "histogram { "
+            + "sample_count: 4 "
+            + "sample_sum: 18.0 "
+            + "bucket { "
+            + "cumulative_count: 4 "
+            + "upper_bound: 2.0 "
+            + exemplar1protoString
+            + " "
+            + "} bucket { "
+            + "cumulative_count: 4 "
+            + "upper_bound: Infinity "
+            + exemplar2protoString
+            + " "
+            + "} "
+            + "created_timestamp { seconds: 1672850285 } "
+            + "} "
+            + "}";
     String prometheusTextWithoutCreated =
         "# HELP cache_size_bytes number of bytes in the cache\n"
             + "# TYPE cache_size_bytes histogram\n"
@@ -1585,7 +1733,7 @@ class ExpositionFormatsTest {
             + "cache_size_bytes_gsum{db=\"options\"} 18.0 "
             + scrapeTimestamp2s
             + "\n";
-    String prometheusProtobuf =
+    String prometheusProtobufWithoutCreated =
         // @formatter:off
         "name: \"cache_size_bytes\" "
             + "help: \"number of bytes in the cache\" "
@@ -1668,6 +1816,7 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, gaugeHistogram);
     assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, gaugeHistogram);
     assertPrometheusProtobuf(prometheusProtobuf, gaugeHistogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobufWithoutCreated, gaugeHistogram);
   }
 
   @Test
@@ -1713,7 +1862,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, gaugeHistogram);
     assertOpenMetricsTextWithoutCreated(openMetricsText, gaugeHistogram);
     assertPrometheusTextWithoutCreated(prometheusText, gaugeHistogram);
-    assertPrometheusProtobuf(prometheusProtobuf, gaugeHistogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, gaugeHistogram);
   }
 
   @Test
@@ -1763,7 +1912,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheusText, gaugeHistogram);
     assertOpenMetricsTextWithoutCreated(openMetricsText, gaugeHistogram);
     assertPrometheusTextWithoutCreated(prometheusText, gaugeHistogram);
-    assertPrometheusProtobuf(prometheusProtobuf, gaugeHistogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, gaugeHistogram);
   }
 
   @Test
@@ -1833,7 +1982,7 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithExemplarsOnAllTimeSeries(
         openMetricsTextWithExemplarsOnAllTimeSeries, histogram);
     assertPrometheusText(prometheusText, histogram);
-    assertPrometheusProtobuf(prometheusProtobuf, histogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, histogram);
   }
 
   @Test
@@ -2016,6 +2165,95 @@ class ExpositionFormatsTest {
             + "zero_count: 0 "
             + "positive_span { offset: 0 length: 1 } "
             + "positive_delta: 2 "
+            + "created_timestamp { seconds: 1672850385 nanos: 800000000 } "
+            + "} "
+            + "} metric { "
+            + "label { name: \"status\" value: \"500\" } "
+            + "timestamp_ms: 1672850585820 "
+            + "histogram { "
+            + "sample_count: 55 "
+            + // bucket counts + zero count
+            "sample_sum: 3.2 "
+            + "bucket { cumulative_count: 55 upper_bound: Infinity "
+            + exemplar2protoString
+            + " } "
+            + "schema: 5 "
+            + "zero_threshold: 0.0 "
+            + "zero_count: 1 "
+            + "negative_span { offset: 0 length: 1 } "
+            + "negative_span { offset: 9 length: 1 } "
+            + "negative_delta: 1 "
+            + "negative_delta: -1 "
+            + // span with count 0
+            "positive_span { offset: 2 length: 3 } "
+            + // span with 3 buckets (indexes 2-4)
+            "positive_span { offset: 7 length: 1 } "
+            + // span with 1 bucket (index 12)
+            "positive_span { offset: 9 length: 4 } "
+            + // span with gap of size 1 (indexes 22-25)
+            "positive_span { offset: 6 length: 5 } "
+            + // span with gap of size 2 (indexes 32-36)
+            "positive_span { offset: 4 length: 2 } "
+            + // span with gap of size 3 part 1 (indexes 41-42)
+            "positive_span { offset: 3 length: 2 } "
+            + // span with gap of size 3 part 2 (indexes 46-47)
+            "positive_delta: 3 "
+            + // index 2, count 3
+            "positive_delta: 2 "
+            + // index 3, count 5
+            "positive_delta: -1 "
+            + // index 4, count 4
+            "positive_delta: 2 "
+            + // index 12, count 6
+            "positive_delta: -4 "
+            + // index 22, count 2
+            "positive_delta: -2 "
+            + // index 23, gap
+            "positive_delta: 1 "
+            + // index 24, count 1
+            "positive_delta: 2 "
+            + // index 25, count 3
+            "positive_delta: 1 "
+            + // index 32, count 4
+            "positive_delta: -1 "
+            + // index 33, count 3
+            "positive_delta: -3 "
+            + // index 34, gap
+            "positive_delta: 0 "
+            + // index 35, gap
+            "positive_delta: 7 "
+            + // index 36, count 7
+            "positive_delta: -4 "
+            + // index 41, count 3
+            "positive_delta: 6 "
+            + // index 42, count 9
+            "positive_delta: -7 "
+            + // index 46, count 2
+            "positive_delta: -1 "
+            + // index 47, count 1
+            "created_timestamp { seconds: 1672850285 } "
+            +
+            "} "
+            + "}";
+    String prometheusProtobufWithoutCreated =
+        // @formatter:off
+        "name: \"response_size_bytes\" "
+            + "help: \"help\" "
+            + "type: HISTOGRAM "
+            + "metric { "
+            + "label { name: \"status\" value: \"200\" } "
+            + "timestamp_ms: 1672850685829 "
+            + "histogram { "
+            + "sample_count: 2 "
+            + "sample_sum: 4.2 "
+            + "bucket { cumulative_count: 2 upper_bound: Infinity "
+            + exemplar2protoString
+            + " } "
+            + "schema: 5 "
+            + "zero_threshold: 0.0 "
+            + "zero_count: 0 "
+            + "positive_span { offset: 0 length: 1 } "
+            + "positive_delta: 2 "
             + "} "
             + "} metric { "
             + "label { name: \"status\" value: \"500\" } "
@@ -2145,6 +2383,7 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithoutCreated(openMetricsTextWithoutCreated, nativeHistogram);
     assertPrometheusTextWithoutCreated(prometheusTextWithoutCreated, nativeHistogram);
     assertPrometheusProtobuf(prometheusProtobuf, nativeHistogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobufWithoutCreated, nativeHistogram);
   }
 
   @Test
@@ -2178,7 +2417,7 @@ class ExpositionFormatsTest {
             .build();
     assertOpenMetricsText(openMetricsText, nativeHistogram);
     assertPrometheusText(prometheusText, nativeHistogram);
-    assertPrometheusProtobuf(prometheusProtobuf, nativeHistogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, nativeHistogram);
   }
 
   @Test
@@ -2253,7 +2492,7 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithExemplarsOnAllTimeSeries(
         openMetricsTextWithExemplarsOnAllTimeSeries, histogram);
     assertPrometheusText(prometheusText, histogram);
-    assertPrometheusProtobuf(prometheusProtobuf, histogram);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, histogram);
   }
 
   // TODO: Gauge Native Histogram
@@ -2316,7 +2555,7 @@ class ExpositionFormatsTest {
             .build();
     assertOpenMetricsText(openMetricsText, info);
     assertPrometheusText(prometheusText, info);
-    assertPrometheusProtobuf(prometheusProtobuf, info);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, info);
   }
 
   @Test
@@ -2442,7 +2681,7 @@ class ExpositionFormatsTest {
             .build();
     assertOpenMetricsText(openMetricsText, stateSet);
     assertPrometheusText(prometheusText, stateSet);
-    assertPrometheusProtobuf(prometheusProtobuf, stateSet);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, stateSet);
   }
 
   @Test
@@ -2571,7 +2810,7 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithExemplarsOnAllTimeSeries(
         openMetricsWithExemplarsOnAllTimeSeries, unknown);
     assertPrometheusText(prometheus, unknown);
-    assertPrometheusProtobuf(prometheusProtobuf, unknown);
+    assertPrometheusProtobufWithoutCreated(prometheusProtobuf, unknown);
   }
 
   @Test
@@ -2660,6 +2899,13 @@ class ExpositionFormatsTest {
   }
 
   private void assertPrometheusProtobuf(String expected, MetricSnapshot<?> snapshot) {
+    PrometheusProtobufWriter writer = new PrometheusProtobufWriter(true);
+    Metrics.MetricFamily protobufData = writer.convert(snapshot);
+    String actual = TextFormatUtil.shortDebugString(protobufData);
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  private void assertPrometheusProtobufWithoutCreated(String expected, MetricSnapshot<?> snapshot) {
     PrometheusProtobufWriter writer = new PrometheusProtobufWriter();
     Metrics.MetricFamily protobufData = writer.convert(snapshot);
     String actual = TextFormatUtil.shortDebugString(protobufData);
