@@ -19,9 +19,11 @@ git push origin v<VERSION>
 
 This will trigger the release workflow which will deploy the release to Maven Central.
 
-Go to https://central.sonatype.com/publishing/deployments to publish the release to Maven Central.
-
 ## Create a Release 
+
+Wait for the release to appear on Maven Central at 
+https://mvnrepository.com/artifact/io.prometheus/prometheus-metrics-core. 
+Once it is available, create a release on Github.
 
 1. Go to https://github.com/prometheus/client_java/releases
 2. Click on "Choose a tag", enter the tag name (e.g. `v0.1.0`), and click "Create a new tag".
