@@ -65,6 +65,7 @@
         <module>prometheus-metrics-config</module>
         <module>prometheus-metrics-model</module>
         <module>prometheus-metrics-tracer</module>
+        <module>prometheus-writer-textformat</module>
         <module>prometheus-metrics-exposition-formats</module>
         <module>prometheus-metrics-exporter-common</module>
         <module>prometheus-metrics-exporter-servlet-jakarta</module>
