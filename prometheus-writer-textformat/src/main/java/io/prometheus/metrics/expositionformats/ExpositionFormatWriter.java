@@ -1,6 +1,7 @@
 package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -9,6 +10,16 @@ public interface ExpositionFormatWriter {
 
   /** Text formats use UTF-8 encoding. */
   void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException;
+
+  default String toDebugString(MetricSnapshots metricSnapshots) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    try {
+      write(out, metricSnapshots);
+      return out.toString("UTF-8");
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   String getContentType();
 }

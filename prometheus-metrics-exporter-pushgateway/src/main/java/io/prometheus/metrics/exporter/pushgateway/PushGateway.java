@@ -5,7 +5,8 @@ import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesException;
-import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
+import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
+import io.prometheus.metrics.expositionformats.ExpositionFormats;
 import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.MultiCollector;
@@ -78,7 +79,7 @@ public class PushGateway {
   private static final int MILLISECONDS_PER_SECOND = 1000;
 
   private final URL url;
-  private final Format format;
+  private final ExpositionFormatWriter writer;
   private final Map<String, String> requestHeaders;
   private final PrometheusRegistry registry;
   private final HttpConnectionFactory connectionFactory;
@@ -90,10 +91,19 @@ public class PushGateway {
       HttpConnectionFactory connectionFactory,
       Map<String, String> requestHeaders) {
     this.registry = registry;
-    this.format = format;
     this.url = url;
     this.requestHeaders = Collections.unmodifiableMap(new HashMap<>(requestHeaders));
     this.connectionFactory = connectionFactory;
+    writer = getWriter(format);
+  }
+
+  private ExpositionFormatWriter getWriter(Format format) {
+    if (format == Format.PROMETHEUS_TEXT) {
+      return new PrometheusTextFormatWriter(false);
+    } else {
+      // use reflection to avoid a compile-time dependency on the expositionformats module
+      return ExpositionFormats.createProtobufWriter();
+    }
   }
 
   /**
@@ -174,11 +184,7 @@ public class PushGateway {
     try {
       HttpURLConnection connection = connectionFactory.create(url);
       requestHeaders.forEach(connection::setRequestProperty);
-      if (format == Format.PROMETHEUS_TEXT) {
-        connection.setRequestProperty("Content-Type", PrometheusTextFormatWriter.CONTENT_TYPE);
-      } else {
-        connection.setRequestProperty("Content-Type", PrometheusProtobufWriter.CONTENT_TYPE);
-      }
+      connection.setRequestProperty("Content-Type", writer.getContentType());
       if (!method.equals("DELETE")) {
         connection.setDoOutput(true);
       }
@@ -191,11 +197,7 @@ public class PushGateway {
       try {
         if (!method.equals("DELETE")) {
           OutputStream outputStream = connection.getOutputStream();
-          if (format == Format.PROMETHEUS_TEXT) {
-            new PrometheusTextFormatWriter(false).write(outputStream, registry.scrape());
-          } else {
-            new PrometheusProtobufWriter().write(outputStream, registry.scrape());
-          }
+          writer.write(outputStream, registry.scrape());
           outputStream.flush();
           outputStream.close();
         }

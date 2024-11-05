@@ -51,6 +51,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     return CONTENT_TYPE;
   }
 
+  @Override
   public String toDebugString(MetricSnapshots metricSnapshots) {
     StringBuilder stringBuilder = new StringBuilder();
     for (MetricSnapshot snapshot : metricSnapshots) {
