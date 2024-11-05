@@ -1,0 +1,13 @@
+# TYPE integration_test info
+# HELP integration_test Info metric on this integration test
+integration_test_info{test_name="exporter-servlet-tomcat-sample"} 1
+# TYPE temperature_celsius gauge
+# UNIT temperature_celsius celsius
+# HELP temperature_celsius Temperature in Celsius
+temperature_celsius{location="inside"} 23.0
+temperature_celsius{location="outside"} 27.0
+# TYPE uptime_seconds counter
+# UNIT uptime_seconds seconds
+# HELP uptime_seconds total number of seconds since this application was started
+uptime_seconds_total 17.0
+# EOF

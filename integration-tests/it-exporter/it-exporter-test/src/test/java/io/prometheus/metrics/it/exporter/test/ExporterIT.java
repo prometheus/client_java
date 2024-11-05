@@ -4,6 +4,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
 import io.prometheus.client.it.common.LogConsumer;
 import io.prometheus.client.it.common.Volume;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
@@ -25,6 +27,9 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 
@@ -68,8 +73,7 @@ abstract class ExporterIT {
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
     assertThat(response.getHeader("Content-Length"))
         .isEqualTo(Integer.toString(response.body.length));
-    String bodyString = new String(response.body, UTF_8);
-    assertThat(bodyString)
+    assertThat(response.stringBody())
         .contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
         .contains("temperature_celsius{location=\"inside\"} 23.0")
         .contains("temperature_celsius{location=\"outside\"} 27.0")
@@ -91,8 +95,7 @@ abstract class ExporterIT {
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
     assertThat(response.getHeader("Content-Length"))
         .isEqualTo(Integer.toString(response.body.length));
-    String bodyString = new String(response.body, UTF_8);
-    assertThat(bodyString)
+    assertThat(response.stringBody())
         .contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
         .contains("temperature_celsius{location=\"inside\"} 23.0")
         .contains("temperature_celsius{location=\"outside\"} 27.0")
@@ -125,11 +128,29 @@ abstract class ExporterIT {
     while (in.available() > 0) {
       metrics.add(Metrics.MetricFamily.parseDelimitedFrom(in));
     }
-    assertThat(metrics.size()).isEqualTo(3);
+    assertThat(metrics).hasSize(3);
     // metrics are sorted by name
     assertThat(metrics.get(0).getName()).isEqualTo("integration_test_info");
     assertThat(metrics.get(1).getName()).isEqualTo("temperature_celsius");
     assertThat(metrics.get(2).getName()).isEqualTo("uptime_seconds_total");
+  }
+
+  @ParameterizedTest
+    @CsvSource({
+      "openmetrics,         debug-openmetrics.txt",
+      "text,                debug-text.txt",
+      "prometheus-protobuf, debug-protobuf.txt",
+    })
+  public void testPrometheusProtobufDebugFormat(String format, String expected) throws IOException {
+    sampleAppContainer
+        .withCommand("java", "-jar", "/app/" + sampleApp + ".jar", "9400", "success")
+        .start();
+    Response response = scrape("GET", "debug=" + format);
+    assertThat(response.status).isEqualTo(200);
+    assertContentType(
+        "text/plain;charset=utf-8",
+        response.getHeader("Content-Type"));
+      assertThat(response.stringBody().trim()).isEqualTo(Resources.toString(Resources.getResource(expected), UTF_8).trim());
   }
 
   @Test
@@ -159,11 +180,7 @@ abstract class ExporterIT {
     assertContentType(
         "application/openmetrics-text; version=1.0.0; charset=utf-8",
         response.getHeader("Content-Type"));
-    String body =
-        new String(
-            IOUtils.toByteArray(new GZIPInputStream(new ByteArrayInputStream(response.body))),
-            UTF_8);
-    assertThat(body).contains("uptime_seconds_total 17.0");
+      assertThat(response.gzipBody()).contains("uptime_seconds_total 17.0");
   }
 
   @Test
@@ -173,7 +190,7 @@ abstract class ExporterIT {
         .start();
     Response response = scrape("GET", "");
     assertThat(response.status).isEqualTo(500);
-    assertThat(new String(response.body, UTF_8)).contains("Simulating an error.");
+    assertThat(response.stringBody()).contains("Simulating an error.");
   }
 
   protected boolean headReturnsContentLength() {
@@ -195,7 +212,7 @@ abstract class ExporterIT {
     } else {
       assertThat(headResponse.getHeader("Content-Length")).isNull();
     }
-    assertThat(headResponse.body.length).isZero();
+    assertThat(headResponse.body).isEmpty();
   }
 
   @Test
@@ -206,8 +223,7 @@ abstract class ExporterIT {
     Response response = scrape("GET", "debug=openmetrics");
     assertThat(response.status).isEqualTo(200);
     assertContentType("text/plain; charset=utf-8", response.getHeader("Content-Type"));
-    String bodyString = new String(response.body, UTF_8);
-    assertThat(bodyString)
+    assertThat(response.stringBody())
         .contains("uptime_seconds_total 17.0")
         .contains("# UNIT uptime_seconds seconds");
   }
@@ -227,8 +243,7 @@ abstract class ExporterIT {
     assertContentType(
         "application/openmetrics-text; version=1.0.0; charset=utf-8",
         response.getHeader("Content-Type"));
-    String bodyString = new String(response.body, UTF_8);
-    assertThat(bodyString)
+    assertThat(response.stringBody())
         .contains("integration_test_info{test_name=\"" + sampleApp + "\"} 1")
         .contains("uptime_seconds_total 17.0")
         .doesNotContain("temperature_celsius");
@@ -251,7 +266,7 @@ abstract class ExporterIT {
         response.getHeader("Content-Type"));
     assertThat(response.getHeader("Content-Length"))
         .isEqualTo(Integer.toString(response.body.length));
-    assertThat(new String(response.body, UTF_8)).isEqualTo("# EOF\n");
+    assertThat(response.stringBody()).isEqualTo("# EOF\n");
   }
 
   @Test
@@ -267,7 +282,7 @@ abstract class ExporterIT {
         != null) { // HTTPServer does not send a zero content length, which is ok
       assertThat(response.getHeader("Content-Length")).isEqualTo("0");
     }
-    assertThat(response.body.length).isZero();
+    assertThat(response.body).isEmpty();
   }
 
   @Test
@@ -285,7 +300,7 @@ abstract class ExporterIT {
     assertContentType(
         "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited",
         response.getHeader("Content-Type"));
-    assertThat(response.body.length).isZero();
+    assertThat(response.body).isEmpty();
   }
 
   @Test
@@ -303,11 +318,7 @@ abstract class ExporterIT {
             "gzip");
     assertThat(response.status).isEqualTo(200);
     assertThat(response.getHeader("Content-Encoding")).isEqualTo("gzip");
-    String body =
-        new String(
-            IOUtils.toByteArray(new GZIPInputStream(new ByteArrayInputStream(response.body))),
-            UTF_8);
-    assertThat(body).isEqualTo("# EOF\n");
+    assertThat(response.gzipBody()).isEqualTo("# EOF\n");
   }
 
   @Test
@@ -318,11 +329,7 @@ abstract class ExporterIT {
     Response response = scrape("GET", nameParam("none_existing"), "Accept-Encoding", "gzip");
     assertThat(response.status).isEqualTo(200);
     assertThat(response.getHeader("Content-Encoding")).isEqualTo("gzip");
-    String body =
-        new String(
-            IOUtils.toByteArray(new GZIPInputStream(new ByteArrayInputStream(response.body))),
-            UTF_8);
-    assertThat(body.length()).isZero();
+    assertThat(response.gzipBody()).isEmpty();
   }
 
   private String nameParam(String name) throws UnsupportedEncodingException {
@@ -410,6 +417,16 @@ abstract class ExporterIT {
     private String getHeader(String name) {
       // HTTP headers are case-insensitive
       return headers.get(name.toLowerCase(Locale.ROOT));
+    }
+
+    private String stringBody() {
+      return new String(body, UTF_8);
+    }
+
+    private String gzipBody() throws IOException {
+      return new String(
+              IOUtils.toByteArray(new GZIPInputStream(new ByteArrayInputStream(body))),
+              UTF_8);
     }
   }
 }

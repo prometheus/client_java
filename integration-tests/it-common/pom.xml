@@ -11,7 +11,6 @@
     <artifactId>it-common</artifactId>
 
     <name>Integration Tests - Common Utilities</name>
-    <url>http://github.com/prometheus/client_java</url>
     <description>
         Common utilities for integration tests
     </description>
