@@ -96,7 +96,11 @@ public class PrometheusPropertiesLoader {
     Map<Object, Object> properties = new HashMap<>();
     properties.putAll(loadPropertiesFromClasspath());
     properties.putAll(loadPropertiesFromFile()); // overriding the entries from the classpath file
-    properties.putAll(System.getProperties()); // overriding the entries from the properties file
+    // overriding the entries from the properties file
+    // copy System properties to avoid ConcurrentModificationException
+    System.getProperties().stringPropertyNames().stream()
+        .filter(key -> key.startsWith("io.prometheus"))
+        .forEach(key -> properties.put(key, System.getProperty(key)));
     properties.putAll(externalProperties); // overriding all the entries above
     // TODO: Add environment variables like EXEMPLARS_ENABLED.
     return properties;
