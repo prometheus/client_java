@@ -104,7 +104,8 @@ abstract class ExporterIT extends ExporterTest {
     start();
     Response response = scrape("GET", "debug=" + format);
     assertThat(response.status).isEqualTo(200);
-    assertContentType("text/plain;charset=utf-8", response.getHeader("Content-Type"));
+    assertContentType(
+        "text/plain;charset=utf-8", response.getHeader("Content-Type").replace(" ", ""));
     assertThat(response.stringBody().trim())
         .isEqualTo(
             Resources.toString(Resources.getResource(expected), UTF_8)
