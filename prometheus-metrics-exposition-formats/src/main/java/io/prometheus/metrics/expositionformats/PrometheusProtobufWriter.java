@@ -3,6 +3,7 @@ package io.prometheus.metrics.expositionformats;
 import static io.prometheus.metrics.expositionformats.ProtobufUtil.timestampFromMillis;
 
 import com.google.protobuf.TextFormat;
+import com.google.protobuf.Timestamp;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -34,6 +35,16 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
   public static final String CONTENT_TYPE =
       "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
+
+  private final boolean writeCreatedTimestamps;
+
+  public PrometheusProtobufWriter() {
+    this(false);
+  }
+
+  public PrometheusProtobufWriter(boolean writeCreatedTimestamps) {
+    this.writeCreatedTimestamps = writeCreatedTimestamps;
+  }
 
   @Override
   public boolean accepts(String acceptHeader) {
@@ -149,6 +160,9 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
       counterBuilder.setExemplar(convert(data.getExemplar()));
     }
     addLabels(metricBuilder, data.getLabels());
+    if (writeCreatedTimestamps) {
+      counterBuilder.setCreatedTimestamp(createTimestamp(data));
+    }
     metricBuilder.setCounter(counterBuilder.build());
     setScrapeTimestamp(metricBuilder, data);
     return metricBuilder;
@@ -209,11 +223,15 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     }
     addLabels(metricBuilder, data.getLabels());
     setScrapeTimestamp(metricBuilder, data);
+
     if (data.hasCount()) {
       histogramBuilder.setSampleCount(data.getCount());
     }
     if (data.hasSum()) {
       histogramBuilder.setSampleSum(data.getSum());
+    }
+    if (writeCreatedTimestamps) {
+      histogramBuilder.setCreatedTimestamp(createTimestamp(data));
     }
     metricBuilder.setHistogram(histogramBuilder.build());
     return metricBuilder;
@@ -302,6 +320,9 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
               .build());
     }
     addLabels(metricBuilder, data.getLabels());
+    if (writeCreatedTimestamps) {
+      summaryBuilder.setCreatedTimestamp(createTimestamp(data));
+    }
     metricBuilder.setSummary(summaryBuilder.build());
     setScrapeTimestamp(metricBuilder, data);
     return metricBuilder;
@@ -377,5 +398,12 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     if (data.hasScrapeTimestamp()) {
       metricBuilder.setTimestampMs(data.getScrapeTimestampMillis());
     }
+  }
+
+  private Timestamp createTimestamp(DataPointSnapshot data) {
+    final long createdTimestamp = data.getCreatedTimestampMillis();
+    final long seconds = createdTimestamp / 1000;
+    final int nanos = (int) (createdTimestamp % 1000 * 1000000);
+    return Timestamp.newBuilder().setSeconds(seconds).setNanos(nanos).build();
   }
 }
