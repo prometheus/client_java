@@ -4,7 +4,7 @@ type: GAUGE
 metric {
   label {
     name: "test_name"
-    value: "exporter-servlet-tomcat-sample"
+    value: "<app>"
   }
   gauge {
     value: 1.0

@@ -106,7 +106,10 @@ abstract class ExporterIT extends ExporterTest {
     assertThat(response.status).isEqualTo(200);
     assertContentType("text/plain;charset=utf-8", response.getHeader("Content-Type"));
     assertThat(response.stringBody().trim())
-        .isEqualTo(Resources.toString(Resources.getResource(expected), UTF_8).trim());
+        .isEqualTo(
+            Resources.toString(Resources.getResource(expected), UTF_8)
+                .trim()
+                .replace("<app>", sampleApp));
   }
 
   @Test

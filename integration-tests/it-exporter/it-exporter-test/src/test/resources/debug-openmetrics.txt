@@ -1,6 +1,6 @@
 # TYPE integration_test info
 # HELP integration_test Info metric on this integration test
-integration_test_info{test_name="exporter-servlet-tomcat-sample"} 1
+integration_test_info{test_name="<app>"} 1
 # TYPE temperature_celsius gauge
 # UNIT temperature_celsius celsius
 # HELP temperature_celsius Temperature in Celsius
