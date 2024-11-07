@@ -101,7 +101,7 @@ public class SimpleclientCollector implements MultiCollector {
     return result.build();
   }
 
-  private MetricSnapshot<?> convertCounter(Collector.MetricFamilySamples samples) {
+  private MetricSnapshot convertCounter(Collector.MetricFamilySamples samples) {
     CounterSnapshot.Builder counter =
         CounterSnapshot.builder()
             .name(sanitizeMetricName(samples.name))
@@ -128,7 +128,7 @@ public class SimpleclientCollector implements MultiCollector {
     return counter.build();
   }
 
-  private MetricSnapshot<?> convertGauge(Collector.MetricFamilySamples samples) {
+  private MetricSnapshot convertGauge(Collector.MetricFamilySamples samples) {
     GaugeSnapshot.Builder gauge =
         GaugeSnapshot.builder()
             .name(sanitizeMetricName(samples.name))
@@ -148,7 +148,7 @@ public class SimpleclientCollector implements MultiCollector {
     return gauge.build();
   }
 
-  private MetricSnapshot<?> convertHistogram(
+  private MetricSnapshot convertHistogram(
       Collector.MetricFamilySamples samples, boolean isGaugeHistogram) {
     HistogramSnapshot.Builder histogram =
         HistogramSnapshot.builder()
@@ -192,7 +192,7 @@ public class SimpleclientCollector implements MultiCollector {
     return histogram.build();
   }
 
-  private MetricSnapshot<?> convertSummary(Collector.MetricFamilySamples samples) {
+  private MetricSnapshot convertSummary(Collector.MetricFamilySamples samples) {
     SummarySnapshot.Builder summary =
         SummarySnapshot.builder()
             .name(sanitizeMetricName(samples.name))
@@ -242,7 +242,7 @@ public class SimpleclientCollector implements MultiCollector {
     return summary.build();
   }
 
-  private MetricSnapshot<?> convertStateSet(Collector.MetricFamilySamples samples) {
+  private MetricSnapshot convertStateSet(Collector.MetricFamilySamples samples) {
     StateSetSnapshot.Builder stateSet =
         StateSetSnapshot.builder().name(sanitizeMetricName(samples.name)).help(samples.help);
     Map<Labels, StateSetSnapshot.StateSetDataPointSnapshot.Builder> dataPoints = new HashMap<>();
@@ -271,7 +271,7 @@ public class SimpleclientCollector implements MultiCollector {
     return stateSet.build();
   }
 
-  private MetricSnapshot<?> convertUnknown(Collector.MetricFamilySamples samples) {
+  private MetricSnapshot convertUnknown(Collector.MetricFamilySamples samples) {
     UnknownSnapshot.Builder unknown =
         UnknownSnapshot.builder()
             .name(sanitizeMetricName(samples.name))
@@ -345,7 +345,7 @@ public class SimpleclientCollector implements MultiCollector {
     return labels.build();
   }
 
-  private MetricSnapshot<?> convertInfo(Collector.MetricFamilySamples samples) {
+  private MetricSnapshot convertInfo(Collector.MetricFamilySamples samples) {
     InfoSnapshot.Builder info =
         InfoSnapshot.builder().name(sanitizeMetricName(samples.name)).help(samples.help);
     for (Collector.MetricFamilySamples.Sample sample : samples.samples) {

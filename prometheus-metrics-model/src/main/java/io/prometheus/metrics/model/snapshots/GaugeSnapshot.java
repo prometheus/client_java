@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 /** Immutable snapshot of a Gauge. */
-public final class GaugeSnapshot extends MetricSnapshot<GaugeSnapshot.GaugeDataPointSnapshot> {
+public final class GaugeSnapshot extends MetricSnapshot {
 
   /**
    * To create a new {@link GaugeSnapshot}, you can either call the constructor directly or use the
@@ -18,9 +18,10 @@ public final class GaugeSnapshot extends MetricSnapshot<GaugeSnapshot.GaugeDataP
     super(metadata, data);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<GaugeDataPointSnapshot> getDataPoints() {
-    return dataPoints;
+    return (List<GaugeDataPointSnapshot>) dataPoints;
   }
 
   public static final class GaugeDataPointSnapshot extends DataPointSnapshot {

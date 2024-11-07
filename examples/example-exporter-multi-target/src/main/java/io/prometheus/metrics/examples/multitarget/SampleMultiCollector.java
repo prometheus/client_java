@@ -71,7 +71,7 @@ public class SampleMultiCollector implements MultiCollector {
         gaugeBuilder.dataPoint(gaugeDataPointBuilder.build());
       }
     }
-    Collection<MetricSnapshot<?>> snaps = new ArrayList<>();
+    Collection<MetricSnapshot> snaps = new ArrayList<>();
     snaps.add(counterBuilder.build());
     snaps.add(gaugeBuilder.build());
     return new MetricSnapshots(snaps);

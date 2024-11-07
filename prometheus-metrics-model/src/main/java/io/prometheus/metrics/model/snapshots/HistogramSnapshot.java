@@ -5,8 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 /** Immutable snapshot of a Histogram. */
-public final class HistogramSnapshot
-    extends MetricSnapshot<HistogramSnapshot.HistogramDataPointSnapshot> {
+public final class HistogramSnapshot extends MetricSnapshot {
 
   private final boolean gaugeHistogram;
   public static final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
@@ -40,9 +39,10 @@ public final class HistogramSnapshot
     return gaugeHistogram;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<HistogramDataPointSnapshot> getDataPoints() {
-    return dataPoints;
+    return (List<HistogramDataPointSnapshot>) dataPoints;
   }
 
   public static final class HistogramDataPointSnapshot extends DistributionDataPointSnapshot {

@@ -51,7 +51,7 @@ class PrometheusMetricProducer implements CollectionRegistration {
             resourceWithTargetInfo,
             scopeFromInfo != null ? scopeFromInfo : instrumentationScopeInfo,
             System.currentTimeMillis());
-    for (MetricSnapshot<?> snapshot : snapshots) {
+    for (MetricSnapshot snapshot : snapshots) {
       if (snapshot instanceof CounterSnapshot) {
         addUnlessNull(result, factory.create((CounterSnapshot) snapshot));
       } else if (snapshot instanceof GaugeSnapshot) {
@@ -78,7 +78,7 @@ class PrometheusMetricProducer implements CollectionRegistration {
 
   private Resource resourceFromTargetInfo(MetricSnapshots snapshots) {
     ResourceBuilder result = Resource.builder();
-    for (MetricSnapshot<?> snapshot : snapshots) {
+    for (MetricSnapshot snapshot : snapshots) {
       if (snapshot.getMetadata().getName().equals("target") && snapshot instanceof InfoSnapshot) {
         InfoSnapshot targetInfo = (InfoSnapshot) snapshot;
         if (!targetInfo.getDataPoints().isEmpty()) {
@@ -95,7 +95,7 @@ class PrometheusMetricProducer implements CollectionRegistration {
 
   private InstrumentationScopeInfo instrumentationScopeFromOTelScopeInfo(
       MetricSnapshots snapshots) {
-    for (MetricSnapshot<?> snapshot : snapshots) {
+    for (MetricSnapshot snapshot : snapshots) {
       if (snapshot.getMetadata().getPrometheusName().equals("otel_scope")
           && snapshot instanceof InfoSnapshot) {
         InfoSnapshot scopeInfo = (InfoSnapshot) snapshot;

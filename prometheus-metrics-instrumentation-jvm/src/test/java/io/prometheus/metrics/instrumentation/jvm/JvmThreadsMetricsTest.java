@@ -146,7 +146,7 @@ class JvmThreadsMetricsTest {
 
   private Map<String, Double> getCountByState(MetricSnapshots snapshots) {
     Map<String, Double> result = new HashMap<>();
-    for (MetricSnapshot<?> snapshot : snapshots) {
+    for (MetricSnapshot snapshot : snapshots) {
       if (snapshot.getMetadata().getName().equals("jvm_threads_state")) {
         for (GaugeSnapshot.GaugeDataPointSnapshot data :
             ((GaugeSnapshot) snapshot).getDataPoints()) {

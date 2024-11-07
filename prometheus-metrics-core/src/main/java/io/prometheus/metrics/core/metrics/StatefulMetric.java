@@ -45,10 +45,10 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
   /**
    * labels and metricData have the same size. labels.get(i) are the labels for metricData.get(i).
    */
-  protected abstract MetricSnapshot<?> collect(List<Labels> labels, List<T> metricData);
+  protected abstract MetricSnapshot collect(List<Labels> labels, List<T> metricData);
 
   @Override
-  public MetricSnapshot<?> collect() {
+  public MetricSnapshot collect() {
     if (labelNames.length == 0 && data.isEmpty()) {
       // This is a metric without labels that has not been used yet. Initialize the data on the fly.
       labelValues();

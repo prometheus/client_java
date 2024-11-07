@@ -60,7 +60,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and
     // "summary".
     OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
-    for (MetricSnapshot<?> snapshot : metricSnapshots) {
+    for (MetricSnapshot snapshot : metricSnapshots) {
       if (snapshot.getDataPoints().size() > 0) {
         if (snapshot instanceof CounterSnapshot) {
           writeCounter(writer, (CounterSnapshot) snapshot);
@@ -80,7 +80,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       }
     }
     if (writeCreatedTimestamps) {
-      for (MetricSnapshot<?> snapshot : metricSnapshots) {
+      for (MetricSnapshot snapshot : metricSnapshots) {
         if (snapshot.getDataPoints().size() > 0) {
           if (snapshot instanceof CounterSnapshot) {
             writeCreated(writer, snapshot);
@@ -95,8 +95,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     writer.flush();
   }
 
-  public void writeCreated(OutputStreamWriter writer, MetricSnapshot<?> snapshot)
-      throws IOException {
+  public void writeCreated(OutputStreamWriter writer, MetricSnapshot snapshot) throws IOException {
     boolean metadataWritten = false;
     MetricMetadata metadata = snapshot.getMetadata();
     for (DataPointSnapshot data : snapshot.getDataPoints()) {

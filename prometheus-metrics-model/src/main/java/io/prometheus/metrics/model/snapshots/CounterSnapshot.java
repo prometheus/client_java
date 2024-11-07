@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 /** Immutable snapshot of a Counter. */
-public class CounterSnapshot extends MetricSnapshot<CounterSnapshot.CounterDataPointSnapshot> {
+public class CounterSnapshot extends MetricSnapshot {
 
   /**
    * To create a new {@link CounterSnapshot}, you can either call the constructor directly or use
@@ -19,9 +19,10 @@ public class CounterSnapshot extends MetricSnapshot<CounterSnapshot.CounterDataP
     super(metadata, dataPoints);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<CounterDataPointSnapshot> getDataPoints() {
-    return dataPoints;
+    return (List<CounterDataPointSnapshot>) dataPoints;
   }
 
   public static class CounterDataPointSnapshot extends DataPointSnapshot {

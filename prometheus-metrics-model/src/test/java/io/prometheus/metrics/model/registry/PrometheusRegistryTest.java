@@ -19,7 +19,7 @@ class PrometheusRegistryTest {
   Collector counterA1 =
       new Collector() {
         @Override
-        public MetricSnapshot<?> collect() {
+        public MetricSnapshot collect() {
           return CounterSnapshot.builder().name("counter_a").build();
         }
 
@@ -32,7 +32,7 @@ class PrometheusRegistryTest {
   Collector counterA2 =
       new Collector() {
         @Override
-        public MetricSnapshot<?> collect() {
+        public MetricSnapshot collect() {
           return CounterSnapshot.builder().name("counter.a").build();
         }
 
@@ -45,7 +45,7 @@ class PrometheusRegistryTest {
   Collector counterB =
       new Collector() {
         @Override
-        public MetricSnapshot<?> collect() {
+        public MetricSnapshot collect() {
           return CounterSnapshot.builder().name("counter_b").build();
         }
 
@@ -58,7 +58,7 @@ class PrometheusRegistryTest {
   Collector gaugeA =
       new Collector() {
         @Override
-        public MetricSnapshot<?> collect() {
+        public MetricSnapshot collect() {
           return GaugeSnapshot.builder().name("gauge_a").build();
         }
 
