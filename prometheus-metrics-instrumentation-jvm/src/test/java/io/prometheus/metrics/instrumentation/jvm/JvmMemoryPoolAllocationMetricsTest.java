@@ -50,7 +50,7 @@ class JvmMemoryPoolAllocationMetricsTest {
   }
 
   private double getCountByPool(String metricName, String poolName, MetricSnapshots snapshots) {
-    for (MetricSnapshot<?> snapshot : snapshots) {
+    for (MetricSnapshot snapshot : snapshots) {
       if (snapshot.getMetadata().getPrometheusName().equals(metricName)) {
         for (CounterSnapshot.CounterDataPointSnapshot data :
             ((CounterSnapshot) snapshot).getDataPoints()) {

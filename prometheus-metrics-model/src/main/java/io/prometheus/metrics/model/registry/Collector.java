@@ -11,13 +11,13 @@ import java.util.function.Predicate;
 public interface Collector {
 
   /** Called when the Prometheus server scrapes metrics. */
-  MetricSnapshot<?> collect();
+  MetricSnapshot collect();
 
   /**
    * Provides Collector with the details of the request issued by Prometheus to allow multi-target
    * pattern implementation Override to implement request dependent logic to provide MetricSnapshot
    */
-  default MetricSnapshot<?> collect(PrometheusScrapeRequest scrapeRequest) {
+  default MetricSnapshot collect(PrometheusScrapeRequest scrapeRequest) {
     return collect();
   }
 
@@ -28,8 +28,8 @@ public interface Collector {
    * <p>Override this if there is a more efficient way than first collecting the snapshot and then
    * discarding it.
    */
-  default MetricSnapshot<?> collect(Predicate<String> includedNames) {
-    MetricSnapshot<?> result = collect();
+  default MetricSnapshot collect(Predicate<String> includedNames) {
+    MetricSnapshot result = collect();
     if (includedNames.test(result.getMetadata().getPrometheusName())) {
       return result;
     } else {
@@ -43,9 +43,9 @@ public interface Collector {
    * <p>Override this if there is a more efficient way than first collecting the snapshot and then
    * discarding it.
    */
-  default MetricSnapshot<?> collect(
+  default MetricSnapshot collect(
       Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
-    MetricSnapshot<?> result = collect(scrapeRequest);
+    MetricSnapshot result = collect(scrapeRequest);
     if (includedNames.test(result.getMetadata().getPrometheusName())) {
       return result;
     } else {

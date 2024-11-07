@@ -40,7 +40,7 @@ class MetricSnapshotTest {
 
   @Test
   public void testNoData() {
-    MetricSnapshot<?> snapshot = CounterSnapshot.builder().name("test").build();
+    MetricSnapshot snapshot = CounterSnapshot.builder().name("test").build();
     assertThat(snapshot.getDataPoints().size()).isEqualTo(0);
   }
 

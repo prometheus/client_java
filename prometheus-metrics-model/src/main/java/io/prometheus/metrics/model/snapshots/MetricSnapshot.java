@@ -7,12 +7,13 @@ import java.util.Comparator;
 import java.util.List;
 
 /** Base class for metric snapshots. */
-public abstract class MetricSnapshot<T extends DataPointSnapshot> {
+public abstract class MetricSnapshot {
 
   private final MetricMetadata metadata;
-  protected final List<T> dataPoints;
+  protected final List<? extends DataPointSnapshot> dataPoints;
 
-  protected MetricSnapshot(MetricMetadata metadata, Collection<T> dataPoints) {
+  protected MetricSnapshot(
+      MetricMetadata metadata, Collection<? extends DataPointSnapshot> dataPoints) {
     if (metadata == null) {
       throw new NullPointerException("metadata");
     }
@@ -20,7 +21,7 @@ public abstract class MetricSnapshot<T extends DataPointSnapshot> {
       throw new NullPointerException("dataPoints");
     }
     this.metadata = metadata;
-    List<T> dataCopy = new ArrayList<>(dataPoints);
+    List<? extends DataPointSnapshot> dataCopy = new ArrayList<>(dataPoints);
     dataCopy.sort(Comparator.comparing(DataPointSnapshot::getLabels));
     this.dataPoints = Collections.unmodifiableList(dataCopy);
     validateLabels(this.dataPoints, metadata);
@@ -30,7 +31,7 @@ public abstract class MetricSnapshot<T extends DataPointSnapshot> {
     return metadata;
   }
 
-  public abstract List<T> getDataPoints();
+  public abstract List<? extends DataPointSnapshot> getDataPoints();
 
   private static <T extends DataPointSnapshot> void validateLabels(
       List<T> dataPoints, MetricMetadata metadata) {
@@ -71,7 +72,7 @@ public abstract class MetricSnapshot<T extends DataPointSnapshot> {
       return self();
     }
 
-    public abstract MetricSnapshot<?> build();
+    public abstract MetricSnapshot build();
 
     protected MetricMetadata buildMetadata() {
       return new MetricMetadata(name, help, unit);

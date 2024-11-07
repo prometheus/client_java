@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 /** Immutable snapshot of an Info metric. */
-public final class InfoSnapshot extends MetricSnapshot<InfoSnapshot.InfoDataPointSnapshot> {
+public final class InfoSnapshot extends MetricSnapshot {
 
   /**
    * To create a new {@link InfoSnapshot}, you can either call the constructor directly or use the
@@ -22,9 +22,10 @@ public final class InfoSnapshot extends MetricSnapshot<InfoSnapshot.InfoDataPoin
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<InfoDataPointSnapshot> getDataPoints() {
-    return dataPoints;
+    return (List<InfoDataPointSnapshot>) dataPoints;
   }
 
   public static class InfoDataPointSnapshot extends DataPointSnapshot {

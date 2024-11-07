@@ -2619,8 +2619,7 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheus, counter);
   }
 
-  private void assertOpenMetricsText(String expected, MetricSnapshot<?> snapshot)
-      throws IOException {
+  private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, false);
     writer.write(out, MetricSnapshots.of(snapshot));
@@ -2628,14 +2627,14 @@ class ExpositionFormatsTest {
   }
 
   private void assertOpenMetricsTextWithExemplarsOnAllTimeSeries(
-      String expected, MetricSnapshot<?> snapshot) throws IOException {
+      String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     writer.write(out, MetricSnapshots.of(snapshot));
     assertThat(out).hasToString(expected);
   }
 
-  private void assertOpenMetricsTextWithoutCreated(String expected, MetricSnapshot<?> snapshot)
+  private void assertOpenMetricsTextWithoutCreated(String expected, MetricSnapshot snapshot)
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, false);
@@ -2643,15 +2642,14 @@ class ExpositionFormatsTest {
     assertThat(out).hasToString(expected);
   }
 
-  private void assertPrometheusText(String expected, MetricSnapshot<?> snapshot)
-      throws IOException {
+  private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(true);
     writer.write(out, MetricSnapshots.of(snapshot));
     assertThat(out).hasToString(expected);
   }
 
-  private void assertPrometheusTextWithoutCreated(String expected, MetricSnapshot<?> snapshot)
+  private void assertPrometheusTextWithoutCreated(String expected, MetricSnapshot snapshot)
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(false);
@@ -2659,7 +2657,7 @@ class ExpositionFormatsTest {
     assertThat(out).hasToString(expected);
   }
 
-  private void assertPrometheusProtobuf(String expected, MetricSnapshot<?> snapshot) {
+  private void assertPrometheusProtobuf(String expected, MetricSnapshot snapshot) {
     PrometheusProtobufWriter writer = new PrometheusProtobufWriter();
     Metrics.MetricFamily protobufData = writer.convert(snapshot);
     String actual = TextFormatUtil.shortDebugString(protobufData);
