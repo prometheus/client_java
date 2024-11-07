@@ -6,12 +6,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.io.Resources;
 import io.prometheus.client.it.common.ExporterTest;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -82,11 +79,7 @@ abstract class ExporterIT extends ExporterTest {
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
     assertThat(response.getHeader("Content-Length"))
         .isEqualTo(Integer.toString(response.body.length));
-    List<Metrics.MetricFamily> metrics = new ArrayList<>();
-    InputStream in = new ByteArrayInputStream(response.body);
-    while (in.available() > 0) {
-      metrics.add(Metrics.MetricFamily.parseDelimitedFrom(in));
-    }
+    List<Metrics.MetricFamily> metrics = response.protoBody();
     assertThat(metrics).hasSize(3);
     // metrics are sorted by name
     assertThat(metrics.get(0).getName()).isEqualTo("integration_test_info");

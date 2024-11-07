@@ -65,20 +65,20 @@
         <module>prometheus-metrics-config</module>
         <module>prometheus-metrics-model</module>
         <module>prometheus-metrics-tracer</module>
-        <module>prometheus-writer-textformat</module>
         <module>prometheus-metrics-exposition-formats</module>
+        <module>prometheus-metrics-exposition-textformats</module>
         <module>prometheus-metrics-exporter-common</module>
         <module>prometheus-metrics-exporter-servlet-jakarta</module>
         <module>prometheus-metrics-exporter-servlet-javax</module>
         <module>prometheus-metrics-exporter-httpserver</module>
         <module>prometheus-metrics-exporter-opentelemetry</module>
+        <module>prometheus-metrics-exporter-opentelemetry-otel-agent-resources</module>
         <module>prometheus-metrics-exporter-pushgateway</module>
         <module>prometheus-metrics-instrumentation-caffeine</module>
         <module>prometheus-metrics-instrumentation-jvm</module>
         <module>prometheus-metrics-instrumentation-dropwizard5</module>
         <module>prometheus-metrics-instrumentation-guava</module>
         <module>prometheus-metrics-simpleclient-bridge</module>
-        <module>otel-agent-resources</module>
     </modules>
 
     <dependencyManagement>
@@ -207,6 +207,16 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.5.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.6.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
                     <version>3.5.0</version>
                 </plugin>
                 <plugin>

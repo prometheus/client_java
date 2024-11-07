@@ -22,6 +22,6 @@
         <module>it-exporter-httpserver-sample</module>
         <module>it-exporter-no-protobuf</module>
         <module>it-exporter-test</module>
-        <module>it-no-protobuf</module>
+        <module>it-no-protobuf-test</module>
     </modules>
 </project>

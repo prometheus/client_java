@@ -17,7 +17,7 @@ mkdir -p $TARGET_DIR
 rm -rf $PROTO_DIR || true
 mkdir -p $PROTO_DIR
 
-OLD_PACKAGE=$(sed -nE 's/import (io.prometheus.metrics.expositionformats.generated.*).Metrics;/\1/p' src/main/java/io/prometheus/metrics/expositionformats/PrometheusProtobufWriter.java)
+OLD_PACKAGE=$(sed -nE 's/import (io.prometheus.metrics.expositionformats.generated.*).Metrics;/\1/p' src/main/java/io/prometheus/metrics/expositionformats/internal/PrometheusProtobufWriterImpl.java)
 PACKAGE="io.prometheus.metrics.expositionformats.generated.com_google_protobuf_${PROTOBUF_VERSION_STRING}"
 
 if [[ $OLD_PACKAGE != "$PACKAGE" ]]; then

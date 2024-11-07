@@ -25,7 +25,6 @@ jobs:
           PROTO_GENERATION: true
           REQUIRE_PROTO_UP_TO_DATE: true
         run: |
-          echo "Java version: $(java -version) in $(which java), Maven version: $(mvn -v)"
-          echo "JAVA_HOME: $JAVA_HOME"
+          mvn -v
           ./mvnw clean install
           ./mvnw javadoc:javadoc -P javadoc # just to check if javadoc is generated

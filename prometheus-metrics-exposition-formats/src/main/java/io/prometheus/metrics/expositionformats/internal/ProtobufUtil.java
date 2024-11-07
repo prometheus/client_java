@@ -1,4 +1,4 @@
-package io.prometheus.metrics.expositionformats;
+package io.prometheus.metrics.expositionformats.internal;
 
 import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.TextFormat;

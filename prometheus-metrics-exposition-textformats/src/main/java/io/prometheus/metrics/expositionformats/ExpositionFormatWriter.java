@@ -22,4 +22,11 @@ public interface ExpositionFormatWriter {
   }
 
   String getContentType();
+
+  /**
+   * Returns true if the writer is available. If false, the writer will throw an exception if used.
+   */
+  default boolean isAvailable() {
+    return true;
+  }
 }

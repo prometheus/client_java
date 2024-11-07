@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>otel-agent-resources</artifactId>
+            <artifactId>prometheus-metrics-exporter-opentelemetry-otel-agent-resources</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -112,7 +112,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>regex-property</id>

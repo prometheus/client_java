@@ -6,7 +6,7 @@ import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesException;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
-import io.prometheus.metrics.expositionformats.ExpositionFormats;
+import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.MultiCollector;
@@ -95,6 +95,9 @@ public class PushGateway {
     this.requestHeaders = Collections.unmodifiableMap(new HashMap<>(requestHeaders));
     this.connectionFactory = connectionFactory;
     writer = getWriter(format);
+    if (!writer.isAvailable()) {
+      throw new RuntimeException(writer.getClass() + " is not available");
+    }
   }
 
   private ExpositionFormatWriter getWriter(Format format) {
@@ -102,7 +105,7 @@ public class PushGateway {
       return new PrometheusTextFormatWriter(false);
     } else {
       // use reflection to avoid a compile-time dependency on the expositionformats module
-      return ExpositionFormats.createProtobufWriter();
+      return new PrometheusProtobufWriter();
     }
   }
 

@@ -2,18 +2,17 @@ package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.config.ExporterProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
-import javax.annotation.Nullable;
 
 public class ExpositionFormats {
 
-  @Nullable private final ExpositionFormatWriter prometheusProtobufWriter;
-  private final ExpositionFormatWriter prometheusTextFormatWriter;
-  private final ExpositionFormatWriter openMetricsTextFormatWriter;
+  private final PrometheusProtobufWriter prometheusProtobufWriter;
+  private final PrometheusTextFormatWriter prometheusTextFormatWriter;
+  private final OpenMetricsTextFormatWriter openMetricsTextFormatWriter;
 
   private ExpositionFormats(
-      ExpositionFormatWriter prometheusProtobufWriter,
-      ExpositionFormatWriter prometheusTextFormatWriter,
-      ExpositionFormatWriter openMetricsTextFormatWriter) {
+      PrometheusProtobufWriter prometheusProtobufWriter,
+      PrometheusTextFormatWriter prometheusTextFormatWriter,
+      OpenMetricsTextFormatWriter openMetricsTextFormatWriter) {
     this.prometheusProtobufWriter = prometheusProtobufWriter;
     this.prometheusTextFormatWriter = prometheusTextFormatWriter;
     this.openMetricsTextFormatWriter = openMetricsTextFormatWriter;
@@ -25,23 +24,10 @@ public class ExpositionFormats {
 
   public static ExpositionFormats init(ExporterProperties properties) {
     return new ExpositionFormats(
-        createProtobufWriter(),
+        new PrometheusProtobufWriter(),
         new PrometheusTextFormatWriter(properties.getIncludeCreatedTimestamps()),
         new OpenMetricsTextFormatWriter(
             properties.getIncludeCreatedTimestamps(), properties.getExemplarsOnAllMetricTypes()));
-  }
-
-  @Nullable
-  public static ExpositionFormatWriter createProtobufWriter() {
-    try {
-      return Class.forName("io.prometheus.metrics.expositionformats.PrometheusProtobufWriter")
-          .asSubclass(ExpositionFormatWriter.class)
-          .getDeclaredConstructor()
-          .newInstance();
-    } catch (Exception e) {
-      // not in classpath
-      return null;
-    }
   }
 
   public ExpositionFormatWriter findWriter(String acceptHeader) {
@@ -54,15 +40,15 @@ public class ExpositionFormats {
     return prometheusTextFormatWriter;
   }
 
-  public ExpositionFormatWriter getPrometheusProtobufWriter() {
+  public PrometheusProtobufWriter getPrometheusProtobufWriter() {
     return prometheusProtobufWriter;
   }
 
-  public ExpositionFormatWriter getPrometheusTextFormatWriter() {
+  public PrometheusTextFormatWriter getPrometheusTextFormatWriter() {
     return prometheusTextFormatWriter;
   }
 
-  public ExpositionFormatWriter getOpenMetricsTextFormatWriter() {
+  public OpenMetricsTextFormatWriter getOpenMetricsTextFormatWriter() {
     return openMetricsTextFormatWriter;
   }
 }

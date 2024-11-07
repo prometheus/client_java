@@ -4,11 +4,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -55,7 +58,7 @@ public abstract class ExporterTest {
     sampleAppVolume.remove();
   }
 
-  protected void assertContentType(String expected, String actual) {
+  public static void assertContentType(String expected, String actual) {
     if (!expected.replace(" ", "").equals(actual)) {
       assertThat(actual).isEqualTo(expected);
     }
@@ -63,13 +66,19 @@ public abstract class ExporterTest {
 
   protected Response scrape(String method, String queryString, String... requestHeaders)
       throws IOException {
-    long timeoutMillis = TimeUnit.SECONDS.toMillis(5);
-    URL url =
+    return scrape(
+        method,
         new URL(
             "http://localhost:"
                 + sampleAppContainer.getMappedPort(9400)
                 + "/metrics?"
-                + queryString);
+                + queryString),
+        requestHeaders);
+  }
+
+  public static Response scrape(String method, URL url, String... requestHeaders)
+      throws IOException {
+    long timeoutMillis = TimeUnit.SECONDS.toMillis(5);
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     con.setRequestMethod(method);
     for (int i = 0; i < requestHeaders.length; i += 2) {
@@ -106,7 +115,7 @@ public abstract class ExporterTest {
     return null; // will not happen
   }
 
-  protected static class Response {
+  public static class Response {
     public final int status;
     private final Map<String, String> headers;
     public final byte[] body;
@@ -135,6 +144,15 @@ public abstract class ExporterTest {
     public String gzipBody() throws IOException {
       return new String(
           IOUtils.toByteArray(new GZIPInputStream(new ByteArrayInputStream(body))), UTF_8);
+    }
+
+    public List<Metrics.MetricFamily> protoBody() throws IOException {
+      List<Metrics.MetricFamily> metrics = new ArrayList<>();
+      InputStream in = new ByteArrayInputStream(body);
+      while (in.available() > 0) {
+        metrics.add(Metrics.MetricFamily.parseDelimitedFrom(in));
+      }
+      return metrics;
     }
   }
 }

@@ -8,9 +8,9 @@ import static org.assertj.core.data.Offset.offset;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
-import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
-import io.prometheus.metrics.expositionformats.ProtobufUtil;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
+import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
+import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
@@ -89,7 +89,7 @@ class HistogramTest {
         }
       }
       Metrics.MetricFamily protobufData =
-          new PrometheusProtobufWriter().convert(histogram.collect());
+          new PrometheusProtobufWriterImpl().convert(histogram.collect());
       String expectedWithMetadata =
           "name: \"test\" type: HISTOGRAM metric { histogram { " + expected + " } }";
       assertThat(ProtobufUtil.shortDebugString(protobufData))
@@ -940,7 +940,7 @@ class HistogramTest {
             + "# EOF\n";
 
     // protobuf
-    Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(snapshot);
+    Metrics.MetricFamily protobufData = new PrometheusProtobufWriterImpl().convert(snapshot);
     assertThat(ProtobufUtil.shortDebugString(protobufData)).isEqualTo(expectedProtobuf);
 
     // text

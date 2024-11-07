@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-writer-textformat</artifactId>
+            <artifactId>prometheus-metrics-exposition-textformats</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

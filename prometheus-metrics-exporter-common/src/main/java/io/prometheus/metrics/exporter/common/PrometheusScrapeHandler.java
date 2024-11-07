@@ -45,7 +45,7 @@ public class PrometheusScrapeHandler {
     this.registry = registry;
     this.nameFilter = makeNameFilter(config.getExporterFilterProperties());
     supportedFormats = new ArrayList<>(Arrays.asList("openmetrics", "text"));
-    if (expositionFormats.getPrometheusProtobufWriter() != null) {
+    if (expositionFormats.getPrometheusProtobufWriter().isAvailable()) {
       supportedFormats.add("prometheus-protobuf");
     }
   }

@@ -1,8 +1,9 @@
-package io.prometheus.metrics.expositionformats;
+package io.prometheus.metrics.expositionformats.internal;
 
-import static io.prometheus.metrics.expositionformats.ProtobufUtil.timestampFromMillis;
+import static io.prometheus.metrics.expositionformats.internal.ProtobufUtil.timestampFromMillis;
 
 import com.google.protobuf.TextFormat;
+import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -24,31 +25,16 @@ import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- * Write the Prometheus protobuf format as defined in <a
- * href="https://github.com/prometheus/client_model/tree/master/io/prometheus/client">github.com/prometheus/client_model</a>.
- *
- * <p>As of today, this is the only exposition format that supports native histograms.
- */
-public class PrometheusProtobufWriter implements ExpositionFormatWriter {
-
-  public static final String CONTENT_TYPE =
-      "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; "
-          + "encoding=delimited";
+public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
 
   @Override
   public boolean accepts(String acceptHeader) {
-    if (acceptHeader == null) {
-      return false;
-    } else {
-      return acceptHeader.contains("application/vnd.google.protobuf")
-          && acceptHeader.contains("proto=io.prometheus.client.MetricFamily");
-    }
+    throw new IllegalStateException("use PrometheusProtobufWriter instead");
   }
 
   @Override
   public String getContentType() {
-    return CONTENT_TYPE;
+    throw new IllegalStateException("use PrometheusProtobufWriter instead");
   }
 
   @Override
