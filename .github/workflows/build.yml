@@ -11,17 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: asdf-vm/actions/install@v3
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
           cache: 'maven'
-      - name: Install Protoc
-        run: |    
-          VERSION=28.2
-          curl -sL -o protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v$VERSION/protoc-$VERSION-linux-x86_64.zip
-          sudo unzip protoc.zip -d /usr/local
       - name: Run the Maven verify phase
         env:
           PROTO_GENERATION: true
