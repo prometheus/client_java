@@ -12,12 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: asdf-vm/actions/install@v3
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - name: Cache local Maven repository
+        uses: actions/cache@v4
         with:
-          java-version: 17
-          distribution: temurin
-          cache: 'maven'
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Run the Maven verify phase
         env:
           PROTO_GENERATION: true
