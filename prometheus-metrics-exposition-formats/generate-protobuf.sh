@@ -12,13 +12,21 @@ PROTOBUF_VERSION="${PROTOBUF_VERSION_STRING//_/.}"
 
 echo "Generating protobuf sources for version $PROTOBUF_VERSION in $TARGET_DIR"
 
-rm -rf TARGET_DIR || true
+rm -rf $TARGET_DIR
 mkdir -p $TARGET_DIR
 rm -rf $PROTO_DIR || true
 mkdir -p $PROTO_DIR
 
-curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/prometheus/client/metrics.proto -o $PROTO_DIR/metrics.proto
+OLD_PACKAGE=$(sed -nE 's/import (io.prometheus.metrics.expositionformats.generated.*).Metrics;/\1/p' src/main/java/io/prometheus/metrics/expositionformats/PrometheusProtobufWriter.java)
 PACKAGE="io.prometheus.metrics.expositionformats.generated.com_google_protobuf_${PROTOBUF_VERSION_STRING}"
+
+if [[ $OLD_PACKAGE != "$PACKAGE" ]]; then
+  echo "Replacing package $OLD_PACKAGE with $PACKAGE in all java files"
+  find .. -type f -name "*.java" -exec sed -i "s/$OLD_PACKAGE/$PACKAGE/g" {} +
+fi
+
+curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/prometheus/client/metrics.proto -o $PROTO_DIR/metrics.proto
+
 sed -i "s/java_package = \"io.prometheus.client\"/java_package = \"$PACKAGE\"/" $PROTO_DIR/metrics.proto
 protoc --java_out $TARGET_DIR $PROTO_DIR/metrics.proto
 
