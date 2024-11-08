@@ -2,7 +2,7 @@ package io.prometheus.metrics.expositionformats;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
