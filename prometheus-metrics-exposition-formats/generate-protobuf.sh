@@ -35,6 +35,7 @@ GENERATED_WITH=$(grep -oP '\/\/ Protobuf Java Version: \K.*' "$TARGET_DIR/${PACK
 if [[ $GENERATED_WITH != "$PROTOBUF_VERSION" ]]; then
   echo "Generated protobuf sources version $GENERATED_WITH does not match provided version $PROTOBUF_VERSION"
   echo "Please update the protoc version .tool-versions to the latest version of https://github.com/protocolbuffers/protobuf/releases"
+  echo "Please use https://github.com/asdf-vm/asdf - this will use the version specified in .tool-versions"
   exit 1
 fi
 
