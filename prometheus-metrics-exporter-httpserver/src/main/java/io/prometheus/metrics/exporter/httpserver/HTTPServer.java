@@ -117,7 +117,9 @@ public class HTTPServer implements Closeable {
           } catch (PrivilegedActionException e) {
             if (e.getException() != null) {
               throw new IOException(e.getException());
-            } else throw new IOException(e);
+            } else {
+                throw new IOException(e);
+            }
           }
         } else {
           drainInputAndClose(exchange);
@@ -130,8 +132,9 @@ public class HTTPServer implements Closeable {
   private void drainInputAndClose(HttpExchange httpExchange) throws IOException {
     InputStream inputStream = httpExchange.getRequestBody();
     byte[] b = new byte[4096];
-    while (inputStream.read(b) != -1)
-      ;
+    while (inputStream.read(b) != -1) {
+        // nop
+    }
     inputStream.close();
   }
 
