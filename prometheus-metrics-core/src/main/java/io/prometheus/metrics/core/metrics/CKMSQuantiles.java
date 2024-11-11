@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-//CHECKSTYLE:OFF: checkstyle
+// CHECKSTYLE:OFF: checkstyle
 
 /**
  * Algorithm solving the "Targeted Quantile Problem" as described in "Effective Computation of
@@ -276,4 +276,4 @@ final class CKMSQuantiles {
   }
 }
 
-//CHECKSTYLE:ON: checkstyle
+// CHECKSTYLE:ON: checkstyle

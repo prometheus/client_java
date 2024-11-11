@@ -77,16 +77,6 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
   }
 
   @Override
-  public void setTrue(String state) {
-    getNoLabels().setTrue(state);
-  }
-
-  @Override
-  public void setFalse(String state) {
-    getNoLabels().setFalse(state);
-  }
-
-  @Override
   protected StateSetSnapshot collect(List<Labels> labels, List<DataPoint> metricDataList) {
     List<StateSetSnapshot.StateSetDataPointSnapshot> data = new ArrayList<>(labels.size());
     for (int i = 0; i < labels.size(); i++) {
@@ -95,6 +85,16 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
               names, metricDataList.get(i).values, labels.get(i)));
     }
     return new StateSetSnapshot(getMetadata(), data);
+  }
+
+  @Override
+  public void setTrue(String state) {
+    getNoLabels().setTrue(state);
+  }
+
+  @Override
+  public void setFalse(String state) {
+    getNoLabels().setFalse(state);
   }
 
   @Override
