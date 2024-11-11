@@ -67,7 +67,8 @@ public class JvmClassLoadingMetrics {
     CounterWithCallback.builder(config)
         .name(JVM_CLASSES_UNLOADED_TOTAL)
         .help(
-            "The total number of classes that have been unloaded since the JVM has started execution")
+            "The total number of classes that have been unloaded since the JVM has "
+                + "started execution")
         .callback(callback -> callback.call(classLoadingBean.getUnloadedClassCount()))
         .register(registry);
   }

@@ -196,7 +196,8 @@ public class DropwizardExports implements MultiCollector {
   @Override
   public MetricSnapshots collect() {
     MetricSnapshots.Builder metricSnapshots = MetricSnapshots.builder();
-    for (Map.Entry<MetricName, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
+    for (@SuppressWarnings("rawtypes")
+    Map.Entry<MetricName, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
       Optional.ofNullable(fromGauge(entry.getKey().getKey(), entry.getValue()))
           .ifPresent(metricSnapshots::metricSnapshot);
     }

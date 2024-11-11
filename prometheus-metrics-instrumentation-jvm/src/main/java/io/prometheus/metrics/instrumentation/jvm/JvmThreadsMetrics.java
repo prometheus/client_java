@@ -109,7 +109,8 @@ public class JvmThreadsMetrics {
       GaugeWithCallback.builder(config)
           .name(JVM_THREADS_DEADLOCKED)
           .help(
-              "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers")
+              "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or "
+                  + "ownable synchronizers")
           .callback(
               callback -> callback.call(nullSafeArrayLength(threadBean.findDeadlockedThreads())))
           .register(registry);

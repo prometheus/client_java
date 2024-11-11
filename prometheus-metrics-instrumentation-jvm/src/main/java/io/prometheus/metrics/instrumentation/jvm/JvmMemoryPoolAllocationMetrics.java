@@ -61,7 +61,8 @@ public class JvmMemoryPoolAllocationMetrics {
         Counter.builder()
             .name(JVM_MEMORY_POOL_ALLOCATED_BYTES_TOTAL)
             .help(
-                "Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.")
+                "Total bytes allocated in a given JVM memory pool. Only updated after GC, "
+                    + "not continuously.")
             .labelNames("pool")
             .register(registry);
 

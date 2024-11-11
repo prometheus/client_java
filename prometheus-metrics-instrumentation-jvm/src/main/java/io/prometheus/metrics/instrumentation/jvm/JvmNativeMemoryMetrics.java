@@ -110,7 +110,8 @@ public class JvmNativeMemoryMetrics {
       GaugeWithCallback.builder(config)
           .name(JVM_NATIVE_MEMORY_RESERVED_BYTES)
           .help(
-              "Reserved bytes of a given JVM. Reserved memory represents the total amount of memory the JVM can potentially use.")
+              "Reserved bytes of a given JVM. Reserved memory represents the total amount of "
+                  + "memory the JVM can potentially use.")
           .unit(Unit.BYTES)
           .labelNames("pool")
           .callback(makeCallback(true))
@@ -119,7 +120,8 @@ public class JvmNativeMemoryMetrics {
       GaugeWithCallback.builder(config)
           .name(JVM_NATIVE_MEMORY_COMMITTED_BYTES)
           .help(
-              "Committed bytes of a given JVM. Committed memory represents the amount of memory the JVM is using right now.")
+              "Committed bytes of a given JVM. Committed memory represents the amount of "
+                  + "memory the JVM is using right now.")
           .unit(Unit.BYTES)
           .labelNames("pool")
           .callback(makeCallback(false))

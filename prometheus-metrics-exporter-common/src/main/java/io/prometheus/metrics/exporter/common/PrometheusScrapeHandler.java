@@ -157,7 +157,8 @@ public class PrometheusScrapeHandler {
           body.write(
               ("debug="
                       + debugParam
-                      + ": Unsupported query parameter. Valid values are 'openmetrics', 'text', and 'prometheus-protobuf'.")
+                      + ": Unsupported query parameter. Valid values are 'openmetrics', "
+                      + "'text', and 'prometheus-protobuf'.")
                   .getBytes(StandardCharsets.UTF_8));
           break;
       }

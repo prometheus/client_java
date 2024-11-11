@@ -105,7 +105,8 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
             getClass().getSimpleName()
                 + " "
                 + getMetadata().getName()
-                + " was created with label names, so you must call labelValues(...) when using it.");
+                + " was created with label names, so you must call labelValues(...)"
+                + " when using it.");
       } else {
         throw new IllegalArgumentException(
             "Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
