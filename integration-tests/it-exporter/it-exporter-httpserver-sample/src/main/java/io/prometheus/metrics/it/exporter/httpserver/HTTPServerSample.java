@@ -26,7 +26,10 @@ public class HTTPServerSample {
 
     int port = parsePortOrExit(args[0]);
     Mode mode = parseModeOrExit(args[1]);
+    run(mode, port);
+  }
 
+  private static void run(Mode mode, int port) throws IOException, InterruptedException {
     Counter counter =
         Counter.builder()
             .name("uptime_seconds_total")

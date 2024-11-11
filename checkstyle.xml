@@ -266,9 +266,7 @@
     </module>
     -->
     <module name="OverloadMethodsDeclarationOrder"/>
-    <!-- there are only a few violations of this, and they all appear to be for good reasons
     <module name="VariableDeclarationUsageDistance"/>
-    -->
     <module name="CustomImportOrder">
       <property name="sortImportsInGroupAlphabetically" value="true"/>
       <property name="separateLineBetweenGroups" value="true"/>

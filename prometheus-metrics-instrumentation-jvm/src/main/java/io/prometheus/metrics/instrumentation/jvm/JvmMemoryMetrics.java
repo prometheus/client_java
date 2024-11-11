@@ -309,11 +309,11 @@ public class JvmMemoryMetrics {
     }
 
     public void register(PrometheusRegistry registry) {
-      MemoryMXBean memoryMXBean =
+      MemoryMXBean bean =
           this.memoryBean != null ? this.memoryBean : ManagementFactory.getMemoryMXBean();
       List<MemoryPoolMXBean> poolBeans =
           this.poolBeans != null ? this.poolBeans : ManagementFactory.getMemoryPoolMXBeans();
-      new JvmMemoryMetrics(poolBeans, memoryMXBean, config).register(registry);
+      new JvmMemoryMetrics(poolBeans, bean, config).register(registry);
     }
   }
 }

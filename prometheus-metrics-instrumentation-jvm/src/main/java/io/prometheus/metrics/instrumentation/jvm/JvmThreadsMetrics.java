@@ -149,7 +149,7 @@ public class JvmThreadsMetrics {
       }
     }
 
-    int numberOfInvalidThreadIds = threadIds.length - writePos;
+    final int numberOfInvalidThreadIds = threadIds.length - writePos;
     threadIds = Arrays.copyOf(threadIds, writePos);
 
     // Get thread information without computing any stack traces
