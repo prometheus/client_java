@@ -15,7 +15,6 @@ import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

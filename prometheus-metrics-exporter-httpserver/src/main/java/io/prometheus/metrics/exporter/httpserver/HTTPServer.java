@@ -118,7 +118,7 @@ public class HTTPServer implements Closeable {
             if (e.getException() != null) {
               throw new IOException(e.getException());
             } else {
-                throw new IOException(e);
+              throw new IOException(e);
             }
           }
         } else {
@@ -133,7 +133,7 @@ public class HTTPServer implements Closeable {
     InputStream inputStream = httpExchange.getRequestBody();
     byte[] b = new byte[4096];
     while (inputStream.read(b) != -1) {
-        // nop
+      // nop
     }
     inputStream.close();
   }
