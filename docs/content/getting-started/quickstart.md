@@ -15,9 +15,9 @@ We use the following dependencies:
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
 ```
-implementation 'io.prometheus:prometheus-metrics-core:1.3.3'
-implementation 'io.prometheus:prometheus-metrics-instrumentation-jvm:1.3.3'
-implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.3.3'
+implementation 'io.prometheus:prometheus-metrics-core:$version'
+implementation 'io.prometheus:prometheus-metrics-instrumentation-jvm:$version'
+implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:$version'
 ```
 {{< /tab >}}
 {{< tab "Maven" >}}
@@ -25,17 +25,17 @@ implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.3.3'
 <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-core</artifactId>
-    <version>1.3.3</version>
+    <version>$version</version>
 </dependency>
 <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-instrumentation-jvm</artifactId>
-    <version>1.3.3</version>
+    <version>$version</version>
 </dependency>
 <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
-    <version>1.3.3</version>
+    <version>$version</version>
 </dependency>
 ```
 {{< /tab >}}
@@ -69,7 +69,7 @@ plugins {
 
 dependencies {
   implementation(platform(SpringBootPlugin.BOM_COORDINATES)) // if you are using Spring Boot
-  implementation(platform("io.prometheus:prometheus-metrics-bom:1.3.3"))
+  implementation(platform("io.prometheus:prometheus-metrics-bom:$version"))
 }
 ```
 
@@ -84,7 +84,7 @@ plugins {
 
 dependencyManagement {
   imports {
-    mavenBom("io.prometheus:prometheus-metrics-bom:1.3.3")
+    mavenBom("io.prometheus:prometheus-metrics-bom:$version")
   }
 }
 ```
@@ -93,7 +93,7 @@ dependencyManagement {
 
 Be careful not to mix up the different ways of configuring things with Gradle.
 For example, don't use
-`implementation(platform("io.prometheus:prometheus-metrics-bom:1.3.3"))`
+`implementation(platform("io.prometheus:prometheus-metrics-bom:$version"))`
 with the `io.spring.dependency-management` plugin.
 
 {{% /alert %}}    
@@ -117,7 +117,7 @@ The following example shows how to import the Prometheus Java metrics BOMs using
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>prometheus-metrics-bom</artifactId>
-            <version>1.3.3</version>
+            <version>$version</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
