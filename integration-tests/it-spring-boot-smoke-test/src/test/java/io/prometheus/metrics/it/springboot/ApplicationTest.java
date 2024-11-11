@@ -3,6 +3,7 @@ package io.prometheus.metrics.it.springboot;
 import io.prometheus.client.it.common.ExporterTest;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
@@ -12,7 +13,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@AutoConfigureObservability
 class ApplicationTest {
   @Test
   public void testPrometheusProtobufFormat() throws IOException {
