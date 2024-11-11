@@ -1,6 +1,6 @@
 ---
 title: Quickstart
-weight: 1
+weight: 0
 ---
 
 This tutorial shows the quickest way to get started with the Prometheus Java metrics library.
@@ -15,9 +15,9 @@ We use the following dependencies:
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
 ```
-implementation 'io.prometheus:prometheus-metrics-core:1.0.0'
-implementation 'io.prometheus:prometheus-metrics-instrumentation-jvm:1.0.0'
-implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.0.0'
+implementation 'io.prometheus:prometheus-metrics-core:1.3.3'
+implementation 'io.prometheus:prometheus-metrics-instrumentation-jvm:1.3.3'
+implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.3.3'
 ```
 {{< /tab >}}
 {{< tab "Maven" >}}
@@ -25,17 +25,17 @@ implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.0.0'
 <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-core</artifactId>
-    <version>1.0.0</version>
+    <version>1.3.3</version>
 </dependency>
 <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-instrumentation-jvm</artifactId>
-    <version>1.0.0</version>
+    <version>1.3.3</version>
 </dependency>
 <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
-    <version>1.0.0</version>
+    <version>1.3.3</version>
 </dependency>
 ```
 {{< /tab >}}
@@ -43,6 +43,90 @@ implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.0.0'
 
 There are alternative exporters as well, for example if you are using a Servlet container like Tomcat or Undertow you might want to use `prometheus-exporter-servlet-jakarta` rather than a standalone HTTP server.
 
+# Dependency management
+
+A Bill of Material
+([BOM](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms))
+ensures that versions of dependencies (including transitive ones) are aligned.
+This is especially important when using Spring Boot, which manages some of the dependencies of the project.
+
+You should omit the version number of the dependencies in your build file if you are using a BOM.
+
+{{< tabs "uniqueid" >}}
+{{< tab "Gradle" >}}
+
+You have two ways to import a BOM.
+
+First, you can use the Gradle’s native BOM support by adding `dependencies`:
+
+```kotlin
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+  id("java")
+  id("org.springframework.boot") version "3.2.O" // if you are using Spring Boot
+}
+
+dependencies {
+  implementation(platform(SpringBootPlugin.BOM_COORDINATES)) // if you are using Spring Boot
+  implementation(platform("io.prometheus:prometheus-metrics-bom:1.3.3"))
+}
+```
+
+The other way with Gradle is to use `dependencyManagement`:
+
+```kotlin
+plugins {
+  id("java")
+  id("org.springframework.boot") version "3.2.O" // if you are using Spring Boot
+  id("io.spring.dependency-management") version "1.1.0" // if you are using Spring Boot
+}
+
+dependencyManagement {
+  imports {
+    mavenBom("io.prometheus:prometheus-metrics-bom:1.3.3")
+  }
+}
+```
+
+{{% alert title="Note" color="info" %}}
+
+Be careful not to mix up the different ways of configuring things with Gradle.
+For example, don't use
+`implementation(platform("io.prometheus:prometheus-metrics-bom:1.3.3"))`
+with the `io.spring.dependency-management` plugin.
+
+{{% /alert %}}    
+
+{{< /tab >}}
+{{< tab "Maven" >}}
+
+{{% alert title="Note" color="info" %}}
+
+Import the Prometheus Java metrics BOMs before any other BOMs in your
+project. For example, if you import the `spring-boot-dependencies` BOM, you have
+to declare it after the Prometheus Java metrics BOMs.
+
+{{% /alert %}}
+
+The following example shows how to import the Prometheus Java metrics BOMs using Maven:
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-bom</artifactId>
+            <version>1.3.3</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+{{< /tab >}}
+{{< /tabs >}}
 
 # Example Application
 
