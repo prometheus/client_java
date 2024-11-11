@@ -127,13 +127,21 @@ public final class MapperConfig {
 
   @Override
   public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     final MapperConfig that = (MapperConfig) o;
 
-    if (match != null ? !match.equals(that.match) : that.match != null) return false;
-    if (name != null ? !name.equals(that.name) : that.name != null) return false;
+    if (match != null ? !match.equals(that.match) : that.match != null) {
+      return false;
+    }
+    if (name != null ? !name.equals(that.name) : that.name != null) {
+      return false;
+    }
     return labels != null ? labels.equals(that.labels) : that.labels == null;
   }
 

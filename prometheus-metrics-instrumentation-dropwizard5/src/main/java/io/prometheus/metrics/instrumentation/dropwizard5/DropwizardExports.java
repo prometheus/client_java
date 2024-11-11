@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 /** Collect Dropwizard metrics from a MetricRegistry. */
 public class DropwizardExports implements MultiCollector {
-  private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
+  private static final Logger logger = Logger.getLogger(DropwizardExports.class.getName());
   private final MetricRegistry registry;
   private final MetricFilter metricFilter;
   private final Optional<CustomLabelMapper> labelMapper;
@@ -109,7 +109,7 @@ public class DropwizardExports implements MultiCollector {
     } else if (obj instanceof Boolean) {
       value = ((Boolean) obj) ? 1 : 0;
     } else {
-      LOGGER.log(
+      logger.log(
           Level.FINE,
           String.format(
               "Invalid type for Gauge %s: %s",
