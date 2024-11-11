@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -euox pipefail
 
 version=$(git tag -l | grep 'v' | sort | tail -1 | sed 's/v//')
 marker="\$version"
