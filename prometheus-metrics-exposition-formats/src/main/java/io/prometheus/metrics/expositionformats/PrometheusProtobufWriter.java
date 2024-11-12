@@ -3,7 +3,7 @@ package io.prometheus.metrics.expositionformats;
 import static io.prometheus.metrics.expositionformats.ProtobufUtil.timestampFromMillis;
 
 import com.google.protobuf.TextFormat;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;

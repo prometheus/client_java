@@ -11,21 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - name: Setup ASDF
+        uses: equisoft-actions/with-asdf-vm@v2
+      - name: Cache local Maven repository
+        uses: actions/cache@v4
         with:
-          java-version: 17
-          distribution: temurin
-          cache: 'maven'
-      - name: Install Protoc
-        run: |    
-          VERSION=28.2
-          curl -sL -o protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v$VERSION/protoc-$VERSION-linux-x86_64.zip
-          sudo unzip protoc.zip -d /usr/local
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Run the Maven verify phase
         env:
           PROTO_GENERATION: true
           REQUIRE_PROTO_UP_TO_DATE: true
         run: |
+          echo "Java version: $(java -version) in $(which java), Maven version: $(mvn -v)"
+          echo "JAVA_HOME: $JAVA_HOME"
           ./mvnw clean install
           ./mvnw javadoc:javadoc -P javadoc # just to check if javadoc is generated

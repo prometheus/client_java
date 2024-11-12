@@ -34,12 +34,17 @@ jobs:
       HUGO_VERSION: 0.115.4
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-tags: 'true'
+          fetch-depth: 0
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
           cache: 'maven'
+      - name: Set release version
+        run: ./scripts/set-release-version-github-pages.sh
       - name: Install Hugo CLI
         run: |
           wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb \

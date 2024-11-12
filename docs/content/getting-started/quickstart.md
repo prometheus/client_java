@@ -1,9 +1,11 @@
 ---
 title: Quickstart
-weight: 1
+weight: 0
 ---
 
 This tutorial shows the quickest way to get started with the Prometheus Java metrics library.
+
+{{< toc >}}
 
 # Dependencies
 
@@ -12,12 +14,12 @@ We use the following dependencies:
 * `prometheus-metrics-core` is the actual metrics library.
 * `prometheus-metrics-instrumentation-jvm` provides out-of-the-box JVM metrics.
 * `prometheus-metrics-exporter-httpserver` is a standalone HTTP server for exposing Prometheus metrics.
-{{< tabs "uniqueid" >}}
+{{< tabs "deps" >}}
 {{< tab "Gradle" >}}
 ```
-implementation 'io.prometheus:prometheus-metrics-core:1.0.0'
-implementation 'io.prometheus:prometheus-metrics-instrumentation-jvm:1.0.0'
-implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.0.0'
+implementation 'io.prometheus:prometheus-metrics-core:$version'
+implementation 'io.prometheus:prometheus-metrics-instrumentation-jvm:$version'
+implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:$version'
 ```
 {{< /tab >}}
 {{< tab "Maven" >}}
@@ -25,17 +27,17 @@ implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.0.0'
 <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-core</artifactId>
-    <version>1.0.0</version>
+    <version>$version</version>
 </dependency>
 <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-instrumentation-jvm</artifactId>
-    <version>1.0.0</version>
+    <version>$version</version>
 </dependency>
 <dependency>
     <groupId>io.prometheus</groupId>
     <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
-    <version>1.0.0</version>
+    <version>$version</version>
 </dependency>
 ```
 {{< /tab >}}
@@ -43,6 +45,90 @@ implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:1.0.0'
 
 There are alternative exporters as well, for example if you are using a Servlet container like Tomcat or Undertow you might want to use `prometheus-exporter-servlet-jakarta` rather than a standalone HTTP server.
 
+# Dependency management
+
+A Bill of Material
+([BOM](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms))
+ensures that versions of dependencies (including transitive ones) are aligned.
+This is especially important when using Spring Boot, which manages some of the dependencies of the project.
+
+You should omit the version number of the dependencies in your build file if you are using a BOM.
+
+{{< tabs "bom" >}}
+{{< tab "Gradle" >}}
+
+You have two ways to import a BOM.
+
+First, you can use the Gradle’s native BOM support by adding `dependencies`:
+
+```kotlin
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+  id("java")
+  id("org.springframework.boot") version "3.2.O" // if you are using Spring Boot
+}
+
+dependencies {
+  implementation(platform(SpringBootPlugin.BOM_COORDINATES)) // if you are using Spring Boot
+  implementation(platform("io.prometheus:prometheus-metrics-bom:$version"))
+}
+```
+
+The other way with Gradle is to use `dependencyManagement`:
+
+```kotlin
+plugins {
+  id("java")
+  id("org.springframework.boot") version "3.2.O" // if you are using Spring Boot
+  id("io.spring.dependency-management") version "1.1.0" // if you are using Spring Boot
+}
+
+dependencyManagement {
+  imports {
+    mavenBom("io.prometheus:prometheus-metrics-bom:$version")
+  }
+}
+```
+
+{{< hint type=note >}}
+
+Be careful not to mix up the different ways of configuring things with Gradle.
+For example, don't use
+`implementation(platform("io.prometheus:prometheus-metrics-bom:$version"))`
+with the `io.spring.dependency-management` plugin.
+
+{{< /hint >}}
+
+{{< /tab >}}
+{{< tab "Maven" >}}
+
+{{< hint type=note >}}
+
+Import the Prometheus Java metrics BOMs before any other BOMs in your
+project. For example, if you import the `spring-boot-dependencies` BOM, you have
+to declare it after the Prometheus Java metrics BOMs.
+
+{{< /hint >}}
+
+The following example shows how to import the Prometheus Java metrics BOMs using Maven:
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-bom</artifactId>
+            <version>$version</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+{{< /tab >}}
+{{< /tabs >}}
 
 # Example Application
 

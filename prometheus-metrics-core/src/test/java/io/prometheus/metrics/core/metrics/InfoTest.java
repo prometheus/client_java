@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
 import io.prometheus.metrics.expositionformats.TextFormatUtil;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_2.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Unit;
