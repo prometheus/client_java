@@ -74,6 +74,16 @@
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>
+                <artifactId>prometheus-metrics-instrumentation-caffeine</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>prometheus-metrics-instrumentation-guava</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
                 <artifactId>prometheus-metrics-instrumentation-jvm</artifactId>
                 <version>${project.version}</version>
             </dependency>
