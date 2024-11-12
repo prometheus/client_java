@@ -237,7 +237,7 @@
                     <failOnViolation>true</failOnViolation>
                     <skip>${checkstyle.skip}</skip>
                     <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
-                    <excludes>**/generated*/**</excludes>
+                    <excludes>**/generated/**,**/jmh_generated/*</excludes>
                 </configuration>
                 <executions>
                     <execution>
