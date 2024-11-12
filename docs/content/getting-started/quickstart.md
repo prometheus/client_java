@@ -89,25 +89,25 @@ dependencyManagement {
 }
 ```
 
-{{% alert title="Note" color="info" %}}
+{{< hint type=note >}}
 
 Be careful not to mix up the different ways of configuring things with Gradle.
 For example, don't use
 `implementation(platform("io.prometheus:prometheus-metrics-bom:$version"))`
 with the `io.spring.dependency-management` plugin.
 
-{{% /alert %}}    
+{{< /hint >}}
 
 {{< /tab >}}
 {{< tab "Maven" >}}
 
-{{% alert title="Note" color="info" %}}
+{{< hint type=note >}}
 
 Import the Prometheus Java metrics BOMs before any other BOMs in your
 project. For example, if you import the `spring-boot-dependencies` BOM, you have
 to declare it after the Prometheus Java metrics BOMs.
 
-{{% /alert %}}
+{{< /hint >}}
 
 The following example shows how to import the Prometheus Java metrics BOMs using Maven:
 
