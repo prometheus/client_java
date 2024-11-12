@@ -5,6 +5,8 @@ weight: 0
 
 This tutorial shows the quickest way to get started with the Prometheus Java metrics library.
 
+{{< toc >}}
+
 # Dependencies
 
 We use the following dependencies:
@@ -12,7 +14,7 @@ We use the following dependencies:
 * `prometheus-metrics-core` is the actual metrics library.
 * `prometheus-metrics-instrumentation-jvm` provides out-of-the-box JVM metrics.
 * `prometheus-metrics-exporter-httpserver` is a standalone HTTP server for exposing Prometheus metrics.
-{{< tabs "uniqueid" >}}
+{{< tabs "deps" >}}
 {{< tab "Gradle" >}}
 ```
 implementation 'io.prometheus:prometheus-metrics-core:$version'
@@ -52,7 +54,7 @@ This is especially important when using Spring Boot, which manages some of the d
 
 You should omit the version number of the dependencies in your build file if you are using a BOM.
 
-{{< tabs "uniqueid" >}}
+{{< tabs "bom" >}}
 {{< tab "Gradle" >}}
 
 You have two ways to import a BOM.
