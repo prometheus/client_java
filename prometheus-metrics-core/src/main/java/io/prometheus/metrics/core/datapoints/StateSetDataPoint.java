@@ -16,17 +16,17 @@ public interface StateSetDataPoint extends DataPoint {
 
   /**
    * {@code state} must be one of the states from when the {@code StateSet} was created with {@link
-   * io.prometheus.metrics.core.metrics.StateSet.Builder#states(String...)}.
-   */
-  void setFalse(String state);
-
-  /**
-   * {@code state} must be one of the states from when the {@code StateSet} was created with {@link
    * io.prometheus.metrics.core.metrics.StateSet.Builder#states(Class)}.
    */
   default void setTrue(Enum<?> state) {
     setTrue(state.toString());
   }
+
+  /**
+   * {@code state} must be one of the states from when the {@code StateSet} was created with {@link
+   * io.prometheus.metrics.core.metrics.StateSet.Builder#states(String...)}.
+   */
+  void setFalse(String state);
 
   /**
    * {@code state} must be one of the states from when the {@code StateSet} was created with {@link

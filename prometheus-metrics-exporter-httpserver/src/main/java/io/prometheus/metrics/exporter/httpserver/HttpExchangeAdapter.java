@@ -120,7 +120,8 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
         Logger.getLogger(this.getClass().getName())
             .log(
                 Level.SEVERE,
-                "The Prometheus metrics HTTPServer caught an Exception during scrape and failed to send an error response to the client.",
+                "The Prometheus metrics HTTPServer caught an Exception during scrape and "
+                    + "failed to send an error response to the client.",
                 errorWriterException);
         Logger.getLogger(this.getClass().getName())
             .log(
@@ -134,7 +135,8 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
       Logger.getLogger(this.getClass().getName())
           .log(
               Level.SEVERE,
-              "The Prometheus metrics HTTPServer caught an Exception while trying to send the metrics response.",
+              "The Prometheus metrics HTTPServer caught an Exception while trying to send "
+                  + "the metrics response.",
               requestHandlerException);
     }
   }

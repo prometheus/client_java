@@ -28,7 +28,8 @@ abstract class CallbackMetric extends MetricWithFixedMetadata {
       if (labelValues == null) {
         throw new IllegalArgumentException(
             this.getClass().getSimpleName()
-                + " was created with label names, but the callback was called without label values.");
+                + " was created with label names, "
+                + "but the callback was called without label values.");
       }
       if (labelValues.length != labelNames.length) {
         throw new IllegalArgumentException(

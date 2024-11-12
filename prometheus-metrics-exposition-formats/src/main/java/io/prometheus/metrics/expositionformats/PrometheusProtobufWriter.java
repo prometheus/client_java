@@ -33,7 +33,8 @@ import java.io.OutputStream;
 public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
   public static final String CONTENT_TYPE =
-      "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
+      "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; "
+          + "encoding=delimited";
 
   @Override
   public boolean accepts(String acceptHeader) {
@@ -53,7 +54,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
   public String toDebugString(MetricSnapshots metricSnapshots) {
     StringBuilder stringBuilder = new StringBuilder();
     for (MetricSnapshot snapshot : metricSnapshots) {
-      if (snapshot.getDataPoints().size() > 0) {
+      if (!snapshot.getDataPoints().isEmpty()) {
         stringBuilder.append(TextFormat.printer().printToString(convert(snapshot)));
       }
     }
@@ -63,7 +64,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
   @Override
   public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
     for (MetricSnapshot snapshot : metricSnapshots) {
-      if (snapshot.getDataPoints().size() > 0) {
+      if (!snapshot.getDataPoints().isEmpty()) {
         convert(snapshot).writeDelimitedTo(out);
       }
     }
@@ -122,32 +123,13 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     return builder.build();
   }
 
-  private void setMetadataUnlessEmpty(
-      Metrics.MetricFamily.Builder builder,
-      MetricMetadata metadata,
-      String nameSuffix,
-      Metrics.MetricType type) {
-    if (builder.getMetricCount() == 0) {
-      return;
-    }
-    if (nameSuffix == null) {
-      builder.setName(metadata.getPrometheusName());
-    } else {
-      builder.setName(metadata.getPrometheusName() + nameSuffix);
-    }
-    if (metadata.getHelp() != null) {
-      builder.setHelp(metadata.getHelp());
-    }
-    builder.setType(type);
-  }
-
   private Metrics.Metric.Builder convert(CounterDataPointSnapshot data) {
-    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     Metrics.Counter.Builder counterBuilder = Metrics.Counter.newBuilder();
     counterBuilder.setValue(data.getValue());
     if (data.getExemplar() != null) {
       counterBuilder.setExemplar(convert(data.getExemplar()));
     }
+    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     addLabels(metricBuilder, data.getLabels());
     metricBuilder.setCounter(counterBuilder.build());
     setScrapeTimestamp(metricBuilder, data);
@@ -155,9 +137,9 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
   }
 
   private Metrics.Metric.Builder convert(GaugeSnapshot.GaugeDataPointSnapshot data) {
-    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
     gaugeBuilder.setValue(data.getValue());
+    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     addLabels(metricBuilder, data.getLabels());
     metricBuilder.setGauge(gaugeBuilder);
     setScrapeTimestamp(metricBuilder, data);
@@ -217,6 +199,94 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     }
     metricBuilder.setHistogram(histogramBuilder.build());
     return metricBuilder;
+  }
+
+  private Metrics.Metric.Builder convert(SummarySnapshot.SummaryDataPointSnapshot data) {
+    Metrics.Summary.Builder summaryBuilder = Metrics.Summary.newBuilder();
+    if (data.hasCount()) {
+      summaryBuilder.setSampleCount(data.getCount());
+    }
+    if (data.hasSum()) {
+      summaryBuilder.setSampleSum(data.getSum());
+    }
+    Quantiles quantiles = data.getQuantiles();
+    for (int i = 0; i < quantiles.size(); i++) {
+      summaryBuilder.addQuantile(
+          Metrics.Quantile.newBuilder()
+              .setQuantile(quantiles.get(i).getQuantile())
+              .setValue(quantiles.get(i).getValue())
+              .build());
+    }
+    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
+    addLabels(metricBuilder, data.getLabels());
+    metricBuilder.setSummary(summaryBuilder.build());
+    setScrapeTimestamp(metricBuilder, data);
+    return metricBuilder;
+  }
+
+  private Metrics.Metric.Builder convert(InfoSnapshot.InfoDataPointSnapshot data) {
+    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
+    Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
+    gaugeBuilder.setValue(1);
+    addLabels(metricBuilder, data.getLabels());
+    metricBuilder.setGauge(gaugeBuilder);
+    setScrapeTimestamp(metricBuilder, data);
+    return metricBuilder;
+  }
+
+  private Metrics.Metric.Builder convert(
+      StateSetSnapshot.StateSetDataPointSnapshot data, String name, int i) {
+    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
+    Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
+    addLabels(metricBuilder, data.getLabels());
+    metricBuilder.addLabel(
+        Metrics.LabelPair.newBuilder().setName(name).setValue(data.getName(i)).build());
+    if (data.isTrue(i)) {
+      gaugeBuilder.setValue(1);
+    } else {
+      gaugeBuilder.setValue(0);
+    }
+    metricBuilder.setGauge(gaugeBuilder);
+    setScrapeTimestamp(metricBuilder, data);
+    return metricBuilder;
+  }
+
+  private Metrics.Metric.Builder convert(UnknownSnapshot.UnknownDataPointSnapshot data) {
+    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
+    Metrics.Untyped.Builder untypedBuilder = Metrics.Untyped.newBuilder();
+    untypedBuilder.setValue(data.getValue());
+    addLabels(metricBuilder, data.getLabels());
+    metricBuilder.setUntyped(untypedBuilder);
+    return metricBuilder;
+  }
+
+  private Metrics.Exemplar.Builder convert(Exemplar exemplar) {
+    Metrics.Exemplar.Builder builder = Metrics.Exemplar.newBuilder();
+    builder.setValue(exemplar.getValue());
+    addLabels(builder, exemplar.getLabels());
+    if (exemplar.hasTimestamp()) {
+      builder.setTimestamp(timestampFromMillis(exemplar.getTimestampMillis()));
+    }
+    return builder;
+  }
+
+  private void setMetadataUnlessEmpty(
+      Metrics.MetricFamily.Builder builder,
+      MetricMetadata metadata,
+      String nameSuffix,
+      Metrics.MetricType type) {
+    if (builder.getMetricCount() == 0) {
+      return;
+    }
+    if (nameSuffix == null) {
+      builder.setName(metadata.getPrometheusName());
+    } else {
+      builder.setName(metadata.getPrometheusName() + nameSuffix);
+    }
+    if (metadata.getHelp() != null) {
+      builder.setHelp(metadata.getHelp());
+    }
+    builder.setType(type);
   }
 
   private long getNativeCount(HistogramSnapshot.HistogramDataPointSnapshot data) {
@@ -284,65 +354,6 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
     }
   }
 
-  private Metrics.Metric.Builder convert(SummarySnapshot.SummaryDataPointSnapshot data) {
-    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
-    Metrics.Summary.Builder summaryBuilder = Metrics.Summary.newBuilder();
-    if (data.hasCount()) {
-      summaryBuilder.setSampleCount(data.getCount());
-    }
-    if (data.hasSum()) {
-      summaryBuilder.setSampleSum(data.getSum());
-    }
-    Quantiles quantiles = data.getQuantiles();
-    for (int i = 0; i < quantiles.size(); i++) {
-      summaryBuilder.addQuantile(
-          Metrics.Quantile.newBuilder()
-              .setQuantile(quantiles.get(i).getQuantile())
-              .setValue(quantiles.get(i).getValue())
-              .build());
-    }
-    addLabels(metricBuilder, data.getLabels());
-    metricBuilder.setSummary(summaryBuilder.build());
-    setScrapeTimestamp(metricBuilder, data);
-    return metricBuilder;
-  }
-
-  private Metrics.Metric.Builder convert(InfoSnapshot.InfoDataPointSnapshot data) {
-    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
-    Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
-    gaugeBuilder.setValue(1);
-    addLabels(metricBuilder, data.getLabels());
-    metricBuilder.setGauge(gaugeBuilder);
-    setScrapeTimestamp(metricBuilder, data);
-    return metricBuilder;
-  }
-
-  private Metrics.Metric.Builder convert(
-      StateSetSnapshot.StateSetDataPointSnapshot data, String name, int i) {
-    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
-    Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
-    addLabels(metricBuilder, data.getLabels());
-    metricBuilder.addLabel(
-        Metrics.LabelPair.newBuilder().setName(name).setValue(data.getName(i)).build());
-    if (data.isTrue(i)) {
-      gaugeBuilder.setValue(1);
-    } else {
-      gaugeBuilder.setValue(0);
-    }
-    metricBuilder.setGauge(gaugeBuilder);
-    setScrapeTimestamp(metricBuilder, data);
-    return metricBuilder;
-  }
-
-  private Metrics.Metric.Builder convert(UnknownSnapshot.UnknownDataPointSnapshot data) {
-    Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
-    Metrics.Untyped.Builder untypedBuilder = Metrics.Untyped.newBuilder();
-    untypedBuilder.setValue(data.getValue());
-    addLabels(metricBuilder, data.getLabels());
-    metricBuilder.setUntyped(untypedBuilder);
-    return metricBuilder;
-  }
-
   private void addLabels(Metrics.Metric.Builder metricBuilder, Labels labels) {
     for (int i = 0; i < labels.size(); i++) {
       metricBuilder.addLabel(
@@ -361,16 +372,6 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
               .setValue(labels.getValue(i))
               .build());
     }
-  }
-
-  private Metrics.Exemplar.Builder convert(Exemplar exemplar) {
-    Metrics.Exemplar.Builder builder = Metrics.Exemplar.newBuilder();
-    builder.setValue(exemplar.getValue());
-    addLabels(builder, exemplar.getLabels());
-    if (exemplar.hasTimestamp()) {
-      builder.setTimestamp(timestampFromMillis(exemplar.getTimestampMillis()));
-    }
-    return builder;
   }
 
   private void setScrapeTimestamp(Metrics.Metric.Builder metricBuilder, DataPointSnapshot data) {

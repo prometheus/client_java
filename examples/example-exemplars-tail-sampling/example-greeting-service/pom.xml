@@ -57,7 +57,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.prometheus.metrics.examples.otel_exemplars.greeting.Main</mainClass>
+                                    <mainClass>io.prometheus.metrics.examples.otel.exemplars.greeting.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

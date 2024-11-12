@@ -59,7 +59,8 @@ class ManualCompleteMetricsTest {
           histogram.labelValues("200").observe(random.nextGaussian());
       }
 
-      // Explicitly use a classic-only histogram to have an example of a classic histogram in OpenTelemetry
+      // Explicitly use a classic-only histogram to have an example of a classic
+      // histogram in OpenTelemetry
       Histogram classicHistogram = Histogram.newBuilder()
               .withName("request_size_bytes")
               .withHelp("Request size in Bytes")

@@ -34,8 +34,12 @@ public final class Label implements Comparable<Label> {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     Label label = (Label) o;
     return Objects.equals(name, label.name) && Objects.equals(value, label.value);
   }

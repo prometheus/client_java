@@ -109,7 +109,8 @@ public class JvmThreadsMetrics {
       GaugeWithCallback.builder(config)
           .name(JVM_THREADS_DEADLOCKED)
           .help(
-              "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers")
+              "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or "
+                  + "ownable synchronizers")
           .callback(
               callback -> callback.call(nullSafeArrayLength(threadBean.findDeadlockedThreads())))
           .register(registry);
@@ -148,7 +149,7 @@ public class JvmThreadsMetrics {
       }
     }
 
-    int numberOfInvalidThreadIds = threadIds.length - writePos;
+    final int numberOfInvalidThreadIds = threadIds.length - writePos;
     threadIds = Arrays.copyOf(threadIds, writePos);
 
     // Get thread information without computing any stack traces

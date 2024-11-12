@@ -56,21 +56,20 @@ public class JvmMemoryPoolAllocationMetrics {
   }
 
   private void register(PrometheusRegistry registry) {
-
     Counter allocatedCounter =
         Counter.builder()
             .name(JVM_MEMORY_POOL_ALLOCATED_BYTES_TOTAL)
             .help(
-                "Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.")
+                "Total bytes allocated in a given JVM memory pool. Only updated after GC, "
+                    + "not continuously.")
             .labelNames("pool")
             .register(registry);
 
     AllocationCountingNotificationListener listener =
         new AllocationCountingNotificationListener(allocatedCounter);
-    for (GarbageCollectorMXBean garbageCollectorMXBean : garbageCollectorBeans) {
-      if (garbageCollectorMXBean instanceof NotificationEmitter) {
-        ((NotificationEmitter) garbageCollectorMXBean)
-            .addNotificationListener(listener, null, null);
+    for (GarbageCollectorMXBean bean : garbageCollectorBeans) {
+      if (bean instanceof NotificationEmitter) {
+        ((NotificationEmitter) bean).addNotificationListener(listener, null, null);
       }
     }
   }

@@ -1,19 +1,36 @@
 package io.prometheus.metrics.instrumentation.dropwizard5;
 
-import io.dropwizard.metrics5.*;
+import io.dropwizard.metrics5.Counter;
+import io.dropwizard.metrics5.Gauge;
+import io.dropwizard.metrics5.Histogram;
+import io.dropwizard.metrics5.Meter;
+import io.dropwizard.metrics5.Metric;
+import io.dropwizard.metrics5.MetricFilter;
+import io.dropwizard.metrics5.MetricName;
+import io.dropwizard.metrics5.MetricRegistry;
+import io.dropwizard.metrics5.Snapshot;
 import io.dropwizard.metrics5.Timer;
 import io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.*;
-import java.util.*;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.Quantiles;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /** Collect Dropwizard metrics from a MetricRegistry. */
 public class DropwizardExports implements MultiCollector {
-  private static final Logger LOGGER = Logger.getLogger(DropwizardExports.class.getName());
+  private static final Logger logger = Logger.getLogger(DropwizardExports.class.getName());
   private final MetricRegistry registry;
   private final MetricFilter metricFilter;
   private final Optional<CustomLabelMapper> labelMapper;
@@ -92,7 +109,7 @@ public class DropwizardExports implements MultiCollector {
     } else if (obj instanceof Boolean) {
       value = ((Boolean) obj) ? 1 : 0;
     } else {
-      LOGGER.log(
+      logger.log(
           Level.FINE,
           String.format(
               "Invalid type for Gauge %s: %s",

@@ -44,7 +44,7 @@ class PrometheusMetricProducer implements CollectionRegistration {
     // registry.scrape(filter) if a filter is configured, like in the Servlet exporter.
     MetricSnapshots snapshots = registry.scrape();
     Resource resourceWithTargetInfo = resource.merge(resourceFromTargetInfo(snapshots));
-    InstrumentationScopeInfo scopeFromInfo = instrumentationScopeFromOTelScopeInfo(snapshots);
+    InstrumentationScopeInfo scopeFromInfo = instrumentationScopeFromOtelScopeInfo(snapshots);
     List<MetricData> result = new ArrayList<>(snapshots.size());
     MetricDataFactory factory =
         new MetricDataFactory(
@@ -93,7 +93,7 @@ class PrometheusMetricProducer implements CollectionRegistration {
     return result.build();
   }
 
-  private InstrumentationScopeInfo instrumentationScopeFromOTelScopeInfo(
+  private InstrumentationScopeInfo instrumentationScopeFromOtelScopeInfo(
       MetricSnapshots snapshots) {
     for (MetricSnapshot snapshot : snapshots) {
       if (snapshot.getMetadata().getPrometheusName().equals("otel_scope")

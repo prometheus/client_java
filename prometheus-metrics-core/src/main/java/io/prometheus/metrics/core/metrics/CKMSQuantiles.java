@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+// CHECKSTYLE:OFF: checkstyle
+
 /**
  * Algorithm solving the "Targeted Quantile Problem" as described in "Effective Computation of
  * Biased Quantiles over Data Streams" by Cormode, Korn, Muthukrishnan, and Srivastava.
@@ -273,3 +275,5 @@ final class CKMSQuantiles {
     }
   }
 }
+
+// CHECKSTYLE:ON: checkstyle

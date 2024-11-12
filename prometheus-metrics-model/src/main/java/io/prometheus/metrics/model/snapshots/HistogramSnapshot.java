@@ -270,7 +270,8 @@ public final class HistogramSnapshot extends MetricSnapshot {
                 nativeZeroCount, nativeBucketsForPositiveValues, nativeBucketsForNegativeValues);
         if (classicCount != nativeCount) {
           throw new IllegalArgumentException(
-              "Inconsistent observation count: If a histogram has both classic and native data the observation count must be the same. Classic count is "
+              "Inconsistent observation count: If a histogram has both classic and native "
+                  + "data the observation count must be the same. Classic count is "
                   + classicCount
                   + " but native count is "
                   + nativeCount

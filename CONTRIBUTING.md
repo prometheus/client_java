@@ -27,6 +27,7 @@ If you're getting errors when running tests:
 
 - Use `-Dspotless.check.skip=true` to skip the formatting check during development.
 - Use `-Dcoverage.skip=true` to skip the coverage check during development.
+- Use `-Dcheckstyle.skip=true` to skip the checkstyle check during development.
 - Use `-Dwarnings=-nowarn` to skip the warnings during development.
 
 ## Updating the Protobuf Java Classes

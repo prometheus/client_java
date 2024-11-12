@@ -301,10 +301,10 @@ public class ProcessMetrics {
     public void register(PrometheusRegistry registry) {
       OperatingSystemMXBean osBean =
           this.osBean != null ? this.osBean : ManagementFactory.getOperatingSystemMXBean();
-      RuntimeMXBean runtimeMXBean =
+      RuntimeMXBean bean =
           this.runtimeBean != null ? this.runtimeBean : ManagementFactory.getRuntimeMXBean();
       Grepper grepper = this.grepper != null ? this.grepper : new FileGrepper();
-      new ProcessMetrics(osBean, runtimeMXBean, grepper, config).register(registry);
+      new ProcessMetrics(osBean, bean, grepper, config).register(registry);
     }
   }
 }

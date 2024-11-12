@@ -46,7 +46,6 @@ public class PrometheusScrapeHandler {
   public void handleRequest(PrometheusHttpExchange exchange) throws IOException {
     try {
       PrometheusHttpRequest request = exchange.getRequest();
-      PrometheusHttpResponse response = exchange.getResponse();
       MetricSnapshots snapshots = scrape(request);
       if (writeDebugResponse(snapshots, exchange)) {
         return;
@@ -57,6 +56,7 @@ public class PrometheusScrapeHandler {
       ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
       writer.write(responseBuffer, snapshots);
       lastResponseSize.set(responseBuffer.size());
+      PrometheusHttpResponse response = exchange.getResponse();
       response.setHeader("Content-Type", writer.getContentType());
 
       if (shouldUseCompression(request)) {
@@ -106,16 +106,6 @@ public class PrometheusScrapeHandler {
     }
   }
 
-  private MetricSnapshots scrape(PrometheusHttpRequest request) {
-
-    Predicate<String> filter = makeNameFilter(request.getParameterValues("name[]"));
-    if (filter != null) {
-      return registry.scrape(filter, request);
-    } else {
-      return registry.scrape(request);
-    }
-  }
-
   private Predicate<String> makeNameFilter(String[] includedNames) {
     Predicate<String> result = null;
     if (includedNames != null && includedNames.length > 0) {
@@ -127,6 +117,16 @@ public class PrometheusScrapeHandler {
       result = nameFilter;
     }
     return result;
+  }
+
+  private MetricSnapshots scrape(PrometheusHttpRequest request) {
+
+    Predicate<String> filter = makeNameFilter(request.getParameterValues("name[]"));
+    if (filter != null) {
+      return registry.scrape(filter, request);
+    } else {
+      return registry.scrape(request);
+    }
   }
 
   private boolean writeDebugResponse(MetricSnapshots snapshots, PrometheusHttpExchange exchange)
@@ -157,7 +157,8 @@ public class PrometheusScrapeHandler {
           body.write(
               ("debug="
                       + debugParam
-                      + ": Unsupported query parameter. Valid values are 'openmetrics', 'text', and 'prometheus-protobuf'.")
+                      + ": Unsupported query parameter. Valid values are 'openmetrics', "
+                      + "'text', and 'prometheus-protobuf'.")
                   .getBytes(StandardCharsets.UTF_8));
           break;
       }

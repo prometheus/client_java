@@ -63,7 +63,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     implements DistributionDataPoint {
 
   // nativeSchema == CLASSIC_HISTOGRAM indicates that this is a classic histogram only.
-  private final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
+  private static final int CLASSIC_HISTOGRAM = Integer.MIN_VALUE;
 
   // NATIVE_BOUNDS is used to look up the native bucket index depending on the current schema.
   private static final double[][] NATIVE_BOUNDS;
@@ -152,7 +152,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     double min =
         getConfigProperty(properties, MetricsProperties::getHistogramNativeMinZeroThreshold);
     nativeMaxZeroThreshold =
-        max == builder.DEFAULT_NATIVE_MAX_ZERO_THRESHOLD && min > max ? min : max;
+        max == Builder.DEFAULT_NATIVE_MAX_ZERO_THRESHOLD && min > max ? min : max;
     nativeMinZeroThreshold = Math.min(min, nativeMaxZeroThreshold);
     nativeMaxBuckets =
         getConfigProperty(properties, MetricsProperties::getHistogramNativeMaxNumberOfBuckets);
@@ -447,9 +447,9 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
             // Now we are in the synchronized block while new observations go into the buffer.
             // Check again if we need to limit the bucket size, because another thread might
             // have limited it in the meantime.
-            int nBuckets =
+            int numBuckets =
                 nativeBucketsForPositiveValues.size() + nativeBucketsForNegativeValues.size();
-            if (nBuckets <= nativeMaxBuckets || nativeSchema == -4) {
+            if (numBuckets <= nativeMaxBuckets || nativeSchema == -4) {
               return null;
             }
             if (maybeReset()) {
@@ -668,11 +668,11 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     public static final double[] DEFAULT_CLASSIC_UPPER_BOUNDS =
         new double[] {.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10};
 
-    private final double DEFAULT_NATIVE_MIN_ZERO_THRESHOLD = Math.pow(2.0, -128);
-    private final double DEFAULT_NATIVE_MAX_ZERO_THRESHOLD = Math.pow(2.0, -128);
-    private final int DEFAULT_NATIVE_INITIAL_SCHEMA = 5;
-    private final int DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS = 160;
-    private final long DEFAULT_NATIVE_RESET_DURATION_SECONDS = 0; // 0 means no reset
+    private static final double DEFAULT_NATIVE_MIN_ZERO_THRESHOLD = Math.pow(2.0, -128);
+    private static final double DEFAULT_NATIVE_MAX_ZERO_THRESHOLD = Math.pow(2.0, -128);
+    private static final int DEFAULT_NATIVE_INITIAL_SCHEMA = 5;
+    private static final int DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS = 160;
+    private static final long DEFAULT_NATIVE_RESET_DURATION_SECONDS = 0; // 0 means no reset
 
     private Boolean nativeOnly;
     private Boolean classicOnly;

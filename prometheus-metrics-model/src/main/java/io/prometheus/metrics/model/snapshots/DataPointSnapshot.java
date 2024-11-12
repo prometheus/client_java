@@ -21,11 +21,13 @@ public abstract class DataPointSnapshot {
     }
     if (createdTimestampMillis < 0) {
       throw new IllegalArgumentException(
-          "Created timestamp cannot be negative. Use 0 if the metric doesn't have a created timestamp.");
+          "Created timestamp cannot be negative. "
+              + "Use 0 if the metric doesn't have a created timestamp.");
     }
     if (scrapeTimestampMillis < 0) {
       throw new IllegalArgumentException(
-          "Scrape timestamp cannot be negative. Use 0 to indicate that the Prometheus server should set the scrape timestamp.");
+          "Scrape timestamp cannot be negative. "
+              + "Use 0 to indicate that the Prometheus server should set the scrape timestamp.");
     }
     if (hasCreatedTimestamp() && hasScrapeTimestamp()) {
       if (scrapeTimestampMillis < createdTimestampMillis) {
