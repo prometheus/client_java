@@ -23,7 +23,8 @@ import java.util.concurrent.ConcurrentMap;
  * <pre>{@code
  * // Note that `recordStats()` is required to gather non-zero statistics
  * Cache<String, String> cache = CacheBuilder.newBuilder().recordStats().build();
- * CacheMetricsCollector cacheMetrics = new CacheMetricsCollector().register();
+ * CacheMetricsCollector cacheMetrics = new CacheMetricsCollector();
+ * PrometheusRegistry.defaultRegistry.register(cacheMetrics);
  * cacheMetrics.addCache("mycache", cache);
  *
  * }</pre>
