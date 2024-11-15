@@ -55,6 +55,30 @@ import java.util.concurrent.ConcurrentMap;
 public class CacheMetricsCollector implements MultiCollector {
   private static final double NANOSECONDS_PER_SECOND = 1_000_000_000.0;
 
+  private static final String METRIC_NAME_CACHE_HIT = "caffeine_cache_hit";
+  private static final String METRIC_NAME_CACHE_MISS = "caffeine_cache_miss";
+  private static final String METRIC_NAME_CACHE_REQUESTS = "caffeine_cache_requests";
+  private static final String METRIC_NAME_CACHE_EVICTION = "caffeine_cache_eviction";
+  private static final String METRIC_NAME_CACHE_EVICTION_WEIGHT = "caffeine_cache_eviction_weight";
+  private static final String METRIC_NAME_CACHE_LOAD_FAILURE = "caffeine_cache_load_failure";
+  private static final String METRIC_NAME_CACHE_LOADS = "caffeine_cache_loads";
+  private static final String METRIC_NAME_CACHE_ESTIMATED_SIZE = "caffeine_cache_estimated_size";
+  private static final String METRIC_NAME_CACHE_LOAD_DURATION_SECONDS =
+      "caffeine_cache_load_duration_seconds";
+
+  private static final List<String> ALL_METRIC_NAMES =
+      Collections.unmodifiableList(
+          Arrays.asList(
+              METRIC_NAME_CACHE_HIT,
+              METRIC_NAME_CACHE_MISS,
+              METRIC_NAME_CACHE_REQUESTS,
+              METRIC_NAME_CACHE_EVICTION,
+              METRIC_NAME_CACHE_EVICTION_WEIGHT,
+              METRIC_NAME_CACHE_LOAD_FAILURE,
+              METRIC_NAME_CACHE_LOADS,
+              METRIC_NAME_CACHE_ESTIMATED_SIZE,
+              METRIC_NAME_CACHE_LOAD_DURATION_SECONDS));
+
   protected final ConcurrentMap<String, Cache<?, ?>> children = new ConcurrentHashMap<>();
 
   /**
@@ -107,40 +131,40 @@ public class CacheMetricsCollector implements MultiCollector {
     final List<String> labelNames = Arrays.asList("cache");
 
     final CounterSnapshot.Builder cacheHitTotal =
-        CounterSnapshot.builder().name("caffeine_cache_hit").help("Cache hit totals");
+        CounterSnapshot.builder().name(METRIC_NAME_CACHE_HIT).help("Cache hit totals");
 
     final CounterSnapshot.Builder cacheMissTotal =
-        CounterSnapshot.builder().name("caffeine_cache_miss").help("Cache miss totals");
+        CounterSnapshot.builder().name(METRIC_NAME_CACHE_MISS).help("Cache miss totals");
 
     final CounterSnapshot.Builder cacheRequestsTotal =
         CounterSnapshot.builder()
-            .name("caffeine_cache_requests")
+            .name(METRIC_NAME_CACHE_REQUESTS)
             .help("Cache request totals, hits + misses");
 
     final CounterSnapshot.Builder cacheEvictionTotal =
         CounterSnapshot.builder()
-            .name("caffeine_cache_eviction")
+            .name(METRIC_NAME_CACHE_EVICTION)
             .help("Cache eviction totals, doesn't include manually removed entries");
 
     final GaugeSnapshot.Builder cacheEvictionWeight =
         GaugeSnapshot.builder()
-            .name("caffeine_cache_eviction_weight")
+            .name(METRIC_NAME_CACHE_EVICTION_WEIGHT)
             .help("Cache eviction weight");
 
     final CounterSnapshot.Builder cacheLoadFailure =
-        CounterSnapshot.builder().name("caffeine_cache_load_failure").help("Cache load failures");
+        CounterSnapshot.builder().name(METRIC_NAME_CACHE_LOAD_FAILURE).help("Cache load failures");
 
     final CounterSnapshot.Builder cacheLoadTotal =
         CounterSnapshot.builder()
-            .name("caffeine_cache_loads")
+            .name(METRIC_NAME_CACHE_LOADS)
             .help("Cache loads: both success and failures");
 
     final GaugeSnapshot.Builder cacheSize =
-        GaugeSnapshot.builder().name("caffeine_cache_estimated_size").help("Estimated cache size");
+        GaugeSnapshot.builder().name(METRIC_NAME_CACHE_ESTIMATED_SIZE).help("Estimated cache size");
 
     final SummarySnapshot.Builder cacheLoadSummary =
         SummarySnapshot.builder()
-            .name("caffeine_cache_load_duration_seconds")
+            .name(METRIC_NAME_CACHE_LOAD_DURATION_SECONDS)
             .help("Cache load duration: both success and failures");
 
     for (final Map.Entry<String, Cache<?, ?>> c : children.entrySet()) {
@@ -222,5 +246,10 @@ public class CacheMetricsCollector implements MultiCollector {
         .metricSnapshot(cacheSize.build())
         .metricSnapshot(cacheLoadSummary.build())
         .build();
+  }
+
+  @Override
+  public List<String> getPrometheusNames() {
+    return ALL_METRIC_NAMES;
   }
 }
