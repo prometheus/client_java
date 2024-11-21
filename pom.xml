@@ -341,6 +341,7 @@
                     <compilerArgs>
                         <arg>-Xlint:all,-serial,-processing,-options</arg>
                         <arg>${warnings}</arg>
+                        <arg>--should-stop=ifError=FLOW</arg>
                         <arg>-XDcompilePolicy=simple</arg>
                         <arg>
                             -Xplugin:ErrorProne
@@ -355,7 +356,7 @@
                         <path>
                             <groupId>com.google.errorprone</groupId>
                             <artifactId>error_prone_core</artifactId>
-                            <version>2.35.1</version>
+                            <version>2.36.0</version>
                         </path>
                         <!-- Other annotation processors go here.
 
