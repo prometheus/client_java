@@ -14,11 +14,13 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class CacheMetricsCollectorTest {
@@ -108,6 +110,34 @@ class CacheMetricsCollectorTest {
 
     assertThat(loadDuration.getCount()).isEqualTo(3);
     assertThat(loadDuration.getSum()).isGreaterThan(0);
+  }
+
+  @Test
+  public void getPrometheusNamesHasSameSizeAsMetricSizeWhenScraping() {
+    final CacheMetricsCollector collector = new CacheMetricsCollector();
+
+    final PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(collector);
+
+    final MetricSnapshots metricSnapshots = registry.scrape();
+    final List<String> prometheusNames = collector.getPrometheusNames();
+
+    assertThat(prometheusNames).hasSize(metricSnapshots.size());
+  }
+
+  @Test
+  public void collectedMetricNamesAreKnownPrometheusNames() {
+    final CacheMetricsCollector collector = new CacheMetricsCollector();
+
+    final PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(collector);
+
+    final MetricSnapshots metricSnapshots = registry.scrape();
+    final List<String> prometheusNames = collector.getPrometheusNames();
+
+    metricSnapshots.forEach(
+        metricSnapshot ->
+            assertThat(prometheusNames).contains(metricSnapshot.getMetadata().getPrometheusName()));
   }
 
   private void assertCounterMetric(
