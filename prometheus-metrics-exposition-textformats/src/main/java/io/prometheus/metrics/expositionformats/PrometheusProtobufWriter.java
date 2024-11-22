@@ -16,7 +16,8 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
   @Nullable private static final ExpositionFormatWriter DELEGATE = createProtobufWriter();
 
   public static final String CONTENT_TYPE =
-      "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
+      "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; "
+          + "encoding=delimited";
 
   @Nullable
   private static ExpositionFormatWriter createProtobufWriter() {
