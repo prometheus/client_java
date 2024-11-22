@@ -28,7 +28,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B package -P release -Dmaven.test.skip=true
+        run: ./scripts/build-release.sh ${{ github.ref_name }}
 
       - name: Set up Apache Maven Central
         uses: actions/setup-java@v4

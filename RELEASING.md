@@ -1,13 +1,3 @@
-## Update Version
-
-In a new PR, update the version in `pom.xml` using 
-
-```shell
-mvn versions:set -DnewVersion=<VERSION>
-```
-
-Commit the changes and open a PR.
-
 ## Create a Release 
 
 1. Go to https://github.com/prometheus/client_java/releases

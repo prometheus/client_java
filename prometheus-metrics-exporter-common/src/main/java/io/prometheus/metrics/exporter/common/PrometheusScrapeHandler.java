@@ -11,8 +11,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.zip.GZIPOutputStream;
@@ -23,7 +25,8 @@ public class PrometheusScrapeHandler {
   private final PrometheusRegistry registry;
   private final ExpositionFormats expositionFormats;
   private final Predicate<String> nameFilter;
-  private AtomicInteger lastResponseSize = new AtomicInteger(2 << 9); //  0.5 MB
+  private final AtomicInteger lastResponseSize = new AtomicInteger(2 << 9); //  0.5 MB
+  private final List<String> supportedFormats;
 
   public PrometheusScrapeHandler() {
     this(PrometheusProperties.get(), PrometheusRegistry.defaultRegistry);
@@ -41,6 +44,10 @@ public class PrometheusScrapeHandler {
     this.expositionFormats = ExpositionFormats.init(config.getExporterProperties());
     this.registry = registry;
     this.nameFilter = makeNameFilter(config.getExporterFilterProperties());
+    supportedFormats = new ArrayList<>(Arrays.asList("openmetrics", "text"));
+    if (expositionFormats.getPrometheusProtobufWriter().isAvailable()) {
+      supportedFormats.add("prometheus-protobuf");
+    }
   }
 
   public void handleRequest(PrometheusHttpExchange exchange) throws IOException {
@@ -137,9 +144,7 @@ public class PrometheusScrapeHandler {
       return false;
     } else {
       response.setHeader("Content-Type", "text/plain; charset=utf-8");
-      boolean supportedFormat =
-          Arrays.asList("openmetrics", "text", "prometheus-protobuf").contains(debugParam);
-      int responseStatus = supportedFormat ? 200 : 500;
+      int responseStatus = supportedFormats.contains(debugParam) ? 200 : 500;
       OutputStream body = response.sendHeadersAndGetBody(responseStatus, 0);
       switch (debugParam) {
         case "openmetrics":

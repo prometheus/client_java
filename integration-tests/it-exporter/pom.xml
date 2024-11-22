@@ -12,23 +12,16 @@
     <packaging>pom</packaging>
 
     <name>Integration Tests - Exporter</name>
-    <url>http://github.com/prometheus/client_java</url>
     <description>
         Integration tests for the Exporter modules
     </description>
-
-    <developers>
-        <developer>
-            <id>fstab</id>
-            <name>Fabian Stäber</name>
-            <email>fabian@fstab.de</email>
-        </developer>
-    </developers>
 
     <modules>
         <module>it-exporter-servlet-tomcat-sample</module>
         <module>it-exporter-servlet-jetty-sample</module>
         <module>it-exporter-httpserver-sample</module>
+        <module>it-exporter-no-protobuf</module>
         <module>it-exporter-test</module>
+        <module>it-no-protobuf-test</module>
     </modules>
 </project>

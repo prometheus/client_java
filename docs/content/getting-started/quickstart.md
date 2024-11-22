@@ -45,6 +45,14 @@ implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:$version'
 
 There are alternative exporters as well, for example if you are using a Servlet container like Tomcat or Undertow you might want to use `prometheus-exporter-servlet-jakarta` rather than a standalone HTTP server.
 
+{{< hint type=note >}}
+
+If you do not use the protobuf exposition format, you can 
+[exclude](../../exporters/formats#exclude-protobuf-exposition-format)
+it from the dependencies. 
+
+{{< /hint >}}
+
 # Dependency management
 
 A Bill of Material

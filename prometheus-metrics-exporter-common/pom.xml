@@ -28,8 +28,14 @@
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-exposition-textformats</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
             <artifactId>prometheus-metrics-exposition-formats</artifactId>
             <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

@@ -6,9 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
-import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
-import io.prometheus.metrics.expositionformats.TextFormatUtil;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
+import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
+import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Label;
@@ -112,8 +112,9 @@ class CounterTest {
           "my_counter_seconds", "my.counter.seconds"
         }) {
       Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
-      Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(counter.collect());
-      assertThat(TextFormatUtil.shortDebugString(protobufData))
+      Metrics.MetricFamily protobufData =
+          new PrometheusProtobufWriterImpl().convert(counter.collect());
+      assertThat(ProtobufUtil.shortDebugString(protobufData))
           .isEqualTo(
               "name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");
     }

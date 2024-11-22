@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
-import io.prometheus.metrics.expositionformats.PrometheusProtobufWriter;
-import io.prometheus.metrics.expositionformats.TextFormatUtil;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
+import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
+import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Unit;
@@ -27,8 +27,9 @@ class InfoTest {
       for (String labelName : new String[] {"my.key", "my_key"}) {
         Info info = Info.builder().name(name).labelNames(labelName).build();
         info.addLabelValues("value");
-        Metrics.MetricFamily protobufData = new PrometheusProtobufWriter().convert(info.collect());
-        assertThat(TextFormatUtil.shortDebugString(protobufData))
+        Metrics.MetricFamily protobufData =
+            new PrometheusProtobufWriterImpl().convert(info.collect());
+        assertThat(ProtobufUtil.shortDebugString(protobufData))
             .isEqualTo(
                 "name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value: \"value\" } gauge { value: 1.0 } }");
       }

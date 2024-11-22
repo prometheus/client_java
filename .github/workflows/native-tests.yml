@@ -1,0 +1,21 @@
+name: GraalVM Native Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  native-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: graalvm
+          cache: 'maven'
+      - name: Run the Maven verify phase
+        run: ./scripts/run-native-tests.sh

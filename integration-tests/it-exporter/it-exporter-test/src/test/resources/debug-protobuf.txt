@@ -1,0 +1,42 @@
+name: "integration_test_info"
+help: "Info metric on this integration test"
+type: GAUGE
+metric {
+  label {
+    name: "test_name"
+    value: "<app>"
+  }
+  gauge {
+    value: 1.0
+  }
+}
+name: "temperature_celsius"
+help: "Temperature in Celsius"
+type: GAUGE
+metric {
+  label {
+    name: "location"
+    value: "inside"
+  }
+  gauge {
+    value: 23.0
+  }
+}
+metric {
+  label {
+    name: "location"
+    value: "outside"
+  }
+  gauge {
+    value: 27.0
+  }
+}
+name: "uptime_seconds_total"
+help: "total number of seconds since this application was started"
+type: COUNTER
+metric {
+  counter {
+    value: 17.0
+  }
+}
+

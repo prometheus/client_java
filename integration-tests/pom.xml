@@ -13,7 +13,6 @@
     <packaging>pom</packaging>
 
     <name>Integration Tests</name>
-    <url>http://github.com/prometheus/client_java</url>
     <description>
         Integration tests for the Exporter modules
     </description>
@@ -26,6 +25,7 @@
         <module>it-common</module>
         <module>it-exporter</module>
         <module>it-pushgateway</module>
+        <module>it-spring-boot-smoke-test</module>
     </modules>
 
     <build>
@@ -46,7 +46,13 @@
             </plugin>
         </plugins>
     </build>
+
     <dependencies>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.18.0</version>
+        </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>

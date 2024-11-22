@@ -9,7 +9,7 @@
         <version>1.3.3</version>
     </parent>
 
-    <artifactId>otel-agent-resources</artifactId>
+    <artifactId>prometheus-metrics-exporter-opentelemetry-otel-agent-resources</artifactId>
     <packaging>bundle</packaging>
 
     <name>OpenTelemetry Agent Resource Extractor</name>
