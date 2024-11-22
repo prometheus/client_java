@@ -13,14 +13,10 @@ import javax.annotation.Nullable;
  */
 public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
-  @Nullable private final ExpositionFormatWriter delegate;
+  @Nullable private static final ExpositionFormatWriter DELEGATE = createProtobufWriter();
 
   public static final String CONTENT_TYPE =
       "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited";
-
-  public PrometheusProtobufWriter() {
-    this.delegate = createProtobufWriter();
-  }
 
   @Nullable
   private static ExpositionFormatWriter createProtobufWriter() {
@@ -53,23 +49,23 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
   @Override
   public boolean isAvailable() {
-    return delegate != null;
+    return DELEGATE != null;
   }
 
   @Override
   public String toDebugString(MetricSnapshots metricSnapshots) {
     checkAvailable();
-    return delegate.toDebugString(metricSnapshots);
+    return DELEGATE.toDebugString(metricSnapshots);
   }
 
   @Override
   public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
     checkAvailable();
-    delegate.write(out, metricSnapshots);
+    DELEGATE.write(out, metricSnapshots);
   }
 
   private void checkAvailable() {
-    if (delegate == null) {
+    if (DELEGATE == null) {
       throw new UnsupportedOperationException("Prometheus protobuf writer not available");
     }
   }
