@@ -9,6 +9,7 @@ import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,28 @@ public class CacheMetricsCollector implements MultiCollector {
 
   private static final double NANOSECONDS_PER_SECOND = 1_000_000_000.0;
 
+  private static final String METRIC_NAME_CACHE_HIT = "guava_cache_hit";
+  private static final String METRIC_NAME_CACHE_MISS = "guava_cache_miss";
+  private static final String METRIC_NAME_CACHE_REQUESTS = "guava_cache_requests";
+  private static final String METRIC_NAME_CACHE_EVICTION = "guava_cache_eviction";
+  private static final String METRIC_NAME_CACHE_LOAD_FAILURE = "guava_cache_load_failure";
+  private static final String METRIC_NAME_CACHE_LOADS = "guava_cache_loads";
+  private static final String METRIC_NAME_CACHE_SIZE = "guava_cache_size";
+  private static final String METRIC_NAME_CACHE_LOAD_DURATION_SECONDS =
+      "guava_cache_load_duration_seconds";
+
+  private static final List<String> ALL_METRIC_NAMES =
+      Collections.unmodifiableList(
+          Arrays.asList(
+              METRIC_NAME_CACHE_HIT,
+              METRIC_NAME_CACHE_MISS,
+              METRIC_NAME_CACHE_REQUESTS,
+              METRIC_NAME_CACHE_EVICTION,
+              METRIC_NAME_CACHE_LOAD_FAILURE,
+              METRIC_NAME_CACHE_LOADS,
+              METRIC_NAME_CACHE_SIZE,
+              METRIC_NAME_CACHE_LOAD_DURATION_SECONDS));
+
   protected final ConcurrentMap<String, Cache<?, ?>> children = new ConcurrentHashMap<>();
 
   /**
@@ -94,33 +117,33 @@ public class CacheMetricsCollector implements MultiCollector {
     final List<String> labelNames = Collections.singletonList("cache");
 
     final CounterSnapshot.Builder cacheHitTotal =
-        CounterSnapshot.builder().name("guava_cache_hit").help("Cache hit totals");
+        CounterSnapshot.builder().name(METRIC_NAME_CACHE_HIT).help("Cache hit totals");
 
     final CounterSnapshot.Builder cacheMissTotal =
-        CounterSnapshot.builder().name("guava_cache_miss").help("Cache miss totals");
+        CounterSnapshot.builder().name(METRIC_NAME_CACHE_MISS).help("Cache miss totals");
 
     final CounterSnapshot.Builder cacheRequestsTotal =
-        CounterSnapshot.builder().name("guava_cache_requests").help("Cache request totals");
+        CounterSnapshot.builder().name(METRIC_NAME_CACHE_REQUESTS).help("Cache request totals");
 
     final CounterSnapshot.Builder cacheEvictionTotal =
         CounterSnapshot.builder()
-            .name("guava_cache_eviction")
+            .name(METRIC_NAME_CACHE_EVICTION)
             .help("Cache eviction totals, doesn't include manually removed entries");
 
     final CounterSnapshot.Builder cacheLoadFailure =
-        CounterSnapshot.builder().name("guava_cache_load_failure").help("Cache load failures");
+        CounterSnapshot.builder().name(METRIC_NAME_CACHE_LOAD_FAILURE).help("Cache load failures");
 
     final CounterSnapshot.Builder cacheLoadTotal =
         CounterSnapshot.builder()
-            .name("guava_cache_loads")
+            .name(METRIC_NAME_CACHE_LOADS)
             .help("Cache loads: both success and failures");
 
     final GaugeSnapshot.Builder cacheSize =
-        GaugeSnapshot.builder().name("guava_cache_size").help("Cache size");
+        GaugeSnapshot.builder().name(METRIC_NAME_CACHE_SIZE).help("Cache size");
 
     final SummarySnapshot.Builder cacheLoadSummary =
         SummarySnapshot.builder()
-            .name("guava_cache_load_duration_seconds")
+            .name(METRIC_NAME_CACHE_LOAD_DURATION_SECONDS)
             .help("Cache load duration: both success and failures");
 
     for (final Map.Entry<String, Cache<?, ?>> c : children.entrySet()) {
@@ -191,5 +214,10 @@ public class CacheMetricsCollector implements MultiCollector {
     metricSnapshotsBuilder.metricSnapshot(cacheLoadSummary.build());
 
     return metricSnapshotsBuilder.build();
+  }
+
+  @Override
+  public List<String> getPrometheusNames() {
+    return ALL_METRIC_NAMES;
   }
 }
