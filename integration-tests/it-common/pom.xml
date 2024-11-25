@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.prometheus</groupId>
         <artifactId>integration-tests</artifactId>
-        <version>1.3.3</version>
+        <version>10.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>it-common</artifactId>
