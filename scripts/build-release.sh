@@ -6,4 +6,4 @@ TAG=$1
 VERSION=${TAG#v}
 
 mvn versions:set -DnewVersion=$VERSION
-mvn -B install -P release -DskipTests=true
+mvn -B package -P release -Dmaven.test.skip=true
