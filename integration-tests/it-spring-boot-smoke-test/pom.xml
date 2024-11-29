@@ -14,7 +14,7 @@
 
     <groupId>io.prometheus</groupId>
     <artifactId>it-spring-boot-smoke-test</artifactId>
-    <version>10.0.0-SNAPSHOT</version>
+    <version>1.4.0-SNAPSHOT</version>
 
     <name>Integration Test - Spring Smoke Tests</name>
     <description>
