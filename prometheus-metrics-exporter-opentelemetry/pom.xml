@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,6 +20,8 @@
 
     <properties>
         <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry</automatic.module.name>
+        <!-- don't update with dependabot, the Otel agent can handle older versions -->
+        <otel-dynamic-load.version>1.29.0</otel-dynamic-load.version>
     </properties>
 
     <dependencyManagement>
@@ -37,11 +40,6 @@
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>prometheus-metrics-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exporter-opentelemetry-otel-agent-resources</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -104,11 +102,45 @@
     <build>
         <resources>
             <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
                 <directory>src/main/resources-filtered</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>io.opentelemetry</groupId>
+                            <artifactId>opentelemetry-api</artifactId>
+                            <version>${otel-dynamic-load.version}</version>
+                            <outputDirectory>${project.basedir}/src/main/resources/lib/
+                            </outputDirectory>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>io.opentelemetry</groupId>
+                            <artifactId>opentelemetry-context</artifactId>
+                            <version>${otel-dynamic-load.version}</version>
+                            <outputDirectory>${project.basedir}/src/main/resources/lib/
+                            </outputDirectory>
+                        </artifactItem>
+                    </artifactItems>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -127,6 +159,16 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/lib/*.jar</exclude>
+                        <exclude>**/ResourceAttributesFromOtelAgent*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -200,7 +242,7 @@
                             </relocations>
                             <transformers>
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
                             <filters>
                                 <filter>

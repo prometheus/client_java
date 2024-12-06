@@ -1,4 +1,4 @@
-package io.prometheus.otelagent;
+package io.prometheus.metrics.exporter.opentelemetry;
 
 import static java.nio.file.Files.createTempDirectory;
 

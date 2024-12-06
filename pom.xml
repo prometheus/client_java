@@ -72,7 +72,6 @@
         <module>prometheus-metrics-exporter-servlet-javax</module>
         <module>prometheus-metrics-exporter-httpserver</module>
         <module>prometheus-metrics-exporter-opentelemetry</module>
-        <module>prometheus-metrics-exporter-opentelemetry-otel-agent-resources</module>
         <module>prometheus-metrics-exporter-pushgateway</module>
         <module>prometheus-metrics-instrumentation-caffeine</module>
         <module>prometheus-metrics-instrumentation-jvm</module>
