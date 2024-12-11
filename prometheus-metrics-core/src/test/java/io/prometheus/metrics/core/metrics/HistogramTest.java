@@ -8,7 +8,7 @@ import static org.assertj.core.data.Offset.offset;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_28_3.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_29_1.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
