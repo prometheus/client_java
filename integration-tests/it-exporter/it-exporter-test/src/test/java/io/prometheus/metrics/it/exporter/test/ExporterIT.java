@@ -142,10 +142,6 @@ abstract class ExporterIT extends ExporterTest {
     assertThat(response.stringBody()).contains("Simulating an error.");
   }
 
-  protected boolean headReturnsContentLength() {
-    return true;
-  }
-
   @Test
   public void testHeadRequest() throws IOException {
     start();
@@ -154,11 +150,7 @@ abstract class ExporterIT extends ExporterTest {
     assertThat(size).isGreaterThan(0);
     Response headResponse = scrape("HEAD", "");
     assertThat(headResponse.status).isEqualTo(200);
-    if (headReturnsContentLength()) {
-      assertThat(headResponse.getHeader("Content-Length")).isEqualTo(Integer.toString(size));
-    } else {
-      assertThat(headResponse.getHeader("Content-Length")).isNull();
-    }
+    assertThat(headResponse.getHeader("Content-Length")).isEqualTo(Integer.toString(size));
     assertThat(headResponse.body).isEmpty();
   }
 
