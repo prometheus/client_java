@@ -1,6 +1,6 @@
 # Prometheus Java Metrics Library
 
-[![Build Status](https://circleci.com/gh/prometheus/client_java.svg?style=svg)](https://circleci.com/gh/prometheus/client_java)
+[![Build](https://github.com/prometheus/client_java/actions/workflows/build.yml/badge.svg)](https://github.com/prometheus/client_java/actions/workflows/build.yml) <a href="#"><img src="https://img.shields.io/badge/JDK%20compatibility-8+-blue.svg" alt="java 8+"></a> <a href="#"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="Apache 2.0"></a>
 
 # Documentation
 
