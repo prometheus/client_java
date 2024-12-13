@@ -3,13 +3,10 @@ package io.prometheus.metrics.instrumentation.dropwizard;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.data.Offset.offset;
 
 import com.codahale.metrics.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -159,62 +156,38 @@ class DropwizardExportsTest {
     }
 
     // The result should look like this
-    //
-    // # TYPE hist summary
-    // # HELP hist Generated from Dropwizard metric import (metric=hist,
-    // type=com.codahale.metrics.Histogram)
-    // hist{quantile="0.5"} 49.0
-    // hist{quantile="0.75"} 74.0
-    // hist{quantile="0.95"} 94.0
-    // hist{quantile="0.98"} 97.0
-    // hist{quantile="0.99"} 98.0
-    // hist{quantile="0.999"} 99.0
-    // hist_count 100
-    // # EOF
-    //
+    String expected1 =
+        "# TYPE hist summary\n"
+            + "# HELP hist Generated from Dropwizard metric import (metric=hist, type=com.codahale.metrics.Histogram)\n"
+            + "hist{quantile=\"0.5\"} 49.0\n"
+            + "hist{quantile=\"0.75\"} 74.0\n"
+            + "hist{quantile=\"0.95\"} 94.0\n"
+            + "hist{quantile=\"0.98\"} 97.0\n"
+            + "hist{quantile=\"0.99\"} 98.0\n"
+            + "hist{quantile=\"0.999\"} 99.0\n"
+            + "hist_count 100\n"
+            + "# EOF\n";
+
     // However, Dropwizard uses a random reservoir sampling algorithm, so the values could as well
     // be off-by-one
-    //
-    // # TYPE hist summary
-    // # HELP hist Generated from Dropwizard metric import (metric=hist,
-    // type=com.codahale.metrics.Histogram)
-    // hist{quantile="0.5"} 50.0
-    // hist{quantile="0.75"} 75.0
-    // hist{quantile="0.95"} 95.0
-    // hist{quantile="0.98"} 98.0
-    // hist{quantile="0.99"} 99.0
-    // hist{quantile="0.999"} 99.0
-    // hist_count 100
-    // # EOF
-    //
-    // The following asserts the values, but allows an error of 1.0 for quantile values.
+    String expected2 =
+        "# TYPE hist summary\n"
+            + "# HELP hist Generated from Dropwizard metric import (metric=hist, type=com.codahale.metrics.Histogram)\n"
+            + "hist{quantile=\"0.5\"} 50.0\n"
+            + "hist{quantile=\"0.75\"} 75.0\n"
+            + "hist{quantile=\"0.95\"} 95.0\n"
+            + "hist{quantile=\"0.98\"} 98.0\n"
+            + "hist{quantile=\"0.99\"} 99.0\n"
+            + "hist{quantile=\"0.999\"} 99.0\n"
+            + "hist_count 100\n"
+            + "# EOF\n";
 
-    MetricSnapshots snapshots = pmRegistry.scrape(name -> name.equals("hist"));
-    assertThat(snapshots.size()).isOne();
-    SummarySnapshot snapshot = (SummarySnapshot) snapshots.get(0);
-    assertThat(snapshot.getMetadata().getName()).isEqualTo("hist");
-    assertThat(snapshot.getMetadata().getHelp())
-        .isEqualTo(
-            "Generated from Dropwizard metric import (metric=hist, type=com.codahale.metrics.Histogram)");
-    assertThat(snapshot.getDataPoints().size()).isOne();
-    SummarySnapshot.SummaryDataPointSnapshot dataPoint = snapshot.getDataPoints().get(0);
-    assertThat(dataPoint.hasCount()).isTrue();
-    assertThat(dataPoint.getCount()).isEqualTo(100);
-    assertThat(dataPoint.hasSum()).isFalse();
-    Quantiles quantiles = dataPoint.getQuantiles();
-    assertThat(quantiles.size()).isEqualTo(6);
-    assertThat(quantiles.get(0).getQuantile()).isEqualTo(0.5);
-    assertThat(quantiles.get(0).getValue()).isCloseTo(49.0, offset(1.0));
-    assertThat(quantiles.get(1).getQuantile()).isEqualTo(0.75);
-    assertThat(quantiles.get(1).getValue()).isCloseTo(74.0, offset(1.0));
-    assertThat(quantiles.get(2).getQuantile()).isEqualTo(0.95);
-    assertThat(quantiles.get(2).getValue()).isCloseTo(94.0, offset(1.0));
-    assertThat(quantiles.get(3).getQuantile()).isEqualTo(0.98);
-    assertThat(quantiles.get(3).getValue()).isCloseTo(97.0, offset(1.0));
-    assertThat(quantiles.get(4).getQuantile()).isEqualTo(0.99);
-    assertThat(quantiles.get(4).getValue()).isCloseTo(98.0, offset(1.0));
-    assertThat(quantiles.get(5).getQuantile()).isEqualTo(0.999);
-    assertThat(quantiles.get(5).getValue()).isCloseTo(99.0, offset(1.0));
+    // The following asserts the values matches either of the expected value.
+    String textFormat = convertToOpenMetricsFormat(pmRegistry);
+    assertThat(textFormat)
+        .satisfiesAnyOf(
+            text -> assertThat(text).isEqualTo(expected1),
+            text -> assertThat(text).isEqualTo(expected2));
   }
 
   @Test
