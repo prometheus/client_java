@@ -129,7 +129,7 @@ public class JvmThreadsMetrics {
           .labelNames("state")
           .callback(
               callback -> {
-                Map<String, Integer> threadStateCounts = getThreadStateCountMap(threadBean);
+                Map<String, Integer> threadStateCounts = getThreadStateCountMapFromThreadGroup();
                 for (Map.Entry<String, Integer> entry : threadStateCounts.entrySet()) {
                   callback.call(entry.getValue(), entry.getKey());
                 }
@@ -171,6 +171,49 @@ public class JvmThreadsMetrics {
 
     // Add the thread count for invalid thread ids
     threadCounts.put(UNKNOWN, numberOfInvalidThreadIds);
+
+    return threadCounts;
+  }
+
+  private Map<String, Integer> getThreadStateCountMapFromThreadGroup() {
+    int threadsNew = 0;
+    int threadsRunnable = 0;
+    int threadsBlocked = 0;
+    int threadsWaiting = 0;
+    int threadsTimedWaiting = 0;
+    int threadsTerminated = 0;
+    int threadsUnknown = 0;
+    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+    Thread[] threads = new Thread[threadGroup.activeCount()];
+    threadGroup.enumerate(threads);
+    for (Thread thread : threads) {
+      if (thread == null) {
+        // race protection
+        continue;
+      }
+      switch (thread.getState()) {
+        case NEW:           threadsNew++;           break;
+        case RUNNABLE:      threadsRunnable++;      break;
+        case BLOCKED:       threadsBlocked++;       break;
+        case WAITING:       threadsWaiting++;       break;
+        case TIMED_WAITING: threadsTimedWaiting++;  break;
+        case TERMINATED:    threadsTerminated++;    break;
+        default:
+          threadsUnknown++;
+      }
+    }
+
+    // Initialize the map with all thread states
+    Map<String, Integer> threadCounts = new HashMap<>();
+
+    threadCounts.put(Thread.State.NEW.name(), threadsNew);
+    threadCounts.put(Thread.State.RUNNABLE.name(), threadsRunnable);
+    threadCounts.put(Thread.State.BLOCKED.name(), threadsBlocked);
+    threadCounts.put(Thread.State.WAITING.name(), threadsWaiting);
+    threadCounts.put(Thread.State.TIMED_WAITING.name(), threadsTimedWaiting);
+    threadCounts.put(Thread.State.TERMINATED.name(), threadsTerminated);
+    // Add the thread count for invalid thread ids
+    threadCounts.put(UNKNOWN, threadsUnknown);
 
     return threadCounts;
   }
