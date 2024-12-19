@@ -2,7 +2,7 @@ package io.prometheus.metrics.expositionformats;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_29_1.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_29_2.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
