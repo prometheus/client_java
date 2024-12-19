@@ -129,7 +129,7 @@ public class JvmThreadsMetrics {
           .labelNames("state")
           .callback(
               callback -> {
-                Map<String, Integer> threadStateCounts = getThreadStateCountMap(threadBean);
+                Map<String, Integer> threadStateCounts = getThreadStateCountMapFromThreadGroup();
                 for (Map.Entry<String, Integer> entry : threadStateCounts.entrySet()) {
                   callback.call(entry.getValue(), entry.getKey());
                 }
@@ -138,39 +138,45 @@ public class JvmThreadsMetrics {
     }
   }
 
-  private Map<String, Integer> getThreadStateCountMap(ThreadMXBean threadBean) {
-    long[] threadIds = threadBean.getAllThreadIds();
-
-    // Code to remove any thread id values <= 0
-    int writePos = 0;
-    for (int i = 0; i < threadIds.length; i++) {
-      if (threadIds[i] > 0) {
-        threadIds[writePos++] = threadIds[i];
+  private Map<String, Integer> getThreadStateCountMapFromThreadGroup() {
+    int threadsNew = 0;
+    int threadsRunnable = 0;
+    int threadsBlocked = 0;
+    int threadsWaiting = 0;
+    int threadsTimedWaiting = 0;
+    int threadsTerminated = 0;
+    int threadsUnknown = 0;
+    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+    Thread[] threads = new Thread[threadGroup.activeCount()];
+    threadGroup.enumerate(threads);
+    for (Thread thread : threads) {
+      if (thread == null) {
+        // race protection
+        continue;
+      }
+      switch (thread.getState()) {
+        case NEW:           threadsNew++;           break;
+        case RUNNABLE:      threadsRunnable++;      break;
+        case BLOCKED:       threadsBlocked++;       break;
+        case WAITING:       threadsWaiting++;       break;
+        case TIMED_WAITING: threadsTimedWaiting++;  break;
+        case TERMINATED:    threadsTerminated++;    break;
+        default:
+          threadsUnknown++;
       }
     }
-
-    final int numberOfInvalidThreadIds = threadIds.length - writePos;
-    threadIds = Arrays.copyOf(threadIds, writePos);
-
-    // Get thread information without computing any stack traces
-    ThreadInfo[] allThreads = threadBean.getThreadInfo(threadIds, 0);
 
     // Initialize the map with all thread states
     Map<String, Integer> threadCounts = new HashMap<>();
-    for (Thread.State state : Thread.State.values()) {
-      threadCounts.put(state.name(), 0);
-    }
 
-    // Collect the actual thread counts
-    for (ThreadInfo curThread : allThreads) {
-      if (curThread != null) {
-        Thread.State threadState = curThread.getThreadState();
-        threadCounts.put(threadState.name(), threadCounts.get(threadState.name()) + 1);
-      }
-    }
-
+    threadCounts.put(Thread.State.NEW.name(), threadsNew);
+    threadCounts.put(Thread.State.RUNNABLE.name(), threadsRunnable);
+    threadCounts.put(Thread.State.BLOCKED.name(), threadsBlocked);
+    threadCounts.put(Thread.State.WAITING.name(), threadsWaiting);
+    threadCounts.put(Thread.State.TIMED_WAITING.name(), threadsTimedWaiting);
+    threadCounts.put(Thread.State.TERMINATED.name(), threadsTerminated);
     // Add the thread count for invalid thread ids
-    threadCounts.put(UNKNOWN, numberOfInvalidThreadIds);
+    threadCounts.put(UNKNOWN, threadsUnknown);
 
     return threadCounts;
   }
