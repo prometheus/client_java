@@ -138,43 +138,6 @@ public class JvmThreadsMetrics {
     }
   }
 
-  private Map<String, Integer> getThreadStateCountMap(ThreadMXBean threadBean) {
-    long[] threadIds = threadBean.getAllThreadIds();
-
-    // Code to remove any thread id values <= 0
-    int writePos = 0;
-    for (int i = 0; i < threadIds.length; i++) {
-      if (threadIds[i] > 0) {
-        threadIds[writePos++] = threadIds[i];
-      }
-    }
-
-    final int numberOfInvalidThreadIds = threadIds.length - writePos;
-    threadIds = Arrays.copyOf(threadIds, writePos);
-
-    // Get thread information without computing any stack traces
-    ThreadInfo[] allThreads = threadBean.getThreadInfo(threadIds, 0);
-
-    // Initialize the map with all thread states
-    Map<String, Integer> threadCounts = new HashMap<>();
-    for (Thread.State state : Thread.State.values()) {
-      threadCounts.put(state.name(), 0);
-    }
-
-    // Collect the actual thread counts
-    for (ThreadInfo curThread : allThreads) {
-      if (curThread != null) {
-        Thread.State threadState = curThread.getThreadState();
-        threadCounts.put(threadState.name(), threadCounts.get(threadState.name()) + 1);
-      }
-    }
-
-    // Add the thread count for invalid thread ids
-    threadCounts.put(UNKNOWN, numberOfInvalidThreadIds);
-
-    return threadCounts;
-  }
-
   private Map<String, Integer> getThreadStateCountMapFromThreadGroup() {
     int threadsNew = 0;
     int threadsRunnable = 0;
