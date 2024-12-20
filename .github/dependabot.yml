@@ -8,7 +8,7 @@ updates:
     # excluding simpleclient_archive from the update is not possible, only includes are supported
     # when we use includes, we run into https://github.com/dependabot/dependabot-core/issues/10415 -
     # even if we limit to 1 PR at a time
-    # therefore we just ignore the simpleclient_archive update for now
+    # therefore we just rename pom.xml in simpleclient_archive for now
     # if this becomes a problem, we can move to renovate
     directory: "/"
     schedule:
