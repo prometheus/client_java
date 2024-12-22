@@ -26,7 +26,7 @@ public class SlidingWindow<T> {
   private int currentBucket;
   private long lastRotateTimestampMillis;
   private final long durationBetweenRotatesMillis;
-  LongSupplier currentTimeMillis = System::currentTimeMillis; // to be replaced in unit tests
+  private final LongSupplier currentTimeMillis;
 
   /**
    * Example: If the {@code maxAgeSeconds} is 60 and {@code ageBuckets} is 3, then 3 instances of
@@ -39,13 +39,24 @@ public class SlidingWindow<T> {
    * @param maxAgeSeconds after this amount of time an instance of T gets evicted.
    * @param ageBuckets number of age buckets.
    */
-  @SuppressWarnings("unchecked")
   public SlidingWindow(
       Class<T> clazz,
       Supplier<T> constructor,
       ObjDoubleConsumer<T> observeFunction,
       long maxAgeSeconds,
       int ageBuckets) {
+    this(clazz, constructor, observeFunction, maxAgeSeconds, ageBuckets, System::currentTimeMillis);
+  }
+
+  // VisibleForTesting
+  @SuppressWarnings("unchecked")
+  SlidingWindow(
+      Class<T> clazz,
+      Supplier<T> constructor,
+      ObjDoubleConsumer<T> observeFunction,
+      long maxAgeSeconds,
+      int ageBuckets,
+      LongSupplier currentTimeMillis) {
     this.constructor = constructor;
     this.observeFunction = observeFunction;
     this.ringBuffer = (T[]) Array.newInstance(clazz, ageBuckets);
@@ -55,6 +66,7 @@ public class SlidingWindow<T> {
     this.currentBucket = 0;
     this.lastRotateTimestampMillis = currentTimeMillis.getAsLong();
     this.durationBetweenRotatesMillis = TimeUnit.SECONDS.toMillis(maxAgeSeconds) / ageBuckets;
+    this.currentTimeMillis = currentTimeMillis;
   }
 
   /** Get the currently active instance of {@code T}. */
