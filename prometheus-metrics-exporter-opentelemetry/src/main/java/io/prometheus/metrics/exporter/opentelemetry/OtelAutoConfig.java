@@ -11,7 +11,6 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.prometheus.metrics.config.ExporterOpenTelemetryProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.otelagent.ResourceAttributesFromOtelAgent;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
