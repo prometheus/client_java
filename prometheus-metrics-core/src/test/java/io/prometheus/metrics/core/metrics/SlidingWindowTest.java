@@ -48,8 +48,12 @@ class SlidingWindowTest {
     currentTimeMillis.set(startTime);
     ringBuffer =
         new SlidingWindow<>(
-            Observer.class, Observer::new, Observer::observe, maxAgeSeconds, ageBuckets);
-    ringBuffer.currentTimeMillis = currentTimeMillis::get;
+            Observer.class,
+            Observer::new,
+            Observer::observe,
+            maxAgeSeconds,
+            ageBuckets,
+            currentTimeMillis::get);
   }
 
   @Test
