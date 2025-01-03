@@ -1,6 +1,15 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.PrometheusProperties;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.lang.Character.MAX_LOW_SURROGATE;
+import static java.lang.Character.MIN_HIGH_SURROGATE;
 
 /**
  * Utility for Prometheus Metric and Label naming.
@@ -11,12 +20,44 @@ import java.util.regex.Pattern;
  */
 public class PrometheusNaming {
 
+  /**
+   * nameValidationScheme determines the method of name validation to be used by
+   * all calls to validateMetricName() and isValidMetricName(). Setting UTF-8 mode
+   * in isolation from other components that don't support UTF-8 may result in
+   * bugs or other undefined behavior. This value is intended to be set by
+   * UTF-8-aware binaries as part of their startup via a properties file.
+   */
+  public static ValidationScheme nameValidationScheme = initValidationScheme();
+
+  /**
+   * nameEscapingScheme defines the default way that names will be
+   * escaped when presented to systems that do not support UTF-8 names. If the
+   * Accept "escaping" term is specified, that will override this value.
+   */
+  public static EscapingScheme nameEscapingScheme = EscapingScheme.VALUE_ENCODING_ESCAPING;
+
+  /**
+   * ESCAPING_KEY is the key in an Accept header that defines how
+   * metric and label names that do not conform to the legacy character
+   * requirements should be escaped when being scraped by a legacy Prometheus
+   * system. If a system does not explicitly pass an escaping parameter in the
+   * Accept header, the default nameEscapingScheme will be used.
+   */
+  public static final String ESCAPING_KEY = "escaping";
+
+  private static final String LOWERHEX = "0123456789abcdef";
+
+  private static final String METRIC_NAME_LABEL= "__name__";
+
   /** Legal characters for metric names, including dot. */
-  private static final Pattern METRIC_NAME_PATTERN =
+  private static final Pattern LEGACY_METRIC_NAME_PATTERN =
       Pattern.compile("^[a-zA-Z_.:][a-zA-Z0-9_.:]*$");
 
+  private static final Pattern METRIC_NAME_PATTERN =
+    Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
+
   /** Legal characters for label names, including dot. */
-  private static final Pattern LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
+  private static final Pattern LEGACY_LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
 
   /** Legal characters for unit names, including dot. */
   private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
@@ -41,11 +82,21 @@ public class PrometheusNaming {
     ".total", ".created", ".bucket", ".info"
   };
 
+  static ValidationScheme initValidationScheme() {
+    if (PrometheusProperties.get() != null && PrometheusProperties.get().getNamingProperties() != null) {
+      String validationScheme = PrometheusProperties.get().getNamingProperties().getValidationScheme();
+      if (validationScheme != null && validationScheme.equals("utf-8")) {
+        return ValidationScheme.UTF_8_VALIDATION;
+      }
+    }
+    return ValidationScheme.LEGACY_VALIDATION;
+  }
+
   /**
    * Test if a metric name is valid. Rules:
    *
    * <ul>
-   *   <li>The name must match {@link #METRIC_NAME_PATTERN}.
+   *   <li>The name must match {@link #LEGACY_METRIC_NAME_PATTERN}.
    *   <li>The name MUST NOT end with one of the {@link #RESERVED_METRIC_NAME_SUFFIXES}.
    * </ul>
    *
@@ -65,25 +116,61 @@ public class PrometheusNaming {
     return validateMetricName(name) == null;
   }
 
+  public static String validateMetricName(String name) {
+    switch (nameValidationScheme) {
+      case LEGACY_VALIDATION:
+        return validateLegacyMetricName(name);
+      case UTF_8_VALIDATION:
+        if(name.isEmpty() || !StandardCharsets.UTF_8.newEncoder().canEncode(name)) {
+          return "The metric name contains unsupported characters";
+        }
+        return null;
+      default:
+        throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+    }
+  }
+
   /**
    * Same as {@link #isValidMetricName(String)}, but produces an error message.
    *
    * <p>The name is valid if the error message is {@code null}.
    */
-  public static String validateMetricName(String name) {
+  public static String validateLegacyMetricName(String name) {
     for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
       if (name.endsWith(reservedSuffix)) {
         return "The metric name must not include the '" + reservedSuffix + "' suffix.";
       }
     }
-    if (!METRIC_NAME_PATTERN.matcher(name).matches()) {
+    if (!isValidLegacyMetricName(name)) {
       return "The metric name contains unsupported characters";
     }
     return null;
   }
 
+  public static boolean isValidLegacyMetricName(String name) {
+    switch (nameValidationScheme) {
+      case LEGACY_VALIDATION:
+        return LEGACY_METRIC_NAME_PATTERN.matcher(name).matches();
+      case UTF_8_VALIDATION:
+        return METRIC_NAME_PATTERN.matcher(name).matches();
+      default:
+        throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+    }
+  }
+
   public static boolean isValidLabelName(String name) {
-    return LABEL_NAME_PATTERN.matcher(name).matches()
+    switch (nameValidationScheme) {
+      case LEGACY_VALIDATION:
+        return isValidLegacyLabelName(name);
+      case UTF_8_VALIDATION:
+        return StandardCharsets.UTF_8.newEncoder().canEncode(name);
+      default:
+        throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+    }
+  }
+
+  public static boolean isValidLegacyLabelName(String name) {
+    return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches()
         && !(name.startsWith("__")
             || name.startsWith("._")
             || name.startsWith("..")
@@ -226,7 +313,7 @@ public class PrometheusNaming {
     return sanitizedName;
   }
 
-  /** Returns a string that matches {@link #METRIC_NAME_PATTERN}. */
+  /** Returns a string that matches {@link #LEGACY_METRIC_NAME_PATTERN}. */
   private static String replaceIllegalCharsInMetricName(String name) {
     int length = name.length();
     char[] sanitized = new char[length];
@@ -244,7 +331,7 @@ public class PrometheusNaming {
     return new String(sanitized);
   }
 
-  /** Returns a string that matches {@link #LABEL_NAME_PATTERN}. */
+  /** Returns a string that matches {@link #LEGACY_LABEL_NAME_PATTERN}. */
   private static String replaceIllegalCharsInLabelName(String name) {
     int length = name.length();
     char[] sanitized = new char[length];
@@ -279,5 +366,367 @@ public class PrometheusNaming {
       }
     }
     return new String(sanitized);
+  }
+
+  /**
+   * Escapes the given metric names and labels with the given
+   * escaping scheme.
+   */
+  public static MetricSnapshot escapeMetricSnapshot(MetricSnapshot v, EscapingScheme scheme) {
+    if (v == null) {
+      return null;
+    }
+
+    if (scheme == EscapingScheme.NO_ESCAPING) {
+      return v;
+    }
+
+    String outName;
+
+    // If the name is null, copy as-is, don't try to escape.
+    if (v.getMetadata().getPrometheusName() == null || isValidLegacyMetricName(v.getMetadata().getPrometheusName())) {
+      outName = v.getMetadata().getPrometheusName();
+    } else {
+      outName = escapeName(v.getMetadata().getPrometheusName(), scheme);
+    }
+
+    List<DataPointSnapshot> outDataPoints = new ArrayList<>();
+
+    for (DataPointSnapshot d : v.getDataPoints()) {
+      if (!metricNeedsEscaping(d)) {
+        outDataPoints.add(d);
+        continue;
+      }
+
+      Labels.Builder outLabelsBuilder = Labels.builder();
+
+      for (Label l : d.getLabels()) {
+        if (METRIC_NAME_LABEL.equals(l.getName())) {
+          if (l.getValue() == null || isValidLegacyMetricName(l.getValue())) {
+            outLabelsBuilder.label(l.getName(), l.getValue());
+            continue;
+          }
+          outLabelsBuilder.label(l.getName(), escapeName(l.getValue(), scheme));
+          continue;
+        }
+        if (l.getName() == null || isValidLegacyMetricName(l.getName())) {
+          outLabelsBuilder.label(l.getName(), l.getValue());
+          continue;
+        }
+        outLabelsBuilder.label(escapeName(l.getName(), scheme), l.getValue());
+      }
+
+      Labels outLabels = outLabelsBuilder.build();
+      DataPointSnapshot outDataPointSnapshot = null;
+
+      if (v instanceof CounterSnapshot) {
+        outDataPointSnapshot = CounterSnapshot.CounterDataPointSnapshot.builder()
+          .value(((CounterSnapshot.CounterDataPointSnapshot) d).getValue())
+          .exemplar(((CounterSnapshot.CounterDataPointSnapshot) d).getExemplar())
+          .labels(outLabels)
+          .createdTimestampMillis(d.getCreatedTimestampMillis())
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
+      } else if (v instanceof GaugeSnapshot) {
+        outDataPointSnapshot = GaugeSnapshot.GaugeDataPointSnapshot.builder()
+          .value(((GaugeSnapshot.GaugeDataPointSnapshot) d).getValue())
+          .exemplar(((GaugeSnapshot.GaugeDataPointSnapshot) d).getExemplar())
+          .labels(outLabels)
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
+      } else if (v instanceof HistogramSnapshot) {
+        outDataPointSnapshot = HistogramSnapshot.HistogramDataPointSnapshot.builder()
+          .classicHistogramBuckets(((HistogramSnapshot.HistogramDataPointSnapshot) d).getClassicBuckets())
+          .nativeSchema(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeSchema())
+          .nativeZeroCount(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroCount())
+          .nativeZeroThreshold(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroThreshold())
+          .nativeBucketsForPositiveValues(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeBucketsForPositiveValues())
+          .nativeBucketsForNegativeValues(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeBucketsForNegativeValues())
+          .count(((HistogramSnapshot.HistogramDataPointSnapshot) d).getCount())
+          .sum(((HistogramSnapshot.HistogramDataPointSnapshot) d).getSum())
+          .exemplars(((HistogramSnapshot.HistogramDataPointSnapshot) d).getExemplars())
+          .labels(outLabels)
+          .createdTimestampMillis(d.getCreatedTimestampMillis())
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
+      } else if (v instanceof SummarySnapshot) {
+        outDataPointSnapshot = SummarySnapshot.SummaryDataPointSnapshot.builder()
+          .quantiles(((SummarySnapshot.SummaryDataPointSnapshot) d).getQuantiles())
+          .count(((SummarySnapshot.SummaryDataPointSnapshot) d).getCount())
+          .sum(((SummarySnapshot.SummaryDataPointSnapshot) d).getSum())
+          .exemplars(((SummarySnapshot.SummaryDataPointSnapshot) d).getExemplars())
+          .labels(outLabels)
+          .createdTimestampMillis(d.getCreatedTimestampMillis())
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
+      } else if (v instanceof InfoSnapshot) {
+        outDataPointSnapshot = InfoSnapshot.InfoDataPointSnapshot.builder()
+          .labels(outLabels)
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
+      } else if (v instanceof StateSetSnapshot) {
+        StateSetSnapshot.StateSetDataPointSnapshot.Builder builder = StateSetSnapshot.StateSetDataPointSnapshot.builder()
+          .labels(outLabels)
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis());
+        for (StateSetSnapshot.State state : ((StateSetSnapshot.StateSetDataPointSnapshot) d)) {
+          builder.state(state.getName(), state.isTrue());
+        }
+        outDataPointSnapshot = builder.build();
+      } else if (v instanceof UnknownSnapshot) {
+        outDataPointSnapshot = UnknownSnapshot.UnknownDataPointSnapshot.builder()
+          .labels(outLabels)
+          .value(((UnknownSnapshot.UnknownDataPointSnapshot) d).getValue())
+          .exemplar(((UnknownSnapshot.UnknownDataPointSnapshot) d).getExemplar())
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
+      }
+
+      outDataPoints.add(outDataPointSnapshot);
+    }
+
+    MetricSnapshot out;
+
+    if (v instanceof CounterSnapshot) {
+      CounterSnapshot.Builder builder = CounterSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((CounterSnapshot.CounterDataPointSnapshot) d);
+      }
+      out = builder.build();
+    } else if (v instanceof GaugeSnapshot) {
+      GaugeSnapshot.Builder builder = GaugeSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((GaugeSnapshot.GaugeDataPointSnapshot) d);
+      }
+      out = builder.build();
+    } else if (v instanceof HistogramSnapshot) {
+      HistogramSnapshot.Builder builder = HistogramSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit())
+        .gaugeHistogram(((HistogramSnapshot) v).isGaugeHistogram());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((HistogramSnapshot.HistogramDataPointSnapshot) d);
+      }
+      out = builder.build();
+    } else if (v instanceof SummarySnapshot) {
+      SummarySnapshot.Builder builder = SummarySnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((SummarySnapshot.SummaryDataPointSnapshot) d);
+      }
+      out = builder.build();
+    } else if (v instanceof InfoSnapshot) {
+      InfoSnapshot.Builder builder = InfoSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((InfoSnapshot.InfoDataPointSnapshot) d);
+      }
+      out = builder.build();
+    } else if (v instanceof StateSetSnapshot) {
+      StateSetSnapshot.Builder builder = StateSetSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((StateSetSnapshot.StateSetDataPointSnapshot) d);
+      }
+      out = builder.build();
+    } else if (v instanceof UnknownSnapshot) {
+      UnknownSnapshot.Builder builder = UnknownSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((UnknownSnapshot.UnknownDataPointSnapshot) d);
+      }
+      out = builder.build();
+    } else {
+      throw new IllegalArgumentException("Unknown MetricSnapshot type: " + v.getClass());
+    }
+
+    return out;
+  }
+
+  static boolean metricNeedsEscaping(DataPointSnapshot d) {
+    Labels labels = d.getLabels();
+    for (Label l : labels) {
+      if (l.getName().equals(METRIC_NAME_LABEL) && !isValidLegacyMetricName(l.getValue())) {
+        return true;
+      }
+      if (!isValidLegacyMetricName(l.getName())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Escapes the incoming name according to the provided escaping
+   * scheme. Depending on the rules of escaping, this may cause no change in the
+   * string that is returned (especially NO_ESCAPING, which by definition is a
+   * noop). This method does not do any validation of the name.
+   */
+  static String escapeName(String name, EscapingScheme scheme) {
+    if (name.isEmpty()) {
+      return name;
+    }
+    StringBuilder escaped = new StringBuilder();
+    switch (scheme) {
+      case NO_ESCAPING:
+        return name;
+      case UNDERSCORE_ESCAPING:
+        if (isValidLegacyMetricName(name)) {
+          return name;
+        }
+        for (int i = 0; i < name.length(); i++) {
+          char c = name.charAt(i);
+          if (isValidLegacyChar(c, i)) {
+            escaped.append(c);
+          } else {
+            escaped.append('_');
+          }
+        }
+        return escaped.toString();
+      case DOTS_ESCAPING:
+        // Do not early return for legacy valid names, we still escape underscores.
+        for (int i = 0; i < name.length(); i++) {
+          char c = name.charAt(i);
+          if (c == '_') {
+            escaped.append("__");
+          } else if (c == '.') {
+            escaped.append("_dot_");
+          } else if (isValidLegacyChar(c, i)) {
+            escaped.append(c);
+          } else {
+            escaped.append('_');
+          }
+        }
+        return escaped.toString();
+      case VALUE_ENCODING_ESCAPING:
+        if (isValidLegacyMetricName(name)) {
+          return name;
+        }
+        escaped.append("U__");
+        for (int i = 0; i < name.length(); i++) {
+          char c = name.charAt(i);
+          if (isValidLegacyChar(c, i)) {
+            escaped.append(c);
+          } else if (!isValidUTF8Char(c)) {
+            escaped.append("_FFFD_");
+          } else if (c < 0x100) {
+            escaped.append('_');
+            for (int s = 4; s >= 0; s -= 4) {
+              escaped.append(LOWERHEX.charAt((c >> s) & 0xF));
+            }
+            escaped.append('_');
+          } else {
+            escaped.append('_');
+            for (int s = 12; s >= 0; s -= 4) {
+              escaped.append(LOWERHEX.charAt((c >> s) & 0xF));
+            }
+            escaped.append('_');
+          }
+        }
+        return escaped.toString();
+      default:
+        throw new IllegalArgumentException("Invalid escaping scheme " + scheme);
+    }
+  }
+
+  /**
+   * Unescapes the incoming name according to the provided escaping
+   * scheme if possible. Some schemes are partially or totally non-roundtripable.
+   * If any error is encountered, returns the original input.
+   */
+  @SuppressWarnings("IncrementInForLoopAndHeader")
+  static String unescapeName(String name, EscapingScheme scheme) {
+    if (name.isEmpty()) {
+      return name;
+    }
+    switch (scheme) {
+      case NO_ESCAPING:
+        return name;
+      case UNDERSCORE_ESCAPING:
+        // It is not possible to unescape from underscore replacement.
+        return name;
+      case DOTS_ESCAPING:
+        name = name.replaceAll("_dot_", ".");
+        name = name.replaceAll("__", "_");
+        return name;
+      case VALUE_ENCODING_ESCAPING:
+        Matcher matcher = Pattern.compile("U__").matcher(name);
+        if (matcher.find()) {
+          String escapedName = name.substring(matcher.end());
+          StringBuilder unescaped = new StringBuilder();
+          TOP:
+          for (int i = 0; i < escapedName.length(); i++) {
+            // All non-underscores are treated normally.
+            if (escapedName.charAt(i) != '_') {
+              unescaped.append(escapedName.charAt(i));
+              continue;
+            }
+            i++;
+            if (i >= escapedName.length()) {
+              return name;
+            }
+            // A double underscore is a single underscore.
+            if (escapedName.charAt(i) == '_') {
+              unescaped.append('_');
+              continue;
+            }
+            // We think we are in a UTF-8 code, process it.
+            long utf8Val = 0;
+            for (int j = 0; i < escapedName.length(); j++) {
+              // This is too many characters for a UTF-8 value.
+              if (j > 4) {
+                return name;
+              }
+              // Found a closing underscore, convert to a char, check validity, and append.
+              if (escapedName.charAt(i) == '_') {
+                char utf8Char = (char) utf8Val;
+                if (!isValidUTF8Char(utf8Char)) {
+                  return name;
+                }
+                unescaped.append(utf8Char);
+                continue TOP;
+              }
+              char r = Character.toLowerCase(escapedName.charAt(i));
+              utf8Val *= 16;
+              if (r >= '0' && r <= '9') {
+                utf8Val += r - '0';
+              } else if (r >= 'a' && r <= 'f') {
+                utf8Val += r - 'a' + 10;
+              } else {
+                return name;
+              }
+              i++;
+            }
+            // Didn't find closing underscore, invalid.
+            return name;
+          }
+          return unescaped.toString();
+        } else {
+          return name;
+        }
+      default:
+        throw new IllegalArgumentException("Invalid escaping scheme " + scheme);
+    }
+  }
+
+  static boolean isValidLegacyChar(char c, int i) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == ':' || (c >= '0' && c <= '9' && i > 0);
+  }
+
+  private static boolean isValidUTF8Char(char b) {
+    return ((b < MIN_HIGH_SURROGATE || b > MAX_LOW_SURROGATE) &&
+      (b < 0xFFFE));
   }
 }

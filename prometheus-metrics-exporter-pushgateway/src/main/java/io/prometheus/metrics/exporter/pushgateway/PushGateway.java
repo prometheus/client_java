@@ -1,6 +1,7 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
 import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
@@ -11,6 +12,8 @@ import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -200,6 +203,7 @@ public class PushGateway {
       try {
         if (!method.equals("DELETE")) {
           OutputStream outputStream = connection.getOutputStream();
+          nameEscapingScheme = EscapingScheme.NO_ESCAPING;
           writer.write(outputStream, registry.scrape());
           outputStream.flush();
           outputStream.close();

@@ -6,6 +6,7 @@ import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.ExpositionFormats;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.zip.GZIPOutputStream;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 
 /** Prometheus scrape endpoint. */
 public class PrometheusScrapeHandler {
@@ -54,12 +57,13 @@ public class PrometheusScrapeHandler {
     try {
       PrometheusHttpRequest request = exchange.getRequest();
       MetricSnapshots snapshots = scrape(request);
+      String acceptHeader = request.getHeader("Accept");
+      nameEscapingScheme = EscapingScheme.fromAcceptHeader(acceptHeader);
       if (writeDebugResponse(snapshots, exchange)) {
         return;
       }
       ByteArrayOutputStream responseBuffer =
           new ByteArrayOutputStream(lastResponseSize.get() + 1024);
-      String acceptHeader = request.getHeader("Accept");
       ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
       writer.write(responseBuffer, snapshots);
       lastResponseSize.set(responseBuffer.size());
