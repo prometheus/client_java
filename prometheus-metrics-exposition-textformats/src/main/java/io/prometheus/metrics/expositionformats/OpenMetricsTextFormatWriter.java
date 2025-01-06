@@ -23,9 +23,11 @@ import io.prometheus.metrics.model.snapshots.Quantile;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -65,7 +67,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
   @Override
   public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
-    OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+    Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
     for (MetricSnapshot snapshot : metricSnapshots) {
       if (!snapshot.getDataPoints().isEmpty()) {
         if (snapshot instanceof CounterSnapshot) {
@@ -89,8 +91,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     writer.flush();
   }
 
-  private void writeCounter(OutputStreamWriter writer, CounterSnapshot snapshot)
-      throws IOException {
+  private void writeCounter(Writer writer, CounterSnapshot snapshot) throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "counter", metadata);
     for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -101,7 +102,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeGauge(OutputStreamWriter writer, GaugeSnapshot snapshot) throws IOException {
+  private void writeGauge(Writer writer, GaugeSnapshot snapshot) throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "gauge", metadata);
     for (GaugeSnapshot.GaugeDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -115,8 +116,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeHistogram(OutputStreamWriter writer, HistogramSnapshot snapshot)
-      throws IOException {
+  private void writeHistogram(Writer writer, HistogramSnapshot snapshot) throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     if (snapshot.isGaugeHistogram()) {
       writeMetadata(writer, "gaugehistogram", metadata);
@@ -128,7 +128,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   }
 
   private void writeClassicHistogramBuckets(
-      OutputStreamWriter writer,
+      Writer writer,
       MetricMetadata metadata,
       String countSuffix,
       String sumSuffix,
@@ -174,8 +174,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeSummary(OutputStreamWriter writer, SummarySnapshot snapshot)
-      throws IOException {
+  private void writeSummary(Writer writer, SummarySnapshot snapshot) throws IOException {
     boolean metadataWritten = false;
     MetricMetadata metadata = snapshot.getMetadata();
     for (SummarySnapshot.SummaryDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -215,7 +214,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeInfo(OutputStreamWriter writer, InfoSnapshot snapshot) throws IOException {
+  private void writeInfo(Writer writer, InfoSnapshot snapshot) throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "info", metadata);
     for (InfoSnapshot.InfoDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -225,8 +224,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeStateSet(OutputStreamWriter writer, StateSetSnapshot snapshot)
-      throws IOException {
+  private void writeStateSet(Writer writer, StateSetSnapshot snapshot) throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "stateset", metadata);
     for (StateSetSnapshot.StateSetDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -259,8 +257,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeUnknown(OutputStreamWriter writer, UnknownSnapshot snapshot)
-      throws IOException {
+  private void writeUnknown(Writer writer, UnknownSnapshot snapshot) throws IOException {
     MetricMetadata metadata = snapshot.getMetadata();
     writeMetadata(writer, "unknown", metadata);
     for (UnknownSnapshot.UnknownDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -275,7 +272,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   }
 
   private void writeCountAndSum(
-      OutputStreamWriter writer,
+      Writer writer,
       MetricMetadata metadata,
       DistributionDataPointSnapshot data,
       String countSuffix,
@@ -298,8 +295,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeCreated(
-      OutputStreamWriter writer, MetricMetadata metadata, DataPointSnapshot data)
+  private void writeCreated(Writer writer, MetricMetadata metadata, DataPointSnapshot data)
       throws IOException {
     if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
       writeNameAndLabels(writer, metadata.getPrometheusName(), "_created", data.getLabels());
@@ -312,13 +308,13 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeNameAndLabels(
-      OutputStreamWriter writer, String name, String suffix, Labels labels) throws IOException {
+  private void writeNameAndLabels(Writer writer, String name, String suffix, Labels labels)
+      throws IOException {
     writeNameAndLabels(writer, name, suffix, labels, null, 0.0);
   }
 
   private void writeNameAndLabels(
-      OutputStreamWriter writer,
+      Writer writer,
       String name,
       String suffix,
       Labels labels,
@@ -336,7 +332,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   }
 
   private void writeScrapeTimestampAndExemplar(
-      OutputStreamWriter writer, DataPointSnapshot data, Exemplar exemplar) throws IOException {
+      Writer writer, DataPointSnapshot data, Exemplar exemplar) throws IOException {
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
       writeTimestamp(writer, data.getScrapeTimestampMillis());
@@ -354,7 +350,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     writer.write('\n');
   }
 
-  private void writeMetadata(OutputStreamWriter writer, String typeName, MetricMetadata metadata)
+  private void writeMetadata(Writer writer, String typeName, MetricMetadata metadata)
       throws IOException {
     writer.write("# TYPE ");
     writer.write(metadata.getPrometheusName());
