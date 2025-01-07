@@ -53,7 +53,7 @@ class PrometheusMetricData<T extends PrometheusData<?>> implements MetricData {
       return null;
     }
     switch (unit.toString()) {
-        // Time
+      // Time
       case "days":
         return "d";
       case "hours":
@@ -68,7 +68,7 @@ class PrometheusMetricData<T extends PrometheusData<?>> implements MetricData {
         return "us";
       case "nanoseconds":
         return "ns";
-        // Bytes
+      // Bytes
       case "bytes":
         return "By";
       case "kibibytes":
@@ -87,7 +87,7 @@ class PrometheusMetricData<T extends PrometheusData<?>> implements MetricData {
         return "GBy";
       case "terabytes":
         return "TBy";
-        // SI
+      // SI
       case "meters":
         return "m";
       case "volts":
@@ -100,14 +100,14 @@ class PrometheusMetricData<T extends PrometheusData<?>> implements MetricData {
         return "W";
       case "grams":
         return "g";
-        // Misc
+      // Misc
       case "celsius":
         return "Cel";
       case "hertz":
         return "Hz";
       case "percent":
         return "%";
-        // default
+      // default
       default:
         return unit.toString();
     }
