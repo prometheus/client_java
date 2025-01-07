@@ -24,6 +24,7 @@ import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -196,8 +197,9 @@ public class DropwizardExports implements MultiCollector {
   @Override
   public MetricSnapshots collect() {
     MetricSnapshots.Builder metricSnapshots = MetricSnapshots.builder();
-    for (@SuppressWarnings("rawtypes")
-    Map.Entry<MetricName, Gauge> entry : registry.getGauges(metricFilter).entrySet()) {
+    @SuppressWarnings("rawtypes")
+    Set<Map.Entry<MetricName, Gauge>> entries = registry.getGauges(metricFilter).entrySet();
+    for (@SuppressWarnings("rawtypes") Map.Entry<MetricName, Gauge> entry : entries) {
       Optional.ofNullable(fromGauge(entry.getKey().getKey(), entry.getValue()))
           .ifPresent(metricSnapshots::metricSnapshot);
     }
