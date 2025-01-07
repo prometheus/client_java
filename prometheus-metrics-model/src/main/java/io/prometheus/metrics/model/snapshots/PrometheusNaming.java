@@ -574,7 +574,7 @@ public class PrometheusNaming {
    * string that is returned (especially NO_ESCAPING, which by definition is a
    * noop). This method does not do any validation of the name.
    */
-  static String escapeName(String name, EscapingScheme scheme) {
+  public static String escapeName(String name, EscapingScheme scheme) {
     if (name.isEmpty()) {
       return name;
     }
