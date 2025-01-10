@@ -19,7 +19,7 @@
 
     <properties>
         <automatic.module.name>io.prometheus.metrics.expositionformats</automatic.module.name>
-        <protobuf-java.version>4.29.2</protobuf-java.version>
+        <protobuf-java.version>4.29.3</protobuf-java.version>
     </properties>
 
     <dependencies>
