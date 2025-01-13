@@ -19,4 +19,12 @@
     <properties>
         <automatic.module.name>io.prometheus.metrics.model</automatic.module.name>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
