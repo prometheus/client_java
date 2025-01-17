@@ -31,7 +31,7 @@ rm -r ./docs/static/api
 mv ./target/site/apidocs ./docs/static/api
 ```
 
-Github pages are in the `/client_java/` folder, so we link to `/client_java/api` rather than `/api`. 
+Github pages are in the `/client_java/` folder, so we link to `/client_java/api` rather than `/api`.
 To make JavaDoc work locally, create a link:
 
 ```

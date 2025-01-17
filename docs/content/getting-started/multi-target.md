@@ -103,7 +103,7 @@ Sample Prometheus scrape_config
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: localhost:9401 
+        replacement: localhost:9401
     static_configs:
       - targets: ["target1", "target2"]
 ```

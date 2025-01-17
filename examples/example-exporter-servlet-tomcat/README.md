@@ -64,7 +64,7 @@ The exporter servlet supports a `debug` URL parameter to quickly view other form
    ```shell
    ./prometheus --enable-feature=native-histograms --enable-feature=exemplar-storage
    ```
-   
+
 Verify that the `tomcat-servlet-example` target is up on [http://localhost:9090/targets](http://localhost:9090/targets).
 
 Prometheus is now scraping metrics in Protobuf format. If you type the name `request_duration_seconds` you will see a non-human-readable representation of the histogram including the native buckets:
