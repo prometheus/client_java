@@ -32,7 +32,7 @@ class CacheMetricsCollectorTest {
     final Cache<String, String> cache =
         Caffeine.newBuilder().maximumSize(2).recordStats().executor(Runnable::run).build();
 
-    final CacheMetricsCollector collector = new CacheMetricsCollector();
+    final CacheMetricsCollector collector = CacheMetricsCollector.builder().build();
     collector.addCache("users", cache);
 
     final PrometheusRegistry registry = new PrometheusRegistry();
@@ -89,7 +89,7 @@ class CacheMetricsCollectorTest {
             .executor(Runnable::run)
             .build();
 
-    final CacheMetricsCollector collector = new CacheMetricsCollector();
+    final CacheMetricsCollector collector = CacheMetricsCollector.builder().build();
     collector.addCache("users", cache);
 
     final PrometheusRegistry registry = new PrometheusRegistry();
@@ -148,7 +148,7 @@ class CacheMetricsCollectorTest {
         .thenReturn("Third User");
 
     final LoadingCache<String, String> cache = Caffeine.newBuilder().recordStats().build(loader);
-    final CacheMetricsCollector collector = new CacheMetricsCollector();
+    final CacheMetricsCollector collector = CacheMetricsCollector.builder().build();
 
     collector.addCache("loadingusers", cache);
 
@@ -180,7 +180,7 @@ class CacheMetricsCollectorTest {
 
   @Test
   public void getPrometheusNamesHasSameSizeAsMetricSizeWhenScraping() {
-    final CacheMetricsCollector collector = new CacheMetricsCollector();
+    final CacheMetricsCollector collector = CacheMetricsCollector.builder().build();
 
     final PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(collector);
@@ -193,7 +193,7 @@ class CacheMetricsCollectorTest {
 
   @Test
   public void collectedMetricNamesAreKnownPrometheusNames() {
-    final CacheMetricsCollector collector = new CacheMetricsCollector();
+    final CacheMetricsCollector collector = CacheMetricsCollector.builder().build();
 
     final PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(collector);

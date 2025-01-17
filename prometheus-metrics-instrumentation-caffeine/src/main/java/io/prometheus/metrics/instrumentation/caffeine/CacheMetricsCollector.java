@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentMap;
  * <pre>{@code
  * // Note that `recordStats()` is required to gather non-zero statistics
  * Cache<String, String> cache = Caffeine.newBuilder().recordStats().build();
- * CacheMetricsCollector cacheMetrics = new CacheMetricsCollector();
+ * CacheMetricsCollector cacheMetrics = CacheMetricsCollector.builder().build();
  * PrometheusRegistry.defaultRegistry.register(cacheMetrics);
  * cacheMetrics.addCache("mycache", cache);
  *
@@ -270,5 +270,15 @@ public class CacheMetricsCollector implements MultiCollector {
   @Override
   public List<String> getPrometheusNames() {
     return ALL_METRIC_NAMES;
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    public CacheMetricsCollector build() {
+      return new CacheMetricsCollector();
+    }
   }
 }
