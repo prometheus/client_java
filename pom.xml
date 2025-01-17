@@ -18,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <automatic.module.name>--module-name-need-to-be-overriden--</automatic.module.name>
         <junit-jupiter.version>5.11.4</junit-jupiter.version>
-        <otel.instrumentation.version>2.11.0-alpha</otel.instrumentation.version>
+        <otel.instrumentation.version>2.12.0-alpha</otel.instrumentation.version>
         <java.version>8</java.version>
         <jacoco.line-coverage>0.70</jacoco.line-coverage>
         <checkstyle.skip>false</checkstyle.skip>
