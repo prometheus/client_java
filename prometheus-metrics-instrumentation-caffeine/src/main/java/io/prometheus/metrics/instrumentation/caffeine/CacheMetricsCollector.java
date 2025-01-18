@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * Collect metrics from Caffeine's com.github.benmanes.caffeine.cache.Cache.
@@ -85,6 +86,7 @@ public class CacheMetricsCollector implements MultiCollector {
 
   protected final ConcurrentMap<String, Cache<?, ?>> children = new ConcurrentHashMap<>();
   private final boolean collectEvictionWeightAsCounter;
+  private final boolean collectWeightedSize;
 
   /**
    * Instantiates a {@link CacheMetricsCollector}, with the legacy parameters.
@@ -96,7 +98,7 @@ public class CacheMetricsCollector implements MultiCollector {
    */
   @Deprecated
   public CacheMetricsCollector() {
-    this(false);
+    this(false, false);
   }
 
   /**
@@ -104,9 +106,12 @@ public class CacheMetricsCollector implements MultiCollector {
    *
    * @param collectEvictionWeightAsCounter If true, {@code caffeine_cache_eviction_weight} will be
    *     observed as an incrementing counter instead of a gauge.
+   * @param collectWeightedSize If true, {@code caffeine_cache_weighted_size} will be observed.
    */
-  protected CacheMetricsCollector(boolean collectEvictionWeightAsCounter) {
+  protected CacheMetricsCollector(
+      boolean collectEvictionWeightAsCounter, boolean collectWeightedSize) {
     this.collectEvictionWeightAsCounter = collectEvictionWeightAsCounter;
+    this.collectWeightedSize = collectWeightedSize;
   }
 
   /**
@@ -225,13 +230,15 @@ public class CacheMetricsCollector implements MultiCollector {
         // EvictionWeight metric is unavailable, newer version of Caffeine is needed.
       }
 
-      final Optional<? extends Policy.Eviction<?, ?>> eviction = c.getValue().policy().eviction();
-      if (eviction.isPresent() && eviction.get().weightedSize().isPresent()) {
-        cacheWeightedSize.dataPoint(
-            GaugeSnapshot.GaugeDataPointSnapshot.builder()
-                .labels(labels)
-                .value(eviction.get().weightedSize().getAsLong())
-                .build());
+      if (collectWeightedSize) {
+        final Optional<? extends Policy.Eviction<?, ?>> eviction = c.getValue().policy().eviction();
+        if (eviction.isPresent() && eviction.get().weightedSize().isPresent()) {
+          cacheWeightedSize.dataPoint(
+              GaugeSnapshot.GaugeDataPointSnapshot.builder()
+                  .labels(labels)
+                  .value(eviction.get().weightedSize().getAsLong())
+                  .build());
+        }
       }
 
       cacheHitTotal.dataPoint(
@@ -286,6 +293,10 @@ public class CacheMetricsCollector implements MultiCollector {
       }
     }
 
+    if (collectWeightedSize) {
+      metricSnapshotsBuilder.metricSnapshot(cacheWeightedSize.build());
+    }
+
     return metricSnapshotsBuilder
         .metricSnapshot(cacheHitTotal.build())
         .metricSnapshot(cacheMissTotal.build())
@@ -298,13 +309,17 @@ public class CacheMetricsCollector implements MultiCollector {
         .metricSnapshot(cacheLoadFailure.build())
         .metricSnapshot(cacheLoadTotal.build())
         .metricSnapshot(cacheSize.build())
-        .metricSnapshot(cacheWeightedSize.build())
         .metricSnapshot(cacheLoadSummary.build())
         .build();
   }
 
   @Override
   public List<String> getPrometheusNames() {
+    if (!collectWeightedSize) {
+      return ALL_METRIC_NAMES.stream()
+          .filter(s -> !METRIC_NAME_CACHE_WEIGHTED_SIZE.equals(s))
+          .collect(Collectors.toList());
+    }
     return ALL_METRIC_NAMES;
   }
 
@@ -315,14 +330,20 @@ public class CacheMetricsCollector implements MultiCollector {
   public static class Builder {
 
     private boolean collectEvictionWeightAsCounter = true;
+    private boolean collectWeightedSize = true;
 
     public Builder collectEvictionWeightAsCounter(boolean collectEvictionWeightAsCounter) {
       this.collectEvictionWeightAsCounter = collectEvictionWeightAsCounter;
       return this;
     }
 
+    public Builder collectWeightedSize(boolean collectWeightedSize) {
+      this.collectWeightedSize = collectWeightedSize;
+      return this;
+    }
+
     public CacheMetricsCollector build() {
-      return new CacheMetricsCollector(collectEvictionWeightAsCounter);
+      return new CacheMetricsCollector(collectEvictionWeightAsCounter, collectWeightedSize);
     }
   }
 }

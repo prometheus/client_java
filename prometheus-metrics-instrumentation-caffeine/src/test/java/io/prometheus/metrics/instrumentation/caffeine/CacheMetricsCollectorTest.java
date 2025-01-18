@@ -30,13 +30,17 @@ import org.junit.jupiter.params.provider.EnumSource;
 class CacheMetricsCollectorTest {
   // This enum was added to simplify test parametrization on argument options.
   public enum Options {
-    LEGACY(false),
-    COLLECT_EVICTION_WEIGHT_AS_COUNTER(true);
+    LEGACY(false, false),
+    COLLECT_EVICTION_WEIGHT_AS_COUNTER(true, false),
+    COLLECT_WEIGHTED_SIZE(false, true),
+    BUILDER_DEFAULT(true, true);
 
     private final boolean collectEvictionWeightAsCounter;
+    private final boolean collectWeightedSize;
 
-    Options(boolean collectEvictionWeightAsCounter) {
+    Options(boolean collectEvictionWeightAsCounter, boolean collectWeightedSize) {
       this.collectEvictionWeightAsCounter = collectEvictionWeightAsCounter;
+      this.collectWeightedSize = collectWeightedSize;
     }
   }
 
@@ -50,6 +54,7 @@ class CacheMetricsCollectorTest {
     final CacheMetricsCollector collector =
         CacheMetricsCollector.builder()
             .collectEvictionWeightAsCounter(options.collectEvictionWeightAsCounter)
+            .collectWeightedSize(options.collectWeightedSize)
             .build();
     collector.addCache("users", cache);
 
@@ -122,6 +127,7 @@ class CacheMetricsCollectorTest {
     final CacheMetricsCollector collector =
         CacheMetricsCollector.builder()
             .collectEvictionWeightAsCounter(options.collectEvictionWeightAsCounter)
+            .collectWeightedSize(options.collectWeightedSize)
             .build();
     collector.addCache("users", cache);
 
@@ -156,6 +162,15 @@ class CacheMetricsCollectorTest {
               + "# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries\n"
               + "caffeine_cache_eviction_weight{cache=\"users\"} 31.0\n";
     }
+    String openMetricWeightedSizeExpectedText;
+    if (options.collectWeightedSize) {
+      openMetricWeightedSizeExpectedText =
+          "# TYPE caffeine_cache_weighted_size gauge\n"
+              + "# HELP caffeine_cache_weighted_size Approximate accumulated weight of cache entries\n"
+              + "caffeine_cache_weighted_size{cache=\"users\"} 31.0\n";
+    } else {
+      openMetricWeightedSizeExpectedText = "";
+    }
 
     final String expected =
         "# TYPE caffeine_cache_estimated_size gauge\n"
@@ -174,9 +189,7 @@ class CacheMetricsCollectorTest {
             + "# TYPE caffeine_cache_requests counter\n"
             + "# HELP caffeine_cache_requests Cache request totals, hits + misses\n"
             + "caffeine_cache_requests_total{cache=\"users\"} 3.0\n"
-            + "# TYPE caffeine_cache_weighted_size gauge\n"
-            + "# HELP caffeine_cache_weighted_size Approximate accumulated weight of cache entries\n"
-            + "caffeine_cache_weighted_size{cache=\"users\"} 31.0\n"
+            + openMetricWeightedSizeExpectedText
             + "# EOF\n";
 
     assertThat(convertToOpenMetricsFormat(registry)).isEqualTo(expected);
@@ -228,6 +241,7 @@ class CacheMetricsCollectorTest {
     final CacheMetricsCollector collector =
         CacheMetricsCollector.builder()
             .collectEvictionWeightAsCounter(options.collectEvictionWeightAsCounter)
+            .collectWeightedSize(options.collectWeightedSize)
             .build();
 
     final PrometheusRegistry registry = new PrometheusRegistry();
@@ -245,6 +259,7 @@ class CacheMetricsCollectorTest {
     final CacheMetricsCollector collector =
         CacheMetricsCollector.builder()
             .collectEvictionWeightAsCounter(options.collectEvictionWeightAsCounter)
+            .collectWeightedSize(options.collectWeightedSize)
             .build();
 
     final PrometheusRegistry registry = new PrometheusRegistry();
