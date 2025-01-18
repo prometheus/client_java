@@ -84,6 +84,30 @@ public class CacheMetricsCollector implements MultiCollector {
               METRIC_NAME_CACHE_LOAD_DURATION_SECONDS));
 
   protected final ConcurrentMap<String, Cache<?, ?>> children = new ConcurrentHashMap<>();
+  private final boolean collectEvictionWeightAsCounter;
+
+  /**
+   * Instantiates a {@link CacheMetricsCollector}, with the legacy parameters.
+   *
+   * <p>The use of this constructor is discouraged, in favor of a Builder pattern {@link #builder()}
+   *
+   * <p>Note that the {@link #builder()} API has different default values than this deprecated
+   * constructor.
+   */
+  @Deprecated
+  public CacheMetricsCollector() {
+    this(false);
+  }
+
+  /**
+   * Instantiate a {@link CacheMetricsCollector}
+   *
+   * @param collectEvictionWeightAsCounter If true, {@code caffeine_cache_eviction_weight} will be
+   *     observed as an incrementing counter instead of a gauge.
+   */
+  protected CacheMetricsCollector(boolean collectEvictionWeightAsCounter) {
+    this.collectEvictionWeightAsCounter = collectEvictionWeightAsCounter;
+  }
 
   /**
    * Add or replace the cache with the given name.
@@ -154,6 +178,10 @@ public class CacheMetricsCollector implements MultiCollector {
         CounterSnapshot.builder()
             .name(METRIC_NAME_CACHE_EVICTION_WEIGHT)
             .help("Weight of evicted cache entries, doesn't include manually removed entries");
+    final GaugeSnapshot.Builder cacheEvictionWeightLegacyGauge =
+        GaugeSnapshot.builder()
+            .name(METRIC_NAME_CACHE_EVICTION_WEIGHT)
+            .help("Weight of evicted cache entries, doesn't include manually removed entries");
 
     final CounterSnapshot.Builder cacheLoadFailure =
         CounterSnapshot.builder().name(METRIC_NAME_CACHE_LOAD_FAILURE).help("Cache load failures");
@@ -185,6 +213,11 @@ public class CacheMetricsCollector implements MultiCollector {
       try {
         cacheEvictionWeight.dataPoint(
             CounterSnapshot.CounterDataPointSnapshot.builder()
+                .labels(labels)
+                .value(stats.evictionWeight())
+                .build());
+        cacheEvictionWeightLegacyGauge.dataPoint(
+            GaugeSnapshot.GaugeDataPointSnapshot.builder()
                 .labels(labels)
                 .value(stats.evictionWeight())
                 .build());
@@ -258,7 +291,10 @@ public class CacheMetricsCollector implements MultiCollector {
         .metricSnapshot(cacheMissTotal.build())
         .metricSnapshot(cacheRequestsTotal.build())
         .metricSnapshot(cacheEvictionTotal.build())
-        .metricSnapshot(cacheEvictionWeight.build())
+        .metricSnapshot(
+            collectEvictionWeightAsCounter
+                ? cacheEvictionWeight.build()
+                : cacheEvictionWeightLegacyGauge.build())
         .metricSnapshot(cacheLoadFailure.build())
         .metricSnapshot(cacheLoadTotal.build())
         .metricSnapshot(cacheSize.build())
@@ -277,8 +313,16 @@ public class CacheMetricsCollector implements MultiCollector {
   }
 
   public static class Builder {
+
+    private boolean collectEvictionWeightAsCounter = true;
+
+    public Builder collectEvictionWeightAsCounter(boolean collectEvictionWeightAsCounter) {
+      this.collectEvictionWeightAsCounter = collectEvictionWeightAsCounter;
+      return this;
+    }
+
     public CacheMetricsCollector build() {
-      return new CacheMetricsCollector();
+      return new CacheMetricsCollector(collectEvictionWeightAsCounter);
     }
   }
 }
