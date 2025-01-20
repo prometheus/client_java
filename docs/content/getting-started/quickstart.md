@@ -47,9 +47,9 @@ There are alternative exporters as well, for example if you are using a Servlet 
 
 {{< hint type=note >}}
 
-If you do not use the protobuf exposition format, you can 
+If you do not use the protobuf exposition format, you can
 [exclude](../../exporters/formats#exclude-protobuf-exposition-format)
-it from the dependencies. 
+it from the dependencies.
 
 {{< /hint >}}
 
