@@ -35,6 +35,9 @@ public class TextFormatUtil {
   }
 
   static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
+    if (s == null) {
+      return;
+    }
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
       switch (c) {
