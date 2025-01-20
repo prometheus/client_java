@@ -34,10 +34,17 @@ In order to collect metrics:
 
 ```java
 var cache = Caffeine.newBuilder().recordStats().build();
-var cacheMetrics = new CacheMetricsCollector();
+var cacheMetrics = CacheMetricsCollector.builder().build();
 PrometheusRegistry.defaultRegistry.register(cacheMetrics);
 cacheMetrics.addCache("mycache", cache);
 ```
+
+{{< hint type=note >}}
+
+In version 1.3.5 and older of the caffeine instrumentation library, `CacheMetricsCollector.builder`
+does not exist, i.e. a constructor call `new CacheMetricsCollector()` is the only option.
+
+{{< /hint >}}
 
 All example metrics on this page will use the `mycache` label value.
 
@@ -87,15 +94,33 @@ caffeine_cache_load_duration_seconds_sum{cache="mycache"} 0.0034
 Weighted Cache Metrics
 ----------------------
 
-If the cache is weighted, i.e. it defines a `weigher` function, then the following metrics
-become interesting:
+Two metrics exist for observability specifically of caches that define a `weigher`:
 
 ```
-# TYPE caffeine_cache_eviction_weight gauge
-# HELP caffeine_cache_eviction_weight Cache eviction weight
-caffeine_cache_eviction_weight{cache="mycache"} 5.0
+# TYPE caffeine_cache_eviction_weight counter
+# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+caffeine_cache_eviction_weight_total{cache="mycache"} 5.0
+# TYPE caffeine_cache_weighted_size gauge
+# HELP caffeine_cache_weighted_size Approximate accumulated weight of cache entries
+caffeine_cache_weighted_size{cache="mycache"} 30.0
 ```
 
-Note: while `caffeine_cache_eviction_weight` is exported as a `gauge` metric, it represents
-a monotonicaly increasing value. Also, in the case where the cache does not define a `weigher`
-function, it will return the same values as `caffeine_cache_eviction_total`.
+{{< hint type=note >}}
+
+`caffeine_cache_weighted_size` is available only if the cache instance defines a `maximumWeight`.
+
+{{< /hint >}}
+
+Up to version 1.3.5 and older, the weighted metrics had a different behavior:
+
+ * `caffeine_cache_weighted_size` was not implemented;
+ * `caffeine_cache_eviction_weight` was exposed as a `gauge`;
+
+It is possible to restore the behavior of version 1.3.5 and older, by either:
+
+ * Using the deprecated `new CacheMetricsCollector()` constructor;
+ * Using the flags provided on the `CacheMetricsCollector.Builder` object to opt-out of each of the
+   elements of the post-1.3.5 behavior:
+   * `builder.collectWeightedSize(false)` will disable collection of `caffeine_cache_weighted_size`;
+   * `builder.collectEvictionWeightAsCounter(false)` will expose `caffeine_cache_eviction_weight` as
+     a `gauge` metric;
