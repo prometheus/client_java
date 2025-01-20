@@ -20,6 +20,7 @@ public class PrometheusProperties {
   private final ExporterHttpServerProperties exporterHttpServerProperties;
   private final ExporterOpenTelemetryProperties exporterOpenTelemetryProperties;
   private final ExporterPushgatewayProperties exporterPushgatewayProperties;
+  private final NamingProperties namingProperties;
 
   /**
    * Get the properties instance. When called for the first time, {@code get()} loads the properties
@@ -44,7 +45,8 @@ public class PrometheusProperties {
       ExporterFilterProperties exporterFilterProperties,
       ExporterHttpServerProperties httpServerConfig,
       ExporterPushgatewayProperties pushgatewayProperties,
-      ExporterOpenTelemetryProperties otelConfig) {
+      ExporterOpenTelemetryProperties otelConfig,
+      NamingProperties namingProperties) {
     this.defaultMetricsProperties = defaultMetricsProperties;
     this.metricProperties.putAll(metricProperties);
     this.exemplarProperties = exemplarProperties;
@@ -53,6 +55,7 @@ public class PrometheusProperties {
     this.exporterHttpServerProperties = httpServerConfig;
     this.exporterPushgatewayProperties = pushgatewayProperties;
     this.exporterOpenTelemetryProperties = otelConfig;
+    this.namingProperties = namingProperties;
   }
 
   /**
@@ -94,5 +97,9 @@ public class PrometheusProperties {
 
   public ExporterOpenTelemetryProperties getExporterOpenTelemetryProperties() {
     return exporterOpenTelemetryProperties;
+  }
+
+  public NamingProperties getNamingProperties() {
+    return namingProperties;
   }
 }
