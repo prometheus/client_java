@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.caffeine;
 import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Policy;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -14,8 +15,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * Collect metrics from Caffeine's com.github.benmanes.caffeine.cache.Cache.
@@ -25,7 +28,7 @@ import java.util.concurrent.ConcurrentMap;
  * <pre>{@code
  * // Note that `recordStats()` is required to gather non-zero statistics
  * Cache<String, String> cache = Caffeine.newBuilder().recordStats().build();
- * CacheMetricsCollector cacheMetrics = new CacheMetricsCollector();
+ * CacheMetricsCollector cacheMetrics = CacheMetricsCollector.builder().build();
  * PrometheusRegistry.defaultRegistry.register(cacheMetrics);
  * cacheMetrics.addCache("mycache", cache);
  *
@@ -63,6 +66,7 @@ public class CacheMetricsCollector implements MultiCollector {
   private static final String METRIC_NAME_CACHE_LOAD_FAILURE = "caffeine_cache_load_failure";
   private static final String METRIC_NAME_CACHE_LOADS = "caffeine_cache_loads";
   private static final String METRIC_NAME_CACHE_ESTIMATED_SIZE = "caffeine_cache_estimated_size";
+  private static final String METRIC_NAME_CACHE_WEIGHTED_SIZE = "caffeine_cache_weighted_size";
   private static final String METRIC_NAME_CACHE_LOAD_DURATION_SECONDS =
       "caffeine_cache_load_duration_seconds";
 
@@ -77,9 +81,38 @@ public class CacheMetricsCollector implements MultiCollector {
               METRIC_NAME_CACHE_LOAD_FAILURE,
               METRIC_NAME_CACHE_LOADS,
               METRIC_NAME_CACHE_ESTIMATED_SIZE,
+              METRIC_NAME_CACHE_WEIGHTED_SIZE,
               METRIC_NAME_CACHE_LOAD_DURATION_SECONDS));
 
   protected final ConcurrentMap<String, Cache<?, ?>> children = new ConcurrentHashMap<>();
+  private final boolean collectEvictionWeightAsCounter;
+  private final boolean collectWeightedSize;
+
+  /**
+   * Instantiates a {@link CacheMetricsCollector}, with the legacy parameters.
+   *
+   * <p>The use of this constructor is discouraged, in favor of a Builder pattern {@link #builder()}
+   *
+   * <p>Note that the {@link #builder()} API has different default values than this deprecated
+   * constructor.
+   */
+  @Deprecated
+  public CacheMetricsCollector() {
+    this(false, false);
+  }
+
+  /**
+   * Instantiate a {@link CacheMetricsCollector}
+   *
+   * @param collectEvictionWeightAsCounter If true, {@code caffeine_cache_eviction_weight} will be
+   *     observed as an incrementing counter instead of a gauge.
+   * @param collectWeightedSize If true, {@code caffeine_cache_weighted_size} will be observed.
+   */
+  protected CacheMetricsCollector(
+      boolean collectEvictionWeightAsCounter, boolean collectWeightedSize) {
+    this.collectEvictionWeightAsCounter = collectEvictionWeightAsCounter;
+    this.collectWeightedSize = collectWeightedSize;
+  }
 
   /**
    * Add or replace the cache with the given name.
@@ -146,10 +179,14 @@ public class CacheMetricsCollector implements MultiCollector {
             .name(METRIC_NAME_CACHE_EVICTION)
             .help("Cache eviction totals, doesn't include manually removed entries");
 
-    final GaugeSnapshot.Builder cacheEvictionWeight =
+    final CounterSnapshot.Builder cacheEvictionWeight =
+        CounterSnapshot.builder()
+            .name(METRIC_NAME_CACHE_EVICTION_WEIGHT)
+            .help("Weight of evicted cache entries, doesn't include manually removed entries");
+    final GaugeSnapshot.Builder cacheEvictionWeightLegacyGauge =
         GaugeSnapshot.builder()
             .name(METRIC_NAME_CACHE_EVICTION_WEIGHT)
-            .help("Cache eviction weight");
+            .help("Weight of evicted cache entries, doesn't include manually removed entries");
 
     final CounterSnapshot.Builder cacheLoadFailure =
         CounterSnapshot.builder().name(METRIC_NAME_CACHE_LOAD_FAILURE).help("Cache load failures");
@@ -161,6 +198,11 @@ public class CacheMetricsCollector implements MultiCollector {
 
     final GaugeSnapshot.Builder cacheSize =
         GaugeSnapshot.builder().name(METRIC_NAME_CACHE_ESTIMATED_SIZE).help("Estimated cache size");
+
+    final GaugeSnapshot.Builder cacheWeightedSize =
+        GaugeSnapshot.builder()
+            .name(METRIC_NAME_CACHE_WEIGHTED_SIZE)
+            .help("Approximate accumulated weight of cache entries");
 
     final SummarySnapshot.Builder cacheLoadSummary =
         SummarySnapshot.builder()
@@ -175,12 +217,28 @@ public class CacheMetricsCollector implements MultiCollector {
 
       try {
         cacheEvictionWeight.dataPoint(
+            CounterSnapshot.CounterDataPointSnapshot.builder()
+                .labels(labels)
+                .value(stats.evictionWeight())
+                .build());
+        cacheEvictionWeightLegacyGauge.dataPoint(
             GaugeSnapshot.GaugeDataPointSnapshot.builder()
                 .labels(labels)
                 .value(stats.evictionWeight())
                 .build());
       } catch (Exception e) {
         // EvictionWeight metric is unavailable, newer version of Caffeine is needed.
+      }
+
+      if (collectWeightedSize) {
+        final Optional<? extends Policy.Eviction<?, ?>> eviction = c.getValue().policy().eviction();
+        if (eviction.isPresent() && eviction.get().weightedSize().isPresent()) {
+          cacheWeightedSize.dataPoint(
+              GaugeSnapshot.GaugeDataPointSnapshot.builder()
+                  .labels(labels)
+                  .value(eviction.get().weightedSize().getAsLong())
+                  .build());
+        }
       }
 
       cacheHitTotal.dataPoint(
@@ -235,12 +293,19 @@ public class CacheMetricsCollector implements MultiCollector {
       }
     }
 
+    if (collectWeightedSize) {
+      metricSnapshotsBuilder.metricSnapshot(cacheWeightedSize.build());
+    }
+
     return metricSnapshotsBuilder
         .metricSnapshot(cacheHitTotal.build())
         .metricSnapshot(cacheMissTotal.build())
         .metricSnapshot(cacheRequestsTotal.build())
         .metricSnapshot(cacheEvictionTotal.build())
-        .metricSnapshot(cacheEvictionWeight.build())
+        .metricSnapshot(
+            collectEvictionWeightAsCounter
+                ? cacheEvictionWeight.build()
+                : cacheEvictionWeightLegacyGauge.build())
         .metricSnapshot(cacheLoadFailure.build())
         .metricSnapshot(cacheLoadTotal.build())
         .metricSnapshot(cacheSize.build())
@@ -250,6 +315,35 @@ public class CacheMetricsCollector implements MultiCollector {
 
   @Override
   public List<String> getPrometheusNames() {
+    if (!collectWeightedSize) {
+      return ALL_METRIC_NAMES.stream()
+          .filter(s -> !METRIC_NAME_CACHE_WEIGHTED_SIZE.equals(s))
+          .collect(Collectors.toList());
+    }
     return ALL_METRIC_NAMES;
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+
+    private boolean collectEvictionWeightAsCounter = true;
+    private boolean collectWeightedSize = true;
+
+    public Builder collectEvictionWeightAsCounter(boolean collectEvictionWeightAsCounter) {
+      this.collectEvictionWeightAsCounter = collectEvictionWeightAsCounter;
+      return this;
+    }
+
+    public Builder collectWeightedSize(boolean collectWeightedSize) {
+      this.collectWeightedSize = collectWeightedSize;
+      return this;
+    }
+
+    public CacheMetricsCollector build() {
+      return new CacheMetricsCollector(collectEvictionWeightAsCounter, collectWeightedSize);
+    }
   }
 }
