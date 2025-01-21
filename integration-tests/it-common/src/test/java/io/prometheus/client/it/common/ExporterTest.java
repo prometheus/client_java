@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 
-public abstract class  ExporterTest {
+public abstract class ExporterTest {
   private final GenericContainer<?> sampleAppContainer;
   private final Volume sampleAppVolume;
   protected final String sampleApp;

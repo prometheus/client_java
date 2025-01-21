@@ -206,6 +206,22 @@ class PrometheusNamingTest {
     got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got).isEqualTo("mysystem.prod.west.cpu.load");
 
+    // name with dots and underscore
+    got = escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.UNDERSCORE_ESCAPING);
+    assertThat(got).isEqualTo("mysystem_prod_west_cpu_load_total");
+    got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
+    assertThat(got).isEqualTo("mysystem_prod_west_cpu_load_total");
+
+    got = escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.DOTS_ESCAPING);
+    assertThat(got).isEqualTo("mysystem_dot_prod_dot_west_dot_cpu_dot_load__total");
+    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
+    assertThat(got).isEqualTo("mysystem.prod.west.cpu.load_total");
+
+    got = escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.VALUE_ENCODING_ESCAPING);
+    assertThat(got).isEqualTo("U__mysystem_2e_prod_2e_west_2e_cpu_2e_load__total");
+    got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
+    assertThat(got).isEqualTo("mysystem.prod.west.cpu.load_total");
+
     // name with dots and colon
     got = escapeName("http.status:sum", EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(got).isEqualTo("http_status:sum");
@@ -222,6 +238,22 @@ class PrometheusNamingTest {
     got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got).isEqualTo("http.status:sum");
 
+    // name with spaces and emoji
+    got = escapeName("label with 😱", EscapingScheme.UNDERSCORE_ESCAPING);
+    assertThat(got).isEqualTo("label_with__");
+    got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
+    assertThat(got).isEqualTo("label_with__");
+
+    got = escapeName("label with 😱", EscapingScheme.DOTS_ESCAPING);
+    assertThat(got).isEqualTo("label__with____");
+    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
+    assertThat(got).isEqualTo("label_with__");
+
+    got = escapeName("label with 😱", EscapingScheme.VALUE_ENCODING_ESCAPING);
+    assertThat(got).isEqualTo("U__label_20_with_20__1f631_");
+    got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
+    assertThat(got).isEqualTo("label with 😱");
+
     // name with unicode characters > 0x100
     got = escapeName("花火", EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(got).isEqualTo("__");
@@ -229,16 +261,32 @@ class PrometheusNamingTest {
     assertThat(got).isEqualTo("__");
 
     got = escapeName("花火", EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("__");
+    assertThat(got).isEqualTo("____");
     got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
     // Dots-replacement does not know the difference between two replaced
     // characters and a single underscore.
-    assertThat(got).isEqualTo("_");
+    assertThat(got).isEqualTo("__");
 
     got = escapeName("花火", EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got).isEqualTo("U___82b1__706b_");
     got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got).isEqualTo("花火");
+
+    // name with spaces and edge-case value
+    got = escapeName("label with Ā", EscapingScheme.UNDERSCORE_ESCAPING);
+    assertThat(got).isEqualTo("label_with__");
+    got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
+    assertThat(got).isEqualTo("label_with__");
+
+    got = escapeName("label with Ā", EscapingScheme.DOTS_ESCAPING);
+    assertThat(got).isEqualTo("label__with____");
+    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
+    assertThat(got).isEqualTo("label_with__");
+
+    got = escapeName("label with Ā", EscapingScheme.VALUE_ENCODING_ESCAPING);
+    assertThat(got).isEqualTo("U__label_20_with_20__100_");
+    got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
+    assertThat(got).isEqualTo("label with Ā");
 
     nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
   }
@@ -435,13 +483,13 @@ class PrometheusNamingTest {
       .build();
     MetricSnapshot got = escapeMetricSnapshot(original, EscapingScheme.DOTS_ESCAPING);
 
-    assertThat(got.getMetadata().getName()).isEqualTo("unicode_dot_and_dot_dots_dot___");
+    assertThat(got.getMetadata().getName()).isEqualTo("unicode_dot_and_dot_dots_dot_____");
     assertThat(got.getMetadata().getHelp()).isEqualTo("some help text");
     assertThat(got.getDataPoints().size()).isEqualTo(1);
     GaugeSnapshot.GaugeDataPointSnapshot data = (GaugeSnapshot.GaugeDataPointSnapshot) got.getDataPoints().get(0);
     assertThat(data.getValue()).isEqualTo(34.2);
     assertThat((Iterable<? extends Label>) data.getLabels()).isEqualTo(Labels.builder()
-      .label("__name__", "unicode_dot_and_dot_dots_dot___")
+      .label("__name__", "unicode_dot_and_dot_dots_dot_____")
       .label("some_label", "label??value")
       .build());
     assertThat(original.getMetadata().getName()).isEqualTo("unicode.and.dots.花火");

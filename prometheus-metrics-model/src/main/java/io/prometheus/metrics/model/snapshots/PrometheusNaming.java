@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.Character.MAX_LOW_SURROGATE;
-import static java.lang.Character.MIN_HIGH_SURROGATE;
+import static java.lang.Character.*;
 
 /**
  * Utility for Prometheus Metric and Label naming.
@@ -44,8 +43,6 @@ public class PrometheusNaming {
    * Accept header, the default nameEscapingScheme will be used.
    */
   public static final String ESCAPING_KEY = "escaping";
-
-  private static final String LOWERHEX = "0123456789abcdef";
 
   private static final String METRIC_NAME_LABEL= "__name__";
 
@@ -586,28 +583,30 @@ public class PrometheusNaming {
         if (isValidLegacyMetricName(name)) {
           return name;
         }
-        for (int i = 0; i < name.length(); i++) {
-          char c = name.charAt(i);
+        for (int i = 0; i < name.length(); ) {
+          int c = name.codePointAt(i);
           if (isValidLegacyChar(c, i)) {
-            escaped.append(c);
+            escaped.appendCodePoint(c);
           } else {
             escaped.append('_');
           }
+          i += Character.charCount(c);
         }
         return escaped.toString();
       case DOTS_ESCAPING:
         // Do not early return for legacy valid names, we still escape underscores.
-        for (int i = 0; i < name.length(); i++) {
-          char c = name.charAt(i);
+        for (int i = 0; i < name.length(); ) {
+          int c = name.codePointAt(i);
           if (c == '_') {
             escaped.append("__");
           } else if (c == '.') {
             escaped.append("_dot_");
           } else if (isValidLegacyChar(c, i)) {
-            escaped.append(c);
+            escaped.appendCodePoint(c);
           } else {
-            escaped.append('_');
+            escaped.append("__");
           }
+          i += Character.charCount(c);
         }
         return escaped.toString();
       case VALUE_ENCODING_ESCAPING:
@@ -615,25 +614,20 @@ public class PrometheusNaming {
           return name;
         }
         escaped.append("U__");
-        for (int i = 0; i < name.length(); i++) {
-          char c = name.charAt(i);
-          if (isValidLegacyChar(c, i)) {
-            escaped.append(c);
+        for (int i = 0; i < name.length(); ) {
+          int c = name.codePointAt(i);
+          if (c == '_') {
+            escaped.append("__");
+          } else if (isValidLegacyChar(c, i)) {
+            escaped.appendCodePoint(c);
           } else if (!isValidUTF8Char(c)) {
             escaped.append("_FFFD_");
-          } else if (c < 0x100) {
-            escaped.append('_');
-            for (int s = 4; s >= 0; s -= 4) {
-              escaped.append(LOWERHEX.charAt((c >> s) & 0xF));
-            }
-            escaped.append('_');
           } else {
             escaped.append('_');
-            for (int s = 12; s >= 0; s -= 4) {
-              escaped.append(LOWERHEX.charAt((c >> s) & 0xF));
-            }
+            escaped.append(Integer.toHexString(c));
             escaped.append('_');
           }
+          i += Character.charCount(c);
         }
         return escaped.toString();
       default:
@@ -666,11 +660,12 @@ public class PrometheusNaming {
         if (matcher.find()) {
           String escapedName = name.substring(matcher.end());
           StringBuilder unescaped = new StringBuilder();
-          TOP:
-          for (int i = 0; i < escapedName.length(); i++) {
+          for (int i = 0; i < escapedName.length(); ) {
             // All non-underscores are treated normally.
-            if (escapedName.charAt(i) != '_') {
-              unescaped.append(escapedName.charAt(i));
+            int c = escapedName.codePointAt(i);
+            if (c != '_') {
+              unescaped.appendCodePoint(c);
+              i += Character.charCount(c);
               continue;
             }
             i++;
@@ -678,25 +673,29 @@ public class PrometheusNaming {
               return name;
             }
             // A double underscore is a single underscore.
-            if (escapedName.charAt(i) == '_') {
+            if (escapedName.codePointAt(i) == '_') {
               unescaped.append('_');
+              i++;
               continue;
             }
             // We think we are in a UTF-8 code, process it.
-            long utf8Val = 0;
+            int utf8Val = 0;
+            boolean foundClosingUnderscore = false;
             for (int j = 0; i < escapedName.length(); j++) {
               // This is too many characters for a UTF-8 value.
-              if (j > 4) {
+              if (j >= 6) {
                 return name;
               }
               // Found a closing underscore, convert to a char, check validity, and append.
-              if (escapedName.charAt(i) == '_') {
-                char utf8Char = (char) utf8Val;
-                if (!isValidUTF8Char(utf8Char)) {
+              if (escapedName.codePointAt(i) == '_') {
+                //char utf8Char = (char) utf8Val;
+                foundClosingUnderscore = true;
+                if (!isValidUTF8Char(utf8Val)) {
                   return name;
                 }
-                unescaped.append(utf8Char);
-                continue TOP;
+                unescaped.appendCodePoint(utf8Val);
+                i++;
+                break;
               }
               char r = Character.toLowerCase(escapedName.charAt(i));
               utf8Val *= 16;
@@ -709,8 +708,9 @@ public class PrometheusNaming {
               }
               i++;
             }
-            // Didn't find closing underscore, invalid.
-            return name;
+            if (!foundClosingUnderscore) {
+              return name;
+            }
           }
           return unescaped.toString();
         } else {
@@ -721,12 +721,11 @@ public class PrometheusNaming {
     }
   }
 
-  static boolean isValidLegacyChar(char c, int i) {
+  static boolean isValidLegacyChar(int c, int i) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == ':' || (c >= '0' && c <= '9' && i > 0);
   }
 
-  private static boolean isValidUTF8Char(char b) {
-    return ((b < MIN_HIGH_SURROGATE || b > MAX_LOW_SURROGATE) &&
-      (b < 0xFFFE));
+  private static boolean isValidUTF8Char(int c) {
+    return (0 <= c && c < MIN_HIGH_SURROGATE) || (MAX_LOW_SURROGATE < c && c <= MAX_CODE_POINT);
   }
 }
