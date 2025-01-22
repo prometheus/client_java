@@ -92,7 +92,7 @@ public class DropwizardExports implements MultiCollector {
     this.invalidMetricHandler = invalidMetricHandler;
   }
 
-  protected String getHelpMessage(String metricName, Metric metric) {
+  private static String getHelpMessage(String metricName, Metric metric) {
     return String.format(
         "Generated from Dropwizard metric import (metric=%s, type=%s)",
         metricName, metric.getClass().getName());
