@@ -17,6 +17,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <automatic.module.name>--module-name-need-to-be-overriden--</automatic.module.name>
+        <guava.version>33.4.0-jre</guava.version>
         <junit-jupiter.version>5.11.4</junit-jupiter.version>
         <otel.instrumentation.version>2.12.0-alpha</otel.instrumentation.version>
         <java.version>8</java.version>
@@ -82,16 +83,6 @@
         <module>prometheus-metrics-simpleclient-bridge</module>
     </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>33.4.0-jre</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
@@ -128,6 +119,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
