@@ -1,5 +1,6 @@
 package io.prometheus.metrics.instrumentation.guava;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -11,11 +12,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.SummarySnapshot;
+import io.prometheus.metrics.model.snapshots.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -163,6 +161,7 @@ class CacheMetricsCollectorTest {
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     final OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
+      nameEscapingScheme = EscapingScheme.NO_ESCAPING;
       writer.write(out, registry.scrape());
       return out.toString(StandardCharsets.UTF_8.name());
     } catch (IOException e) {

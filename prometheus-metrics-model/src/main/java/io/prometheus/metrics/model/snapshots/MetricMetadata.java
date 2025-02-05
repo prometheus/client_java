@@ -53,7 +53,7 @@ public final class MetricMetadata {
     this.help = help;
     this.unit = unit;
     validate();
-    this.prometheusName = name.contains(".") ? PrometheusNaming.prometheusName(name) : name;
+    this.prometheusName = name.contains(".") && PrometheusNaming.nameValidationScheme == ValidationScheme.LEGACY_VALIDATION ? PrometheusNaming.prometheusName(name) : name;
   }
 
   /**
