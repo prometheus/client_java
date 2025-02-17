@@ -1,5 +1,6 @@
 package io.prometheus.metrics.simpleclient.bridge;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.prometheus.client.Collector;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -266,6 +269,7 @@ class SimpleclientCollectorTest {
   private String newOpenMetrics() throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, false);
+    nameEscapingScheme = EscapingScheme.NO_ESCAPING;
     writer.write(out, newRegistry.scrape());
     return out.toString(StandardCharsets.UTF_8.name());
   }

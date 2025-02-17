@@ -1,11 +1,13 @@
 package io.prometheus.metrics.instrumentation.dropwizard5;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
 
 import io.dropwizard.metrics5.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
@@ -288,6 +290,7 @@ class DropwizardExportsTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
+      nameEscapingScheme = EscapingScheme.NO_ESCAPING;
       writer.write(out, _registry.scrape());
       return out.toString(StandardCharsets.UTF_8.name());
     } catch (IOException e) {
