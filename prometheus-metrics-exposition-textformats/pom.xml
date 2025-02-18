@@ -19,6 +19,7 @@
 
     <properties>
         <automatic.module.name>io.prometheus.writer.text</automatic.module.name>
+        <jacoco.line-coverage>0.50</jacoco.line-coverage>
     </properties>
 
     <dependencies>
@@ -33,4 +34,20 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
