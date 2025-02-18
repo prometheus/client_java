@@ -33,6 +33,14 @@
             <artifactId>protobuf-java</artifactId>
             <version>${protobuf-java.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>prometheus-metrics-exposition-textformats</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+            <type>test-jar</type>
+        </dependency>
     </dependencies>
 
     <build>
