@@ -13,7 +13,7 @@ Migration using the Simpleclient Bridge
 
 Good news: Users of version 0.16.0 and older do not need to refactor all their instrumentation code to get started with 1.0.0.
 
-We provide a migration module for bridging the old simpleclient `CollectorRegistry` to the new `PromethesuRegistry`.
+We provide a migration module for bridging the old simpleclient `CollectorRegistry` to the new `PrometheusRegistry`.
 
 To use the bridge, add the following dependency:
 
