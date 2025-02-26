@@ -37,19 +37,67 @@ import java.util.List;
  */
 public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
+  public static class Builder {
+    CreatedTimestampStyle createdTimestampStyle;
+    boolean exemplarsOnAllMetricTypesEnabled;
+
+    private Builder() {
+    }
+
+    /**
+     * @param createdTimestampsEnabled whether to include the _created timestamp in the output
+     */
+    public void setCreatedTimestampsEnabled(boolean createdTimestampsEnabled) {
+      this.createdTimestampStyle = CreatedTimestampStyle.fromEnabled(createdTimestampsEnabled);
+    }
+
+    /**
+     * @param exemplarsOnAllMetricTypesEnabled whether to include exemplars in the output for all metric types
+     */
+    public void setExemplarsOnAllMetricTypesEnabled(boolean exemplarsOnAllMetricTypesEnabled) {
+      this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
+    }
+  }
+
+  private enum CreatedTimestampStyle {
+    DISABLED,
+    DEPRECATED,
+    MILLISECONDS;
+
+    private static CreatedTimestampStyle fromDeprecated(boolean createdTimestampsEnabled) {
+      return createdTimestampsEnabled ? DEPRECATED : DISABLED;
+    }
+
+    private static CreatedTimestampStyle fromEnabled(boolean createdTimestampsEnabled) {
+      return createdTimestampsEnabled ? MILLISECONDS : DISABLED;
+    }
+  }
+
   public static final String CONTENT_TYPE =
       "application/openmetrics-text; version=1.0.0; charset=utf-8";
-  private final boolean createdTimestampsEnabled;
+  private final CreatedTimestampStyle createdTimestampStyle;
   private final boolean exemplarsOnAllMetricTypesEnabled;
 
   /**
-   * @param createdTimestampsEnabled defines if {@code _created} timestamps should be included in
-   *     the output or not.
+   * @param createdTimestampsEnabled whether to include the _created timestamp in the output - This will produce an invalid OpenMetrics output, but is kept for backwards compatibility.
+   * @deprecated this constructor is deprecated and will be removed in the next major version. Use
    */
+  @Deprecated
   public OpenMetricsTextFormatWriter(
       boolean createdTimestampsEnabled, boolean exemplarsOnAllMetricTypesEnabled) {
-    this.createdTimestampsEnabled = createdTimestampsEnabled;
+    this(CreatedTimestampStyle.fromDeprecated(createdTimestampsEnabled), exemplarsOnAllMetricTypesEnabled);
+  }
+
+  // some new ctor that produces milliceconds timestamps as required by the OpenMetrics spec
+  // https://prometheus.io/docs/instrumenting/exposition_formats/#comments-help-text-and-type-information
+  private OpenMetricsTextFormatWriter(
+    CreatedTimestampStyle createdTimestampStyle, boolean exemplarsOnAllMetricTypesEnabled) {
+    this.createdTimestampStyle = createdTimestampStyle;
     this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
+  }
+
+  public static Builder builder() {
+    return new Builder();
   }
 
   @Override
@@ -297,7 +345,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
   private void writeCreated(Writer writer, MetricMetadata metadata, DataPointSnapshot data)
       throws IOException {
-    if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
+    if (createdTimestampStyle != CreatedTimestampStyle.DISABLED && data.hasCreatedTimestamp()) {
       writeNameAndLabels(writer, metadata.getPrometheusName(), "_created", data.getLabels());
       writeTimestamp(writer, data.getCreatedTimestampMillis());
       if (data.hasScrapeTimestamp()) {
