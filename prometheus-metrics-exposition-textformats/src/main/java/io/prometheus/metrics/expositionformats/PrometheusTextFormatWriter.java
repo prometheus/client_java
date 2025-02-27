@@ -36,9 +36,55 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   public static final String CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8";
 
   private final boolean writeCreatedTimestamps;
+  private final boolean timestampsInMs;
 
+  public static class Builder {
+    boolean includeCreatedTimestamps;
+    boolean timestampsInMs = true;
+
+    private Builder() {}
+
+    /**
+     * @param includeCreatedTimestamps whether to include the _created timestamp in the output
+     */
+    public Builder setIncludeCreatedTimestamps(boolean includeCreatedTimestamps) {
+      this.includeCreatedTimestamps = includeCreatedTimestamps;
+      return this;
+    }
+
+    @Deprecated
+    public Builder setTimestampsInMs(boolean timestampsInMs) {
+      this.timestampsInMs = timestampsInMs;
+      return this;
+    }
+
+    public PrometheusTextFormatWriter build() {
+      return new PrometheusTextFormatWriter(includeCreatedTimestamps, timestampsInMs);
+    }
+  }
+
+  /**
+   * @param writeCreatedTimestamps whether to include the _created timestamp in the output - This
+   *     will produce an invalid OpenMetrics output, but is kept for backwards compatibility.
+   * @deprecated this constructor is deprecated and will be removed in the next major version -
+   *     {@link #builder()} or {@link #create()} instead
+   */
+  @Deprecated
   public PrometheusTextFormatWriter(boolean writeCreatedTimestamps) {
+    this(writeCreatedTimestamps, false);
+  }
+
+  private PrometheusTextFormatWriter(boolean writeCreatedTimestamps, boolean timestampsInMs) {
     this.writeCreatedTimestamps = writeCreatedTimestamps;
+    this.timestampsInMs = timestampsInMs;
+  }
+
+  public static PrometheusTextFormatWriter.Builder builder() {
+    return new Builder();
+  }
+
+  public static PrometheusTextFormatWriter create() {
+    return builder().build();
   }
 
   @Override
@@ -106,7 +152,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
           metadataWritten = true;
         }
         writeNameAndLabels(writer, metadata.getPrometheusName(), "_created", data.getLabels());
-        writeTimestamp(writer, data.getCreatedTimestampMillis());
+        writeTimestamp(writer, data.getCreatedTimestampMillis(), timestampsInMs);
         writeScrapeTimestampAndNewline(writer, data);
       }
     }
@@ -363,7 +409,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
-      writeTimestamp(writer, data.getScrapeTimestampMillis());
+      writeTimestamp(writer, data.getScrapeTimestampMillis(), timestampsInMs);
     }
     writer.write('\n');
   }

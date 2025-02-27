@@ -22,12 +22,19 @@ public class ExpositionFormats {
     return init(PrometheusProperties.get().getExporterProperties());
   }
 
+  @SuppressWarnings("deprecation")
   public static ExpositionFormats init(ExporterProperties properties) {
     return new ExpositionFormats(
         new PrometheusProtobufWriter(),
-        new PrometheusTextFormatWriter(properties.getIncludeCreatedTimestamps()),
-        new OpenMetricsTextFormatWriter(
-            properties.getIncludeCreatedTimestamps(), properties.getExemplarsOnAllMetricTypes()));
+        PrometheusTextFormatWriter.builder()
+            .setIncludeCreatedTimestamps(properties.getIncludeCreatedTimestamps())
+            .setTimestampsInMs(properties.getTimestampsInMs())
+            .build(),
+        OpenMetricsTextFormatWriter.builder()
+            .setCreatedTimestampsEnabled(properties.getIncludeCreatedTimestamps())
+            .setExemplarsOnAllMetricTypesEnabled(properties.getExemplarsOnAllMetricTypes())
+            .setTimestampsInMs(properties.getTimestampsInMs())
+            .build());
   }
 
   public ExpositionFormatWriter findWriter(String acceptHeader) {

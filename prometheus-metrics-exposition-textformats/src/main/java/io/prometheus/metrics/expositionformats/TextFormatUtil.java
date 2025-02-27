@@ -21,17 +21,25 @@ public class TextFormatUtil {
     }
   }
 
-  static void writeTimestamp(Writer writer, long timestampMs) throws IOException {
-    writer.write(Long.toString(timestampMs / 1000L));
-    writer.write(".");
-    long ms = timestampMs % 1000;
-    if (ms < 100) {
-      writer.write("0");
+  static void writeTimestamp(Writer writer, long timestampMs, boolean timestampsInMs)
+      throws IOException {
+    if (timestampsInMs) {
+      // correct as per
+      // https://prometheus.io/docs/instrumenting/exposition_formats/#text-format-details
+      writer.write(Long.toString(timestampMs));
+    } else {
+      // this is incorrect - but we need to support it for backwards compatibility
+      writer.write(Long.toString(timestampMs / 1000L));
+      writer.write(".");
+      long ms = timestampMs % 1000;
+      if (ms < 100) {
+        writer.write("0");
+      }
+      if (ms < 10) {
+        writer.write("0");
+      }
+      writer.write(Long.toString(ms));
     }
-    if (ms < 10) {
-      writer.write("0");
-    }
-    writer.write(Long.toString(ms));
   }
 
   static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
