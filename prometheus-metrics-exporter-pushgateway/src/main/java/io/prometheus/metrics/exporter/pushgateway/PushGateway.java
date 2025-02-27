@@ -80,6 +80,7 @@ public class PushGateway {
 
   private final URL url;
   private final ExpositionFormatWriter writer;
+  private final boolean timestampsInMs;
   private final Map<String, String> requestHeaders;
   private final PrometheusRegistry registry;
   private final HttpConnectionFactory connectionFactory;
@@ -89,20 +90,23 @@ public class PushGateway {
       Format format,
       URL url,
       HttpConnectionFactory connectionFactory,
-      Map<String, String> requestHeaders) {
+      Map<String, String> requestHeaders,
+      boolean timestampsInMs) {
     this.registry = registry;
     this.url = url;
     this.requestHeaders = Collections.unmodifiableMap(new HashMap<>(requestHeaders));
     this.connectionFactory = connectionFactory;
+    this.timestampsInMs = timestampsInMs;
     writer = getWriter(format);
     if (!writer.isAvailable()) {
       throw new RuntimeException(writer.getClass() + " is not available");
     }
   }
 
+  @SuppressWarnings("deprecation")
   private ExpositionFormatWriter getWriter(Format format) {
     if (format == Format.PROMETHEUS_TEXT) {
-      return new PrometheusTextFormatWriter(false);
+      return PrometheusTextFormatWriter.builder().setTimestampsInMs(this.timestampsInMs).build();
     } else {
       // use reflection to avoid a compile-time dependency on the expositionformats module
       return new PrometheusProtobufWriter();
@@ -264,6 +268,7 @@ public class PushGateway {
     private String address;
     private Scheme scheme;
     private String job;
+    private boolean timestampsInMs;
     private final Map<String, String> requestHeaders = new HashMap<>();
     private PrometheusRegistry registry = PrometheusRegistry.defaultRegistry;
     private HttpConnectionFactory connectionFactory = new DefaultHttpConnectionFactory();
@@ -380,6 +385,20 @@ public class PushGateway {
       return this;
     }
 
+    /**
+     * Use milliseconds for timestamps in text format? Default is {@code false}. Can be overwritten
+     * at runtime with the {@code io.prometheus.exporter.timestampsInMs} property.
+     */
+    public Builder setTimestampsInMs(boolean timestampsInMs) {
+      this.timestampsInMs = timestampsInMs;
+      return this;
+    }
+
+    private boolean getTimestampsInMs() {
+      // accept either to opt in to timestamps in milliseconds
+      return config.getExporterProperties().getTimestampsInMs() || this.timestampsInMs;
+    }
+
     private Scheme getScheme(ExporterPushgatewayProperties properties) {
       if (properties != null && properties.getScheme() != null) {
         return Scheme.valueOf(properties.getScheme());
@@ -453,7 +472,12 @@ public class PushGateway {
           config == null ? null : config.getExporterPushgatewayProperties();
       try {
         return new PushGateway(
-            registry, getFormat(), makeUrl(properties), connectionFactory, requestHeaders);
+            registry,
+            getFormat(),
+            makeUrl(properties),
+            connectionFactory,
+            requestHeaders,
+            getTimestampsInMs());
       } catch (MalformedURLException e) {
         throw new PrometheusPropertiesException(
             address + ": Invalid address. Expecting <host>:<port>");

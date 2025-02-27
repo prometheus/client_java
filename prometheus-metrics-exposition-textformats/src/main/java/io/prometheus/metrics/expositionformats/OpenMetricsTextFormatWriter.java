@@ -38,66 +38,74 @@ import java.util.List;
 public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
   public static class Builder {
-    CreatedTimestampStyle createdTimestampStyle;
+    boolean createdTimestampsEnabled;
+    boolean timestampsInMs = true;
     boolean exemplarsOnAllMetricTypesEnabled;
 
-    private Builder() {
-    }
+    private Builder() {}
 
     /**
      * @param createdTimestampsEnabled whether to include the _created timestamp in the output
      */
-    public void setCreatedTimestampsEnabled(boolean createdTimestampsEnabled) {
-      this.createdTimestampStyle = CreatedTimestampStyle.fromEnabled(createdTimestampsEnabled);
+    public Builder setCreatedTimestampsEnabled(boolean createdTimestampsEnabled) {
+      this.createdTimestampsEnabled = createdTimestampsEnabled;
+      return this;
     }
 
     /**
-     * @param exemplarsOnAllMetricTypesEnabled whether to include exemplars in the output for all metric types
+     * @param exemplarsOnAllMetricTypesEnabled whether to include exemplars in the output for all
+     *     metric types
      */
-    public void setExemplarsOnAllMetricTypesEnabled(boolean exemplarsOnAllMetricTypesEnabled) {
+    public Builder setExemplarsOnAllMetricTypesEnabled(boolean exemplarsOnAllMetricTypesEnabled) {
       this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
-    }
-  }
-
-  private enum CreatedTimestampStyle {
-    DISABLED,
-    DEPRECATED,
-    MILLISECONDS;
-
-    private static CreatedTimestampStyle fromDeprecated(boolean createdTimestampsEnabled) {
-      return createdTimestampsEnabled ? DEPRECATED : DISABLED;
+      return this;
     }
 
-    private static CreatedTimestampStyle fromEnabled(boolean createdTimestampsEnabled) {
-      return createdTimestampsEnabled ? MILLISECONDS : DISABLED;
+    @Deprecated
+    public Builder setTimestampsInMs(boolean timestampsInMs) {
+      this.timestampsInMs = timestampsInMs;
+      return this;
+    }
+
+    public OpenMetricsTextFormatWriter build() {
+      return new OpenMetricsTextFormatWriter(
+          createdTimestampsEnabled, timestampsInMs, exemplarsOnAllMetricTypesEnabled);
     }
   }
 
   public static final String CONTENT_TYPE =
       "application/openmetrics-text; version=1.0.0; charset=utf-8";
-  private final CreatedTimestampStyle createdTimestampStyle;
+  private final boolean createdTimestampsEnabled;
+  private final boolean timestampsInMs;
   private final boolean exemplarsOnAllMetricTypesEnabled;
 
   /**
-   * @param createdTimestampsEnabled whether to include the _created timestamp in the output - This will produce an invalid OpenMetrics output, but is kept for backwards compatibility.
-   * @deprecated this constructor is deprecated and will be removed in the next major version. Use
+   * @param createdTimestampsEnabled whether to include the _created timestamp in the output - This
+   *     will produce an invalid OpenMetrics output, but is kept for backwards compatibility.
+   * @deprecated this constructor is deprecated and will be removed in the next major version -
+   *     {@link #builder()} or {@link #create()} instead
    */
   @Deprecated
   public OpenMetricsTextFormatWriter(
       boolean createdTimestampsEnabled, boolean exemplarsOnAllMetricTypesEnabled) {
-    this(CreatedTimestampStyle.fromDeprecated(createdTimestampsEnabled), exemplarsOnAllMetricTypesEnabled);
+    this(createdTimestampsEnabled, false, exemplarsOnAllMetricTypesEnabled);
   }
 
-  // some new ctor that produces milliceconds timestamps as required by the OpenMetrics spec
-  // https://prometheus.io/docs/instrumenting/exposition_formats/#comments-help-text-and-type-information
   private OpenMetricsTextFormatWriter(
-    CreatedTimestampStyle createdTimestampStyle, boolean exemplarsOnAllMetricTypesEnabled) {
-    this.createdTimestampStyle = createdTimestampStyle;
+      boolean createdTimestampsEnabled,
+      boolean timestampsInMs,
+      boolean exemplarsOnAllMetricTypesEnabled) {
+    this.createdTimestampsEnabled = createdTimestampsEnabled;
+    this.timestampsInMs = timestampsInMs;
     this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
   }
 
   public static Builder builder() {
     return new Builder();
+  }
+
+  public static OpenMetricsTextFormatWriter create() {
+    return builder().build();
   }
 
   @Override
@@ -345,12 +353,12 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
   private void writeCreated(Writer writer, MetricMetadata metadata, DataPointSnapshot data)
       throws IOException {
-    if (createdTimestampStyle != CreatedTimestampStyle.DISABLED && data.hasCreatedTimestamp()) {
+    if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
       writeNameAndLabels(writer, metadata.getPrometheusName(), "_created", data.getLabels());
-      writeTimestamp(writer, data.getCreatedTimestampMillis());
+      writeTimestamp(writer, data.getCreatedTimestampMillis(), timestampsInMs);
       if (data.hasScrapeTimestamp()) {
         writer.write(' ');
-        writeTimestamp(writer, data.getScrapeTimestampMillis());
+        writeTimestamp(writer, data.getScrapeTimestampMillis(), timestampsInMs);
       }
       writer.write('\n');
     }
@@ -383,7 +391,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       Writer writer, DataPointSnapshot data, Exemplar exemplar) throws IOException {
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
-      writeTimestamp(writer, data.getScrapeTimestampMillis());
+      writeTimestamp(writer, data.getScrapeTimestampMillis(), timestampsInMs);
     }
     if (exemplar != null) {
       writer.write(" # ");
@@ -392,7 +400,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       writeDouble(writer, exemplar.getValue());
       if (exemplar.hasTimestamp()) {
         writer.write(' ');
-        writeTimestamp(writer, exemplar.getTimestampMillis());
+        writeTimestamp(writer, exemplar.getTimestampMillis(), timestampsInMs);
       }
     }
     writer.write('\n');
