@@ -32,14 +32,50 @@ You can exclude the protobuf exposition format by including the
 For example, in Maven:
 
 ```xml
-<dependency>
-    <groupId>io.prometheus</groupId>
-    <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
-    <exclusions>
-        <exclusion>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exposition-formats</artifactId>
-        </exclusion>
-    </exclusions>
-</dependency>
+<dependencies>
+  <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
+      <exclusions>
+          <exclusion>
+              <groupId>io.prometheus</groupId>
+              <artifactId>prometheus-metrics-exposition-formats</artifactId>
+          </exclusion>
+      </exclusions>
+  </dependency>
+  <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exposition-textformats</artifactId>
+  </dependency>
+</dependencies>
 ```
+
+## Exclude the shaded protobuf classes
+
+You can exclude the shaded protobuf classes including the
+`prometheus-metrics-exposition-formats-no-protobuf` module and excluding the
+`prometheus-metrics-exposition-formats` module in your build file.
+
+For example, in Maven:
+
+```xml
+<dependencies>
+  <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
+      <exclusions>
+          <exclusion>
+              <groupId>io.prometheus</groupId>
+              <artifactId>prometheus-metrics-exposition-formats</artifactId>
+          </exclusion>
+      </exclusions>
+  </dependency>
+  <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exposition-formats-no-protobuf</artifactId>
+  </dependency>
+</dependencies>
+```
+
+
+todo how to exclude shaded protobuf classes
