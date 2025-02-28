@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class ExpositionFormatWriterTest {
 
-  private final ExpositionFormatWriter writer = new OpenMetricsTextFormatWriter(false, false);
+  private final ExpositionFormatWriter writer = OpenMetricsTextFormatWriter.create();
 
   @Test
   void toDebugString() {

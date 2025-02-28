@@ -1,5 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -19,6 +20,18 @@ class TextFormatUtilTest {
   private static String escape(String s) throws IOException {
     StringWriter writer = new StringWriter();
     TextFormatUtil.writeEscapedLabelValue(writer, s);
+    return writer.toString();
+  }
+
+  @Test
+  void testWriteTimestamp() throws IOException {
+    assertThat(writeTimestamp(true)).isEqualTo("1000");
+    assertThat(writeTimestamp(false)).isEqualTo("1.000");
+  }
+
+  private static String writeTimestamp(boolean timestampsInMs) throws IOException {
+    StringWriter writer = new StringWriter();
+    TextFormatUtil.writeTimestamp(writer, 1000, timestampsInMs);
     return writer.toString();
   }
 }
