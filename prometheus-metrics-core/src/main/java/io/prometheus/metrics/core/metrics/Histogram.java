@@ -765,7 +765,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     /**
      * Create classic histogram buckets with linear bucket boundaries.
      *
-     * <p>Example: {@code withClassicLinearBuckets(1.0, 0.5, 10)} creates bucket boundaries {@code
+     * <p>Example: {@code classicLinearUpperBounds(1.0, 0.5, 10)} creates bucket boundaries {@code
      * [[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5]}.
      *
      * @param start is the first bucket boundary
@@ -786,7 +786,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     /**
      * Create classic histogram buckets with exponential boundaries.
      *
-     * <p>Example: {@code withClassicExponentialBuckets(1.0, 2.0, 10)} creates bucket boundaries
+     * <p>Example: {@code classicExponentialUpperBounds(1.0, 2.0, 10)} creates bucket boundaries
      * {@code [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0]}
      *
      * @param start is the first bucket boundary
