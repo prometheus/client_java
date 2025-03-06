@@ -38,6 +38,7 @@ if [[ $GENERATED_WITH != "$PROTOBUF_VERSION" ]]; then
   echo "Generated protobuf sources version $GENERATED_WITH does not match provided version $PROTOBUF_VERSION"
   echo "Please update the protoc version .tool-versions to the latest version of https://github.com/protocolbuffers/protobuf/releases"
   echo "Please use https://github.com/asdf-vm/asdf - this will use the version specified in .tool-versions"
+  echo "Generated protobuf sources are not up-to-date. Please run 'PROTO_GENERATION=true mvn clean install' and commit the changes."
   exit 1
 fi
 
