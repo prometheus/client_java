@@ -2620,7 +2620,8 @@ class ExpositionFormatsTest {
 
   private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, false);
+    OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
     writer.write(out, MetricSnapshots.of(snapshot));
     assertThat(out).hasToString(expected);
   }
@@ -2628,7 +2629,11 @@ class ExpositionFormatsTest {
   private void assertOpenMetricsTextWithExemplarsOnAllTimeSeries(
       String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
+    OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder()
+            .setCreatedTimestampsEnabled(true)
+            .setExemplarsOnAllMetricTypesEnabled(true)
+            .build();
     writer.write(out, MetricSnapshots.of(snapshot));
     assertThat(out).hasToString(expected);
   }
@@ -2636,14 +2641,15 @@ class ExpositionFormatsTest {
   private void assertOpenMetricsTextWithoutCreated(String expected, MetricSnapshot snapshot)
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, false);
+    OpenMetricsTextFormatWriter writer = OpenMetricsTextFormatWriter.create();
     writer.write(out, MetricSnapshots.of(snapshot));
     assertThat(out).hasToString(expected);
   }
 
   private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(true);
+    PrometheusTextFormatWriter writer =
+        PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true).build();
     writer.write(out, MetricSnapshots.of(snapshot));
     assertThat(out).hasToString(expected);
   }
@@ -2651,7 +2657,7 @@ class ExpositionFormatsTest {
   private void assertPrometheusTextWithoutCreated(String expected, MetricSnapshot snapshot)
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(false);
+    PrometheusTextFormatWriter writer = PrometheusTextFormatWriter.create();
     writer.write(out, MetricSnapshots.of(snapshot));
     assertThat(out).hasToString(expected);
   }
