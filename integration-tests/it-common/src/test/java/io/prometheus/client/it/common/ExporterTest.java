@@ -4,7 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_29_3.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_30_0.Metrics;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
