@@ -14,9 +14,15 @@ import java.util.concurrent.TimeUnit;
 public class Scheduler {
 
   private static class DaemonThreadFactory implements ThreadFactory {
+    private static int threadNum;
+
+    private static synchronized int nextThreadNum() {
+      return threadNum++;
+    }
+
     @Override
     public Thread newThread(Runnable runnable) {
-      Thread thread = new Thread(runnable);
+      Thread thread = new Thread(runnable, "prometheus-metrics-scheduler-" + nextThreadNum());
       thread.setDaemon(true);
       return thread;
     }
