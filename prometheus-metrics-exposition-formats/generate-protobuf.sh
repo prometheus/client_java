@@ -36,15 +36,15 @@ GENERATED_WITH=$(grep -oP '\/\/ Protobuf Java Version: \K.*' "$TARGET_DIR/${PACK
 
 if [[ $GENERATED_WITH != "$PROTOBUF_VERSION" ]]; then
   echo "Generated protobuf sources version $GENERATED_WITH does not match provided version $PROTOBUF_VERSION"
-  echo "Please update the protoc version .tool-versions to the latest version of https://github.com/protocolbuffers/protobuf/releases"
-  echo "Please use https://github.com/asdf-vm/asdf - this will use the version specified in .tool-versions"
-  echo "Generated protobuf sources are not up-to-date. Please run 'PROTO_GENERATION=true mvn clean install' and commit the changes."
+  echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
+  echo "Generated protobuf sources are not up-to-date. Please run 'mise up && mvn clean install' and commit the changes."
   exit 1
 fi
 
 STATUS=$(git status --porcelain)
 if [[ ${REQUIRE_PROTO_UP_TO_DATE:-false} == "true" && -n "$STATUS" ]]; then
-  echo "Generated protobuf sources are not up-to-date. Please run 'PROTO_GENERATION=true mvn clean install' and commit the changes."
+  echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
+  echo "Generated protobuf sources are not up-to-date. Please run 'mvn clean install' and commit the changes."
   echo "Local changes:"
   echo "$STATUS"
   exit 1

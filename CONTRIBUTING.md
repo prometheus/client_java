@@ -30,6 +30,8 @@ If you're getting errors when running tests:
 - Use `-Dcheckstyle.skip=true` to skip the checkstyle check during development.
 - Use `-Dwarnings=-nowarn` to skip the warnings during development.
 
+Combine all with `mvn test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn`.
+
 ## Updating the Protobuf Java Classes
 
 Use `PROTO_GENERATION=true mvn clean install` to generate protobuf classes.
