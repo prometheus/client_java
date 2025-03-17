@@ -3,4 +3,4 @@ PROTO_GENERATION = "true"
 
 [tools]
 java = "temurin-17.0.13+11"
-protoc = "latest"
+protoc = "30.1"
