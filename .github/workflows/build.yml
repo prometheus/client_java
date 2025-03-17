@@ -23,8 +23,5 @@ jobs:
         env:
           PROTO_GENERATION: true
           REQUIRE_PROTO_UP_TO_DATE: true
-        run: |
-          mise run ci
-          mvn -v
-          ./mvnw clean install
-          ./mvnw javadoc:javadoc -P javadoc # just to check if javadoc is generated
+        run: mise run ci
+
