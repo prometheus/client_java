@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <automatic.module.name>--module-name-need-to-be-overriden--</automatic.module.name>
         <guava.version>33.4.0-jre</guava.version>
-        <junit-jupiter.version>5.12.0</junit-jupiter.version>
+        <junit-jupiter.version>5.12.1</junit-jupiter.version>
         <otel.instrumentation.version>2.13.3-alpha</otel.instrumentation.version>
         <java.version>8</java.version>
         <jacoco.line-coverage>0.70</jacoco.line-coverage>
