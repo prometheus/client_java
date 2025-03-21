@@ -52,36 +52,44 @@ class ProcessMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        "# TYPE process_cpu_seconds counter\n"
-            + "# UNIT process_cpu_seconds seconds\n"
-            + "# HELP process_cpu_seconds Total user and system CPU time spent in seconds.\n"
-            + "process_cpu_seconds_total 0.072\n"
-            + "# TYPE process_max_fds gauge\n"
-            + "# HELP process_max_fds Maximum number of open file descriptors.\n"
-            + "process_max_fds 244.0\n"
-            + "# TYPE process_open_fds gauge\n"
-            + "# HELP process_open_fds Number of open file descriptors.\n"
-            + "process_open_fds 127.0\n";
+        """
+        # TYPE process_cpu_seconds counter
+        # UNIT process_cpu_seconds seconds
+        # HELP process_cpu_seconds Total user and system CPU time spent in seconds.
+        process_cpu_seconds_total 0.072
+        # TYPE process_max_fds gauge
+        # HELP process_max_fds Maximum number of open file descriptors.
+        process_max_fds 244.0
+        # TYPE process_open_fds gauge
+        # HELP process_open_fds Number of open file descriptors.
+        process_open_fds 127.0
+        """;
     // To allow running this test in non-linux environments
     if (ProcessMetrics.PROC_SELF_STATUS.canRead()) {
       expected +=
-          "# TYPE process_resident_memory_bytes gauge\n"
-              + "# UNIT process_resident_memory_bytes bytes\n"
-              + "# HELP process_resident_memory_bytes Resident memory size in bytes.\n"
-              + "process_resident_memory_bytes 1036288.0\n";
+          """
+          # TYPE process_resident_memory_bytes gauge
+          # UNIT process_resident_memory_bytes bytes
+          # HELP process_resident_memory_bytes Resident memory size in bytes.
+          process_resident_memory_bytes 1036288.0
+          """;
     }
     expected +=
-        "# TYPE process_start_time_seconds gauge\n"
-            + "# UNIT process_start_time_seconds seconds\n"
-            + "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n"
-            + "process_start_time_seconds 37.1\n";
+        """
+        # TYPE process_start_time_seconds gauge
+        # UNIT process_start_time_seconds seconds
+        # HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+        process_start_time_seconds 37.1
+        """;
     // To allow running this test in non-linux environments
     if (ProcessMetrics.PROC_SELF_STATUS.canRead()) {
       expected +=
-          "# TYPE process_virtual_memory_bytes gauge\n"
-              + "# UNIT process_virtual_memory_bytes bytes\n"
-              + "# HELP process_virtual_memory_bytes Virtual memory size in bytes.\n"
-              + "process_virtual_memory_bytes 6180864.0\n";
+          """
+          # TYPE process_virtual_memory_bytes gauge
+          # UNIT process_virtual_memory_bytes bytes
+          # HELP process_virtual_memory_bytes Virtual memory size in bytes.
+          process_virtual_memory_bytes 6180864.0
+          """;
     }
     expected += "# EOF\n";
 
@@ -99,11 +107,13 @@ class ProcessMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        "# TYPE process_start_time_seconds gauge\n"
-            + "# UNIT process_start_time_seconds seconds\n"
-            + "# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.\n"
-            + "process_start_time_seconds 37.1\n"
-            + "# EOF\n";
+        """
+        # TYPE process_start_time_seconds gauge
+        # UNIT process_start_time_seconds seconds
+        # HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+        process_start_time_seconds 37.1
+        # EOF
+        """;
 
     assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }
