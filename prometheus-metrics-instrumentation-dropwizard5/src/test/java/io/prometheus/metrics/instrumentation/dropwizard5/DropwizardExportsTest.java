@@ -31,10 +31,12 @@ class DropwizardExportsTest {
   public void testCounter() {
     metricRegistry.counter("foo.bar").inc(1);
     String expected =
-        "# TYPE foo_bar counter\n"
-            + "# HELP foo_bar Generated from Dropwizard metric import (metric=foo.bar, type=io.dropwizard.metrics5.Counter)\n"
-            + "foo_bar_total 1.0\n"
-            + "# EOF\n";
+        """
+        # TYPE foo_bar counter
+        # HELP foo_bar Generated from Dropwizard metric import (metric=foo.bar, type=io.dropwizard.metrics5.Counter)
+        foo_bar_total 1.0
+        # EOF
+        """;
 
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
@@ -85,22 +87,24 @@ class DropwizardExportsTest {
     metricRegistry.register("boolean.gauge", booleanGauge);
 
     String expected =
-        "# TYPE boolean_gauge gauge\n"
-            + "# HELP boolean_gauge Generated from Dropwizard metric import (metric=boolean.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$5)\n"
-            + "boolean_gauge 1.0\n"
-            + "# TYPE double_gauge gauge\n"
-            + "# HELP double_gauge Generated from Dropwizard metric import (metric=double.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$2)\n"
-            + "double_gauge 1.234\n"
-            + "# TYPE float_gauge gauge\n"
-            + "# HELP float_gauge Generated from Dropwizard metric import (metric=float.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$4)\n"
-            + "float_gauge 0.1234000027179718\n"
-            + "# TYPE integer_gauge gauge\n"
-            + "# HELP integer_gauge Generated from Dropwizard metric import (metric=integer.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$1)\n"
-            + "integer_gauge 1234.0\n"
-            + "# TYPE long_gauge gauge\n"
-            + "# HELP long_gauge Generated from Dropwizard metric import (metric=long.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$3)\n"
-            + "long_gauge 1234.0\n"
-            + "# EOF\n";
+        """
+        # TYPE boolean_gauge gauge
+        # HELP boolean_gauge Generated from Dropwizard metric import (metric=boolean.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$5)
+        boolean_gauge 1.0
+        # TYPE double_gauge gauge
+        # HELP double_gauge Generated from Dropwizard metric import (metric=double.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$2)
+        double_gauge 1.234
+        # TYPE float_gauge gauge
+        # HELP float_gauge Generated from Dropwizard metric import (metric=float.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$4)
+        float_gauge 0.1234000027179718
+        # TYPE integer_gauge gauge
+        # HELP integer_gauge Generated from Dropwizard metric import (metric=integer.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$1)
+        integer_gauge 1234.0
+        # TYPE long_gauge gauge
+        # HELP long_gauge Generated from Dropwizard metric import (metric=long.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$3)
+        long_gauge 1234.0
+        # EOF
+        """;
 
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
@@ -203,10 +207,12 @@ class DropwizardExportsTest {
     meter.mark();
 
     String expected =
-        "# TYPE meter counter\n"
-            + "# HELP meter Generated from Dropwizard metric import (metric=meter_total, type=io.dropwizard.metrics5.Meter)\n"
-            + "meter_total 2.0\n"
-            + "# EOF\n";
+        """
+        # TYPE meter counter
+        # HELP meter Generated from Dropwizard metric import (metric=meter_total, type=io.dropwizard.metrics5.Meter)
+        meter_total 2.0
+        # EOF
+        """;
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 
@@ -246,34 +252,36 @@ class DropwizardExportsTest {
     metricRegistry.register("my.application.namedGauge1", new ExampleDoubleGauge());
 
     String expected =
-        "# TYPE my_application_namedCounter1 counter\n"
-            + "# HELP my_application_namedCounter1 Generated from Dropwizard metric import (metric=my.application.namedCounter1, type=io.dropwizard.metrics5.Counter)\n"
-            + "my_application_namedCounter1_total 0.0\n"
-            + "# TYPE my_application_namedGauge1 gauge\n"
-            + "# HELP my_application_namedGauge1 Generated from Dropwizard metric import (metric=my.application.namedGauge1, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$ExampleDoubleGauge)\n"
-            + "my_application_namedGauge1 0.0\n"
-            + "# TYPE my_application_namedHistogram1 summary\n"
-            + "# HELP my_application_namedHistogram1 Generated from Dropwizard metric import (metric=my.application.namedHistogram1, type=io.dropwizard.metrics5.Histogram)\n"
-            + "my_application_namedHistogram1{quantile=\"0.5\"} 0.0\n"
-            + "my_application_namedHistogram1{quantile=\"0.75\"} 0.0\n"
-            + "my_application_namedHistogram1{quantile=\"0.95\"} 0.0\n"
-            + "my_application_namedHistogram1{quantile=\"0.98\"} 0.0\n"
-            + "my_application_namedHistogram1{quantile=\"0.99\"} 0.0\n"
-            + "my_application_namedHistogram1{quantile=\"0.999\"} 0.0\n"
-            + "my_application_namedHistogram1_count 0\n"
-            + "# TYPE my_application_namedMeter1 counter\n"
-            + "# HELP my_application_namedMeter1 Generated from Dropwizard metric import (metric=my.application.namedMeter1_total, type=io.dropwizard.metrics5.Meter)\n"
-            + "my_application_namedMeter1_total 0.0\n"
-            + "# TYPE my_application_namedTimer1 summary\n"
-            + "# HELP my_application_namedTimer1 Generated from Dropwizard metric import (metric=my.application.namedTimer1, type=io.dropwizard.metrics5.Timer)\n"
-            + "my_application_namedTimer1{quantile=\"0.5\"} 0.0\n"
-            + "my_application_namedTimer1{quantile=\"0.75\"} 0.0\n"
-            + "my_application_namedTimer1{quantile=\"0.95\"} 0.0\n"
-            + "my_application_namedTimer1{quantile=\"0.98\"} 0.0\n"
-            + "my_application_namedTimer1{quantile=\"0.99\"} 0.0\n"
-            + "my_application_namedTimer1{quantile=\"0.999\"} 0.0\n"
-            + "my_application_namedTimer1_count 0\n"
-            + "# EOF\n";
+        """
+        # TYPE my_application_namedCounter1 counter
+        # HELP my_application_namedCounter1 Generated from Dropwizard metric import (metric=my.application.namedCounter1, type=io.dropwizard.metrics5.Counter)
+        my_application_namedCounter1_total 0.0
+        # TYPE my_application_namedGauge1 gauge
+        # HELP my_application_namedGauge1 Generated from Dropwizard metric import (metric=my.application.namedGauge1, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$ExampleDoubleGauge)
+        my_application_namedGauge1 0.0
+        # TYPE my_application_namedHistogram1 summary
+        # HELP my_application_namedHistogram1 Generated from Dropwizard metric import (metric=my.application.namedHistogram1, type=io.dropwizard.metrics5.Histogram)
+        my_application_namedHistogram1{quantile="0.5"} 0.0
+        my_application_namedHistogram1{quantile="0.75"} 0.0
+        my_application_namedHistogram1{quantile="0.95"} 0.0
+        my_application_namedHistogram1{quantile="0.98"} 0.0
+        my_application_namedHistogram1{quantile="0.99"} 0.0
+        my_application_namedHistogram1{quantile="0.999"} 0.0
+        my_application_namedHistogram1_count 0
+        # TYPE my_application_namedMeter1 counter
+        # HELP my_application_namedMeter1 Generated from Dropwizard metric import (metric=my.application.namedMeter1_total, type=io.dropwizard.metrics5.Meter)
+        my_application_namedMeter1_total 0.0
+        # TYPE my_application_namedTimer1 summary
+        # HELP my_application_namedTimer1 Generated from Dropwizard metric import (metric=my.application.namedTimer1, type=io.dropwizard.metrics5.Timer)
+        my_application_namedTimer1{quantile="0.5"} 0.0
+        my_application_namedTimer1{quantile="0.75"} 0.0
+        my_application_namedTimer1{quantile="0.95"} 0.0
+        my_application_namedTimer1{quantile="0.98"} 0.0
+        my_application_namedTimer1{quantile="0.99"} 0.0
+        my_application_namedTimer1{quantile="0.999"} 0.0
+        my_application_namedTimer1_count 0
+        # EOF
+        """;
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 

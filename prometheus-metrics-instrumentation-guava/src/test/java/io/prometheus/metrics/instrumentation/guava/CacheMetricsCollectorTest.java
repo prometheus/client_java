@@ -52,22 +52,24 @@ class CacheMetricsCollectorTest {
     assertCounterMetric(registry, "guava_cache_eviction", "users", 2.0);
 
     final String expected =
-        "# TYPE guava_cache_eviction counter\n"
-            + "# HELP guava_cache_eviction Cache eviction totals, doesn't include manually removed entries\n"
-            + "guava_cache_eviction_total{cache=\"users\"} 2.0\n"
-            + "# TYPE guava_cache_hit counter\n"
-            + "# HELP guava_cache_hit Cache hit totals\n"
-            + "guava_cache_hit_total{cache=\"users\"} 1.0\n"
-            + "# TYPE guava_cache_miss counter\n"
-            + "# HELP guava_cache_miss Cache miss totals\n"
-            + "guava_cache_miss_total{cache=\"users\"} 2.0\n"
-            + "# TYPE guava_cache_requests counter\n"
-            + "# HELP guava_cache_requests Cache request totals\n"
-            + "guava_cache_requests_total{cache=\"users\"} 3.0\n"
-            + "# TYPE guava_cache_size gauge\n"
-            + "# HELP guava_cache_size Cache size\n"
-            + "guava_cache_size{cache=\"users\"} 2.0\n"
-            + "# EOF\n";
+        """
+        # TYPE guava_cache_eviction counter
+        # HELP guava_cache_eviction Cache eviction totals, doesn't include manually removed entries
+        guava_cache_eviction_total{cache="users"} 2.0
+        # TYPE guava_cache_hit counter
+        # HELP guava_cache_hit Cache hit totals
+        guava_cache_hit_total{cache="users"} 1.0
+        # TYPE guava_cache_miss counter
+        # HELP guava_cache_miss Cache miss totals
+        guava_cache_miss_total{cache="users"} 2.0
+        # TYPE guava_cache_requests counter
+        # HELP guava_cache_requests Cache request totals
+        guava_cache_requests_total{cache="users"} 3.0
+        # TYPE guava_cache_size gauge
+        # HELP guava_cache_size Cache size
+        guava_cache_size{cache="users"} 2.0
+        # EOF
+        """;
 
     assertThat(convertToOpenMetricsFormat(registry)).isEqualTo(expected);
   }

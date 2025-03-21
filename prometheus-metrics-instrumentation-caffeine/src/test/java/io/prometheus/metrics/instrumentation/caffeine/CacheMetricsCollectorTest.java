@@ -79,15 +79,19 @@ class CacheMetricsCollectorTest {
     if (options.collectEvictionWeightAsCounter) {
       assertCounterMetric(registry, "caffeine_cache_eviction_weight", "users", 2.0);
       openMetricEvictionWeightExpectedText =
-          "# TYPE caffeine_cache_eviction_weight counter\n"
-              + "# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries\n"
-              + "caffeine_cache_eviction_weight_total{cache=\"users\"} 2.0\n";
+          """
+          # TYPE caffeine_cache_eviction_weight counter
+          # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+          caffeine_cache_eviction_weight_total{cache="users"} 2.0
+          """;
     } else {
       assertGaugeMetric(registry, "caffeine_cache_eviction_weight", "users", 2.0);
       openMetricEvictionWeightExpectedText =
-          "# TYPE caffeine_cache_eviction_weight gauge\n"
-              + "# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries\n"
-              + "caffeine_cache_eviction_weight{cache=\"users\"} 2.0\n";
+          """
+          # TYPE caffeine_cache_eviction_weight gauge
+          # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+          caffeine_cache_eviction_weight{cache="users"} 2.0
+          """;
     }
 
     final String expected =
@@ -152,22 +156,28 @@ class CacheMetricsCollectorTest {
     if (options.collectEvictionWeightAsCounter) {
       assertCounterMetric(registry, "caffeine_cache_eviction_weight", "users", 31.0);
       openMetricEvictionWeightExpectedText =
-          "# TYPE caffeine_cache_eviction_weight counter\n"
-              + "# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries\n"
-              + "caffeine_cache_eviction_weight_total{cache=\"users\"} 31.0\n";
+          """
+          # TYPE caffeine_cache_eviction_weight counter
+          # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+          caffeine_cache_eviction_weight_total{cache="users"} 31.0
+          """;
     } else {
       assertGaugeMetric(registry, "caffeine_cache_eviction_weight", "users", 31.0);
       openMetricEvictionWeightExpectedText =
-          "# TYPE caffeine_cache_eviction_weight gauge\n"
-              + "# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries\n"
-              + "caffeine_cache_eviction_weight{cache=\"users\"} 31.0\n";
+          """
+          # TYPE caffeine_cache_eviction_weight gauge
+          # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+          caffeine_cache_eviction_weight{cache="users"} 31.0
+          """;
     }
     String openMetricWeightedSizeExpectedText;
     if (options.collectWeightedSize) {
       openMetricWeightedSizeExpectedText =
-          "# TYPE caffeine_cache_weighted_size gauge\n"
-              + "# HELP caffeine_cache_weighted_size Approximate accumulated weight of cache entries\n"
-              + "caffeine_cache_weighted_size{cache=\"users\"} 31.0\n";
+          """
+          # TYPE caffeine_cache_weighted_size gauge
+          # HELP caffeine_cache_weighted_size Approximate accumulated weight of cache entries
+          caffeine_cache_weighted_size{cache="users"} 31.0
+          """;
     } else {
       openMetricWeightedSizeExpectedText = "";
     }

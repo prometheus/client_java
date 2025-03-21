@@ -13,3 +13,15 @@ run = [
     "./mvnw javadoc:javadoc -P javadoc"
 ]
 env = { PROTO_GENERATION = "true", REQUIRE_PROTO_UP_TO_DATE = "true" }
+
+[tasks.format]
+description = "format source code"
+run = "./mvnw spotless:apply"
+
+[tasks.test]
+description = "run unit tests, ignoring formatting and linters"
+run = "./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+
+[tasks.test-all]
+description = "run all tests"
+run = "./mvnw verify"

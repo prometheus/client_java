@@ -13,8 +13,7 @@ public class DefaultHandler implements HttpHandler {
 
   public DefaultHandler() {
     String responseString =
-        ""
-            + "<html>\n"
+        "<html>\n"
             + "<head><title>Prometheus Java Client</title></head>\n"
             + "<body>\n"
             + "<h1>Prometheus Java Client</h1>\n"
