@@ -6,20 +6,30 @@ import java.util.Map;
 public class ExporterProperties {
 
   private static final String INCLUDE_CREATED_TIMESTAMPS = "includeCreatedTimestamps";
+  // milliseconds is the default - we only provide a boolean flag to avoid a breaking change
+  private static final String TIMESTAMPS_IN_MS = "timestampsInMs";
   private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplarsOnAllMetricTypes";
   private static final String PREFIX = "io.prometheus.exporter";
 
   private final Boolean includeCreatedTimestamps;
+  private final Boolean timestampsInMs;
   private final Boolean exemplarsOnAllMetricTypes;
 
-  private ExporterProperties(Boolean includeCreatedTimestamps, Boolean exemplarsOnAllMetricTypes) {
+  private ExporterProperties(
+      Boolean includeCreatedTimestamps, Boolean timestampsInMs, Boolean exemplarsOnAllMetricTypes) {
     this.includeCreatedTimestamps = includeCreatedTimestamps;
+    this.timestampsInMs = timestampsInMs;
     this.exemplarsOnAllMetricTypes = exemplarsOnAllMetricTypes;
   }
 
   /** Include the {@code _created} timestamps in text format? Default is {@code false}. */
   public boolean getIncludeCreatedTimestamps() {
     return includeCreatedTimestamps != null && includeCreatedTimestamps;
+  }
+
+  /** Use milliseconds for timestamps in text format? Default is {@code false}. */
+  public boolean getTimestampsInMs() {
+    return timestampsInMs != null && timestampsInMs;
   }
 
   /**
@@ -38,9 +48,12 @@ public class ExporterProperties {
       throws PrometheusPropertiesException {
     Boolean includeCreatedTimestamps =
         Util.loadBoolean(PREFIX + "." + INCLUDE_CREATED_TIMESTAMPS, properties);
+    Boolean timestampsInMs = Util.loadBoolean(PREFIX + "." + TIMESTAMPS_IN_MS, properties);
     Boolean exemplarsOnAllMetricTypes =
         Util.loadBoolean(PREFIX + "." + EXEMPLARS_ON_ALL_METRIC_TYPES, properties);
-    return new ExporterProperties(includeCreatedTimestamps, exemplarsOnAllMetricTypes);
+    // new prop?
+    return new ExporterProperties(
+        includeCreatedTimestamps, timestampsInMs, exemplarsOnAllMetricTypes);
   }
 
   public static Builder builder() {
@@ -51,6 +64,7 @@ public class ExporterProperties {
 
     private Boolean includeCreatedTimestamps;
     private Boolean exemplarsOnAllMetricTypes;
+    boolean timestampsInMs;
 
     private Builder() {}
 
@@ -66,8 +80,15 @@ public class ExporterProperties {
       return this;
     }
 
+    /** See {@link #getTimestampsInMs()}. */
+    public Builder setTimestampsInMs(boolean timestampsInMs) {
+      this.timestampsInMs = timestampsInMs;
+      return this;
+    }
+
     public ExporterProperties build() {
-      return new ExporterProperties(includeCreatedTimestamps, exemplarsOnAllMetricTypes);
+      return new ExporterProperties(
+          includeCreatedTimestamps, timestampsInMs, exemplarsOnAllMetricTypes);
     }
   }
 }
