@@ -34,4 +34,4 @@ Combine all with `./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcove
 
 ## Updating the Protobuf Java Classes
 
-Use `PROTO_GENERATION=true mvn clean install` to generate protobuf classes.
+Use `mise up && mise run test` to generate protobuf classes.

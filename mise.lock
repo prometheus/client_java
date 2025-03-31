@@ -1,0 +1,10 @@
+[tools.java]
+version = "temurin-17.0.13+11"
+backend = "core:java"
+
+[tools.protoc]
+version = "30.2"
+backend = "aqua:protocolbuffers/protobuf/protoc"
+
+[tools.protoc.checksums]
+"protoc-30.2-linux-x86_64.zip" = "sha256:327e9397c6fb3ea2a542513a3221334c6f76f7aa524a7d2561142b67b312a01f"

@@ -20,8 +20,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run the Maven verify phase
-        env:
-          PROTO_GENERATION: true
-          REQUIRE_PROTO_UP_TO_DATE: true
         run: mise run ci
 
