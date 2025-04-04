@@ -31,5 +31,11 @@ run = "./mvnw verify"
 description = "Run OATs acceptance tests"
 run = "oats -timeout 5m examples/"
 
+[tasks.native-test]
+tools.java = "graalvm-21.3.3+java17"
+run = "./scripts/run-native-tests.sh"
 
+[settings]
+# to get lock file support and for go backend
+experimental = true
 

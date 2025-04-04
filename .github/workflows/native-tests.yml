@@ -10,12 +10,8 @@ jobs:
   native-tests:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: graalvm
-          cache: 'maven'
-      - name: Run the Maven verify phase
-        run: ./scripts/run-native-tests.sh
+      - name: Check out
+        uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - name: Run native tests
+        run: mise run native-test

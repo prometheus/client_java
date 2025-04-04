@@ -13,10 +13,8 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
-        with:
-          experimental: true # to get lock file support and for go backend
       - name: Run acceptance tests
-        run: ./scripts/run-acceptance-tests.sh
+        run: mise run acceptance-test
       - name: upload log file
         uses: actions/upload-artifact@v4
         if: failure()
