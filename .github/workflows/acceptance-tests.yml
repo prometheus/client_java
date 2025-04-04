@@ -10,32 +10,14 @@ jobs:
   acceptance-tests:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Check out oats
+      - name: Check out
         uses: actions/checkout@v4
-        with:
-          repository: grafana/oats
-          ref: v0.1.0
-          path: oats
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: temurin
-          cache: 'maven'
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-          cache-dependency-path: oats/go.sum
-      - name: Run the Maven verify phase
-        run: |
-          ./mvnw clean install -DskipTests
+      - uses: jdx/mise-action@v2
       - name: Run acceptance tests
-        run: ./scripts/run-acceptance-tests.sh
+        run: mise run acceptance-test
       - name: upload log file
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: OATS logs
-          path: oats/yaml/build/**/*.log
+          name: OATs logs
+          path: build/**/*.log

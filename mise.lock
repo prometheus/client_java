@@ -1,3 +1,7 @@
+[tools."go:github.com/grafana/oats"]
+version = "0.2.0"
+backend = "go:github.com/grafana/oats"
+
 [tools.java]
 version = "temurin-17.0.13+11"
 backend = "core:java"

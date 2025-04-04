@@ -2,15 +2,16 @@
 PROTO_GENERATION = "true"
 
 [tools]
+"go:github.com/grafana/oats" = "0.2.0"
 java = "temurin-17.0.13+11"
 protoc = "latest"
 
 [tasks.ci]
 description = "CI Build"
 run = [
-    "./mvnw clean install",
-    # just to check if javadoc can be generated
-    "./mvnw javadoc:javadoc -P javadoc"
+  "./mvnw clean install",
+  # just to check if javadoc can be generated
+  "./mvnw javadoc:javadoc -P javadoc"
 ]
 env = { REQUIRE_PROTO_UP_TO_DATE = "true" }
 
@@ -25,4 +26,23 @@ run = "./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=t
 [tasks.test-all]
 description = "run all tests"
 run = "./mvnw verify"
+
+[tasks.build]
+description = "build all modules wihthout tests"
+run = "./mvnw clean install -DskipTests"
+
+[tasks.acceptance-test]
+description = "Run OATs acceptance tests"
+depends = "build"
+run = "oats -timeout 5m examples/"
+
+[tasks.native-test]
+depends = "build"
+tools.java = "graalvm-22.3.3+java17"
+run = "../../mvnw  test -PnativeTest"
+dir = "integration-tests/it-spring-boot-smoke-test"
+
+[settings]
+# to get lock file support and for go backend
+experimental = true
 
