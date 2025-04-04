@@ -2,6 +2,7 @@
 PROTO_GENERATION = "true"
 
 [tools]
+"go:github.com/grafana/oats" = "0.2.0"
 java = "temurin-17.0.13+11"
 protoc = "latest"
 
@@ -25,4 +26,10 @@ run = "./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=t
 [tasks.test-all]
 description = "run all tests"
 run = "./mvnw verify"
+
+[tasks.acceptance-test]
+description = "Run OATs acceptance tests"
+run = "oats -timeout 5m examples/"
+
+
 
