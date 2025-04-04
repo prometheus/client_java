@@ -50,9 +50,9 @@ public class TextFormatUtilBenchmark {
   }
 
   private static final ExpositionFormatWriter OPEN_METRICS_TEXT_FORMAT_WRITER =
-      new OpenMetricsTextFormatWriter(false, false);
+      OpenMetricsTextFormatWriter.create();
   private static final ExpositionFormatWriter PROMETHEUS_TEXT_FORMAT_WRITER =
-      new PrometheusTextFormatWriter(false);
+      PrometheusTextFormatWriter.create();
 
   @State(Scope.Benchmark)
   public static class WriterState {
