@@ -7,14 +7,15 @@ from urllib.request import urlopen
 import urllib.parse
 import json
 
-url = ' http://localhost:9090/api/v1/label/instance/values'
+url = ' http://localhost:9090/api/v1/query?query=target_info'
 res = json.loads(urlopen(url).read().decode('utf-8'))
 
-values = list(res['data'])
-print(values)
+# uncomment the following line to use the local file instead of the url - for debugging
+# with open('example_target_info.json') as f:
+#   res = json.load(f)
 
-if "localhost:8888" in values:
-    values.remove("localhost:8888")
+values = list({r['metric']['instance'] for r in res['data']['result'] if not r['metric']['service_name'] == 'otelcol-contrib'})
+print(values)
 
 # both the agent and the exporter should report the same instance id
 assert len(values) == 1
