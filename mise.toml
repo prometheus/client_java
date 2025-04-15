@@ -2,7 +2,7 @@
 PROTO_GENERATION = "true"
 
 [tools]
-"go:github.com/grafana/oats" = "0.2.0"
+"go:github.com/grafana/oats" = "latest"
 java = "temurin-17.0.13+11"
 protoc = "latest"
 

@@ -18,6 +18,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <automatic.module.name>--module-name-need-to-be-overriden--</automatic.module.name>
+        <protobuf-java.version>4.30.2</protobuf-java.version>
         <guava.version>33.4.7-jre</guava.version>
         <junit-jupiter.version>5.12.2</junit-jupiter.version>
         <otel.instrumentation.version>2.15.0-alpha</otel.instrumentation.version>
@@ -68,12 +69,14 @@
         <module>prometheus-metrics-model</module>
         <module>prometheus-metrics-tracer</module>
         <module>prometheus-metrics-exposition-formats</module>
+        <module>prometheus-metrics-exposition-formats-shaded</module>
         <module>prometheus-metrics-exposition-textformats</module>
         <module>prometheus-metrics-exporter-common</module>
         <module>prometheus-metrics-exporter-servlet-jakarta</module>
         <module>prometheus-metrics-exporter-servlet-javax</module>
         <module>prometheus-metrics-exporter-httpserver</module>
         <module>prometheus-metrics-exporter-opentelemetry</module>
+        <module>prometheus-metrics-exporter-opentelemetry-shaded</module>
         <module>prometheus-metrics-exporter-opentelemetry-otel-agent-resources</module>
         <module>prometheus-metrics-exporter-pushgateway</module>
         <module>prometheus-metrics-instrumentation-caffeine</module>
