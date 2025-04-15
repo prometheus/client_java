@@ -29,6 +29,7 @@ class BasicAuthPushGatewayTest {
             .address("localhost:" + mockServerClient.getPort())
             .basicAuth("testUser", "testPwd")
             .registry(registry)
+            .prometheusTimestampsInMs(true)
             .job("j")
             .build();
   }

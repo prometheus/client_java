@@ -48,6 +48,7 @@ class ExporterPropertiesTest {
         ExporterProperties.builder()
             .includeCreatedTimestamps(true)
             .exemplarsOnAllMetricTypes(true)
+            .prometheusTimestampsInMs(false)
             .build();
     assertThat(properties.getIncludeCreatedTimestamps()).isTrue();
     assertThat(properties.getExemplarsOnAllMetricTypes()).isTrue();

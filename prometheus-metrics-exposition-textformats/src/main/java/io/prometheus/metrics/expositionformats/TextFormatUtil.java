@@ -21,7 +21,20 @@ public class TextFormatUtil {
     }
   }
 
-  static void writeTimestamp(Writer writer, long timestampMs) throws IOException {
+  static void writePrometheusTimestamp(Writer writer, long timestampMs, boolean timestampsInMs)
+      throws IOException {
+    if (timestampsInMs) {
+      // correct for prometheus exposition format
+      // https://prometheus.io/docs/instrumenting/exposition_formats/#text-format-details
+      writer.write(Long.toString(timestampMs));
+    } else {
+      // incorrect for prometheus exposition format -
+      // but we need to support it for backwards compatibility
+      writeOpenMetricsTimestamp(writer, timestampMs);
+    }
+  }
+
+  static void writeOpenMetricsTimestamp(Writer writer, long timestampMs) throws IOException {
     writer.write(Long.toString(timestampMs / 1000L));
     writer.write(".");
     long ms = timestampMs % 1000;
