@@ -4,7 +4,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeDouble
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscapedLabelValue;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimestamp;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeOpenMetricsTimestamp;
 
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -39,7 +39,6 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
   public static class Builder {
     boolean createdTimestampsEnabled;
-    boolean timestampsInMs = true;
     boolean exemplarsOnAllMetricTypesEnabled;
 
     private Builder() {}
@@ -61,22 +60,15 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       return this;
     }
 
-    @Deprecated
-    public Builder setTimestampsInMs(boolean timestampsInMs) {
-      this.timestampsInMs = timestampsInMs;
-      return this;
-    }
-
     public OpenMetricsTextFormatWriter build() {
       return new OpenMetricsTextFormatWriter(
-          createdTimestampsEnabled, timestampsInMs, exemplarsOnAllMetricTypesEnabled);
+          createdTimestampsEnabled, exemplarsOnAllMetricTypesEnabled);
     }
   }
 
   public static final String CONTENT_TYPE =
       "application/openmetrics-text; version=1.0.0; charset=utf-8";
   private final boolean createdTimestampsEnabled;
-  private final boolean timestampsInMs;
   private final boolean exemplarsOnAllMetricTypesEnabled;
 
   /**
@@ -85,18 +77,9 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
    * @deprecated this constructor is deprecated and will be removed in the next major version -
    *     {@link #builder()} or {@link #create()} instead
    */
-  @Deprecated
   public OpenMetricsTextFormatWriter(
       boolean createdTimestampsEnabled, boolean exemplarsOnAllMetricTypesEnabled) {
-    this(createdTimestampsEnabled, false, exemplarsOnAllMetricTypesEnabled);
-  }
-
-  private OpenMetricsTextFormatWriter(
-      boolean createdTimestampsEnabled,
-      boolean timestampsInMs,
-      boolean exemplarsOnAllMetricTypesEnabled) {
     this.createdTimestampsEnabled = createdTimestampsEnabled;
-    this.timestampsInMs = timestampsInMs;
     this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
   }
 
@@ -355,10 +338,10 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
       writeNameAndLabels(writer, metadata.getPrometheusName(), "_created", data.getLabels());
-      writeTimestamp(writer, data.getCreatedTimestampMillis(), timestampsInMs);
+      writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
       if (data.hasScrapeTimestamp()) {
         writer.write(' ');
-        writeTimestamp(writer, data.getScrapeTimestampMillis(), timestampsInMs);
+        writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
       }
       writer.write('\n');
     }
@@ -391,7 +374,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       Writer writer, DataPointSnapshot data, Exemplar exemplar) throws IOException {
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
-      writeTimestamp(writer, data.getScrapeTimestampMillis(), timestampsInMs);
+      writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
     }
     if (exemplar != null) {
       writer.write(" # ");
@@ -400,7 +383,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       writeDouble(writer, exemplar.getValue());
       if (exemplar.hasTimestamp()) {
         writer.write(' ');
-        writeTimestamp(writer, exemplar.getTimestampMillis(), timestampsInMs);
+        writeOpenMetricsTimestamp(writer, exemplar.getTimestampMillis());
       }
     }
     writer.write('\n');

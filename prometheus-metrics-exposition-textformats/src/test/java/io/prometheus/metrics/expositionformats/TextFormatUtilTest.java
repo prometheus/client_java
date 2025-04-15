@@ -31,7 +31,7 @@ class TextFormatUtilTest {
 
   private static String writeTimestamp(boolean timestampsInMs) throws IOException {
     StringWriter writer = new StringWriter();
-    TextFormatUtil.writeTimestamp(writer, 1000, timestampsInMs);
+    TextFormatUtil.writePrometheusTimestamp(writer, 1000, timestampsInMs);
     return writer.toString();
   }
 }

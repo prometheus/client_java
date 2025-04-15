@@ -7,18 +7,20 @@ public class ExporterProperties {
 
   private static final String INCLUDE_CREATED_TIMESTAMPS = "includeCreatedTimestamps";
   // milliseconds is the default - we only provide a boolean flag to avoid a breaking change
-  private static final String TIMESTAMPS_IN_MS = "timestampsInMs";
+  private static final String PROMETHEUS_TIMESTAMPS_IN_MS = "prometheusTimestampsInMs";
   private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplarsOnAllMetricTypes";
   private static final String PREFIX = "io.prometheus.exporter";
 
   private final Boolean includeCreatedTimestamps;
-  private final Boolean timestampsInMs;
+  private final Boolean prometheusTimestampsInMs;
   private final Boolean exemplarsOnAllMetricTypes;
 
   private ExporterProperties(
-      Boolean includeCreatedTimestamps, Boolean timestampsInMs, Boolean exemplarsOnAllMetricTypes) {
+      Boolean includeCreatedTimestamps,
+      Boolean prometheusTimestampsInMs,
+      Boolean exemplarsOnAllMetricTypes) {
     this.includeCreatedTimestamps = includeCreatedTimestamps;
-    this.timestampsInMs = timestampsInMs;
+    this.prometheusTimestampsInMs = prometheusTimestampsInMs;
     this.exemplarsOnAllMetricTypes = exemplarsOnAllMetricTypes;
   }
 
@@ -27,9 +29,9 @@ public class ExporterProperties {
     return includeCreatedTimestamps != null && includeCreatedTimestamps;
   }
 
-  /** Use milliseconds for timestamps in text format? Default is {@code false}. */
-  public boolean getTimestampsInMs() {
-    return timestampsInMs != null && timestampsInMs;
+  /** Use milliseconds for timestamps in prometheus text format? Default is {@code false}. */
+  public boolean getPrometheusTimestampsInMs() {
+    return prometheusTimestampsInMs != null && prometheusTimestampsInMs;
   }
 
   /**
@@ -48,10 +50,9 @@ public class ExporterProperties {
       throws PrometheusPropertiesException {
     Boolean includeCreatedTimestamps =
         Util.loadBoolean(PREFIX + "." + INCLUDE_CREATED_TIMESTAMPS, properties);
-    Boolean timestampsInMs = Util.loadBoolean(PREFIX + "." + TIMESTAMPS_IN_MS, properties);
+    Boolean timestampsInMs = Util.loadBoolean(PREFIX + "." + PROMETHEUS_TIMESTAMPS_IN_MS, properties);
     Boolean exemplarsOnAllMetricTypes =
         Util.loadBoolean(PREFIX + "." + EXEMPLARS_ON_ALL_METRIC_TYPES, properties);
-    // new prop?
     return new ExporterProperties(
         includeCreatedTimestamps, timestampsInMs, exemplarsOnAllMetricTypes);
   }
@@ -64,7 +65,7 @@ public class ExporterProperties {
 
     private Boolean includeCreatedTimestamps;
     private Boolean exemplarsOnAllMetricTypes;
-    boolean timestampsInMs;
+    boolean prometheusTimestampsInMs;
 
     private Builder() {}
 
@@ -80,15 +81,15 @@ public class ExporterProperties {
       return this;
     }
 
-    /** See {@link #getTimestampsInMs()}. */
-    public Builder setTimestampsInMs(boolean timestampsInMs) {
-      this.timestampsInMs = timestampsInMs;
+    /** See {@link #getPrometheusTimestampsInMs()}. */
+    public Builder prometheusTimestampsInMs(boolean prometheusTimestampsInMs) {
+      this.prometheusTimestampsInMs = prometheusTimestampsInMs;
       return this;
     }
 
     public ExporterProperties build() {
       return new ExporterProperties(
-          includeCreatedTimestamps, timestampsInMs, exemplarsOnAllMetricTypes);
+          includeCreatedTimestamps, prometheusTimestampsInMs, exemplarsOnAllMetricTypes);
     }
   }
 }

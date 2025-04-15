@@ -28,12 +28,11 @@ public class ExpositionFormats {
         new PrometheusProtobufWriter(),
         PrometheusTextFormatWriter.builder()
             .setIncludeCreatedTimestamps(properties.getIncludeCreatedTimestamps())
-            .setTimestampsInMs(properties.getTimestampsInMs())
+            .setTimestampsInMs(properties.getPrometheusTimestampsInMs())
             .build(),
         OpenMetricsTextFormatWriter.builder()
             .setCreatedTimestampsEnabled(properties.getIncludeCreatedTimestamps())
             .setExemplarsOnAllMetricTypesEnabled(properties.getExemplarsOnAllMetricTypes())
-            .setTimestampsInMs(properties.getTimestampsInMs())
             .build());
   }
 

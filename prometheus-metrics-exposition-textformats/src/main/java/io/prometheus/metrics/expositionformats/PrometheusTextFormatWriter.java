@@ -4,7 +4,7 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeDouble
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscapedLabelValue;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeTimestamp;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writePrometheusTimestamp;
 
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -108,7 +108,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     // "summary".
     Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
     for (MetricSnapshot snapshot : metricSnapshots) {
-      if (snapshot.getDataPoints().size() > 0) {
+      if (!snapshot.getDataPoints().isEmpty()) {
         if (snapshot instanceof CounterSnapshot) {
           writeCounter(writer, (CounterSnapshot) snapshot);
         } else if (snapshot instanceof GaugeSnapshot) {
@@ -128,7 +128,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     }
     if (writeCreatedTimestamps) {
       for (MetricSnapshot snapshot : metricSnapshots) {
-        if (snapshot.getDataPoints().size() > 0) {
+        if (!snapshot.getDataPoints().isEmpty()) {
           if (snapshot instanceof CounterSnapshot) {
             writeCreated(writer, snapshot);
           } else if (snapshot instanceof HistogramSnapshot) {
@@ -152,14 +152,14 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
           metadataWritten = true;
         }
         writeNameAndLabels(writer, metadata.getPrometheusName(), "_created", data.getLabels());
-        writeTimestamp(writer, data.getCreatedTimestampMillis(), timestampsInMs);
+        writePrometheusTimestamp(writer, data.getCreatedTimestampMillis(), timestampsInMs);
         writeScrapeTimestampAndNewline(writer, data);
       }
     }
   }
 
   private void writeCounter(Writer writer, CounterSnapshot snapshot) throws IOException {
-    if (snapshot.getDataPoints().size() > 0) {
+    if (!snapshot.getDataPoints().isEmpty()) {
       MetricMetadata metadata = snapshot.getMetadata();
       writeMetadata(writer, "_total", "counter", metadata);
       for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getDataPoints()) {
@@ -409,7 +409,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
-      writeTimestamp(writer, data.getScrapeTimestampMillis(), timestampsInMs);
+      writePrometheusTimestamp(writer, data.getScrapeTimestampMillis(), timestampsInMs);
     }
     writer.write('\n');
   }
