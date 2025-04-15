@@ -77,5 +77,29 @@ For example, in Maven:
 </dependencies>
 ```
 
+## Exclude the shaded otel classes
 
-todo how to exclude shaded protobuf classes
+You can exclude the shaded otel classes including the
+`prometheus-metrics-exporter-opentelemetry-no-otel` module and excluding the
+`prometheus-metrics-exporter-opentelemetry` module in your build file.
+
+For example, in Maven:
+
+```xml
+<dependencies>
+  <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exporter-opentelemetry</artifactId>
+      <exclusions>
+          <exclusion>
+              <groupId>io.prometheus</groupId>
+              <artifactId>prometheus-metrics-exporter-opentelemetry</artifactId>
+          </exclusion>
+      </exclusions>
+  </dependency>
+  <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exporter-opentelemetry-no-otel</artifactId>
+  </dependency>
+</dependencies>
+```

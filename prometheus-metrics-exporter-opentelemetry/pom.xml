@@ -9,7 +9,7 @@
         <version>10.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>prometheus-metrics-exporter-opentelemetry-nootel</artifactId>
+    <artifactId>prometheus-metrics-exporter-opentelemetry-no-otel</artifactId>
     <packaging>bundle</packaging>
 
     <name>Prometheus Metrics to OpenTelemetry Exporter without OTel shaded</name>
@@ -18,7 +18,7 @@
     </description>
 
     <properties>
-        <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry.nootel</automatic.module.name>
+        <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry.no-otel</automatic.module.name>
     </properties>
 
     <dependencyManagement>

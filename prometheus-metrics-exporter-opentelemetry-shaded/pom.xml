@@ -24,7 +24,7 @@
     <dependencies>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exporter-opentelemetry-nootel</artifactId>
+            <artifactId>prometheus-metrics-exporter-opentelemetry-no-otel</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
