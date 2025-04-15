@@ -46,6 +46,9 @@ tools.java = "graalvm-22.3.3+java17"
 run = "../../mvnw test -PnativeTest"
 dir = "integration-tests/it-spring-boot-smoke-test"
 
+[tasks.set-version]
+run = 'mvn versions:set -DnewVersion={{arg(name="version")}}'
+
 [settings]
 # to get lock file support and for go backend
 experimental = true
