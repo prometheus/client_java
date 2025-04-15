@@ -19,9 +19,13 @@ env = { REQUIRE_PROTO_UP_TO_DATE = "true" }
 description = "format source code"
 run = "./mvnw spotless:apply"
 
+[tasks.compile]
+description = "bare compile, ignoring formatting and linters"
+run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+
 [tasks.test]
 description = "run unit tests, ignoring formatting and linters"
-run = "./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = "./mvnw test -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
 
 [tasks.test-all]
 description = "run all tests"
@@ -29,7 +33,7 @@ run = "./mvnw verify"
 
 [tasks.build]
 description = "build all modules wihthout tests"
-run = "./mvnw clean install -DskipTests"
+run = "./mvnw install -DskipTests"
 
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
@@ -39,7 +43,7 @@ run = "oats -timeout 5m examples/"
 [tasks.native-test]
 depends = "build"
 tools.java = "graalvm-22.3.3+java17"
-run = "../../mvnw  test -PnativeTest"
+run = "../../mvnw test -PnativeTest"
 dir = "integration-tests/it-spring-boot-smoke-test"
 
 [settings]

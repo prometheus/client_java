@@ -2767,17 +2767,23 @@ class ExpositionFormatsTest {
 
   private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    PrometheusTextFormatWriter writer =
-        PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true).build();
-    writer.write(out, MetricSnapshots.of(snapshot));
+
+    getPrometheusWriter(PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true))
+        .write(out, MetricSnapshots.of(snapshot));
     assertThat(out).hasToString(expected);
+  }
+
+  @SuppressWarnings("deprecation")
+  private static PrometheusTextFormatWriter getPrometheusWriter(
+      PrometheusTextFormatWriter.Builder builder) {
+    return builder.setTimestampsInMs(false).build();
   }
 
   private void assertPrometheusTextWithoutCreated(String expected, MetricSnapshot snapshot)
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    PrometheusTextFormatWriter writer = PrometheusTextFormatWriter.create();
-    writer.write(out, MetricSnapshots.of(snapshot));
+    getPrometheusWriter(PrometheusTextFormatWriter.builder())
+        .write(out, MetricSnapshots.of(snapshot));
     assertThat(out).hasToString(expected);
   }
 

@@ -74,8 +74,6 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   /**
    * @param createdTimestampsEnabled whether to include the _created timestamp in the output - This
    *     will produce an invalid OpenMetrics output, but is kept for backwards compatibility.
-   * @deprecated this constructor is deprecated and will be removed in the next major version -
-   *     {@link #builder()} or {@link #create()} instead
    */
   public OpenMetricsTextFormatWriter(
       boolean createdTimestampsEnabled, boolean exemplarsOnAllMetricTypesEnabled) {
