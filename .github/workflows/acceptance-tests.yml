@@ -15,9 +15,3 @@ jobs:
       - uses: jdx/mise-action@v2
       - name: Run acceptance tests
         run: mise run acceptance-test
-      - name: upload log file
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: OATs logs
-          path: build/**/*.log
