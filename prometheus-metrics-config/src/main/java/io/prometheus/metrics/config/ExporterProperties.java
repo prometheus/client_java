@@ -50,7 +50,8 @@ public class ExporterProperties {
       throws PrometheusPropertiesException {
     Boolean includeCreatedTimestamps =
         Util.loadBoolean(PREFIX + "." + INCLUDE_CREATED_TIMESTAMPS, properties);
-    Boolean timestampsInMs = Util.loadBoolean(PREFIX + "." + PROMETHEUS_TIMESTAMPS_IN_MS, properties);
+    Boolean timestampsInMs =
+        Util.loadBoolean(PREFIX + "." + PROMETHEUS_TIMESTAMPS_IN_MS, properties);
     Boolean exemplarsOnAllMetricTypes =
         Util.loadBoolean(PREFIX + "." + EXEMPLARS_ON_ALL_METRIC_TYPES, properties);
     return new ExporterProperties(

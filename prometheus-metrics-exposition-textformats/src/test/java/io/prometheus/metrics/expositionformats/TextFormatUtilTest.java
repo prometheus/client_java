@@ -24,12 +24,12 @@ class TextFormatUtilTest {
   }
 
   @Test
-  void testWriteTimestamp() throws IOException {
-    assertThat(writeTimestamp(true)).isEqualTo("1000");
-    assertThat(writeTimestamp(false)).isEqualTo("1.000");
+  void testWritePrometheusTimestamp() throws IOException {
+    assertThat(writePrometheusTimestamp(true)).isEqualTo("1000");
+    assertThat(writePrometheusTimestamp(false)).isEqualTo("1.000");
   }
 
-  private static String writeTimestamp(boolean timestampsInMs) throws IOException {
+  private static String writePrometheusTimestamp(boolean timestampsInMs) throws IOException {
     StringWriter writer = new StringWriter();
     TextFormatUtil.writePrometheusTimestamp(writer, 1000, timestampsInMs);
     return writer.toString();
