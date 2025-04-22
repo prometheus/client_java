@@ -105,18 +105,18 @@ class HistogramSnapshotTest {
     int i = 0;
     for (ClassicHistogramBucket bucket : data.getClassicBuckets()) {
       switch (i++) {
-        case 0:
+        case 0 -> {
           assertThat(bucket.getUpperBound()).isEqualTo(128.0);
           assertThat(bucket.getCount()).isEqualTo(7);
-          break;
-        case 1:
+        }
+        case 1 -> {
           assertThat(bucket.getUpperBound()).isEqualTo(1024.0);
           assertThat(bucket.getCount()).isEqualTo(15);
-          break;
-        case 2:
+        }
+        case 2 -> {
           assertThat(bucket.getUpperBound()).isEqualTo(Double.POSITIVE_INFINITY);
           assertThat(bucket.getCount()).isZero();
-          break;
+        }
       }
     }
     assertThat(i).as("expecting 3 classic histogram buckets").isEqualTo(3);
@@ -128,18 +128,18 @@ class HistogramSnapshotTest {
     i = 0;
     for (NativeHistogramBucket bucket : data.getNativeBucketsForPositiveValues()) {
       switch (i++) {
-        case 0:
+        case 0 -> {
           assertThat(bucket.getBucketIndex()).isOne();
           assertThat(bucket.getCount()).isEqualTo(12);
-          break;
-        case 1:
+        }
+        case 1 -> {
           assertThat(bucket.getBucketIndex()).isEqualTo(2);
           assertThat(bucket.getCount()).isEqualTo(3);
-          break;
-        case 2:
+        }
+        case 2 -> {
           assertThat(bucket.getBucketIndex()).isEqualTo(4);
           assertThat(bucket.getCount()).isEqualTo(2);
-          break;
+        }
       }
     }
     assertThat(i).as("expecting 3 native buckets for positive values").isEqualTo(3);
@@ -147,14 +147,14 @@ class HistogramSnapshotTest {
     assertThat(data.getNativeBucketsForNegativeValues().size()).isEqualTo(2);
     for (NativeHistogramBucket bucket : data.getNativeBucketsForNegativeValues()) {
       switch (i++) {
-        case 0:
+        case 0 -> {
           assertThat(bucket.getBucketIndex()).isEqualTo(-1);
           assertThat(bucket.getCount()).isOne();
-          break;
-        case 1:
+        }
+        case 1 -> {
           assertThat(bucket.getBucketIndex()).isZero();
           assertThat(bucket.getCount()).isEqualTo(2);
-          break;
+        }
       }
     }
     assertThat(i).as("expecting 2 native buckets for positive values").isEqualTo(2);
