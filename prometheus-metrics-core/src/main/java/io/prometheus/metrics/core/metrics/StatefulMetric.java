@@ -112,7 +112,20 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
             "Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
       }
     }
-    return data.computeIfAbsent(Arrays.asList(labelValues), l -> newDataPoint());
+    return data.computeIfAbsent(
+        Arrays.asList(labelValues),
+        l -> {
+          for (int i = 0; i < l.size(); i++) {
+            if (l.get(i) == null) {
+              throw new IllegalArgumentException(
+                  "null label value for metric "
+                      + getMetadata().getName()
+                      + " and label "
+                      + labelNames[i]);
+            }
+          }
+          return newDataPoint();
+        });
   }
 
   /**
