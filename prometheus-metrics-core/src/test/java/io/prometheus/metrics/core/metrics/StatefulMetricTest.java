@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -66,5 +67,13 @@ class StatefulMetricTest {
     counter.inc();
     assertThat(counter.collect().getDataPoints()).hasSize(1);
     assertThat(counter.collect().getDataPoints().get(0).getValue()).isEqualTo(1.0);
+  }
+
+  @Test
+  public void testNullLabel() {
+    Counter counter = Counter.builder().name("test").labelNames("l1", "l2").build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> counter.labelValues("l1", null))
+        .withMessage("null label value for metric test and label l2");
   }
 }
