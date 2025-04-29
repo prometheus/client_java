@@ -51,7 +51,8 @@ Here's how the initial `docs/` folder was set up:
 hugo new site docs
 cd docs/
 mkdir -p themes/hugo-geekdoc/
-curl -L https://github.com/thegeeklab/hugo-geekdoc/releases/download/v0.41.1/hugo-geekdoc.tar.gz | tar -xz -C themes/hugo-geekdoc/ --strip-components=1
+curl -L https://github.com/thegeeklab/hugo-geekdoc/releases/download/v0.41.1/hugo-geekdoc.tar.gz \
+  | tar -xz -C themes/hugo-geekdoc/ --strip-components=1
 ```
 
 Create the initial `hugo.toml` file as described

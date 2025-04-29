@@ -1,8 +1,18 @@
 root = true
 
-[*]
-max_line_length = 100
-indent_size = 2
+[version-rules.xml]
+max_line_length = 200
+
+[*.java]
+# checked by google-java-format
+max_line_length = 200
 
 [pom.xml]
 indent_size = 4
+
+[docs/themes/**.*]
+max_line_length = 400
+
+[*]
+max_line_length = 150
+indent_size = 2

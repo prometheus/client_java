@@ -20,7 +20,8 @@ Accessing [http://localhost:8080/](http://localhost:8080/) with a Web browser sh
 
 ## Manually testing the Metrics Endpoint
 
-Metrics are available on [http://localhost:8080/metrics](http://localhost:8080/metrics). The default Prometheus text format looks like this:
+Metrics are available on [http://localhost:8080/metrics](http://localhost:8080/metrics). The default Prometheus text
+format looks like this:
 
 ```
 # HELP request_duration_seconds request duration in seconds
@@ -46,13 +47,17 @@ requests_total{http_status="200"} 12.0
 
 The exporter servlet supports a `debug` URL parameter to quickly view other formats in your Web browser:
 
-- [http://localhost:8080/metrics?debug=text](http://localhost:8080/metrics?debug=text): Prometheus text format, same as without the `debug` option.
-- [http://localhost:8080/metrics?debug=openmetrics](http://localhost:8080/metrics?debug=openmetrics): OpenMetrics text format.
-- [http://localhost:8080/metrics?debug=prometheus-protobuf](http://localhost:8080/metrics?debug=prometheus-protobuf): Text representation of the Prometheus protobuf format.
+- [http://localhost:8080/metrics?debug=text](http://localhost:8080/metrics?debug=text): Prometheus text format, same as
+  without the `debug` option.
+- [http://localhost:8080/metrics?debug=openmetrics](http://localhost:8080/metrics?debug=openmetrics): OpenMetrics text
+  format.
+- [http://localhost:8080/metrics?debug=prometheus-protobuf](http://localhost:8080/metrics?debug=prometheus-protobuf):
+  Text representation of the Prometheus protobuf format.
 
 ## Testing with the Prometheus Server
 
-1. Download the latest Prometheus server release from [https://github.com/prometheus/prometheus/releases](https://github.com/prometheus/prometheus/releases).
+1. Download the latest Prometheus server release
+   from [https://github.com/prometheus/prometheus/releases](https://github.com/prometheus/prometheus/releases).
 2. Extract the archive
 3. Edit `prometheus.yml` and append the following snippet at the end:
    ```yaml
@@ -67,11 +72,13 @@ The exporter servlet supports a `debug` URL parameter to quickly view other form
 
 Verify that the `tomcat-servlet-example` target is up on [http://localhost:9090/targets](http://localhost:9090/targets).
 
-Prometheus is now scraping metrics in Protobuf format. If you type the name `request_duration_seconds` you will see a non-human-readable representation of the histogram including the native buckets:
+Prometheus is now scraping metrics in Protobuf format. If you type the name `request_duration_seconds` you will see a
+non-human-readable representation of the histogram including the native buckets:
 
 ![Screenshot showing a Prometheus Native Histogram in Text Format](https://github.com/prometheus/client_java/assets/330535/863efe0b-a9eb-40ae-a078-72497abc6f04)
 
-Note: You have to run at least one GET request on the Hello World endpoint [http://localhost:8080](http://localhost:8080) before you see the metric.
+Note: You have to run at least one GET request on the Hello World
+endpoint [http://localhost:8080](http://localhost:8080) before you see the metric.
 
 Use the `histogram_quantile()` function to calculate quantiles from the native histogram:
 

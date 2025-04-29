@@ -27,4 +27,5 @@ This will run the following Docker containers:
 
 You might need to replace `localhost` with `host.docker.internal` on MacOS or Windows.
 
-The Grafana server is preconfigured with two dashboards, one based on the classic histogram and the other one based on the native histogram.
+The Grafana server is preconfigured with two dashboards, one based on the classic histogram and the other one based on
+the native histogram.

@@ -5,7 +5,8 @@ weight: 5
 
 ## Alternative: Use Spring's Built-in Metrics Library
 
-[Spring Boot](https://spring.io/projects/spring-boot) has a built-in metric library named [Micrometer](https://micrometer.io/), which supports Prometheus
+[Spring Boot](https://spring.io/projects/spring-boot) has a built-in metric library named
+[Micrometer](https://micrometer.io/), which supports Prometheus
 exposition format and can be set up in three simple steps:
 
 1. Add the `org.springframework.boot:spring-boot-starter-actuator` dependency.
@@ -25,7 +26,8 @@ Spring anyway. Maybe you want full support for all Prometheus metric types,
 or you want to use the new Prometheus native histograms.
 
 The easiest way to use the Prometheus metrics library in Spring is to configure the
-[PrometheusMetricsServlet](/client_java/api/io/prometheus/metrics/exporter/servlet/jakarta/PrometheusMetricsServlet.html) to expose metrics.
+[PrometheusMetricsServlet](/client_java/api/io/prometheus/metrics/exporter/servlet/jakarta/PrometheusMetricsServlet.html)
+to expose metrics.
 
 Dependencies:
 
@@ -51,35 +53,37 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DemoApplication {
 
-    private static final Counter requestCount = Counter.builder()
-            .name("requests_total")
-            .register();
+  private static final Counter requestCount = Counter.builder()
+    .name("requests_total")
+    .register();
 
-    public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
-        JvmMetrics.builder().register();
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(DemoApplication.class, args);
+    JvmMetrics.builder().register();
+  }
 
-    @GetMapping("/")
-    public String sayHello() throws InterruptedException {
-        requestCount.inc();
-        return "Hello, World!\n";
-    }
+  @GetMapping("/")
+  public String sayHello() throws InterruptedException {
+    requestCount.inc();
+    return "Hello, World!\n";
+  }
 
-    @Bean
-    public ServletRegistrationBean<PrometheusMetricsServlet> createPrometheusMetricsEndpoint() {
-        return new ServletRegistrationBean<>(new PrometheusMetricsServlet(), "/metrics/*");
-    }
+  @Bean
+  public ServletRegistrationBean<PrometheusMetricsServlet> createPrometheusMetricsEndpoint() {
+    return new ServletRegistrationBean<>(new PrometheusMetricsServlet(), "/metrics/*");
+  }
 }
 ```
 
 The important part are the last three lines: They configure the
-[PrometheusMetricsServlet](/client_java/api/io/prometheus/metrics/exporter/servlet/jakarta/PrometheusMetricsServlet.html) to expose metrics on `/metrics`:
+[PrometheusMetricsServlet](/client_java/api/io/prometheus/metrics/exporter/servlet/jakarta/PrometheusMetricsServlet.html)
+to expose metrics on `/metrics`:
 
 ```java
+
 @Bean
 public ServletRegistrationBean<PrometheusMetricsServlet> createPrometheusMetricsEndpoint() {
-    return new ServletRegistrationBean<>(new PrometheusMetricsServlet(), "/metrics/*");
+  return new ServletRegistrationBean<>(new PrometheusMetricsServlet(), "/metrics/*");
 }
 ```
 

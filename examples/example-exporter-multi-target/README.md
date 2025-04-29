@@ -18,7 +18,8 @@ java -jar ./examples/example-exporter-multi-target/target/example-exporter-multi
 
 ## Manually testing the Metrics Endpoint
 
-Accessing [http://localhost:9400/metrics](http://localhost:9400/metrics) with a Web browser should yield an example of a counter metric.
+Accessing [http://localhost:9400/metrics](http://localhost:9400/metrics) with a Web browser should yield an example of a
+counter metric.
 
 ```
 # HELP uptime_seconds_total total number of seconds since this application was started
@@ -28,6 +29,9 @@ uptime_seconds_total 301.0
 
 The exporter supports a `debug` URL parameter to quickly view other formats in your Web browser:
 
-- [http://localhost:9400/metrics?debug=text](http://localhost:9400/metrics?debug=text): Prometheus text format, same as without the `debug` option.
-- [http://localhost:9400/metrics?debug=openmetrics](http://localhost:9400/metrics?debug=openmetrics): OpenMetrics text format.
-- [http://localhost:9400/metrics?debug=prometheus-protobuf](http://localhost:9400/metrics?debug=prometheus-protobuf): Text representation of the Prometheus protobuf format.
+- [http://localhost:9400/metrics?debug=text](http://localhost:9400/metrics?debug=text): Prometheus text format, same as
+  without the `debug` option.
+- [http://localhost:9400/metrics?debug=openmetrics](http://localhost:9400/metrics?debug=openmetrics): OpenMetrics text
+  format.
+- [http://localhost:9400/metrics?debug=prometheus-protobuf](http://localhost:9400/metrics?debug=prometheus-protobuf):
+  Text representation of the Prometheus protobuf format.

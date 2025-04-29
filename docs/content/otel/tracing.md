@@ -61,11 +61,7 @@ to sample all Spans marked with `exemplar="true"`, and then discard 90% of the t
 ```yaml
 policies:
   [
-    {
-      name: keep-exemplars,
-      type: string_attribute,
-      string_attribute: { key: "exemplar", values: ["true"] },
-    },
+    { name: keep-exemplars, type: string_attribute, string_attribute: { key: "exemplar", values: ["true"] } },
     { name: keep-10-percent, type: probabilistic, probabilistic: { sampling_percentage: 10 } },
   ]
 ```

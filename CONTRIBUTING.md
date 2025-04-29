@@ -13,7 +13,8 @@ Prometheus uses GitHub to manage reviews of pull requests.
 
 ## Formatting
 
-This repository uses [Google Java Format](https://github.com/google/google-java-format) to format the code.
+This repository uses [Google Java Format](https://github.com/google/google-java-format) to format
+the code.
 
 Run `./mvnw spotless:apply` to format the code (only changed files) before committing.
 
@@ -21,7 +22,8 @@ Run `./mvnw spotless:apply` to format the code (only changed files) before commi
 
 If you're getting errors when running tests:
 
-- Make sure that the IDE uses only the "Maven Shade" dependency of "prometheus-metrics-exposition-formats" and the "prometheus-metrics-tracer\*" dependencies.
+- Make sure that the IDE uses only the "Maven Shade" dependency of "
+  prometheus-metrics-exposition-formats" and the "prometheus-metrics-tracer\*" dependencies.
 
 ### Avoid failures while running tests
 
@@ -30,7 +32,8 @@ If you're getting errors when running tests:
 - Use `-Dcheckstyle.skip=true` to skip the checkstyle check during development.
 - Use `-Dwarnings=-nowarn` to skip the warnings during development.
 
-Combine all with `./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn`.
+Combine all with
+`./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn`.
 
 ## Updating the Protobuf Java Classes
 
