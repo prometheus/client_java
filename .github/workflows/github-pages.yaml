@@ -46,15 +46,11 @@ jobs:
           cache: "false"
       - name: Prepare GitHub Pages
         run: mise run prepare-gh-pages
-        with:
-          permissions: block
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
       - name: Build GitHub Pages
         run: mise run build-gh-pages
-        with:
-          permissions: block
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
