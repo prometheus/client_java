@@ -8,11 +8,14 @@ provided by Guava `Cache` objects into prometheus metrics.
 
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
+
 ```
 implementation 'io.prometheus:prometheus-metrics-instrumentation-guava:1.3.2'
 ```
+
 {{< /tab >}}
 {{< tab "Maven" >}}
+
 ```xml
 <dependency>
     <groupId>io.prometheus</groupId>
@@ -20,17 +23,18 @@ implementation 'io.prometheus:prometheus-metrics-instrumentation-guava:1.3.2'
     <version>1.3.2</version>
 </dependency>
 ```
+
 {{< /tab >}}
 {{< /tabs >}}
 
 In order to collect metrics:
 
-* A single `CacheMetricsCollector` instance must be registered with the registry;
-  * Multiple `CacheMetricsCollector` instances cannot be registered with the same registry;
-* The `Cache` object must be instantiated with the `recordStats()` option, and then added to the
+- A single `CacheMetricsCollector` instance must be registered with the registry;
+  - Multiple `CacheMetricsCollector` instances cannot be registered with the same registry;
+- The `Cache` object must be instantiated with the `recordStats()` option, and then added to the
   `CacheMetricsCollector` instance with a unique name, which will be used as the value of the
   `cache` label on the exported metrics;
-  * If the `recordStats` option is not set, most metrics will only return zero values;
+  - If the `recordStats` option is not set, most metrics will only return zero values;
 
 ```java
 var cache = CacheBuilder.newBuilder().recordStats().build();
@@ -41,8 +45,7 @@ cacheMetrics.addCache("mycache", cache);
 
 All example metrics on this page will use the `mycache` label value.
 
-Generic Cache Metrics
----------------------
+## Generic Cache Metrics
 
 For all cache instances, the following metrics will be available:
 
@@ -64,8 +67,7 @@ guava_cache_eviction_total{cache="mycache"} 1.0
 guava_cache_size{cache="mycache"} 5.0
 ```
 
-Loading Cache Metrics
----------------------
+## Loading Cache Metrics
 
 If the cache is an instance of `LoadingCache`, i.e. it is built with a `loader` function that is
 managed by the cache library, then metrics for observing load time and load failures become

@@ -11,18 +11,21 @@ This tutorial shows the quickest way to get started with the Prometheus Java met
 
 We use the following dependencies:
 
-* `prometheus-metrics-core` is the actual metrics library.
-* `prometheus-metrics-instrumentation-jvm` provides out-of-the-box JVM metrics.
-* `prometheus-metrics-exporter-httpserver` is a standalone HTTP server for exposing Prometheus metrics.
-{{< tabs "deps" >}}
-{{< tab "Gradle" >}}
+- `prometheus-metrics-core` is the actual metrics library.
+- `prometheus-metrics-instrumentation-jvm` provides out-of-the-box JVM metrics.
+- `prometheus-metrics-exporter-httpserver` is a standalone HTTP server for exposing Prometheus metrics.
+  {{< tabs "deps" >}}
+  {{< tab "Gradle" >}}
+
 ```
 implementation 'io.prometheus:prometheus-metrics-core:$version'
 implementation 'io.prometheus:prometheus-metrics-instrumentation-jvm:$version'
 implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:$version'
 ```
+
 {{< /tab >}}
 {{< tab "Maven" >}}
+
 ```xml
 <dependency>
     <groupId>io.prometheus</groupId>
@@ -40,6 +43,7 @@ implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:$version'
     <version>$version</version>
 </dependency>
 ```
+
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -194,7 +198,6 @@ global:
   scrape_interval: 10s # short interval for manual testing
 
 scrape_configs:
-
   - job_name: "java-example"
     static_configs:
       - targets: ["localhost:9400"]

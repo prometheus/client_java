@@ -11,12 +11,11 @@ The goal is, if you set up a pipeline as illustrated below, you will see the sam
 
 The main steps when converting OpenTelemetry metric names to Prometheus metric names are:
 
-* Replace dots with underscores.
-* If the metric has a unit, append the unit to the metric name, like `_seconds`.
-* If the metric type has a suffix, append it, like `_total` for counters.
+- Replace dots with underscores.
+- If the metric has a unit, append the unit to the metric name, like `_seconds`.
+- If the metric type has a suffix, append it, like `_total` for counters.
 
-Dots in Metric and Label Names
-------------------------------
+## Dots in Metric and Label Names
 
 OpenTelemetry defines not only a line protocol, but also _semantic conventions_, i.e. standardized metric and label names. For example, OpenTelemetry's [Semantic Conventions for HTTP Metrics](https://opentelemetry.io/docs/specs/otel/metrics/semantic_conventions/http-metrics/) say that if you instrument an HTTP server with OpenTelemetry, you must have a histogram named `http.server.duration`.
 

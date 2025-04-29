@@ -39,9 +39,9 @@ Better examples of callback metrics can be found in the `prometheus-metrics-inst
 
 The available callback metric types are:
 
-* `GaugeWithCallback` for gauges.
-* `CounterWithCallback` for counters.
-* `SummaryWithCallback` for summaries.
+- `GaugeWithCallback` for gauges.
+- `CounterWithCallback` for counters.
+- `SummaryWithCallback` for summaries.
 
 The API for gauges and counters is very similar. For summaries the callback has a few more parameters, because it accepts a count, a sum, and quantiles:
 

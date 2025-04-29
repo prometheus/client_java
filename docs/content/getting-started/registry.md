@@ -5,8 +5,7 @@ weight: 2
 
 In order to expose metrics, you need to register them with a `PrometheusRegistry`. We are using a counter as an example here, but the `register()` method is the same for all metric types.
 
-Registering a Metrics with the Default Registry
------------------------------------------------
+## Registering a Metrics with the Default Registry
 
 ```java
 Counter eventsTotal = Counter.builder()
@@ -17,8 +16,7 @@ Counter eventsTotal = Counter.builder()
 
 The `register()` call above builds the counter and registers it with the global static `PrometheusRegistry.defaultRegistry`. Using the default registry is recommended.
 
-Registering a Metrics with a Custom Registry
---------------------------------------------
+## Registering a Metrics with a Custom Registry
 
 You can also register your metric with a custom registry:
 
@@ -31,8 +29,7 @@ Counter eventsTotal = Counter.builder()
     .register(myRegistry);
 ```
 
-Registering a Metric with Multiple Registries
----------------------------------------------
+## Registering a Metric with Multiple Registries
 
 As an alternative to calling `register()` directly, you can `build()` metrics without registering them,
 and register them later:
@@ -60,8 +57,7 @@ myRegistry.register(eventsTotal);
 Custom registries are useful if you want to maintain different scopes of metrics, like
 a debug registry with a lot of metrics, and a default registry with only a few metrics.
 
-IllegalArgumentException: Duplicate Metric Name in Registry
------------------------------------------------------------
+## IllegalArgumentException: Duplicate Metric Name in Registry
 
 While it is ok to register the same metric with multiple registries, it is illegal to register the same metric name multiple times with the same registry.
 The following code will throw an `IllegalArgumentException`:
@@ -78,8 +74,7 @@ Counter eventsTotal2 = Counter.builder()
     .register(); // <-- IllegalArgumentException, because a metric with that name is already registered
 ```
 
-Unregistering a Metric
-----------------------
+## Unregistering a Metric
 
 There is no automatic expiry of unused metrics (yet), once a metric is registered it will remain registered forever.
 

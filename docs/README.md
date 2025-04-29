@@ -1,10 +1,8 @@
-Docs
-----
+## Docs
 
 This directory contains [hugo](https://gohugo.io) documentation to be published in Github pages.
 
-Run Locally
------------
+## Run Locally
 
 ```
 hugo server -D
@@ -12,13 +10,11 @@ hugo server -D
 
 This will serve the docs on [http://localhost:1313](http://localhost:1313).
 
-Deploy to Github Pages
-----------------------
+## Deploy to Github Pages
 
 Changes to the `main` branch will be deployed automatically with Github actions.
 
-Update Javadoc
---------------
+## Update Javadoc
 
 Javadoc are not checked-in to the Github repository.
 They are generated on the fly by Github actions when the docs are updated.
@@ -39,13 +35,11 @@ mkdir ./docs/static/client_java
 ln -s ../api ./docs/static/client_java/api
 ```
 
-Update Geekdocs
----------------
+## Update Geekdocs
 
 The docs use the [Geekdocs](https://geekdocs.de/) theme. The theme is checked in to Github in the `./docs/themes/hugo-geekdoc/` folder. To update [Geekdocs](https://geekdocs.de/), remove the current folder and create a new one with the latest [release](https://github.com/thegeeklab/hugo-geekdoc/releases). There are no local modifications in `./docs/themes/hugo-geekdoc/`.
 
-Notes
------
+## Notes
 
 Here's how the initial `docs/` folder was set up:
 

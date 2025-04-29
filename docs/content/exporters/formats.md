@@ -5,9 +5,9 @@ weight: 1
 
 All exporters the following exposition formats:
 
-* OpenMetrics text format
-* Prometheus text format
-* Prometheus protobuf format
+- OpenMetrics text format
+- Prometheus text format
+- Prometheus protobuf format
 
 Moreover, gzip encoding is supported for each of these formats.
 
@@ -19,9 +19,9 @@ The Prometheus server sends an `Accept` header to specify which format is reques
 
 If you view the `/metrics` endpoint with your Web browser you will see Prometheus text format. For quick debugging of the other formats, exporters provide a `debug` URL parameter:
 
-* `/metrics?debug=openmetrics`: View OpenMetrics text format.
-* `/metrics?debug=text`: View Prometheus text format.
-* `/metrics?debug=prometheus-protobuf`: View a text representation of the Prometheus protobuf format.
+- `/metrics?debug=openmetrics`: View OpenMetrics text format.
+- `/metrics?debug=text`: View Prometheus text format.
+- `/metrics?debug=prometheus-protobuf`: View a text representation of the Prometheus protobuf format.
 
 ## Exclude protobuf exposition format
 

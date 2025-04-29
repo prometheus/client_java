@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions: {}
 
@@ -25,4 +25,3 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Run the Maven verify phase
         run: mise run ci
-

@@ -3,8 +3,7 @@ title: Spring
 weight: 5
 ---
 
-Alternative: Use Spring's Built-in Metrics Library
---------------------------------------------------
+## Alternative: Use Spring's Built-in Metrics Library
 
 [Spring Boot](https://spring.io/projects/spring-boot) has a built-in metric library named [Micrometer](https://micrometer.io/), which supports Prometheus exposition format and can be set up in three simple steps:
 
@@ -16,8 +15,7 @@ Note that Spring's default Prometheus endpoint is `/actuator/prometheus`, not `/
 
 In most cases the built-in Spring metrics library will work for you and you don't need the Prometheus Java library in Spring applications.
 
-Use the Prometheus Metrics Library in Spring
---------------------------------------------
+## Use the Prometheus Metrics Library in Spring
 
 However, you may have your reasons why you want to use the Prometheus metrics library in Spring anyway. Maybe you want full support for all Prometheus metric types, or you want to use the new Prometheus native histograms.
 
@@ -25,9 +23,9 @@ The easiest way to use the Prometheus metrics library in Spring is to configure 
 
 Dependencies:
 
-* `prometheus-metrics-core`: The core metrics library.
-* `prometheus-metrics-exporter-servlet-jakarta`: For providing the `/metrics` endpoint.
-* `prometheus-metrics-instrumentation-jvm`: Optional - JVM metrics
+- `prometheus-metrics-core`: The core metrics library.
+- `prometheus-metrics-exporter-servlet-jakarta`: For providing the `/metrics` endpoint.
+- `prometheus-metrics-instrumentation-jvm`: Optional - JVM metrics
 
 The following is the complete source code of a Spring Boot REST service using the Prometheus metrics library:
 

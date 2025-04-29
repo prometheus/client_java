@@ -36,7 +36,7 @@ posts_tagged_with: Alle berichten gemarkeerd met '{{ . }}'
 
 footer_build_with: >
   Gebouwd met <a href="https://gohugo.io/" class="gdoc-footer__link">Hugo</a> en
-  <svg class="gdoc-icon gdoc_heart"><use xlink:href="#gdoc_heart"></use></svg> 
+  <svg class="gdoc-icon gdoc_heart"><use xlink:href="#gdoc_heart"></use></svg>
 footer_legal_notice: Juridische mededeling
 footer_privacy_policy: Privacybeleid
 footer_content_license_prefix: >

@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Debug gpg key - remove after debugging
         env:
-            GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
         run: |
           echo "$GPG_SIGNING_KEY" | wc -c
           echo "$GPG_SIGNING_KEY" | gpg --batch --import-options import-show --import
@@ -37,8 +37,8 @@ jobs:
       - name: Set up Apache Maven Central
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
           server-id: ossrh
           server-username: MAVEN_USERNAME
           server-password: MAVEN_CENTRAL_TOKEN

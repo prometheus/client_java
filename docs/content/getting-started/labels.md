@@ -15,8 +15,7 @@ payments_total{status="success",type="paypal"} 2.0
 
 The example shows a counter metric named `payments_total` with two labels: `status` and `type`. Each individual data point (each line in text format) is identified by the unique combination of its metric name and its label name/value pairs.
 
-Creating a Metric with Labels
------------------------------
+## Creating a Metric with Labels
 
 Labels are supported for all metric types. We are using counters in this example, however the `labelNames()` and `labelValues()` methods are the same for other metric types.
 
@@ -36,8 +35,7 @@ counter.labelValues("paypal", "error").inc(1.0);
 
 The label names have to be specified when the metric is created and cannot change. The label values are created on demand when values are observed.
 
-Creating a Metric without Labels
---------------------------------
+## Creating a Metric without Labels
 
 Labels are optional. The following example shows a metric without labels:
 
@@ -50,8 +48,7 @@ Counter counter = Counter.builder()
 counter.inc(3.0);
 ```
 
-Cardinality Explosion
----------------------
+## Cardinality Explosion
 
 Each combination of label names and values will result in a new data point, i.e. a new line in text format.
 Therefore, a good label should have only a small number of possible values.
@@ -73,8 +70,7 @@ String timestamp = Long.toString(System.currentTimeMillis());
 loginCount.labelValues(userId, timestamp).inc();
 ```
 
-Initializing Label Values
--------------------------
+## Initializing Label Values
 
 If you register a metric without labels, it will show up immediately with initial value of zero.
 
@@ -118,8 +114,7 @@ payments_total{status="success",type="credit card"} 0.0
 payments_total{status="success",type="paypal"} 0.0
 ```
 
-Expiring Unused Label Values
-----------------------------
+## Expiring Unused Label Values
 
 There is no automatic expiry of unused label values (yet). Once a set of label values is used, it will remain there forever.
 
@@ -130,8 +125,7 @@ counter.remove("paypal", "error");
 counter.remove("paypal", "success");
 ```
 
-Const Labels
-------------
+## Const Labels
 
 If you have labels values that never change, you can specify them in the builder as `constLabels()`:
 

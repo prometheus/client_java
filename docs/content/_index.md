@@ -6,9 +6,9 @@ This is the documentation for the [Prometheus Java client library](https://githu
 
 The main new features of the 1.0.0 release are:
 
-* **Prometheus native histograms:** Support for the new Prometheus histogram type.
-* **OpenTelemetry Exporter:** Push metrics in OTLP format to an OpenTelemetry endpoint.
-* **Runtime configuration:** Configure metrics, exporters, and more at runtime using a properties file or system properties.
+- **Prometheus native histograms:** Support for the new Prometheus histogram type.
+- **OpenTelemetry Exporter:** Push metrics in OTLP format to an OpenTelemetry endpoint.
+- **Runtime configuration:** Configure metrics, exporters, and more at runtime using a properties file or system properties.
 
 **Documentation and Examples**
 

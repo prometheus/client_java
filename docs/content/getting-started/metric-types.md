@@ -1,5 +1,5 @@
 ---
-title: 'Metric Types'
+title: "Metric Types"
 weight: 4
 ---
 
@@ -7,8 +7,7 @@ The Prometheus Java metrics library implements the metric types defined in the [
 
 {{< toc >}}
 
-Counter
--------
+## Counter
 
 Counter is the most common and useful metric type. Counters can only increase, but never decrease. In the Prometheus query language, the [rate()](https://prometheus.io/docs/prometheus/latest/querying/functions/#rate) function is often used for counters to calculate the average increase per second.
 
@@ -32,8 +31,7 @@ The resulting counter has the value `0.2`. As `SECONDS` is the standard time uni
 
 As defined in [OpenMetrics](https://openmetrics.io/), counter metric names must have the `_total` suffix. If you create a counter without the `_total` suffix the suffix will be appended automatically.
 
-Gauge
------
+## Gauge
 
 Gauges are current measurements, such as the current temperature in Celsius.
 
@@ -48,25 +46,25 @@ Gauge temperature = Gauge.builder()
 temperature.labelValues("Berlin").set(22.3);
 ```
 
-Histogram
----------
+## Histogram
 
 Histograms are for observing distributions, like latency distributions for HTTP services or the distribution of request sizes.
 Unlike with counters and gauges, each histogram data point has a complex data structure representing different aspects of the distribution:
 
-* Count: The total number of observations.
-* Sum: The sum of all observed values, e.g. the total time spent serving requests.
-* Buckets: The histogram buckets representing the distribution.
+- Count: The total number of observations.
+- Sum: The sum of all observed values, e.g. the total time spent serving requests.
+- Buckets: The histogram buckets representing the distribution.
 
 Prometheus supports two flavors of histograms:
 
-* Classic histograms: Bucket boundaries are explicitly defined when the histogram is created.
-* Native histograms (exponential histograms): Infinitely many virtual buckets.
+- Classic histograms: Bucket boundaries are explicitly defined when the histogram is created.
+- Native histograms (exponential histograms): Infinitely many virtual buckets.
 
 By default, histograms maintain both flavors. Which one is used depends on the scrape request from the Prometheus server.
-* By default, the Prometheus server will scrape metrics in OpenMetrics format and get the classic histogram flavor.
-* If the Prometheus server is started with `--enable-feature=native-histograms`, it will request metrics in Prometheus protobuf format and ingest the native histogram.
-* If the Prometheus server is started with `--enable-feature=native-histogram` and the scrape config has the option `scrape_classic_histograms: true`, it will request metrics in Prometheus protobuf format and ingest both, the classic and the native flavor. This is great for migrating from classic histograms to native histograms.
+
+- By default, the Prometheus server will scrape metrics in OpenMetrics format and get the classic histogram flavor.
+- If the Prometheus server is started with `--enable-feature=native-histograms`, it will request metrics in Prometheus protobuf format and ingest the native histogram.
+- If the Prometheus server is started with `--enable-feature=native-histogram` and the scrape config has the option `scrape_classic_histograms: true`, it will request metrics in Prometheus protobuf format and ingest both, the classic and the native flavor. This is great for migrating from classic histograms to native histograms.
 
 See [examples/example-native-histogram](https://github.com/prometheus/client_java/tree/1.0.x/examples/example-native-histogram) for an example.
 
@@ -87,9 +85,9 @@ Histograms implement the [TimerApi](/client_java/api/io/prometheus/metrics/core/
 
 The histogram builder provides a lot of configuration for fine-tuning the histogram behavior. In most cases you don't need them, defaults are good. The following is an incomplete list showing the most important options:
 
-* `nativeOnly()` / `classicOnly()`: Create a histogram with one representation only.
-* `classicBuckets(...)`: Set the classic bucket boundaries. Default buckets are `.005`, `.01`, `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The default bucket boundaries are designed for measuring request durations in seconds.
-* `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is 160. When the maximum is reached, the native histogram automatically reduces resolution to stay below the limit.
+- `nativeOnly()` / `classicOnly()`: Create a histogram with one representation only.
+- `classicBuckets(...)`: Set the classic bucket boundaries. Default buckets are `.005`, `.01`, `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The default bucket boundaries are designed for measuring request durations in seconds.
+- `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is 160. When the maximum is reached, the native histogram automatically reduces resolution to stay below the limit.
 
 See Javadoc for [Histogram.Builder](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html) for a complete list of options. Some options can be configured at runtime, see [config](../../config/config).
 
@@ -128,8 +126,7 @@ successfulEvents.observe(0.7);
 erroneousEvents.observe(0.2);
 ```
 
-Summary
--------
+## Summary
 
 Like histograms, summaries are for observing distributions. Each summary data point has a count and a sum like a histogram data point.
 However, rather than histogram buckets summaries maintain quantiles.
@@ -164,8 +161,7 @@ Some options can be configured at runtime, see [config](../../config/config).
 
 In general you should prefer histograms over summaries. The Prometheus query language has a function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile) for calculating quantiles from histograms. The advantage of query-time quantile calculation is that you can aggregate histograms before calculating the quantile. With summaries you must use the quantile with all its labels as it is.
 
-Info
-----
+## Info
 
 Info metrics are used to expose textual information which should not change during process lifetime. The value of an Info metric is always `1`.
 
@@ -195,8 +191,7 @@ The example is taken from the `prometheus-metrics-instrumentation-jvm` module, s
 
 As defined in [OpenMetrics](https://openmetrics.io/), info metric names must have the `_info` suffix. If you create a counter without the `_info` suffix the suffix will be appended automatically.
 
-StateSet
---------
+## StateSet
 
 StateSet are a niche metric type in the OpenMetrics standard that is rarely used. The main use case is to signal which feature flags are enabled.
 
@@ -221,8 +216,7 @@ feature_flags{env="dev",feature_flags="feature1"} 0
 feature_flags{env="dev",feature_flags="feature2"} 1
 ```
 
-GaugeHistogram and Unknown
---------------------------
+## GaugeHistogram and Unknown
 
 These types are defined in the [OpenMetrics](https://openmetrics.io/) standard but not implemented in the `prometheus-metrics-core` API.
 However, `prometheus-metrics-model` implements the underlying data model for these types.
