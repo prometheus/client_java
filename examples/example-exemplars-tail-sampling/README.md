@@ -1,5 +1,4 @@
-Exemplars with OpenTelemetry's Tail Sampling
---------------------------------------------
+## Exemplars with OpenTelemetry's Tail Sampling
 
 ## Background: What are Exemplars?
 
@@ -66,13 +65,13 @@ This should generate two Java services `.../example-greeting-service/target/exam
 
 The `docker-compose` file will run the example with the following containers:
 
-* `hello-world-app`: Java service described above, with the OpenTelemetry Java instrumentation agent attached for distrubted tracing.
-* `greeting-service`: Java service described above, with the OpenTelemetry Java instrumentation agent attached for distrubted tracing.
-* `collector`: OpenTelemetry collector for receiving the distributed traces, performing _tail sampling_, and forwarding them to `tempo`.
-* `prometheus`: Prometheus server scraping metrics from `hello-world-app`, `greeting-service`, and `tempo`.
-* `tempo`: Trace database.
-* `grafana`: Has `prometheus` and `tempo` configured as data sources, and is configured with an example dashboard with Exemplars enabled.
-* `k6`: The [k6](https://k6.io/) load test tool for generating 50 requests / second on the Java services.
+- `hello-world-app`: Java service described above, with the OpenTelemetry Java instrumentation agent attached for distrubted tracing.
+- `greeting-service`: Java service described above, with the OpenTelemetry Java instrumentation agent attached for distrubted tracing.
+- `collector`: OpenTelemetry collector for receiving the distributed traces, performing _tail sampling_, and forwarding them to `tempo`.
+- `prometheus`: Prometheus server scraping metrics from `hello-world-app`, `greeting-service`, and `tempo`.
+- `tempo`: Trace database.
+- `grafana`: Has `prometheus` and `tempo` configured as data sources, and is configured with an example dashboard with Exemplars enabled.
+- `k6`: The [k6](https://k6.io/) load test tool for generating 50 requests / second on the Java services.
 
 With the Java services described above available in the `target/` directories, you can run the example with:
 
@@ -109,13 +108,9 @@ processors:
         {
           name: keep-exemplars,
           type: string_attribute,
-          string_attribute: { key: "exemplar", values: [ "true" ] }
+          string_attribute: { key: "exemplar", values: ["true"] },
         },
-        {
-          name: keep-10-percent,
-          type: probabilistic,
-          probabilistic: { sampling_percentage: 10 }
-        },
+        { name: keep-10-percent, type: probabilistic, probabilistic: { sampling_percentage: 10 } },
       ]
 ```
 

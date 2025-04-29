@@ -28,6 +28,6 @@ uptime_seconds_total 301.0
 
 The exporter supports a `debug` URL parameter to quickly view other formats in your Web browser:
 
-* [http://localhost:9400/metrics?debug=text](http://localhost:9400/metrics?debug=text): Prometheus text format, same as without the `debug` option.
-* [http://localhost:9400/metrics?debug=openmetrics](http://localhost:9400/metrics?debug=openmetrics): OpenMetrics text format.
-* [http://localhost:9400/metrics?debug=prometheus-protobuf](http://localhost:9400/metrics?debug=prometheus-protobuf): Text representation of the Prometheus protobuf format.
+- [http://localhost:9400/metrics?debug=text](http://localhost:9400/metrics?debug=text): Prometheus text format, same as without the `debug` option.
+- [http://localhost:9400/metrics?debug=openmetrics](http://localhost:9400/metrics?debug=openmetrics): OpenMetrics text format.
+- [http://localhost:9400/metrics?debug=prometheus-protobuf](http://localhost:9400/metrics?debug=prometheus-protobuf): Text representation of the Prometheus protobuf format.

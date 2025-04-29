@@ -13,13 +13,9 @@ processors:
         {
           name: keep-exemplars,
           type: string_attribute,
-          string_attribute: { key: "exemplar", values: [ "true" ] }
+          string_attribute: { key: "exemplar", values: ["true"] },
         },
-        {
-          name: keep-10-percent,
-          type: probabilistic,
-          probabilistic: { sampling_percentage: 10 }
-        },
+        { name: keep-10-percent, type: probabilistic, probabilistic: { sampling_percentage: 10 } },
       ]
 
 exporters:

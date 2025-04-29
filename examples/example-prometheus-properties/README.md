@@ -22,6 +22,6 @@ The example has a `prometheus.properties` file in the classpath with a few examp
 
 There are multiple alternative ways to specify the location of the `prometheus.properties` file:
 
-* Put it in the classpath, like in this example.
-* Set the environment variable `PROMETHEUS_CONFIG` to the file location.
-* Set the `prometheus.config` System property to the file location.
+- Put it in the classpath, like in this example.
+- Set the environment variable `PROMETHEUS_CONFIG` to the file location.
+- Set the `prometheus.config` System property to the file location.

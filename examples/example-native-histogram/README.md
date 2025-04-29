@@ -21,9 +21,9 @@ docker-compose up
 
 This will run the following Docker containers:
 
-* [http://localhost:9400/metrics](http://localhost:9400/metrics) example application
-* [http://localhost:9090](http://localhost:9090) Prometheus server
-* [http://localhost:3000](http://localhost:3000) Grafana (user _admin_, password _admin_)
+- [http://localhost:9400/metrics](http://localhost:9400/metrics) example application
+- [http://localhost:9090](http://localhost:9090) Prometheus server
+- [http://localhost:3000](http://localhost:3000) Grafana (user _admin_, password _admin_)
 
 You might need to replace `localhost` with `host.docker.internal` on MacOS or Windows.
 

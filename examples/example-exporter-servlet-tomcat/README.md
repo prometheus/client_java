@@ -46,9 +46,9 @@ requests_total{http_status="200"} 12.0
 
 The exporter servlet supports a `debug` URL parameter to quickly view other formats in your Web browser:
 
-* [http://localhost:8080/metrics?debug=text](http://localhost:8080/metrics?debug=text): Prometheus text format, same as without the `debug` option.
-* [http://localhost:8080/metrics?debug=openmetrics](http://localhost:8080/metrics?debug=openmetrics): OpenMetrics text format.
-* [http://localhost:8080/metrics?debug=prometheus-protobuf](http://localhost:8080/metrics?debug=prometheus-protobuf): Text representation of the Prometheus protobuf format.
+- [http://localhost:8080/metrics?debug=text](http://localhost:8080/metrics?debug=text): Prometheus text format, same as without the `debug` option.
+- [http://localhost:8080/metrics?debug=openmetrics](http://localhost:8080/metrics?debug=openmetrics): OpenMetrics text format.
+- [http://localhost:8080/metrics?debug=prometheus-protobuf](http://localhost:8080/metrics?debug=prometheus-protobuf): Text representation of the Prometheus protobuf format.
 
 ## Testing with the Prometheus Server
 
@@ -56,9 +56,9 @@ The exporter servlet supports a `debug` URL parameter to quickly view other form
 2. Extract the archive
 3. Edit `prometheus.yml` and append the following snippet at the end:
    ```yaml
-    job_name: "tomcat-servlet-example"
-    static_configs:
-      - targets: ["localhost:8080"]
+   job_name: "tomcat-servlet-example"
+   static_configs:
+     - targets: ["localhost:8080"]
    ```
 4. Run with native histograms and examplars enabled:
    ```shell

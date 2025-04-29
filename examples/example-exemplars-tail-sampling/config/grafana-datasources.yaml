@@ -1,7 +1,6 @@
 apiVersion: 1
 
 datasources:
-
   - name: Prometheus
     type: prometheus
     uid: prometheus

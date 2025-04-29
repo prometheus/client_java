@@ -4,6 +4,5 @@ docker-compose:
     - ./docker-compose.yml
 expected:
   metrics:
-    - promql: 'uptime_seconds_total{}'
-      value: '>= 0'
-
+    - promql: "uptime_seconds_total{}"
+      value: ">= 0"

@@ -21,8 +21,8 @@ OLD_PACKAGE=$(sed -nE 's/import (io.prometheus.metrics.expositionformats.generat
 PACKAGE="io.prometheus.metrics.expositionformats.generated.com_google_protobuf_${PROTOBUF_VERSION_STRING}"
 
 if [[ $OLD_PACKAGE != "$PACKAGE" ]]; then
-  echo "Replacing package $OLD_PACKAGE with $PACKAGE in all java files"
-  find .. -type f -name "*.java" -exec sed -i "s/$OLD_PACKAGE/$PACKAGE/g" {} +
+	echo "Replacing package $OLD_PACKAGE with $PACKAGE in all java files"
+	find .. -type f -name "*.java" -exec sed -i "s/$OLD_PACKAGE/$PACKAGE/g" {} +
 fi
 
 curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/prometheus/client/metrics.proto -o $PROTO_DIR/metrics.proto
@@ -35,19 +35,18 @@ sed -i -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' $(find src/main/generated/io -typ
 GENERATED_WITH=$(grep -oP '\/\/ Protobuf Java Version: \K.*' "$TARGET_DIR/${PACKAGE//\.//}"/Metrics.java)
 
 if [[ $GENERATED_WITH != "$PROTOBUF_VERSION" ]]; then
-  echo "Generated protobuf sources version $GENERATED_WITH does not match provided version $PROTOBUF_VERSION"
-  echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
-  echo "Generated protobuf sources are not up-to-date. Please run 'mise up && mise run test' and commit the changes."
-  exit 1
+	echo "Generated protobuf sources version $GENERATED_WITH does not match provided version $PROTOBUF_VERSION"
+	echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
+	echo "Generated protobuf sources are not up-to-date. Please run 'mise up && mise run test' and commit the changes."
+	exit 1
 fi
 
 git checkout -- ../mise.lock # see https://github.com/jdx/mise/discussions/4782
 STATUS=$(git status --porcelain)
 if [[ ${REQUIRE_PROTO_UP_TO_DATE:-false} == "true" && -n "$STATUS" ]]; then
-  echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
-  echo "Generated protobuf sources are not up-to-date. Please run 'mise run test' and commit the changes."
-  echo "Local changes:"
-  echo "$STATUS"
-  exit 1
+	echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
+	echo "Generated protobuf sources are not up-to-date. Please run 'mise run test' and commit the changes."
+	echo "Local changes:"
+	echo "$STATUS"
+	exit 1
 fi
-
