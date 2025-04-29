@@ -5,7 +5,7 @@ docker-compose:
     - ./docker-compose.yml
 expected:
   custom-checks:
-    - script: ./service-instance-id-check.py
+    - script: ./service_instance_id_check.py
   metrics:
     - promql: "uptime_seconds_total{}"
       value: ">= 0"

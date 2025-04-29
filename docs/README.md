@@ -12,12 +12,12 @@ This will serve the docs on [http://localhost:1313](http://localhost:1313).
 
 ## Deploy to GitHub Pages
 
-Changes to the `main` branch will be deployed automatically with GitHub actions.
+Changes to the `main` branch will be deployed automatically with GitHub Actions.
 
 ## Update Javadoc
 
 Javadoc are not checked-in to the GitHub repository.
-They are generated on the fly by GitHub actions when the docs are updated.
+They are generated on the fly by GitHub Actions when the docs are updated.
 To view locally, run the following:
 
 ```
