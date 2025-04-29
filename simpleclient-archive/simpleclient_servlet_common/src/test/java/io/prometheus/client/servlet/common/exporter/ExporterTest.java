@@ -27,7 +27,7 @@ class ExporterTest {
       public String getHeader(String name) {
         if (openMetrics && "Accept".equals(name)) {
           return "application/openmetrics-text;"
-                     + " version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1";
+              + " version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1";
         }
         return null;
       }
