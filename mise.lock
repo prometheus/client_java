@@ -18,10 +18,6 @@ backend = "core:java"
 version = "0.18.1"
 backend = "aqua:lycheeverse/lychee"
 
-[tools.node]
-version = "23.10.0"
-backend = "core:node"
-
 [tools.protoc]
 version = "30.2"
 backend = "aqua:protocolbuffers/protobuf/protoc"

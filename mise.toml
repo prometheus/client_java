@@ -7,7 +7,6 @@ PROTO_GENERATION = "true"
 "go:github.com/grafana/oats" = "latest"
 java = "temurin-17.0.13+11"
  lychee = "latest"
-node = "latest"
 protoc = "latest"
 
 [tasks.ci]
@@ -87,7 +86,6 @@ description = "Build GitHub pages"
 env = { HUGO_ENVIRONMENT = "production", HUGO_ENV = "production" }
 dir = "docs"
 run = [
-  "npm ci",
   "hugo --gc --minify --baseURL ${BASE_URL}/",
   "echo 'ls ./docs/public/api' && ls ./docs/public/api"
 ]
