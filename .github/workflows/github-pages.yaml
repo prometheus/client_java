@@ -1,14 +1,14 @@
 name: Deploy Documentation to Github Pages
 
 on:
-  on:
-    push:
-      branches: [ "main" ]
-    pull_request:
-      branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
   # Runs on pushes targeting the 1.0.x branch
   # todo revert this
+#on:
 #  push:
 #    branches:
 #      - main
