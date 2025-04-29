@@ -87,7 +87,7 @@ env = { HUGO_ENVIRONMENT = "production", HUGO_ENV = "production" }
 dir = "docs"
 run = [
   "hugo --gc --minify --baseURL ${BASE_URL}/",
-  "echo 'ls ./docs/public/api' && ls ./docs/public/api"
+  "echo 'ls ./public/api' && ls ./public/api"
 ]
 
 [settings]

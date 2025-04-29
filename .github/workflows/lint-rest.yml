@@ -3,11 +3,10 @@ name: Acceptance Tests
 
 on: [pull_request]
 
-permissions: {}
+permissions: { }
 
 jobs:
   acceptance-tests:
-    permissions: {}
     runs-on: ubuntu-24.04
     steps:
       - name: Check out

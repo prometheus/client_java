@@ -1,6 +1,7 @@
 tls_server_config:
   # cert and key have been generated with the following command:
-  # openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 36500 -nodes -subj "/CN=localhost"
+  # openssl req -x509 -newkey rsa:4096 -keyout key.pem -out
+  # cert.pem -sha256 -days 36500 -nodes -subj "/CN=localhost"
   cert: |
     -----BEGIN CERTIFICATE-----
     MIIFCzCCAvOgAwIBAgIUPwSov6+heI4uY6+fvB1N+1EN3FwwDQYJKoZIhvcNAQEL

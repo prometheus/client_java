@@ -1,4 +1,5 @@
-# OATS is an acceptance testing framework for OpenTelemetry - https://github.com/grafana/oats/tree/main/yaml
+# OATS is an acceptance testing framework for OpenTelemetry -
+# https://github.com/grafana/oats/tree/main/yaml
 docker-compose:
   files:
     - ./docker-compose.yml

@@ -1,3 +1,4 @@
+---
 name: GraalVM Native Tests
 
 on:
@@ -6,7 +7,7 @@ on:
   pull_request:
     branches: ["main"]
 
-permissions: {}
+permissions: { }
 
 jobs:
   native-tests:

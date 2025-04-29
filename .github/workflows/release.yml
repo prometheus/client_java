@@ -1,3 +1,4 @@
+---
 name: Deploy to Maven Central
 
 on:
@@ -9,7 +10,7 @@ jobs:
   deploy:
     if: ${{ github.repository == 'prometheus/client_java' }}
     runs-on: ubuntu-24.04
-    permissions: {}
+    permissions: { }
 
     steps:
       - name: Debug gpg key - remove after debugging
