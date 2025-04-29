@@ -3,7 +3,8 @@ title: HTTPServer
 weight: 3
 ---
 
-The `HTTPServer` is a standalone server for exposing a metric endpoint. A minimal example application for `HTTPServer` can be found in the [examples](https://github.com/prometheus/client_java/tree/1.0.x/examples) directory.
+The `HTTPServer` is a standalone server for exposing a metric endpoint. A minimal example 
+application for `HTTPServer` can be found in the [examples](https://github.com/prometheus/client_java/tree/1.0.x/examples) directory.
 
 ```java
 HTTPServer server = HTTPServer.builder()
@@ -11,7 +12,8 @@ HTTPServer server = HTTPServer.builder()
     .buildAndStart();
 ```
 
-By default, `HTTPServer` binds to any IP address, you can change this with [hostname()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#hostname(java.lang.String)>) or [inetAddress()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#inetAddress(java.net.InetAddress)>).
+By default, `HTTPServer` binds to any IP address, you can change this with 
+[hostname()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#hostname(java.lang.String)>) or [inetAddress()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#inetAddress(java.net.InetAddress)>).
 
 `HTTPServer` is configured with three endpoints:
 

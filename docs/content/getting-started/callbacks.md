@@ -5,9 +5,11 @@ weight: 5
 
 The section on [metric types](../metric-types) showed how to use metrics that actively maintain their state.
 
-This section shows how to create callback-based metrics, i.e. metrics that invoke a callback at scrape time to get the current values.
+This section shows how to create callback-based metrics, i.e. metrics that invoke a callback 
+at scrape time to get the current values.
 
-For example, let's assume we have two instances of a `Cache`, a `coldCache` and a `hotCache`. The following implements a callback-based `cache_size_bytes` metric:
+For example, let's assume we have two instances of a `Cache`, a `coldCache` and a `hotCache`. 
+The following implements a callback-based `cache_size_bytes` metric:
 
 ```java
 Cache coldCache = new Cache();
@@ -35,7 +37,8 @@ cache_size_bytes{state="cold"} 78.0
 cache_size_bytes{state="hot"} 83.0
 ```
 
-Better examples of callback metrics can be found in the `prometheus-metrics-instrumentation-jvm` module.
+Better examples of callback metrics can be found in the `prometheus-metrics-instrumentation-jvm` 
+module.
 
 The available callback metric types are:
 
@@ -43,7 +46,8 @@ The available callback metric types are:
 - `CounterWithCallback` for counters.
 - `SummaryWithCallback` for summaries.
 
-The API for gauges and counters is very similar. For summaries the callback has a few more parameters, because it accepts a count, a sum, and quantiles:
+The API for gauges and counters is very similar. For summaries the callback has a few more 
+parameters, because it accepts a count, a sum, and quantiles:
 
 ```java
 SummaryWithCallback.builder()

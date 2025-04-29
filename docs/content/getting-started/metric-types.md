@@ -3,16 +3,23 @@ title: "Metric Types"
 weight: 4
 ---
 
-The Prometheus Java metrics library implements the metric types defined in the [OpenMetrics](https://openmetrics.io) standard:
+The Prometheus Java metrics library implements the metric types defined in
+the [OpenMetrics](https://openmetrics.io) standard:
 
 {{< toc >}}
 
 ## Counter
 
-Counter is the most common and useful metric type. Counters can only increase, but never decrease. In the Prometheus query language, the [rate()](https://prometheus.io/docs/prometheus/latest/querying/functions/#rate) function is often used for counters to calculate the average increase per second.
+Counter is the most common and useful metric type. Counters can only increase, but never decrease.
+In the Prometheus query language,
+the [rate()](https://prometheus.io/docs/prometheus/latest/querying/functions/#rate) function is
+often used for counters to calculate the average increase per second.
 
 {{< hint type=note >}}
-Counter values do not need to be integers. In many cases counters represent a number of events (like the number of requests), and in that case the counter value is an integer. However, counters can also be used for something like "total time spent doing something" in which case the counter value is a floating point number.
+Counter values do not need to be integers. In many cases counters represent a number of events (like
+the number of requests), and in that case the counter value is an integer. However, counters can
+also be used for something like "total time spent doing something" in which case the counter value
+is a floating point number.
 {{< /hint >}}
 
 Here's an example of a counter:
@@ -27,9 +34,12 @@ Counter serviceTimeSeconds = Counter.builder()
 serviceTimeSeconds.inc(Unit.millisToSeconds(200));
 ```
 
-The resulting counter has the value `0.2`. As `SECONDS` is the standard time unit in Prometheus, the `Unit` utility class has methods to convert other time units to seconds.
+The resulting counter has the value `0.2`. As `SECONDS` is the standard time unit in Prometheus, the
+`Unit` utility class has methods to convert other time units to seconds.
 
-As defined in [OpenMetrics](https://openmetrics.io/), counter metric names must have the `_total` suffix. If you create a counter without the `_total` suffix the suffix will be appended automatically.
+As defined in [OpenMetrics](https://openmetrics.io/), counter metric names must have the `_total`
+suffix. If you create a counter without the `_total` suffix the suffix will be appended
+automatically.
 
 ## Gauge
 
@@ -48,8 +58,10 @@ temperature.labelValues("Berlin").set(22.3);
 
 ## Histogram
 
-Histograms are for observing distributions, like latency distributions for HTTP services or the distribution of request sizes.
-Unlike with counters and gauges, each histogram data point has a complex data structure representing different aspects of the distribution:
+Histograms are for observing distributions, like latency distributions for HTTP services or the
+distribution of request sizes.
+Unlike with counters and gauges, each histogram data point has a complex data structure representing
+different aspects of the distribution:
 
 - Count: The total number of observations.
 - Sum: The sum of all observed values, e.g. the total time spent serving requests.
@@ -60,11 +72,17 @@ Prometheus supports two flavors of histograms:
 - Classic histograms: Bucket boundaries are explicitly defined when the histogram is created.
 - Native histograms (exponential histograms): Infinitely many virtual buckets.
 
-By default, histograms maintain both flavors. Which one is used depends on the scrape request from the Prometheus server.
+By default, histograms maintain both flavors. Which one is used depends on the scrape request from
+the Prometheus server.
 
-- By default, the Prometheus server will scrape metrics in OpenMetrics format and get the classic histogram flavor.
-- If the Prometheus server is started with `--enable-feature=native-histograms`, it will request metrics in Prometheus protobuf format and ingest the native histogram.
-- If the Prometheus server is started with `--enable-feature=native-histogram` and the scrape config has the option `scrape_classic_histograms: true`, it will request metrics in Prometheus protobuf format and ingest both, the classic and the native flavor. This is great for migrating from classic histograms to native histograms.
+- By default, the Prometheus server will scrape metrics in OpenMetrics format and get the classic
+  histogram flavor.
+- If the Prometheus server is started with `--enable-feature=native-histograms`, it will request
+  metrics in Prometheus protobuf format and ingest the native histogram.
+- If the Prometheus server is started with `--enable-feature=native-histogram` and the scrape config
+  has the option `scrape_classic_histograms: true`, it will request metrics in Prometheus protobuf
+  format and ingest both, the classic and the native flavor. This is great for migrating from
+  classic histograms to native histograms.
 
 See [examples/example-native-histogram](https://github.com/prometheus/client_java/tree/1.0.x/examples/example-native-histogram) for an example.
 
@@ -81,17 +99,30 @@ long start = System.nanoTime();
 duration.labelValues("GET", "/", "200").observe(Unit.nanosToSeconds(System.nanoTime() - start));
 ```
 
-Histograms implement the [TimerApi](/client_java/api/io/prometheus/metrics/core/datapoints/TimerApi.html) interface, which provides convenience methods for measuring durations.
+Histograms implement
+the [TimerApi](/client_java/api/io/prometheus/metrics/core/datapoints/TimerApi.html) interface,
+which provides convenience methods for measuring durations.
 
-The histogram builder provides a lot of configuration for fine-tuning the histogram behavior. In most cases you don't need them, defaults are good. The following is an incomplete list showing the most important options:
+The histogram builder provides a lot of configuration for fine-tuning the histogram behavior. In
+most cases you don't need them, defaults are good. The following is an incomplete list showing the
+most important options:
 
 - `nativeOnly()` / `classicOnly()`: Create a histogram with one representation only.
-- `classicBuckets(...)`: Set the classic bucket boundaries. Default buckets are `.005`, `.01`, `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The default bucket boundaries are designed for measuring request durations in seconds.
-- `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is 160. When the maximum is reached, the native histogram automatically reduces resolution to stay below the limit.
+- `classicBuckets(...)`: Set the classic bucket boundaries. Default buckets are `.005`, `.01`,
+  `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The default bucket boundaries are
+  designed for measuring request durations in seconds.
+- `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is
+  160. When the maximum is reached, the native histogram automatically reduces resolution to stay
+  below the limit.
 
-See Javadoc for [Histogram.Builder](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html) for a complete list of options. Some options can be configured at runtime, see [config](../../config/config).
+See Javadoc
+for [Histogram.Builder](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html)
+for a complete list of options. Some options can be configured at runtime,
+see [config](../../config/config).
 
-Histograms and summaries are both used for observing distributions. Therefore, the both implement the `DistributionDataPoint` interface. Using the `DistributionDataPoint` interface directly gives you the option to switch between histograms and summaries later with minimal code changes.
+Histograms and summaries are both used for observing distributions. Therefore, the both implement
+the `DistributionDataPoint` interface. Using the `DistributionDataPoint` interface directly gives
+you the option to switch between histograms and summaries later with minimal code changes.
 
 Example of using the `DistributionDataPoint` interface for a histogram without labels:
 
@@ -128,7 +159,8 @@ erroneousEvents.observe(0.2);
 
 ## Summary
 
-Like histograms, summaries are for observing distributions. Each summary data point has a count and a sum like a histogram data point.
+Like histograms, summaries are for observing distributions. Each summary data point has a count and
+a sum like a histogram data point.
 However, rather than histogram buckets summaries maintain quantiles.
 
 ```java
@@ -145,21 +177,32 @@ Summary requestLatency = Summary.builder()
 requestLatency.labelValues("ok").observe(2.7);
 ```
 
-The example above creates a summary with the 50th percentile (median), the 95th percentile, and the 99th percentile. Quantiles are optional, you can create a summary without quantiles if all you need is the count and the sum.
+The example above creates a summary with the 50th percentile (median), the 95th percentile, and the
+99th percentile. Quantiles are optional, you can create a summary without quantiles if all you need
+is the count and the sum.
 
 {{< hint type=note >}}
-The terms "percentile" and "quantile" mean the same thing. We use percentile when we express it as a number in [0, 100], and we use quantile when we express it as a number in [0.0, 1.0].
+The terms "percentile" and "quantile" mean the same thing. We use percentile when we express it as a
+number in [0, 100], and we use quantile when we express it as a number in [0.0, 1.0].
 {{< /hint >}}
 
-The second parameter to `quantile()` is the maximum acceptable error. The call `.quantile(0.5, 0.01)` means that the actual quantile is somewhere in [0.49, 0.51]. Higher precision means higher memory usage.
+The second parameter to `quantile()` is the maximum acceptable error. The call
+`.quantile(0.5, 0.01)` means that the actual quantile is somewhere in [0.49, 0.51]. Higher precision
+means higher memory usage.
 
-The 0.0 quantile (min value) and the 1.0 quantile (max value) are special cases because you can get the precise values (error 0.0) with almost no memory overhead.
+The 0.0 quantile (min value) and the 1.0 quantile (max value) are special cases because you can get
+the precise values (error 0.0) with almost no memory overhead.
 
-Quantile values are calculated based on a 5 minutes moving time window. The default time window can be changed with `maxAgeSeconds()` and `numberOfAgeBuckets()`.
+Quantile values are calculated based on a 5 minutes moving time window. The default time window can
+be changed with `maxAgeSeconds()` and `numberOfAgeBuckets()`.
 
 Some options can be configured at runtime, see [config](../../config/config).
 
-In general you should prefer histograms over summaries. The Prometheus query language has a function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile) for calculating quantiles from histograms. The advantage of query-time quantile calculation is that you can aggregate histograms before calculating the quantile. With summaries you must use the quantile with all its labels as it is.
+In general you should prefer histograms over summaries. The Prometheus query language has a
+function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile)
+for calculating quantiles from histograms. The advantage of query-time quantile calculation is that
+you can aggregate histograms before calculating the quantile. With summaries you must use the
+quantile with all its labels as it is.
 
 ## Info
 
@@ -187,13 +230,17 @@ The info above looks as follows in OpenMetrics text format:
 jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
 ```
 
-The example is taken from the `prometheus-metrics-instrumentation-jvm` module, so if you have `JvmMetrics` registered you should have a `jvm_runtime_info` metric out-of-the-box.
+The example is taken from the `prometheus-metrics-instrumentation-jvm` module, so if you have
+`JvmMetrics` registered you should have a `jvm_runtime_info` metric out-of-the-box.
 
-As defined in [OpenMetrics](https://openmetrics.io/), info metric names must have the `_info` suffix. If you create a counter without the `_info` suffix the suffix will be appended automatically.
+As defined in [OpenMetrics](https://openmetrics.io/), info metric names must have the `_info`
+suffix. If you create a counter without the `_info` suffix the suffix will be appended
+automatically.
 
 ## StateSet
 
-StateSet are a niche metric type in the OpenMetrics standard that is rarely used. The main use case is to signal which feature flags are enabled.
+StateSet are a niche metric type in the OpenMetrics standard that is rarely used. The main use case
+is to signal which feature flags are enabled.
 
 ```java
 StateSet stateSet = StateSet.builder()
@@ -218,6 +265,8 @@ feature_flags{env="dev",feature_flags="feature2"} 1
 
 ## GaugeHistogram and Unknown
 
-These types are defined in the [OpenMetrics](https://openmetrics.io/) standard but not implemented in the `prometheus-metrics-core` API.
+These types are defined in the [OpenMetrics](https://openmetrics.io/) standard but not implemented
+in the `prometheus-metrics-core` API.
 However, `prometheus-metrics-model` implements the underlying data model for these types.
-To use these types, you need to implement your own `Collector` where the `collect()` method returns an `UnknownSnapshot` or a `HistogramSnapshot` with `.gaugeHistogram(true)`.
+To use these types, you need to implement your own `Collector` where the `collect()` method returns
+an `UnknownSnapshot` or a `HistogramSnapshot` with `.gaugeHistogram(true)`.

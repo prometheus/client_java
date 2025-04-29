@@ -13,7 +13,8 @@ We use the following dependencies:
 
 - `prometheus-metrics-core` is the actual metrics library.
 - `prometheus-metrics-instrumentation-jvm` provides out-of-the-box JVM metrics.
-- `prometheus-metrics-exporter-httpserver` is a standalone HTTP server for exposing Prometheus metrics.
+- `prometheus-metrics-exporter-httpserver` is a standalone HTTP server for exposing Prometheus
+  metrics.
   {{< tabs "deps" >}}
   {{< tab "Gradle" >}}
 
@@ -47,7 +48,9 @@ implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:$version'
 {{< /tab >}}
 {{< /tabs >}}
 
-There are alternative exporters as well, for example if you are using a Servlet container like Tomcat or Undertow you might want to use `prometheus-exporter-servlet-jakarta` rather than a standalone HTTP server.
+There are alternative exporters as well, for example if you are using a Servlet container like
+Tomcat or Undertow you might want to use `prometheus-exporter-servlet-jakarta` rather than a
+standalone HTTP server.
 
 {{< hint type=note >}}
 
@@ -62,7 +65,8 @@ it from the dependencies.
 A Bill of Material
 ([BOM](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms))
 ensures that versions of dependencies (including transitive ones) are aligned.
-This is especially important when using Spring Boot, which manages some of the dependencies of the project.
+This is especially important when using Spring Boot, which manages some of the dependencies of the
+project.
 
 You should omit the version number of the dependencies in your build file if you are using a BOM.
 
@@ -180,7 +184,9 @@ public class App {
 
 # Result
 
-Run the application and view [http://localhost:9400/metrics](http://localhost:9400/metrics) with your browser to see the raw metrics. You should see the `my_count_total` metric as shown below plus the `jvm_` and `process_` metrics coming from `JvmMetrics`.
+Run the application and view [http://localhost:9400/metrics](http://localhost:9400/metrics) with
+your browser to see the raw metrics. You should see the `my_count_total` metric as shown below plus
+the `jvm_` and `process_` metrics coming from `JvmMetrics`.
 
 ```
 # HELP my_count_total example counter
@@ -191,7 +197,9 @@ my_count_total{status="ok"} 2.0
 
 # Prometheus Configuration
 
-To scrape the metrics with a Prometheus server, download the latest Prometheus server [release](https://github.com/prometheus/prometheus/releases), and configure the `prometheus.yml` file as follows:
+To scrape the metrics with a Prometheus server, download the latest Prometheus
+server [release](https://github.com/prometheus/prometheus/releases), and configure the
+`prometheus.yml` file as follows:
 
 ```yaml
 global:

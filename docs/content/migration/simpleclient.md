@@ -109,15 +109,20 @@ Version 0.16.0 provided the `simpleclient_hotspot` module for exposing built-in 
 DefaultExports.initialize();
 ```
 
-With version 1.0.0 these metrics moved to the `prometheus-metrics-instrumentation-jvm` module and are initialized as follows:
+With version 1.0.0 these metrics moved to the `prometheus-metrics-instrumentation-jvm` module and
+are initialized as follows:
 
 ```java
 JvmMetrics.builder().register();
 ```
 
-A full list of the available JVM metrics can be found on [/instrumentation/jvm](../../instrumentation/jvm/).
+A full list of the available JVM metrics can be found
+on [/instrumentation/jvm](../../instrumentation/jvm/).
 
-Most JVM metric names remained the same, except for a few cases where the old 0.16.0 metric names were not compliant with the [OpenMetrics](https://openmetrics.io) specification. OpenMetrics requires the unit to be a suffix, so we renamed metrics where the unit was in the middle of the metric name and moved the unit to the end of the metric name. The following metric names changed:
+Most JVM metric names remained the same, except for a few cases where the old 0.16.0 metric names
+were not compliant with the [OpenMetrics](https://openmetrics.io) specification. OpenMetrics
+requires the unit to be a suffix, so we renamed metrics where the unit was in the middle of the
+metric name and moved the unit to the end of the metric name. The following metric names changed:
 
 - `jvm_memory_bytes_committed` -> `jvm_memory_committed_bytes`
 - `jvm_memory_bytes_init` -> `jvm_memory_init_bytes`

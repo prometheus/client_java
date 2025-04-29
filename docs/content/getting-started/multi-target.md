@@ -109,7 +109,10 @@ Sample Prometheus scrape_config
 ```
 
 It's up to the specific MultiCollector implementation how to interpret the _target_ parameter.
-It might be an explicit real target (i.e. via host name/ip address) or as an alias in some internal configuration.
-The latter is more suitable when the MultiCollector implementation is a proxy (see <https://github.com/prometheus/snmp_exporter>)
-In this case, invoking real target might require extra parameters (e.g. credentials) that might be complex to manage in Prometheus configuration
+It might be an explicit real target (i.e. via host name/ip address) or as an alias in some internal
+configuration.
+The latter is more suitable when the MultiCollector implementation is a proxy (
+see <https://github.com/prometheus/snmp_exporter>)
+In this case, invoking real target might require extra parameters (e.g. credentials) that might be
+complex to manage in Prometheus configuration
 (not considering the case where the proxy might become an "open relay")
