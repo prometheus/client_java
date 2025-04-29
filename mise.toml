@@ -2,8 +2,11 @@
 PROTO_GENERATION = "true"
 
 [tools]
+"cargo:zizmor" = "latest"
+"go:github.com/gohugoio/hugo" = "latest"
 "go:github.com/grafana/oats" = "latest"
 java = "temurin-17.0.13+11"
+node = "latest"
 protoc = "latest"
 
 [tasks.ci]
@@ -35,6 +38,12 @@ run = "./mvnw verify"
 description = "build all modules wihthout tests"
 run = "./mvnw install -DskipTests"
 
+[tasks.lint-gh-actions]
+run = "zizmor .github/"
+
+[tasks.lint-all]
+depends = ["lint-gh-actions"]
+
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
 depends = "build"
@@ -48,6 +57,30 @@ dir = "integration-tests/it-spring-boot-smoke-test"
 
 [tasks.set-version]
 run = 'mvn versions:set -DnewVersion={{arg(name="version")}}'
+
+[tasks.javadoc]
+run = [
+  "./mvnw -B clean compile javadoc:javadoc javadoc:aggregate -P javadoc",
+  "mv ./target/reports/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api"
+]
+
+[tasks.set-gh-pages-version]
+run = "./scripts/set-release-version-github-pages.sh"
+
+[tasks.prepare-gh-pages]
+description = "Prepare GitHub pages"
+depends = ["javadoc", "set-gh-pages-version"]
+
+[tasks.build-gh-pages]
+description = "Build GitHub pages"
+# For maximum backward compatibility with Hugo modules
+env = { HUGO_ENVIRONMENT = "production", HUGO_ENV = "production" }
+dir = "docs"
+run = [
+  "npm ci",
+  "hugo --gc --minify --baseURL ${BASE_URL}/",
+  "echo 'ls ./docs/public/api' && ls ./docs/public/api"
+]
 
 [settings]
 # to get lock file support and for go backend

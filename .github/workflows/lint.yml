@@ -1,21 +1,20 @@
-name: OpenTelemetry Acceptance Tests
+---
+name: Acceptance Tests
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+on: [pull_request]
 
 permissions: {}
 
 jobs:
   acceptance-tests:
+    permissions: {}
     runs-on: ubuntu-24.04
     steps:
       - name: Check out
         with:
           persist-credentials: false
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.1.1
-      - name: Run acceptance tests
-        run: mise run acceptance-test
+      - name: Lint
+        run: mise run lint-all
+

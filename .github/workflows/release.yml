@@ -9,6 +9,7 @@ jobs:
   deploy:
     if: ${{ github.repository == 'prometheus/client_java' }}
     runs-on: ubuntu-24.04
+    permissions: {}
 
     steps:
       - name: Debug gpg key - remove after debugging
@@ -19,16 +20,19 @@ jobs:
           echo "$GPG_SIGNING_KEY" | gpg --batch --import-options import-show --import
       - name: Checkout Plugin Repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
-          cache: 'maven'
 
       - name: Build with Maven
-        run: ./scripts/build-release.sh ${{ github.ref_name }}
+        run: ./scripts/build-release.sh
+        env:
+          TAG: ${{ github.ref_name }}
 
       - name: Set up Apache Maven Central
         uses: actions/setup-java@v4
