@@ -11,11 +11,7 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: {}
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
@@ -32,55 +28,38 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-24.04
-    env:
-      HUGO_VERSION: 0.115.4
     steps:
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           fetch-tags: 'true'
           fetch-depth: 0
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.1.1
         with:
-          java-version: 17
-          distribution: temurin
-          cache: 'maven'
-      - name: Set release version
-        run: ./scripts/set-release-version-github-pages.sh
-      - name: Install Hugo CLI
-        run: |
-          wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb \
-          && sudo dpkg -i ${{ runner.temp }}/hugo.deb
-      - name: Make Javadoc
-        run: ./mvnw -B clean compile javadoc:javadoc javadoc:aggregate -P javadoc
-      - name: Move the Javadoc to docs/static/api/
-        run: mv ./target/reports/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api
+          cache: 'false'
+      - name: Prepare GitHub Pages
+        run: mise run prepare-gh-pages
+        with:
+          permissions: block
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-      - name: Install Node.js dependencies
-        run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"
-        working-directory: ./docs
-      - name: Build with Hugo
-        env:
-          # For maximum backward compatibility with Hugo modules
-          HUGO_ENVIRONMENT: production
-          HUGO_ENV: production
-        run: |
-          hugo \
-            --gc \
-            --minify \
-            --baseURL "${{ steps.pages.outputs.base_url }}/"
-        working-directory: ./docs
-      - name: ls ./docs/public/api
-        run: echo 'ls ./docs/public/api' && ls ./docs/public/api
+      - name: Build GitHub Pages
+        run: mise run build-gh-pages
+        with:
+          permissions: block
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs/public
+          # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 
   # Deployment job
   deploy:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
