@@ -9,7 +9,7 @@ provided by Guava `Cache` objects into prometheus metrics.
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
 
-```
+```groovy
 implementation 'io.prometheus:prometheus-metrics-instrumentation-guava:1.3.2'
 ```
 
@@ -49,7 +49,7 @@ All example metrics on this page will use the `mycache` label value.
 
 For all cache instances, the following metrics will be available:
 
-```
+```text
 # TYPE guava_cache_hit counter
 # HELP guava_cache_hit Cache hit totals
 guava_cache_hit_total{cache="mycache"} 10.0
@@ -73,7 +73,7 @@ If the cache is an instance of `LoadingCache`, i.e. it is built with a `loader` 
 managed by the cache library, then metrics for observing load time and load failures become
 available:
 
-```
+```text
 # TYPE guava_cache_load_failure counter
 # HELP guava_cache_load_failure Cache load failures
 guava_cache_load_failure_total{cache="mycache"} 10.0

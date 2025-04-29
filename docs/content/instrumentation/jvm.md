@@ -9,7 +9,7 @@ it, add the following dependency:
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
 
-```
+```groovy
 implementation 'io.prometheus:prometheus-metrics-instrumentation-jvm:1.0.0'
 ```
 
@@ -49,7 +49,7 @@ class. The data is coming from
 the [BufferPoolMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/BufferPoolMXBean.html).
 Example metrics:
 
-```
+```text
 # HELP jvm_buffer_pool_capacity_bytes Bytes capacity of a given JVM buffer pool.
 # TYPE jvm_buffer_pool_capacity_bytes gauge
 jvm_buffer_pool_capacity_bytes{pool="direct"} 8192.0
@@ -72,7 +72,7 @@ class. The data is coming from
 the [ClassLoadingMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/ClassLoadingMXBean.html).
 Example metrics:
 
-```
+```text
 # HELP jvm_classes_currently_loaded The number of classes that are currently loaded in the JVM
 # TYPE jvm_classes_currently_loaded gauge
 jvm_classes_currently_loaded 1109.0
@@ -92,7 +92,7 @@ class. The data is coming from
 the [CompilationMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/CompilationMXBean.html).
 Example metrics:
 
-```
+```text
 # HELP jvm_compilation_time_seconds_total The total time in seconds taken for HotSpot class compilation
 # TYPE jvm_compilation_time_seconds_total counter
 jvm_compilation_time_seconds_total 0.152
@@ -106,7 +106,7 @@ class. The data is coming from
 the [GarbageCollectorMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/GarbageCollectorMXBean.html).
 Example metrics:
 
-```
+```text
 # HELP jvm_gc_collection_seconds Time spent in a given JVM garbage collector in seconds.
 # TYPE jvm_gc_collection_seconds summary
 jvm_gc_collection_seconds_count{gc="PS MarkSweep"} 0
@@ -125,7 +125,7 @@ and
 the [MemoryPoolMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/MemoryPoolMXBean.html).
 Example metrics:
 
-```
+```text
 # HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.
 # TYPE jvm_memory_committed_bytes gauge
 jvm_memory_committed_bytes{area="heap"} 4.98597888E8
@@ -209,7 +209,7 @@ to
 the [GarbageCollectorMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/GarbageCollectorMXBean.html).
 Example metrics:
 
-```
+```text
 # HELP jvm_memory_pool_allocated_bytes_total Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.
 # TYPE jvm_memory_pool_allocated_bytes_total counter
 jvm_memory_pool_allocated_bytes_total{pool="Code Cache"} 4336448.0
@@ -227,7 +227,7 @@ the [JvmRuntimeInfoMetric](/client_java/api/io/prometheus/metrics/instrumentatio
 class. The data is obtained via system properties and will not change throughout the lifetime of the
 application. Example metric:
 
-```
+```text
 # TYPE jvm_runtime info
 # HELP jvm_runtime JVM runtime info
 jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
@@ -241,7 +241,7 @@ class. The data is coming from
 the [ThreadMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/ThreadMXBean.html).
 Example metrics:
 
-```
+```text
 # HELP jvm_threads_current Current thread count of a JVM
 # TYPE jvm_threads_current gauge
 jvm_threads_current 10.0
@@ -285,7 +285,7 @@ in the
 Prometheus [writing client libraries](https://prometheus.io/docs/instrumenting/writing_clientlibs/#process-metrics)
 documentation. Example metrics:
 
-```
+```text
 # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
 # TYPE process_cpu_seconds_total counter
 process_cpu_seconds_total 1.63

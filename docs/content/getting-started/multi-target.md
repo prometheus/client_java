@@ -90,7 +90,7 @@ public interface PrometheusScrapeRequest {
 
 Sample Prometheus scrape_config
 
-```
+```yaml
   - job_name: "multi-target"
 
     # metrics_path defaults to '/metrics'

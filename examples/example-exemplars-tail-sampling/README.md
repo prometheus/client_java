@@ -7,7 +7,7 @@ series.
 Exemplars are often used to reference trace IDs when distributed tracing is used.
 The following shows an example of a histogram in OpenMetrics text format where each non-empty bucket has an Exemplar:
 
-```
+```text
 # TYPE request_duration_seconds histogram
 # UNIT request_duration_seconds seconds
 # HELP request_duration_seconds request duration in seconds

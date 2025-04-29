@@ -4,7 +4,7 @@
 
 This example is built as part of the `client_java` project.
 
-```
+```shell
 ./mvnw package
 ```
 

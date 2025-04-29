@@ -1,14 +1,14 @@
-## Benchmarks
+# Benchmarks
 
 ## How to Run
 
-```
+```shell
 java -jar ./benchmarks/target/benchmarks.jar
 ```
 
 Run only one specific benchmark:
 
-```
+```shell
 java -jar ./benchmarks/target/benchmarks.jar CounterBenchmark
 ```
 

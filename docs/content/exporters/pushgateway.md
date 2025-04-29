@@ -14,7 +14,7 @@ The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/Pu
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
 
-```
+```groovy
 implementation 'io.prometheus:prometheus-metrics-core:1.3.0'
 implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway:1.3.0'
 ```

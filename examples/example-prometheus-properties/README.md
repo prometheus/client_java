@@ -4,7 +4,7 @@
 
 This example is built as part of the `client_java` project.
 
-```
+```shell
 ./mvnw package
 ```
 
@@ -12,7 +12,7 @@ This should create the file `./examples/example-prometheus-properties/target/exa
 
 ## Run
 
-```
+```shell
 java -jar ./examples/example-prometheus-properties/target/example-prometheus-properties.jar
 ```
 

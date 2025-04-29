@@ -4,7 +4,7 @@
 
 This example is built as part of the `client_java` project.
 
-```
+```shell
 ./mvnw package
 ```
 
@@ -12,7 +12,7 @@ This example is built as part of the `client_java` project.
 
 The build creates a JAR file with the example application in `./examples/example-exporter-multi-target/target/`.
 
-```
+```shell
 java -jar ./examples/example-exporter-multi-target/target/example-exporter-multi-target.jar
 ```
 
@@ -21,7 +21,7 @@ java -jar ./examples/example-exporter-multi-target/target/example-exporter-multi
 Accessing [http://localhost:9400/metrics](http://localhost:9400/metrics) with a Web browser should yield an example of a
 counter metric.
 
-```
+```text
 # HELP uptime_seconds_total total number of seconds since this application was started
 # TYPE uptime_seconds_total counter
 uptime_seconds_total 301.0

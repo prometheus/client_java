@@ -4,7 +4,7 @@
 
 This example is built as part of the `client_java` project.
 
-```
+```shell
 ./mvnw package
 ```
 
@@ -14,7 +14,7 @@ This should create the file `./examples/example-native-histogram/target/example-
 
 With `./examples/example-native-histogram/target/example-native-histogram.jar` present, simply run:
 
-```
+```shell
 cd ./examples/example-native-histogram/
 docker-compose up
 ```

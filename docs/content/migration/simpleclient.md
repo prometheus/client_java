@@ -26,7 +26,7 @@ To use the bridge, add the following dependency:
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
 
-```
+```groovy
 implementation 'io.prometheus:prometheus-metrics-simpleclient-bridge:1.0.0'
 ```
 
@@ -48,9 +48,7 @@ implementation 'io.prometheus:prometheus-metrics-simpleclient-bridge:1.0.0'
 Then add the following to your code:
 
 ```java
-SimpleclientCollector.builder().
-
-register();
+SimpleclientCollector.builder().register();
 ```
 
 This will make all metrics registered with simpleclient's `CollectorRegistry.defaultRegistry` available in the new
@@ -62,15 +60,7 @@ If you are using custom registries, you can specify them like this:
 CollectorRegistry simpleclientRegistry = ...;
 PrometheusRegistry prometheusRegistry = ...;
 
-  SimpleclientCollector.
-
-builder()
-    .
-
-collectorRegistry(simpleclientRegistry)
-    .
-
-register(prometheusRegistry);
+SimpleclientCollector.builder().collectorRegistry(simpleclientRegistry).register(prometheusRegistry);
 ```
 
 ## Refactoring the Instrumentation Code
@@ -99,11 +89,7 @@ Counter counter = Counter.build()
   .labelNames("path")
   .register();
 
-counter.
-
-labels("/hello-world").
-
-inc();
+counter.labels("/hello-world").inc();
 ```
 
 Example of the new 1.0.0 API:
@@ -117,11 +103,7 @@ Counter counter = Counter.builder()
   .labelNames("path")
   .register();
 
-counter.
-
-labelValues("/hello-world").
-
-inc();
+counter.labelValues("/hello-world").inc();
 ```
 
 Reasons why we changed the API: Changing the package names was a necessity because the previous package names were
@@ -146,9 +128,7 @@ With version 1.0.0 these metrics moved to the `prometheus-metrics-instrumentatio
 are initialized as follows:
 
 ```java
-JvmMetrics.builder().
-
-register();
+JvmMetrics.builder().register();
 ```
 
 A full list of the available JVM metrics can be found

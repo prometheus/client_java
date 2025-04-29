@@ -13,7 +13,7 @@ To implement this, you need to include `prometheus-metrics-exporter` as a depend
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
 
-```
+```groovy
 implementation 'io.prometheus:prometheus-metrics-exporter-opentelemetry:1.0.0'
 ```
 

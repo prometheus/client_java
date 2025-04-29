@@ -223,7 +223,7 @@ info.setLabelValues(version, vendor, runtime);
 
 The info above looks as follows in OpenMetrics text format:
 
-```
+```text
 # TYPE jvm_runtime info
 # HELP jvm_runtime JVM runtime info
 jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
@@ -255,7 +255,7 @@ stateSet.labelValues("dev").setTrue("feature2");
 
 The OpenMetrics text format looks like this:
 
-```
+```text
 # TYPE feature_flags stateset
 # HELP feature_flags Feature flags
 feature_flags{env="dev",feature_flags="feature1"} 0

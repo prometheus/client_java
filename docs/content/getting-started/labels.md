@@ -5,7 +5,7 @@ weight: 3
 
 The following shows an example of a Prometheus metric in text format:
 
-```
+```text
 # HELP payments_total total number of payments
 # TYPE payments_total counter
 payments_total{status="error",type="paypal"} 1.0
@@ -88,7 +88,7 @@ counter.labelValues("paypal", "error").inc();
 
 The data point
 
-```
+```text
 payments_total{status="error",type="paypal"} 1.0
 ```
 
@@ -112,7 +112,7 @@ counter.initLabelValues("paypal", "error");
 
 Now the four combinations will be visible from the start with initial value zero.
 
-```
+```text
 # HELP payments_total total number of payments
 # TYPE payments_total counter
 payments_total{status="error",type="credit card"} 0.0

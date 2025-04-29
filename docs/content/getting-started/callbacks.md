@@ -29,7 +29,7 @@ GaugeWithCallback.builder()
 
 The resulting text format looks like this:
 
-```
+```text
 # TYPE cache_size_bytes gauge
 # UNIT cache_size_bytes bytes
 # HELP cache_size_bytes Size of the cache in Bytes.

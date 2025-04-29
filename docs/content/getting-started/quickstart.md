@@ -18,7 +18,7 @@ We use the following dependencies:
   {{< tabs "deps" >}}
   {{< tab "Gradle" >}}
 
-```
+```groovy
 implementation 'io.prometheus:prometheus-metrics-core:$version'
 implementation 'io.prometheus:prometheus-metrics-instrumentation-jvm:$version'
 implementation 'io.prometheus:prometheus-metrics-exporter-httpserver:$version'
@@ -188,7 +188,7 @@ Run the application and view [http://localhost:9400/metrics](http://localhost:94
 your browser to see the raw metrics. You should see the `my_count_total` metric as shown below plus
 the `jvm_` and `process_` metrics coming from `JvmMetrics`.
 
-```
+```text
 # HELP my_count_total example counter
 # TYPE my_count_total counter
 my_count_total{status="error"} 1.0

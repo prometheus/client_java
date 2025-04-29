@@ -14,7 +14,7 @@ Future releases will add more options, like configuration via environment variab
 
 Example:
 
-```
+```properties
 io.prometheus.exporter.httpServer.port = 9401
 ```
 
@@ -66,13 +66,13 @@ There's one special feature about metric properties: You can set a property for 
 metric only by specifying the metric name. Example:
 Let's say you have a histogram named `latency_seconds`.
 
-```
+```properties
 io.prometheus.metrics.histogramClassicUpperBounds = 0.2, 0.4, 0.8, 1.0
 ```
 
 The line above sets histogram buckets for all histograms. However:
 
-```
+```properties
 io.prometheus.metrics.latency_seconds.histogramClassicUpperBounds = 0.2, 0.4, 0.8, 1.0
 ```
 

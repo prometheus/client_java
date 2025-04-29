@@ -4,7 +4,7 @@
 
 This example is built as part of the `client_java` project.
 
-```
+```shell
 ./mvnw package
 ```
 
@@ -12,7 +12,7 @@ This example is built as part of the `client_java` project.
 
 The build creates a JAR file with the example application in `./examples/example-exporter-servlet-tomcat/target/`.
 
-```
+```shell
 java -jar ./examples/example-exporter-servlet-tomcat/target/example-exporter-servlet-tomcat.jar
 ```
 
@@ -23,7 +23,7 @@ Accessing [http://localhost:8080/](http://localhost:8080/) with a Web browser sh
 Metrics are available on [http://localhost:8080/metrics](http://localhost:8080/metrics). The default Prometheus text
 format looks like this:
 
-```
+```text
 # HELP request_duration_seconds request duration in seconds
 # TYPE request_duration_seconds histogram
 request_duration_seconds_bucket{http_status="200",le="0.005"} 0
@@ -82,7 +82,7 @@ endpoint [http://localhost:8080](http://localhost:8080) before you see the metri
 
 Use the `histogram_quantile()` function to calculate quantiles from the native histogram:
 
-```
+```text
 histogram_quantile(0.95, rate(request_duration_seconds[10m]))
 ```
 
