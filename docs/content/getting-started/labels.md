@@ -13,13 +13,13 @@ payments_total{status="success",type="credit card"} 3.0
 payments_total{status="success",type="paypal"} 2.0
 ```
 
-The example shows a counter metric named `payments_total` with two labels: `status` and `type`. 
-Each individual data point (each line in text format) is identified by the unique combination of 
+The example shows a counter metric named `payments_total` with two labels: `status` and `type`.
+Each individual data point (each line in text format) is identified by the unique combination of
 its metric name and its label name/value pairs.
 
 ## Creating a Metric with Labels
 
-Labels are supported for all metric types. We are using counters in this example, however the 
+Labels are supported for all metric types. We are using counters in this example, however the
 `labelNames()` and `labelValues()` methods are the same for other metric types.
 
 The following code creates the counter above.
@@ -36,7 +36,7 @@ counter.labelValues("paypal", "success").inc(2.0);
 counter.labelValues("paypal", "error").inc(1.0);
 ```
 
-The label names have to be specified when the metric is created and cannot change. The label values 
+The label names have to be specified when the metric is created and cannot change. The label values
 are created on demand when values are observed.
 
 ## Creating a Metric without Labels
@@ -54,10 +54,10 @@ counter.inc(3.0);
 
 ## Cardinality Explosion
 
-Each combination of label names and values will result in a new data point, i.e. a new line in text 
+Each combination of label names and values will result in a new data point, i.e. a new line in text
 format.
 Therefore, a good label should have only a small number of possible values.
-If you select labels with many possible values, like unique IDs or timestamps, 
+If you select labels with many possible values, like unique IDs or timestamps,
 you may end up with an enormous number of data points.
 This is called cardinality explosion.
 

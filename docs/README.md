@@ -37,7 +37,11 @@ ln -s ../api ./docs/static/client_java/api
 
 ## Update Geekdocs
 
-The docs use the [Geekdocs](https://geekdocs.de/) theme. The theme is checked in to Github in the `./docs/themes/hugo-geekdoc/` folder. To update [Geekdocs](https://geekdocs.de/), remove the current folder and create a new one with the latest [release](https://github.com/thegeeklab/hugo-geekdoc/releases). There are no local modifications in `./docs/themes/hugo-geekdoc/`.
+The docs use the [Geekdocs](https://geekdocs.de/) theme. The theme is checked in to Github in the
+`./docs/themes/hugo-geekdoc/` folder. To update [Geekdocs](https://geekdocs.de/), remove the current
+folder and create a new one with the
+latest [release](https://github.com/thegeeklab/hugo-geekdoc/releases). There are no local
+modifications in `./docs/themes/hugo-geekdoc/`.
 
 ## Notes
 
@@ -50,4 +54,5 @@ mkdir -p themes/hugo-geekdoc/
 curl -L https://github.com/thegeeklab/hugo-geekdoc/releases/download/v0.41.1/hugo-geekdoc.tar.gz | tar -xz -C themes/hugo-geekdoc/ --strip-components=1
 ```
 
-Create the initial `hugo.toml` file as described in [https://geekdocs.de/usage/getting-started/](https://geekdocs.de/usage/getting-started/).
+Create the initial `hugo.toml` file as described
+in [https://geekdocs.de/usage/getting-started/](https://geekdocs.de/usage/getting-started/).
