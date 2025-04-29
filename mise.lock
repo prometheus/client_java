@@ -1,3 +1,11 @@
+[tools."cargo:zizmor"]
+version = "1.6.0"
+backend = "cargo:zizmor"
+
+[tools."go:github.com/gohugoio/hugo"]
+version = "latest"
+backend = "go:github.com/gohugoio/hugo"
+
 [tools."go:github.com/grafana/oats"]
 version = "0.3.0"
 backend = "go:github.com/grafana/oats"

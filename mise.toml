@@ -2,6 +2,8 @@
 PROTO_GENERATION = "true"
 
 [tools]
+"cargo:zizmor" = "latest"
+"go:github.com/gohugoio/hugo" = "latest"
 "go:github.com/grafana/oats" = "latest"
 java = "temurin-17.0.13+11"
 protoc = "latest"
@@ -34,6 +36,12 @@ run = "./mvnw verify"
 [tasks.build]
 description = "build all modules wihthout tests"
 run = "./mvnw install -DskipTests"
+
+[tasks.lint-gh-actions]
+run = "zizmor .github/"
+
+[tasks.lint-all]
+depends = ["lint-gh-actions"]
 
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
