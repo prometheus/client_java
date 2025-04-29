@@ -51,7 +51,7 @@ Counter eventsTotal = Counter.builder()
 PrometheusRegistry.defaultRegistry.register(eventsTotal);
 
 // register the counter with a custom registry.
-// This is ok, you can register a metric with multiple registries.
+// This is OK, you can register a metric with multiple registries.
 
 PrometheusRegistry myRegistry = new PrometheusRegistry();
 myRegistry.register(eventsTotal);
@@ -62,7 +62,7 @@ a debug registry with a lot of metrics, and a default registry with only a few m
 
 ## IllegalArgumentException: Duplicate Metric Name in Registry
 
-While it is ok to register the same metric with multiple registries, it is illegal to register the
+While it is OK to register the same metric with multiple registries, it is illegal to register the
 same metric name multiple times with the same registry.
 The following code will throw an `IllegalArgumentException`:
 

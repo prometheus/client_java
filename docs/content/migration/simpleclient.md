@@ -3,7 +3,7 @@ title: Simpleclient
 weight: 1
 ---
 
-The Prometheus Java client library 1.0.0 is a complete rewrite of the underlying data model, and is not backwards
+The Prometheus Java client library 1.0.0 is a complete rewrite of the underlying data model, and is not backward
 compatible with releases 0.16.0 and older for a variety of reasons:
 
 - The old data model was based on [OpenMetrics](https://openmetrics.io). Native histograms don't fit with the

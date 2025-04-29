@@ -1,6 +1,6 @@
 ## Docs
 
-This directory contains [hugo](https://gohugo.io) documentation to be published in Github pages.
+This directory contains [hugo](https://gohugo.io) documentation to be published in GitHub pages.
 
 ## Run Locally
 
@@ -10,14 +10,14 @@ hugo server -D
 
 This will serve the docs on [http://localhost:1313](http://localhost:1313).
 
-## Deploy to Github Pages
+## Deploy to GitHub Pages
 
-Changes to the `main` branch will be deployed automatically with Github actions.
+Changes to the `main` branch will be deployed automatically with GitHub actions.
 
 ## Update Javadoc
 
-Javadoc are not checked-in to the Github repository.
-They are generated on the fly by Github actions when the docs are updated.
+Javadoc are not checked-in to the GitHub repository.
+They are generated on the fly by GitHub actions when the docs are updated.
 To view locally, run the following:
 
 ```
@@ -27,7 +27,7 @@ rm -r ./docs/static/api
 mv ./target/site/apidocs ./docs/static/api
 ```
 
-Github pages are in the `/client_java/` folder, so we link to `/client_java/api` rather than `/api`.
+GitHub pages are in the `/client_java/` folder, so we link to `/client_java/api` rather than `/api`.
 To make JavaDoc work locally, create a link:
 
 ```
@@ -37,7 +37,7 @@ ln -s ../api ./docs/static/client_java/api
 
 ## Update Geekdocs
 
-The docs use the [Geekdocs](https://geekdocs.de/) theme. The theme is checked in to Github in the
+The docs use the [Geekdocs](https://geekdocs.de/) theme. The theme is checked in to GitHub in the
 `./docs/themes/hugo-geekdoc/` folder. To update [Geekdocs](https://geekdocs.de/), remove the current
 folder and create a new one with the
 latest [release](https://github.com/thegeeklab/hugo-geekdoc/releases). There are no local

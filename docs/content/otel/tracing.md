@@ -69,4 +69,4 @@ policies:
 The [examples/example-exemplar-tail-sampling/](https://github.com/prometheus/client_java/tree/main/examples/example-exemplars-tail-sampling)
 directory has a complete end-to-end example, with a distributed Java application with two services,
 an OpenTelemetry collector, Prometheus, Tempo as a trace database, and Grafana dashboards. Use
-docker-compose as described in the example's README to run the example and explore the results.
+docker-compose as described in the example's readme to run the example and explore the results.

@@ -60,7 +60,7 @@ With _head-based sampling_ this works out-of-the-box: The Prometheus client libr
 `Span.current().getSpanContext().isSampled()` function and selects Exemplars only if the current Span is sampled.
 
 With _tail-based sampling_ there is a trick: The Prometheus client library adds an attribute `exemplar="true"` to each
-Span that is used as an Exemplar. The remainder of this README shows how you can configure the `tail_sampling` processor
+Span that is used as an Exemplar. The remainder of this readme shows how you can configure the `tail_sampling` processor
 of the OpenTelemetry collector to sample Spans marked with `exemplar="true"`.
 
 ## Build the Example
