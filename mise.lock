@@ -3,7 +3,7 @@ version = "1.6.0"
 backend = "cargo:zizmor"
 
 [tools."go:github.com/gohugoio/hugo"]
-version = "latest"
+version = "v0.147.0"
 backend = "go:github.com/gohugoio/hugo"
 
 [tools."go:github.com/grafana/oats"]
@@ -13,6 +13,10 @@ backend = "go:github.com/grafana/oats"
 [tools.java]
 version = "temurin-17.0.13+11"
 backend = "core:java"
+
+[tools.node]
+version = "23.10.0"
+backend = "core:node"
 
 [tools.protoc]
 version = "30.2"

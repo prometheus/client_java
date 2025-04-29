@@ -28,8 +28,6 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-24.04
-    env:
-      HUGO_VERSION: 0.115.4
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,42 +37,15 @@ jobs:
       - uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.1.1
         with:
           cache: 'false'
-      - name: Set release version
-        run: ./scripts/set-release-version-github-pages.sh
-        with:
-          permissions: block
-      - name: Make Javadoc
-        run: ./mvnw -B clean compile javadoc:javadoc javadoc:aggregate -P javadoc
-        with:
-          permissions: block
-      - name: Move the Javadoc to docs/static/api/
-        run: mv ./target/reports/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api
+      - name: Prepare GitHub Pages
+        run: mise run prepare-gh-pages
         with:
           permissions: block
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-      - name: Install Node.js dependencies
-        run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"
-        with:
-          permissions: block
-        working-directory: ./docs
-      - name: Build with Hugo
-        env:
-          # For maximum backward compatibility with Hugo modules
-          HUGO_ENVIRONMENT: production
-          HUGO_ENV: production
-          BASE_URL: "${{ steps.pages.outputs.base_url }}"
-        run: |
-          hugo \
-            --gc \
-            --minify \
-            --baseURL "${BASE_URL}/"
-        with:
-          permissions: block
-        working-directory: ./docs
-      - name: ls ./docs/public/api
-        run: echo 'ls ./docs/public/api' && ls ./docs/public/api
+      - name: Build GitHub Pages
+        run: mise run build-gh-pages
         with:
           permissions: block
       - name: Upload artifact
