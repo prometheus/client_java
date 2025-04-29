@@ -22,7 +22,8 @@ class ApplicationTest {
             "GET",
             new URL("http://localhost:8080/actuator/prometheus"),
             "Accept",
-            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited");
+            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+                + " encoding=delimited");
     assertThat(response.status).isEqualTo(200);
 
     List<Metrics.MetricFamily> metrics = response.protoBody();

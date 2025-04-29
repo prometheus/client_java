@@ -6,6 +6,7 @@ PROTO_GENERATION = "true"
 "go:github.com/gohugoio/hugo" = "latest"
 "go:github.com/grafana/oats" = "latest"
 java = "temurin-17.0.13+11"
+ lychee = "latest"
 node = "latest"
 protoc = "latest"
 
@@ -38,11 +39,20 @@ run = "./mvnw verify"
 description = "build all modules wihthout tests"
 run = "./mvnw install -DskipTests"
 
+[tasks.lint]
+run = "scripts/super-linter.sh"
+
+[tasks.lint-links]
+run = "lychee --cache --include-fragments ."
+
 [tasks.lint-gh-actions]
 run = "zizmor .github/"
 
-[tasks.lint-all]
-depends = ["lint-gh-actions"]
+[tasks.lint-rest]
+description = "All lints not covered by super linter"
+depends = [
+  #  "lint-links", # try out first
+  "lint-gh-actions"]
 
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"

@@ -3,37 +3,38 @@ package io.prometheus.client.filter;
 import io.prometheus.client.internal.Adapter;
 import io.prometheus.client.servlet.common.filter.Filter;
 import io.prometheus.client.servlet.common.filter.FilterConfigurationException;
-
+import java.io.IOException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
- * The MetricsFilter class provides a high-level filter that enables tunable collection of metrics for Servlet
- * performance.
+ * The MetricsFilter class provides a high-level filter that enables tunable collection of metrics
+ * for Servlet performance.
  *
- * This is the Javax version of the MetricsFilter. If you are using Jakarta Servlet, there is a Jakarta version
- * available in {@code simpleclient-servlet-jakarta}.
+ * <p>This is the Javax version of the MetricsFilter. If you are using Jakarta Servlet, there is a
+ * Jakarta version available in {@code simpleclient-servlet-jakarta}.
  *
  * <p>The metric name itself is required, and configured with a {@code metric-name} init parameter.
  *
- * <p>The help parameter, configured with the {@code help} init parameter, is not required but strongly recommended.
+ * <p>The help parameter, configured with the {@code help} init parameter, is not required but
+ * strongly recommended.
  *
- * <p>The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a comma-separated
- * list * of valid {@code double} values. If omitted, the default buckets from {@link io.prometheus.client.Histogram}
- * are used.
+ * <p>The Histogram buckets can be configured with a {@code buckets} init parameter whose value is a
+ * comma-separated list * of valid {@code double} values. If omitted, the default buckets from
+ * {@link io.prometheus.client.Histogram} are used.
  *
- * <p>By default, this filter will provide metrics that distinguish only 1 level deep for the request path
- * (including servlet context path), but can be configured with the {@code path-components} init parameter. Any number
- * provided that is less than 1 will provide the full path granularity (warning, this may affect performance).
+ * <p>By default, this filter will provide metrics that distinguish only 1 level deep for the
+ * request path (including servlet context path), but can be configured with the {@code
+ * path-components} init parameter. Any number provided that is less than 1 will provide the full
+ * path granularity (warning, this may affect performance).
  *
- * <p>The {@code strip-context-path} init parameter can be used to avoid including the leading path components which are
- * part of the context (i.e. the folder where the servlet is deployed) so that the same project deployed under different
- * paths can produce the same metrics.
+ * <p>The {@code strip-context-path} init parameter can be used to avoid including the leading path
+ * components which are part of the context (i.e. the folder where the servlet is deployed) so that
+ * the same project deployed under different paths can produce the same metrics.
  *
- * <p>HTTP statuses will be aggregated via Counter. The name for this counter will be derived from the
- * {@code metric-name} init parameter.
+ * <p>HTTP statuses will be aggregated via Counter. The name for this counter will be derived from
+ * the {@code metric-name} init parameter.
  *
  * <pre>{@code
  * <filter>
@@ -78,57 +79,53 @@ import java.io.IOException;
  */
 public class MetricsFilter implements javax.servlet.Filter {
 
-    private final Filter delegate;
+  private final Filter delegate;
 
-    public MetricsFilter() {
-        this.delegate = new Filter();
-    }
+  public MetricsFilter() {
+    this.delegate = new Filter();
+  }
 
-    // compatibility with 0.11.1 and older
-    public MetricsFilter(
-            String metricName,
-            String help,
-            Integer pathComponents,
-            double[] buckets) {
-        this(metricName, help, pathComponents, buckets, false);
-    }
+  // compatibility with 0.11.1 and older
+  public MetricsFilter(String metricName, String help, Integer pathComponents, double[] buckets) {
+    this(metricName, help, pathComponents, buckets, false);
+  }
 
-    /**
-     * See {@link Filter#Filter(String, String, Integer, double[], boolean)}.
-     */
-    public MetricsFilter(
-            String metricName,
-            String help,
-            Integer pathComponents,
-            double[] buckets,
-            boolean stripContextPath) {
-        this.delegate = new Filter(metricName, help, pathComponents, buckets, stripContextPath);
-    }
+  /** See {@link Filter#Filter(String, String, Integer, double[], boolean)}. */
+  public MetricsFilter(
+      String metricName,
+      String help,
+      Integer pathComponents,
+      double[] buckets,
+      boolean stripContextPath) {
+    this.delegate = new Filter(metricName, help, pathComponents, buckets, stripContextPath);
+  }
 
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        try {
-            delegate.init(Adapter.wrap(filterConfig));
-        } catch (FilterConfigurationException e) {
-            throw new ServletException(e);
-        }
+  @Override
+  public void init(FilterConfig filterConfig) throws ServletException {
+    try {
+      delegate.init(Adapter.wrap(filterConfig));
+    } catch (FilterConfigurationException e) {
+      throw new ServletException(e);
     }
+  }
 
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if (!(servletRequest instanceof HttpServletRequest) || !(servletResponse instanceof HttpServletResponse)) {
-            filterChain.doFilter(servletRequest, servletResponse);
-            return;
-        }
-        Filter.MetricData data = delegate.startTimer(Adapter.wrap((HttpServletRequest) servletRequest));
-        try {
-            filterChain.doFilter(servletRequest, servletResponse);
-        } finally {
-            delegate.observeDuration(data, Adapter.wrap((HttpServletResponse) servletResponse));
-        }
+  @Override
+  public void doFilter(
+      ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+      throws IOException, ServletException {
+    if (!(servletRequest instanceof HttpServletRequest)
+        || !(servletResponse instanceof HttpServletResponse)) {
+      filterChain.doFilter(servletRequest, servletResponse);
+      return;
     }
+    Filter.MetricData data = delegate.startTimer(Adapter.wrap((HttpServletRequest) servletRequest));
+    try {
+      filterChain.doFilter(servletRequest, servletResponse);
+    } finally {
+      delegate.observeDuration(data, Adapter.wrap((HttpServletResponse) servletResponse));
+    }
+  }
 
-    @Override
-    public void destroy() {
-    }
+  @Override
+  public void destroy() {}
 }

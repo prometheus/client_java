@@ -1,6 +1,7 @@
 package io.prometheus.client.benchmark;
 
 import com.codahale.metrics.MetricRegistry;
+import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
@@ -12,8 +13,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-
-import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
 public class CounterBenchmark {
@@ -28,16 +27,16 @@ public class CounterBenchmark {
 
   @Setup
   public void setup() {
-    prometheusSimpleCounter = io.prometheus.client.Counter.build()
-      .name("name")
-      .help("some description..")
-      .labelNames("some", "group").create();
+    prometheusSimpleCounter =
+        io.prometheus.client.Counter.build()
+            .name("name")
+            .help("some description..")
+            .labelNames("some", "group")
+            .create();
     prometheusSimpleCounterChild = prometheusSimpleCounter.labels("test", "group");
 
-    prometheusSimpleCounterNoLabels = io.prometheus.client.Counter.build()
-      .name("name")
-      .help("some description..")
-      .create();
+    prometheusSimpleCounterNoLabels =
+        io.prometheus.client.Counter.build().name("name").help("some description..").create();
 
     registry = new MetricRegistry();
     codahaleCounter = registry.counter("counter");
@@ -48,21 +47,21 @@ public class CounterBenchmark {
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleCounterIncBenchmark() {
-    prometheusSimpleCounter.labels("test", "group").inc(); 
+    prometheusSimpleCounter.labels("test", "group").inc();
   }
-  
+
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleCounterChildIncBenchmark() {
-    prometheusSimpleCounterChild.inc(); 
+    prometheusSimpleCounterChild.inc();
   }
 
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleCounterNoLabelsIncBenchmark() {
-    prometheusSimpleCounterNoLabels.inc(); 
+    prometheusSimpleCounterNoLabels.inc();
   }
 
   @Benchmark
@@ -81,13 +80,14 @@ public class CounterBenchmark {
 
   public static void main(String[] args) throws RunnerException {
 
-    Options opt = new OptionsBuilder()
-      .include(CounterBenchmark.class.getSimpleName())
-      .warmupIterations(5)
-      .measurementIterations(4)
-      .threads(4)
-      .forks(1)
-      .build();
+    Options opt =
+        new OptionsBuilder()
+            .include(CounterBenchmark.class.getSimpleName())
+            .warmupIterations(5)
+            .measurementIterations(4)
+            .threads(4)
+            .forks(1)
+            .build();
 
     new Runner(opt).run();
   }

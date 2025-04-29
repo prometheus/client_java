@@ -18,7 +18,8 @@ class CallbackMetricTest {
                     .build()
                     .makeLabels("foo"))
         .withMessage(
-            "CounterWithCallback was created with 2 label names, but the callback was called with 1 label values.");
+            "CounterWithCallback was created with 2 label names, but the callback was called with 1"
+                + " label values.");
 
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
@@ -30,7 +31,8 @@ class CallbackMetricTest {
                     .build()
                     .makeLabels((String[]) null))
         .withMessage(
-            "CounterWithCallback was created with label names, but the callback was called without label values.");
+            "CounterWithCallback was created with label names, but the callback was called without"
+                + " label values.");
 
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
@@ -41,6 +43,7 @@ class CallbackMetricTest {
                     .build()
                     .makeLabels("foo"))
         .withMessage(
-            "Cannot pass label values to a CounterWithCallback that was created without label names.");
+            "Cannot pass label values to a CounterWithCallback that was created without label"
+                + " names.");
   }
 }

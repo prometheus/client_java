@@ -18,8 +18,7 @@ class QueuedThreadPoolStatisticsCollectorTest {
 
   private static final String[] LABEL_NAMES = {"unit"};
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   private Server server;
   private QueuedThreadPool queuedThreadPool;
@@ -45,16 +44,20 @@ class QueuedThreadPoolStatisticsCollectorTest {
     server.start();
 
     assertTrue(
-        CollectorRegistry.defaultRegistry.getSampleValue("jetty_queued_thread_pool_threads",
-            LABEL_NAMES, labelValues) > 0);
+        CollectorRegistry.defaultRegistry.getSampleValue(
+                "jetty_queued_thread_pool_threads", LABEL_NAMES, labelValues)
+            > 0);
     assertTrue(
-        CollectorRegistry.defaultRegistry.getSampleValue("jetty_queued_thread_pool_threads_idle",
-            LABEL_NAMES, labelValues) > 0);
+        CollectorRegistry.defaultRegistry.getSampleValue(
+                "jetty_queued_thread_pool_threads_idle", LABEL_NAMES, labelValues)
+            > 0);
     assertTrue(
-        CollectorRegistry.defaultRegistry.getSampleValue("jetty_queued_thread_pool_threads_max",
-            LABEL_NAMES, labelValues) == 200);
-    assertNotNull(CollectorRegistry.defaultRegistry.getSampleValue("jetty_queued_thread_pool_jobs",
-        LABEL_NAMES, labelValues));
+        CollectorRegistry.defaultRegistry.getSampleValue(
+                "jetty_queued_thread_pool_threads_max", LABEL_NAMES, labelValues)
+            == 200);
+    assertNotNull(
+        CollectorRegistry.defaultRegistry.getSampleValue(
+            "jetty_queued_thread_pool_jobs", LABEL_NAMES, labelValues));
   }
 
   @Test

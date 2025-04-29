@@ -70,10 +70,12 @@ abstract class ExporterIT extends ExporterTest {
             "GET",
             "",
             "Accept",
-            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited");
+            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+                + " encoding=delimited");
     assertThat(response.status).isEqualTo(200);
     assertContentType(
-        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited",
+        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+            + " encoding=delimited",
         response.getHeader("Content-Type"));
     assertThat(response.getHeader("Content-Encoding")).isNull();
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
@@ -224,10 +226,12 @@ abstract class ExporterIT extends ExporterTest {
             "GET",
             nameParam("none_existing"),
             "Accept",
-            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited");
+            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+                + " encoding=delimited");
     assertThat(response.status).isEqualTo(200);
     assertContentType(
-        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited",
+        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+            + " encoding=delimited",
         response.getHeader("Content-Type"));
     assertThat(response.body).isEmpty();
   }

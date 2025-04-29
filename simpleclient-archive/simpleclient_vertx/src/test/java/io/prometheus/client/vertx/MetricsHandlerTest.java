@@ -1,21 +1,20 @@
 package io.prometheus.client.vertx;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 class MetricsHandlerTest {
 
@@ -27,7 +26,6 @@ class MetricsHandlerTest {
   public static void setUp() throws Throwable {
     Semaphore s = new Semaphore(1);
 
-
     vertx = Vertx.vertx();
     final Vertx vertx = Vertx.vertx();
     final Router router = Router.router(vertx);
@@ -35,18 +33,19 @@ class MetricsHandlerTest {
     registry = new CollectorRegistry();
     router.route("/metrics").handler(new MetricsHandler(registry));
 
-    router.route("/test").handler(routingContext -> {
-      routingContext.response().putHeader("content-type", "text").end("Hello World!");
-    });
+    router
+        .route("/test")
+        .handler(
+            routingContext -> {
+              routingContext.response().putHeader("content-type", "text").end("Hello World!");
+            });
 
     ServerSocket socket = new ServerSocket(0);
     port = socket.getLocalPort();
     socket.close();
 
     s.acquire();
-    vertx.createHttpServer().requestHandler(router::accept).listen(port,
-            event -> s.release()
-    );
+    vertx.createHttpServer().requestHandler(router::accept).listen(port, event -> s.release());
 
     s.tryAcquire(10, TimeUnit.SECONDS);
 
@@ -78,9 +77,9 @@ class MetricsHandlerTest {
     assertThat(out).contains("c 0.0");
   }
 
-
   private String makeRequest(String url) throws IOException {
-    Scanner scanner = new Scanner(new URL("http://localhost:" + port + url).openStream(), "UTF-8")
+    Scanner scanner =
+        new Scanner(new URL("http://localhost:" + port + url).openStream(), "UTF-8")
             .useDelimiter("\\A");
     String out = scanner.next();
     scanner.close();

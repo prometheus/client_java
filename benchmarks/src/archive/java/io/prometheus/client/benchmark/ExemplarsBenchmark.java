@@ -3,6 +3,7 @@ package io.prometheus.client.benchmark;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exemplars.DefaultExemplarSampler;
 import io.prometheus.client.exemplars.tracer.common.SpanContextSupplier;
+import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
@@ -10,8 +11,6 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-
-import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
 public class ExemplarsBenchmark {
@@ -23,25 +22,28 @@ public class ExemplarsBenchmark {
   @Setup
   public void setup() {
 
-    counter = Counter.build()
-        .name("counter_total")
-        .help("Total number of requests.")
-        .labelNames("path")
-        .create();
+    counter =
+        Counter.build()
+            .name("counter_total")
+            .help("Total number of requests.")
+            .labelNames("path")
+            .create();
 
-    counterWithExemplars = Counter.build()
-        .name("counter_with_exemplars_total")
-        .help("Total number of requests.")
-        .labelNames("path")
-        .withExemplarSampler(new DefaultExemplarSampler(new MockSpanContextSupplier()))
-        .create();
+    counterWithExemplars =
+        Counter.build()
+            .name("counter_with_exemplars_total")
+            .help("Total number of requests.")
+            .labelNames("path")
+            .withExemplarSampler(new DefaultExemplarSampler(new MockSpanContextSupplier()))
+            .create();
 
-    counterWithoutExemplars = Counter.build()
-        .name("counter_without_exemplars_total")
-        .help("Total number of requests.")
-        .labelNames("path")
-        .withoutExemplars()
-        .create();
+    counterWithoutExemplars =
+        Counter.build()
+            .name("counter_without_exemplars_total")
+            .help("Total number of requests.")
+            .labelNames("path")
+            .withoutExemplars()
+            .create();
   }
 
   @Benchmark
@@ -79,7 +81,7 @@ public class ExemplarsBenchmark {
 
     @Override
     public boolean isSampled() {
-        return true;
+      return true;
     }
   }
 }

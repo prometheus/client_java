@@ -11,11 +11,14 @@ To implement this, you need to include `prometheus-metrics-exporter` as a depend
 
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
+
 ```
 implementation 'io.prometheus:prometheus-metrics-exporter-opentelemetry:1.0.0'
 ```
+
 {{< /tab >}}
 {{< tab "Maven" >}}
+
 ```xml
 <dependency>
     <groupId>io.prometheus</groupId>
@@ -23,6 +26,7 @@ implementation 'io.prometheus:prometheus-metrics-exporter-opentelemetry:1.0.0'
     <version>1.0.0</version>
 </dependency>
 ```
+
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -34,7 +38,7 @@ OpenTelemetryExporter.builder()
     .buildAndStart();
 ```
 
-By default, the `OpenTelemetryExporter` will push metrics every 60 seconds to `localhost:4317` using `grpc` protocol. You can configure this in code using the [OpenTelemetryExporter.Builder](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html), or at runtime via [`io.prometheus.exporter.opentelemetry.*`](../../config/config/#exporter-opentelemetry-properties) properties.
+By default, the `OpenTelemetryExporter` will push metrics every 60 seconds to `localhost:4317` using `grpc` protocol. You can configure this in code using the [OpenTelemetryExporter.Builder](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html), or at runtime via [`io.prometheus.exporter.opentelemetry.*`](../config/config.md#exporter-opentelemetry-properties) properties.
 
 In addition to the Prometheus Java client configuration, the exporter also recognizes standard OpenTelemetry configuration. For example, you can set the [OTEL_EXPORTER_OTLP_METRICS_ENDPOINT](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_metrics_endpoint) environment variable to configure the endpoint. The Javadoc for [OpenTelemetryExporter.Builder](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html) shows which settings have corresponding OTel configuration. The intended use case is that if you attach the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/) for tracing, and use the Prometheus Java client for metrics, it is sufficient to configure the OTel agent because the Prometheus library will pick up the same configuration.
 

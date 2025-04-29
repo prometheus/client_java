@@ -9,17 +9,19 @@ The Pushgateway then exposes these metrics to Prometheus.
 
 The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) Java class allows you to push metrics to a Prometheus Pushgateway.
 
-Example
--------
+## Example
 
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
+
 ```
 implementation 'io.prometheus:prometheus-metrics-core:1.3.0'
 implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway:1.3.0'
 ```
+
 {{< /tab >}}
 {{< tab "Maven" >}}
+
 ```xml
 <dependency>
     <groupId>io.prometheus</groupId>
@@ -32,6 +34,7 @@ implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway:1.3.0'
     <version>1.3.0</version>
 </dependency>
 ```
+
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -66,8 +69,7 @@ public class ExampleBatchJob {
 }
 ```
 
-Basic Auth
-----------
+## Basic Auth
 
 The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports basic authentication.
 
@@ -80,8 +82,7 @@ PushGateway pushGateway = PushGateway.builder()
 
 The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
 
-Bearer token
-----------
+## Bearer token
 
 The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports Bearer token authentication.
 
@@ -94,9 +95,7 @@ PushGateway pushGateway = PushGateway.builder()
 
 The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
 
-
-SSL
----
+## SSL
 
 The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports SSL.
 
@@ -109,10 +108,9 @@ PushGateway pushGateway = PushGateway.builder()
 
 However, this requires that the JVM can validate the server certificate.
 
-If you want to skip certificate verification, you need to provide your own  [HttpConnectionFactory](/client_java/api/io/prometheus/metrics/exporter/pushgateway/HttpConnectionFactory.html).
+If you want to skip certificate verification, you need to provide your own [HttpConnectionFactory](/client_java/api/io/prometheus/metrics/exporter/pushgateway/HttpConnectionFactory.html).
 The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
 
-Configuration Properties
-------------------------
+## Configuration Properties
 
-The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports a couple of properties that can be configured at runtime. See [config](../../config/config).
+The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports a couple of properties that can be configured at runtime. See [config](../config/config.md).

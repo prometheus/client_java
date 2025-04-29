@@ -605,7 +605,8 @@ class HistogramTest {
               -2,
               -3),
           new GolangTestCase(
-              "'buckets limited by widening the zero bucket, negative observations' from client_golang",
+              "'buckets limited by widening the zero bucket, negative observations' from"
+                  + " client_golang",
               "sample_count: 8 "
                   + "sample_sum: -11.5 "
                   + "schema: 2 "
@@ -635,7 +636,8 @@ class HistogramTest {
               -2,
               -3),
           new GolangTestCase(
-              "'buckets limited by widening the zero bucket twice, negative observations' from client_golang",
+              "'buckets limited by widening the zero bucket twice, negative observations' from"
+                  + " client_golang",
               "sample_count: 9 "
                   + "sample_sum: -15.5 "
                   + "schema: 2 "

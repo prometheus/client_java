@@ -1,19 +1,18 @@
 package io.prometheus.client.servlet.common.exporter;
 
+import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Java6Assertions.fail;
+
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.servlet.common.adapter.HttpServletRequestAdapter;
 import io.prometheus.client.servlet.common.adapter.HttpServletResponseAdapter;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.assertj.core.api.Java6Assertions.fail;
+import org.junit.Assert;
+import org.junit.Test;
 
 class ExporterTest {
 
@@ -21,12 +20,14 @@ class ExporterTest {
     return mockHttpServletRequest(null, false);
   }
 
-  private HttpServletRequestAdapter mockHttpServletRequest(final String[] nameParam, final boolean openMetrics) {
+  private HttpServletRequestAdapter mockHttpServletRequest(
+      final String[] nameParam, final boolean openMetrics) {
     return new HttpServletRequestAdapter() {
       @Override
       public String getHeader(String name) {
         if (openMetrics && "Accept".equals(name)) {
-          return "application/openmetrics-text; version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1";
+          return "application/openmetrics-text;"
+                     + " version=0.0.1,text/plain;version=0.0.4;q=0.5,*/*;q=0.1";
         }
         return null;
       }
@@ -64,12 +65,10 @@ class ExporterTest {
       }
 
       @Override
-      public void setStatus(int httpStatusCode) {
-      }
+      public void setStatus(int httpStatusCode) {}
 
       @Override
-      public void setContentType(String contentType) {
-      }
+      public void setContentType(String contentType) {}
 
       @Override
       public PrintWriter getWriter() {
@@ -85,7 +84,8 @@ class ExporterTest {
     Gauge.build("b", "a help").register(registry);
     Gauge.build("c", "a help").register(registry);
 
-    HttpServletRequestAdapter req = mockHttpServletRequest(new String[]{"a", "b", "oneTheDoesntExist", ""}, false);
+    HttpServletRequestAdapter req =
+        mockHttpServletRequest(new String[] {"a", "b", "oneTheDoesntExist", ""}, false);
     StringWriter responseBody = new StringWriter();
     HttpServletResponseAdapter resp = mockHttpServletResponse(new PrintWriter(responseBody));
 
@@ -99,12 +99,13 @@ class ExporterTest {
   @Test
   public void testWriterIsClosedNormally() throws IOException {
     final AtomicBoolean closed = new AtomicBoolean(false);
-    StringWriter responseBody = new StringWriter() {
-      @Override
-      public void close() {
-        closed.set(true);
-      }
-    };
+    StringWriter responseBody =
+        new StringWriter() {
+          @Override
+          public void close() {
+            closed.set(true);
+          }
+        };
     HttpServletRequestAdapter req = mockHttpServletRequest();
     HttpServletResponseAdapter resp = mockHttpServletResponse(new PrintWriter(responseBody));
     CollectorRegistry registry = new CollectorRegistry();
@@ -117,16 +118,18 @@ class ExporterTest {
   @Test
   public void testWriterIsClosedOnException() {
     final AtomicBoolean closed = new AtomicBoolean(false);
-    StringWriter responseBody = new StringWriter() {
-      @Override
-      public void write(char cbuf[], int off, int len) {
-        throw new RuntimeException();
-      }
-      @Override
-      public void close() {
-        closed.set(true);
-      }
-    };
+    StringWriter responseBody =
+        new StringWriter() {
+          @Override
+          public void write(char cbuf[], int off, int len) {
+            throw new RuntimeException();
+          }
+
+          @Override
+          public void close() {
+            closed.set(true);
+          }
+        };
     HttpServletRequestAdapter req = mockHttpServletRequest();
     HttpServletResponseAdapter resp = mockHttpServletResponse(new PrintWriter(responseBody));
     CollectorRegistry registry = new CollectorRegistry();
