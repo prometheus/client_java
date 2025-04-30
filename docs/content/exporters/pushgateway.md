@@ -115,4 +115,4 @@ The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete ex
 ## Configuration Properties
 
 The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports a couple of properties that can be configured at runtime.
-See [config](../config/config.md).
+See [config]({{< relref "../config/config.md" >}}).

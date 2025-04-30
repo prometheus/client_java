@@ -42,7 +42,7 @@ OpenTelemetryExporter.builder()
 By default, the `OpenTelemetryExporter` will push metrics every 60 seconds to `localhost:4317` using
 `grpc` protocol. You can configure this in code using
 the [OpenTelemetryExporter.Builder](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html),
-or at runtime via [`io.prometheus.exporter.opentelemetry.*`](../config/config.md#exporter-opentelemetry-properties)
+or at runtime via [`io.prometheus.exporter.opentelemetry.*`]({{< relref "../config/config.md#exporter-opentelemetry-properties" >}})
 properties.
 
 In addition to the Prometheus Java client configuration, the exporter also recognizes standard

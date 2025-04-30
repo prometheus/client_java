@@ -113,7 +113,7 @@ used in Spring, Lombok, and so on. So naming the method `builder()` makes the Pr
 broader Java ecosystem.
 
 If you are using the low level `Collector` API directly, you should have a look at the new callback metric types,
-see [/getting-started/callbacks/](../../getting-started/callbacks/). Chances are good that the new callback metrics have
+see [/getting-started/callbacks/]({{< relref "../getting-started/callbacks.md" >}}). Chances are good that the new callback metrics have
 an easier way to achieve what you need than the old 0.16.0 code.
 
 ## JVM Metrics
@@ -132,7 +132,7 @@ JvmMetrics.builder().register();
 ```
 
 A full list of the available JVM metrics can be found
-on [/instrumentation/jvm](../../instrumentation/jvm/).
+on [/instrumentation/jvm]({{< relref "../instrumentation/jvm.md" >}}).
 
 Most JVM metric names remained the same, except for a few cases where the old 0.16.0 metric names
 were not compliant with the [OpenMetrics](https://openmetrics.io) specification. OpenMetrics

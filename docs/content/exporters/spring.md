@@ -26,8 +26,7 @@ Spring anyway. Maybe you want full support for all Prometheus metric types,
 or you want to use the new Prometheus native histograms.
 
 The easiest way to use the Prometheus metrics library in Spring is to configure the
-[//]: editorconfig-checker-disable-next-line
-[PrometheusMetricsServlet](/client_java/api/io/prometheus/metrics/exporter/servlet/jakarta/PrometheusMetricsServlet.html)
+[PrometheusMetricsServlet](/client_java/api/io/prometheus/metrics/exporter/servlet/jakarta/PrometheusMetricsServlet.html) <!-- editorconfig-checker-disable-line -->
 to expose metrics.
 
 Dependencies:
@@ -77,8 +76,7 @@ public class DemoApplication {
 ```
 
 The important part are the last three lines: They configure the
-[//]: # editorconfig-checker-disable-next-line
-[PrometheusMetricsServlet](/client_java/api/io/prometheus/metrics/exporter/servlet/jakarta/PrometheusMetricsServlet.html)
+[PrometheusMetricsServlet](/client_java/api/io/prometheus/metrics/exporter/servlet/jakarta/PrometheusMetricsServlet.html) <!-- editorconfig-checker-disable-line -->
 to expose metrics on `/metrics`:
 
 ```java

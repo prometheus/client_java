@@ -3,14 +3,13 @@ title: Tracing
 weight: 2
 ---
 
-OpenTelemetry’s 
+OpenTelemetry’s
 [vision statement](https://github.com/open-telemetry/community/blob/main/mission-vision-values.md)
 says that
-[//]: editorconfig-checker-disable-next-line
-[telemetry should be loosely coupled](https://github.com/open-telemetry/community/blob/main/mission-vision-values.md#telemetry-should-be-loosely-coupled),
+[telemetry should be loosely coupled](https://github.com/open-telemetry/community/blob/main/mission-vision-values.md#telemetry-should-be-loosely-coupled), <!-- editorconfig-checker-disable-line -->
 allowing end users to pick and choose from the pieces they want without having to bring in the rest
 of the project, too. In that spirit, you might choose to instrument your Java application with the
-Prometheus Java client library for metrics, and attach the 
+Prometheus Java client library for metrics, and attach the
 [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/)
 to get distributed tracing.
 
@@ -54,11 +53,10 @@ Exemplar with the `exemplar="true"` Span attribute.
 The sampling policy in the OpenTelemetry collector can be configured to keep traces with this
 attribute. There's no risk that this results in a significant increase in trace data, because new
 Exemplars are only selected every
-[`minRetentionPeriodSeconds`](../../config/config/#exemplar-properties) seconds.
+[`minRetentionPeriodSeconds`]({{< relref "../config/config.md#exemplar-properties" >}}) seconds.
 
-Here's an example of how to configure OpenTelemetry's 
-[//]: editorconfig-checker-disable-next-line
-[tail sampling processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/)
+Here's an example of how to configure OpenTelemetry's
+[tail sampling processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/) <!-- editorconfig-checker-disable-line -->
 to sample all Spans marked with `exemplar="true"`, and then discard 90% of the traces:
 
 ```yaml
@@ -73,8 +71,7 @@ policies:
   ]
 ```
 
-[//]: editorconfig-checker-disable-next-line
-The [examples/example-exemplar-tail-sampling/](https://github.com/prometheus/client_java/tree/main/examples/example-exemplars-tail-sampling)
+The [examples/example-exemplar-tail-sampling/](https://github.com/prometheus/client_java/tree/main/examples/example-exemplars-tail-sampling) <!-- editorconfig-checker-disable-line -->
 directory has a complete end-to-end example, with a distributed Java application with two services,
 an OpenTelemetry collector, Prometheus, Tempo as a trace database, and Grafana dashboards. Use
 docker-compose as described in the example's readme to run the example and explore the results.

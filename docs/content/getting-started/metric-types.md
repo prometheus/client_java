@@ -117,7 +117,7 @@ most important options:
 See Javadoc
 for [Histogram.Builder](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html)
 for a complete list of options. Some options can be configured at runtime,
-see [config](../../config/config).
+see [config]({{< relref "../config/config.md" >}}).
 
 Histograms and summaries are both used for observing distributions. Therefore, the both implement
 the `DistributionDataPoint` interface. Using the `DistributionDataPoint` interface directly gives
@@ -195,7 +195,7 @@ the precise values (error 0.0) with almost no memory overhead.
 Quantile values are calculated based on a 5 minutes moving time window. The default time window can
 be changed with `maxAgeSeconds()` and `numberOfAgeBuckets()`.
 
-Some options can be configured at runtime, see [config](../../config/config).
+Some options can be configured at runtime, see [config]({{< relref "../config/config.md" >}}).
 
 In general you should prefer histograms over summaries. The Prometheus query language has a
 function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile)
