@@ -34,7 +34,7 @@ request_duration_seconds_sum{http_status="200"} 2843.3178731140015
 <!-- editorconfig-checker-enable -->
 
 In Grafana Exemplars can be visualized as little green dots. The following shows an example of the
-95th [quantile](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile) 
+95th [quantile](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile)
 for the histogram above.
 
 ![Screenshot of a Latency Graph with Exemplars](https://github.com/prometheus/client_java/assets/330535/68aada3d-f55b-4a7b-90be-222481f0ec79) <!-- editorconfig-checker-disable-line -->
