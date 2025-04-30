@@ -91,21 +91,21 @@ public interface PrometheusScrapeRequest {
 Sample Prometheus scrape_config
 
 ```yaml
-  - job_name: "multi-target"
+- job_name: "multi-target"
 
-    # metrics_path defaults to '/metrics'
-    # scheme defaults to 'http'.
-    params:
-      proc: [proc1, proc2]
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: localhost:9401
-    static_configs:
-      - targets: ["target1", "target2"]
+  # metrics_path defaults to '/metrics'
+  # scheme defaults to 'http'.
+  params:
+    proc: [proc1, proc2]
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: localhost:9401
+  static_configs:
+    - targets: ["target1", "target2"]
 ```
 
 It's up to the specific MultiCollector implementation how to interpret the _target_ parameter.
