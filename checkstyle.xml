@@ -362,7 +362,6 @@
     <module name="SuppressionXpathFilter">
       <property name="file" value="${org.checkstyle.google.suppressionxpathfilter.config}"
                 default="checkstyle-xpath-suppressions.xml"/>
-      6
       <property name="optional" value="true"/>
     </module>
     <!-- this enables @SuppressWarnings("checkstyle:...") annotations -->
