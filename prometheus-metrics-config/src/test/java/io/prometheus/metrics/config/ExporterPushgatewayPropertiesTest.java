@@ -25,7 +25,8 @@ class ExporterPushgatewayPropertiesTest {
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> load(Map.of("io.prometheus.exporter.pushgateway.scheme", "foo")))
         .withMessage(
-            "io.prometheus.exporter.pushgateway.scheme: Illegal value. Expecting 'http' or 'https'. Found: foo");
+            "io.prometheus.exporter.pushgateway.scheme: Illegal value. Expecting 'http' or 'https'."
+                + " Found: foo");
   }
 
   private static ExporterPushgatewayProperties load(Map<String, String> map) {

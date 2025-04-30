@@ -33,7 +33,8 @@ class PrometheusPropertiesLoaderTest {
               PrometheusPropertiesLoader.load(new Properties());
             })
         .withMessage(
-            "Failed to read Prometheus properties from nonexistent.properties: nonexistent.properties");
+            "Failed to read Prometheus properties from nonexistent.properties:"
+                + " nonexistent.properties");
   }
 
   @Test

@@ -16,9 +16,11 @@ public class InstrumentedAppender extends AppenderSkeleton {
   private static final Counter.Child WARN_LABEL;
   private static final Counter.Child ERROR_LABEL;
   private static final Counter.Child FATAL_LABEL;
-  
+
   static {
-    COUNTER = Counter.build().name(COUNTER_NAME)
+    COUNTER =
+        Counter.build()
+            .name(COUNTER_NAME)
             .help("Log4j log statements at various log levels")
             .labelNames("level")
             .register();
@@ -31,16 +33,11 @@ public class InstrumentedAppender extends AppenderSkeleton {
     FATAL_LABEL = COUNTER.labels("fatal");
   }
 
-  /**
-   * Create a new instrumented appender using the default registry.
-   */
-  public InstrumentedAppender() {
-  }
-
+  /** Create a new instrumented appender using the default registry. */
+  public InstrumentedAppender() {}
 
   @Override
-  public void activateOptions() {
-  }
+  public void activateOptions() {}
 
   @Override
   protected void append(LoggingEvent event) {

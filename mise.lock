@@ -14,9 +14,9 @@ backend = "go:github.com/grafana/oats"
 version = "temurin-17.0.13+11"
 backend = "core:java"
 
-[tools.node]
-version = "23.10.0"
-backend = "core:node"
+[tools.lychee]
+version = "0.18.1"
+backend = "aqua:lycheeverse/lychee"
 
 [tools.protoc]
 version = "30.2"

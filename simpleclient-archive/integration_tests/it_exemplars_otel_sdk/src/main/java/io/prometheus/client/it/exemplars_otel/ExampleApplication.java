@@ -5,22 +5,17 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.HTTPServer;
-
 import java.io.IOException;
 
-/**
- * Example application using the OpenTelemetry SDK.
- */
+/** Example application using the OpenTelemetry SDK. */
 public class ExampleApplication {
 
   public static void main(String[] args) throws IOException, InterruptedException {
-    Counter counter = Counter.build()
-        .name("test")
-        .help("help")
-        .register();
+    Counter counter = Counter.build().name("test").help("help").register();
 
     // The following code compiles with OpenTelemetry versions 0.13.0 and higher.
-    // Starting with 0.16.0 you will see exemplars. With 0.15.0 or lower the code will run but you won't see exemplars.
+    // Starting with 0.16.0 you will see exemplars. With 0.15.0 or lower the code will run but you
+    // won't see exemplars.
     System.out.println(Tracer.class.getProtectionDomain().getCodeSource().getLocation());
     Tracer tracer = SdkTracerProvider.builder().build().get(null);
     Span span = tracer.spanBuilder("my span").startSpan();

@@ -27,10 +27,7 @@
           "telemetry_sdk_name": "opentelemetry",
           "telemetry_sdk_version": "1.42.1"
         },
-        "value": [
-          1743776399.291,
-          "1"
-        ]
+        "value": [1743776399.291, "1"]
       },
       {
         "metric": {
@@ -45,10 +42,7 @@
           "service_version": "0.122.1",
           "url_scheme": "http"
         },
-        "value": [
-          1743776399.291,
-          "1"
-        ]
+        "value": [1743776399.291, "1"]
       },
       {
         "metric": {
@@ -72,10 +66,7 @@
           "telemetry_sdk_name": "opentelemetry",
           "telemetry_sdk_version": "1.48.0"
         },
-        "value": [
-          1743776399.291,
-          "1"
-        ]
+        "value": [1743776399.291, "1"]
       }
     ]
   }

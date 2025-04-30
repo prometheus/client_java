@@ -22,11 +22,11 @@ class JvmRuntimeInfoMetricTest {
 
     String expected =
         """
-        # TYPE jvm_runtime info
-        # HELP jvm_runtime JVM runtime info
-        jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
-        # EOF
-        """;
+# TYPE jvm_runtime info
+# HELP jvm_runtime JVM runtime info
+jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
+# EOF
+""";
 
     assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }

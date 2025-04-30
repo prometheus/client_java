@@ -235,15 +235,15 @@ class ExpositionFormatsTest {
   public void testCounterMinimal() throws IOException {
     String openMetricsText =
         """
-      # TYPE my_counter counter
-      my_counter_total 1.1
-      # EOF
-      """;
+        # TYPE my_counter counter
+        my_counter_total 1.1
+        # EOF
+        """;
     String prometheusText =
         """
-      # TYPE my_counter_total counter
-      my_counter_total 1.1
-      """;
+        # TYPE my_counter_total counter
+        my_counter_total 1.1
+        """;
     String prometheusProtobuf =
         "name: \"my_counter_total\" type: COUNTER metric { counter { value: 1.1 } }";
     CounterSnapshot counter =
@@ -849,9 +849,9 @@ class ExpositionFormatsTest {
         """;
     String prometheusText =
         """
-      # TYPE latency_seconds summary
-      latency_seconds_count 1
-      """;
+        # TYPE latency_seconds summary
+        latency_seconds_count 1
+        """;
     String prometheusProtobuf =
         // @formatter:off
         "name: \"latency_seconds\" "
@@ -884,9 +884,9 @@ class ExpositionFormatsTest {
         """;
     String prometheusText =
         """
-      # TYPE latency_seconds summary
-      latency_seconds_sum 12.3
-      """;
+        # TYPE latency_seconds summary
+        latency_seconds_sum 12.3
+        """;
     String prometheusProtobuf =
         // @formatter:off
         "name: \"latency_seconds\" "
@@ -2610,15 +2610,15 @@ class ExpositionFormatsTest {
   public void testUnknownMinimal() throws IOException {
     String openMetrics =
         """
-      # TYPE other unknown
-      other 22.3
-      # EOF
-      """;
+        # TYPE other unknown
+        other 22.3
+        # EOF
+        """;
     String prometheus =
         """
-      # TYPE other untyped
-      other 22.3
-      """;
+        # TYPE other untyped
+        other 22.3
+        """;
     UnknownSnapshot unknown =
         UnknownSnapshot.builder()
             .name("other")
