@@ -7,9 +7,11 @@ weight: 7
 This is for the upcoming release 1.1.0.
 {{< /hint >}}
 
-To support multi-target pattern you can create a custom collector overriding the purposed internal method in ExtendedMultiCollector
+To support multi-target pattern you can create a custom collector overriding the purposed internal
+method in ExtendedMultiCollector
 see SampleExtendedMultiCollector in io.prometheus.metrics.examples.httpserver
 
+<!-- editorconfig-checker-disable -->
 ```java
 public class SampleExtendedMultiCollector extends ExtendedMultiCollector {
 
@@ -76,8 +78,11 @@ public class SampleExtendedMultiCollector extends ExtendedMultiCollector {
 }
 
 ```
+<!-- editorconfig-checker-enable --> 
 
-`PrometheusScrapeRequest` provides methods to access http-related infos from the request originally received by the endpoint
+
+`PrometheusScrapeRequest` provides methods to access http-related infos from the request originally
+received by the endpoint
 
 ```java
 public interface PrometheusScrapeRequest {

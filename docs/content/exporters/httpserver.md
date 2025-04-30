@@ -14,8 +14,8 @@ HTTPServer server = HTTPServer.builder()
 ```
 
 By default, `HTTPServer` binds to any IP address, you can change this with
-[hostname()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#hostname(java.lang.String)>)
-or [inetAddress()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#inetAddress(java.net.InetAddress)>).
+[hostname()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#hostname(java.lang.String)>) <!-- editorconfig-checker-disable-line -->
+or [inetAddress()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#inetAddress(java.net.InetAddress)>). <!-- editorconfig-checker-disable-line -->
 
 `HTTPServer` is configured with three endpoints:
 
@@ -24,7 +24,7 @@ or [inetAddress()](</client_java/api/io/prometheus/metrics/exporter/httpserver/H
 - `/` the default handler is a static HTML page.
 
 The default handler can be changed
-with [defaultHandler()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#defaultHandler(com.sun.net.httpserver.HttpHandler)>).
+with [defaultHandler()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#defaultHandler(com.sun.net.httpserver.HttpHandler)>). <!-- editorconfig-checker-disable-line -->
 
 ## Authentication and HTTPS
 
@@ -33,7 +33,7 @@ with [defaultHandler()](</client_java/api/io/prometheus/metrics/exporter/httpser
 - [httpsConfigurator()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#httpsConfigurator(com.sun.net.httpserver.HttpsConfigurator)>)
   is for configuring HTTPS.
 
-You can find an example of authentication and SSL in the [jmx_exporter](https://github.com/prometheus/jmx_exporter).
+You can find an example of authentication and SSL in the [jmx_exporter](https://github.com/prometheus/jmx_exporter). <!-- editorconfig-checker-disable-line -->
 
 ## Properties
 

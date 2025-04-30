@@ -53,7 +53,7 @@ In performance critical applications we recommend to use either the classic repr
 native representation, but not both.
 
 You can either configure this in code for each histogram by
-calling [classicOnly()](</client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicOnly()>)
+calling [classicOnly()](</client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicOnly()>) <!-- editorconfig-checker-disable-line -->
 or [nativeOnly()](</client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeOnly()>),
 or you use the corresponding [config options]({{< relref "../config/config.md" >}}).
 

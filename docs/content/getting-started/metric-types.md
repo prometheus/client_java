@@ -111,7 +111,8 @@ most important options:
 - `classicBuckets(...)`: Set the classic bucket boundaries. Default buckets are `.005`, `.01`,
   `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The default bucket boundaries are
   designed for measuring request durations in seconds.
-- `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is 160. When the maximum is reached, the native histogram automatically reduces resolution to stay
+- `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is
+  160. When the maximum is reached, the native histogram automatically reduces resolution to stay
   below the limit.
 
 See Javadoc
@@ -198,14 +199,15 @@ be changed with `maxAgeSeconds()` and `numberOfAgeBuckets()`.
 Some options can be configured at runtime, see [config]({{< relref "../config/config.md" >}}).
 
 In general you should prefer histograms over summaries. The Prometheus query language has a
-function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile)
+function [histogram_quantile()](https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile) <!-- editorconfig-checker-disable-line -->
 for calculating quantiles from histograms. The advantage of query-time quantile calculation is that
 you can aggregate histograms before calculating the quantile. With summaries you must use the
 quantile with all its labels as it is.
 
 ## Info
 
-Info metrics are used to expose textual information which should not change during process lifetime. The value of an Info metric is always `1`.
+Info metrics are used to expose textual information which should not change during process lifetime.
+The value of an Info metric is always `1`.
 
 ```java
 Info info = Info.builder()
@@ -223,11 +225,13 @@ info.setLabelValues(version, vendor, runtime);
 
 The info above looks as follows in OpenMetrics text format:
 
+<!-- editorconfig-checker-disable -->
 ```text
 # TYPE jvm_runtime info
 # HELP jvm_runtime JVM runtime info
 jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
 ```
+<!-- editorconfig-checker-enable --> 
 
 The example is taken from the `prometheus-metrics-instrumentation-jvm` module, so if you have
 `JvmMetrics` registered you should have a `jvm_runtime_info` metric out-of-the-box.

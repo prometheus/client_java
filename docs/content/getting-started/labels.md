@@ -80,7 +80,8 @@ loginCount.labelValues(userId, timestamp).inc();
 
 If you register a metric without labels, it will show up immediately with initial value of zero.
 
-However, metrics with labels only show up after the label values are first used. In the example above
+However, metrics with labels only show up after the label values are first used. In the example
+above
 
 ```java
 counter.labelValues("paypal", "error").inc();
@@ -149,4 +150,4 @@ Counter counter = Counter.builder()
 However, most use cases for `constLabels()` are better covered by target labels set by the scraping
 Prometheus server,
 or by one specific metric (e.g. a `build_info` or a `machine_role` metric). See also
-[target labels, not static scraped labels](https://prometheus.io/docs/instrumenting/writing_exporters/#target-labels-not-static-scraped-labels).
+[target labels, not static scraped labels](https://prometheus.io/docs/instrumenting/writing_exporters/#target-labels-not-static-scraped-labels). <!-- editorconfig-checker-disable-line -->
