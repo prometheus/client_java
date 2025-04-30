@@ -1,53 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.prometheus</groupId>
-        <artifactId>client_java</artifactId>
-        <version>1.4.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>io.prometheus</groupId>
+    <artifactId>client_java</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>prometheus-metrics-instrumentation-caffeine</artifactId>
-    <packaging>bundle</packaging>
+  <artifactId>prometheus-metrics-instrumentation-caffeine</artifactId>
+  <packaging>bundle</packaging>
 
-    <name>Prometheus Metrics Instrumentation - Caffeine</name>
-    <description>
-        Instrumentation library for caffeine based caches
-    </description>
+  <name>Prometheus Metrics Instrumentation - Caffeine</name>
+  <description>
+    Instrumentation library for caffeine based caches
+  </description>
 
-    <properties>
-        <automatic.module.name>io.prometheus.metrics.instrumentation.caffeine</automatic.module.name>
-    </properties>
+  <properties>
+    <automatic.module.name>io.prometheus.metrics.instrumentation.caffeine</automatic.module.name>
+  </properties>
 
-    <developers>
-        <developer>
-            <id>pheyken</id>
-            <name>Petar Heyken</name>
-            <email>mail@petar-heyken.de</email>
-        </developer>
-    </developers>
+  <developers>
+    <developer>
+      <id>pheyken</id>
+      <name>Petar Heyken</name>
+      <email>mail@petar-heyken.de</email>
+    </developer>
+  </developers>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-            <version>3.2.0</version>
-            <scope>provided</scope>
-        </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>3.2.0</version>
+      <scope>provided</scope>
+    </dependency>
 
-        <!-- test dependencies -->
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exposition-textformats</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exposition-textformats</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-    </dependencies>
+  </dependencies>
 </project>

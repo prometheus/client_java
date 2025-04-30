@@ -183,58 +183,58 @@ class JvmNativeMemoryMetricsTest {
 
     String expected =
         """
-        # TYPE jvm_native_memory_committed_bytes gauge
-        # UNIT jvm_native_memory_committed_bytes bytes
-        # HELP jvm_native_memory_committed_bytes Committed bytes of a given JVM. Committed memory represents the amount of memory the JVM is using right now.
-        jvm_native_memory_committed_bytes{pool="Arena Chunk"} 503216.0
-        jvm_native_memory_committed_bytes{pool="Arguments"} 160.0
-        jvm_native_memory_committed_bytes{pool="Class"} 616867.0
-        jvm_native_memory_committed_bytes{pool="Code"} 7836080.0
-        jvm_native_memory_committed_bytes{pool="Compiler"} 1926356.0
-        jvm_native_memory_committed_bytes{pool="GC"} 7.6530708E7
-        jvm_native_memory_committed_bytes{pool="Internal"} 242257.0
-        jvm_native_memory_committed_bytes{pool="Java Heap"} 5.36870912E8
-        jvm_native_memory_committed_bytes{pool="Metaspace"} 2829952.0
-        jvm_native_memory_committed_bytes{pool="Module"} 169168.0
-        jvm_native_memory_committed_bytes{pool="Native Memory Tracking"} 373448.0
-        jvm_native_memory_committed_bytes{pool="Object Monitors"} 832.0
-        jvm_native_memory_committed_bytes{pool="Other"} 4096.0
-        jvm_native_memory_committed_bytes{pool="Safepoint"} 8192.0
-        jvm_native_memory_committed_bytes{pool="Serviceability"} 600.0
-        jvm_native_memory_committed_bytes{pool="Shared class space"} 1.2386304E7
-        jvm_native_memory_committed_bytes{pool="String Deduplication"} 632.0
-        jvm_native_memory_committed_bytes{pool="Symbol"} 1505072.0
-        jvm_native_memory_committed_bytes{pool="Synchronization"} 31160.0
-        jvm_native_memory_committed_bytes{pool="Thread"} 847280.0
-        jvm_native_memory_committed_bytes{pool="Total"} 6.42716389E8
-        jvm_native_memory_committed_bytes{pool="Tracing"} 33097.0
-        # TYPE jvm_native_memory_reserved_bytes gauge
-        # UNIT jvm_native_memory_reserved_bytes bytes
-        # HELP jvm_native_memory_reserved_bytes Reserved bytes of a given JVM. Reserved memory represents the total amount of memory the JVM can potentially use.
-        jvm_native_memory_reserved_bytes{pool="Arena Chunk"} 503216.0
-        jvm_native_memory_reserved_bytes{pool="Arguments"} 160.0
-        jvm_native_memory_reserved_bytes{pool="Class"} 1.073899939E9
-        jvm_native_memory_reserved_bytes{pool="Code"} 2.53796784E8
-        jvm_native_memory_reserved_bytes{pool="Compiler"} 1926356.0
-        jvm_native_memory_reserved_bytes{pool="GC"} 3.73343252E8
-        jvm_native_memory_reserved_bytes{pool="Internal"} 242257.0
-        jvm_native_memory_reserved_bytes{pool="Java Heap"} 8.531214336E9
-        jvm_native_memory_reserved_bytes{pool="Metaspace"} 6.7120768E7
-        jvm_native_memory_reserved_bytes{pool="Module"} 169168.0
-        jvm_native_memory_reserved_bytes{pool="Native Memory Tracking"} 373448.0
-        jvm_native_memory_reserved_bytes{pool="Object Monitors"} 832.0
-        jvm_native_memory_reserved_bytes{pool="Other"} 4096.0
-        jvm_native_memory_reserved_bytes{pool="Safepoint"} 8192.0
-        jvm_native_memory_reserved_bytes{pool="Serviceability"} 600.0
-        jvm_native_memory_reserved_bytes{pool="Shared class space"} 1.6777216E7
-        jvm_native_memory_reserved_bytes{pool="String Deduplication"} 632.0
-        jvm_native_memory_reserved_bytes{pool="Symbol"} 1505072.0
-        jvm_native_memory_reserved_bytes{pool="Synchronization"} 31160.0
-        jvm_native_memory_reserved_bytes{pool="Thread"} 2.102008E7
-        jvm_native_memory_reserved_bytes{pool="Total"} 1.0341970661E10
-        jvm_native_memory_reserved_bytes{pool="Tracing"} 33097.0
-        # EOF
-        """;
+# TYPE jvm_native_memory_committed_bytes gauge
+# UNIT jvm_native_memory_committed_bytes bytes
+# HELP jvm_native_memory_committed_bytes Committed bytes of a given JVM. Committed memory represents the amount of memory the JVM is using right now.
+jvm_native_memory_committed_bytes{pool="Arena Chunk"} 503216.0
+jvm_native_memory_committed_bytes{pool="Arguments"} 160.0
+jvm_native_memory_committed_bytes{pool="Class"} 616867.0
+jvm_native_memory_committed_bytes{pool="Code"} 7836080.0
+jvm_native_memory_committed_bytes{pool="Compiler"} 1926356.0
+jvm_native_memory_committed_bytes{pool="GC"} 7.6530708E7
+jvm_native_memory_committed_bytes{pool="Internal"} 242257.0
+jvm_native_memory_committed_bytes{pool="Java Heap"} 5.36870912E8
+jvm_native_memory_committed_bytes{pool="Metaspace"} 2829952.0
+jvm_native_memory_committed_bytes{pool="Module"} 169168.0
+jvm_native_memory_committed_bytes{pool="Native Memory Tracking"} 373448.0
+jvm_native_memory_committed_bytes{pool="Object Monitors"} 832.0
+jvm_native_memory_committed_bytes{pool="Other"} 4096.0
+jvm_native_memory_committed_bytes{pool="Safepoint"} 8192.0
+jvm_native_memory_committed_bytes{pool="Serviceability"} 600.0
+jvm_native_memory_committed_bytes{pool="Shared class space"} 1.2386304E7
+jvm_native_memory_committed_bytes{pool="String Deduplication"} 632.0
+jvm_native_memory_committed_bytes{pool="Symbol"} 1505072.0
+jvm_native_memory_committed_bytes{pool="Synchronization"} 31160.0
+jvm_native_memory_committed_bytes{pool="Thread"} 847280.0
+jvm_native_memory_committed_bytes{pool="Total"} 6.42716389E8
+jvm_native_memory_committed_bytes{pool="Tracing"} 33097.0
+# TYPE jvm_native_memory_reserved_bytes gauge
+# UNIT jvm_native_memory_reserved_bytes bytes
+# HELP jvm_native_memory_reserved_bytes Reserved bytes of a given JVM. Reserved memory represents the total amount of memory the JVM can potentially use.
+jvm_native_memory_reserved_bytes{pool="Arena Chunk"} 503216.0
+jvm_native_memory_reserved_bytes{pool="Arguments"} 160.0
+jvm_native_memory_reserved_bytes{pool="Class"} 1.073899939E9
+jvm_native_memory_reserved_bytes{pool="Code"} 2.53796784E8
+jvm_native_memory_reserved_bytes{pool="Compiler"} 1926356.0
+jvm_native_memory_reserved_bytes{pool="GC"} 3.73343252E8
+jvm_native_memory_reserved_bytes{pool="Internal"} 242257.0
+jvm_native_memory_reserved_bytes{pool="Java Heap"} 8.531214336E9
+jvm_native_memory_reserved_bytes{pool="Metaspace"} 6.7120768E7
+jvm_native_memory_reserved_bytes{pool="Module"} 169168.0
+jvm_native_memory_reserved_bytes{pool="Native Memory Tracking"} 373448.0
+jvm_native_memory_reserved_bytes{pool="Object Monitors"} 832.0
+jvm_native_memory_reserved_bytes{pool="Other"} 4096.0
+jvm_native_memory_reserved_bytes{pool="Safepoint"} 8192.0
+jvm_native_memory_reserved_bytes{pool="Serviceability"} 600.0
+jvm_native_memory_reserved_bytes{pool="Shared class space"} 1.6777216E7
+jvm_native_memory_reserved_bytes{pool="String Deduplication"} 632.0
+jvm_native_memory_reserved_bytes{pool="Symbol"} 1505072.0
+jvm_native_memory_reserved_bytes{pool="Synchronization"} 31160.0
+jvm_native_memory_reserved_bytes{pool="Thread"} 2.102008E7
+jvm_native_memory_reserved_bytes{pool="Total"} 1.0341970661E10
+jvm_native_memory_reserved_bytes{pool="Tracing"} 33097.0
+# EOF
+""";
 
     assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }

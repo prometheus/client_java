@@ -1,6 +1,7 @@
 package io.prometheus.client.benchmark;
 
 import com.codahale.metrics.MetricRegistry;
+import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
@@ -12,8 +13,6 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-
-import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
 public class GaugeBenchmark {
@@ -27,16 +26,16 @@ public class GaugeBenchmark {
 
   @Setup
   public void setup() {
-    prometheusSimpleGauge = io.prometheus.client.Gauge.build()
-      .name("name")
-      .help("some description..")
-      .labelNames("some", "group").create();
+    prometheusSimpleGauge =
+        io.prometheus.client.Gauge.build()
+            .name("name")
+            .help("some description..")
+            .labelNames("some", "group")
+            .create();
     prometheusSimpleGaugeChild = prometheusSimpleGauge.labels("test", "group");
 
-    prometheusSimpleGaugeNoLabels = io.prometheus.client.Gauge.build()
-      .name("name")
-      .help("some description..")
-      .create();
+    prometheusSimpleGaugeNoLabels =
+        io.prometheus.client.Gauge.build().name("name").help("some description..").create();
 
     registry = new MetricRegistry();
     codahaleCounter = registry.counter("name");
@@ -47,21 +46,21 @@ public class GaugeBenchmark {
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleGaugeIncBenchmark() {
-    prometheusSimpleGauge.labels("test", "group").inc(); 
+    prometheusSimpleGauge.labels("test", "group").inc();
   }
-  
+
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleGaugeChildIncBenchmark() {
-    prometheusSimpleGaugeChild.inc(); 
+    prometheusSimpleGaugeChild.inc();
   }
 
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleGaugeNoLabelsIncBenchmark() {
-    prometheusSimpleGaugeNoLabels.inc(); 
+    prometheusSimpleGaugeNoLabels.inc();
   }
 
   @Benchmark
@@ -71,27 +70,26 @@ public class GaugeBenchmark {
     codahaleCounter.inc();
   }
 
-
   // Decrement.
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleGaugeDecBenchmark() {
-    prometheusSimpleGauge.labels("test", "group").dec(); 
+    prometheusSimpleGauge.labels("test", "group").dec();
   }
-  
+
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleGaugeChildDecBenchmark() {
-    prometheusSimpleGaugeChild.dec(); 
+    prometheusSimpleGaugeChild.dec();
   }
 
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleGaugeNoLabelsDecBenchmark() {
-    prometheusSimpleGaugeNoLabels.dec(); 
+    prometheusSimpleGaugeNoLabels.dec();
   }
 
   @Benchmark
@@ -106,9 +104,9 @@ public class GaugeBenchmark {
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleGaugeSetBenchmark() {
-    prometheusSimpleGauge.labels("test", "group").set(42); 
+    prometheusSimpleGauge.labels("test", "group").set(42);
   }
-  
+
   @Benchmark
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -120,18 +118,19 @@ public class GaugeBenchmark {
   @BenchmarkMode({Mode.AverageTime})
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
   public void prometheusSimpleGaugeNoLabelsSetBenchmark() {
-    prometheusSimpleGaugeNoLabels.set(42); 
+    prometheusSimpleGaugeNoLabels.set(42);
   }
 
   public static void main(String[] args) throws RunnerException {
 
-    Options opt = new OptionsBuilder()
-      .include(GaugeBenchmark.class.getSimpleName())
-      .warmupIterations(5)
-      .measurementIterations(4)
-      .threads(4)
-      .forks(1)
-      .build();
+    Options opt =
+        new OptionsBuilder()
+            .include(GaugeBenchmark.class.getSimpleName())
+            .warmupIterations(5)
+            .measurementIterations(4)
+            .threads(4)
+            .forks(1)
+            .build();
 
     new Runner(opt).run();
   }

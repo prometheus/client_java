@@ -1,64 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.prometheus</groupId>
-        <artifactId>client_java</artifactId>
-        <version>1.4.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>io.prometheus</groupId>
+    <artifactId>client_java</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>prometheus-metrics-exporter-opentelemetry-otel-agent-resources</artifactId>
-    <packaging>bundle</packaging>
+  <artifactId>prometheus-metrics-exporter-opentelemetry-otel-agent-resources</artifactId>
+  <packaging>bundle</packaging>
 
-    <name>OpenTelemetry Agent Resource Extractor</name>
-    <description>
-        Reads the OpenTelemetry Agent resources the GlobalOpenTelemetry instance
-    </description>
+  <name>OpenTelemetry Agent Resource Extractor</name>
+  <description>
+    Reads the OpenTelemetry Agent resources the GlobalOpenTelemetry instance
+  </description>
 
-    <properties>
-        <automatic.module.name>io.prometheus.otel.resource.attributes</automatic.module.name>
-        <!-- don't update with dependabot, the Otel agent can handle older versions -->
-        <otel-dynamic-load.version>1.29.0</otel-dynamic-load.version>
-    </properties>
+  <properties>
+    <automatic.module.name>io.prometheus.otel.resource.attributes</automatic.module.name>
+    <!-- don't update with dependabot, the Otel agent can handle older versions -->
+    <otel-dynamic-load.version>1.29.0</otel-dynamic-load.version>
+  </properties>
 
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <artifactItems>
-                        <artifactItem>
-                            <groupId>io.opentelemetry</groupId>
-                            <artifactId>opentelemetry-api</artifactId>
-                            <version>${otel-dynamic-load.version}</version>
-                            <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>io.opentelemetry</groupId>
-                            <artifactId>opentelemetry-context</artifactId>
-                            <version>${otel-dynamic-load.version}</version>
-                            <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
-                        </artifactItem>
-                    </artifactItems>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <artifactItems>
+            <artifactItem>
+              <groupId>io.opentelemetry</groupId>
+              <artifactId>opentelemetry-api</artifactId>
+              <version>${otel-dynamic-load.version}</version>
+              <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
+            </artifactItem>
+            <artifactItem>
+              <groupId>io.opentelemetry</groupId>
+              <artifactId>opentelemetry-context</artifactId>
+              <version>${otel-dynamic-load.version}</version>
+              <outputDirectory>${project.basedir}/src/main/resources/lib/</outputDirectory>
+            </artifactItem>
+          </artifactItems>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

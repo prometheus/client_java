@@ -80,18 +80,18 @@ class CacheMetricsCollectorTest {
       assertCounterMetric(registry, "caffeine_cache_eviction_weight", "users", 2.0);
       openMetricEvictionWeightExpectedText =
           """
-          # TYPE caffeine_cache_eviction_weight counter
-          # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
-          caffeine_cache_eviction_weight_total{cache="users"} 2.0
-          """;
+# TYPE caffeine_cache_eviction_weight counter
+# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+caffeine_cache_eviction_weight_total{cache="users"} 2.0
+""";
     } else {
       assertGaugeMetric(registry, "caffeine_cache_eviction_weight", "users", 2.0);
       openMetricEvictionWeightExpectedText =
           """
-          # TYPE caffeine_cache_eviction_weight gauge
-          # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
-          caffeine_cache_eviction_weight{cache="users"} 2.0
-          """;
+# TYPE caffeine_cache_eviction_weight gauge
+# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+caffeine_cache_eviction_weight{cache="users"} 2.0
+""";
     }
 
     final String expected =
@@ -99,7 +99,8 @@ class CacheMetricsCollectorTest {
             + "# HELP caffeine_cache_estimated_size Estimated cache size\n"
             + "caffeine_cache_estimated_size{cache=\"users\"} 2.0\n"
             + "# TYPE caffeine_cache_eviction counter\n"
-            + "# HELP caffeine_cache_eviction Cache eviction totals, doesn't include manually removed entries\n"
+            + "# HELP caffeine_cache_eviction Cache eviction totals, doesn't include manually"
+            + " removed entries\n"
             + "caffeine_cache_eviction_total{cache=\"users\"} 2.0\n"
             + openMetricEvictionWeightExpectedText
             + "# TYPE caffeine_cache_hit counter\n"
@@ -157,18 +158,18 @@ class CacheMetricsCollectorTest {
       assertCounterMetric(registry, "caffeine_cache_eviction_weight", "users", 31.0);
       openMetricEvictionWeightExpectedText =
           """
-          # TYPE caffeine_cache_eviction_weight counter
-          # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
-          caffeine_cache_eviction_weight_total{cache="users"} 31.0
-          """;
+# TYPE caffeine_cache_eviction_weight counter
+# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+caffeine_cache_eviction_weight_total{cache="users"} 31.0
+""";
     } else {
       assertGaugeMetric(registry, "caffeine_cache_eviction_weight", "users", 31.0);
       openMetricEvictionWeightExpectedText =
           """
-          # TYPE caffeine_cache_eviction_weight gauge
-          # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
-          caffeine_cache_eviction_weight{cache="users"} 31.0
-          """;
+# TYPE caffeine_cache_eviction_weight gauge
+# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+caffeine_cache_eviction_weight{cache="users"} 31.0
+""";
     }
     String openMetricWeightedSizeExpectedText;
     if (options.collectWeightedSize) {
@@ -187,7 +188,8 @@ class CacheMetricsCollectorTest {
             + "# HELP caffeine_cache_estimated_size Estimated cache size\n"
             + "caffeine_cache_estimated_size{cache=\"users\"} 2.0\n"
             + "# TYPE caffeine_cache_eviction counter\n"
-            + "# HELP caffeine_cache_eviction Cache eviction totals, doesn't include manually removed entries\n"
+            + "# HELP caffeine_cache_eviction Cache eviction totals, doesn't include manually"
+            + " removed entries\n"
             + "caffeine_cache_eviction_total{cache=\"users\"} 2.0\n"
             + openMetricEvictionWeightExpectedText
             + "# TYPE caffeine_cache_hit counter\n"

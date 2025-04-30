@@ -1,7 +1,7 @@
 apiVersion: 1
 
 providers:
-  - name: 'Example Dashboard'
+  - name: "Example Dashboard"
     type: file
     options:
       path: /etc/grafana/example-dashboard.json

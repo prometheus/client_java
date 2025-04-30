@@ -89,71 +89,71 @@ class JvmMemoryMetricsTest {
 
     String expected =
         """
-        # TYPE jvm_memory_committed_bytes gauge
-        # UNIT jvm_memory_committed_bytes bytes
-        # HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.
-        jvm_memory_committed_bytes{area="heap"} 4.0
-        jvm_memory_committed_bytes{area="nonheap"} 8.0
-        # TYPE jvm_memory_init_bytes gauge
-        # UNIT jvm_memory_init_bytes bytes
-        # HELP jvm_memory_init_bytes Initial bytes of a given JVM memory area.
-        jvm_memory_init_bytes{area="heap"} 5.0
-        jvm_memory_init_bytes{area="nonheap"} 9.0
-        # TYPE jvm_memory_max_bytes gauge
-        # UNIT jvm_memory_max_bytes bytes
-        # HELP jvm_memory_max_bytes Max (bytes) of a given JVM memory area.
-        jvm_memory_max_bytes{area="heap"} 3.0
-        jvm_memory_max_bytes{area="nonheap"} 7.0
-        # TYPE jvm_memory_objects_pending_finalization gauge
-        # HELP jvm_memory_objects_pending_finalization The number of objects waiting in the finalizer queue.
-        jvm_memory_objects_pending_finalization 1.0
-        # TYPE jvm_memory_pool_collection_committed_bytes gauge
-        # UNIT jvm_memory_pool_collection_committed_bytes bytes
-        # HELP jvm_memory_pool_collection_committed_bytes Committed after last collection bytes of a given JVM memory pool.
-        jvm_memory_pool_collection_committed_bytes{pool="PS Eden Space"} 20.0
-        jvm_memory_pool_collection_committed_bytes{pool="PS Old Gen"} 24.0
-        # TYPE jvm_memory_pool_collection_init_bytes gauge
-        # UNIT jvm_memory_pool_collection_init_bytes bytes
-        # HELP jvm_memory_pool_collection_init_bytes Initial after last collection bytes of a given JVM memory pool.
-        jvm_memory_pool_collection_init_bytes{pool="PS Eden Space"} 21.0
-        jvm_memory_pool_collection_init_bytes{pool="PS Old Gen"} 25.0
-        # TYPE jvm_memory_pool_collection_max_bytes gauge
-        # UNIT jvm_memory_pool_collection_max_bytes bytes
-        # HELP jvm_memory_pool_collection_max_bytes Max bytes after last collection of a given JVM memory pool.
-        jvm_memory_pool_collection_max_bytes{pool="PS Eden Space"} 19.0
-        jvm_memory_pool_collection_max_bytes{pool="PS Old Gen"} 23.0
-        # TYPE jvm_memory_pool_collection_used_bytes gauge
-        # UNIT jvm_memory_pool_collection_used_bytes bytes
-        # HELP jvm_memory_pool_collection_used_bytes Used bytes after last collection of a given JVM memory pool.
-        jvm_memory_pool_collection_used_bytes{pool="PS Eden Space"} 18.0
-        jvm_memory_pool_collection_used_bytes{pool="PS Old Gen"} 22.0
-        # TYPE jvm_memory_pool_committed_bytes gauge
-        # UNIT jvm_memory_pool_committed_bytes bytes
-        # HELP jvm_memory_pool_committed_bytes Committed bytes of a given JVM memory pool.
-        jvm_memory_pool_committed_bytes{pool="PS Eden Space"} 12.0
-        jvm_memory_pool_committed_bytes{pool="PS Old Gen"} 16.0
-        # TYPE jvm_memory_pool_init_bytes gauge
-        # UNIT jvm_memory_pool_init_bytes bytes
-        # HELP jvm_memory_pool_init_bytes Initial bytes of a given JVM memory pool.
-        jvm_memory_pool_init_bytes{pool="PS Eden Space"} 13.0
-        jvm_memory_pool_init_bytes{pool="PS Old Gen"} 17.0
-        # TYPE jvm_memory_pool_max_bytes gauge
-        # UNIT jvm_memory_pool_max_bytes bytes
-        # HELP jvm_memory_pool_max_bytes Max bytes of a given JVM memory pool.
-        jvm_memory_pool_max_bytes{pool="PS Eden Space"} 11.0
-        jvm_memory_pool_max_bytes{pool="PS Old Gen"} 15.0
-        # TYPE jvm_memory_pool_used_bytes gauge
-        # UNIT jvm_memory_pool_used_bytes bytes
-        # HELP jvm_memory_pool_used_bytes Used bytes of a given JVM memory pool.
-        jvm_memory_pool_used_bytes{pool="PS Eden Space"} 10.0
-        jvm_memory_pool_used_bytes{pool="PS Old Gen"} 14.0
-        # TYPE jvm_memory_used_bytes gauge
-        # UNIT jvm_memory_used_bytes bytes
-        # HELP jvm_memory_used_bytes Used bytes of a given JVM memory area.
-        jvm_memory_used_bytes{area="heap"} 2.0
-        jvm_memory_used_bytes{area="nonheap"} 6.0
-        # EOF
-        """;
+# TYPE jvm_memory_committed_bytes gauge
+# UNIT jvm_memory_committed_bytes bytes
+# HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.
+jvm_memory_committed_bytes{area="heap"} 4.0
+jvm_memory_committed_bytes{area="nonheap"} 8.0
+# TYPE jvm_memory_init_bytes gauge
+# UNIT jvm_memory_init_bytes bytes
+# HELP jvm_memory_init_bytes Initial bytes of a given JVM memory area.
+jvm_memory_init_bytes{area="heap"} 5.0
+jvm_memory_init_bytes{area="nonheap"} 9.0
+# TYPE jvm_memory_max_bytes gauge
+# UNIT jvm_memory_max_bytes bytes
+# HELP jvm_memory_max_bytes Max (bytes) of a given JVM memory area.
+jvm_memory_max_bytes{area="heap"} 3.0
+jvm_memory_max_bytes{area="nonheap"} 7.0
+# TYPE jvm_memory_objects_pending_finalization gauge
+# HELP jvm_memory_objects_pending_finalization The number of objects waiting in the finalizer queue.
+jvm_memory_objects_pending_finalization 1.0
+# TYPE jvm_memory_pool_collection_committed_bytes gauge
+# UNIT jvm_memory_pool_collection_committed_bytes bytes
+# HELP jvm_memory_pool_collection_committed_bytes Committed after last collection bytes of a given JVM memory pool.
+jvm_memory_pool_collection_committed_bytes{pool="PS Eden Space"} 20.0
+jvm_memory_pool_collection_committed_bytes{pool="PS Old Gen"} 24.0
+# TYPE jvm_memory_pool_collection_init_bytes gauge
+# UNIT jvm_memory_pool_collection_init_bytes bytes
+# HELP jvm_memory_pool_collection_init_bytes Initial after last collection bytes of a given JVM memory pool.
+jvm_memory_pool_collection_init_bytes{pool="PS Eden Space"} 21.0
+jvm_memory_pool_collection_init_bytes{pool="PS Old Gen"} 25.0
+# TYPE jvm_memory_pool_collection_max_bytes gauge
+# UNIT jvm_memory_pool_collection_max_bytes bytes
+# HELP jvm_memory_pool_collection_max_bytes Max bytes after last collection of a given JVM memory pool.
+jvm_memory_pool_collection_max_bytes{pool="PS Eden Space"} 19.0
+jvm_memory_pool_collection_max_bytes{pool="PS Old Gen"} 23.0
+# TYPE jvm_memory_pool_collection_used_bytes gauge
+# UNIT jvm_memory_pool_collection_used_bytes bytes
+# HELP jvm_memory_pool_collection_used_bytes Used bytes after last collection of a given JVM memory pool.
+jvm_memory_pool_collection_used_bytes{pool="PS Eden Space"} 18.0
+jvm_memory_pool_collection_used_bytes{pool="PS Old Gen"} 22.0
+# TYPE jvm_memory_pool_committed_bytes gauge
+# UNIT jvm_memory_pool_committed_bytes bytes
+# HELP jvm_memory_pool_committed_bytes Committed bytes of a given JVM memory pool.
+jvm_memory_pool_committed_bytes{pool="PS Eden Space"} 12.0
+jvm_memory_pool_committed_bytes{pool="PS Old Gen"} 16.0
+# TYPE jvm_memory_pool_init_bytes gauge
+# UNIT jvm_memory_pool_init_bytes bytes
+# HELP jvm_memory_pool_init_bytes Initial bytes of a given JVM memory pool.
+jvm_memory_pool_init_bytes{pool="PS Eden Space"} 13.0
+jvm_memory_pool_init_bytes{pool="PS Old Gen"} 17.0
+# TYPE jvm_memory_pool_max_bytes gauge
+# UNIT jvm_memory_pool_max_bytes bytes
+# HELP jvm_memory_pool_max_bytes Max bytes of a given JVM memory pool.
+jvm_memory_pool_max_bytes{pool="PS Eden Space"} 11.0
+jvm_memory_pool_max_bytes{pool="PS Old Gen"} 15.0
+# TYPE jvm_memory_pool_used_bytes gauge
+# UNIT jvm_memory_pool_used_bytes bytes
+# HELP jvm_memory_pool_used_bytes Used bytes of a given JVM memory pool.
+jvm_memory_pool_used_bytes{pool="PS Eden Space"} 10.0
+jvm_memory_pool_used_bytes{pool="PS Old Gen"} 14.0
+# TYPE jvm_memory_used_bytes gauge
+# UNIT jvm_memory_used_bytes bytes
+# HELP jvm_memory_used_bytes Used bytes of a given JVM memory area.
+jvm_memory_used_bytes{area="heap"} 2.0
+jvm_memory_used_bytes{area="nonheap"} 6.0
+# EOF
+""";
 
     assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }

@@ -27,7 +27,8 @@ class ExporterPropertiesTest {
                     new HashMap<>(
                         Map.of("io.prometheus.exporter.includeCreatedTimestamps", "invalid"))))
         .withMessage(
-            "io.prometheus.exporter.includeCreatedTimestamps: Expecting 'true' or 'false'. Found: invalid");
+            "io.prometheus.exporter.includeCreatedTimestamps: Expecting 'true' or 'false'. Found:"
+                + " invalid");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
@@ -35,7 +36,8 @@ class ExporterPropertiesTest {
                     new HashMap<>(
                         Map.of("io.prometheus.exporter.exemplarsOnAllMetricTypes", "invalid"))))
         .withMessage(
-            "io.prometheus.exporter.exemplarsOnAllMetricTypes: Expecting 'true' or 'false'. Found: invalid");
+            "io.prometheus.exporter.exemplarsOnAllMetricTypes: Expecting 'true' or 'false'. Found:"
+                + " invalid");
   }
 
   private static ExporterProperties load(Map<String, String> map) {

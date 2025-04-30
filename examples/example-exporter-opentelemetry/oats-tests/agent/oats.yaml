@@ -1,11 +1,11 @@
-# OATS is an acceptance testing framework for OpenTelemetry - https://github.com/grafana/oats/tree/main/yaml
+# OATS is an acceptance testing framework for OpenTelemetry -
+# https://github.com/grafana/oats/tree/main/yaml
 docker-compose:
   files:
     - ./docker-compose.yml
 expected:
   custom-checks:
-    - script: ./service-instance-id-check.py
+    - script: ./service_instance_id_check.py
   metrics:
-    - promql: 'uptime_seconds_total{}'
-      value: '>= 0'
-
+    - promql: "uptime_seconds_total{}"
+      value: ">= 0"
