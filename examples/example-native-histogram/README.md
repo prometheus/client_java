@@ -8,7 +8,8 @@ This example is built as part of the `client_java` project.
 ./mvnw package
 ```
 
-This should create the file `./examples/example-native-histogram/target/example-native-histogram.jar`.
+This should create the file
+`./examples/example-native-histogram/target/example-native-histogram.jar`.
 
 ## Run
 
@@ -27,5 +28,5 @@ This will run the following Docker containers:
 
 You might need to replace `localhost` with `host.docker.internal` on macOS or Windows.
 
-The Grafana server is preconfigured with two dashboards, one based on the classic histogram and the other one based on
-the native histogram.
+The Grafana server is preconfigured with two dashboards, one based on the classic histogram and the
+other one based on the native histogram.

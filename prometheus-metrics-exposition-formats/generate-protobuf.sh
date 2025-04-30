@@ -3,7 +3,8 @@
 set -euo pipefail
 
 # We use the shaded protobuf JAR from the protobuf-shaded module.
-# I could not figure out how to use a protoc Maven plugin to use the shaded module, so I ran this command to generate the sources manually.
+# I could not figure out how to use a protoc Maven plugin to use the shaded module,
+# so I ran this command to generate the sources manually.
 
 TARGET_DIR=$1
 PROTO_DIR=src/main/protobuf
