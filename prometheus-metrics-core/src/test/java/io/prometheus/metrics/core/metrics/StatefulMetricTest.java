@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +35,28 @@ class StatefulMetricTest {
       assertThat(entry.getKey()).isNotNull();
       assertThat(entry.getValue()).isNotNull();
     }
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testLabelRemoveIf() throws Exception {
+    Counter counter = Counter.builder().name("testLabelRemoveIf").labelNames("label1", "label2").build();
+    Field data = counter.getClass().getSuperclass().getDeclaredField("data");
+    data.setAccessible(true);
+
+    counter.labelValues("a", "b").inc(1.0);
+    counter.labelValues("a", "c").inc(3.0);
+    counter.labelValues("a", "d").inc(7.0);
+    counter.labelValues("e", "f").inc(8.0);
+
+    counter.removeIf(labels -> labels.size() == 2 && labels.get(0).equals("a"));
+
+    Map<List<String>, Counter.DataPoint> dataPoints =
+        (Map<List<String>, Counter.DataPoint>) data.get(counter);
+
+    assertThat(dataPoints).hasSize(1);
+    assertThat(dataPoints.get(Arrays.asList("e", "f"))).isNotNull();
+    assertThat(dataPoints.get(Arrays.asList("e", "f")).get()).isEqualTo(8.0D);
   }
 
   @Test
