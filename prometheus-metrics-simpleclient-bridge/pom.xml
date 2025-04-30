@@ -1,56 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.prometheus</groupId>
-        <artifactId>client_java</artifactId>
-        <version>1.4.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>io.prometheus</groupId>
+    <artifactId>client_java</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>prometheus-metrics-simpleclient-bridge</artifactId>
-    <packaging>bundle</packaging>
+  <artifactId>prometheus-metrics-simpleclient-bridge</artifactId>
+  <packaging>bundle</packaging>
 
-    <name>Prometheus Metrics - Simpleclient Bridge</name>
-    <description>
-        Bridge the old simpleclient CollectorRegistry to the new PrometheusRegistry
-    </description>
+  <name>Prometheus Metrics - Simpleclient Bridge</name>
+  <description>
+    Bridge the old simpleclient CollectorRegistry to the new PrometheusRegistry
+  </description>
 
-    <properties>
-        <automatic.module.name>io.prometheus.metrics.simpleclient.bridge</automatic.module.name>
-    </properties>
+  <properties>
+    <automatic.module.name>io.prometheus.metrics.simpleclient.bridge</automatic.module.name>
+  </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-config</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient</artifactId>
-            <version>0.16.0</version>
-            <scope>provided</scope><!-- provided so that this can be used with older simpleclient versions -->
-        </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-model</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-config</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient</artifactId>
+      <version>0.16.0</version>
+      <scope>provided</scope><!-- provided so that this can be used with older simpleclient versions -->
+    </dependency>
 
-        <!-- test dependencies -->
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exposition-textformats</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_common</artifactId>
-            <version>0.16.0</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exposition-textformats</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_common</artifactId>
+      <version>0.16.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>
