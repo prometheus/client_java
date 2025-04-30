@@ -10,6 +10,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -134,6 +135,11 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
    */
   public void remove(String... labelValues) {
     data.remove(Arrays.asList(labelValues));
+  }
+
+  /** Remove the data points when the given function. */
+  public void removeIf(Function<List<String>, Boolean> f) {
+    data.entrySet().removeIf(entry -> f.apply(Collections.unmodifiableList(entry.getKey())));
   }
 
   /** Reset the metric (remove all data points). */
