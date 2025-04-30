@@ -7,7 +7,7 @@ This tutorial shows the quickest way to get started with the Prometheus Java met
 
 {{< toc >}}
 
-# Dependencies
+## Dependencies
 
 We use the following dependencies:
 
@@ -60,7 +60,7 @@ it from the dependencies.
 
 {{< /hint >}}
 
-# Dependency management
+## Dependency management
 
 A Bill of Material
 ([BOM](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms))
@@ -146,7 +146,7 @@ The following example shows how to import the Prometheus Java metrics BOMs using
 {{< /tab >}}
 {{< /tabs >}}
 
-# Example Application
+## Example Application
 
 ```java
 import io.prometheus.metrics.core.metrics.Counter;
@@ -182,7 +182,7 @@ public class App {
 }
 ```
 
-# Result
+## Result
 
 Run the application and view [http://localhost:9400/metrics](http://localhost:9400/metrics) with
 your browser to see the raw metrics. You should see the `my_count_total` metric as shown below plus
@@ -195,7 +195,7 @@ my_count_total{status="error"} 1.0
 my_count_total{status="ok"} 2.0
 ```
 
-# Prometheus Configuration
+## Prometheus Configuration
 
 To scrape the metrics with a Prometheus server, download the latest Prometheus
 server [release](https://github.com/prometheus/prometheus/releases), and configure the

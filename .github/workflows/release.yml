@@ -17,7 +17,7 @@ jobs:
         env:
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
         run: |
-          echo "${#GPG_SIGNING_KEY}" | wc -c
+          echo "${#GPG_SIGNING_KEY}"
           echo "${GPG_SIGNING_KEY}" | gpg --batch --import-options import-show --import
       - name: Checkout Plugin Repository
         uses: actions/checkout@v4

@@ -13,7 +13,8 @@ The main new features of the 1.0.0 release are:
 
 **Documentation and Examples**
 
-In addition to this documentation page we created an [examples/](https://github.com/prometheus/client_java/tree/main/examples) directory with end-to-end
+In addition to this documentation page we created an
+[examples/](https://github.com/prometheus/client_java/tree/main/examples) directory with end-to-end
 scenarios (Docker compose) illustrating new features.
 
 **Performance Benchmarks**
@@ -26,8 +27,9 @@ synchronization. See Javadoc comments in
 
 **More Info**
 
-The Grafana Labs Blog has a post [Introducing the Prometheus Java Client 1.0.0](https://grafana.com/blog/2023/09/27/introducing-the-prometheus-java-client-1.0.0/) with a
-good overview of the release.
+The Grafana Labs Blog has a post
+[Introducing the Prometheus Java Client 1.0.0](https://grafana.com/blog/2023/09/27/introducing-the-prometheus-java-client-1.0.0/)
+with a good overview of the release.
 
 There will also be a presentation at the [PromCon](https://promcon.io) conference on 29 Sep 2023.
 Tune in to the live stream on [https://promcon.io](https://promcon.io)

@@ -99,7 +99,8 @@ Two metrics exist for observability specifically of caches that define a `weighe
 
 ```text
 # TYPE caffeine_cache_eviction_weight counter
-# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
+# HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries // editorconfig-checker-disable-line
+
 caffeine_cache_eviction_weight_total{cache="mycache"} 5.0
 # TYPE caffeine_cache_weighted_size gauge
 # HELP caffeine_cache_weighted_size Approximate accumulated weight of cache entries

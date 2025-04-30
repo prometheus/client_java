@@ -1,4 +1,4 @@
-## Exemplars with OpenTelemetry's Tail Sampling
+# Exemplars with OpenTelemetry's Tail Sampling
 
 ## Background: What are Exemplars?
 
@@ -124,7 +124,11 @@ processors:
     expected_new_traces_per_sec: 10
     policies:
       [
-        { name: keep-exemplars, type: string_attribute, string_attribute: { key: "exemplar", values: ["true"] } },
+        {
+          name: keep-exemplars,
+          type: string_attribute,
+          string_attribute: { key: "exemplar", values: ["true"] },
+        },
         { name: keep-10-percent, type: probabilistic, probabilistic: { sampling_percentage: 10 } },
       ]
 ```

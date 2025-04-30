@@ -22,10 +22,16 @@ See Javadoc of the benchmark classes:
 ## What Prometheus Java client optimizes for
 
 concurrent updates of metrics in multi-threaded applications.
-If your application is single-threaded and uses only one processor core, your application isn't performance critical anyway.
-If your application is designed to use all available processor cores for maximum performance, then you want a metric library that doesn't slow your application down.
-Prometheus client Java metrics support concurrent updates and scrapes. This shows in benchmarks with multiple threads recording data in shared metrics.
+If your application is single-threaded and uses only one processor core, your application isn't
+performance critical anyway.
+If your application is designed to use all available processor cores for maximum performance, then
+you want a metric library that doesn't slow your
+application down.
+Prometheus client Java metrics support concurrent updates and scrapes. This shows in benchmarks with
+multiple threads recording data in shared
+metrics.
 
 ## Archive
 
-The `src/main/archive/` directory contains the old benchmarks from 0.16.0 and earlier. It will be removed as soon as all benchmarks are ported to the 1.0.0 release.
+The `src/main/archive/` directory contains the old benchmarks from 0.16.0 and earlier. It will be
+removed as soon as all benchmarks are ported to the 1.0.0 release.

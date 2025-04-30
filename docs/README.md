@@ -1,10 +1,10 @@
-## Docs
+# Docs
 
 This directory contains [hugo](https://gohugo.io) documentation to be published in GitHub pages.
 
 ## Run Locally
 
-```
+```shell
 hugo server -D
 ```
 
@@ -20,7 +20,7 @@ Javadoc are not checked-in to the GitHub repository.
 They are generated on the fly by GitHub Actions when the docs are updated.
 To view locally, run the following:
 
-```
+```shell
 # note that the 'compile' in the following command is necessary for Javadoc to detect the module structure
 ./mvnw clean compile javadoc:javadoc javadoc:aggregate
 rm -r ./docs/static/api
@@ -30,7 +30,7 @@ mv ./target/site/apidocs ./docs/static/api
 GitHub pages are in the `/client_java/` folder, so we link to `/client_java/api` rather than `/api`.
 To make JavaDoc work locally, create a link:
 
-```
+```shell
 mkdir ./docs/static/client_java
 ln -s ../api ./docs/static/client_java/api
 ```
@@ -47,7 +47,7 @@ modifications in `./docs/themes/hugo-geekdoc/`.
 
 Here's how the initial `docs/` folder was set up:
 
-```
+```shell
 hugo new site docs
 cd docs/
 mkdir -p themes/hugo-geekdoc/

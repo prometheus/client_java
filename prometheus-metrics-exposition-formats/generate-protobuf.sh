@@ -12,8 +12,8 @@ PROTOBUF_VERSION="${PROTOBUF_VERSION_STRING//_/.}"
 
 echo "Generating protobuf sources for version $PROTOBUF_VERSION in $TARGET_DIR"
 
-rm -rf $TARGET_DIR
-mkdir -p $TARGET_DIR
+rm -rf "$TARGET_DIR"
+mkdir -p "$TARGET_DIR"
 rm -rf $PROTO_DIR || true
 mkdir -p $PROTO_DIR
 
@@ -28,9 +28,9 @@ fi
 curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/prometheus/client/metrics.proto -o $PROTO_DIR/metrics.proto
 
 sed -i "s/java_package = \"io.prometheus.client\"/java_package = \"$PACKAGE\"/" $PROTO_DIR/metrics.proto
-protoc --java_out $TARGET_DIR $PROTO_DIR/metrics.proto
-sed -i '1 i\//CHECKSTYLE:OFF: checkstyle' $(find src/main/generated/io -type f)
-sed -i -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' $(find src/main/generated/io -type f)
+protoc --java_out "$TARGET_DIR" $PROTO_DIR/metrics.proto
+sed -i '1 i\//CHECKSTYLE:OFF: checkstyle' "$(find src/main/generated/io -type f)"
+sed -i -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' "$(find src/main/generated/io -type f)"
 
 GENERATED_WITH=$(grep -oP '\/\/ Protobuf Java Version: \K.*' "$TARGET_DIR/${PACKAGE//\.//}"/Metrics.java)
 
