@@ -3,7 +3,7 @@ title: Callbacks
 weight: 5
 ---
 
-The section on [metric types]({{< relref "metric-types.md" >}}) 
+The section on [metric types]({{< relref "metric-types.md" >}})
 showed how to use metrics that actively maintain their state.
 
 This section shows how to create callback-based metrics, i.e. metrics that invoke a callback

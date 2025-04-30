@@ -25,7 +25,7 @@ quick debugging of the other formats, exporters provide a `debug` URL parameter:
 
 - `/metrics?debug=openmetrics`: View OpenMetrics text format.
 - `/metrics?debug=text`: View Prometheus text format.
- - `/metrics?debug=prometheus-protobuf`: View a text representation of the Prometheus protobuf
+- `/metrics?debug=prometheus-protobuf`: View a text representation of the Prometheus protobuf
   format.
 
 ## Exclude protobuf exposition format

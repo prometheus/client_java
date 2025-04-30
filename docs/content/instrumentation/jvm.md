@@ -73,6 +73,7 @@ the [ClassLoadingMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java
 Example metrics:
 
 <!-- editorconfig-checker-disable -->
+
 ```text
 # HELP jvm_classes_currently_loaded The number of classes that are currently loaded in the JVM
 # TYPE jvm_classes_currently_loaded gauge
@@ -84,7 +85,8 @@ jvm_classes_loaded_total 1109.0
 # TYPE jvm_classes_unloaded_total counter
 jvm_classes_unloaded_total 0.0
 ```
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 ## JVM Compilation Metrics
 
@@ -95,12 +97,14 @@ the [CompilationMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.
 Example metrics:
 
 <!-- editorconfig-checker-disable -->
+
 ```text
 # HELP jvm_compilation_time_seconds_total The total time in seconds taken for HotSpot class compilation
 # TYPE jvm_compilation_time_seconds_total counter
 jvm_compilation_time_seconds_total 0.152
 ```
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 ## JVM Garbage Collector Metrics
 
@@ -129,6 +133,7 @@ and the [MemoryPoolMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/ja
 Example metrics:
 
 <!-- editorconfig-checker-disable -->
+
 ```text
 # HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.
 # TYPE jvm_memory_committed_bytes gauge
@@ -202,8 +207,8 @@ jvm_memory_pool_used_bytes{pool="PS Survivor Space"} 0.0
 jvm_memory_used_bytes{area="heap"} 9051232.0
 jvm_memory_used_bytes{area="nonheap"} 1.1490688E7
 ```
-<!-- editorconfig-checker-enable --> 
 
+<!-- editorconfig-checker-enable -->
 
 ## JVM Memory Pool Allocation Metrics
 
@@ -215,6 +220,7 @@ to the [GarbageCollectorMXBean](https://docs.oracle.com/en/java/javase/21/docs/a
 Example metrics:
 
 <!-- editorconfig-checker-disable -->
+
 ```text
 # HELP jvm_memory_pool_allocated_bytes_total Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.
 # TYPE jvm_memory_pool_allocated_bytes_total counter
@@ -225,7 +231,8 @@ jvm_memory_pool_allocated_bytes_total{pool="PS Eden Space"} 1.79232824E8
 jvm_memory_pool_allocated_bytes_total{pool="PS Old Gen"} 1428888.0
 jvm_memory_pool_allocated_bytes_total{pool="PS Survivor Space"} 4115280.0
 ```
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 ## JVM Runtime Info Metric
 
@@ -235,12 +242,14 @@ class. The data is obtained via system properties and will not change throughout
 application. Example metric:
 
 <!-- editorconfig-checker-disable -->
+
 ```text
 # TYPE jvm_runtime info
 # HELP jvm_runtime JVM runtime info
 jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
 ```
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 ## JVM Thread Metrics
 
@@ -251,6 +260,7 @@ the [ThreadMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.manag
 Example metrics:
 
 <!-- editorconfig-checker-disable -->
+
 ```text
 # HELP jvm_threads_current Current thread count of a JVM
 # TYPE jvm_threads_current gauge
@@ -280,7 +290,8 @@ jvm_threads_state{state="TIMED_WAITING"} 2.0
 jvm_threads_state{state="UNKNOWN"} 0.0
 jvm_threads_state{state="WAITING"} 3.0
 ```
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 ## Process Metrics
 

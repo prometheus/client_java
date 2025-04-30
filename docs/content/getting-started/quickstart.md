@@ -175,7 +175,7 @@ public class App {
                 .port(9400)
                 .buildAndStart();
 
-        System.out.println("HTTPServer listening on port http://localhost:" + 
+        System.out.println("HTTPServer listening on port http://localhost:" +
           server.getPort() + "/metrics");
 
         Thread.currentThread().join(); // sleep forever

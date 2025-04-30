@@ -37,6 +37,7 @@ The properties file is searched in the following locations:
 ## Metrics Properties
 
 <!-- editorconfig-checker-disable -->
+
 | Name                                                      | Javadoc                                                                                                                                                                         | Note    |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | io.prometheus.metrics.exemplarsEnabled                    | [Counter.Builder.withExemplars()](</client_java/api/io/prometheus/metrics/core/metrics/Counter.Builder.html#withExemplars()>)                                                   | (1) (2) |
@@ -52,6 +53,7 @@ The properties file is searched in the following locations:
 | io.prometheus.metrics.summaryQuantileErrors               | [Summary.Builder.quantile(double, double)](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#quantile(double,double)>)                                  | (5)     |
 | io.prometheus.metrics.summaryMaxAgeSeconds                | [Summary.Builder.maxAgeSeconds()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#maxAgeSeconds(long)>)                                               |         |
 | io.prometheus.metrics.summaryNumberOfAgeBuckets           | [Summary.Builder.numberOfAgeBuckets()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#numberOfAgeBuckets(int)>)                                      |         |
+
 <!-- editorconfig-checker-enable -->
 
 **Notes**
@@ -85,34 +87,40 @@ This works for all Metrics properties.
 ## Exemplar Properties
 
 <!-- editorconfig-checker-disable -->
+
 | Name                                               | Javadoc                                                                                                                                                         | Note |
 | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exemplars.minRetentionPeriodSeconds  | [ExemplarsProperties.getMinRetentionPeriodSeconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getMinRetentionPeriodSeconds()>)   |      |
 | io.prometheus.exemplars.maxRetentionPeriodSeconds  | [ExemplarsProperties.getMaxRetentionPeriodSeconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getMaxRetentionPeriodSeconds()>)   |      |
 | io.prometheus.exemplars.sampleIntervalMilliseconds | [ExemplarsProperties.getSampleIntervalMilliseconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getSampleIntervalMilliseconds()>) |      |
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 ## Exporter Properties
 
 <!-- editorconfig-checker-disable -->
+
 | Name                                             | Javadoc                                                                                                                                                     | Note |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.includeCreatedTimestamps  | [ExporterProperties.getIncludeCreatedTimestamps()](</client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getIncludeCreatedTimestamps()>)   | (1)  |
 | io.prometheus.exporter.exemplarsOnAllMetricTypes | [ExporterProperties.getExemplarsOnAllMetricTypes()](</client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getExemplarsOnAllMetricTypes()>) | (1)  |
-<!-- editorconfig-checker-enable -->  
+
+<!-- editorconfig-checker-enable -->
 
 (1) Boolean value, `true` or `false`. Default see Javadoc.
 
 ## Exporter Filter Properties
 
 <!-- editorconfig-checker-disable -->
+
 | Name                                                     | Javadoc                                                                                                                                                                   | Note |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.filter.metricNameMustBeEqualTo    | [ExporterFilterProperties.getAllowedMetricNames()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getAllowedMetricNames()>)                 | (1)  |
 | io.prometheus.exporter.filter.metricNameMustNotBeEqualTo | [ExporterFilterProperties.getExcludedMetricNames()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getExcludedMetricNames()>)               | (2)  |
 | io.prometheus.exporter.filter.metricNameMustStartWith    | [ExporterFilterProperties.getAllowedMetricNamePrefixes()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getAllowedMetricNamePrefixes()>)   | (3)  |
 | io.prometheus.exporter.filter.metricNameMustNotStartWith | [ExporterFilterProperties.getExcludedMetricNamePrefixes()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getExcludedMetricNamePrefixes()>) | (4)  |
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 (1) Comma sparated list of allowed metric names. Only these metrics will be exposed.<br/>
 (2) Comma sparated list of excluded metric names. These metrics will not be exposed.<br/>
@@ -122,14 +130,17 @@ This works for all Metrics properties.
 ## Exporter HTTPServer Properties
 
 <!-- editorconfig-checker-disable -->
+
 | Name                                   | Javadoc                                                                                                                     | Note |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.httpServer.port | [HTTPServer.Builder.port()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#port(int)>) |      |
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 ## Exporter OpenTelemetry Properties
 
 <!-- editorconfig-checker-disable -->
+
 | Name                                                    | Javadoc                                                                                                                                                                                                       | Note |
 | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.opentelemetry.protocol           | [OpenTelemetryExporter.Builder.protocol()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#protocol(java.lang.String)>)                                     | (1)  |
@@ -142,7 +153,8 @@ This works for all Metrics properties.
 | io.prometheus.exporter.opentelemetry.serviceInstanceId  | [OpenTelemetryExporter.Builder.serviceInstanceId()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#serviceInstanceId(java.lang.String)>)                   |      |
 | io.prometheus.exporter.opentelemetry.serviceVersion     | [OpenTelemetryExporter.Builder.serviceVersion()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#serviceVersion(java.lang.String)>)                         |      |
 | io.prometheus.exporter.opentelemetry.resourceAttributes | [OpenTelemetryExporter.Builder.resourceAttributes()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#resourceAttribute(java.lang.String,java.lang.String)>) | (3)  |
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 (1) Protocol can be `grpc` or `http/protobuf`.<br>
 (2) Format: `key1=value1,key2=value2`<br>
@@ -156,9 +168,11 @@ See Javadoc for details.
 ## Exporter PushGateway Properties
 
 <!-- editorconfig-checker-disable -->
+
 | Name                                       | Javadoc                                                                                                                                           | Note |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.pushgateway.address | [PushGateway.Builder.address()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#address(java.lang.String)>) |      |
 | io.prometheus.exporter.pushgateway.scheme  | [PushGateway.Builder.scheme()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#scheme(java.lang.String)>)   |      |
 | io.prometheus.exporter.pushgateway.job     | [PushGateway.Builder.job()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#job(java.lang.String)>)         |      |
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->

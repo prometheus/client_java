@@ -2,8 +2,8 @@
 title: "client_java"
 ---
 
-This is the documentation for the 
-[Prometheus Java client library](https://github.com/prometheus/client_java) 
+This is the documentation for the
+[Prometheus Java client library](https://github.com/prometheus/client_java)
 version 1.0.0 and higher.
 
 The main new features of the 1.0.0 release are:
@@ -43,11 +43,11 @@ Updating to the 1.0.0 version is a breaking change. However, there's a
 `prometheus-metrics-simpleclient-bridge` module available that allows you to use your existing
 simpleclient 0.16.0 metrics with the new 1.0.0 `PrometheusRegistry`.
 So you don't need to upgrade your instrumentation code, you can keep using your existing metrics.
-See the 
-[compatibility > simpleclient](https://prometheus.github.io/client_java/migration/simpleclient/) 
+See the
+[compatibility > simpleclient](https://prometheus.github.io/client_java/migration/simpleclient/)
 in the menu on the left.
 
-The pre 1.0.0 code is now maintained on the 
+The pre 1.0.0 code is now maintained on the
 [simpleclient](https://github.com/prometheus/client_java/tree/simpleclient) feature branch.
 
 Not all `simpleclient` modules from 0.16.0 are included in the initial 1.0.0 release.

@@ -11,7 +11,7 @@ The illustration below shows the internal architecture of the Prometheus Java cl
 
 This is the user facing metrics library, implementing the core metric types,
 like [Counter](/client_java/api/io/prometheus/metrics/core/metrics/Counter.html),
-[Gauge](/client_java/api/io/prometheus/metrics/core/metrics/Gauge.html) 
+[Gauge](/client_java/api/io/prometheus/metrics/core/metrics/Gauge.html)
 [Histogram](/client_java/api/io/prometheus/metrics/core/metrics/Histogram.html),
 and so on.
 

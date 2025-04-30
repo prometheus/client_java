@@ -84,7 +84,7 @@ the Prometheus server.
   format and ingest both, the classic and the native flavor. This is great for migrating from
   classic histograms to native histograms.
 
-See [examples/example-native-histogram](https://github.com/prometheus/client_java/tree/1.0.x/examples/example-native-histogram) <!-- editorconfig-checker-disable-line --> 
+See [examples/example-native-histogram](https://github.com/prometheus/client_java/tree/1.0.x/examples/example-native-histogram) <!-- editorconfig-checker-disable-line -->
 for an example.
 
 ```java
@@ -112,8 +112,7 @@ most important options:
 - `classicBuckets(...)`: Set the classic bucket boundaries. Default buckets are `.005`, `.01`,
   `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The default bucket boundaries are
   designed for measuring request durations in seconds.
-- `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is
-  160. When the maximum is reached, the native histogram automatically reduces resolution to stay
+- `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets. Default is 160. When the maximum is reached, the native histogram automatically reduces resolution to stay
   below the limit.
 
 See Javadoc
@@ -227,12 +226,14 @@ info.setLabelValues(version, vendor, runtime);
 The info above looks as follows in OpenMetrics text format:
 
 <!-- editorconfig-checker-disable -->
+
 ```text
 # TYPE jvm_runtime info
 # HELP jvm_runtime JVM runtime info
 jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
 ```
-<!-- editorconfig-checker-enable --> 
+
+<!-- editorconfig-checker-enable -->
 
 The example is taken from the `prometheus-metrics-instrumentation-jvm` module, so if you have
 `JvmMetrics` registered you should have a `jvm_runtime_info` metric out-of-the-box.

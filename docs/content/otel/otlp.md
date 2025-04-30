@@ -51,7 +51,7 @@ the [OTEL_EXPORTER_OTLP_METRICS_ENDPOINT](https://opentelemetry.io/docs/concepts
 environment variable to configure the endpoint. The Javadoc
 for [OpenTelemetryExporter.Builder](/client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html) <!-- editorconfig-checker-disable-line -->
 shows which settings have corresponding OTel configuration. The intended use case is that if you
-attach the 
+attach the
 [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/)
 for tracing, and use the Prometheus Java client for metrics, it is sufficient to configure the OTel
 agent because the Prometheus library will pick up the same configuration.
