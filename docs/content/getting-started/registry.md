@@ -75,7 +75,7 @@ Counter eventsTotal1 = Counter.builder()
 Counter eventsTotal2 = Counter.builder()
     .name("events_total")
     .help("Total number of events")
-    .register(); // <-- IllegalArgumentException, because a metric with that name is already registered
+    .register(); // IllegalArgumentException, because a metric with that name is already registered
 ```
 
 ## Unregistering a Metric

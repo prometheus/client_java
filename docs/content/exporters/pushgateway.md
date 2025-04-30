@@ -74,7 +74,8 @@ public class ExampleBatchJob {
 
 ## Basic Auth
 
-The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports basic authentication.
+The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) 
+supports basic authentication.
 
 ```java
 PushGateway pushGateway = PushGateway.builder()
@@ -87,7 +88,8 @@ The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete ex
 
 ## Bearer token
 
-The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports Bearer token authentication.
+The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) 
+supports Bearer token authentication.
 
 ```java
 PushGateway pushGateway = PushGateway.builder()

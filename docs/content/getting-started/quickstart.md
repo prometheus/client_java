@@ -63,7 +63,7 @@ it from the dependencies.
 ## Dependency management
 
 A Bill of Material
-([BOM](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms))
+([BOM](https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms)) <!-- editorconfig-checker-disable-line -->
 ensures that versions of dependencies (including transitive ones) are aligned.
 This is especially important when using Spring Boot, which manages some of the dependencies of the
 project.
@@ -175,7 +175,8 @@ public class App {
                 .port(9400)
                 .buildAndStart();
 
-        System.out.println("HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");
+        System.out.println("HTTPServer listening on port http://localhost:" + 
+          server.getPort() + "/metrics");
 
         Thread.currentThread().join(); // sleep forever
     }

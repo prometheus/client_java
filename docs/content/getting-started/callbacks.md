@@ -3,7 +3,8 @@ title: Callbacks
 weight: 5
 ---
 
-The section on [metric types]({{< relref "metric-types.md" >}}) showed how to use metrics that actively maintain their state.
+The section on [metric types]({{< relref "metric-types.md" >}}) 
+showed how to use metrics that actively maintain their state.
 
 This section shows how to create callback-based metrics, i.e. metrics that invoke a callback
 at scrape time to get the current values.

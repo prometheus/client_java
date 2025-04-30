@@ -28,12 +28,13 @@ with [defaultHandler()](</client_java/api/io/prometheus/metrics/exporter/httpser
 
 ## Authentication and HTTPS
 
-- [authenticator()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#authenticator(com.sun.net.httpserver.Authenticator)>)
+- [authenticator()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#authenticator(com.sun.net.httpserver.Authenticator)>) <!-- editorconfig-checker-disable-line -->
   is for configuring authentication.
-- [httpsConfigurator()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#httpsConfigurator(com.sun.net.httpserver.HttpsConfigurator)>)
+- [httpsConfigurator()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#httpsConfigurator(com.sun.net.httpserver.HttpsConfigurator)>) <!-- editorconfig-checker-disable-line -->
   is for configuring HTTPS.
 
-You can find an example of authentication and SSL in the [jmx_exporter](https://github.com/prometheus/jmx_exporter). <!-- editorconfig-checker-disable-line -->
+You can find an example of authentication and SSL in the 
+[jmx_exporter](https://github.com/prometheus/jmx_exporter). 
 
 ## Properties
 

@@ -44,9 +44,9 @@ register all JVM metrics, you can register each of these classes individually ra
 ## JVM Buffer Pool Metrics
 
 JVM buffer pool metrics are provided by
-the [JvmBufferPoolMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmBufferPoolMetrics.html)
+the [JvmBufferPoolMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmBufferPoolMetrics.html) <!-- editorconfig-checker-disable-line -->
 class. The data is coming from
-the [BufferPoolMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/BufferPoolMXBean.html).
+the [BufferPoolMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/BufferPoolMXBean.html). <!-- editorconfig-checker-disable-line -->
 Example metrics:
 
 ```text
@@ -67,11 +67,12 @@ jvm_buffer_pool_used_bytes{pool="mapped"} 0.0
 ## JVM Class Loading Metrics
 
 JVM class loading metrics are provided by
-the [JvmClassLoadingMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmClassLoadingMetrics.html)
+the [JvmClassLoadingMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmClassLoadingMetrics.html) <!-- editorconfig-checker-disable-line -->
 class. The data is coming from
-the [ClassLoadingMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/ClassLoadingMXBean.html).
+the [ClassLoadingMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/ClassLoadingMXBean.html). <!-- editorconfig-checker-disable-line -->
 Example metrics:
 
+<!-- editorconfig-checker-disable -->
 ```text
 # HELP jvm_classes_currently_loaded The number of classes that are currently loaded in the JVM
 # TYPE jvm_classes_currently_loaded gauge
@@ -83,27 +84,30 @@ jvm_classes_loaded_total 1109.0
 # TYPE jvm_classes_unloaded_total counter
 jvm_classes_unloaded_total 0.0
 ```
+<!-- editorconfig-checker-enable --> 
 
 ## JVM Compilation Metrics
 
 JVM compilation metrics are provided by
-the [JvmCompilationMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmCompilationMetrics.html)
+the [JvmCompilationMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmCompilationMetrics.html) <!-- editorconfig-checker-disable-line -->
 class. The data is coming from
-the [CompilationMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/CompilationMXBean.html).
+the [CompilationMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/CompilationMXBean.html). <!-- editorconfig-checker-disable-line -->
 Example metrics:
 
+<!-- editorconfig-checker-disable -->
 ```text
 # HELP jvm_compilation_time_seconds_total The total time in seconds taken for HotSpot class compilation
 # TYPE jvm_compilation_time_seconds_total counter
 jvm_compilation_time_seconds_total 0.152
 ```
+<!-- editorconfig-checker-enable --> 
 
 ## JVM Garbage Collector Metrics
 
 JVM garbage collector metrics are provided by
-the [JvmGarbageCollectorMetric](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmGarbageCollectorMetrics.html)
+the [JvmGarbageCollectorMetric](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmGarbageCollectorMetrics.html) <!-- editorconfig-checker-disable-line -->
 class. The data is coming from
-the [GarbageCollectorMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/GarbageCollectorMXBean.html).
+the [GarbageCollectorMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/GarbageCollectorMXBean.html). <!-- editorconfig-checker-disable-line -->
 Example metrics:
 
 ```text
@@ -118,13 +122,13 @@ jvm_gc_collection_seconds_sum{gc="PS Scavenge"} 0.0
 ## JVM Memory Metrics
 
 JVM memory metrics are provided by
-the [JvmMemoryMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmMemoryMetrics.html)
+the [JvmMemoryMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmMemoryMetrics.html) <!-- editorconfig-checker-disable-line -->
 class. The data is coming from
-the [MemoryMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/MemoryMXBean.html)
-and
-the [MemoryPoolMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/MemoryPoolMXBean.html).
+the [MemoryMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/MemoryMXBean.html) <!-- editorconfig-checker-disable-line -->
+and the [MemoryPoolMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/MemoryPoolMXBean.html). <!-- editorconfig-checker-disable-line -->
 Example metrics:
 
+<!-- editorconfig-checker-disable -->
 ```text
 # HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.
 # TYPE jvm_memory_committed_bytes gauge
@@ -198,17 +202,19 @@ jvm_memory_pool_used_bytes{pool="PS Survivor Space"} 0.0
 jvm_memory_used_bytes{area="heap"} 9051232.0
 jvm_memory_used_bytes{area="nonheap"} 1.1490688E7
 ```
+<!-- editorconfig-checker-enable --> 
+
 
 ## JVM Memory Pool Allocation Metrics
 
 JVM memory pool allocation metrics are provided by
-the [JvmMemoryPoolAllocationMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmMemoryPoolAllocationMetrics.html)
+the [JvmMemoryPoolAllocationMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmMemoryPoolAllocationMetrics.html) <!-- editorconfig-checker-disable-line -->
 class. The data is obtained by adding
-a [NotificationListener](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/javax/management/NotificationListener.html)
-to
-the [GarbageCollectorMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/GarbageCollectorMXBean.html).
+a [NotificationListener](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/javax/management/NotificationListener.html) <!-- editorconfig-checker-disable-line -->
+to the [GarbageCollectorMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/GarbageCollectorMXBean.html). <!-- editorconfig-checker-disable-line -->
 Example metrics:
 
+<!-- editorconfig-checker-disable -->
 ```text
 # HELP jvm_memory_pool_allocated_bytes_total Total bytes allocated in a given JVM memory pool. Only updated after GC, not continuously.
 # TYPE jvm_memory_pool_allocated_bytes_total counter
@@ -219,28 +225,32 @@ jvm_memory_pool_allocated_bytes_total{pool="PS Eden Space"} 1.79232824E8
 jvm_memory_pool_allocated_bytes_total{pool="PS Old Gen"} 1428888.0
 jvm_memory_pool_allocated_bytes_total{pool="PS Survivor Space"} 4115280.0
 ```
+<!-- editorconfig-checker-enable --> 
 
 ## JVM Runtime Info Metric
 
 The JVM runtime info metric is provided by
-the [JvmRuntimeInfoMetric](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmRuntimeInfoMetric.html)
+the [JvmRuntimeInfoMetric](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmRuntimeInfoMetric.html) <!-- editorconfig-checker-disable-line -->
 class. The data is obtained via system properties and will not change throughout the lifetime of the
 application. Example metric:
 
+<!-- editorconfig-checker-disable -->
 ```text
 # TYPE jvm_runtime info
 # HELP jvm_runtime JVM runtime info
 jvm_runtime_info{runtime="OpenJDK Runtime Environment",vendor="Oracle Corporation",version="1.8.0_382-b05"} 1
 ```
+<!-- editorconfig-checker-enable --> 
 
 ## JVM Thread Metrics
 
 JVM thread metrics are provided by
-the [JvmThreadsMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmThreadsMetrics.html)
+the [JvmThreadsMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/JvmThreadsMetrics.html) <!-- editorconfig-checker-disable-line -->
 class. The data is coming from
-the [ThreadMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/ThreadMXBean.html).
+the [ThreadMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/ThreadMXBean.html). <!-- editorconfig-checker-disable-line -->
 Example metrics:
 
+<!-- editorconfig-checker-disable -->
 ```text
 # HELP jvm_threads_current Current thread count of a JVM
 # TYPE jvm_threads_current gauge
@@ -270,19 +280,20 @@ jvm_threads_state{state="TIMED_WAITING"} 2.0
 jvm_threads_state{state="UNKNOWN"} 0.0
 jvm_threads_state{state="WAITING"} 3.0
 ```
+<!-- editorconfig-checker-enable --> 
 
 ## Process Metrics
 
 Process metrics are provided by
 the [ProcessMetrics](/client_java/api/io/prometheus/metrics/instrumentation/jvm/ProcessMetrics.html)
 class. The data is coming from
-the [OperatingSystemMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/OperatingSystemMXBean.html),
-the [RuntimeMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/RuntimeMXBean.html),
+the [OperatingSystemMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/OperatingSystemMXBean.html), <!-- editorconfig-checker-disable-line -->
+the [RuntimeMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/RuntimeMXBean.html), <!-- editorconfig-checker-disable-line -->
 and from the `/proc/self/status` file on Linux. The metrics with prefix `process_` are not specific
 to Java, but should be provided by every Prometheus client library,
 see [Process Metrics](https://prometheus.io/docs/instrumenting/writing_clientlibs/#process-metrics)
 in the
-Prometheus [writing client libraries](https://prometheus.io/docs/instrumenting/writing_clientlibs/#process-metrics)
+Prometheus [writing client libraries](https://prometheus.io/docs/instrumenting/writing_clientlibs/#process-metrics) <!-- editorconfig-checker-disable-line -->
 documentation. Example metrics:
 
 ```text

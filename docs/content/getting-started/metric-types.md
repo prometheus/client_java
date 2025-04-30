@@ -84,7 +84,8 @@ the Prometheus server.
   format and ingest both, the classic and the native flavor. This is great for migrating from
   classic histograms to native histograms.
 
-See [examples/example-native-histogram](https://github.com/prometheus/client_java/tree/1.0.x/examples/example-native-histogram) for an example.
+See [examples/example-native-histogram](https://github.com/prometheus/client_java/tree/1.0.x/examples/example-native-histogram) <!-- editorconfig-checker-disable-line --> 
+for an example.
 
 ```java
 Histogram duration = Histogram.builder()
