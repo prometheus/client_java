@@ -21,7 +21,8 @@ They are generated on the fly by GitHub Actions when the docs are updated.
 To view locally, run the following:
 
 ```shell
-# note that the 'compile' in the following command is necessary for Javadoc to detect the module structure
+# note that the 'compile' in the following command is necessary for 
+# Javadoc to detect the module structure
 ./mvnw clean compile javadoc:javadoc javadoc:aggregate
 rm -r ./docs/static/api
 mv ./target/site/apidocs ./docs/static/api

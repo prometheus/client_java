@@ -4,7 +4,7 @@ root = true
 max_line_length = 100
 indent_size = 2
 
-[version-rules.xml]
+[{version-rules.xml,maven-wrapper.properties}]
 max_line_length = 200
 
 [*.java]
@@ -12,7 +12,7 @@ max_line_length = 200
 max_line_length = 200
 
 [pom.xml]
-indent_size = 4
+max_line_length = 110
 
 [*.py]
 # checked by black

@@ -33,7 +33,7 @@ If you're getting errors when running tests:
 - Use `-Dwarnings=-nowarn` to skip the warnings during development.
 
 Combine all with
-`./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn`.
+`./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn`. # editorconfig-checker-disable-line
 
 ## Updating the Protobuf Java Classes
 
