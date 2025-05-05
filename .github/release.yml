@@ -8,6 +8,9 @@ changelog:
       exclude:
         labels:
           - dependencies
+    - title: 🧹 Chore
+      labels:
+        - chore
     - title: 👒 Dependencies
       labels:
         - dependencies
