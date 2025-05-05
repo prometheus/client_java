@@ -76,6 +76,11 @@ run = "./scripts/set-release-version-github-pages.sh"
 description = "Prepare GitHub pages"
 depends = ["javadoc", "set-gh-pages-version"]
 
+[tasks.gh-pages-dev]
+description = "Build GitHub pages for dev"
+run = "hugo server -D"
+dir = "docs"
+
 [tasks.build-gh-pages]
 description = "Build GitHub pages"
 # For maximum backward compatibility with Hugo modules
