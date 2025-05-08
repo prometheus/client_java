@@ -55,7 +55,7 @@ standalone HTTP server.
 {{< hint type=note >}}
 
 If you do not use the protobuf exposition format, you can
-[exclude]({{< relref "quickstart.md#exclude-protobuf-exposition-format" >}})
+[exclude]({{< relref "../exporters/formats.md#exclude-protobuf-exposition-format" >}})
 it from the dependencies.
 
 {{< /hint >}}
