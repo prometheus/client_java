@@ -1,11 +1,7 @@
 ---
 name: OpenTelemetry Acceptance Tests
 
-on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+on: [pull_request]
 
 permissions: {}
 
