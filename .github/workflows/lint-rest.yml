@@ -1,5 +1,5 @@
 ---
-name: Acceptance Tests
+name: Lint What Super Linter Can't
 
 on: [pull_request]
 
