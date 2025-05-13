@@ -25,4 +25,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run the Maven verify phase
-        run: mise run ci
+        run: mise run build-release

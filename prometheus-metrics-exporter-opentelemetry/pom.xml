@@ -19,7 +19,7 @@
   </description>
 
   <properties>
-    <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry.no-otel</automatic.module.name>
+    <automatic.module.name>io.prometheus.metrics.exporter.opentelemetry.nootel</automatic.module.name>
   </properties>
 
   <dependencyManagement>

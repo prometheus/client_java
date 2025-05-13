@@ -6,17 +6,13 @@ PROTO_GENERATION = "true"
 "go:github.com/gohugoio/hugo" = "latest"
 "go:github.com/grafana/oats" = "latest"
 java = "temurin-17.0.13+11"
- lychee = "latest"
+lychee = "latest"
 protoc = "latest"
 
 [tasks.ci]
 description = "CI Build"
-run = [
-  "./mvnw clean install",
-  # just to check if javadoc can be generated
-  "./mvnw javadoc:javadoc -P javadoc"
-]
-env = { REQUIRE_PROTO_UP_TO_DATE = "true" }
+run = "./mvnw clean install"
+env.REQUIRE_PROTO_UP_TO_DATE = "true"
 
 [tasks.format]
 description = "format source code"
@@ -80,6 +76,11 @@ run = "./scripts/set-release-version-github-pages.sh"
 description = "Prepare GitHub pages"
 depends = ["javadoc", "set-gh-pages-version"]
 
+[tasks.gh-pages-dev]
+description = "Build GitHub pages for dev"
+run = "hugo server -D"
+dir = "docs"
+
 [tasks.build-gh-pages]
 description = "Build GitHub pages"
 # For maximum backward compatibility with Hugo modules
@@ -89,6 +90,11 @@ run = [
   "hugo --gc --minify --baseURL ${BASE_URL}/",
   "echo 'ls ./public/api' && ls ./public/api"
 ]
+
+[tasks.build-release]
+description = "Build release"
+run = "./scripts/build-release.sh"
+env.TAG = "1.4.0-SNAPSHOT"
 
 [settings]
 # to get lock file support and for go backend
