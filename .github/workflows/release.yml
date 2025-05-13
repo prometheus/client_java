@@ -13,7 +13,7 @@ jobs:
     permissions: {}
 
     steps:
-      - name: Debug gpg key - remove after debugging
+      - name: Debug gpg key
         env:
           GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
         run: |
