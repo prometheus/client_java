@@ -40,7 +40,8 @@ class StatefulMetricTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testLabelRemoveIf() throws Exception {
-    Counter counter = Counter.builder().name("testLabelRemoveIf").labelNames("label1", "label2").build();
+    Counter counter =
+        Counter.builder().name("testLabelRemoveIf").labelNames("label1", "label2").build();
     Field data = counter.getClass().getSuperclass().getDeclaredField("data");
     data.setAccessible(true);
 
