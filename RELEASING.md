@@ -9,10 +9,12 @@
 ## If the GPG key expired
 
 1. Generate a new key:
-   <https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key#generating-a-gpg-key> <!-- editorconfig-checker-disable-line -->
-2. BUT use `gpg --armor --export-secret-keys YOUR_ID` to
+   <https://central.sonatype.org/publish/requirements/gpg/#generating-a-key-pair>
+2. Distribute the
+   key: <https://central.sonatype.org/publish/requirements/gpg/#distributing-your-public-key>
+3. use `gpg --armor --export-secret-keys YOUR_ID` to
    export ([docs](https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#gpg))
-3. Update the
+4. Update the
    passphrase: <https://github.com/prometheus/client_java/settings/secrets/actions/GPG_SIGNING_PASSPHRASE> <!-- editorconfig-checker-disable-line -->
-4. Update the GPG
+5. Update the GPG
    key: <https://github.com/prometheus/client_java/settings/secrets/actions/GPG_SIGNING_KEY>
