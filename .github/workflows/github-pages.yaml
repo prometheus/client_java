@@ -42,12 +42,10 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-      - name: Prepare GitHub Pages
-        run: mise run prepare-gh-pages
-        env:
-          BASE_URL: "${{ steps.pages.outputs.base_url }}/"
       - name: Build GitHub Pages
         run: mise run build-gh-pages
+        env:
+          BASE_URL: "${{ steps.pages.outputs.base_url }}/"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
