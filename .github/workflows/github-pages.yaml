@@ -41,6 +41,8 @@ jobs:
           cache: "false"
       - name: Prepare GitHub Pages
         run: mise run prepare-gh-pages
+        env:
+          BASE_URL: "${{ steps.pages.outputs.base_url }}/"
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
