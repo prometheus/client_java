@@ -4,7 +4,7 @@ import static io.prometheus.metrics.expositionformats.internal.ProtobufUtil.time
 
 import com.google.protobuf.TextFormat;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_30_2.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_31_0.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
