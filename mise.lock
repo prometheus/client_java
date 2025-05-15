@@ -1,5 +1,5 @@
 [tools."cargo:zizmor"]
-version = "1.6.0"
+version = "1.7.0"
 backend = "cargo:zizmor"
 
 [tools."go:github.com/gohugoio/hugo"]
@@ -7,7 +7,7 @@ version = "v0.147.0"
 backend = "go:github.com/gohugoio/hugo"
 
 [tools."go:github.com/grafana/oats"]
-version = "0.3.0"
+version = "0.3.1"
 backend = "go:github.com/grafana/oats"
 
 [tools.java]
@@ -19,8 +19,8 @@ version = "0.18.1"
 backend = "aqua:lycheeverse/lychee"
 
 [tools.protoc]
-version = "30.2"
+version = "31.0"
 backend = "aqua:protocolbuffers/protobuf/protoc"
 
 [tools.protoc.checksums]
-"protoc-30.2-linux-x86_64.zip" = "sha256:327e9397c6fb3ea2a542513a3221334c6f76f7aa524a7d2561142b67b312a01f"
+"protoc-31.0-linux-x86_64.zip" = "sha256:24e2ed32060b7c990d5eb00d642fde04869d7f77c6d443f609353f097799dd42"
