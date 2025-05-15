@@ -11,7 +11,7 @@
 1. Generate a new key:
    <https://central.sonatype.org/publish/requirements/gpg/#generating-a-key-pair>
 2. Distribute the
-   key: https://central.sonatype.org/publish/requirements/gpg/#distributing-your-public-key
+   key: <https://central.sonatype.org/publish/requirements/gpg/#distributing-your-public-key>
 3. use `gpg --armor --export-secret-keys YOUR_ID` to
    export ([docs](https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#gpg))
 4. Update the
