@@ -39,11 +39,13 @@ jobs:
       - uses: jdx/mise-action@c94f0bf9e520b150e34c017db785461f7e71c5fb # v2.1.1
         with:
           cache: "false"
-      - name: Prepare GitHub Pages
-        run: mise run prepare-gh-pages
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
+      - name: Prepare GitHub Pages
+        run: mise run prepare-gh-pages
+        env:
+          BASE_URL: "${{ steps.pages.outputs.base_url }}/"
       - name: Build GitHub Pages
         run: mise run build-gh-pages
       - name: Upload artifact
