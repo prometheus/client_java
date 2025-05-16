@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.codahale.metrics.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -276,6 +277,52 @@ my_application_namedTimer1_count 0
 # EOF
 """;
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
+  }
+
+  @Test
+  void responseWhenRegistryIsEmpty() {
+    var registry = new PrometheusRegistry();
+    registry.register(new IgnoreInvalidCounter(metricRegistry));
+    assertThat(convertToOpenMetricsFormat(registry))
+        .isEqualTo(
+            """
+# EOF
+""");
+  }
+
+  @Test
+  void collectInvalidMetricFails() {
+    metricRegistry.counter("my.application.namedCounter1").inc(-10);
+    assertThatThrownBy(() -> convertToOpenMetricsFormat())
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void allowSubclassesToIgnoreInvalidMetric() {
+    var registry = new PrometheusRegistry();
+    registry.register(new IgnoreInvalidCounter(metricRegistry));
+    metricRegistry.counter("my.application.namedCounter1").inc(-10);
+    assertThat(convertToOpenMetricsFormat(registry))
+        .isEqualTo(
+            """
+# EOF
+""");
+  }
+
+  private static class IgnoreInvalidCounter extends DropwizardExports {
+
+    public IgnoreInvalidCounter(MetricRegistry registry) {
+      super(registry);
+    }
+
+    @Override
+    protected MetricSnapshot fromCounter(String dropwizardName, Counter counter) {
+      try {
+        return super.fromCounter(dropwizardName, counter);
+      } catch (IllegalArgumentException exc) {
+        return null;
+      }
+    }
   }
 
   private static class ExampleDoubleGauge implements Gauge<Double> {
