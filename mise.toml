@@ -38,16 +38,14 @@ run = "./mvnw install -DskipTests"
 run = "scripts/super-linter.sh"
 
 [tasks.lint-links]
-run = "lychee --cache --include-fragments ."
+run = "lychee --include-fragments ."
 
 [tasks.lint-gh-actions]
 run = "zizmor .github/"
 
 [tasks.lint-rest]
 description = "All lints not covered by super linter"
-depends = [
-  #  "lint-links", # try out first
-  "lint-gh-actions"]
+depends = ["lint-links", "lint-gh-actions"]
 
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
