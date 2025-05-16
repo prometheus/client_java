@@ -21,7 +21,7 @@
     <protobuf-java.version>4.31.0</protobuf-java.version>
     <guava.version>33.4.8-jre</guava.version>
     <junit-jupiter.version>5.12.2</junit-jupiter.version>
-    <otel.instrumentation.version>2.15.0-alpha</otel.instrumentation.version>
+    <otel.instrumentation.version>2.16.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
     <checkstyle.skip>false</checkstyle.skip>
