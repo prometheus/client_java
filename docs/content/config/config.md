@@ -124,7 +124,8 @@ This works for all Metrics properties.
 
 (1) Comma separated list of allowed metric names. Only these metrics will be exposed.<br/>
 (2) Comma separated list of excluded metric names. These metrics will not be exposed.<br/>
-(3) Comma separated list of prefixes. Only metrics starting with these prefixes will be exposed.<br/>
+(3) Comma separated list of prefixes.
+Only metrics starting with these prefixes will be exposed.<br/>
 (4) Comma separated list of prefixes. Metrics starting with these prefixes will not be exposed.<br/>
 
 ## Exporter HTTPServer Properties
