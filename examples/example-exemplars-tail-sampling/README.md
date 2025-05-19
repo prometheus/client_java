@@ -60,7 +60,7 @@ There are two ways how to do this:
 2. _Tail-based sampling_ is performed by an external infrastructure component like
    the [OpenTelemetry collector](https://opentelemetry.io/docs/collector/).
 
-When generating Exemplars, the Prometheus Java client libray must make sure that the Exemplar points
+When generating Exemplars, the Prometheus Java client library must make sure that the Exemplar points
 to a trace that is
 actually sampled. Otherwise, Exemplar's trace ID will not be available in the monitoring backend,
 i.e. the Exemplar will
@@ -95,10 +95,10 @@ The `docker-compose` file will run the example with the following containers:
 
 - `hello-world-app`: Java service described above, with the OpenTelemetry Java instrumentation agent
   attached for
-  distrubted tracing.
+  distributed tracing.
 - `greeting-service`: Java service described above, with the OpenTelemetry Java instrumentation
   agent attached for
-  distrubted tracing.
+  distributed tracing.
 - `collector`: OpenTelemetry collector for receiving the distributed traces, performing _tail
   sampling_, and forwarding
   them to `tempo`.
@@ -124,7 +124,7 @@ password _admin_.
 
 ## Example Dashboard
 
-The example dashboard shows 50 requests / second for the Java serices:
+The example dashboard shows 50 requests / second for the Java services:
 
 ![Screenshot showing the request rate on the Java services](https://github.com/prometheus/client_java/assets/330535/9f8dc92e-c9aa-40b6-8fda-a0f7e98560ba) <!-- editorconfig-checker-disable-line -->
 
