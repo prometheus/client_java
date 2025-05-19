@@ -60,11 +60,10 @@ There are two ways how to do this:
 2. _Tail-based sampling_ is performed by an external infrastructure component like
    the [OpenTelemetry collector](https://opentelemetry.io/docs/collector/).
 
-When generating Exemplars, the Prometheus Java client library must make sure that the Exemplar points
-to a trace that is
+When generating Exemplars, the Prometheus Java client library must make sure that the Exemplar
+points to a trace that is
 actually sampled. Otherwise, Exemplar's trace ID will not be available in the monitoring backend,
-i.e. the Exemplar will
-link to a non-existing trace ID.
+i.e. the Exemplar will link to a non-existing trace ID.
 
 With _head-based sampling_ this works out-of-the-box: The Prometheus client library calls
 OpenTelemetry's
