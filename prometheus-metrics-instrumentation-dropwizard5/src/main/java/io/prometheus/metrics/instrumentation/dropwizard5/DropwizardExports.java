@@ -169,7 +169,8 @@ public class DropwizardExports implements MultiCollector {
             .quantile(0.999, snapshot.get999thPercentile() * factor)
             .build();
 
-    String name = labelMapper.isPresent() ? labelMapper.get().getName(dropwizardName) : dropwizardName;
+    String name =
+        labelMapper.isPresent() ? labelMapper.get().getName(dropwizardName) : dropwizardName;
     MetricMetadata metadata =
         new MetricMetadata(PrometheusNaming.sanitizeMetricName(name), helpMessage);
     SummarySnapshot.SummaryDataPointSnapshot.Builder dataPointBuilder =
