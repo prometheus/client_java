@@ -417,13 +417,6 @@
       </dependencyManagement>
     </profile>
     <profile>
-      <id>setVersion</id>
-      <modules>
-        <module>prometheus-metrics-parent</module>
-        <module>prometheus-metrics-bom</module>
-      </modules>
-    </profile>
-    <profile>
       <id>javadoc</id>
       <build>
         <plugins>
