@@ -63,7 +63,7 @@ run = 'mvn versions:set -DnewVersion={{arg(name="version")}}'
 
 [tasks.javadoc]
 run = [
-  "./mvnw -B clean compile javadoc:javadoc javadoc:aggregate -P javadoc",
+  "./mvnw -B clean compile javadoc:javadoc javadoc:aggregate -P 'javadoc,!default'",
   "mv ./target/reports/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api"
 ]
 
