@@ -19,6 +19,7 @@
     <checkstyle.skip>true</checkstyle.skip>
     <coverage.skip>true</coverage.skip>
     <spotless.skip>true</spotless.skip>
+    <javadoc.skip>true</javadoc.skip>
   </properties>
 
   <licenses>
@@ -103,6 +104,9 @@
                 <goals>
                   <goal>jar</goal>
                 </goals>
+                <configuration>
+                  <skip>${javadoc.skip}</skip>
+                </configuration>
               </execution>
             </executions>
           </plugin>
