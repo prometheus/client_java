@@ -26,7 +26,7 @@
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-exposition-textformats</artifactId>
-      <version>${project.version}</version>
+      <version>${revision}</version>
     </dependency>
     <dependency>
       <groupId>com.google.protobuf</groupId>
@@ -53,7 +53,7 @@
         <dependency>
           <groupId>io.prometheus</groupId>
           <artifactId>prometheus-metrics-exposition-textformats</artifactId>
-          <version>${project.version}</version>
+          <version>${revision}</version>
           <scope>test</scope>
           <type>test-jar</type>
         </dependency>

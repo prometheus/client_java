@@ -20,7 +20,7 @@
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
-      <version>${project.version}</version>
+      <version>${revision}</version>
       <exclusions>
         <exclusion>
           <groupId>io.prometheus</groupId>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-core</artifactId>
-      <version>${project.version}</version>
+      <version>${revision}</version>
       <exclusions>
         <exclusion>
           <groupId>io.prometheus</groupId>
