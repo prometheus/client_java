@@ -8,11 +8,11 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>client_java_parent</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <relativePath>prometheus-metrics-parent/pom.xml</relativePath>
   </parent>
 
-  <version>1.4.0-SNAPSHOT</version>
+  <version>${revision}</version>
   <artifactId>client_java</artifactId>
 
   <name>Prometheus Metrics Library</name>
@@ -192,9 +192,39 @@
           <artifactId>spotless-maven-plugin</artifactId>
           <version>2.44.4</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>1.1.0</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <inherited>true</inherited>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>resolveCiFriendliesOnly</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>

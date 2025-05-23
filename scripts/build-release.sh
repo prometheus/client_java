@@ -4,5 +4,4 @@ set -euo pipefail
 
 VERSION=${TAG#v}
 
-./setVersion "$VERSION"
-mvn -B package -P release -Dmaven.test.skip=true
+mvn -B package -P release -Drevision="$VERSION" -Dmaven.test.skip=true

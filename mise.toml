@@ -58,9 +58,6 @@ tools.java = "graalvm-22.3.3+java17"
 run = "../../mvnw test -PnativeTest"
 dir = "integration-tests/it-spring-boot-smoke-test"
 
-[tasks.set-version]
-run = './scripts/set-version.sh {{arg(name="version")}}'
-
 [tasks.javadoc]
 run = [
   "./mvnw -B clean compile javadoc:javadoc javadoc:aggregate -P javadoc",

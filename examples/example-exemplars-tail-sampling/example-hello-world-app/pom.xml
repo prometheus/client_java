@@ -7,7 +7,7 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>example-exemplars-tail-sampling</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>${revision}</version>
   </parent>
 
   <artifactId>example-hello-world-app</artifactId>
