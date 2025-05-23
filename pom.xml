@@ -35,8 +35,6 @@
   </properties>
 
   <modules>
-    <module>prometheus-metrics-parent</module>
-    <module>prometheus-metrics-bom</module>
     <module>prometheus-metrics-core</module>
     <module>prometheus-metrics-config</module>
     <module>prometheus-metrics-model</module>
@@ -417,6 +415,13 @@
           </dependency>
         </dependencies>
       </dependencyManagement>
+    </profile>
+    <profile>
+      <id>setVersion</id>
+      <modules>
+        <module>prometheus-metrics-parent</module>
+        <module>prometheus-metrics-bom</module>
+      </modules>
     </profile>
     <profile>
       <id>javadoc</id>
