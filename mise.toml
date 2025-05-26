@@ -1,18 +1,16 @@
-[env]
-PROTO_GENERATION = "true"
-
 [tools]
-"cargo:zizmor" = "latest"
-"go:github.com/gohugoio/hugo" = "latest"
-"go:github.com/grafana/oats" = "latest"
+"cargo:zizmor" = "1.8.0"
+"go:github.com/gohugoio/hugo" = "v0.147.0"
+"go:github.com/grafana/oats" = "0.3.1"
 java = "temurin-17.0.13+11"
-lychee = "latest"
-protoc = "latest"
+lychee = "0.18.1"
+protoc = "31.0"
 
 [tasks.ci]
 description = "CI Build"
 run = "./mvnw clean install"
 env.REQUIRE_PROTO_UP_TO_DATE = "true"
+env.PROTO_GENERATION = "true"
 
 [tasks.format]
 description = "format source code"
