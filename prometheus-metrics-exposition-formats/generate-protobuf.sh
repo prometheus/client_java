@@ -42,7 +42,6 @@ if [[ $GENERATED_WITH != "$PROTOBUF_VERSION" ]]; then
 	exit 1
 fi
 
-git checkout -- ../mise.lock # see https://github.com/jdx/mise/discussions/4782
 STATUS=$(git status --porcelain)
 if [[ ${REQUIRE_PROTO_UP_TO_DATE:-false} == "true" && -n "$STATUS" ]]; then
 	echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
