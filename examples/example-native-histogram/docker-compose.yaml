@@ -10,7 +10,7 @@ services:
       - -jar
       - /example-native-histogram.jar
   prometheus:
-    image: prom/prometheus:v2.47.0
+    image: prom/prometheus:v2.55.1
     network_mode: host
     volumes:
       - ./docker-compose/prometheus.yml:/prometheus.yml
