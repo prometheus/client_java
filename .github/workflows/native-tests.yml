@@ -15,6 +15,6 @@ jobs:
         uses: actions/checkout@v4
       - uses: jdx/mise-action@c94f0bf9e520b150e34c017db785461f7e71c5fb # v2.1.1
         env:
-          MISE_ENABLE: java
+          MISE_ENABLE_TOOLS: java
       - name: Run native tests
         run: mise run native-test

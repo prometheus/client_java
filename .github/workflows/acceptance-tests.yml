@@ -15,6 +15,6 @@ jobs:
         uses: actions/checkout@v4
       - uses: jdx/mise-action@c94f0bf9e520b150e34c017db785461f7e71c5fb # v2.1.1
         env:
-          MISE_ENABLE: oats,java
+          MISE_ENABLE_TOOLS: oats,java
       - name: Run acceptance tests
         run: mise run acceptance-test
