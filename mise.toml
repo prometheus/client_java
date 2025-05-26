@@ -2,7 +2,7 @@
 "cargo:zizmor" = "1.8.0"
 "go:github.com/gohugoio/hugo" = "v0.147.0"
 "go:github.com/grafana/oats" = "0.3.1"
-java = "temurin-17.0.13+11"
+java = "temurin-17.0.15+6"
 lychee = "0.18.1"
 protoc = "31.0"
 
