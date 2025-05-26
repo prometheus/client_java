@@ -59,7 +59,7 @@ run = "../../mvnw test -PnativeTest"
 dir = "integration-tests/it-spring-boot-smoke-test"
 
 [tasks.set-version]
-run = 'mvn versions:set -DnewVersion={{arg(name="version")}}'
+run = './scripts/set-version.sh {{arg(name="version")}}'
 
 [tasks.javadoc]
 run = [
