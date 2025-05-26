@@ -4,5 +4,5 @@
   "platformCommit": "enabled",
   "automerge": true,
   "dependencyDashboard": false,
-  "ignorePaths": ["simpleclient-archive/**"]
+  "ignorePaths": ["**/simpleclient-archive/**"]
 }
