@@ -29,6 +29,7 @@ defaults:
 jobs:
   # Build job
   build:
+    if: github.repository == 'prometheus/client_java'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -56,6 +57,7 @@ jobs:
 
   # Deployment job
   deploy:
+    if: github.repository == 'prometheus/client_java'
     permissions:
       contents: read
       pages: write
