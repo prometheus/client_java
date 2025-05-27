@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21.0.7_6-jre
 
 COPY target/example-exporter-opentelemetry.jar ./app.jar
 # check that the resource attributes from the agent are used, epsecially the service.instance.id should be the same
