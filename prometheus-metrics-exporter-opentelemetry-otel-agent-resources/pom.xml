@@ -20,7 +20,7 @@
   <properties>
     <automatic.module.name>io.prometheus.otel.resource.attributes</automatic.module.name>
     <!-- don't update with dependabot, the Otel agent can handle older versions -->
-    <otel-dynamic-load.version>1.29.0</otel-dynamic-load.version>
+    <otel-dynamic-load.version>1.50.0</otel-dynamic-load.version>
   </properties>
 
   <build>
