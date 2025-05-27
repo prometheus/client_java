@@ -18,6 +18,10 @@
     Bill of Materials for the Prometheus Metrics library
   </description>
 
+  <properties>
+    <spotless.skip>true</spotless.skip>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>

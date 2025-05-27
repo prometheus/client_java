@@ -9,6 +9,7 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
+import io.prometheus.metrics.instrumentation.dropwizard5.InvalidMetricHandler;
 import io.prometheus.metrics.instrumentation.dropwizard5.labels.CustomLabelMapper;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -21,8 +22,10 @@ import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +35,7 @@ public class DropwizardExports implements MultiCollector {
   private final MetricRegistry registry;
   private final MetricFilter metricFilter;
   private final Optional<CustomLabelMapper> labelMapper;
+  private final InvalidMetricHandler invalidMetricHandler;
 
   /**
    * Creates a new DropwizardExports and {@link MetricFilter#ALL}.
@@ -43,6 +47,7 @@ public class DropwizardExports implements MultiCollector {
     this.registry = registry;
     this.metricFilter = MetricFilter.ALL;
     this.labelMapper = Optional.empty();
+    this.invalidMetricHandler = InvalidMetricHandler.ALWAYS_THROW;
   }
 
   /**
@@ -55,6 +60,7 @@ public class DropwizardExports implements MultiCollector {
     this.registry = registry;
     this.metricFilter = metricFilter;
     this.labelMapper = Optional.empty();
+    this.invalidMetricHandler = InvalidMetricHandler.ALWAYS_THROW;
   }
 
   /**
@@ -67,6 +73,23 @@ public class DropwizardExports implements MultiCollector {
     this.registry = registry;
     this.metricFilter = metricFilter;
     this.labelMapper = Optional.ofNullable(labelMapper);
+    this.invalidMetricHandler = InvalidMetricHandler.ALWAYS_THROW;
+  }
+
+  /**
+   * @param registry a metric registry to export in prometheus.
+   * @param metricFilter a custom metric filter.
+   * @param labelMapper a labelMapper to use to map labels.
+   */
+  private DropwizardExports(
+      MetricRegistry registry,
+      MetricFilter metricFilter,
+      CustomLabelMapper labelMapper,
+      InvalidMetricHandler invalidMetricHandler) {
+    this.registry = registry;
+    this.metricFilter = metricFilter;
+    this.labelMapper = Optional.ofNullable(labelMapper);
+    this.invalidMetricHandler = invalidMetricHandler;
   }
 
   private static String getHelpMessage(String metricName, Metric metric) {
@@ -146,8 +169,10 @@ public class DropwizardExports implements MultiCollector {
             .quantile(0.999, snapshot.get999thPercentile() * factor)
             .build();
 
+    String name =
+        labelMapper.isPresent() ? labelMapper.get().getName(dropwizardName) : dropwizardName;
     MetricMetadata metadata =
-        new MetricMetadata(PrometheusNaming.sanitizeMetricName(dropwizardName), helpMessage);
+        new MetricMetadata(PrometheusNaming.sanitizeMetricName(name), helpMessage);
     SummarySnapshot.SummaryDataPointSnapshot.Builder dataPointBuilder =
         SummarySnapshot.SummaryDataPointSnapshot.builder().quantiles(quantiles).count(count);
     labelMapper.ifPresent(
@@ -194,32 +219,31 @@ public class DropwizardExports implements MultiCollector {
   @Override
   public MetricSnapshots collect() {
     MetricSnapshots.Builder metricSnapshots = MetricSnapshots.builder();
-
-    registry
-        .getGauges(metricFilter)
-        .forEach(
-            (name, gauge) -> {
-              MetricSnapshot snapshot = fromGauge(name, gauge);
-              if (snapshot != null) {
-                metricSnapshots.metricSnapshot(snapshot);
-              }
-            });
-
-    registry
-        .getCounters(metricFilter)
-        .forEach((name, counter) -> metricSnapshots.metricSnapshot(fromCounter(name, counter)));
-    registry
-        .getHistograms(metricFilter)
-        .forEach(
-            (name, histogram) -> metricSnapshots.metricSnapshot(fromHistogram(name, histogram)));
-    registry
-        .getTimers(metricFilter)
-        .forEach((name, timer) -> metricSnapshots.metricSnapshot(fromTimer(name, timer)));
-    registry
-        .getMeters(metricFilter)
-        .forEach((name, meter) -> metricSnapshots.metricSnapshot(fromMeter(name, meter)));
-
+    collectMetricKind(metricSnapshots, registry.getGauges(metricFilter), this::fromGauge);
+    collectMetricKind(metricSnapshots, registry.getCounters(metricFilter), this::fromCounter);
+    collectMetricKind(metricSnapshots, registry.getHistograms(metricFilter), this::fromHistogram);
+    collectMetricKind(metricSnapshots, registry.getTimers(metricFilter), this::fromTimer);
+    collectMetricKind(metricSnapshots, registry.getMeters(metricFilter), this::fromMeter);
     return metricSnapshots.build();
+  }
+
+  private <T> void collectMetricKind(
+      MetricSnapshots.Builder builder,
+      Map<String, T> metric,
+      BiFunction<String, T, MetricSnapshot> toSnapshot) {
+    for (Map.Entry<String, T> entry : metric.entrySet()) {
+      String metricName = entry.getKey();
+      try {
+        MetricSnapshot snapshot = toSnapshot.apply(metricName, entry.getValue());
+        if (snapshot != null) {
+          builder.metricSnapshot(snapshot);
+        }
+      } catch (Exception e) {
+        if (!invalidMetricHandler.suppressException(metricName, e)) {
+          throw e;
+        }
+      }
+    }
   }
 
   public static Builder builder() {
@@ -231,9 +255,11 @@ public class DropwizardExports implements MultiCollector {
     private MetricRegistry registry;
     private MetricFilter metricFilter;
     private CustomLabelMapper labelMapper;
+    private InvalidMetricHandler invalidMetricHandler;
 
     private Builder() {
       this.metricFilter = MetricFilter.ALL;
+      this.invalidMetricHandler = InvalidMetricHandler.ALWAYS_THROW;
     }
 
     public Builder dropwizardRegistry(MetricRegistry registry) {
@@ -251,15 +277,16 @@ public class DropwizardExports implements MultiCollector {
       return this;
     }
 
+    public Builder invalidMetricHandler(InvalidMetricHandler invalidMetricHandler) {
+      this.invalidMetricHandler = invalidMetricHandler;
+      return this;
+    }
+
     DropwizardExports build() {
       if (registry == null) {
         throw new IllegalArgumentException("MetricRegistry must be set");
       }
-      if (labelMapper == null) {
-        return new DropwizardExports(registry, metricFilter);
-      } else {
-        return new DropwizardExports(registry, metricFilter, labelMapper);
-      }
+      return new DropwizardExports(registry, metricFilter, labelMapper, invalidMetricHandler);
     }
 
     public void register() {

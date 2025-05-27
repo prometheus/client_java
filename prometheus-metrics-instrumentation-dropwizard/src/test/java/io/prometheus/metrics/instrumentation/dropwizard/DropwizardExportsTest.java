@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.codahale.metrics.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
+import io.prometheus.metrics.instrumentation.dropwizard5.InvalidMetricHandler;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.io.ByteArrayOutputStream;
@@ -276,6 +277,56 @@ my_application_namedTimer1_count 0
 # EOF
 """;
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
+  }
+
+  @Test
+  void responseWhenRegistryIsEmpty() {
+    var registry = new PrometheusRegistry();
+    registry.register(DropwizardExports.builder().dropwizardRegistry(metricRegistry).build());
+    assertThat(convertToOpenMetricsFormat(registry))
+        .isEqualTo(
+            """
+# EOF
+""");
+  }
+
+  @Test
+  void collectInvalidMetricFails() {
+    metricRegistry.counter("my.application.namedCounter1").inc(-10);
+    metricRegistry.counter("my.application.namedCounter2").inc(10);
+    var registry = new PrometheusRegistry();
+    DropwizardExports.builder().dropwizardRegistry(metricRegistry).register(registry);
+    assertThatThrownBy(() -> convertToOpenMetricsFormat(registry))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  void collectInvalidMetricPassesWhenExceptionIsIgnored() {
+    metricRegistry.counter("my.application.namedCounter1").inc(-10);
+    metricRegistry.counter("my.application.namedCounter2").inc(10);
+    var registry = new PrometheusRegistry();
+
+    final StringBuilder buf = new StringBuilder();
+    InvalidMetricHandler invalidMetricHandler =
+        (name, exc) -> {
+          buf.append("%s: %s%n".formatted(name, exc.getMessage()));
+          return true;
+        };
+
+    DropwizardExports.builder()
+        .dropwizardRegistry(metricRegistry)
+        .invalidMetricHandler(invalidMetricHandler)
+        .register(registry);
+    assertThat(convertToOpenMetricsFormat(registry))
+        .isEqualTo(
+            """
+# TYPE my_application_namedCounter2 counter
+# HELP my_application_namedCounter2 Generated from Dropwizard metric import (metric=my.application.namedCounter2, type=com.codahale.metrics.Counter)
+my_application_namedCounter2_total 10.0
+# EOF
+""");
+    assertThat(buf.toString())
+        .contains("my.application.namedCounter1: -10.0: counters cannot have a negative value");
   }
 
   private static class ExampleDoubleGauge implements Gauge<Double> {
