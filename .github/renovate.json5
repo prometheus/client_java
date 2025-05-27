@@ -1,12 +1,12 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
-  "platformCommit": "enabled",
-  "automerge": true,
-  "dependencyDashboard": false,
-  "ignorePaths": [
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended"],
+  platformCommit: "enabled",
+  automerge: true,
+  dependencyDashboard: false,
+  ignorePaths: [
     "**/simpleclient-archive/**", // old projects
     // agent resources packages an OTel API that is the minimum required API version
-    "**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml"
-  ]
+    "**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml",
+  ],
 }
