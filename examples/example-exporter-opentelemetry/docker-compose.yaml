@@ -1,7 +1,7 @@
 version: "3"
 services:
   prometheus-opentelemetry-example-app:
-    image: openjdk:11-jre
+    image: openjdk:11.0.16-jre
     network_mode: host
     ports:
       - "5005:5005"
