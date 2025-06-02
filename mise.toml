@@ -4,7 +4,7 @@
 "go:github.com/grafana/oats" = "0.3.1"
 java = "temurin-21.0.7+6.0.LTS"
 lychee = "0.18.1"
-protoc = "31.0"
+protoc = "31.1"
 
 [tasks.ci]
 description = "CI Build"
@@ -19,6 +19,11 @@ run = "./mvnw spotless:apply"
 [tasks.compile]
 description = "bare compile, ignoring formatting and linters"
 run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+
+[tasks.generate]
+description = "bare compile, ignoring formatting and linters"
+run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+env.PROTO_GENERATION = "true"
 
 [tasks.test]
 description = "run unit tests, ignoring formatting and linters"
