@@ -4,6 +4,12 @@ cache = true
 
 base = "https://prometheus.github.io"
 exclude_path = ["docs/themes"]
-exclude = ['^https://github\.com/prometheus/client_java/settings', '#']
+exclude = [
+  '^https://github\.com/prometheus/client_java/settings',
+  '#',
+  'CONTRIBUTING.md',
+  'LICENSE',
+  'MAINTAINERS.md'
+]
 
 
