@@ -20,6 +20,11 @@ run = "./mvnw spotless:apply"
 description = "bare compile, ignoring formatting and linters"
 run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
 
+[tasks.generate]
+description = "bare compile, ignoring formatting and linters"
+run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+env.PROTO_GENERATION = "true"
+
 [tasks.test]
 description = "run unit tests, ignoring formatting and linters"
 run = "./mvnw test -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
