@@ -55,12 +55,6 @@ description = "Run OATs acceptance tests"
 depends = "build"
 run = "oats -timeout 5m examples/"
 
-[tasks.native-test]
-depends = "build"
-tools.java = "graalvm-22.3.3+java17"
-run = "../../mvnw test -PnativeTest"
-dir = "integration-tests/it-spring-boot-smoke-test"
-
 [tasks.set-version]
 run = './scripts/set-version.sh {{arg(name="version")}}'
 

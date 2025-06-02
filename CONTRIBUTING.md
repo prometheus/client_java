@@ -4,7 +4,7 @@ Prometheus uses GitHub to manage reviews of pull requests.
 
 - If you have a trivial fix or improvement, go ahead and create a pull request,
   addressing (with `@...`) the maintainer of this repository (see
-  [MAINTAINERS.md](https://github.com/prometheus/client_java/blob/main/MAINTAINERS.md)) in the
+  [MAINTAINERS.md](MAINTAINERS.md)) in the
   description of the pull request.
 
 - If you plan to do something more involved, first discuss your ideas
@@ -26,6 +26,12 @@ If you're getting errors when running tests:
 - Make sure that the IDE uses only the "Maven Shade" dependency of "
   prometheus-metrics-exposition-formats" and the "prometheus-metrics-tracer\*" dependencies.
 
+### Running native tests
+
+```shell
+mise --env native test
+```
+
 ### Avoid failures while running tests
 
 - Use `-Dspotless.check.skip=true` to skip the formatting check during development.
@@ -34,8 +40,24 @@ If you're getting errors when running tests:
 - Use `-Dwarnings=-nowarn` to skip the warnings during development.
 
 Combine all with
-`./mvnw test -DskipTests=true -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn`. # editorconfig-checker-disable-line
+
+```shell
+./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true \
+  -Dcheckstyle.skip=true -Dwarnings=-nowarn
+```
+
+or simply
+
+```shell
+mise run compile
+```
 
 ## Updating the Protobuf Java Classes
 
-Use `mise up && mise run test` to generate protobuf classes.
+In the failing PR from renovate, run:
+
+```shell
+mise run generate
+```
+
+Add the new `Metrics.java` to Git and commit it.

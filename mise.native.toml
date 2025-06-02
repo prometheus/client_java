@@ -1,0 +1,8 @@
+[tools]
+java = "graalvm-community-24.0.1"
+
+[tasks.test]
+depends = "build"
+run = "../../mvnw test -PnativeTest"
+dir = "integration-tests/it-spring-boot-smoke-test"
+
