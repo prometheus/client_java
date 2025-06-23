@@ -1,6 +1,6 @@
 [tools]
 "cargo:zizmor" = "1.8.0"
-"go:github.com/gohugoio/hugo" = "v0.147.8"
+"go:github.com/gohugoio/hugo" = "v0.147.9"
 "go:github.com/grafana/oats" = "0.3.2"
 java = "temurin-21.0.7+6.0.LTS"
 lychee = "0.18.1"
