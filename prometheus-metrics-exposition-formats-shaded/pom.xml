@@ -27,6 +27,12 @@
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-exposition-formats-no-protobuf</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.protobuf</groupId>
+          <artifactId>protobuf-java</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
