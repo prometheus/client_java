@@ -251,7 +251,8 @@ meter_total 2.0
     metricRegistry.counter("my.application.namedCounter1");
     metricRegistry.meter("my.application.namedMeter1");
     metricRegistry.histogram("my.application.namedHistogram1");
-    metricRegistry.register(MetricName.parse("my.application.namedGauge1"), new ExampleDoubleGauge());
+    metricRegistry.register(
+        MetricName.parse("my.application.namedGauge1"), new ExampleDoubleGauge());
 
     String expected =
         """
