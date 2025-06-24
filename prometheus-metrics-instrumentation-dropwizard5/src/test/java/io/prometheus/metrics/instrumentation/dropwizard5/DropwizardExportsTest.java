@@ -81,11 +81,11 @@ foo_bar_total 1.0
           }
         };
 
-    metricRegistry.register("double.gauge", doubleGauge);
-    metricRegistry.register("long.gauge", longGauge);
-    metricRegistry.register("integer.gauge", integerGauge);
-    metricRegistry.register("float.gauge", floatGauge);
-    metricRegistry.register("boolean.gauge", booleanGauge);
+    metricRegistry.register(MetricName.parse("double.gauge"), doubleGauge);
+    metricRegistry.register(MetricName.parse("long.gauge"), longGauge);
+    metricRegistry.register(MetricName.parse("integer.gauge"), integerGauge);
+    metricRegistry.register(MetricName.parse("float.gauge"), floatGauge);
+    metricRegistry.register(MetricName.parse("boolean.gauge"), booleanGauge);
 
     String expected =
         """
@@ -114,7 +114,7 @@ long_gauge 1234.0
   public void testInvalidGaugeType() {
     Gauge<String> invalidGauge = () -> "foobar";
 
-    metricRegistry.register("invalid_gauge", invalidGauge);
+    metricRegistry.register(MetricName.parse("invalid_gauge"), invalidGauge);
 
     String expected = "# EOF\n";
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
@@ -123,7 +123,7 @@ long_gauge 1234.0
   @Test
   public void testGaugeReturningNullValue() {
     Gauge<String> invalidGauge = () -> null;
-    metricRegistry.register("invalid_gauge", invalidGauge);
+    metricRegistry.register(MetricName.parse("invalid_gauge"), invalidGauge);
     String expected = "# EOF\n";
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
@@ -251,7 +251,8 @@ meter_total 2.0
     metricRegistry.counter("my.application.namedCounter1");
     metricRegistry.meter("my.application.namedMeter1");
     metricRegistry.histogram("my.application.namedHistogram1");
-    metricRegistry.register("my.application.namedGauge1", new ExampleDoubleGauge());
+    metricRegistry.register(
+        MetricName.parse("my.application.namedGauge1"), new ExampleDoubleGauge());
 
     String expected =
         """
