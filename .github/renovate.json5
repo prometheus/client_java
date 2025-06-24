@@ -3,7 +3,6 @@
   extends: ["config:recommended"],
   platformCommit: "enabled",
   automerge: true,
-  dependencyDashboard: false,
   ignorePaths: [
     "**/simpleclient-archive/**", // old projects
     // agent resources packages an OTel API that is the minimum required API version
