@@ -43,7 +43,7 @@ services:
     command:
       - --config=file:/config.yaml
   prometheus:
-    image: prom/prometheus:v3.4.1
+    image: prom/prometheus:v3.4.2
     network_mode: host
     volumes:
       - ./config/prometheus.yaml:/prometheus.yaml
