@@ -14,7 +14,5 @@ jobs:
           persist-credentials: false
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
-        env:
-          MISE_ENABLE_TOOLS: lychee,zizmor
       - name: Lint
         run: mise run lint-rest
