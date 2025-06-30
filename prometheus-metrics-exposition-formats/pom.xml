@@ -28,11 +28,11 @@
       <artifactId>prometheus-metrics-exposition-textformats</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
+    <!--<dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <version>${protobuf-java.version}</version>
-    </dependency>
+    </dependency>-->
   </dependencies>
 
   <profiles>
