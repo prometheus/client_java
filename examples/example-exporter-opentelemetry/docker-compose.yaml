@@ -13,7 +13,7 @@ services:
       #- -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005
       - /example-exporter-opentelemetry.jar
   collector:
-    image: otel/opentelemetry-collector-contrib:0.128.0
+    image: otel/opentelemetry-collector-contrib:0.129.1
     network_mode: host
     volumes:
       - ./config/otelcol-config.yaml:/config.yaml
