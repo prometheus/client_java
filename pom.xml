@@ -141,7 +141,6 @@
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-sdk-testing</artifactId>
-      <version>1.49.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -415,6 +414,13 @@
             <groupId>org.junit</groupId>
             <artifactId>junit-bom</artifactId>
             <version>${junit-jupiter.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
+          <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+            <version>${otel.instrumentation.version}</version>
             <type>pom</type>
             <scope>import</scope>
           </dependency>
