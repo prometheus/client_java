@@ -34,7 +34,6 @@
     <spotless.skip>false</spotless.skip>
     <javadoc.skip>false</javadoc.skip>
     <warnings>-Werror</warnings>
-    <release>false</release>
   </properties>
 
   <modules>
