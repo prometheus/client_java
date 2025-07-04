@@ -28,4 +28,4 @@ jobs:
         run: ./scripts/build-release.sh
         env:
           # don't ues the current snapshot version, to test a more realistic release
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ github.run_number }}
