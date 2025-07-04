@@ -138,6 +138,8 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
+              <!-- Skip copying test resources in release builds, where tests are skipped -->
+              <skip>${release}</skip>
               <outputDirectory>target/metrics-exporter-opentelemetry/src/test</outputDirectory>
               <resources>
                 <resource>
