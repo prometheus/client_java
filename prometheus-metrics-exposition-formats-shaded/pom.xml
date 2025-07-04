@@ -33,14 +33,33 @@
       <artifactId>protobuf-java</artifactId>
       <version>${protobuf-java.version}</version>
     </dependency>
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>prometheus-metrics-exposition-textformats</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-      <type>test-jar</type>
-    </dependency>
   </dependencies>
+
+  <profiles>
+    <!-- just to make sure that default profile is only activated if no profiles are specified -->
+    <profile>
+      <id>javadoc</id>
+    </profile>
+    <profile>
+      <id>release</id>
+    </profile>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <!-- GH pages and release task try to resolve this and fail -->
+        <dependency>
+          <groupId>io.prometheus</groupId>
+          <artifactId>prometheus-metrics-exposition-textformats</artifactId>
+          <version>${project.version}</version>
+          <scope>test</scope>
+          <type>test-jar</type>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
   <build>
     <plugins>
@@ -70,8 +89,6 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <!-- Skip copying test resources in release builds, where tests are skipped -->
-              <skip>${release}</skip>
               <outputDirectory>target/metrics-exposition-formats/src/test</outputDirectory>
               <resources>
                 <resource>
