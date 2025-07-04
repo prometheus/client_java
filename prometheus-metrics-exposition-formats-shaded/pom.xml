@@ -25,13 +25,61 @@
   <dependencies>
     <dependency>
       <groupId>io.prometheus</groupId>
-      <artifactId>prometheus-metrics-exposition-formats-no-protobuf</artifactId>
+      <artifactId>prometheus-metrics-exposition-textformats</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>${protobuf-java.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exposition-textformats</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+      <type>test-jar</type>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-metrics-exposition-formats-main</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>target/metrics-exposition-formats/src/main</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../prometheus-metrics-exposition-formats/src/main</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-metrics-exposition-formats-test</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>target/metrics-exposition-formats/src/test</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../prometheus-metrics-exposition-formats/src/test</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -47,6 +95,31 @@
               <regex>\.</regex>
               <replacement>_</replacement>
               <failIfNoMatch>true</failIfNoMatch>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-metrics-exposition-formats-main</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>target/metrics-exposition-formats/src/main/java</source>
+                <source>target/metrics-exposition-formats/src/main/generated</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-metrics-exposition-formats-test</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>target/metrics-exposition-formats/src/test/java</source>
+              </sources>
             </configuration>
           </execution>
         </executions>
