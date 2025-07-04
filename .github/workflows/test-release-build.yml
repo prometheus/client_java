@@ -25,4 +25,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run the Maven verify phase
-        run: mise run build-release
+        run: ./scripts/build-release.sh
+        env:
+          # don't ues the current snapshot version, to test a more realistic release
+          TAG: ${{ github.ref_name }}
