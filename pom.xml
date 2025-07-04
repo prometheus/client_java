@@ -350,6 +350,12 @@
             <type>pom</type>
             <scope>import</scope>
           </dependency>
+          <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-proto</artifactId>
+            <version>1.7.1-alpha</version>
+            <scope>test</scope>
+          </dependency>
         </dependencies>
       </dependencyManagement>
       <dependencies>
@@ -413,17 +419,6 @@
               <artifactId>hamcrest-core</artifactId>
             </exclusion>
           </exclusions>
-        </dependency>
-        <dependency>
-          <groupId>io.opentelemetry</groupId>
-          <artifactId>opentelemetry-proto</artifactId>
-          <version>1.7.1-alpha</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>io.opentelemetry</groupId>
-          <artifactId>opentelemetry-sdk-testing</artifactId>
-          <scope>test</scope>
         </dependency>
       </dependencies>
     </profile>

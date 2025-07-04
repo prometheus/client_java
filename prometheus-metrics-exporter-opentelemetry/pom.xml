@@ -69,6 +69,18 @@
       <groupId>io.opentelemetry.instrumentation</groupId>
       <artifactId>opentelemetry-resources</artifactId>
     </dependency>
+
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-proto</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-sdk-testing</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
