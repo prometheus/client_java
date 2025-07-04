@@ -1,8 +1,5 @@
 package io.prometheus.metrics.core.metrics;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DataPoint;
@@ -204,13 +201,13 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
 
     /** Allow Exemplars for this metric. */
     public B withExemplars() {
-      this.exemplarsEnabled = TRUE;
+      this.exemplarsEnabled = true;
       return self();
     }
 
     /** Turn off Exemplars for this metric. */
     public B withoutExemplars() {
-      this.exemplarsEnabled = FALSE;
+      this.exemplarsEnabled = false;
       return self();
     }
 
