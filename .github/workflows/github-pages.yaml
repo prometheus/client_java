@@ -38,8 +38,6 @@ jobs:
           fetch-tags: "true"
           fetch-depth: 0
       - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
-        env:
-          MISE_ENABLE_TOOLS: hugo,java
         with:
           cache: "false"
       - name: Setup Pages
