@@ -69,19 +69,36 @@
       <groupId>io.opentelemetry.instrumentation</groupId>
       <artifactId>opentelemetry-resources</artifactId>
     </dependency>
-
-    <!-- test dependencies -->
-    <dependency>
-      <groupId>io.opentelemetry</groupId>
-      <artifactId>opentelemetry-proto</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.opentelemetry</groupId>
-      <artifactId>opentelemetry-sdk-testing</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
+
+  <profiles>
+    <!-- just to make sure that default profile is only activated if no profiles are specified -->
+    <profile>
+      <id>javadoc</id>
+    </profile>
+    <profile>
+      <id>release</id>
+    </profile>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <dependencies>
+        <!-- GH pages and release task try to resolve this and fail -->
+        <dependency>
+          <groupId>io.opentelemetry</groupId>
+          <artifactId>opentelemetry-proto</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>io.opentelemetry</groupId>
+          <artifactId>opentelemetry-sdk-testing</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
   <build>
     <resources>
