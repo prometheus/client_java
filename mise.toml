@@ -46,9 +46,12 @@ run = "lychee --include-fragments ."
 [tasks.lint-gh-actions]
 run = "zizmor .github/"
 
+[tasks.lint-bom]
+run = "scripts/lint-bom.sh"
+
 [tasks.lint-rest]
 description = "All lints not covered by super linter"
-depends = ["lint-links", "lint-gh-actions"]
+depends = ["lint-links", "lint-gh-actions", "lint-bom"]
 
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
