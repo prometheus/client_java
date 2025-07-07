@@ -4,7 +4,8 @@ set -euo pipefail
 
 function first_artifact_id() {
 	local bom_file="$1"
-	grep '<artifactId>' "$bom_file" | head -n 2 | tail -n 1 | sed 's/.*<artifactId>\(.*\)<\/artifactId>.*/\1/'
+	grep '<artifactId>' "$bom_file" | head -n 2 | tail -n 1 |
+		sed 's/.*<artifactId>\(.*\)<\/artifactId>.*/\1/'
 }
 
 function add_dir() {
@@ -53,7 +54,8 @@ for dir in prometheus-metrics-tracer/prometheus-metrics*; do
 done
 
 want=$(echo "$want" | sort | uniq)
-have="$(grep '<artifactId>prometheus-metrics' prometheus-metrics-bom/pom.xml | sed 's/.*<artifactId>\(.*\)<\/artifactId>.*/\1/' | sort)"
+have="$(grep '<artifactId>prometheus-metrics' prometheus-metrics-bom/pom.xml |
+	sed 's/.*<artifactId>\(.*\)<\/artifactId>.*/\1/' | sort)"
 
 if [[ "$want" != "$have" ]]; then
 	echo "The BOM file prometheus-metrics-bom/bom.xml does not match the current directory contents."
