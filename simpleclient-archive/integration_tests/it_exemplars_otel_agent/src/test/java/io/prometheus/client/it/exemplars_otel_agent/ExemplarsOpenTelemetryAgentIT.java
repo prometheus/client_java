@@ -1,6 +1,13 @@
 package io.prometheus.client.it.exemplars_otel_agent;
 
 import io.prometheus.client.it.common.*;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -11,17 +18,7 @@ import org.junit.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-/**
- * Test if traces from the OpenTelemetry agent are picked up as Exemplars.
- */
+/** Test if traces from the OpenTelemetry agent are picked up as Exemplars. */
 public class ExemplarsOpenTelemetryAgentIT {
 
   private final String image = "openjdk:11-jre";
@@ -32,25 +29,32 @@ public class ExemplarsOpenTelemetryAgentIT {
   public ExemplarsOpenTelemetryAgentIT() throws IOException, URISyntaxException {
     String appJar = "example-spring-boot-app.jar";
     String agentJar = "opentelemetry-javaagent.jar";
-    String agentDownloadUrl = "https://github.com/open-telemetry/opentelemetry-java-instrumentation/" +
-            "releases/download/v" + otelAgentVersion + "/" + agentJar;
+    String agentDownloadUrl =
+        "https://github.com/open-telemetry/opentelemetry-java-instrumentation/"
+            + "releases/download/v"
+            + otelAgentVersion
+            + "/"
+            + agentJar;
     Downloader.downloadToTarget(agentDownloadUrl, agentJar);
-    this.volume = Volume.create("exemplars-otel-agent-test")
+    this.volume =
+        Volume.create("exemplars-otel-agent-test")
             .copyFromTargetDirectory(appJar)
             .copyFromTargetDirectory(agentJar);
-    String[] cmd = new String[] {
-            "java",
-            "-Dotel.traces.exporter=logging",
-            "-Dotel.metrics.exporter=none",
-            "-Dotel.traces.sampler=always_on",
-            "-javaagent:/app/" + agentJar,
-            "-jar",
-            "/app/" + appJar
-    };
+    String[] cmd =
+        new String[] {
+          "java",
+          "-Dotel.traces.exporter=logging",
+          "-Dotel.metrics.exporter=none",
+          "-Dotel.traces.sampler=always_on",
+          "-javaagent:/app/" + agentJar,
+          "-jar",
+          "/app/" + appJar
+        };
     System.out.println("Volume directory: " + volume.getHostPath());
     System.out.println("Command: " + String.join(" ", cmd));
     System.out.println("Docker image: " + image);
-    javaContainer = new GenericContainer<>(image)
+    javaContainer =
+        new GenericContainer<>(image)
             .withFileSystemBind(volume.getHostPath(), "/app", BindMode.READ_ONLY)
             .withWorkingDirectory("/app")
             .withLogConsumer(LogConsumer.withPrefix(image))
@@ -79,8 +83,12 @@ public class ExemplarsOpenTelemetryAgentIT {
 
     callHelloWorldEndpoint();
     List<String> metrics = Scraper.scrape(metricsUrl, 10_000);
-    SpanContext outer = getSpanContext(metrics, "request_duration_histogram_bucket", "path", "/hello", "le", "0.001");
-    SpanContext inner = getSpanContext(metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", "0.001");
+    SpanContext outer =
+        getSpanContext(
+            metrics, "request_duration_histogram_bucket", "path", "/hello", "le", "0.001");
+    SpanContext inner =
+        getSpanContext(
+            metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", "0.001");
     Assert.assertEquals(outer.traceId, inner.traceId);
     Assert.assertNotEquals(outer.spanId, inner.spanId);
 
@@ -95,22 +103,30 @@ public class ExemplarsOpenTelemetryAgentIT {
     assertNoExemplar(metrics, "last_request_timestamp", "path", "/god-of-fire");
 
     // histogram: simulated duration is 0.5ms for the outer and 0.3ms for the inner request
-    assertExemplar(outer, metrics, "request_duration_histogram_bucket", "path", "/hello", "le", "0.001");
-    assertExemplar(inner, metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", "0.001");
-    for (int i=2; i<=9; i++) {
-      assertNoExemplar(metrics, "request_duration_histogram_bucket", "path", "/hello", "le", "0.00" + i);
-      assertNoExemplar(metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", "0.00" + i);
+    assertExemplar(
+        outer, metrics, "request_duration_histogram_bucket", "path", "/hello", "le", "0.001");
+    assertExemplar(
+        inner, metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", "0.001");
+    for (int i = 2; i <= 9; i++) {
+      assertNoExemplar(
+          metrics, "request_duration_histogram_bucket", "path", "/hello", "le", "0.00" + i);
+      assertNoExemplar(
+          metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", "0.00" + i);
     }
     assertNoExemplar(metrics, "request_duration_histogram_bucket", "path", "/hello", "le", "+Inf");
-    assertNoExemplar(metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", "+Inf");
+    assertNoExemplar(
+        metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", "+Inf");
 
-    // summary: all values are identical because there is only one observation. Summaries don't have exempalrs
+    // summary: all values are identical because there is only one observation. Summaries don't have
+    // exempalrs
     assertNoExemplar(metrics, "request_duration_summary", "path", "/hello", "quantile", "0.75");
     assertNoExemplar(metrics, "request_duration_summary", "path", "/hello", "quantile", "0.85");
     assertNoExemplar(metrics, "request_duration_summary_count", "path", "/hello");
     assertNoExemplar(metrics, "request_duration_summary_sum", "path", "/hello");
-    assertNoExemplar(metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.75");
-    assertNoExemplar(metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.85");
+    assertNoExemplar(
+        metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.75");
+    assertNoExemplar(
+        metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.85");
     assertNoExemplar(metrics, "request_duration_summary_count", "path", "/god-of-fire");
     assertNoExemplar(metrics, "request_duration_summary_sum", "path", "/god-of-fire");
 
@@ -121,15 +137,24 @@ public class ExemplarsOpenTelemetryAgentIT {
     // 10 more requests
     // ---------------------------------------------------
 
-    for (int i=0; i<10; i++) {
+    for (int i = 0; i < 10; i++) {
       callHelloWorldEndpoint();
     }
     metrics = Scraper.scrape(metricsUrl, 10_000);
     Map<String, SpanContext> outers = new HashMap<>();
     Map<String, SpanContext> inners = new HashMap<>();
-    for (String bucket : new String[]{"0.001", "0.002", "0.003", "0.004", "0.005", "0.006", "0.007", "0.008", "0.009", "+Inf"}) {
-      outers.put(bucket, getSpanContext(metrics, "request_duration_histogram_bucket", "path", "/hello", "le", bucket));
-      inners.put(bucket, getSpanContext(metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", bucket));
+    for (String bucket :
+        new String[] {
+          "0.001", "0.002", "0.003", "0.004", "0.005", "0.006", "0.007", "0.008", "0.009", "+Inf"
+        }) {
+      outers.put(
+          bucket,
+          getSpanContext(
+              metrics, "request_duration_histogram_bucket", "path", "/hello", "le", bucket));
+      inners.put(
+          bucket,
+          getSpanContext(
+              metrics, "request_duration_histogram_bucket", "path", "/god-of-fire", "le", bucket));
     }
 
     // counter: not updated, because the minimum retention interval is not over yet
@@ -150,8 +175,10 @@ public class ExemplarsOpenTelemetryAgentIT {
     assertNoExemplar(metrics, "request_duration_summary", "path", "/hello", "quantile", "0.85");
     assertNoExemplar(metrics, "request_duration_summary_count", "path", "/hello");
     assertNoExemplar(metrics, "request_duration_summary_sum", "path", "/hello");
-    assertNoExemplar(metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.75");
-    assertNoExemplar(metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.85");
+    assertNoExemplar(
+        metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.75");
+    assertNoExemplar(
+        metrics, "request_duration_summary", "path", "/god-of-fire", "quantile", "0.85");
     assertNoExemplar(metrics, "request_duration_summary_count", "path", "/god-of-fire");
     assertNoExemplar(metrics, "request_duration_summary_sum", "path", "/god-of-fire");
 
@@ -159,11 +186,13 @@ public class ExemplarsOpenTelemetryAgentIT {
     assertNoExemplar(metrics, "jvm_threads_current");
   }
 
-  private void assertHistogramAfterMoreThenTenCalls(Map<String, SpanContext> outers, Map<String, SpanContext> inners) {
+  private void assertHistogramAfterMoreThenTenCalls(
+      Map<String, SpanContext> outers, Map<String, SpanContext> inners) {
     for (String outerKey : outers.keySet()) {
       for (String innerKey : inners.keySet()) {
         if (outerKey.equals(innerKey)) {
-          // same bucket == same trace, because the sample application simulates the same duration for both calls
+          // same bucket == same trace, because the sample application simulates the same duration
+          // for both calls
           Assert.assertEquals(outers.get(outerKey).traceId, inners.get(innerKey).traceId);
         } else {
           // different bucket -> different trace
@@ -175,12 +204,15 @@ public class ExemplarsOpenTelemetryAgentIT {
     }
   }
 
-  private void assertExemplar(SpanContext spanContext, List<String> responseBody, String metricName, String... labels) {
+  private void assertExemplar(
+      SpanContext spanContext, List<String> responseBody, String metricName, String... labels) {
     String prefix = makeFullMetricName(metricName, labels);
     for (String line : responseBody) {
       if (line.startsWith(prefix)) {
-        String exemplarLabels = "# {span_id=\"" + spanContext.spanId + "\",trace_id=\"" + spanContext.traceId + "\"}";
-        String message = prefix + " did not have the expected exemplar labels " + exemplarLabels + ":\n" + line;
+        String exemplarLabels =
+            "# {span_id=\"" + spanContext.spanId + "\",trace_id=\"" + spanContext.traceId + "\"}";
+        String message =
+            prefix + " did not have the expected exemplar labels " + exemplarLabels + ":\n" + line;
         Assert.assertTrue(message, line.contains(exemplarLabels));
         return;
       }
@@ -221,7 +253,8 @@ public class ExemplarsOpenTelemetryAgentIT {
     }
   }
 
-  private SpanContext getSpanContext(List<String> responseBody, String metricName, String... labels) {
+  private SpanContext getSpanContext(
+      List<String> responseBody, String metricName, String... labels) {
     String prefix = makeFullMetricName(metricName, labels);
     Pattern pattern = Pattern.compile(".*span_id=\"([0-9a-f]+)\",trace_id=\"([0-9a-f]+).*");
     for (String line : responseBody) {
@@ -243,9 +276,7 @@ public class ExemplarsOpenTelemetryAgentIT {
     if (labels.length == 0) {
       return metricName;
     } else {
-      StringBuilder result = new StringBuilder()
-          .append(metricName)
-          .append("{");
+      StringBuilder result = new StringBuilder().append(metricName).append("{");
       for (int i = 0; i < labels.length; i += 2) {
         if (i > 0) {
           result.append(",");

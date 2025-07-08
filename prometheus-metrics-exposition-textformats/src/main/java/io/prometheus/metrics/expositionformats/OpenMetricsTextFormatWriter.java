@@ -36,19 +36,56 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapin
  */
 public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
 
+  public static class Builder {
+    boolean createdTimestampsEnabled;
+    boolean exemplarsOnAllMetricTypesEnabled;
+
+    private Builder() {}
+
+    /**
+     * @param createdTimestampsEnabled whether to include the _created timestamp in the output
+     */
+    public Builder setCreatedTimestampsEnabled(boolean createdTimestampsEnabled) {
+      this.createdTimestampsEnabled = createdTimestampsEnabled;
+      return this;
+    }
+
+    /**
+     * @param exemplarsOnAllMetricTypesEnabled whether to include exemplars in the output for all
+     *     metric types
+     */
+    public Builder setExemplarsOnAllMetricTypesEnabled(boolean exemplarsOnAllMetricTypesEnabled) {
+      this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
+      return this;
+    }
+
+    public OpenMetricsTextFormatWriter build() {
+      return new OpenMetricsTextFormatWriter(
+          createdTimestampsEnabled, exemplarsOnAllMetricTypesEnabled);
+    }
+  }
+
   public static final String CONTENT_TYPE =
       "application/openmetrics-text; version=1.0.0; charset=utf-8";
   private final boolean createdTimestampsEnabled;
   private final boolean exemplarsOnAllMetricTypesEnabled;
 
   /**
-   * @param createdTimestampsEnabled defines if {@code _created} timestamps should be included in
-   *     the output or not.
+   * @param createdTimestampsEnabled whether to include the _created timestamp in the output - This
+   *     will produce an invalid OpenMetrics output, but is kept for backwards compatibility.
    */
   public OpenMetricsTextFormatWriter(
       boolean createdTimestampsEnabled, boolean exemplarsOnAllMetricTypesEnabled) {
     this.createdTimestampsEnabled = createdTimestampsEnabled;
     this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static OpenMetricsTextFormatWriter create() {
+    return builder().build();
   }
 
   @Override
@@ -299,10 +336,10 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       throws IOException {
     if (createdTimestampsEnabled && data.hasCreatedTimestamp()) {
       writeNameAndLabels(writer, metadata.getPrometheusName(), "_created", data.getLabels());
-      writeTimestamp(writer, data.getCreatedTimestampMillis());
+      writeOpenMetricsTimestamp(writer, data.getCreatedTimestampMillis());
       if (data.hasScrapeTimestamp()) {
         writer.write(' ');
-        writeTimestamp(writer, data.getScrapeTimestampMillis());
+        writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
       }
       writer.write('\n');
     }
@@ -341,7 +378,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       Writer writer, DataPointSnapshot data, Exemplar exemplar) throws IOException {
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
-      writeTimestamp(writer, data.getScrapeTimestampMillis());
+      writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());
     }
     if (exemplar != null) {
       writer.write(" # ");
@@ -350,7 +387,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       writeDouble(writer, exemplar.getValue());
       if (exemplar.hasTimestamp()) {
         writer.write(' ');
-        writeTimestamp(writer, exemplar.getTimestampMillis());
+        writeOpenMetricsTimestamp(writer, exemplar.getTimestampMillis());
       }
     }
     writer.write('\n');

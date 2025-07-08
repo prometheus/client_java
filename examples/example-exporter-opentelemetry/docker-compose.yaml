@@ -1,7 +1,7 @@
 version: "3"
 services:
   prometheus-opentelemetry-example-app:
-    image: openjdk:11-jre
+    image: openjdk:11.0.16-jre@sha256:356949c3125c4fa8104745e7ea92bd995da4567634e6599b470d2f972d13e0e2
     network_mode: host
     ports:
       - "5005:5005"
@@ -13,14 +13,14 @@ services:
       #- -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005
       - /example-exporter-opentelemetry.jar
   collector:
-    image: otel/opentelemetry-collector-contrib:0.85.0
+    image: otel/opentelemetry-collector-contrib:0.129.1@sha256:4798e3095561ac8ae13a81965088d68b943b1991bbeede91b1564e12c95372cc
     network_mode: host
     volumes:
       - ./config/otelcol-config.yaml:/config.yaml
     command:
       - --config=file:/config.yaml
   prometheus:
-    image: prom/prometheus:v2.47.0
+    image: prom/prometheus:v3.4.2@sha256:3b1d5be5c3eef4f027665ddaa3b1a7de8a58d96a0a6de5dd45629afd267ecaf0
     network_mode: host
     volumes:
       - ./config/prometheus.yaml:/prometheus.yaml

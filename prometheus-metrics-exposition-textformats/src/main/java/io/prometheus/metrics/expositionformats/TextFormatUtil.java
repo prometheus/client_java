@@ -23,7 +23,20 @@ public class TextFormatUtil {
     }
   }
 
-  static void writeTimestamp(Writer writer, long timestampMs) throws IOException {
+  static void writePrometheusTimestamp(Writer writer, long timestampMs, boolean timestampsInMs)
+      throws IOException {
+    if (timestampsInMs) {
+      // correct for prometheus exposition format
+      // https://prometheus.io/docs/instrumenting/exposition_formats/#text-format-details
+      writer.write(Long.toString(timestampMs));
+    } else {
+      // incorrect for prometheus exposition format -
+      // but we need to support it for backwards compatibility
+      writeOpenMetricsTimestamp(writer, timestampMs);
+    }
+  }
+
+  static void writeOpenMetricsTimestamp(Writer writer, long timestampMs) throws IOException {
     writer.write(Long.toString(timestampMs / 1000L));
     writer.write(".");
     long ms = timestampMs % 1000;
@@ -36,22 +49,54 @@ public class TextFormatUtil {
     writer.write(Long.toString(ms));
   }
 
-  static void writeEscapedString(Writer writer, String s) throws IOException {
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
+  static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
+    // optimize for the common case where no escaping is needed
+    int start = 0;
+    // #indexOf is a vectorized intrinsic
+    int backslashIndex = s.indexOf('\\', start);
+    int quoteIndex = s.indexOf('\"', start);
+    int newlineIndex = s.indexOf('\n', start);
+
+    int allEscapesIndex = backslashIndex & quoteIndex & newlineIndex;
+    while (allEscapesIndex != -1) {
+      int escapeStart = Integer.MAX_VALUE;
+      if (backslashIndex != -1) {
+        escapeStart = backslashIndex;
+      }
+      if (quoteIndex != -1) {
+        escapeStart = Math.min(escapeStart, quoteIndex);
+      }
+      if (newlineIndex != -1) {
+        escapeStart = Math.min(escapeStart, newlineIndex);
+      }
+
+      // bulk write up to the first character that needs to be escaped
+      if (escapeStart > start) {
+        writer.write(s, start, escapeStart - start);
+      }
+      char c = s.charAt(escapeStart);
+      start = escapeStart + 1;
       switch (c) {
         case '\\':
-          writer.append("\\\\");
+          writer.write("\\\\");
+          backslashIndex = s.indexOf('\\', start);
           break;
         case '\"':
-          writer.append("\\\"");
+          writer.write("\\\"");
+          quoteIndex = s.indexOf('\"', start);
           break;
         case '\n':
-          writer.append("\\n");
+          writer.write("\\n");
+          newlineIndex = s.indexOf('\n', start);
           break;
-        default:
-          writer.append(c);
       }
+
+      allEscapesIndex = backslashIndex & quoteIndex & newlineIndex;
+    }
+    // up until the end nothing needs to be escaped anymore
+    int remaining = s.length() - start;
+    if (remaining > 0) {
+      writer.write(s, start, remaining);
     }
   }
 

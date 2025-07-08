@@ -6,13 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Enable Spring-AOP-based automated method timing for the annotated method. The timings will be recorded in a
- * {@link io.prometheus.client.Summary} with a name specified by the required {@code name} parameter, and help
- * specified by the {@code help} parameter.
+ * Enable Spring-AOP-based automated method timing for the annotated method. The timings will be
+ * recorded in a {@link io.prometheus.client.Summary} with a name specified by the required {@code
+ * name} parameter, and help specified by the {@code help} parameter.
  *
- * To properly work, {@link EnablePrometheusTiming} must be specified somewhere in your application configuration.
+ * <p>To properly work, {@link EnablePrometheusTiming} must be specified somewhere in your
+ * application configuration.
  *
- *  <pre><code>
+ * <pre><code>
  * {@literal @}Controller
  *  public class MyController {
  *    {@literal @}RequestMapping("/")
@@ -25,21 +26,22 @@ import java.lang.annotation.Target;
  *  }
  * </code></pre>
  *
- *
  * @author Andrew Stuart
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface PrometheusTimeMethod {
-    /**
-     * The metric name to use for recording latencies
-     * @return A metric name specific to your use case.
-     */
-    String name();
+  /**
+   * The metric name to use for recording latencies
+   *
+   * @return A metric name specific to your use case.
+   */
+  String name();
 
-    /**
-     * The help message to show in prometheus metrics
-     * @return A help string
-     */
-    String help();
+  /**
+   * The help message to show in prometheus metrics
+   *
+   * @return A help string
+   */
+  String help();
 }

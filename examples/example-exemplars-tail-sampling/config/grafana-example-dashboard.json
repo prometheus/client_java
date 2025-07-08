@@ -204,7 +204,7 @@
           "exemplar": false,
           "expr": "histogram_count(rate(request_duration_seconds{job=\"$instance\"}[5m]))",
           "instant": true,
-          "key": "Q-ddf5e7ad-fa7a-4342-acf8-819848f226a3-0",
+          "key": "key1",
           "range": true,
           "refId": "A"
         }
@@ -300,7 +300,7 @@
           "editorMode": "code",
           "expr": "rate(tempo_ingester_traces_created_total[5m])",
           "instant": true,
-          "key": "Q-0e8731c6-7df2-47bc-a1a3-45dcb9f5e92d-0",
+          "key": "key2",
           "range": true,
           "refId": "A"
         }

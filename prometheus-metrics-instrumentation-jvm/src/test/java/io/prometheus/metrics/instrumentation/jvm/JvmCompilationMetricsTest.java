@@ -32,11 +32,13 @@ class JvmCompilationMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        "# TYPE jvm_compilation_time_seconds counter\n"
-            + "# UNIT jvm_compilation_time_seconds seconds\n"
-            + "# HELP jvm_compilation_time_seconds The total time in seconds taken for HotSpot class compilation\n"
-            + "jvm_compilation_time_seconds_total 10.0\n"
-            + "# EOF\n";
+        """
+# TYPE jvm_compilation_time_seconds counter
+# UNIT jvm_compilation_time_seconds seconds
+# HELP jvm_compilation_time_seconds The total time in seconds taken for HotSpot class compilation
+jvm_compilation_time_seconds_total 10.0
+# EOF
+""";
 
     assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }

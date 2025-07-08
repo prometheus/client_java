@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.io.Resources;
 import io.prometheus.client.it.common.ExporterTest;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_29_3.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_31_1.Metrics;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -70,10 +70,12 @@ abstract class ExporterIT extends ExporterTest {
             "GET",
             "",
             "Accept",
-            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited");
+            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+                + " encoding=delimited");
     assertThat(response.status).isEqualTo(200);
     assertContentType(
-        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited",
+        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+            + " encoding=delimited",
         response.getHeader("Content-Type"));
     assertThat(response.getHeader("Content-Encoding")).isNull();
     assertThat(response.getHeader("Transfer-Encoding")).isNull();
@@ -224,10 +226,12 @@ abstract class ExporterIT extends ExporterTest {
             "GET",
             nameParam("none_existing"),
             "Accept",
-            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited");
+            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+                + " encoding=delimited");
     assertThat(response.status).isEqualTo(200);
     assertContentType(
-        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited",
+        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+            + " encoding=delimited",
         response.getHeader("Content-Type"));
     assertThat(response.body).isEmpty();
   }

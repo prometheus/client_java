@@ -320,7 +320,8 @@ class CKMSQuantilesTest {
       assertThat(sample.g + sample.delta).as(msg).isLessThanOrEqualTo(ckms.f(r));
       assertThat(prev)
           .as(
-              "Samples not ordered. Keep in mind that insertBatch() takes a sorted array as parameter.")
+              "Samples not ordered. Keep in mind that insertBatch() takes a sorted array as"
+                  + " parameter.")
           .isLessThanOrEqualTo(sample.value);
       prev = sample.value;
       r += sample.g;

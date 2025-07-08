@@ -1,49 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.prometheus</groupId>
-        <artifactId>client_java</artifactId>
-        <version>10.0.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>io.prometheus</groupId>
+    <artifactId>client_java</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>prometheus-metrics-instrumentation-guava</artifactId>
-    <packaging>bundle</packaging>
+  <artifactId>prometheus-metrics-instrumentation-guava</artifactId>
+  <packaging>bundle</packaging>
 
-    <name>Prometheus Metrics Instrumentation - Guava</name>
-    <description>
-        Instrumentation library guava based caches
-    </description>
+  <name>Prometheus Metrics Instrumentation - Guava</name>
+  <description>
+    Instrumentation library guava based caches
+  </description>
 
-    <properties>
-        <automatic.module.name>io.prometheus.metrics.instrumentation.guava</automatic.module.name>
-    </properties>
+  <properties>
+    <automatic.module.name>io.prometheus.metrics.instrumentation.guava</automatic.module.name>
+  </properties>
 
-    <developers>
-        <developer>
-            <id>pheyken</id>
-            <name>Petar Heyken</name>
-            <email>mail@petar-heyken.de</email>
-        </developer>
-    </developers>
+  <developers>
+    <developer>
+      <id>pheyken</id>
+      <name>Petar Heyken</name>
+      <email>mail@petar-heyken.de</email>
+    </developer>
+  </developers>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exposition-textformats</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exposition-textformats</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>

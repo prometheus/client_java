@@ -1,30 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.prometheus</groupId>
-        <artifactId>client_java</artifactId>
-        <version>10.0.0-SNAPSHOT</version>
-    </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>prometheus-metrics-model</artifactId>
-    <packaging>bundle</packaging>
+  <parent>
+    <groupId>io.prometheus</groupId>
+    <artifactId>client_java</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+  </parent>
 
-    <name>Prometheus Metrics Model</name>
-    <description>
-        Data model for read-only immutable Prometheus metrics snapshots.
-    </description>
+  <artifactId>prometheus-metrics-model</artifactId>
+  <packaging>bundle</packaging>
 
-    <properties>
-        <automatic.module.name>io.prometheus.metrics.model</automatic.module.name>
-    </properties>
+  <name>Prometheus Metrics Model</name>
+  <description>
+    Data model for read-only immutable Prometheus metrics snapshots.
+  </description>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-config</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+  <properties>
+    <automatic.module.name>io.prometheus.metrics.model</automatic.module.name>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-config</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 </project>

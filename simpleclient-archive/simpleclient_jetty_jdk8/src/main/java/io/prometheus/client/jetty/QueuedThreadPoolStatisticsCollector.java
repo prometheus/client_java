@@ -17,8 +17,7 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
 
   private final Map<String, QueuedThreadPool> queuedThreadPoolMap = new ConcurrentHashMap<>();
 
-  public QueuedThreadPoolStatisticsCollector() {
-  }
+  public QueuedThreadPoolStatisticsCollector() {}
 
   public QueuedThreadPoolStatisticsCollector(QueuedThreadPool queuedThreadPool, String name) {
     add(queuedThreadPool, name);
@@ -32,13 +31,21 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
   @Override
   public List<MetricFamilySamples> collect() {
     return Arrays.asList(
-        buildGauge("jetty_queued_thread_pool_threads", "Number of total threads",
+        buildGauge(
+            "jetty_queued_thread_pool_threads",
+            "Number of total threads",
             QueuedThreadPool::getThreads),
-        buildGauge("jetty_queued_thread_pool_threads_idle", "Number of idle threads",
+        buildGauge(
+            "jetty_queued_thread_pool_threads_idle",
+            "Number of idle threads",
             QueuedThreadPool::getIdleThreads),
-        buildGauge("jetty_queued_thread_pool_threads_max", "Max size of thread pool",
+        buildGauge(
+            "jetty_queued_thread_pool_threads_max",
+            "Max size of thread pool",
             QueuedThreadPool::getMaxThreads),
-        buildGauge("jetty_queued_thread_pool_jobs", "Number of total jobs",
+        buildGauge(
+            "jetty_queued_thread_pool_jobs",
+            "Number of total jobs",
             QueuedThreadPool::getQueueSize));
   }
 
@@ -50,13 +57,13 @@ public class QueuedThreadPoolStatisticsCollector extends Collector {
     return super.register(registry);
   }
 
-  private GaugeMetricFamily buildGauge(String metric, String help,
-      Function<QueuedThreadPool, Integer> metricValueProvider) {
+  private GaugeMetricFamily buildGauge(
+      String metric, String help, Function<QueuedThreadPool, Integer> metricValueProvider) {
     final GaugeMetricFamily metricFamily = new GaugeMetricFamily(metric, help, LABEL_NAMES);
-    queuedThreadPoolMap.forEach((key, value) -> metricFamily.addMetric(
-        Collections.singletonList(key),
-        metricValueProvider.apply(value)
-    ));
+    queuedThreadPoolMap.forEach(
+        (key, value) ->
+            metricFamily.addMetric(
+                Collections.singletonList(key), metricValueProvider.apply(value)));
     return metricFamily;
   }
 }

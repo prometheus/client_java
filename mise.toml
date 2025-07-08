@@ -1,0 +1,98 @@
+[tools]
+"cargo:zizmor" = "1.9.0"
+"go:github.com/gohugoio/hugo" = "v0.147.9"
+"go:github.com/grafana/oats" = "0.3.2"
+java = "temurin-21.0.7+6.0.LTS"
+lychee = "0.19.1"
+protoc = "31.1"
+
+[tasks.ci]
+description = "CI Build"
+run = "./mvnw clean install"
+env.REQUIRE_PROTO_UP_TO_DATE = "true"
+env.PROTO_GENERATION = "true"
+
+[tasks.format]
+description = "format source code"
+run = "./mvnw spotless:apply"
+
+[tasks.compile]
+description = "bare compile, ignoring formatting and linters"
+run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+
+[tasks.generate]
+description = "bare compile, ignoring formatting and linters"
+run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+env.PROTO_GENERATION = "true"
+
+[tasks.test]
+description = "run unit tests, ignoring formatting and linters"
+run = "./mvnw test -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+
+[tasks.test-all]
+description = "run all tests"
+run = "./mvnw verify"
+
+[tasks.build]
+description = "build all modules wihthout tests"
+run = "./mvnw install -DskipTests"
+
+[tasks.lint]
+run = "scripts/super-linter.sh"
+
+[tasks.lint-links]
+run = "lychee --include-fragments ."
+
+[tasks.lint-gh-actions]
+run = "zizmor .github/"
+
+[tasks.lint-bom]
+run = "scripts/lint-bom.sh"
+
+[tasks.lint-rest]
+description = "All lints not covered by super linter"
+depends = ["lint-links", "lint-gh-actions", "lint-bom"]
+
+[tasks.acceptance-test]
+description = "Run OATs acceptance tests"
+depends = "build"
+run = "oats -timeout 5m examples/"
+
+[tasks.set-version]
+run = './scripts/set-version.sh {{arg(name="version")}}'
+
+[tasks.javadoc]
+run = [
+  "./mvnw -B clean compile javadoc:javadoc javadoc:aggregate -P 'javadoc,!default'",
+  "rm -rf ./docs/static/api",
+  "mv ./target/reports/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api"
+]
+
+[tasks.set-gh-pages-version]
+run = "./scripts/set-release-version-github-pages.sh"
+
+[tasks.gh-pages-dev]
+description = "Build GitHub pages for dev"
+run = "hugo server -D"
+dir = "docs"
+
+[tasks.build-gh-pages]
+description = "Build GitHub pages"
+depends = ["javadoc", "set-gh-pages-version"]
+# For maximum backward compatibility with Hugo modules
+env = { HUGO_ENVIRONMENT = "production", HUGO_ENV = "production" }
+dir = "docs"
+run = [
+  "hugo --gc --minify --baseURL ${BASE_URL}/",
+  "echo 'ls ./public/api' && ls ./public/api"
+]
+
+[tasks.build-release]
+description = "Build release"
+run = "./scripts/build-release.sh"
+env.TAG = "1.4.0-SNAPSHOT"
+
+[settings]
+# to get lock file support and for go backend
+experimental = true
+

@@ -1,79 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.prometheus</groupId>
-        <artifactId>client_java</artifactId>
-        <version>10.0.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>io.prometheus</groupId>
+    <artifactId>client_java</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>prometheus-metrics-instrumentation-dropwizard</artifactId>
-    <packaging>bundle</packaging>
+  <artifactId>prometheus-metrics-instrumentation-dropwizard</artifactId>
+  <packaging>bundle</packaging>
 
-    <name>Prometheus Metrics Instrumentation - Dropwizard 4.x</name>
-    <description>
-        Instrumentation library for Dropwizard metrics 4.x
-    </description>
+  <name>Prometheus Metrics Instrumentation - Dropwizard 4.x</name>
+  <description>
+    Instrumentation library for Dropwizard metrics 4.x
+  </description>
 
-    <properties>
-        <automatic.module.name>io.prometheus.metrics.instrumentation.dropwizard</automatic.module.name>
-    </properties>
+  <properties>
+    <automatic.module.name>io.prometheus.metrics.instrumentation.dropwizard</automatic.module.name>
+  </properties>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>kingster</id>
-            <name>Kinshuk Bairagi</name>
-            <email>hi@kinsh.uk</email>
-        </developer>
+  <developers>
+    <developer>
+      <id>kingster</id>
+      <name>Kinshuk Bairagi</name>
+      <email>hi@kinsh.uk</email>
+    </developer>
+  </developers>
 
-    </developers>
+  <dependencies>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>4.2.33</version>
+      <scope>provided</scope>
+    </dependency>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <version>4.2.30</version>
-            <scope>provided</scope>
-        </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exposition-textformats</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-instrumentation-dropwizard5</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>io.dropwizard.metrics5</groupId>
+          <artifactId>metrics-core</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exporter-httpserver</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exposition-textformats</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-instrumentation-dropwizard5</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.dropwizard.metrics5</groupId>
-                    <artifactId>metrics-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-    </dependencies>
+  </dependencies>
 
 </project>

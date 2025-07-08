@@ -8,8 +8,10 @@ import io.prometheus.client.Counter;
 
 public class InstrumentedAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
   public static final String COUNTER_NAME = "logback_appender_total";
-  
-  private static final Counter defaultCounter = Counter.build().name(COUNTER_NAME)
+
+  private static final Counter defaultCounter =
+      Counter.build()
+          .name(COUNTER_NAME)
           .help("Logback log statements at various log levels")
           .labelNames("level")
           .register();
@@ -19,18 +21,16 @@ public class InstrumentedAppender extends UnsynchronizedAppenderBase<ILoggingEve
   private final Counter.Child warnCounter;
   private final Counter.Child errorCounter;
 
-  /**
-   * Create a new instrumented appender using the default registry.
-   */
+  /** Create a new instrumented appender using the default registry. */
   public InstrumentedAppender() {
     this(defaultCounter);
   }
 
-  /**
-   * Create a new instrumented appender using the supplied registry.
-   */
+  /** Create a new instrumented appender using the supplied registry. */
   public InstrumentedAppender(CollectorRegistry registry) {
-    this(Counter.build().name(COUNTER_NAME)
+    this(
+        Counter.build()
+            .name(COUNTER_NAME)
             .help("Logback log statements at various log levels")
             .labelNames("level")
             .register(registry));

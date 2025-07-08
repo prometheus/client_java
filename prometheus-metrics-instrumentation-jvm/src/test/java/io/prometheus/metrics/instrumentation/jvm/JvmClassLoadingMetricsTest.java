@@ -33,16 +33,18 @@ class JvmClassLoadingMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        "# TYPE jvm_classes_currently_loaded gauge\n"
-            + "# HELP jvm_classes_currently_loaded The number of classes that are currently loaded in the JVM\n"
-            + "jvm_classes_currently_loaded 1000.0\n"
-            + "# TYPE jvm_classes_loaded counter\n"
-            + "# HELP jvm_classes_loaded The total number of classes that have been loaded since the JVM has started execution\n"
-            + "jvm_classes_loaded_total 2000.0\n"
-            + "# TYPE jvm_classes_unloaded counter\n"
-            + "# HELP jvm_classes_unloaded The total number of classes that have been unloaded since the JVM has started execution\n"
-            + "jvm_classes_unloaded_total 500.0\n"
-            + "# EOF\n";
+        """
+# TYPE jvm_classes_currently_loaded gauge
+# HELP jvm_classes_currently_loaded The number of classes that are currently loaded in the JVM
+jvm_classes_currently_loaded 1000.0
+# TYPE jvm_classes_loaded counter
+# HELP jvm_classes_loaded The total number of classes that have been loaded since the JVM has started execution
+jvm_classes_loaded_total 2000.0
+# TYPE jvm_classes_unloaded counter
+# HELP jvm_classes_unloaded The total number of classes that have been unloaded since the JVM has started execution
+jvm_classes_unloaded_total 500.0
+# EOF
+""";
 
     assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }

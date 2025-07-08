@@ -20,7 +20,7 @@ class InstrumentedAppenderTest {
   public void setUp() throws Exception {
     appender = new InstrumentedAppender();
     appender.activateOptions();
-    
+
     event = mock(LoggingEvent.class);
   }
 
@@ -79,7 +79,8 @@ class InstrumentedAppenderTest {
   }
 
   private int getLogLevelCount(String level) {
-    return CollectorRegistry.defaultRegistry.getSampleValue(COUNTER_NAME, 
-            new String[]{"level"}, new String[]{level}).intValue();
+    return CollectorRegistry.defaultRegistry
+        .getSampleValue(COUNTER_NAME, new String[] {"level"}, new String[] {level})
+        .intValue();
   }
 }

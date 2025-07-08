@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.prometheus</groupId>
-        <artifactId>client_java</artifactId>
-        <version>10.0.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>io.prometheus</groupId>
+    <artifactId>client_java</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>examples</artifactId>
-    <packaging>pom</packaging>
+  <artifactId>examples</artifactId>
+  <packaging>pom</packaging>
 
-    <name>Examples</name>
-    <description>
-        Example projects for the Prometheus Metrics Library.
-    </description>
+  <name>Examples</name>
+  <description>
+    Example projects for the Prometheus Metrics Library.
+  </description>
 
-    <properties>
-        <coverage.skip>true</coverage.skip>
-    </properties>
+  <properties>
+    <coverage.skip>true</coverage.skip>
+  </properties>
 
-    <modules>
-        <module>example-exemplars-tail-sampling</module>
-        <module>example-exporter-servlet-tomcat</module>
-        <module>example-exporter-httpserver</module>
-        <module>example-exporter-multi-target</module>
-        <module>example-exporter-opentelemetry</module>
-        <module>example-simpleclient-bridge</module>
-        <module>example-native-histogram</module>
-        <module>example-prometheus-properties</module>
-    </modules>
+  <modules>
+    <module>example-exemplars-tail-sampling</module>
+    <module>example-exporter-servlet-tomcat</module>
+    <module>example-exporter-httpserver</module>
+    <module>example-exporter-multi-target</module>
+    <module>example-exporter-opentelemetry</module>
+    <module>example-simpleclient-bridge</module>
+    <module>example-native-histogram</module>
+    <module>example-prometheus-properties</module>
+  </modules>
 
 </project>

@@ -86,12 +86,14 @@ class InstrumentedAppenderTest {
   }
 
   private int getLogLevelCount(String level) {
-    return registry.getSampleValue(COUNTER_NAME, new String[]{"level"}, new String[]{level}).intValue();
+    return registry
+        .getSampleValue(COUNTER_NAME, new String[] {"level"}, new String[] {level})
+        .intValue();
   }
 
   private int getDefaultLogLevelCount(String level) {
     return CollectorRegistry.defaultRegistry
-            .getSampleValue(COUNTER_NAME, new String[]{"level"}, new String[]{level})
-            .intValue();
+        .getSampleValue(COUNTER_NAME, new String[] {"level"}, new String[] {level})
+        .intValue();
   }
 }

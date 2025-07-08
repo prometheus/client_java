@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_29_3.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_31_1.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.EscapingScheme;
@@ -33,7 +33,8 @@ class InfoTest {
             new PrometheusProtobufWriterImpl().convert(info.collect());
         assertThat(ProtobufUtil.shortDebugString(protobufData))
             .isEqualTo(
-                "name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value: \"value\" } gauge { value: 1.0 } }");
+                "name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value:"
+                    + " \"value\" } gauge { value: 1.0 } }");
       }
     }
   }
@@ -58,7 +59,8 @@ class InfoTest {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> info.addLabelValues("val1", "val2", "extra"))
         .withMessage(
-            "Info test was created with 2 label names, but you called addLabelValues() with 3 label values.");
+            "Info test was created with 2 label names, but you called addLabelValues() with 3 label"
+                + " values.");
   }
 
   @Test
@@ -74,18 +76,21 @@ class InfoTest {
     info.setLabelValues("2.0.0");
     assertThat(info.collect().getDataPoints()).hasSize(1);
     assertTextFormat(
-        "target_info{service_instance_id=\"123\",service_name=\"test\",service_version=\"2.0.0\"} 1\n",
+        "target_info{service_instance_id=\"123\",service_name=\"test\",service_version=\"2.0.0\"}"
+            + " 1\n",
         info);
 
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> info.setLabelValues("2.0.0", "extra"))
         .withMessage(
-            "Info target was created with 1 label names, but you called setLabelValues() with 2 label values.");
+            "Info target was created with 1 label names, but you called setLabelValues() with 2"
+                + " label values.");
 
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> info.remove("2.0.0", "extra"))
         .withMessage(
-            "Info target was created with 1 label names, but you called remove() with 2 label values.");
+            "Info target was created with 1 label names, but you called remove() with 2 label"
+                + " values.");
   }
 
   @Test

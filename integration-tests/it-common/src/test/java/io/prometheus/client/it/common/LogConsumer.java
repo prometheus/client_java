@@ -19,15 +19,10 @@ public class LogConsumer implements Consumer<OutputFrame> {
   @Override
   public void accept(OutputFrame outputFrame) {
     switch (outputFrame.getType()) {
-      case STDOUT:
-        System.out.print(prefix + " - " + outputFrame.getUtf8String());
-        break;
-      case END:
-        System.out.println(prefix + " - END");
-        break;
-      default: // STDERR or unexpected
-        System.err.print(prefix + " - " + outputFrame.getUtf8String());
-        break;
+      case STDOUT -> System.out.print(prefix + " - " + outputFrame.getUtf8String());
+      case END -> System.out.println(prefix + " - END");
+      default -> // STDERR or unexpected
+          System.err.print(prefix + " - " + outputFrame.getUtf8String());
     }
   }
 }

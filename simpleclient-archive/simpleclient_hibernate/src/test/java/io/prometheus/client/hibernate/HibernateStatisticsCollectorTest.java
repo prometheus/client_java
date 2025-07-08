@@ -18,8 +18,7 @@ import org.junit.rules.ExpectedException;
 
 class HibernateStatisticsCollectorTest {
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  @Rule public ExpectedException expectedException = ExpectedException.none();
 
   private SessionFactory sessionFactory;
   private Statistics statistics;
@@ -44,16 +43,13 @@ class HibernateStatisticsCollectorTest {
     when(statistics.getConnectCount()).thenReturn(4L);
     when(statistics.getOptimisticFailureCount()).thenReturn(5L);
 
-    new HibernateStatisticsCollector()
-        .add(sessionFactory, "factory1")
-        .register(registry);
+    new HibernateStatisticsCollector().add(sessionFactory, "factory1").register(registry);
 
     assertThat(getSample("hibernate_session_opened_total", "factory1"), is(1.0));
     assertThat(getSample("hibernate_session_closed_total", "factory1"), is(2.0));
     assertThat(getSample("hibernate_flushed_total", "factory1"), is(3.0));
     assertThat(getSample("hibernate_connect_total", "factory1"), is(4.0));
     assertThat(getSample("hibernate_optimistic_failure_total", "factory1"), is(5.0));
-
   }
 
   @Test
@@ -64,15 +60,12 @@ class HibernateStatisticsCollectorTest {
     when(statistics.getTransactionCount()).thenReturn(3L);
     when(statistics.getSuccessfulTransactionCount()).thenReturn(4L);
 
-    new HibernateStatisticsCollector()
-        .add(sessionFactory, "factory2")
-        .register(registry);
+    new HibernateStatisticsCollector().add(sessionFactory, "factory2").register(registry);
 
     assertThat(getSample("hibernate_statement_prepared_total", "factory2"), is(1.0));
     assertThat(getSample("hibernate_statement_closed_total", "factory2"), is(2.0));
     assertThat(getSample("hibernate_transaction_total", "factory2"), is(3.0));
     assertThat(getSample("hibernate_transaction_success_total", "factory2"), is(4.0));
-
   }
 
   @Test
@@ -94,9 +87,7 @@ class HibernateStatisticsCollectorTest {
     when(statistics.getUpdateTimestampsCacheMissCount()).thenReturn(11L);
     when(statistics.getUpdateTimestampsCachePutCount()).thenReturn(12L);
 
-    new HibernateStatisticsCollector()
-        .add(sessionFactory, "factory3")
-        .register(registry);
+    new HibernateStatisticsCollector().add(sessionFactory, "factory3").register(registry);
 
     assertThat(getSample("hibernate_second_level_cache_hit_total", "factory3"), is(1.0));
     assertThat(getSample("hibernate_second_level_cache_miss_total", "factory3"), is(2.0));
@@ -113,7 +104,6 @@ class HibernateStatisticsCollectorTest {
     assertThat(getSample("hibernate_update_timestamps_cache_hit_total", "factory3"), is(10.0));
     assertThat(getSample("hibernate_update_timestamps_cache_miss_total", "factory3"), is(11.0));
     assertThat(getSample("hibernate_update_timestamps_cache_put_total", "factory3"), is(12.0));
-
   }
 
   @Test
@@ -131,9 +121,7 @@ class HibernateStatisticsCollectorTest {
     when(statistics.getCollectionRemoveCount()).thenReturn(9L);
     when(statistics.getCollectionRecreateCount()).thenReturn(10L);
 
-    new HibernateStatisticsCollector()
-        .add(sessionFactory, "factory4")
-        .register(registry);
+    new HibernateStatisticsCollector().add(sessionFactory, "factory4").register(registry);
 
     assertThat(getSample("hibernate_entity_delete_total", "factory4"), is(1.0));
     assertThat(getSample("hibernate_entity_insert_total", "factory4"), is(2.0));
@@ -146,7 +134,6 @@ class HibernateStatisticsCollectorTest {
     assertThat(getSample("hibernate_collection_update_total", "factory4"), is(8.0));
     assertThat(getSample("hibernate_collection_remove_total", "factory4"), is(9.0));
     assertThat(getSample("hibernate_collection_recreate_total", "factory4"), is(10.0));
-
   }
 
   @Test
@@ -155,13 +142,10 @@ class HibernateStatisticsCollectorTest {
     when(statistics.getQueryExecutionCount()).thenReturn(1L);
     when(statistics.getNaturalIdQueryExecutionCount()).thenReturn(3L);
 
-    new HibernateStatisticsCollector()
-        .add(sessionFactory, "factory5")
-        .register(registry);
+    new HibernateStatisticsCollector().add(sessionFactory, "factory5").register(registry);
 
     assertThat(getSample("hibernate_query_execution_total", "factory5"), is(1.0));
     assertThat(getSample("hibernate_natural_id_query_execution_total", "factory5"), is(3.0));
-
   }
 
   @Test
@@ -170,19 +154,29 @@ class HibernateStatisticsCollectorTest {
     mockQueryStatistics(query);
 
     new HibernateStatisticsCollector()
-            .add(sessionFactory, "factory6")
-            .enablePerQueryMetrics()
-            .register(registry);
+        .add(sessionFactory, "factory6")
+        .enablePerQueryMetrics()
+        .register(registry);
 
-    assertThat(getSampleForQuery("hibernate_per_query_cache_hit_total", "factory6", query), is(1.0));
-    assertThat(getSampleForQuery("hibernate_per_query_cache_miss_total", "factory6", query), is(2.0));
-    assertThat(getSampleForQuery("hibernate_per_query_cache_put_total", "factory6", query), is(3.0));
-    assertThat(getSampleForQuery("hibernate_per_query_execution_max_seconds", "factory6", query), is(0.555d));
-    assertThat(getSampleForQuery("hibernate_per_query_execution_min_seconds", "factory6", query), is(0.123d));
-    assertThat(getSampleForQuery("hibernate_per_query_execution_rows_total", "factory6", query), is(7.0));
-    assertThat(getSampleForQuery("hibernate_per_query_execution_total", "factory6", query), is(8.0));
-    assertThat(getSampleForQuery("hibernate_per_query_execution_seconds_total", "factory6", query), is(102.540d));
-
+    assertThat(
+        getSampleForQuery("hibernate_per_query_cache_hit_total", "factory6", query), is(1.0));
+    assertThat(
+        getSampleForQuery("hibernate_per_query_cache_miss_total", "factory6", query), is(2.0));
+    assertThat(
+        getSampleForQuery("hibernate_per_query_cache_put_total", "factory6", query), is(3.0));
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_max_seconds", "factory6", query),
+        is(0.555d));
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_min_seconds", "factory6", query),
+        is(0.123d));
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_rows_total", "factory6", query), is(7.0));
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_total", "factory6", query), is(8.0));
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_seconds_total", "factory6", query),
+        is(102.540d));
   }
 
   @Test
@@ -190,23 +184,31 @@ class HibernateStatisticsCollectorTest {
     String query = "query";
     mockQueryStatistics(query);
 
-    new HibernateStatisticsCollector()
-            .add(sessionFactory, "factory7")
-            .register(registry);
+    new HibernateStatisticsCollector().add(sessionFactory, "factory7").register(registry);
 
-    assertThat(getSampleForQuery("hibernate_per_query_cache_hit_total", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_cache_miss_total", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_cache_put_total", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_max_seconds", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_min_seconds", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_rows_total", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_total", "factory7", query), nullValue());
-    assertThat(getSampleForQuery("hibernate_per_query_execution_seconds", "factory7", query), nullValue());
-
+    assertThat(
+        getSampleForQuery("hibernate_per_query_cache_hit_total", "factory7", query), nullValue());
+    assertThat(
+        getSampleForQuery("hibernate_per_query_cache_miss_total", "factory7", query), nullValue());
+    assertThat(
+        getSampleForQuery("hibernate_per_query_cache_put_total", "factory7", query), nullValue());
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_max_seconds", "factory7", query),
+        nullValue());
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_min_seconds", "factory7", query),
+        nullValue());
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_rows_total", "factory7", query),
+        nullValue());
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_total", "factory7", query), nullValue());
+    assertThat(
+        getSampleForQuery("hibernate_per_query_execution_seconds", "factory7", query), nullValue());
   }
 
   private void mockQueryStatistics(String query) {
-    when(statistics.getQueries()).thenReturn(new String[]{query});
+    when(statistics.getQueries()).thenReturn(new String[] {query});
     when(statistics.getQueryStatistics(eq(query))).thenReturn(queryStatistics);
     when(queryStatistics.getCacheHitCount()).thenReturn(1L);
     when(queryStatistics.getCacheMissCount()).thenReturn(2L);
@@ -225,19 +227,14 @@ class HibernateStatisticsCollectorTest {
     expectedException.expectMessage("SessionFactory");
 
     new HibernateStatisticsCollector().register(registry);
-
   }
 
   private Double getSample(String metric, String factory) {
-    return registry.getSampleValue(
-        metric, new String[]{"unit"}, new String[]{factory}
-    );
+    return registry.getSampleValue(metric, new String[] {"unit"}, new String[] {factory});
   }
 
   private Double getSampleForQuery(String metric, String factory, String query) {
     return registry.getSampleValue(
-            metric, new String[]{"unit", "query"}, new String[]{factory, query}
-    );
+        metric, new String[] {"unit", "query"}, new String[] {factory, query});
   }
-
 }

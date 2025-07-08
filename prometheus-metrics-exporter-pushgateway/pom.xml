@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.prometheus</groupId>
-        <artifactId>client_java</artifactId>
-        <version>10.0.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>io.prometheus</groupId>
+    <artifactId>client_java</artifactId>
+    <version>1.4.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>prometheus-metrics-exporter-pushgateway</artifactId>
-    <packaging>bundle</packaging>
+  <artifactId>prometheus-metrics-exporter-pushgateway</artifactId>
+  <packaging>bundle</packaging>
 
-    <name>Prometheus Metrics Exporter - Pushgateway</name>
-    <description>
-        Exporter for pushing metrics to a pushgateway.
-    </description>
+  <name>Prometheus Metrics Exporter - Pushgateway</name>
+  <description>
+    Exporter for pushing metrics to a pushgateway.
+  </description>
 
-    <properties>
-        <automatic.module.name>io.prometheus.metrics.exporter.pushgateway</automatic.module.name>
-    </properties>
+  <properties>
+    <automatic.module.name>io.prometheus.metrics.exporter.pushgateway</automatic.module.name>
+  </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exporter-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-netty-no-dependencies</artifactId>
-            <version>5.15.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-core</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exporter-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty-no-dependencies</artifactId>
+      <version>5.15.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-core</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>

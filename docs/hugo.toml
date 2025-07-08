@@ -28,3 +28,7 @@ enableRobotsTXT = true
 
 [taxonomies]
    tag = "tags"
+
+[caches]
+  [caches.images]
+    dir = ':cacheDir/images'

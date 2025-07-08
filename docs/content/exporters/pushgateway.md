@@ -3,23 +3,28 @@ title: Pushgateway
 weight: 5
 ---
 
-The [Prometheus Pushgateway](https://github.com/prometheus/pushgateway) exists to allow ephemeral and batch jobs to expose their metrics to Prometheus.
-Since these kinds of jobs may not exist long enough to be scraped, they can instead push their metrics to a Pushgateway.
+The [Prometheus Pushgateway](https://github.com/prometheus/pushgateway) exists to allow ephemeral
+and batch jobs to expose their metrics to Prometheus.
+Since these kinds of jobs may not exist long enough to be scraped, they can instead push their
+metrics to a Pushgateway.
 The Pushgateway then exposes these metrics to Prometheus.
 
-The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) Java class allows you to push metrics to a Prometheus Pushgateway.
+The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) Java
+class allows you to push metrics to a Prometheus Pushgateway.
 
-Example
--------
+## Example
 
 {{< tabs "uniqueid" >}}
 {{< tab "Gradle" >}}
-```
+
+```groovy
 implementation 'io.prometheus:prometheus-metrics-core:1.3.0'
 implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway:1.3.0'
 ```
+
 {{< /tab >}}
 {{< tab "Maven" >}}
+
 ```xml
 <dependency>
     <groupId>io.prometheus</groupId>
@@ -32,6 +37,7 @@ implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway:1.3.0'
     <version>1.3.0</version>
 </dependency>
 ```
+
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -66,10 +72,10 @@ public class ExampleBatchJob {
 }
 ```
 
-Basic Auth
-----------
+## Basic Auth
 
-The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports basic authentication.
+The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html)
+supports basic authentication.
 
 ```java
 PushGateway pushGateway = PushGateway.builder()
@@ -80,10 +86,10 @@ PushGateway pushGateway = PushGateway.builder()
 
 The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
 
-Bearer token
-----------
+## Bearer token
 
-The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports Bearer token authentication.
+The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html)
+supports Bearer token authentication.
 
 ```java
 PushGateway pushGateway = PushGateway.builder()
@@ -94,11 +100,10 @@ PushGateway pushGateway = PushGateway.builder()
 
 The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
 
+## SSL
 
-SSL
----
-
-The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports SSL.
+The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html)
+supports SSL.
 
 ```java
 PushGateway pushGateway = PushGateway.builder()
@@ -109,10 +114,12 @@ PushGateway pushGateway = PushGateway.builder()
 
 However, this requires that the JVM can validate the server certificate.
 
-If you want to skip certificate verification, you need to provide your own  [HttpConnectionFactory](/client_java/api/io/prometheus/metrics/exporter/pushgateway/HttpConnectionFactory.html).
+If you want to skip certificate verification, you need to provide your own
+[HttpConnectionFactory](/client_java/api/io/prometheus/metrics/exporter/pushgateway/HttpConnectionFactory.html). <!-- editorconfig-checker-disable-line -->
 The `PushGatewayTestApp` in `integration-tests/it-pushgateway` has a complete example of this.
 
-Configuration Properties
-------------------------
+## Configuration Properties
 
-The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html) supports a couple of properties that can be configured at runtime. See [config](../../config/config).
+The [PushGateway](/client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.html)
+supports a couple of properties that can be configured at runtime.
+See [config]({{< relref "../config/config.md" >}}).

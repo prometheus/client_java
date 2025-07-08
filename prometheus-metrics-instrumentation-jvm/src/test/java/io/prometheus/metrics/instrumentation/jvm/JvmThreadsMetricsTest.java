@@ -54,34 +54,36 @@ class JvmThreadsMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        "# TYPE jvm_threads_current gauge\n"
-            + "# HELP jvm_threads_current Current thread count of a JVM\n"
-            + "jvm_threads_current 300.0\n"
-            + "# TYPE jvm_threads_daemon gauge\n"
-            + "# HELP jvm_threads_daemon Daemon thread count of a JVM\n"
-            + "jvm_threads_daemon 200.0\n"
-            + "# TYPE jvm_threads_deadlocked gauge\n"
-            + "# HELP jvm_threads_deadlocked Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers\n"
-            + "jvm_threads_deadlocked 3.0\n"
-            + "# TYPE jvm_threads_deadlocked_monitor gauge\n"
-            + "# HELP jvm_threads_deadlocked_monitor Cycles of JVM-threads that are in deadlock waiting to acquire object monitors\n"
-            + "jvm_threads_deadlocked_monitor 3.0\n"
-            + "# TYPE jvm_threads_peak gauge\n"
-            + "# HELP jvm_threads_peak Peak thread count of a JVM\n"
-            + "jvm_threads_peak 301.0\n"
-            + "# TYPE jvm_threads_started counter\n"
-            + "# HELP jvm_threads_started Started thread count of a JVM\n"
-            + "jvm_threads_started_total 503.0\n"
-            + "# TYPE jvm_threads_state gauge\n"
-            + "# HELP jvm_threads_state Current count of threads by state\n"
-            + "jvm_threads_state{state=\"BLOCKED\"} 1.0\n"
-            + "jvm_threads_state{state=\"NEW\"} 0.0\n"
-            + "jvm_threads_state{state=\"RUNNABLE\"} 2.0\n"
-            + "jvm_threads_state{state=\"TERMINATED\"} 0.0\n"
-            + "jvm_threads_state{state=\"TIMED_WAITING\"} 0.0\n"
-            + "jvm_threads_state{state=\"UNKNOWN\"} 0.0\n"
-            + "jvm_threads_state{state=\"WAITING\"} 0.0\n"
-            + "# EOF\n";
+        """
+# TYPE jvm_threads_current gauge
+# HELP jvm_threads_current Current thread count of a JVM
+jvm_threads_current 300.0
+# TYPE jvm_threads_daemon gauge
+# HELP jvm_threads_daemon Daemon thread count of a JVM
+jvm_threads_daemon 200.0
+# TYPE jvm_threads_deadlocked gauge
+# HELP jvm_threads_deadlocked Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or ownable synchronizers
+jvm_threads_deadlocked 3.0
+# TYPE jvm_threads_deadlocked_monitor gauge
+# HELP jvm_threads_deadlocked_monitor Cycles of JVM-threads that are in deadlock waiting to acquire object monitors
+jvm_threads_deadlocked_monitor 3.0
+# TYPE jvm_threads_peak gauge
+# HELP jvm_threads_peak Peak thread count of a JVM
+jvm_threads_peak 301.0
+# TYPE jvm_threads_started counter
+# HELP jvm_threads_started Started thread count of a JVM
+jvm_threads_started_total 503.0
+# TYPE jvm_threads_state gauge
+# HELP jvm_threads_state Current count of threads by state
+jvm_threads_state{state="BLOCKED"} 1.0
+jvm_threads_state{state="NEW"} 0.0
+jvm_threads_state{state="RUNNABLE"} 2.0
+jvm_threads_state{state="TERMINATED"} 0.0
+jvm_threads_state{state="TIMED_WAITING"} 0.0
+jvm_threads_state{state="UNKNOWN"} 0.0
+jvm_threads_state{state="WAITING"} 0.0
+# EOF
+""";
 
     assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }

@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_29_3.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_31_1.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -216,34 +216,24 @@ class CounterTest {
 
           @Override
           public String getCurrentTraceId() {
-            switch (callNumber) {
-              case 1:
-                return "abc";
-              case 3:
-                return "def";
-              case 4:
-                return "123";
-              case 5:
-                return "bab";
-              default:
-                throw new RuntimeException("unexpected call");
-            }
+            return switch (callNumber) {
+              case 1 -> "abc";
+              case 3 -> "def";
+              case 4 -> "123";
+              case 5 -> "bab";
+              default -> throw new RuntimeException("unexpected call");
+            };
           }
 
           @Override
           public String getCurrentSpanId() {
-            switch (callNumber) {
-              case 1:
-                return "123";
-              case 3:
-                return "456";
-              case 4:
-                return "abc";
-              case 5:
-                return "cdc";
-              default:
-                throw new RuntimeException("unexpected call");
-            }
+            return switch (callNumber) {
+              case 1 -> "123";
+              case 3 -> "456";
+              case 4 -> "abc";
+              case 5 -> "cdc";
+              default -> throw new RuntimeException("unexpected call");
+            };
           }
 
           @Override

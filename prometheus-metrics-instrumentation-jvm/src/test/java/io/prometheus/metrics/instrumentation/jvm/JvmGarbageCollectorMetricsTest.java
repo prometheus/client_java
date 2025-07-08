@@ -41,14 +41,16 @@ class JvmGarbageCollectorMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        "# TYPE jvm_gc_collection_seconds summary\n"
-            + "# UNIT jvm_gc_collection_seconds seconds\n"
-            + "# HELP jvm_gc_collection_seconds Time spent in a given JVM garbage collector in seconds.\n"
-            + "jvm_gc_collection_seconds_count{gc=\"MyGC1\"} 100\n"
-            + "jvm_gc_collection_seconds_sum{gc=\"MyGC1\"} 10.0\n"
-            + "jvm_gc_collection_seconds_count{gc=\"MyGC2\"} 200\n"
-            + "jvm_gc_collection_seconds_sum{gc=\"MyGC2\"} 20.0\n"
-            + "# EOF\n";
+        """
+        # TYPE jvm_gc_collection_seconds summary
+        # UNIT jvm_gc_collection_seconds seconds
+        # HELP jvm_gc_collection_seconds Time spent in a given JVM garbage collector in seconds.
+        jvm_gc_collection_seconds_count{gc="MyGC1"} 100
+        jvm_gc_collection_seconds_sum{gc="MyGC1"} 10.0
+        jvm_gc_collection_seconds_count{gc="MyGC2"} 200
+        jvm_gc_collection_seconds_sum{gc="MyGC2"} 20.0
+        # EOF
+        """;
 
     assertThat(convertToOpenMetricsFormat(snapshots)).isEqualTo(expected);
   }

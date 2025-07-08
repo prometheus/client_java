@@ -1,0 +1,73 @@
+{
+  "status": "success",
+  "data": {
+    "resultType": "vector",
+    "result": [
+      {
+        "metric": {
+          "__name__": "target_info",
+          "container_id": "0282187277c5f259f3405455bd5094a936642415a02bd8dbbdb41a73987d8db7",
+          "host_arch": "amd64",
+          "host_name": "0282187277c5",
+          "instance": "6b3318d9-2b87-498b-a1a3-bbfaecc96374",
+          "job": "rolldice",
+          "os_description": "Linux 6.8.0-57-generic",
+          "os_type": "linux",
+          "process_command_args": "[\"/opt/java/openjdk/bin/java\",\"-jar\",\"./app.jar\"]",
+          "process_executable_path": "/opt/java/openjdk/bin/java",
+          "process_pid": "1",
+          "process_runtime_description": "Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.6+7-LTS",
+          "process_runtime_name": "OpenJDK Runtime Environment",
+          "process_runtime_version": "21.0.6+7-LTS",
+          "service_instance_id": "6b3318d9-2b87-498b-a1a3-bbfaecc96374",
+          "service_name": "rolldice",
+          "telemetry_distro_name": "opentelemetry-java-instrumentation",
+          "telemetry_distro_version": "2.8.0",
+          "telemetry_sdk_language": "java",
+          "telemetry_sdk_name": "opentelemetry",
+          "telemetry_sdk_version": "1.42.1"
+        },
+        "value": [1743776399.291, "1"]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "http_scheme": "http",
+          "instance": "e6ff9e41-acdb-4c47-88b5-8112c831f5b5",
+          "job": "otelcol-contrib",
+          "net_host_port": "8888",
+          "server_port": "8888",
+          "service_instance_id": "e6ff9e41-acdb-4c47-88b5-8112c831f5b5",
+          "service_name": "otelcol-contrib",
+          "service_version": "0.122.1",
+          "url_scheme": "http"
+        },
+        "value": [1743776399.291, "1"]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "container_id": "0282187277c5f259f3405455bd5094a936642415a02bd8dbbdb41a73987d8db7",
+          "host_arch": "amd64",
+          "host_name": "0282187277c5",
+          "instance": "6b3318d9-2b87-498b-a1a3-bbfaecc96374",
+          "job": "rolldice",
+          "os_description": "Linux 6.8.0-57-generic",
+          "os_type": "linux",
+          "process_command_line": "/opt/java/openjdk/bin/java -javaagent:/usr/src/app/opentelemetry-javaagent.jar -jar ./app.jar",
+          "process_executable_path": "/opt/java/openjdk/bin/java",
+          "process_pid": "1",
+          "process_runtime_description": "Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.6+7-LTS",
+          "process_runtime_name": "OpenJDK Runtime Environment",
+          "process_runtime_version": "21.0.6+7-LTS",
+          "service_instance_id": "6b3318d9-2b87-498b-a1a3-bbfaecc96374",
+          "service_name": "rolldice",
+          "telemetry_sdk_language": "java",
+          "telemetry_sdk_name": "opentelemetry",
+          "telemetry_sdk_version": "1.48.0"
+        },
+        "value": [1743776399.291, "1"]
+      }
+    ]
+  }
+}

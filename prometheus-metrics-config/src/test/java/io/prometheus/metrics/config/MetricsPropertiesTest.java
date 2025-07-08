@@ -56,7 +56,8 @@ class MetricsPropertiesTest {
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> MetricsProperties.builder().summaryQuantileErrors(0.9).build())
         .withMessage(
-            ".summaryQuantileErrors: Can't configure summaryQuantileErrors without configuring summaryQuantiles");
+            ".summaryQuantileErrors: Can't configure summaryQuantileErrors without configuring"
+                + " summaryQuantiles");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
@@ -149,6 +150,7 @@ class MetricsPropertiesTest {
                     .histogramNativeMaxZeroThreshold(0.01)
                     .build())
         .withMessage(
-            ".histogramNativeMinZeroThreshold cannot be greater than .histogramNativeMaxZeroThreshold");
+            ".histogramNativeMinZeroThreshold cannot be greater than"
+                + " .histogramNativeMaxZeroThreshold");
   }
 }

@@ -1,21 +1,20 @@
+---
 name: GraalVM Native Tests
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+on: [pull_request]
+
+permissions: {}
 
 jobs:
   native-tests:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - name: Check out
         with:
-          java-version: '21'
-          distribution: graalvm
-          cache: 'maven'
-      - name: Run the Maven verify phase
-        run: ./scripts/run-native-tests.sh
+          persist-credentials: false
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
+        env:
+          MISE_ENV: native
+      - name: Run native tests
+        run: mise run test

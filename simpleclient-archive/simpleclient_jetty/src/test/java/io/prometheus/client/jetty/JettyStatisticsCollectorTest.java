@@ -31,7 +31,7 @@ class JettyStatisticsCollectorTest {
 
     ServletContextHandler context = new ServletContextHandler();
     context.setContextPath("/");
-    handlers.setHandlers(new Handler[]{context});
+    handlers.setHandlers(new Handler[] {context});
 
     StatisticsHandler stats = new StatisticsHandler();
     stats.setHandler(handlers);
@@ -62,54 +62,72 @@ class JettyStatisticsCollectorTest {
 
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_total"), is(1.0));
     Double jettyRequestsActive = null;
-    for (int i=0; i<10; i++) {
-      jettyRequestsActive = CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active");
+    for (int i = 0; i < 10; i++) {
+      jettyRequestsActive =
+          CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active");
       if (Double.valueOf(0.0).equals(jettyRequestsActive)) {
         break;
       }
       Thread.sleep(50);
     }
     assertThat(jettyRequestsActive, is(0.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active_max"),
-        is(1.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_max_seconds"),
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_requests_active_max"), is(1.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_max_seconds"),
         is(notNullValue()));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_seconds_total"),
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_request_time_seconds_total"),
         is(notNullValue()));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_total"), is(1.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_active"),
-        is(0.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_active_max"),
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_active"), is(0.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_active_max"),
         is(greaterThan(0.0)));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_time_max"),
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_time_max"),
         is(notNullValue()));
     assertThat(
         CollectorRegistry.defaultRegistry.getSampleValue("jetty_dispatched_time_seconds_total"),
         is(notNullValue()));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_requests_total"),
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_requests_total"), is(0.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_requests_waiting"), is(0.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_requests_waiting_max"),
         is(0.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_requests_waiting"),
-        is(0.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_requests_waiting_max"),
-        is(0.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_dispatches_total"),
-        is(0.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_async_dispatches_total"), is(0.0));
     assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_expires_total"), is(0.0));
 
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_responses_total",
-        new String[]{"code"}, new String[]{"1xx"}), is(0.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_responses_total",
-        new String[]{"code"}, new String[]{"2xx"}), is(0.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_responses_total",
-        new String[]{"code"}, new String[]{"3xx"}), is(0.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_responses_total",
-        new String[]{"code"}, new String[]{"4xx"}), is(1.0));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_responses_total",
-        new String[]{"code"}, new String[]{"5xx"}), is(0.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue(
+            "jetty_responses_total", new String[] {"code"}, new String[] {"1xx"}),
+        is(0.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue(
+            "jetty_responses_total", new String[] {"code"}, new String[] {"2xx"}),
+        is(0.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue(
+            "jetty_responses_total", new String[] {"code"}, new String[] {"3xx"}),
+        is(0.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue(
+            "jetty_responses_total", new String[] {"code"}, new String[] {"4xx"}),
+        is(1.0));
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue(
+            "jetty_responses_total", new String[] {"code"}, new String[] {"5xx"}),
+        is(0.0));
 
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_stats_seconds"),
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_stats_seconds"),
         is(notNullValue()));
-    assertThat(CollectorRegistry.defaultRegistry.getSampleValue("jetty_responses_bytes_total"),
+    assertThat(
+        CollectorRegistry.defaultRegistry.getSampleValue("jetty_responses_bytes_total"),
         is(notNullValue()));
   }
 }

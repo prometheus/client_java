@@ -35,7 +35,7 @@ public class ResourceAttributesFromOtelAgent {
    * runtime dependency on any OTel version remains.
    *
    * <p>The test for this class is in
-   * examples/example-exporter-opentelemetry/oats-tests/agent/service-instance-id-check.py
+   * examples/example-exporter-opentelemetry/oats-tests/agent/service_instance_id_check.py
    */
   public static Map<String, String> getResourceAttributes(String instrumentationScopeName) {
     try {

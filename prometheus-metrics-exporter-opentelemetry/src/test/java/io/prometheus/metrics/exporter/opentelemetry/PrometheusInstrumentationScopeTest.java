@@ -24,7 +24,8 @@ class PrometheusInstrumentationScopeTest {
                     "instrumentationScope.properties", "name", "version"))
         .havingRootCause()
         .withMessage(
-            "Prometheus metrics library initialization error: name not found in instrumentationScope.properties in classpath.");
+            "Prometheus metrics library initialization error: name not found in"
+                + " instrumentationScope.properties in classpath.");
 
     assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(
@@ -33,6 +34,7 @@ class PrometheusInstrumentationScopeTest {
                     "instrumentationScope.properties", "instrumentationScope.name", "version"))
         .havingRootCause()
         .withMessage(
-            "Prometheus metrics library initialization error: version not found in instrumentationScope.properties in classpath.");
+            "Prometheus metrics library initialization error: version not found in"
+                + " instrumentationScope.properties in classpath.");
   }
 }

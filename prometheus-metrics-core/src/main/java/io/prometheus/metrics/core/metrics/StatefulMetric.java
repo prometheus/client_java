@@ -1,8 +1,5 @@
 package io.prometheus.metrics.core.metrics;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DataPoint;
@@ -10,6 +7,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -112,7 +110,20 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
             "Expected " + labelNames.length + " label values, but got " + labelValues.length + ".");
       }
     }
-    return data.computeIfAbsent(Arrays.asList(labelValues), l -> newDataPoint());
+    return data.computeIfAbsent(
+        Arrays.asList(labelValues),
+        l -> {
+          for (int i = 0; i < l.size(); i++) {
+            if (l.get(i) == null) {
+              throw new IllegalArgumentException(
+                  "null label value for metric "
+                      + getMetadata().getName()
+                      + " and label "
+                      + labelNames[i]);
+            }
+          }
+          return newDataPoint();
+        });
   }
 
   /**
@@ -121,6 +132,11 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
    */
   public void remove(String... labelValues) {
     data.remove(Arrays.asList(labelValues));
+  }
+
+  /** Remove the data points when the given function. */
+  public void removeIf(Function<List<String>, Boolean> f) {
+    data.entrySet().removeIf(entry -> f.apply(Collections.unmodifiableList(entry.getKey())));
   }
 
   /** Reset the metric (remove all data points). */
@@ -185,13 +201,13 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
 
     /** Allow Exemplars for this metric. */
     public B withExemplars() {
-      this.exemplarsEnabled = TRUE;
+      this.exemplarsEnabled = true;
       return self();
     }
 
     /** Turn off Exemplars for this metric. */
     public B withoutExemplars() {
-      this.exemplarsEnabled = FALSE;
+      this.exemplarsEnabled = false;
       return self();
     }
 

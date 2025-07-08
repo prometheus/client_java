@@ -7,5 +7,5 @@ scrape_configs:
     static_configs:
       - targets: ["pushgateway:9091"]
     basic_auth:
-      username: 'my_user'
-      password: 'secret_password'
+      username: "my_user"
+      password: "secret_password"
