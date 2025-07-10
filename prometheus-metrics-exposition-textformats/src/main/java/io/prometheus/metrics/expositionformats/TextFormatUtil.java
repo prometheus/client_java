@@ -49,7 +49,7 @@ public class TextFormatUtil {
     writer.write(Long.toString(ms));
   }
 
-  static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
+  static void writeEscapedString(Writer writer, String s) throws IOException {
     // optimize for the common case where no escaping is needed
     int start = 0;
     // #indexOf is a vectorized intrinsic

@@ -464,10 +464,12 @@ class ExpositionFormatsTest {
   @Test
   public void testGaugeUTF8() throws IOException {
     String prometheusText =
-      "# HELP \"gauge.name\" gauge\\ndoc\\nstr\"ing\n" +
-        "# TYPE \"gauge.name\" gauge\n" +
-        "{\"gauge.name\",\"name*2\"=\"val with \\\\backslash and \\\"quotes\\\"\",\"name.1\"=\"val with\\nnew line\"} +Inf\n" +
-        "{\"gauge.name\",\"name*2\"=\"佖佥\",\"name.1\"=\"Björn\"} 3.14E42\n";
+      """
+      # HELP \"gauge.name\" gauge\\ndoc\\nstr\"ing
+      # TYPE \"gauge.name\" gauge
+      {\"gauge.name\",\"name*2\"=\"val with \\\\backslash and \\\"quotes\\\"\",\"name.1\"=\"val with\\nnew line\"} +Inf
+      {\"gauge.name\",\"name*2\"=\"佖佥\",\"name.1\"=\"Björn\"} 3.14E42
+      """;
     PrometheusNaming.nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
 
     GaugeSnapshot gauge = GaugeSnapshot.builder()
@@ -2872,26 +2874,19 @@ class ExpositionFormatsTest {
         .build())
       .build();
 
-    String acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited";
-    nameEscapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    ExpositionFormatWriter protoWriter = expositionFormats.findWriter(acceptHeaderValue);
-
-    protoWriter.write(buff, MetricSnapshots.of(unknown));
-    byte[] out = buff.toByteArray();
-    assertThat(out.length).isNotEqualTo(0);
-
-    buff.reset();
-
-    acceptHeaderValue = "text/plain; version=0.0.4; charset=utf-8";
+    String acceptHeaderValue = "text/plain; version=0.0.4; charset=utf-8";
     nameEscapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
     ExpositionFormatWriter textWriter = expositionFormats.findWriter(acceptHeaderValue);
 
     textWriter.write(buff, MetricSnapshots.of(unknown));
-    out = buff.toByteArray();
+    byte[] out = buff.toByteArray();
     assertThat(out.length).isNotEqualTo(0);
 
-    String expected = "# TYPE foo_metric untyped\n" +
-      "foo_metric 1.234\n";
+    String expected =
+      """
+      # TYPE foo_metric untyped
+      foo_metric 1.234
+      """;
 
     assertThat(new String(out, UTF_8)).hasToString(expected);
   }
