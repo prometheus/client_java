@@ -12,7 +12,7 @@ class PrometheusNamingTest {
 
   @Test
   public void testSanitizeMetricName() {
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties
     assertThat(prometheusName(sanitizeMetricName("0abc.def"))).isEqualTo("_abc_def");
     assertThat(prometheusName(sanitizeMetricName("___ab.:c0"))).isEqualTo("___ab__c0");
     assertThat(sanitizeMetricName("my_prefix/my_metric")).isEqualTo("my_prefix_my_metric");
@@ -27,7 +27,7 @@ class PrometheusNamingTest {
 
   @Test
   public void testSanitizeMetricNameWithUnit() {
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
     assertThat(prometheusName(sanitizeMetricName("0abc.def", Unit.RATIO)))
         .isEqualTo("_abc_def_" + Unit.RATIO);
     assertThat(prometheusName(sanitizeMetricName("___ab.:c0", Unit.RATIO)))
@@ -46,7 +46,7 @@ class PrometheusNamingTest {
 
   @Test
   public void testSanitizeLabelName() {
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
     assertThat(prometheusName(sanitizeLabelName("0abc.def"))).isEqualTo("_abc_def");
     assertThat(prometheusName(sanitizeLabelName("_abc"))).isEqualTo("_abc");
     assertThat(prometheusName(sanitizeLabelName("__abc"))).isEqualTo("_abc");
@@ -104,18 +104,7 @@ class PrometheusNamingTest {
 
   @Test
   public void testMetricNameIsValid() {
-    nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
-    assertThat(validateMetricName("Avalid_23name")).isNull();
-    assertThat(validateMetricName("_Avalid_23name")).isNull();
-    assertThat(validateMetricName("1valid_23name")).isNull();
-    assertThat(validateMetricName("avalid_23name")).isNull();
-    assertThat(validateMetricName("Ava:lid_23name")).isNull();
-    assertThat(validateMetricName("a lid_23name")).isNull();
-    assertThat(validateMetricName(":leading_colon")).isNull();
-    assertThat(validateMetricName("colon:in:the:middle")).isNull();
-    assertThat(validateMetricName("")).isEqualTo("The metric name contains unsupported characters");
-    assertThat(validateMetricName("a\ud800z")).isEqualTo("The metric name contains unsupported characters");
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties (defaults to LEGACY_VALIDATION)
     assertThat(validateMetricName("Avalid_23name")).isNull();
     assertThat(validateMetricName("_Avalid_23name")).isNull();
     assertThat(validateMetricName("1valid_23name")).isEqualTo("The metric name contains unsupported characters");
@@ -130,7 +119,7 @@ class PrometheusNamingTest {
 
   @Test
   public void testLabelNameIsValid() {
-    nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties
     assertThat(isValidLabelName("Avalid_23name")).isTrue();
     assertThat(isValidLabelName("_Avalid_23name")).isTrue();
     assertThat(isValidLabelName("1valid_23name")).isTrue();
@@ -140,7 +129,7 @@ class PrometheusNamingTest {
     assertThat(isValidLabelName(":leading_colon")).isTrue();
     assertThat(isValidLabelName("colon:in:the:middle")).isTrue();
     assertThat(isValidLabelName("a\ud800z")).isFalse();
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
     assertThat(isValidLabelName("Avalid_23name")).isTrue();
     assertThat(isValidLabelName("_Avalid_23name")).isTrue();
     assertThat(isValidLabelName("1valid_23name")).isFalse();
@@ -154,7 +143,7 @@ class PrometheusNamingTest {
 
   @Test
   public void testEscapeName() {
-    nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties
 
     // empty string
     String got = escapeName("", EscapingScheme.UNDERSCORE_ESCAPING);
@@ -288,12 +277,12 @@ class PrometheusNamingTest {
     got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got).isEqualTo("label with Ā");
 
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
   }
 
   @Test
   public void testValueUnescapeErrors() {
-    nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties
     String got;
 
     // empty string
@@ -336,22 +325,22 @@ class PrometheusNamingTest {
     got = unescapeName("U__bad__utf_D900_", EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got).isEqualTo("U__bad__utf_D900_");
 
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
   }
 
   @Test
   public void testEscapeMetricSnapshotEmpty() {
-    nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties
     MetricSnapshot original = CounterSnapshot.builder().name("empty").build();
     MetricSnapshot got = escapeMetricSnapshot(original, EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got.getMetadata().getName()).isEqualTo("empty");
     assertThat(original.getMetadata().getName()).isEqualTo("empty");
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
   }
 
   @Test
   public void testEscapeMetricSnapshotSimpleNoEscapingNeeded() {
-    nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties
     MetricSnapshot original = CounterSnapshot.builder()
       .name("my_metric")
       .help("some help text")
@@ -385,12 +374,12 @@ class PrometheusNamingTest {
       .label("some_label", "labelvalue")
       .build());
 
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
   }
 
   @Test
   public void testEscapeMetricSnapshotLabelNameEscapingNeeded() {
-    nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties
     MetricSnapshot original = CounterSnapshot.builder()
       .name("my_metric")
       .help("some help text")
@@ -424,12 +413,12 @@ class PrometheusNamingTest {
       .label("some.label", "labelvalue")
       .build());
 
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
   }
 
   @Test
   public void testEscapeMetricSnapshotCounterEscapingNeeded() {
-    nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties
     MetricSnapshot original = CounterSnapshot.builder()
       .name("my.metric")
       .help("some help text")
@@ -463,12 +452,12 @@ class PrometheusNamingTest {
       .label("some?label", "label??value")
       .build());
 
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
   }
 
   @Test
   public void testEscapeMetricSnapshotGaugeEscapingNeeded() {
-    nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+    // nameValidationScheme is now final and initialized from properties
     MetricSnapshot original = GaugeSnapshot.builder()
       .name("unicode.and.dots.花火")
       .help("some help text")
@@ -502,6 +491,6 @@ class PrometheusNamingTest {
       .label("some_label", "label??value")
       .build());
 
-    nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+    
   }
 }

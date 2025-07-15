@@ -28,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.*;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 
 /**
  * Write the OpenMetrics text format as defined on <a
@@ -102,10 +101,10 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   }
 
   @Override
-  public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
+  public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
     for (MetricSnapshot s : metricSnapshots) {
-      MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, nameEscapingScheme);
+      MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         if (snapshot instanceof CounterSnapshot) {
           writeCounter(writer, (CounterSnapshot) snapshot);

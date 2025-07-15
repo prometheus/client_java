@@ -24,7 +24,6 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.*;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 
 /**
  * Write the Prometheus text format. This is the default if you view a Prometheus endpoint with your
@@ -101,13 +100,13 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   }
 
   @Override
-  public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
+  public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException {
     // See https://prometheus.io/docs/instrumenting/exposition_formats/
     // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and
     // "summary".
     Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
     for (MetricSnapshot s : metricSnapshots) {
-      MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, nameEscapingScheme);
+      MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         if (snapshot instanceof CounterSnapshot) {
           writeCounter(writer, (CounterSnapshot) snapshot);
@@ -128,7 +127,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     }
     if (writeCreatedTimestamps) {
       for (MetricSnapshot s : metricSnapshots) {
-        MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, nameEscapingScheme);
+        MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
         if (!snapshot.getDataPoints().isEmpty()) {
           if (snapshot instanceof CounterSnapshot) {
             writeCreated(writer, snapshot);

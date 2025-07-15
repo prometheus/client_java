@@ -1,7 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.ESCAPING_KEY;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.DEFAULT_ESCAPING_SCHEME;
 
 public enum EscapingScheme {
   // NO_ESCAPING indicates that a name will not be escaped.
@@ -48,12 +48,12 @@ public enum EscapingScheme {
             return EscapingScheme.forString(value);
           } catch (IllegalArgumentException e) {
             // If the escaping parameter is unknown, ignore it.
-            return nameEscapingScheme;
+            return DEFAULT_ESCAPING_SCHEME;
           }
         }
       }
     }
-    return nameEscapingScheme;
+    return DEFAULT_ESCAPING_SCHEME;
   }
 
   private static EscapingScheme forString(String value) {

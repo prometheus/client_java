@@ -9,6 +9,7 @@ import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
@@ -18,6 +19,7 @@ import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
@@ -38,9 +40,10 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
   }
 
   @Override
-  public String toDebugString(MetricSnapshots metricSnapshots) {
+  public String toDebugString(MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) {
     StringBuilder stringBuilder = new StringBuilder();
-    for (MetricSnapshot snapshot : metricSnapshots) {
+    for (MetricSnapshot s : metricSnapshots) {
+      MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         stringBuilder.append(TextFormat.printer().printToString(convert(snapshot)));
       }
@@ -49,8 +52,9 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
   }
 
   @Override
-  public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
-    for (MetricSnapshot snapshot : metricSnapshots) {
+  public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException {
+    for (MetricSnapshot s : metricSnapshots) {
+      MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         convert(snapshot).writeDelimitedTo(out);
       }

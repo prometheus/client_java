@@ -1,6 +1,5 @@
 package io.prometheus.metrics.core.metrics;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -128,8 +127,7 @@ class InfoTest {
   private void assertTextFormat(String expected, Info info) throws IOException {
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-    writer.write(outputStream, MetricSnapshots.of(info.collect()));
+    writer.write(outputStream, MetricSnapshots.of(info.collect()), EscapingScheme.NO_ESCAPING);
     String result = outputStream.toString(StandardCharsets.UTF_8.name());
     if (!result.contains(expected)) {
       throw new AssertionError(expected + " is not contained in the following output:\n" + result);

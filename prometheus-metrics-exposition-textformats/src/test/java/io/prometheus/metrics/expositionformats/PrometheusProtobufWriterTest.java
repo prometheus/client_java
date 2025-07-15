@@ -3,6 +3,7 @@ package io.prometheus.metrics.expositionformats;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import org.junit.jupiter.api.Test;
 
 class PrometheusProtobufWriterTest {
@@ -24,13 +25,13 @@ class PrometheusProtobufWriterTest {
 
   @Test
   void write() {
-    assertThatCode(() -> writer.write(null, null))
+    assertThatCode(() -> writer.write(null, null, EscapingScheme.NO_ESCAPING))
         .isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
   void toDebugString() {
-    assertThatCode(() -> writer.toDebugString(null))
+    assertThatCode(() -> writer.toDebugString(null, EscapingScheme.NO_ESCAPING))
         .isInstanceOf(UnsupportedOperationException.class);
   }
 }

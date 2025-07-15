@@ -1,7 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
@@ -946,8 +945,7 @@ class HistogramTest {
     // text
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
-    nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expectedTextFormat);
   }
 

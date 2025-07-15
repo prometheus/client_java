@@ -1,6 +1,5 @@
 package io.prometheus.metrics.expositionformats;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -2798,69 +2797,49 @@ class ExpositionFormatsTest {
 
   @Test
   public void testFindWriter() {
-    EscapingScheme oldDefault = nameEscapingScheme;
-    nameEscapingScheme = EscapingScheme.UNDERSCORE_ESCAPING;
     ExpositionFormats expositionFormats = ExpositionFormats.init();
 
-    // delimited format
+    // delimited format - should use default escaping scheme
     String acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited";
-    String expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=underscores";
+    String expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=values";
     EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
     ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeaderValue);
     assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
 
-    // plain text format
-    acceptHeaderValue = "text/plain;version=0.0.4";
-    expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=underscores";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    // delimited format UTF-8
-    acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited; escaping=allow-utf-8";
-    expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    nameEscapingScheme = EscapingScheme.VALUE_ENCODING_ESCAPING;
-
-    // OM format, no version
-    acceptHeaderValue = "application/openmetrics-text";
-    expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=values";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    // OM format, 0.0.1 version
-    acceptHeaderValue = "application/openmetrics-text;version=0.0.1; escaping=underscores";
-    expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    // plain text format
+    // plain text format - should use default escaping scheme
     acceptHeaderValue = "text/plain;version=0.0.4";
     expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=values";
     escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
     writer = expositionFormats.findWriter(acceptHeaderValue);
     assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
 
-    // plain text format UTF-8
+    // delimited format UTF-8 - explicit escaping parameter
+    acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited; escaping=allow-utf-8";
+    expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8";
+    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+    writer = expositionFormats.findWriter(acceptHeaderValue);
+    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
+
+    // OM format, no version - should use default escaping scheme
+    acceptHeaderValue = "application/openmetrics-text";
+    expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=values";
+    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+    writer = expositionFormats.findWriter(acceptHeaderValue);
+    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
+
+    // OM format, 0.0.1 version - explicit escaping parameter
+    acceptHeaderValue = "application/openmetrics-text;version=0.0.1; escaping=underscores";
+    expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores";
+    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+    writer = expositionFormats.findWriter(acceptHeaderValue);
+    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
+
+    // plain text format UTF-8 - explicit escaping parameter
     acceptHeaderValue = "text/plain;version=0.0.4; escaping=allow-utf-8";
     expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8";
     escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
     writer = expositionFormats.findWriter(acceptHeaderValue);
     assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    // delimited format UTF-8
-    acceptHeaderValue = "text/plain;version=0.0.4; escaping=allow-utf-8";
-    expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    nameEscapingScheme = oldDefault;
   }
 
   @Test
@@ -2875,10 +2854,10 @@ class ExpositionFormatsTest {
       .build();
 
     String acceptHeaderValue = "text/plain; version=0.0.4; charset=utf-8";
-    nameEscapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+    EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
     ExpositionFormatWriter textWriter = expositionFormats.findWriter(acceptHeaderValue);
 
-    textWriter.write(buff, MetricSnapshots.of(unknown));
+    textWriter.write(buff, MetricSnapshots.of(unknown), escapingScheme);
     byte[] out = buff.toByteArray();
     assertThat(out.length).isNotEqualTo(0);
 
@@ -2895,8 +2874,7 @@ class ExpositionFormatsTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer =
         OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
-    nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2908,8 +2886,7 @@ class ExpositionFormatsTest {
             .setCreatedTimestampsEnabled(true)
             .setExemplarsOnAllMetricTypesEnabled(true)
             .build();
-    nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2917,17 +2894,14 @@ class ExpositionFormatsTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = OpenMetricsTextFormatWriter.create();
-    nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
   private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-
     getPrometheusWriter(PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true))
-        .write(out, MetricSnapshots.of(snapshot));
+        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2940,9 +2914,8 @@ class ExpositionFormatsTest {
   private void assertPrometheusTextWithoutCreated(String expected, MetricSnapshot snapshot)
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    nameEscapingScheme = EscapingScheme.NO_ESCAPING;
     getPrometheusWriter(PrometheusTextFormatWriter.builder())
-        .write(out, MetricSnapshots.of(snapshot));
+        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 

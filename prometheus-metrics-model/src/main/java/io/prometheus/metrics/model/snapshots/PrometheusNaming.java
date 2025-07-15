@@ -26,14 +26,12 @@ public class PrometheusNaming {
    * bugs or other undefined behavior. This value is intended to be set by
    * UTF-8-aware binaries as part of their startup via a properties file.
    */
-  public static ValidationScheme nameValidationScheme = initValidationScheme();
+  public static final ValidationScheme nameValidationScheme = initValidationScheme();
 
   /**
-   * nameEscapingScheme defines the default way that names will be
-   * escaped when presented to systems that do not support UTF-8 names. If the
-   * Accept "escaping" term is specified, that will override this value.
+   * Default escaping scheme for names when not specified.
    */
-  public static EscapingScheme nameEscapingScheme = EscapingScheme.VALUE_ENCODING_ESCAPING;
+  public static final EscapingScheme DEFAULT_ESCAPING_SCHEME = EscapingScheme.VALUE_ENCODING_ESCAPING;
 
   /**
    * ESCAPING_KEY is the key in an Accept header that defines how

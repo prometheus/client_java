@@ -209,8 +209,7 @@ public class PushGateway {
       try {
         if (!method.equals("DELETE")) {
           OutputStream outputStream = connection.getOutputStream();
-          nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-          writer.write(outputStream, registry.scrape());
+          writer.write(outputStream, registry.scrape(), EscapingScheme.NO_ESCAPING);
           outputStream.flush();
           outputStream.close();
         }
