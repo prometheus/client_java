@@ -1,6 +1,5 @@
 package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -220,8 +219,7 @@ app_okhttpclient_client_HttpClient_greatService_total{client="sampleClient",serv
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
-      nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-      writer.write(out, snapshots);
+      writer.write(out, snapshots, EscapingScheme.NO_ESCAPING);
       return out.toString(StandardCharsets.UTF_8.name());
     } catch (IOException e) {
       throw new RuntimeException(e);

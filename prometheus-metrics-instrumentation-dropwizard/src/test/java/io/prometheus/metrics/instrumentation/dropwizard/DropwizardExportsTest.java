@@ -1,6 +1,5 @@
 package io.prometheus.metrics.instrumentation.dropwizard;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -342,8 +341,7 @@ my_application_namedCounter2_total 10.0
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
-      nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-      writer.write(out, _registry.scrape());
+      writer.write(out, _registry.scrape(), EscapingScheme.NO_ESCAPING);
       return out.toString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);

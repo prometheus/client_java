@@ -1,6 +1,5 @@
 package io.prometheus.metrics.instrumentation.guava;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.nameEscapingScheme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -163,8 +162,7 @@ class CacheMetricsCollectorTest {
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     final OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
-      nameEscapingScheme = EscapingScheme.NO_ESCAPING;
-      writer.write(out, registry.scrape());
+      writer.write(out, registry.scrape(), EscapingScheme.NO_ESCAPING);
       return out.toString(StandardCharsets.UTF_8.name());
     } catch (IOException e) {
       throw new UncheckedIOException(e);
