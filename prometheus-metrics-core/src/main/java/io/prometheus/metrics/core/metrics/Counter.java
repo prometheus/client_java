@@ -38,7 +38,11 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     super(builder);
     MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
     boolean exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
-    if (exemplarsEnabled) {
+    // exemplars might be enabled specifically for a metric, however, if the code
+    // says withoutExemplars they should stay disabled.
+    boolean notTurnedOffWithinCode =
+      builder == null || builder.exemplarsEnabled == null || builder.exemplarsEnabled;
+    if (exemplarsEnabled && notTurnedOffWithinCode) {
       exemplarSamplerConfig =
           new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 1);
     } else {
