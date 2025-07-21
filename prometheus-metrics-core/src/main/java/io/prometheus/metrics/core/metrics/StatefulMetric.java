@@ -28,7 +28,7 @@ import java.util.function.Function;
  * because in Java <i>synchronous</i> and <i>asynchronous</i> usually refers to multi-threading, but
  * this has nothing to do with multi-threading.
  */
-abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWithFixedMetadata {
+public abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWithFixedMetadata {
 
   /** Map label values to data points. */
   private final ConcurrentHashMap<List<String>, T> data = new ConcurrentHashMap<>();
