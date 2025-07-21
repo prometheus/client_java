@@ -57,5 +57,5 @@ for tracing, and use the Prometheus Java client for metrics, it is sufficient to
 agent because the Prometheus library will pick up the same configuration.
 
 The [examples/example-exporter-opentelemetry](https://github.com/prometheus/client_java/tree/main/examples/example-exporter-opentelemetry) <!-- editorconfig-checker-disable-line -->
-folder has a docker compose with a complete end-to-end example, including a Java app, the OTel
+folder has a Docker compose with a complete end-to-end example, including a Java app, the OTel
 collector, and a Prometheus server.
