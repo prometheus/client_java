@@ -32,13 +32,12 @@ import java.util.concurrent.atomic.LongAdder;
 public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     implements CounterDataPoint {
 
-  private final boolean exemplarsEnabled;
   private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   private Counter(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
     MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
-    exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
+    boolean exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
     if (exemplarsEnabled) {
       exemplarSamplerConfig =
           new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 1);
@@ -93,7 +92,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
 
   @Override
   protected boolean isExemplarsEnabled() {
-    return exemplarsEnabled;
+    return exemplarSamplerConfig != null;
   }
 
   @Override
@@ -118,7 +117,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
     // and DoubleAdder for double observations. If the user doesn't observe any double at all,
     // we will be using the LongAdder and get the best performance.
-    private final LongAdder longValue = new LongAdder();
+    protected final LongAdder longValue = new LongAdder();
     private final long createdTimeMillis = System.currentTimeMillis();
     private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
@@ -188,7 +187,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       doubleValue.add(amount);
     }
 
-    private CounterSnapshot.CounterDataPointSnapshot collect(Labels labels) {
+    protected CounterSnapshot.CounterDataPointSnapshot collect(Labels labels) {
       // Read the exemplar first. Otherwise, there is a race condition where you might
       // see an Exemplar for a value that's not counted yet.
       // If there are multiple Exemplars (by default it's just one), use the newest.
@@ -227,6 +226,17 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     @Override
     public void inc(long amount) {
       validateAndAdd(amount);
+    }
+
+    /**
+     * Counter increment, probably the most used metric update method. Specialise and skip
+     * validation. Basically, the JVM JIT is doing this for us and inlining the code. However,
+     * for people that are curious about performance and inspecting the code, it might be good
+     * to be assured that this goes directly to the `LongAdder` method.
+     */
+    @Override
+    public void inc() {
+      longValue.increment();
     }
 
     /**
