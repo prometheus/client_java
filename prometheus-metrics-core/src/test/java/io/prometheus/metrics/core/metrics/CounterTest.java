@@ -319,8 +319,6 @@ class CounterTest {
   public void testExemplarSamplerDisabled() {
     Counter counter =
         Counter.builder()
-            // .withExemplarSampler((inc, prev) -> {throw new RuntimeException("unexpected call to
-            // exemplar sampler");})
             .name("count_total")
             .withoutExemplars()
             .build();
@@ -328,6 +326,21 @@ class CounterTest {
     assertThat(getData(counter).getExemplar()).isNull();
     counter.inc(2.0);
     assertThat(getData(counter).getExemplar()).isNull();
+  }
+
+  @Test
+  public void testExemplarSamplerDisabledReturnsFastCounter() {
+    Counter counter =
+      Counter.builder()
+        .name("count_total")
+        .withoutExemplars()
+        .build();
+    Counter.DataPointIgnoringExemplars fasterCounter = (Counter.DataPointIgnoringExemplars)
+      counter.labelValues();
+    assertThat(getData(counter).getValue()).isEqualTo(0);
+    fasterCounter.inc(1);
+    assertThat(getData(counter).getValue()).isEqualTo(1);
+    assertThat(fasterCounter.isExemplarsEnabled()).isFalse();
   }
 
   @Test

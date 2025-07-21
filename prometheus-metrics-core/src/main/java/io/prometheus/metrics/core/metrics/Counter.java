@@ -101,7 +101,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     if (isExemplarsEnabled()) {
       return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
     } else {
-      return new DataPoint(null);
+      return new DataPointIgnoringExemplars();
     }
   }
 
@@ -112,7 +112,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     return name;
   }
 
-  class DataPoint implements CounterDataPoint {
+  public static class DataPoint implements CounterDataPoint {
 
     private final DoubleAdder doubleValue = new DoubleAdder();
     // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
@@ -168,7 +168,11 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       }
     }
 
-    private void validateAndAdd(long amount) {
+    protected boolean isExemplarsEnabled() {
+      return exemplarSampler != null;
+    }
+
+    protected void validateAndAdd(long amount) {
       if (amount < 0) {
         throw new IllegalArgumentException(
             "Negative increment " + amount + " is illegal for Counter metrics.");
@@ -200,6 +204,40 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       return new CounterSnapshot.CounterDataPointSnapshot(
           get(), labels, latestExemplar, createdTimeMillis);
     }
+  }
+
+  /**
+   * Specialized data point, which is used in case no exemplar support is enabled.
+   * Applications can cast to this data time to speed up counter increment operations.
+   */
+  public static final class DataPointIgnoringExemplars extends DataPoint {
+
+    private DataPointIgnoringExemplars() {
+      super(null);
+    }
+
+    /**
+     * This is one of the most used metric. Override for speed. Direct shortcut to
+     * the {@code LongAdder.add} method with just only validating the argument. This
+     * override is actually not really needed because the override of {@link #isExemplarsEnabled()}
+     * and inlining has the same effect in the end, however, for everyone inspecting
+     * the code it makes it obvious that the increment a long counter code path is as short
+     * as possible.
+     */
+    @Override
+    public void inc(long amount) {
+      validateAndAdd(amount);
+    }
+
+    /**
+     * Override for speed. Since final, the JVM will inline code for this
+     * method and all Exemplar code will be left out.
+     */
+    @Override
+    protected boolean isExemplarsEnabled() {
+      return false;
+    }
+
   }
 
   public static Builder builder() {
