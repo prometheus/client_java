@@ -1,9 +1,6 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: [
-    "config:best-practices",
-    "config:recommended"
-  ],
+  extends: ["config:best-practices", "config:recommended"],
   platformCommit: "enabled",
   automerge: true,
   ignorePaths: [
@@ -12,19 +9,13 @@
     // agent resources packages an OTel API that is the minimum required API version
     "**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml",
   ],
-  labels: [
-    "dependencies"
-  ],
+  labels: ["dependencies"],
   mackageRules: [
     {
-      matchPackageNames: [
-        "jdx/mise"
-      ],
+      matchPackageNames: ["jdx/mise"],
       groupName: "mise",
-      schedule: [
-        "before 4am on monday"
-      ],
-    }
+      schedule: ["before 4am on monday"],
+    },
   ],
   customManagers: [
     {
@@ -32,14 +23,14 @@
       description: "update mise",
       managerFilePatterns: [
         "/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/",
-        "/(^|/)action\\.ya?ml$/"
+        "/(^|/)action\\.ya?ml$/",
       ],
       datasourceTemplate: "github-release-attachments",
       packageNameTemplate: "jdx/mise",
       depNameTemplate: "mise",
       matchStrings: [
-        "jdx/mise-action.*\\n\\s*with:\\s*\\n\\s*version: [\"']?(?<currentValue>v[.\\d]+)[\"']?\\s*\\n\\s*sha256: [\"']?(?<currentDigest>\\w+)[\"']?"
+        "jdx/mise-action.*\\n\\s*with:\\s*\\n\\s*version: [\"']?(?<currentValue>v[.\\d]+)[\"']?\\s*\\n\\s*sha256: [\"']?(?<currentDigest>\\w+)[\"']?",
       ],
     },
-  ]
+  ],
 }
