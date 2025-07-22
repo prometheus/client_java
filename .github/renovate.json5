@@ -1,12 +1,45 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:best-practices", "config:recommended"],
+  extends: [
+    "config:best-practices",
+    "config:recommended"
+  ],
   platformCommit: "enabled",
   automerge: true,
   ignorePaths: [
-    "**/simpleclient-archive/**", // old projects
+    "**/simpleclient-archive/**",
+    // old projects
     // agent resources packages an OTel API that is the minimum required API version
     "**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml",
   ],
-  labels: ["dependencies"],
+  labels: [
+    "dependencies"
+  ],
+  mackageRules: [
+    {
+      matchPackageNames: [
+        "jdx/mise"
+      ],
+      groupName: "mise",
+      schedule: [
+        "before 4am on monday"
+      ],
+    }
+  ],
+  customManagers: [
+    {
+      customType: "regex",
+      description: "update mise",
+      managerFilePatterns: [
+        "/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/",
+        "/(^|/)action\\.ya?ml$/"
+      ],
+      datasourceTemplate: "github-release-attachments",
+      packageNameTemplate: "jdx/mise",
+      depNameTemplate: "mise",
+      matchStrings: [
+        "jdx/mise-action.*\\n\\s*with:\\s*\\n\\s*version: [\"']?(?<currentValue>v[.\\d]+)[\"']?\\s*\\n\\s*sha256: [\"']?(?<currentDigest>\\w+)[\"']?"
+      ],
+    },
+  ]
 }
