@@ -13,7 +13,7 @@ jobs:
         with:
           persist-credentials: false
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - uses: jdx/mise-action@bfb9fa0b029db830a8c570757cee683df207a6c5 # v2.4.0
+      - uses: jdx/mise-action@eb2f5cb41b0a8175dad2f797e3daca6fe7795a19 # v2.4.2
         env:
           MISE_ENV: native
       - name: Run native tests
