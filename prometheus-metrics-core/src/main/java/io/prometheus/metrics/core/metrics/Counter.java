@@ -32,13 +32,13 @@ import java.util.concurrent.atomic.LongAdder;
 public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     implements CounterDataPoint {
 
-  private final boolean exemplarsEnabled;
   private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   private Counter(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
     MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
-    exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
+    boolean exemplarsEnabled =
+        getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
     if (exemplarsEnabled) {
       exemplarSamplerConfig =
           new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 1);
@@ -93,7 +93,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
 
   @Override
   protected boolean isExemplarsEnabled() {
-    return exemplarsEnabled;
+    return exemplarSamplerConfig != null;
   }
 
   @Override
@@ -112,7 +112,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     return name;
   }
 
-  class DataPoint implements CounterDataPoint {
+  static class DataPoint implements CounterDataPoint {
 
     private final DoubleAdder doubleValue = new DoubleAdder();
     // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
@@ -166,6 +166,10 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       if (isExemplarsEnabled()) {
         exemplarSampler.observeWithExemplar(amount, labels);
       }
+    }
+
+    private boolean isExemplarsEnabled() {
+      return exemplarSampler != null;
     }
 
     private void validateAndAdd(long amount) {
