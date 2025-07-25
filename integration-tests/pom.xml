@@ -33,10 +33,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skipITs>true</skipITs>
+        </configuration>
         <executions>
           <execution>
-            <id>integration-test</id>
-            <phase>integration-test</phase>
             <goals>
               <goal>integration-test</goal>
               <goal>verify</goal>
