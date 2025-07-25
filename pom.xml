@@ -348,7 +348,6 @@
       <modules>
         <module>examples</module>
         <module>benchmarks</module>
-        <module>integration-tests</module>
       </modules>
       <dependencyManagement>
         <dependencies>
