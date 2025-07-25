@@ -136,7 +136,7 @@ public class TextFormatUtil {
         }
         break;
       case Label:
-        if (PrometheusNaming.isValidLegacyLabelName(name) && PrometheusNaming.nameValidationScheme == ValidationScheme.LEGACY_VALIDATION) {
+        if (PrometheusNaming.isValidLegacyLabelName(name) && PrometheusNaming.getValidationScheme() == ValidationScheme.LEGACY_VALIDATION) {
           writer.write(name);
           return;
         }

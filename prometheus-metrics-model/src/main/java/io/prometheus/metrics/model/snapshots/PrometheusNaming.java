@@ -88,6 +88,15 @@ public class PrometheusNaming {
   }
 
   /**
+   * Get the current validation scheme. This method exists primarily to enable
+   * testing different validation behaviors while keeping the validation scheme
+   * field final and immutable.
+   */
+  public static ValidationScheme getValidationScheme() {
+    return nameValidationScheme;
+  }
+
+  /**
    * Test if a metric name is valid. Rules:
    *
    * <ul>
@@ -112,7 +121,7 @@ public class PrometheusNaming {
   }
 
   public static String validateMetricName(String name) {
-    switch (nameValidationScheme) {
+    switch (getValidationScheme()) {
       case LEGACY_VALIDATION:
         return validateLegacyMetricName(name);
       case UTF_8_VALIDATION:
@@ -121,7 +130,7 @@ public class PrometheusNaming {
         }
         return null;
       default:
-        throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+        throw new RuntimeException("Invalid name validation scheme requested: " + getValidationScheme());
     }
   }
 
@@ -143,24 +152,24 @@ public class PrometheusNaming {
   }
 
   public static boolean isValidLegacyMetricName(String name) {
-    switch (nameValidationScheme) {
+    switch (getValidationScheme()) {
       case LEGACY_VALIDATION:
         return LEGACY_METRIC_NAME_PATTERN.matcher(name).matches();
       case UTF_8_VALIDATION:
         return METRIC_NAME_PATTERN.matcher(name).matches();
       default:
-        throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+        throw new RuntimeException("Invalid name validation scheme requested: " + getValidationScheme());
     }
   }
 
   public static boolean isValidLabelName(String name) {
-    switch (nameValidationScheme) {
+    switch (getValidationScheme()) {
       case LEGACY_VALIDATION:
         return isValidLegacyLabelName(name);
       case UTF_8_VALIDATION:
         return StandardCharsets.UTF_8.newEncoder().canEncode(name);
       default:
-        throw new RuntimeException("Invalid name validation scheme requested: " + nameValidationScheme);
+        throw new RuntimeException("Invalid name validation scheme requested: " + getValidationScheme());
     }
   }
 

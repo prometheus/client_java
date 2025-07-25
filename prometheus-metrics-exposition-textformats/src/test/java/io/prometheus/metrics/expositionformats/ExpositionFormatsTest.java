@@ -2,6 +2,8 @@ package io.prometheus.metrics.expositionformats;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mockStatic;
 
 import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
@@ -12,10 +14,12 @@ import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryDataPointSna
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 class ExpositionFormatsTest {
 
@@ -192,7 +196,6 @@ class ExpositionFormatsTest {
             + "}";
     // @formatter:on
 
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("service_time_seconds")
@@ -237,7 +240,6 @@ class ExpositionFormatsTest {
         """;
     String prometheusProtobuf =
         "name: \"my_counter_total\" type: COUNTER metric { counter { value: 1.1 } }";
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("my_counter")
@@ -277,7 +279,6 @@ class ExpositionFormatsTest {
             + "}";
     // @formatter:on
 
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("my.request.count")
@@ -345,7 +346,6 @@ class ExpositionFormatsTest {
             + "timestamp_ms: 1672850585820 "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     GaugeSnapshot gauge =
         GaugeSnapshot.builder()
             .name("disk_usage_ratio")
@@ -390,7 +390,6 @@ class ExpositionFormatsTest {
         """;
     String prometheusProtobuf =
         "name: \"temperature_centigrade\" type: GAUGE metric { gauge { value: 22.3 } }";
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     GaugeSnapshot gauge =
         GaugeSnapshot.builder()
             .name("temperature_centigrade")
@@ -440,7 +439,6 @@ class ExpositionFormatsTest {
             + "}";
     // @formatter:on
 
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     GaugeSnapshot gauge =
         GaugeSnapshot.builder()
             .name("my.temperature.celsius")
@@ -462,36 +460,37 @@ class ExpositionFormatsTest {
 
   @Test
   public void testGaugeUTF8() throws IOException {
-    String prometheusText =
-      """
-      # HELP \"gauge.name\" gauge\\ndoc\\nstr\"ing
-      # TYPE \"gauge.name\" gauge
-      {\"gauge.name\",\"name*2\"=\"val with \\\\backslash and \\\"quotes\\\"\",\"name.1\"=\"val with\\nnew line\"} +Inf
-      {\"gauge.name\",\"name*2\"=\"佖佥\",\"name.1\"=\"Björn\"} 3.14E42
-      """;
-    PrometheusNaming.nameValidationScheme = ValidationScheme.UTF_8_VALIDATION;
+    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+      mock.when(PrometheusNaming::getValidationScheme)
+        .thenReturn(ValidationScheme.UTF_8_VALIDATION);
 
-    GaugeSnapshot gauge = GaugeSnapshot.builder()
-      .name("gauge.name")
-      .help("gauge\ndoc\nstr\"ing")
-      .dataPoint(GaugeDataPointSnapshot.builder()
-        .value(Double.POSITIVE_INFINITY)
-        .labels(Labels.builder()
-          .label("name.1", "val with\nnew line")
-          .label("name*2", "val with \\backslash and \"quotes\"")
+      String prometheusText =
+        """
+        # HELP \"gauge.name\" gauge\\ndoc\\nstr\"ing
+        # TYPE \"gauge.name\" gauge
+        {\"gauge.name\",\"name*2\"=\"val with \\\\backslash and \\\"quotes\\\"\",\"name.1\"=\"val with\\nnew line\"} +Inf
+        {\"gauge.name\",\"name*2\"=\"佖佥\",\"name.1\"=\"Björn\"} 3.14E42
+        """;
+      GaugeSnapshot gauge = GaugeSnapshot.builder()
+        .name("gauge.name")
+        .help("gauge\ndoc\nstr\"ing")
+        .dataPoint(GaugeDataPointSnapshot.builder()
+          .value(Double.POSITIVE_INFINITY)
+          .labels(Labels.builder()
+            .label("name.1", "val with\nnew line")
+            .label("name*2", "val with \\backslash and \"quotes\"")
+            .build())
           .build())
-        .build())
-      .dataPoint(GaugeDataPointSnapshot.builder()
-        .value(3.14e42)
-        .labels(Labels.builder()
-          .label("name.1", "Björn")
-          .label("name*2", "佖佥")
+        .dataPoint(GaugeDataPointSnapshot.builder()
+          .value(3.14e42)
+          .labels(Labels.builder()
+            .label("name.1", "Björn")
+            .label("name*2", "佖佥")
+            .build())
           .build())
-        .build())
-      .build();
-    assertPrometheusText(prometheusText, gauge);
-
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
+        .build();
+      assertPrometheusText(prometheusText, gauge);
+    }
   }
 
   @Test
@@ -742,7 +741,6 @@ class ExpositionFormatsTest {
             + "timestamp_ms: 1672850585820 "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     SummarySnapshot summary =
         SummarySnapshot.builder()
             .name("http_request_duration_seconds")
@@ -818,7 +816,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     SummarySnapshot summary =
         SummarySnapshot.builder()
             .name("latency_seconds")
@@ -856,7 +853,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     SummarySnapshot summary =
         SummarySnapshot.builder()
             .name("latency_seconds")
@@ -895,7 +891,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     SummarySnapshot summary =
         SummarySnapshot.builder()
             .name("latency_seconds")
@@ -931,7 +926,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     SummarySnapshot summary =
         SummarySnapshot.builder()
             .name("latency_seconds")
@@ -948,7 +942,6 @@ class ExpositionFormatsTest {
   public void testSummaryEmptyData() throws IOException {
     // SummaryData can be present but empty (no count, no sum, no quantiles).
     // This should be treated like no data is present.
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     SummarySnapshot summary =
         SummarySnapshot.builder()
             .name("latency_seconds")
@@ -990,7 +983,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     SummarySnapshot summary =
         SummarySnapshot.builder()
             .name("latency_seconds")
@@ -1048,7 +1040,6 @@ class ExpositionFormatsTest {
             + "}";
     // @formatter:on
 
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     SummarySnapshot summary =
         SummarySnapshot.builder()
             .name("my.request.duration.seconds")
@@ -1333,7 +1324,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot histogram =
         HistogramSnapshot.builder()
             .name("response_size_bytes")
@@ -1406,7 +1396,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot histogram =
         HistogramSnapshot.builder()
             .name("request_latency_seconds")
@@ -1457,7 +1446,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot histogram =
         HistogramSnapshot.builder()
             .name("request_latency_seconds")
@@ -1731,7 +1719,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot gaugeHistogram =
         HistogramSnapshot.builder()
             .gaugeHistogram(true)
@@ -1805,7 +1792,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot gaugeHistogram =
         HistogramSnapshot.builder()
             .gaugeHistogram(true)
@@ -1859,7 +1845,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot gaugeHistogram =
         HistogramSnapshot.builder()
             .gaugeHistogram(true)
@@ -1929,7 +1914,6 @@ class ExpositionFormatsTest {
             + "}";
     // @formatter:on
 
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot histogram =
         HistogramSnapshot.builder()
             .name("my.request.duration.seconds")
@@ -2201,7 +2185,6 @@ class ExpositionFormatsTest {
             "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot nativeHistogram =
         HistogramSnapshot.builder()
             .name("response_size_bytes")
@@ -2292,7 +2275,6 @@ class ExpositionFormatsTest {
             + "} "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot nativeHistogram =
         HistogramSnapshot.builder()
             .name("latency_seconds")
@@ -2358,7 +2340,6 @@ class ExpositionFormatsTest {
             + "}";
     // @formatter:on
 
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     HistogramSnapshot histogram =
         HistogramSnapshot.builder()
             .name("my.request.duration.seconds")
@@ -2399,7 +2380,6 @@ class ExpositionFormatsTest {
         # TYPE version_info gauge
         version_info{version="1.2.3"} 1
         """;
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     InfoSnapshot info =
         InfoSnapshot.builder()
             .name("version")
@@ -2440,7 +2420,6 @@ class ExpositionFormatsTest {
             + "gauge { value: 1.0 } "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     InfoSnapshot info =
         InfoSnapshot.builder()
             .name("jvm.status")
@@ -2488,7 +2467,6 @@ class ExpositionFormatsTest {
             + "state{env=\"prod\",state=\"state2\"} 1 "
             + scrapeTimestamp2s
             + "\n";
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     StateSetSnapshot stateSet =
         StateSetSnapshot.builder()
             .name("state")
@@ -2529,7 +2507,6 @@ class ExpositionFormatsTest {
         state{state="a"} 1
         state{state="bb"} 0
         """;
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     StateSetSnapshot stateSet =
         StateSetSnapshot.builder()
             .name("state")
@@ -2577,7 +2554,6 @@ class ExpositionFormatsTest {
             + "gauge { value: 0.0 } "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     StateSetSnapshot stateSet =
         StateSetSnapshot.builder()
             .name("my.application.state")
@@ -2631,7 +2607,6 @@ class ExpositionFormatsTest {
             + "my_special_thing_bytes{env=\"prod\"} 0.7 "
             + scrapeTimestamp2s
             + "\n";
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     UnknownSnapshot unknown =
         UnknownSnapshot.builder()
             .name("my_special_thing_bytes")
@@ -2673,7 +2648,6 @@ class ExpositionFormatsTest {
         # TYPE other untyped
         other 22.3
         """;
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     UnknownSnapshot unknown =
         UnknownSnapshot.builder()
             .name("other")
@@ -2719,7 +2693,6 @@ class ExpositionFormatsTest {
             + "untyped { value: 0.7 } "
             + "}";
     // @formatter:on
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     UnknownSnapshot unknown =
         UnknownSnapshot.builder()
             .name(PrometheusNaming.sanitizeMetricName("some.unknown.metric", Unit.BYTES))
@@ -2754,7 +2727,6 @@ class ExpositionFormatsTest {
         # TYPE test_total counter
         test_total 1.0
         """;
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("test")
@@ -2780,7 +2752,6 @@ class ExpositionFormatsTest {
         # TYPE test_total counter
         test_total{a="x",b="escaping\\" example \\n "} 1.0
         """;
-    PrometheusNaming.nameValidationScheme = ValidationScheme.LEGACY_VALIDATION;
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("test")
