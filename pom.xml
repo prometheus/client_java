@@ -75,13 +75,21 @@
     <pluginManagement>
       <plugins>
         <plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-failsafe-plugin</artifactId>
-  <version>3.5.3</version>
-  <configuration>
-    <skipITs>${skipITs}</skipITs>
-  </configuration>
-</plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>3.5.3</version>
+          <configuration>
+            <skipITs>${skipITs}</skipITs>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
         <!-- Add plugin versions for reproducible builds. Versions for default bindings are taken from -->
         <!--https://github.com/apache/maven/tree/maven-3.8.1/maven-core/src/main/resources/META-INF/plexus-->
         <plugin>
