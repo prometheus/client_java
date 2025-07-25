@@ -23,9 +23,7 @@
 
   <modules>
     <module>it-common</module>
-    <module>it-exporter</module>
     <module>it-pushgateway</module>
-    <module>it-spring-boot-smoke-test</module>
   </modules>
 
   <build>
