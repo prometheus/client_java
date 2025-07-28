@@ -1,6 +1,7 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
 import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.*;
 
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
@@ -11,6 +12,8 @@ import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -206,7 +209,7 @@ public class PushGateway {
       try {
         if (!method.equals("DELETE")) {
           OutputStream outputStream = connection.getOutputStream();
-          writer.write(outputStream, registry.scrape());
+          writer.write(outputStream, registry.scrape(), EscapingScheme.NO_ESCAPING);
           outputStream.flush();
           outputStream.close();
         }
@@ -452,11 +455,11 @@ public class PushGateway {
       if (groupingKey != null) {
         for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
           if (entry.getValue().isEmpty()) {
-            url += "/" + entry.getKey() + "@base64/=";
+            url += "/" + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING) + "@base64/=";
           } else if (entry.getValue().contains("/")) {
-            url += "/" + entry.getKey() + "@base64/" + base64url(entry.getValue());
+            url += "/" + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING) + "@base64/" + base64url(entry.getValue());
           } else {
-            url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
+            url += "/" + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING) + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
           }
         }
       }

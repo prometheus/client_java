@@ -3,6 +3,7 @@ package io.prometheus.metrics.benchmarks;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -69,14 +70,14 @@ public class TextFormatUtilBenchmark {
     // avoid growing the array
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
-    OPEN_METRICS_TEXT_FORMAT_WRITER.write(byteArrayOutputStream, SNAPSHOTS);
+    OPEN_METRICS_TEXT_FORMAT_WRITER.write(byteArrayOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
     return byteArrayOutputStream;
   }
 
   @Benchmark
   public OutputStream openMetricsWriteToNull() throws IOException {
     OutputStream nullOutputStream = NullOutputStream.INSTANCE;
-    OPEN_METRICS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS);
+    OPEN_METRICS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
     return nullOutputStream;
   }
 
@@ -85,14 +86,14 @@ public class TextFormatUtilBenchmark {
     // avoid growing the array
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
-    PROMETHEUS_TEXT_FORMAT_WRITER.write(byteArrayOutputStream, SNAPSHOTS);
+    PROMETHEUS_TEXT_FORMAT_WRITER.write(byteArrayOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
     return byteArrayOutputStream;
   }
 
   @Benchmark
   public OutputStream prometheusWriteToNull() throws IOException {
     OutputStream nullOutputStream = NullOutputStream.INSTANCE;
-    PROMETHEUS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS);
+    PROMETHEUS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
     return nullOutputStream;
   }
 

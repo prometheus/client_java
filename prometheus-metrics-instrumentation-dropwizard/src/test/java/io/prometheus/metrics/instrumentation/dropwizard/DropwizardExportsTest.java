@@ -8,6 +8,7 @@ import com.codahale.metrics.*;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.instrumentation.dropwizard5.InvalidMetricHandler;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -340,7 +341,7 @@ my_application_namedCounter2_total 10.0
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
-      writer.write(out, _registry.scrape());
+      writer.write(out, _registry.scrape(), EscapingScheme.NO_ESCAPING);
       return out.toString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);

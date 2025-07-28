@@ -1,7 +1,10 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.isValidLabelName;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
@@ -11,9 +14,13 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URL;
+
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.ValidationScheme;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 
@@ -142,6 +149,26 @@ class PushGatewayTest {
   }
 
   @Test
+  public void testPushWithEscapedGroupingKey() throws IOException {
+    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+      mock.when(PrometheusNaming::getValidationScheme)
+        .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+
+      mockServerClient
+        .when(request().withMethod("PUT").withPath("/metrics/job/j/U__l_2e_1/v1"))
+        .respond(response().withStatusCode(202));
+      PushGateway pg =
+        PushGateway.builder()
+          .address("localhost:" + mockServerClient.getPort())
+          .registry(registry)
+          .job("j")
+          .groupingKey("l.1", "v1")
+          .build();
+      pg.push();
+    }
+  }
+
+  @Test
   public void testPushWithMultiGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/l/v/l2/v2"))
@@ -155,6 +182,27 @@ class PushGatewayTest {
             .groupingKey("l2", "v2")
             .build();
     pg.push();
+  }
+
+  @Test
+  public void testPushWithMultiEscapedGroupingKey() throws IOException {
+    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+      mock.when(PrometheusNaming::getValidationScheme)
+        .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+
+      mockServerClient
+        .when(request().withMethod("PUT").withPath("/metrics/job/j/U__l_2e_1/v1/U__l_2e_2/v2"))
+        .respond(response().withStatusCode(202));
+      PushGateway pg =
+        PushGateway.builder()
+          .address("localhost:" + mockServerClient.getPort())
+          .registry(registry)
+          .job("j")
+          .groupingKey("l.1", "v1")
+          .groupingKey("l.2", "v2")
+          .build();
+      pg.push();
+    }
   }
 
   @Test
@@ -206,6 +254,26 @@ class PushGatewayTest {
   }
 
   @Test
+  public void testPushCollectorWithEscapedGroupingKey() throws IOException {
+    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+      mock.when(PrometheusNaming::getValidationScheme)
+        .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+
+      mockServerClient
+        .when(request().withMethod("PUT").withPath("/metrics/job/j/U__l_2e_1/v1"))
+        .respond(response().withStatusCode(202));
+      PushGateway pg =
+        PushGateway.builder()
+          .address("localhost:" + mockServerClient.getPort())
+          .registry(registry)
+          .job("j")
+          .groupingKey("l.1", "v1")
+          .build();
+      pg.push(gauge);
+    }
+  }
+
+  @Test
   public void testPushAdd() throws IOException {
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j"))
@@ -245,6 +313,26 @@ class PushGatewayTest {
   }
 
   @Test
+  public void testPushAddWithEscapedGroupingKey() throws IOException {
+    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+      mock.when(PrometheusNaming::getValidationScheme)
+        .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+
+      mockServerClient
+        .when(request().withMethod("POST").withPath("/metrics/job/j/U__l_2e_1/v1"))
+        .respond(response().withStatusCode(202));
+      PushGateway pg =
+        PushGateway.builder()
+          .address("localhost:" + mockServerClient.getPort())
+          .registry(registry)
+          .groupingKey("l.1", "v1")
+          .job("j")
+          .build();
+      pg.pushAdd();
+    }
+  }
+
+  @Test
   public void testPushAddCollectorWithGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j/l/v"))
@@ -257,6 +345,26 @@ class PushGatewayTest {
             .job("j")
             .build();
     pg.pushAdd(gauge);
+  }
+
+  @Test
+  public void testPushAddCollectorWithEscapedGroupingKey() throws IOException {
+    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+      mock.when(PrometheusNaming::getValidationScheme)
+        .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+
+      mockServerClient
+        .when(request().withMethod("POST").withPath("/metrics/job/j/U__l_2e_1/v1"))
+        .respond(response().withStatusCode(202));
+      PushGateway pg =
+        PushGateway.builder()
+          .address("localhost:" + mockServerClient.getPort())
+          .registry(registry)
+          .groupingKey("l.1", "v1")
+          .job("j")
+          .build();
+      pg.pushAdd(gauge);
+    }
   }
 
   @Test
@@ -284,6 +392,25 @@ class PushGatewayTest {
   }
 
   @Test
+  public void testDeleteWithEscapedGroupingKey() throws IOException {
+    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+      mock.when(PrometheusNaming::getValidationScheme)
+        .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+
+      mockServerClient
+        .when(request().withMethod("DELETE").withPath("/metrics/job/j/U__l_2e_1/v1"))
+        .respond(response().withStatusCode(202));
+      PushGateway pg =
+        PushGateway.builder()
+          .address("localhost:" + mockServerClient.getPort())
+          .job("j")
+          .groupingKey("l.1", "v1")
+          .build();
+      pg.delete();
+    }
+  }
+
+  @Test
   public void testInstanceIpGroupingKey() throws IOException {
     String ip = InetAddress.getLocalHost().getHostAddress();
     assertThat(ip).isNotEmpty();
@@ -298,5 +425,27 @@ class PushGatewayTest {
             .instanceIpGroupingKey()
             .build();
     pg.delete();
+  }
+
+  @Test
+  public void testInstanceIpEscapedGroupingKey() throws IOException {
+    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+      mock.when(PrometheusNaming::getValidationScheme)
+        .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+
+      String ip = InetAddress.getLocalHost().getHostAddress();
+      assertThat(ip).isNotEmpty();
+      mockServerClient
+        .when(request().withMethod("DELETE").withPath("/metrics/job/j/instance/" + ip + "/U__l_2e_1/v1"))
+        .respond(response().withStatusCode(202));
+      PushGateway pg =
+        PushGateway.builder()
+          .address("localhost:" + mockServerClient.getPort())
+          .job("j")
+          .groupingKey("l.1", "v1")
+          .instanceIpGroupingKey()
+          .build();
+      pg.delete();
+    }
   }
 }

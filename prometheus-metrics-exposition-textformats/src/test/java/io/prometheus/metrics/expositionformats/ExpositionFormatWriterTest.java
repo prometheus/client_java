@@ -2,6 +2,7 @@ package io.prometheus.metrics.expositionformats;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ class ExpositionFormatWriterTest {
 
   @Test
   void toDebugString() {
-    assertThat(writer.toDebugString(new MetricSnapshots())).isEqualTo("# EOF\n");
+    assertThat(writer.toDebugString(new MetricSnapshots(), EscapingScheme.NO_ESCAPING)).isEqualTo("# EOF\n");
   }
 
   @Test

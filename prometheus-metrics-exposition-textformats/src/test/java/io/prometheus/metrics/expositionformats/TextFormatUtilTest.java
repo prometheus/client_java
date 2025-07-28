@@ -19,7 +19,7 @@ class TextFormatUtilTest {
 
   private static String escape(String s) throws IOException {
     StringWriter writer = new StringWriter();
-    TextFormatUtil.writeEscapedLabelValue(writer, s);
+    TextFormatUtil.writeEscapedString(writer, s);
     return writer.toString();
   }
 

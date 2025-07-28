@@ -11,12 +11,7 @@ import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_31_1.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
-import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
-import io.prometheus.metrics.model.snapshots.Exemplar;
-import io.prometheus.metrics.model.snapshots.Exemplars;
-import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import java.io.ByteArrayOutputStream;
@@ -950,7 +945,7 @@ class HistogramTest {
     // text
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expectedTextFormat);
   }
 
