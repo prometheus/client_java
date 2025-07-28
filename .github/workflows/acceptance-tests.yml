@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
         with:
-          version: v2025.7.19
-          sha256: 73c7d061d1654e64cc8d98bfaa52939e0f034292d70b7b735a3795d6a293dfda
+          version: v2025.7.29
+          sha256: 72e9e76d0e52998b0dc084c6550aef472091975978586980d703a87240a87fde
       - name: Run acceptance tests
         run: mise run acceptance-test
