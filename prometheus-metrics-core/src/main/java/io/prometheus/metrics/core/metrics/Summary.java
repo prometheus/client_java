@@ -44,19 +44,22 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
   private final List<CKMSQuantiles.Quantile> quantiles; // May be empty, but cannot be null.
   private final long maxAgeSeconds;
   private final int ageBuckets;
-  private final boolean exemplarsEnabled;
   private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   private Summary(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
     MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
-    this.exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
-    this.quantiles = Collections.unmodifiableList(makeQuantiles(properties));
-    this.maxAgeSeconds = getConfigProperty(properties, MetricsProperties::getSummaryMaxAgeSeconds);
-    this.ageBuckets =
-        getConfigProperty(properties, MetricsProperties::getSummaryNumberOfAgeBuckets);
-    this.exemplarSamplerConfig =
-        new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 4);
+    quantiles = Collections.unmodifiableList(makeQuantiles(properties));
+    maxAgeSeconds = getConfigProperty(properties, MetricsProperties::getSummaryMaxAgeSeconds);
+    ageBuckets = getConfigProperty(properties, MetricsProperties::getSummaryNumberOfAgeBuckets);
+    boolean exemplarsEnabled =
+        getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
+    if (exemplarsEnabled) {
+      exemplarSamplerConfig =
+          new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 4);
+    } else {
+      exemplarSamplerConfig = null;
+    }
   }
 
   private List<CKMSQuantiles.Quantile> makeQuantiles(MetricsProperties[] properties) {
@@ -79,7 +82,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
 
   @Override
   protected boolean isExemplarsEnabled() {
-    return exemplarsEnabled;
+    return exemplarSamplerConfig != null;
   }
 
   @Override
@@ -134,7 +137,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       } else {
         quantileValues = null;
       }
-      if (exemplarsEnabled) {
+      if (isExemplarsEnabled()) {
         exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
       } else {
         exemplarSampler = null;

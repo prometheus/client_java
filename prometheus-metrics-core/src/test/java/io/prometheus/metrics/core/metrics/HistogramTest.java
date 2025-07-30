@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
+import io.prometheus.metrics.config.MetricsProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
@@ -1426,6 +1428,25 @@ class HistogramTest {
     assertThat(getBucket(histogram, 5).getCount()).isZero();
     assertThat(getBucket(histogram, 10).getCount()).isZero();
     assertThat(getBucket(histogram, Double.POSITIVE_INFINITY).getCount()).isOne();
+  }
+
+  @Test
+  public void testExemplarsDisabledInBuilder() {
+    Histogram histogram = Histogram.builder().withoutExemplars().name("test").build();
+    histogram.observeWithExemplar(2.5, Labels.EMPTY);
+    assertThat(getData(histogram).getExemplars().size()).isZero();
+  }
+
+  @Test
+  public void testExemplarsDisabledInBuilder_enabledByPropertiesOnMetric() {
+    PrometheusProperties properties =
+        PrometheusProperties.builder()
+            .putMetricProperty("test", MetricsProperties.builder().exemplarsEnabled(true).build())
+            .defaultMetricsProperties(MetricsProperties.builder().build())
+            .build();
+    Histogram histogram = Histogram.builder(properties).withoutExemplars().name("test").build();
+    histogram.observeWithExemplar(2.5, Labels.EMPTY);
+    assertThat(getData(histogram).getExemplars().size()).isZero();
   }
 
   @Test

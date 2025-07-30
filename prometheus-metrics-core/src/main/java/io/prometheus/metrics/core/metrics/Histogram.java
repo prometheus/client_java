@@ -68,7 +68,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
   // NATIVE_BOUNDS is used to look up the native bucket index depending on the current schema.
   private static final double[][] NATIVE_BOUNDS;
 
-  private final boolean exemplarsEnabled;
   private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   // Upper bounds for the classic histogram buckets. Contains at least +Inf.
@@ -116,7 +115,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
   private Histogram(Histogram.Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
     MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
-    exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
     nativeInitialSchema =
         getConfigProperty(
             properties,
@@ -158,11 +156,17 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         getConfigProperty(properties, MetricsProperties::getHistogramNativeMaxNumberOfBuckets);
     nativeResetDurationSeconds =
         getConfigProperty(properties, MetricsProperties::getHistogramNativeResetDurationSeconds);
+    boolean exemplarsEnabled =
+        getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
     ExemplarsProperties exemplarsProperties = prometheusProperties.getExemplarProperties();
-    exemplarSamplerConfig =
-        classicUpperBounds.length == 0
-            ? new ExemplarSamplerConfig(exemplarsProperties, 4)
-            : new ExemplarSamplerConfig(exemplarsProperties, classicUpperBounds);
+    if (exemplarsEnabled) {
+      exemplarSamplerConfig =
+          classicUpperBounds.length == 0
+              ? new ExemplarSamplerConfig(exemplarsProperties, 4)
+              : new ExemplarSamplerConfig(exemplarsProperties, classicUpperBounds);
+    } else {
+      exemplarSamplerConfig = null;
+    }
   }
 
   @Override
@@ -177,7 +181,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
   @Override
   protected boolean isExemplarsEnabled() {
-    return exemplarsEnabled;
+    return exemplarSamplerConfig != null;
   }
 
   public class DataPoint implements DistributionDataPoint {
@@ -198,7 +202,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     private final ExemplarSampler exemplarSampler;
 
     private DataPoint() {
-      if (exemplarsEnabled) {
+      if (isExemplarsEnabled()) {
         exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
       } else {
         exemplarSampler = null;

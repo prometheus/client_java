@@ -39,13 +39,13 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     implements GaugeDataPoint {
 
-  private final boolean exemplarsEnabled;
   private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   private Gauge(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
     MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
-    exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
+    boolean exemplarsEnabled =
+        getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
     if (exemplarsEnabled) {
       exemplarSamplerConfig =
           new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 1);
@@ -104,10 +104,10 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
 
   @Override
   protected boolean isExemplarsEnabled() {
-    return exemplarsEnabled;
+    return exemplarSamplerConfig != null;
   }
 
-  class DataPoint implements GaugeDataPoint {
+  static class DataPoint implements GaugeDataPoint {
 
     private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
@@ -170,6 +170,10 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
         }
       }
       return new GaugeSnapshot.GaugeDataPointSnapshot(get(), labels, oldest);
+    }
+
+    private boolean isExemplarsEnabled() {
+      return exemplarSampler != null;
     }
   }
 

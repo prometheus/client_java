@@ -4,6 +4,8 @@ import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
 
+import io.prometheus.metrics.config.MetricsProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.Timer;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.model.snapshots.Exemplar;
@@ -222,6 +224,19 @@ class GaugeTest {
   @Test
   public void testExemplarSamplerDisabled() {
     Gauge gauge = Gauge.builder().name("test").withoutExemplars().build();
+    gauge.setWithExemplar(3.0, Labels.of("a", "b"));
+    assertThat(getData(gauge).getExemplar()).isNull();
+    gauge.inc(2.0);
+    assertThat(getData(gauge).getExemplar()).isNull();
+  }
+
+  @Test
+  public void testExemplarSamplerDisabledByBuilder_enabledByPropertiesOnMetric() {
+    PrometheusProperties properties =
+        PrometheusProperties.builder()
+            .putMetricProperty("test", MetricsProperties.builder().exemplarsEnabled(true).build())
+            .build();
+    Gauge gauge = Gauge.builder(properties).name("test").withoutExemplars().build();
     gauge.setWithExemplar(3.0, Labels.of("a", "b"));
     assertThat(getData(gauge).getExemplar()).isNull();
     gauge.inc(2.0);
