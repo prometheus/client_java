@@ -32,14 +32,17 @@ import java.util.concurrent.atomic.LongAdder;
 public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     implements CounterDataPoint {
 
-  private final boolean exemplarsEnabled;
   private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   private Counter(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
     MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
-    exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
-    if (exemplarsEnabled) {
+    boolean exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
+    // exemplars might be enabled specifically for a metric, however, if the code
+    // says withoutExemplars they should stay disabled.
+    boolean notTurnedOffWithinCode =
+      builder == null || builder.exemplarsEnabled == null || builder.exemplarsEnabled;
+    if (exemplarsEnabled && notTurnedOffWithinCode) {
       exemplarSamplerConfig =
           new ExemplarSamplerConfig(prometheusProperties.getExemplarProperties(), 1);
     } else {
@@ -93,7 +96,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
 
   @Override
   protected boolean isExemplarsEnabled() {
-    return exemplarsEnabled;
+    return exemplarSamplerConfig != null;
   }
 
   @Override
@@ -101,7 +104,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     if (isExemplarsEnabled()) {
       return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
     } else {
-      return new DataPoint(null);
+      return new DataPointIgnoringExemplars();
     }
   }
 
@@ -112,13 +115,13 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     return name;
   }
 
-  class DataPoint implements CounterDataPoint {
+  public static class DataPoint implements CounterDataPoint {
 
     private final DoubleAdder doubleValue = new DoubleAdder();
     // LongAdder is 20% faster than DoubleAdder. So let's use the LongAdder for long observations,
     // and DoubleAdder for double observations. If the user doesn't observe any double at all,
     // we will be using the LongAdder and get the best performance.
-    private final LongAdder longValue = new LongAdder();
+    protected final LongAdder longValue = new LongAdder();
     private final long createdTimeMillis = System.currentTimeMillis();
     private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
@@ -168,7 +171,11 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       }
     }
 
-    private void validateAndAdd(long amount) {
+    protected boolean isExemplarsEnabled() {
+      return exemplarSampler != null;
+    }
+
+    protected void validateAndAdd(long amount) {
       if (amount < 0) {
         throw new IllegalArgumentException(
             "Negative increment " + amount + " is illegal for Counter metrics.");
@@ -184,7 +191,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       doubleValue.add(amount);
     }
 
-    private CounterSnapshot.CounterDataPointSnapshot collect(Labels labels) {
+    protected CounterSnapshot.CounterDataPointSnapshot collect(Labels labels) {
       // Read the exemplar first. Otherwise, there is a race condition where you might
       // see an Exemplar for a value that's not counted yet.
       // If there are multiple Exemplars (by default it's just one), use the newest.
@@ -200,6 +207,51 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
       return new CounterSnapshot.CounterDataPointSnapshot(
           get(), labels, latestExemplar, createdTimeMillis);
     }
+  }
+
+  /**
+   * Specialized data point, which is used in case no exemplar support is enabled.
+   * Applications can cast to this data time to speed up counter increment operations.
+   */
+  public static final class DataPointIgnoringExemplars extends DataPoint {
+
+    private DataPointIgnoringExemplars() {
+      super(null);
+    }
+
+    /**
+     * This is one of the most used metric. Override for speed. Direct shortcut to
+     * the {@code LongAdder.add} method with just only validating the argument. This
+     * override is actually not really needed because the override of {@link #isExemplarsEnabled()}
+     * and inlining has the same effect in the end, however, for everyone inspecting
+     * the code it makes it obvious that the increment a long counter code path is as short
+     * as possible.
+     */
+    @Override
+    public void inc(long amount) {
+      validateAndAdd(amount);
+    }
+
+    /**
+     * Counter increment, probably the most used metric update method. Specialise and skip
+     * validation. Basically, the JVM JIT is doing this for us and inlining the code. However,
+     * for people that are curious about performance and inspecting the code, it might be good
+     * to be assured that this goes directly to the `LongAdder` method.
+     */
+    @Override
+    public void inc() {
+      longValue.increment();
+    }
+
+    /**
+     * Override for speed. Since final, the JVM will inline code for this
+     * method and all Exemplar code will be left out.
+     */
+    @Override
+    protected boolean isExemplarsEnabled() {
+      return false;
+    }
+
   }
 
   public static Builder builder() {
