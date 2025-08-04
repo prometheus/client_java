@@ -108,7 +108,7 @@ jvm_threads_state{state="WAITING"} 0.0
       String javaVersion = System.getProperty("java.version"); // Example: "21.0.2"
       String majorJavaVersion = javaVersion.replaceAll("\\..*", ""); // Example: "21"
       // With Java 21 and newer you can no longer have invalid thread ids.
-      assumeThat(Integer.parseInt(majorJavaVersion)).isLessThanOrEqualTo(21);
+      assumeThat(Integer.parseInt(majorJavaVersion)).isLessThan(21);
     } catch (NumberFormatException ignored) {
       // ignore
     }
