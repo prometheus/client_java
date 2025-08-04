@@ -18,7 +18,7 @@ class MultiCollectorNameFilterTest {
   private static class Registry extends PrometheusRegistry {
     private final AtomicBoolean collectCalled = new AtomicBoolean();
 
-    public Registry(List<String> prometheusNames) {
+    private Registry(List<String> prometheusNames) {
       register(
           new MultiCollector() {
             @Override
@@ -45,7 +45,7 @@ class MultiCollectorNameFilterTest {
           });
     }
 
-    public boolean collectCalled() {
+    private boolean collectCalled() {
       return collectCalled.get();
     }
   }

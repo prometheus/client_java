@@ -2,6 +2,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 
 import static io.prometheus.metrics.instrumentation.jvm.TestUtil.convertToOpenMetricsFormat;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,10 +107,8 @@ jvm_threads_state{state="WAITING"} 0.0
     try {
       String javaVersion = System.getProperty("java.version"); // Example: "21.0.2"
       String majorJavaVersion = javaVersion.replaceAll("\\..*", ""); // Example: "21"
-      if (Integer.parseInt(majorJavaVersion) >= 21) {
-        // With Java 21 and newer you can no longer have invalid thread ids.
-        return;
-      }
+      // With Java 21 and newer you can no longer have invalid thread ids.
+      assumeThat(Integer.parseInt(majorJavaVersion)).isLessThan(21);
     } catch (NumberFormatException ignored) {
       // ignore
     }
@@ -165,7 +164,7 @@ jvm_threads_state{state="WAITING"} 0.0
 
     private final long id;
 
-    public ThreadWithInvalidId(long id, Runnable runnable) {
+    private ThreadWithInvalidId(long id, Runnable runnable) {
       super(runnable);
       setDaemon(true);
       this.id = id;
@@ -181,14 +180,7 @@ jvm_threads_state{state="WAITING"} 0.0
     }
   }
 
-  private static class TestRunnable implements Runnable {
-
-    private final CountDownLatch countDownLatch;
-
-    public TestRunnable(CountDownLatch countDownLatch) {
-      this.countDownLatch = countDownLatch;
-    }
-
+  private record TestRunnable(CountDownLatch countDownLatch) implements Runnable {
     @Override
     public void run() {
       try {
