@@ -165,7 +165,7 @@ jvm_threads_state{state="WAITING"} 0.0
 
     private final long id;
 
-    public ThreadWithInvalidId(long id, Runnable runnable) {
+    private ThreadWithInvalidId(long id, Runnable runnable) {
       super(runnable);
       setDaemon(true);
       this.id = id;
@@ -185,7 +185,7 @@ jvm_threads_state{state="WAITING"} 0.0
 
     private final CountDownLatch countDownLatch;
 
-    public TestRunnable(CountDownLatch countDownLatch) {
+    private TestRunnable(CountDownLatch countDownLatch) {
       this.countDownLatch = countDownLatch;
     }
 
