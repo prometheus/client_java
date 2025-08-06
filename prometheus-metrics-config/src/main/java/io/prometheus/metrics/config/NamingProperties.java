@@ -4,6 +4,7 @@ import java.util.Map;
 
 public class NamingProperties {
 
+  private static final String PREFIX = "io.prometheus.naming";
   private static final String VALIDATION_SCHEME = "validationScheme";
   private final String validationScheme;
 
@@ -15,8 +16,8 @@ public class NamingProperties {
     return validationScheme;
   }
 
-  static NamingProperties load(String prefix, Map<Object, Object> properties) throws PrometheusPropertiesException {
-    String validationScheme = Util.loadString(prefix + "." + VALIDATION_SCHEME, properties);
+  static NamingProperties load(Map<Object, Object> properties) throws PrometheusPropertiesException {
+    String validationScheme = Util.loadString(PREFIX + "." + VALIDATION_SCHEME, properties);
     return new NamingProperties(validationScheme);
   }
 

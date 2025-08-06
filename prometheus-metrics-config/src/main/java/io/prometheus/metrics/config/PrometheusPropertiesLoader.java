@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -43,7 +42,7 @@ public class PrometheusPropertiesLoader {
         ExporterPushgatewayProperties.load(properties);
     ExporterOpenTelemetryProperties exporterOpenTelemetryProperties =
         ExporterOpenTelemetryProperties.load(properties);
-    NamingProperties namingProperties = NamingProperties.load("io.prometheus.naming", properties);
+    NamingProperties namingProperties = NamingProperties.load(properties);
     validateAllPropertiesProcessed(properties);
     return new PrometheusProperties(
         defaultMetricsProperties,
