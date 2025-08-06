@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
+import io.prometheus.metrics.config.MetricsProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_31_1.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
@@ -317,13 +319,33 @@ class CounterTest {
 
   @Test
   public void testExemplarSamplerDisabled() {
-    Counter counter =
-        Counter.builder()
-            // .withExemplarSampler((inc, prev) -> {throw new RuntimeException("unexpected call to
-            // exemplar sampler");})
-            .name("count_total")
-            .withoutExemplars()
+    Counter counter = Counter.builder().name("count_total").withoutExemplars().build();
+    counter.incWithExemplar(3.0, Labels.of("a", "b"));
+    assertThat(getData(counter).getExemplar()).isNull();
+    counter.inc(2.0);
+    assertThat(getData(counter).getExemplar()).isNull();
+  }
+
+  @Test
+  public void testExemplarSamplerDisabled_enabledByDefault() {
+    PrometheusProperties properties =
+        PrometheusProperties.builder()
+            .defaultMetricsProperties(MetricsProperties.builder().exemplarsEnabled(true).build())
             .build();
+    Counter counter = Counter.builder(properties).name("count_total").withoutExemplars().build();
+    counter.incWithExemplar(3.0, Labels.of("a", "b"));
+    assertThat(getData(counter).getExemplar()).isNull();
+    counter.inc(2.0);
+    assertThat(getData(counter).getExemplar()).isNull();
+  }
+
+  @Test
+  public void testExemplarSamplerDisabledInBuilder_enabledByPropertiesOnMetric() {
+    PrometheusProperties properties =
+        PrometheusProperties.builder()
+            .putMetricProperty("count", MetricsProperties.builder().exemplarsEnabled(true).build())
+            .build();
+    Counter counter = Counter.builder(properties).name("count_total").withoutExemplars().build();
     counter.incWithExemplar(3.0, Labels.of("a", "b"));
     assertThat(getData(counter).getExemplar()).isNull();
     counter.inc(2.0);
