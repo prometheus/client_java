@@ -57,12 +57,8 @@ public class PrometheusScrapeHandler {
       if (writeDebugResponse(snapshots, exchange)) {
         return;
       }
-      ByteArrayOutputStream responseBuffer =
-          new ByteArrayOutputStream(lastResponseSize.get() + 1024);
       String acceptHeader = request.getHeader("Accept");
       ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
-      writer.write(responseBuffer, snapshots);
-      lastResponseSize.set(responseBuffer.size());
       PrometheusHttpResponse response = exchange.getResponse();
       response.setHeader("Content-Type", writer.getContentType());
 
@@ -70,9 +66,13 @@ public class PrometheusScrapeHandler {
         response.setHeader("Content-Encoding", "gzip");
         try (GZIPOutputStream gzipOutputStream =
             new GZIPOutputStream(response.sendHeadersAndGetBody(200, 0))) {
-          responseBuffer.writeTo(gzipOutputStream);
+          writer.write(gzipOutputStream, snapshots);
         }
       } else {
+        ByteArrayOutputStream responseBuffer =
+            new ByteArrayOutputStream(lastResponseSize.get() + 1024);
+        writer.write(responseBuffer, snapshots);
+        lastResponseSize.set(responseBuffer.size());
         int contentLength = responseBuffer.size();
         if (contentLength > 0) {
           response.setHeader("Content-Length", String.valueOf(contentLength));
