@@ -420,142 +420,11 @@ public class PrometheusNaming {
       }
 
       Labels outLabels = outLabelsBuilder.build();
-      DataPointSnapshot outDataPointSnapshot = null;
-
-      if (v instanceof CounterSnapshot) {
-        outDataPointSnapshot = CounterSnapshot.CounterDataPointSnapshot.builder()
-          .value(((CounterSnapshot.CounterDataPointSnapshot) d).getValue())
-          .exemplar(((CounterSnapshot.CounterDataPointSnapshot) d).getExemplar())
-          .labels(outLabels)
-          .createdTimestampMillis(d.getCreatedTimestampMillis())
-          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-          .build();
-      } else if (v instanceof GaugeSnapshot) {
-        outDataPointSnapshot = GaugeSnapshot.GaugeDataPointSnapshot.builder()
-          .value(((GaugeSnapshot.GaugeDataPointSnapshot) d).getValue())
-          .exemplar(((GaugeSnapshot.GaugeDataPointSnapshot) d).getExemplar())
-          .labels(outLabels)
-          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-          .build();
-      } else if (v instanceof HistogramSnapshot) {
-        outDataPointSnapshot = HistogramSnapshot.HistogramDataPointSnapshot.builder()
-          .classicHistogramBuckets(((HistogramSnapshot.HistogramDataPointSnapshot) d).getClassicBuckets())
-          .nativeSchema(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeSchema())
-          .nativeZeroCount(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroCount())
-          .nativeZeroThreshold(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroThreshold())
-          .nativeBucketsForPositiveValues(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeBucketsForPositiveValues())
-          .nativeBucketsForNegativeValues(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeBucketsForNegativeValues())
-          .count(((HistogramSnapshot.HistogramDataPointSnapshot) d).getCount())
-          .sum(((HistogramSnapshot.HistogramDataPointSnapshot) d).getSum())
-          .exemplars(((HistogramSnapshot.HistogramDataPointSnapshot) d).getExemplars())
-          .labels(outLabels)
-          .createdTimestampMillis(d.getCreatedTimestampMillis())
-          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-          .build();
-      } else if (v instanceof SummarySnapshot) {
-        outDataPointSnapshot = SummarySnapshot.SummaryDataPointSnapshot.builder()
-          .quantiles(((SummarySnapshot.SummaryDataPointSnapshot) d).getQuantiles())
-          .count(((SummarySnapshot.SummaryDataPointSnapshot) d).getCount())
-          .sum(((SummarySnapshot.SummaryDataPointSnapshot) d).getSum())
-          .exemplars(((SummarySnapshot.SummaryDataPointSnapshot) d).getExemplars())
-          .labels(outLabels)
-          .createdTimestampMillis(d.getCreatedTimestampMillis())
-          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-          .build();
-      } else if (v instanceof InfoSnapshot) {
-        outDataPointSnapshot = InfoSnapshot.InfoDataPointSnapshot.builder()
-          .labels(outLabels)
-          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-          .build();
-      } else if (v instanceof StateSetSnapshot) {
-        StateSetSnapshot.StateSetDataPointSnapshot.Builder builder = StateSetSnapshot.StateSetDataPointSnapshot.builder()
-          .labels(outLabels)
-          .scrapeTimestampMillis(d.getScrapeTimestampMillis());
-        for (StateSetSnapshot.State state : ((StateSetSnapshot.StateSetDataPointSnapshot) d)) {
-          builder.state(state.getName(), state.isTrue());
-        }
-        outDataPointSnapshot = builder.build();
-      } else if (v instanceof UnknownSnapshot) {
-        outDataPointSnapshot = UnknownSnapshot.UnknownDataPointSnapshot.builder()
-          .labels(outLabels)
-          .value(((UnknownSnapshot.UnknownDataPointSnapshot) d).getValue())
-          .exemplar(((UnknownSnapshot.UnknownDataPointSnapshot) d).getExemplar())
-          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-          .build();
-      }
-
+      DataPointSnapshot outDataPointSnapshot = createEscapedDataPointSnapshot(v, d, outLabels);
       outDataPoints.add(outDataPointSnapshot);
     }
 
-    MetricSnapshot out;
-
-    if (v instanceof CounterSnapshot) {
-      CounterSnapshot.Builder builder = CounterSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit());
-      for (DataPointSnapshot d : outDataPoints) {
-        builder.dataPoint((CounterSnapshot.CounterDataPointSnapshot) d);
-      }
-      out = builder.build();
-    } else if (v instanceof GaugeSnapshot) {
-      GaugeSnapshot.Builder builder = GaugeSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit());
-      for (DataPointSnapshot d : outDataPoints) {
-        builder.dataPoint((GaugeSnapshot.GaugeDataPointSnapshot) d);
-      }
-      out = builder.build();
-    } else if (v instanceof HistogramSnapshot) {
-      HistogramSnapshot.Builder builder = HistogramSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit())
-        .gaugeHistogram(((HistogramSnapshot) v).isGaugeHistogram());
-      for (DataPointSnapshot d : outDataPoints) {
-        builder.dataPoint((HistogramSnapshot.HistogramDataPointSnapshot) d);
-      }
-      out = builder.build();
-    } else if (v instanceof SummarySnapshot) {
-      SummarySnapshot.Builder builder = SummarySnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit());
-      for (DataPointSnapshot d : outDataPoints) {
-        builder.dataPoint((SummarySnapshot.SummaryDataPointSnapshot) d);
-      }
-      out = builder.build();
-    } else if (v instanceof InfoSnapshot) {
-      InfoSnapshot.Builder builder = InfoSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp());
-      for (DataPointSnapshot d : outDataPoints) {
-        builder.dataPoint((InfoSnapshot.InfoDataPointSnapshot) d);
-      }
-      out = builder.build();
-    } else if (v instanceof StateSetSnapshot) {
-      StateSetSnapshot.Builder builder = StateSetSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp());
-      for (DataPointSnapshot d : outDataPoints) {
-        builder.dataPoint((StateSetSnapshot.StateSetDataPointSnapshot) d);
-      }
-      out = builder.build();
-    } else if (v instanceof UnknownSnapshot) {
-      UnknownSnapshot.Builder builder = UnknownSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit());
-      for (DataPointSnapshot d : outDataPoints) {
-        builder.dataPoint((UnknownSnapshot.UnknownDataPointSnapshot) d);
-      }
-      out = builder.build();
-    } else {
-      throw new IllegalArgumentException("Unknown MetricSnapshot type: " + v.getClass());
-    }
-
-    return out;
+    return createEscapedMetricSnapshot(v, outName, outDataPoints);
   }
 
   static boolean metricNeedsEscaping(DataPointSnapshot d) {
@@ -569,6 +438,140 @@ public class PrometheusNaming {
       }
     }
     return false;
+  }
+
+  private static DataPointSnapshot createEscapedDataPointSnapshot(MetricSnapshot v, DataPointSnapshot d, Labels outLabels) {
+    if (v instanceof CounterSnapshot) {
+      return CounterSnapshot.CounterDataPointSnapshot.builder()
+        .value(((CounterSnapshot.CounterDataPointSnapshot) d).getValue())
+        .exemplar(((CounterSnapshot.CounterDataPointSnapshot) d).getExemplar())
+        .labels(outLabels)
+        .createdTimestampMillis(d.getCreatedTimestampMillis())
+        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+        .build();
+    } else if (v instanceof GaugeSnapshot) {
+      return GaugeSnapshot.GaugeDataPointSnapshot.builder()
+        .value(((GaugeSnapshot.GaugeDataPointSnapshot) d).getValue())
+        .exemplar(((GaugeSnapshot.GaugeDataPointSnapshot) d).getExemplar())
+        .labels(outLabels)
+        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+        .build();
+    } else if (v instanceof HistogramSnapshot) {
+      return HistogramSnapshot.HistogramDataPointSnapshot.builder()
+        .classicHistogramBuckets(((HistogramSnapshot.HistogramDataPointSnapshot) d).getClassicBuckets())
+        .nativeSchema(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeSchema())
+        .nativeZeroCount(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroCount())
+        .nativeZeroThreshold(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroThreshold())
+        .nativeBucketsForPositiveValues(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeBucketsForPositiveValues())
+        .nativeBucketsForNegativeValues(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeBucketsForNegativeValues())
+        .count(((HistogramSnapshot.HistogramDataPointSnapshot) d).getCount())
+        .sum(((HistogramSnapshot.HistogramDataPointSnapshot) d).getSum())
+        .exemplars(((HistogramSnapshot.HistogramDataPointSnapshot) d).getExemplars())
+        .labels(outLabels)
+        .createdTimestampMillis(d.getCreatedTimestampMillis())
+        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+        .build();
+    } else if (v instanceof SummarySnapshot) {
+      return SummarySnapshot.SummaryDataPointSnapshot.builder()
+        .quantiles(((SummarySnapshot.SummaryDataPointSnapshot) d).getQuantiles())
+        .count(((SummarySnapshot.SummaryDataPointSnapshot) d).getCount())
+        .sum(((SummarySnapshot.SummaryDataPointSnapshot) d).getSum())
+        .exemplars(((SummarySnapshot.SummaryDataPointSnapshot) d).getExemplars())
+        .labels(outLabels)
+        .createdTimestampMillis(d.getCreatedTimestampMillis())
+        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+        .build();
+    } else if (v instanceof InfoSnapshot) {
+      return InfoSnapshot.InfoDataPointSnapshot.builder()
+        .labels(outLabels)
+        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+        .build();
+    } else if (v instanceof StateSetSnapshot) {
+      StateSetSnapshot.StateSetDataPointSnapshot.Builder builder = StateSetSnapshot.StateSetDataPointSnapshot.builder()
+        .labels(outLabels)
+        .scrapeTimestampMillis(d.getScrapeTimestampMillis());
+      for (StateSetSnapshot.State state : ((StateSetSnapshot.StateSetDataPointSnapshot) d)) {
+        builder.state(state.getName(), state.isTrue());
+      }
+      return builder.build();
+    } else if (v instanceof UnknownSnapshot) {
+      return UnknownSnapshot.UnknownDataPointSnapshot.builder()
+        .labels(outLabels)
+        .value(((UnknownSnapshot.UnknownDataPointSnapshot) d).getValue())
+        .exemplar(((UnknownSnapshot.UnknownDataPointSnapshot) d).getExemplar())
+        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+        .build();
+    } else {
+      throw new IllegalArgumentException("Unknown MetricSnapshot type: " + v.getClass());
+    }
+  }
+
+  private static MetricSnapshot createEscapedMetricSnapshot(MetricSnapshot v, String outName, List<DataPointSnapshot> outDataPoints) {
+    if (v instanceof CounterSnapshot) {
+      CounterSnapshot.Builder builder = CounterSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((CounterSnapshot.CounterDataPointSnapshot) d);
+      }
+      return builder.build();
+    } else if (v instanceof GaugeSnapshot) {
+      GaugeSnapshot.Builder builder = GaugeSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((GaugeSnapshot.GaugeDataPointSnapshot) d);
+      }
+      return builder.build();
+    } else if (v instanceof HistogramSnapshot) {
+      HistogramSnapshot.Builder builder = HistogramSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit())
+        .gaugeHistogram(((HistogramSnapshot) v).isGaugeHistogram());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((HistogramSnapshot.HistogramDataPointSnapshot) d);
+      }
+      return builder.build();
+    } else if (v instanceof SummarySnapshot) {
+      SummarySnapshot.Builder builder = SummarySnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((SummarySnapshot.SummaryDataPointSnapshot) d);
+      }
+      return builder.build();
+    } else if (v instanceof InfoSnapshot) {
+      InfoSnapshot.Builder builder = InfoSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((InfoSnapshot.InfoDataPointSnapshot) d);
+      }
+      return builder.build();
+    } else if (v instanceof StateSetSnapshot) {
+      StateSetSnapshot.Builder builder = StateSetSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((StateSetSnapshot.StateSetDataPointSnapshot) d);
+      }
+      return builder.build();
+    } else if (v instanceof UnknownSnapshot) {
+      UnknownSnapshot.Builder builder = UnknownSnapshot.builder()
+        .name(outName)
+        .help(v.getMetadata().getHelp())
+        .unit(v.getMetadata().getUnit());
+      for (DataPointSnapshot d : outDataPoints) {
+        builder.dataPoint((UnknownSnapshot.UnknownDataPointSnapshot) d);
+      }
+      return builder.build();
+    } else {
+      throw new IllegalArgumentException("Unknown MetricSnapshot type: " + v.getClass());
+    }
   }
 
   /**
