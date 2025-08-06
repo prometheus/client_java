@@ -1,6 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
-public enum NameType {
+enum NameType {
   Metric,
   Label
 }
