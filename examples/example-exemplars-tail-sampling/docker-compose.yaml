@@ -36,7 +36,7 @@ services:
       - -jar
       - /example-greeting-service.jar
   collector:
-    image: otel/opentelemetry-collector-contrib:0.131.0@sha256:13b685dc9f68fbbb0fce06d3be84e9d70ba5b90085d79dcbd4c4c0d909ee2d6e
+    image: otel/opentelemetry-collector-contrib:0.131.1@sha256:c06aa6d7833e9a2b81c6c394d67e40ae9864edec8dca8a8e8552df1316c96d9b
     network_mode: host
     volumes:
       - ./config/otelcol-config.yaml:/config.yaml
