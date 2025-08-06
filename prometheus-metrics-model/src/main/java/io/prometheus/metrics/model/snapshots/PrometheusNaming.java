@@ -78,12 +78,11 @@ public class PrometheusNaming {
   };
 
   static ValidationScheme initValidationScheme() {
-    if (PrometheusProperties.get() != null && PrometheusProperties.get().getNamingProperties() != null) {
-      String validationScheme = PrometheusProperties.get().getNamingProperties().getValidationScheme();
-      if (validationScheme != null && validationScheme.equals("utf-8")) {
-        return ValidationScheme.UTF_8_VALIDATION;
-      }
+    String validationScheme = PrometheusProperties.get().getNamingProperties().getValidationScheme();
+    if (validationScheme != null && validationScheme.equals("utf-8")) {
+      return ValidationScheme.UTF_8_VALIDATION;
     }
+
     return ValidationScheme.LEGACY_VALIDATION;
   }
 
