@@ -8,12 +8,16 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.config.PrometheusPropertiesLoader;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.Properties;
 
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.ValidationScheme;
@@ -447,5 +451,19 @@ class PushGatewayTest {
           .build();
       pg.delete();
     }
+  }
+
+  @Test 
+  public void testEscapingSchemeDefaultValue() throws IllegalAccessException, NoSuchFieldException {
+    PushGateway pg = PushGateway.builder()
+      .address("localhost:" + mockServerClient.getPort())
+      .job("test")
+      .build();
+    
+    Field escapingSchemeField = pg.getClass().getDeclaredField("escapingScheme");
+    escapingSchemeField.setAccessible(true);
+    EscapingScheme scheme = (EscapingScheme) escapingSchemeField.get(pg);
+    
+    assertThat(scheme).isEqualTo(EscapingScheme.NO_ESCAPING);
   }
 }

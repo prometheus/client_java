@@ -87,6 +87,7 @@ public class PushGateway {
   private final Map<String, String> requestHeaders;
   private final PrometheusRegistry registry;
   private final HttpConnectionFactory connectionFactory;
+  private final EscapingScheme escapingScheme;
 
   private PushGateway(
       PrometheusRegistry registry,
@@ -94,12 +95,14 @@ public class PushGateway {
       URL url,
       HttpConnectionFactory connectionFactory,
       Map<String, String> requestHeaders,
-      boolean prometheusTimestampsInMs) {
+      boolean prometheusTimestampsInMs,
+      EscapingScheme escapingScheme) {
     this.registry = registry;
     this.url = url;
     this.requestHeaders = Collections.unmodifiableMap(new HashMap<>(requestHeaders));
     this.connectionFactory = connectionFactory;
     this.prometheusTimestampsInMs = prometheusTimestampsInMs;
+    this.escapingScheme = escapingScheme;
     writer = getWriter(format);
     if (!writer.isAvailable()) {
       throw new RuntimeException(writer.getClass() + " is not available");
@@ -209,7 +212,7 @@ public class PushGateway {
       try {
         if (!method.equals("DELETE")) {
           OutputStream outputStream = connection.getOutputStream();
-          writer.write(outputStream, registry.scrape(), EscapingScheme.NO_ESCAPING);
+          writer.write(outputStream, registry.scrape(), this.escapingScheme);
           outputStream.flush();
           outputStream.close();
         }
@@ -435,6 +438,20 @@ public class PushGateway {
       }
     }
 
+    private EscapingScheme getEscapingScheme(ExporterPushgatewayProperties properties) {
+      if (properties != null && properties.getEscapingScheme() != null) {
+        String scheme = properties.getEscapingScheme();
+        switch (scheme) {
+          case "no-escaping": return EscapingScheme.NO_ESCAPING;
+          case "values": return EscapingScheme.VALUE_ENCODING_ESCAPING;
+          case "underscores": return EscapingScheme.UNDERSCORE_ESCAPING;
+          case "dots": return EscapingScheme.DOTS_ESCAPING;
+          default: return EscapingScheme.NO_ESCAPING;
+        }
+      }
+      return EscapingScheme.NO_ESCAPING;
+    }
+
     private Format getFormat() {
       // currently not configurable via properties
       if (this.format != null) {
@@ -483,7 +500,8 @@ public class PushGateway {
             makeUrl(properties),
             connectionFactory,
             requestHeaders,
-            getPrometheusTimestampsInMs());
+            getPrometheusTimestampsInMs(),
+            getEscapingScheme(properties));
       } catch (MalformedURLException e) {
         throw new PrometheusPropertiesException(
             address + ": Invalid address. Expecting <host>:<port>");
