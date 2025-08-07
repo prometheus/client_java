@@ -19,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
 
 class ExpositionFormatsTest {
@@ -2766,50 +2768,19 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheus, counter);
   }
 
-  @Test
-  public void testFindWriter() {
+  @ParameterizedTest
+  @CsvSource({
+    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited', 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=values'",
+    "'text/plain;version=0.0.4', 'text/plain; version=0.0.4; charset=utf-8; escaping=values'",
+    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited; escaping=allow-utf-8', 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8'",
+    "'application/openmetrics-text', 'application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=values'",
+    "'application/openmetrics-text;version=0.0.1; escaping=underscores', 'application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores'",
+    "'text/plain;version=0.0.4; escaping=allow-utf-8', 'text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8'"
+  })
+  public void testFindWriter(String acceptHeaderValue, String expectedFmt) {
     ExpositionFormats expositionFormats = ExpositionFormats.init();
-
-    // delimited format - should use default escaping scheme
-    String acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited";
-    String expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=values";
     EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
     ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    // plain text format - should use default escaping scheme
-    acceptHeaderValue = "text/plain;version=0.0.4";
-    expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=values";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    // delimited format UTF-8 - explicit escaping parameter
-    acceptHeaderValue = "application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited; escaping=allow-utf-8";
-    expectedFmt = "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    // OM format, no version - should use default escaping scheme
-    acceptHeaderValue = "application/openmetrics-text";
-    expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=values";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    // OM format, 0.0.1 version - explicit escaping parameter
-    acceptHeaderValue = "application/openmetrics-text;version=0.0.1; escaping=underscores";
-    expectedFmt = "application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
-    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
-
-    // plain text format UTF-8 - explicit escaping parameter
-    acceptHeaderValue = "text/plain;version=0.0.4; escaping=allow-utf-8";
-    expectedFmt = "text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8";
-    escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
-    writer = expositionFormats.findWriter(acceptHeaderValue);
     assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
   }
 
