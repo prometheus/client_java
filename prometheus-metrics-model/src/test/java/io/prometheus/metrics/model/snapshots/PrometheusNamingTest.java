@@ -153,38 +153,52 @@ class PrometheusNamingTest {
   @Test
   public void testEscapeName() {
     // empty string
-    String got = escapeName("", EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEmpty();
-    got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEmpty();
+    assertThat(escapeName("", EscapingScheme.UNDERSCORE_ESCAPING)).isEmpty();
+    assertThat(
+            unescapeName(
+                escapeName("", EscapingScheme.UNDERSCORE_ESCAPING),
+                EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEmpty();
 
-    got = escapeName("", EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEmpty();
-    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEmpty();
+    assertThat(escapeName("", EscapingScheme.DOTS_ESCAPING)).isEmpty();
+    assertThat(
+            unescapeName(
+                escapeName("", EscapingScheme.DOTS_ESCAPING), EscapingScheme.DOTS_ESCAPING))
+        .isEmpty();
 
-    got = escapeName("", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEmpty();
-    got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEmpty();
+    assertThat(escapeName("", EscapingScheme.VALUE_ENCODING_ESCAPING)).isEmpty();
+    assertThat(
+            unescapeName(
+                escapeName("", EscapingScheme.VALUE_ENCODING_ESCAPING),
+                EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEmpty();
 
     // legacy valid name
-    got = escapeName("no:escaping_required", EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEqualTo("no:escaping_required");
-    got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEqualTo("no:escaping_required");
+    assertThat(escapeName("no:escaping_required", EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEqualTo("no:escaping_required");
+    assertThat(
+            unescapeName(
+                escapeName("no:escaping_required", EscapingScheme.UNDERSCORE_ESCAPING),
+                EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEqualTo("no:escaping_required");
 
-    got = escapeName("no:escaping_required", EscapingScheme.DOTS_ESCAPING);
     // Dots escaping will escape underscores even though it's not strictly
     // necessary for compatibility.
-    assertThat(got).isEqualTo("no:escaping__required");
-    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("no:escaping_required");
+    assertThat(escapeName("no:escaping_required", EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("no:escaping__required");
+    assertThat(
+            unescapeName(
+                escapeName("no:escaping_required", EscapingScheme.DOTS_ESCAPING),
+                EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("no:escaping_required");
 
-    got = escapeName("no:escaping_required", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("no:escaping_required");
-    got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("no:escaping_required");
+    assertThat(escapeName("no:escaping_required", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("no:escaping_required");
+    assertThat(
+            unescapeName(
+                escapeName("no:escaping_required", EscapingScheme.VALUE_ENCODING_ESCAPING),
+                EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("no:escaping_required");
 
     // name with dots - needs UTF-8 validation for escaping to occur
     try (MockedStatic<PrometheusNaming> mock =
@@ -192,26 +206,35 @@ class PrometheusNamingTest {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
 
-      got = escapeName("mysystem.prod.west.cpu.load", EscapingScheme.UNDERSCORE_ESCAPING);
-      assertThat(got).isEqualTo("mysystem_prod_west_cpu_load");
-      got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
-      assertThat(got).isEqualTo("mysystem_prod_west_cpu_load");
+      assertThat(escapeName("mysystem.prod.west.cpu.load", EscapingScheme.UNDERSCORE_ESCAPING))
+          .isEqualTo("mysystem_prod_west_cpu_load");
+      assertThat(
+              unescapeName(
+                  escapeName("mysystem.prod.west.cpu.load", EscapingScheme.UNDERSCORE_ESCAPING),
+                  EscapingScheme.UNDERSCORE_ESCAPING))
+          .isEqualTo("mysystem_prod_west_cpu_load");
     }
 
-    got = escapeName("mysystem.prod.west.cpu.load", EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("mysystem_dot_prod_dot_west_dot_cpu_dot_load");
-    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("mysystem.prod.west.cpu.load");
+    assertThat(escapeName("mysystem.prod.west.cpu.load", EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("mysystem_dot_prod_dot_west_dot_cpu_dot_load");
+    assertThat(
+            unescapeName(
+                escapeName("mysystem.prod.west.cpu.load", EscapingScheme.DOTS_ESCAPING),
+                EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("mysystem.prod.west.cpu.load");
 
     try (MockedStatic<PrometheusNaming> mock =
         mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
 
-      got = escapeName("mysystem.prod.west.cpu.load", EscapingScheme.VALUE_ENCODING_ESCAPING);
-      assertThat(got).isEqualTo("U__mysystem_2e_prod_2e_west_2e_cpu_2e_load");
-      got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
-      assertThat(got).isEqualTo("mysystem.prod.west.cpu.load");
+      assertThat(escapeName("mysystem.prod.west.cpu.load", EscapingScheme.VALUE_ENCODING_ESCAPING))
+          .isEqualTo("U__mysystem_2e_prod_2e_west_2e_cpu_2e_load");
+      assertThat(
+              unescapeName(
+                  escapeName("mysystem.prod.west.cpu.load", EscapingScheme.VALUE_ENCODING_ESCAPING),
+                  EscapingScheme.VALUE_ENCODING_ESCAPING))
+          .isEqualTo("mysystem.prod.west.cpu.load");
     }
 
     // name with dots and underscore - needs UTF-8 validation for escaping to occur
@@ -220,26 +243,40 @@ class PrometheusNamingTest {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
 
-      got = escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.UNDERSCORE_ESCAPING);
-      assertThat(got).isEqualTo("mysystem_prod_west_cpu_load_total");
-      got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
-      assertThat(got).isEqualTo("mysystem_prod_west_cpu_load_total");
+      assertThat(
+              escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.UNDERSCORE_ESCAPING))
+          .isEqualTo("mysystem_prod_west_cpu_load_total");
+      assertThat(
+              unescapeName(
+                  escapeName(
+                      "mysystem.prod.west.cpu.load_total", EscapingScheme.UNDERSCORE_ESCAPING),
+                  EscapingScheme.UNDERSCORE_ESCAPING))
+          .isEqualTo("mysystem_prod_west_cpu_load_total");
     }
 
-    got = escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("mysystem_dot_prod_dot_west_dot_cpu_dot_load__total");
-    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("mysystem.prod.west.cpu.load_total");
+    assertThat(escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("mysystem_dot_prod_dot_west_dot_cpu_dot_load__total");
+    assertThat(
+            unescapeName(
+                escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.DOTS_ESCAPING),
+                EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("mysystem.prod.west.cpu.load_total");
 
     try (MockedStatic<PrometheusNaming> mock =
         mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
 
-      got = escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.VALUE_ENCODING_ESCAPING);
-      assertThat(got).isEqualTo("U__mysystem_2e_prod_2e_west_2e_cpu_2e_load__total");
-      got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
-      assertThat(got).isEqualTo("mysystem.prod.west.cpu.load_total");
+      assertThat(
+              escapeName(
+                  "mysystem.prod.west.cpu.load_total", EscapingScheme.VALUE_ENCODING_ESCAPING))
+          .isEqualTo("U__mysystem_2e_prod_2e_west_2e_cpu_2e_load__total");
+      assertThat(
+              unescapeName(
+                  escapeName(
+                      "mysystem.prod.west.cpu.load_total", EscapingScheme.VALUE_ENCODING_ESCAPING),
+                  EscapingScheme.VALUE_ENCODING_ESCAPING))
+          .isEqualTo("mysystem.prod.west.cpu.load_total");
     }
 
     // name with dots and colon - needs UTF-8 validation for escaping to occur
@@ -248,124 +285,155 @@ class PrometheusNamingTest {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
 
-      got = escapeName("http.status:sum", EscapingScheme.UNDERSCORE_ESCAPING);
-      assertThat(got).isEqualTo("http_status:sum");
-      got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
-      assertThat(got).isEqualTo("http_status:sum");
+      assertThat(escapeName("http.status:sum", EscapingScheme.UNDERSCORE_ESCAPING))
+          .isEqualTo("http_status:sum");
+      assertThat(
+              unescapeName(
+                  escapeName("http.status:sum", EscapingScheme.UNDERSCORE_ESCAPING),
+                  EscapingScheme.UNDERSCORE_ESCAPING))
+          .isEqualTo("http_status:sum");
     }
 
-    got = escapeName("http.status:sum", EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("http_dot_status:sum");
-    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("http.status:sum");
+    assertThat(escapeName("http.status:sum", EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("http_dot_status:sum");
+    assertThat(
+            unescapeName(
+                escapeName("http.status:sum", EscapingScheme.DOTS_ESCAPING),
+                EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("http.status:sum");
 
     try (MockedStatic<PrometheusNaming> mock =
         mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
 
-      got = escapeName("http.status:sum", EscapingScheme.VALUE_ENCODING_ESCAPING);
-      assertThat(got).isEqualTo("U__http_2e_status:sum");
-      got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
-      assertThat(got).isEqualTo("http.status:sum");
+      assertThat(escapeName("http.status:sum", EscapingScheme.VALUE_ENCODING_ESCAPING))
+          .isEqualTo("U__http_2e_status:sum");
+      assertThat(
+              unescapeName(
+                  escapeName("http.status:sum", EscapingScheme.VALUE_ENCODING_ESCAPING),
+                  EscapingScheme.VALUE_ENCODING_ESCAPING))
+          .isEqualTo("http.status:sum");
     }
 
     // name with spaces and emoji
-    got = escapeName("label with 😱", EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEqualTo("label_with__");
-    got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEqualTo("label_with__");
+    assertThat(escapeName("label with 😱", EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEqualTo("label_with__");
+    assertThat(
+            unescapeName(
+                escapeName("label with 😱", EscapingScheme.UNDERSCORE_ESCAPING),
+                EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEqualTo("label_with__");
 
-    got = escapeName("label with 😱", EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("label__with____");
-    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("label_with__");
+    assertThat(escapeName("label with 😱", EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("label__with____");
+    assertThat(
+            unescapeName(
+                escapeName("label with 😱", EscapingScheme.DOTS_ESCAPING),
+                EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("label_with__");
 
-    got = escapeName("label with 😱", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("U__label_20_with_20__1f631_");
-    got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("label with 😱");
+    assertThat(escapeName("label with 😱", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__label_20_with_20__1f631_");
+    assertThat(
+            unescapeName(
+                escapeName("label with 😱", EscapingScheme.VALUE_ENCODING_ESCAPING),
+                EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("label with 😱");
 
     // name with unicode characters > 0x100
-    got = escapeName("花火", EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEqualTo("__");
-    got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEqualTo("__");
+    assertThat(escapeName("花火", EscapingScheme.UNDERSCORE_ESCAPING)).isEqualTo("__");
+    assertThat(
+            unescapeName(
+                escapeName("花火", EscapingScheme.UNDERSCORE_ESCAPING),
+                EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEqualTo("__");
 
-    got = escapeName("花火", EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("____");
-    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
+    assertThat(escapeName("花火", EscapingScheme.DOTS_ESCAPING)).isEqualTo("____");
     // Dots-replacement does not know the difference between two replaced
     // characters and a single underscore.
-    assertThat(got).isEqualTo("__");
+    assertThat(
+            unescapeName(
+                escapeName("花火", EscapingScheme.DOTS_ESCAPING), EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("__");
 
-    got = escapeName("花火", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("U___82b1__706b_");
-    got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("花火");
+    assertThat(escapeName("花火", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U___82b1__706b_");
+    assertThat(
+            unescapeName(
+                escapeName("花火", EscapingScheme.VALUE_ENCODING_ESCAPING),
+                EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("花火");
 
     // name with spaces and edge-case value
-    got = escapeName("label with Ā", EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEqualTo("label_with__");
-    got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
-    assertThat(got).isEqualTo("label_with__");
+    assertThat(escapeName("label with Ā", EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEqualTo("label_with__");
+    assertThat(
+            unescapeName(
+                escapeName("label with Ā", EscapingScheme.UNDERSCORE_ESCAPING),
+                EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEqualTo("label_with__");
 
-    got = escapeName("label with Ā", EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("label__with____");
-    got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
-    assertThat(got).isEqualTo("label_with__");
+    assertThat(escapeName("label with Ā", EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("label__with____");
+    assertThat(
+            unescapeName(
+                escapeName("label with Ā", EscapingScheme.DOTS_ESCAPING),
+                EscapingScheme.DOTS_ESCAPING))
+        .isEqualTo("label_with__");
 
-    got = escapeName("label with Ā", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("U__label_20_with_20__100_");
-    got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("label with Ā");
+    assertThat(escapeName("label with Ā", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__label_20_with_20__100_");
+    assertThat(
+            unescapeName(
+                escapeName("label with Ā", EscapingScheme.VALUE_ENCODING_ESCAPING),
+                EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("label with Ā");
   }
 
   @Test
   public void testValueUnescapeErrors() {
-    String got;
-
     // empty string
-    got = unescapeName("", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEmpty();
+    assertThat(unescapeName("", EscapingScheme.VALUE_ENCODING_ESCAPING)).isEmpty();
 
     // basic case, no error
-    got = unescapeName("U__no:unescapingrequired", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("no:unescapingrequired");
+    assertThat(unescapeName("U__no:unescapingrequired", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("no:unescapingrequired");
 
     // capitals ok, no error
-    got = unescapeName("U__capitals_2E_ok", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("capitals.ok");
+    assertThat(unescapeName("U__capitals_2E_ok", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("capitals.ok");
 
     // underscores, no error
-    got = unescapeName("U__underscores__doubled__", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("underscores_doubled_");
+    assertThat(unescapeName("U__underscores__doubled__", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("underscores_doubled_");
 
     // invalid single underscore
-    got = unescapeName("U__underscores_doubled_", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("U__underscores_doubled_");
+    assertThat(unescapeName("U__underscores_doubled_", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__underscores_doubled_");
 
     // invalid single underscore, 2
-    got = unescapeName("U__underscores__doubled_", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("U__underscores__doubled_");
+    assertThat(unescapeName("U__underscores__doubled_", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__underscores__doubled_");
 
     // giant fake UTF-8 code
-    got =
-        unescapeName(
-            "U__my__hack_2e_attempt_872348732fabdabbab_", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("U__my__hack_2e_attempt_872348732fabdabbab_");
+    assertThat(
+            unescapeName(
+                "U__my__hack_2e_attempt_872348732fabdabbab_",
+                EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__my__hack_2e_attempt_872348732fabdabbab_");
 
     // trailing UTF-8
-    got = unescapeName("U__my__hack_2e", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("U__my__hack_2e");
+    assertThat(unescapeName("U__my__hack_2e", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__my__hack_2e");
 
     // invalid UTF-8 value
-    got = unescapeName("U__bad__utf_2eg_", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("U__bad__utf_2eg_");
+    assertThat(unescapeName("U__bad__utf_2eg_", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__bad__utf_2eg_");
 
     // surrogate UTF-8 value
-    got = unescapeName("U__bad__utf_D900_", EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got).isEqualTo("U__bad__utf_D900_");
+    assertThat(unescapeName("U__bad__utf_D900_", EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo("U__bad__utf_D900_");
   }
 
   @Test
