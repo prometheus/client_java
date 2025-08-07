@@ -34,7 +34,7 @@ public class PrometheusNaming {
    * ESCAPING_KEY is the key in an Accept header that defines how metric and label names that do not
    * conform to the legacy character requirements should be escaped when being scraped by a legacy
    * Prometheus system. If a system does not explicitly pass an escaping parameter in the Accept
-   * header, the default nameEscapingScheme will be used.
+   * header, the default escaping scheme will be used.
    */
   public static final String ESCAPING_KEY = "escaping";
 
