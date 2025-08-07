@@ -70,7 +70,8 @@ public class TextFormatUtilBenchmark {
     // avoid growing the array
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
-    OPEN_METRICS_TEXT_FORMAT_WRITER.write(byteArrayOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
+    OPEN_METRICS_TEXT_FORMAT_WRITER.write(
+        byteArrayOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
     return byteArrayOutputStream;
   }
 
@@ -86,7 +87,8 @@ public class TextFormatUtilBenchmark {
     // avoid growing the array
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
-    PROMETHEUS_TEXT_FORMAT_WRITER.write(byteArrayOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
+    PROMETHEUS_TEXT_FORMAT_WRITER.write(
+        byteArrayOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
     return byteArrayOutputStream;
   }
 

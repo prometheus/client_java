@@ -14,10 +14,7 @@ import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryDataPointSna
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -462,35 +459,38 @@ class ExpositionFormatsTest {
 
   @Test
   public void testGaugeUTF8() throws IOException {
-    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+    try (MockedStatic<PrometheusNaming> mock =
+        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
-        .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+          .thenReturn(ValidationScheme.UTF_8_VALIDATION);
 
       String prometheusText =
-        """
+          """
         # HELP \"gauge.name\" gauge\\ndoc\\nstr\"ing
         # TYPE \"gauge.name\" gauge
         {\"gauge.name\",\"name*2\"=\"val with \\\\backslash and \\\"quotes\\\"\",\"name.1\"=\"val with\\nnew line\"} +Inf
         {\"gauge.name\",\"name*2\"=\"佖佥\",\"name.1\"=\"Björn\"} 3.14E42
         """;
-      GaugeSnapshot gauge = GaugeSnapshot.builder()
-        .name("gauge.name")
-        .help("gauge\ndoc\nstr\"ing")
-        .dataPoint(GaugeDataPointSnapshot.builder()
-          .value(Double.POSITIVE_INFINITY)
-          .labels(Labels.builder()
-            .label("name.1", "val with\nnew line")
-            .label("name*2", "val with \\backslash and \"quotes\"")
-            .build())
-          .build())
-        .dataPoint(GaugeDataPointSnapshot.builder()
-          .value(3.14e42)
-          .labels(Labels.builder()
-            .label("name.1", "Björn")
-            .label("name*2", "佖佥")
-            .build())
-          .build())
-        .build();
+      GaugeSnapshot gauge =
+          GaugeSnapshot.builder()
+              .name("gauge.name")
+              .help("gauge\ndoc\nstr\"ing")
+              .dataPoint(
+                  GaugeDataPointSnapshot.builder()
+                      .value(Double.POSITIVE_INFINITY)
+                      .labels(
+                          Labels.builder()
+                              .label("name.1", "val with\nnew line")
+                              .label("name*2", "val with \\backslash and \"quotes\"")
+                              .build())
+                      .build())
+              .dataPoint(
+                  GaugeDataPointSnapshot.builder()
+                      .value(3.14e42)
+                      .labels(
+                          Labels.builder().label("name.1", "Björn").label("name*2", "佖佥").build())
+                      .build())
+              .build();
       assertPrometheusText(prometheusText, gauge);
     }
   }
@@ -2788,12 +2788,11 @@ class ExpositionFormatsTest {
   public void testWrite() throws IOException {
     ByteArrayOutputStream buff = new ByteArrayOutputStream(new AtomicInteger(2 << 9).get() + 1024);
     ExpositionFormats expositionFormats = ExpositionFormats.init();
-    UnknownSnapshot unknown = UnknownSnapshot.builder()
-      .name("foo_metric")
-      .dataPoint(UnknownDataPointSnapshot.builder()
-        .value(1.234)
-        .build())
-      .build();
+    UnknownSnapshot unknown =
+        UnknownSnapshot.builder()
+            .name("foo_metric")
+            .dataPoint(UnknownDataPointSnapshot.builder().value(1.234).build())
+            .build();
 
     String acceptHeaderValue = "text/plain; version=0.0.4; charset=utf-8";
     EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
@@ -2804,7 +2803,7 @@ class ExpositionFormatsTest {
     assertThat(out.length).isNotEqualTo(0);
 
     String expected =
-      """
+        """
       # TYPE foo_metric untyped
       foo_metric 1.234
       """;

@@ -52,7 +52,9 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
   }
 
   @Override
-  public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException {
+  public void write(
+      OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)
+      throws IOException {
     for (MetricSnapshot s : metricSnapshots) {
       MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {

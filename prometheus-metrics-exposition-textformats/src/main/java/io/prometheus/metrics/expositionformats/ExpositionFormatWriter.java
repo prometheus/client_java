@@ -10,7 +10,8 @@ public interface ExpositionFormatWriter {
   boolean accepts(String acceptHeader);
 
   /** Text formats use UTF-8 encoding. */
-  void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException;
+  void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)
+      throws IOException;
 
   default String toDebugString(MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) {
     ByteArrayOutputStream out = new ByteArrayOutputStream();

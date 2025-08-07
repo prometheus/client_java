@@ -14,7 +14,8 @@ public class ExporterPushgatewayProperties {
   private final String job;
   private final String escapingScheme;
 
-  private ExporterPushgatewayProperties(String address, String job, String scheme, String escapingScheme) {
+  private ExporterPushgatewayProperties(
+      String address, String job, String scheme, String escapingScheme) {
     this.address = address;
     this.job = job;
     this.scheme = scheme;
@@ -43,8 +44,8 @@ public class ExporterPushgatewayProperties {
   }
 
   /**
-   * Escaping scheme to be used when pushing metric data to the pushgateway.
-   * Valid values: "no-escaping", "values", "underscores", "dots". Default is "no-escaping".
+   * Escaping scheme to be used when pushing metric data to the pushgateway. Valid values:
+   * "no-escaping", "values", "underscores", "dots". Default is "no-escaping".
    */
   public String getEscapingScheme() {
     return escapingScheme;
@@ -60,7 +61,7 @@ public class ExporterPushgatewayProperties {
     String job = Util.loadString(PREFIX + "." + JOB, properties);
     String scheme = Util.loadString(PREFIX + "." + SCHEME, properties);
     String escapingScheme = Util.loadString(PREFIX + "." + ESCAPING_SCHEME, properties);
-    
+
     if (scheme != null) {
       if (!scheme.equals("http") && !scheme.equals("https")) {
         throw new PrometheusPropertiesException(
@@ -69,17 +70,19 @@ public class ExporterPushgatewayProperties {
                 PREFIX, SCHEME, scheme));
       }
     }
-    
+
     if (escapingScheme != null) {
-      if (!escapingScheme.equals("no-escaping") && !escapingScheme.equals("values") 
-          && !escapingScheme.equals("underscores") && !escapingScheme.equals("dots")) {
+      if (!escapingScheme.equals("no-escaping")
+          && !escapingScheme.equals("values")
+          && !escapingScheme.equals("underscores")
+          && !escapingScheme.equals("dots")) {
         throw new PrometheusPropertiesException(
             String.format(
                 "%s.%s: Illegal value. Expecting 'no-escaping', 'values', 'underscores', or 'dots'. Found: %s",
                 PREFIX, ESCAPING_SCHEME, escapingScheme));
       }
     }
-    
+
     return new ExporterPushgatewayProperties(address, job, scheme, escapingScheme);
   }
 }

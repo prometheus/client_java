@@ -16,7 +16,8 @@ public class NamingProperties {
     return validationScheme;
   }
 
-  static NamingProperties load(Map<Object, Object> properties) throws PrometheusPropertiesException {
+  static NamingProperties load(Map<Object, Object> properties)
+      throws PrometheusPropertiesException {
     String validationScheme = Util.loadString(PREFIX + "." + VALIDATION_SCHEME, properties);
     return new NamingProperties(validationScheme);
   }
@@ -40,5 +41,4 @@ public class NamingProperties {
       return new NamingProperties(validationScheme);
     }
   }
-
 }

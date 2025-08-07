@@ -12,7 +12,8 @@ class ExpositionFormatWriterTest {
 
   @Test
   void toDebugString() {
-    assertThat(writer.toDebugString(new MetricSnapshots(), EscapingScheme.NO_ESCAPING)).isEqualTo("# EOF\n");
+    assertThat(writer.toDebugString(new MetricSnapshots(), EscapingScheme.NO_ESCAPING))
+        .isEqualTo("# EOF\n");
   }
 
   @Test

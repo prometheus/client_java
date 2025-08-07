@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.zip.GZIPOutputStream;
 
-
 /** Prometheus scrape endpoint. */
 public class PrometheusScrapeHandler {
 
@@ -139,7 +138,8 @@ public class PrometheusScrapeHandler {
     }
   }
 
-  private boolean writeDebugResponse(MetricSnapshots snapshots, EscapingScheme escapingScheme, PrometheusHttpExchange exchange)
+  private boolean writeDebugResponse(
+      MetricSnapshots snapshots, EscapingScheme escapingScheme, PrometheusHttpExchange exchange)
       throws IOException {
     String debugParam = exchange.getRequest().getParameter("debug");
     PrometheusHttpResponse response = exchange.getResponse();
@@ -158,7 +158,9 @@ public class PrometheusScrapeHandler {
           break;
         case "prometheus-protobuf":
           String debugString =
-              expositionFormats.getPrometheusProtobufWriter().toDebugString(snapshots, escapingScheme);
+              expositionFormats
+                  .getPrometheusProtobufWriter()
+                  .toDebugString(snapshots, escapingScheme);
           body.write(debugString.getBytes(StandardCharsets.UTF_8));
           break;
         default:

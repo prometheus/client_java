@@ -1,7 +1,8 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.metrics.model.snapshots.*;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.*;
 
+import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
@@ -26,8 +27,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.*;
 
 /**
  * Write the OpenMetrics text format as defined on <a
@@ -101,7 +100,9 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   }
 
   @Override
-  public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException {
+  public void write(
+      OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)
+      throws IOException {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
     for (MetricSnapshot s : metricSnapshots) {
       MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);

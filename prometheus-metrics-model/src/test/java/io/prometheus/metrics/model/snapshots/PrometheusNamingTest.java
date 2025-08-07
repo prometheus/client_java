@@ -3,8 +3,8 @@ package io.prometheus.metrics.model.snapshots;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mockStatic;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -27,7 +27,7 @@ class PrometheusNamingTest {
 
   @Test
   public void testSanitizeMetricNameWithUnit() {
-    
+
     assertThat(prometheusName(sanitizeMetricName("0abc.def", Unit.RATIO)))
         .isEqualTo("_abc_def_" + Unit.RATIO);
     assertThat(prometheusName(sanitizeMetricName("___ab.:c0", Unit.RATIO)))
@@ -46,7 +46,7 @@ class PrometheusNamingTest {
 
   @Test
   public void testSanitizeLabelName() {
-    
+
     assertThat(prometheusName(sanitizeLabelName("0abc.def"))).isEqualTo("_abc_def");
     assertThat(prometheusName(sanitizeLabelName("_abc"))).isEqualTo("_abc");
     assertThat(prometheusName(sanitizeLabelName("__abc"))).isEqualTo("_abc");
@@ -106,23 +106,27 @@ class PrometheusNamingTest {
   public void testMetricNameIsValid() {
     assertThat(validateMetricName("Avalid_23name")).isNull();
     assertThat(validateMetricName("_Avalid_23name")).isNull();
-    assertThat(validateMetricName("1valid_23name")).isEqualTo("The metric name contains unsupported characters");
+    assertThat(validateMetricName("1valid_23name"))
+        .isEqualTo("The metric name contains unsupported characters");
     assertThat(validateMetricName("avalid_23name")).isNull();
     assertThat(validateMetricName("Ava:lid_23name")).isNull();
-    assertThat(validateMetricName("a lid_23name")).isEqualTo("The metric name contains unsupported characters");
+    assertThat(validateMetricName("a lid_23name"))
+        .isEqualTo("The metric name contains unsupported characters");
     assertThat(validateMetricName(":leading_colon")).isNull();
     assertThat(validateMetricName("colon:in:the:middle")).isNull();
     assertThat(validateMetricName("")).isEqualTo("The metric name contains unsupported characters");
-    assertThat(validateMetricName("a\ud800z")).isEqualTo("The metric name contains unsupported characters");
+    assertThat(validateMetricName("a\ud800z"))
+        .isEqualTo("The metric name contains unsupported characters");
   }
 
   @Test
   public void testLabelNameIsValid() {
-    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+    try (MockedStatic<PrometheusNaming> mock =
+        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       // Mock the validation scheme to use UTF-8 validation for this test
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
-      
+
       // These assertions now use UTF-8 validation behavior
       assertThat(isValidLabelName("Avalid_23name")).isTrue();
       assertThat(isValidLabelName("_Avalid_23name")).isTrue();
@@ -134,7 +138,7 @@ class PrometheusNamingTest {
       assertThat(isValidLabelName("colon:in:the:middle")).isTrue();
       assertThat(isValidLabelName("a\ud800z")).isFalse();
     }
-    
+
     assertThat(isValidLabelName("Avalid_23name")).isTrue();
     assertThat(isValidLabelName("_Avalid_23name")).isTrue();
     assertThat(isValidLabelName("1valid_23name")).isFalse();
@@ -183,10 +187,11 @@ class PrometheusNamingTest {
     assertThat(got).isEqualTo("no:escaping_required");
 
     // name with dots - needs UTF-8 validation for escaping to occur
-    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+    try (MockedStatic<PrometheusNaming> mock =
+        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
-      
+
       got = escapeName("mysystem.prod.west.cpu.load", EscapingScheme.UNDERSCORE_ESCAPING);
       assertThat(got).isEqualTo("mysystem_prod_west_cpu_load");
       got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
@@ -198,10 +203,11 @@ class PrometheusNamingTest {
     got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
     assertThat(got).isEqualTo("mysystem.prod.west.cpu.load");
 
-    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+    try (MockedStatic<PrometheusNaming> mock =
+        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
-      
+
       got = escapeName("mysystem.prod.west.cpu.load", EscapingScheme.VALUE_ENCODING_ESCAPING);
       assertThat(got).isEqualTo("U__mysystem_2e_prod_2e_west_2e_cpu_2e_load");
       got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
@@ -209,10 +215,11 @@ class PrometheusNamingTest {
     }
 
     // name with dots and underscore - needs UTF-8 validation for escaping to occur
-    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+    try (MockedStatic<PrometheusNaming> mock =
+        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
-      
+
       got = escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.UNDERSCORE_ESCAPING);
       assertThat(got).isEqualTo("mysystem_prod_west_cpu_load_total");
       got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
@@ -224,10 +231,11 @@ class PrometheusNamingTest {
     got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
     assertThat(got).isEqualTo("mysystem.prod.west.cpu.load_total");
 
-    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+    try (MockedStatic<PrometheusNaming> mock =
+        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
-      
+
       got = escapeName("mysystem.prod.west.cpu.load_total", EscapingScheme.VALUE_ENCODING_ESCAPING);
       assertThat(got).isEqualTo("U__mysystem_2e_prod_2e_west_2e_cpu_2e_load__total");
       got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
@@ -235,10 +243,11 @@ class PrometheusNamingTest {
     }
 
     // name with dots and colon - needs UTF-8 validation for escaping to occur
-    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+    try (MockedStatic<PrometheusNaming> mock =
+        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
-      
+
       got = escapeName("http.status:sum", EscapingScheme.UNDERSCORE_ESCAPING);
       assertThat(got).isEqualTo("http_status:sum");
       got = unescapeName(got, EscapingScheme.UNDERSCORE_ESCAPING);
@@ -250,10 +259,11 @@ class PrometheusNamingTest {
     got = unescapeName(got, EscapingScheme.DOTS_ESCAPING);
     assertThat(got).isEqualTo("http.status:sum");
 
-    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+    try (MockedStatic<PrometheusNaming> mock =
+        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
-      
+
       got = escapeName("http.status:sum", EscapingScheme.VALUE_ENCODING_ESCAPING);
       assertThat(got).isEqualTo("U__http_2e_status:sum");
       got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
@@ -309,8 +319,6 @@ class PrometheusNamingTest {
     assertThat(got).isEqualTo("U__label_20_with_20__100_");
     got = unescapeName(got, EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got).isEqualTo("label with Ā");
-
-    
   }
 
   @Test
@@ -342,7 +350,9 @@ class PrometheusNamingTest {
     assertThat(got).isEqualTo("U__underscores__doubled_");
 
     // giant fake UTF-8 code
-    got = unescapeName("U__my__hack_2e_attempt_872348732fabdabbab_", EscapingScheme.VALUE_ENCODING_ESCAPING);
+    got =
+        unescapeName(
+            "U__my__hack_2e_attempt_872348732fabdabbab_", EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got).isEqualTo("U__my__hack_2e_attempt_872348732fabdabbab_");
 
     // trailing UTF-8
@@ -356,8 +366,6 @@ class PrometheusNamingTest {
     // surrogate UTF-8 value
     got = unescapeName("U__bad__utf_D900_", EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got).isEqualTo("U__bad__utf_D900_");
-
-    
   }
 
   @Test
@@ -366,14 +374,19 @@ class PrometheusNamingTest {
     MetricSnapshot got = escapeMetricSnapshot(original, EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(got.getMetadata().getName()).isEqualTo("empty");
     assertThat(original.getMetadata().getName()).isEqualTo("empty");
-    
   }
 
   @Test
   public void testEscapeMetricSnapshotSimpleNoEscapingNeeded() {
     testEscapeMetricSnapshot(
-        "my_metric", "some_label", "labelvalue", "some help text",
-        "my_metric", "some_label", "labelvalue", "some help text",
+        "my_metric",
+        "some_label",
+        "labelvalue",
+        "some help text",
+        "my_metric",
+        "some_label",
+        "labelvalue",
+        "some help text",
         EscapingScheme.VALUE_ENCODING_ESCAPING,
         CounterSnapshot.class);
   }
@@ -381,8 +394,14 @@ class PrometheusNamingTest {
   @Test
   public void testEscapeMetricSnapshotLabelNameEscapingNeeded() {
     testEscapeMetricSnapshot(
-        "my_metric", "some.label", "labelvalue", "some help text",
-        "my_metric", "U__some_2e_label", "labelvalue", "some help text",
+        "my_metric",
+        "some.label",
+        "labelvalue",
+        "some help text",
+        "my_metric",
+        "U__some_2e_label",
+        "labelvalue",
+        "some help text",
         EscapingScheme.VALUE_ENCODING_ESCAPING,
         CounterSnapshot.class);
   }
@@ -390,8 +409,14 @@ class PrometheusNamingTest {
   @Test
   public void testEscapeMetricSnapshotCounterEscapingNeeded() {
     testEscapeMetricSnapshot(
-        "my.metric", "some?label", "label??value", "some help text",
-        "U__my_2e_metric", "U__some_3f_label", "label??value", "some help text",
+        "my.metric",
+        "some?label",
+        "label??value",
+        "some help text",
+        "U__my_2e_metric",
+        "U__some_3f_label",
+        "label??value",
+        "some help text",
         EscapingScheme.VALUE_ENCODING_ESCAPING,
         CounterSnapshot.class);
   }
@@ -399,73 +424,89 @@ class PrometheusNamingTest {
   @Test
   public void testEscapeMetricSnapshotGaugeEscapingNeeded() {
     testEscapeMetricSnapshot(
-        "unicode.and.dots.花火", "some_label", "label??value", "some help text",
-        "unicode_dot_and_dot_dots_dot_____", "some_label", "label??value", "some help text",
+        "unicode.and.dots.花火",
+        "some_label",
+        "label??value",
+        "some help text",
+        "unicode_dot_and_dot_dots_dot_____",
+        "some_label",
+        "label??value",
+        "some help text",
         EscapingScheme.DOTS_ESCAPING,
         GaugeSnapshot.class);
   }
 
   private void testEscapeMetricSnapshot(
-      String name, String labelName, String labelValue, String help,
-      String expectedName, String expectedLabelName, String expectedLabelValue, String expectedHelp,
+      String name,
+      String labelName,
+      String labelValue,
+      String help,
+      String expectedName,
+      String expectedLabelName,
+      String expectedLabelValue,
+      String expectedHelp,
       EscapingScheme escapingScheme,
       Class<? extends MetricSnapshot> snapshotType) {
-    
-    try (MockedStatic<PrometheusNaming> mock = mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
+
+    try (MockedStatic<PrometheusNaming> mock =
+        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
       mock.when(PrometheusNaming::getValidationScheme)
           .thenReturn(ValidationScheme.UTF_8_VALIDATION);
 
-      MetricSnapshot original = createTestSnapshot(name, labelName, labelValue, help, 34.2, snapshotType);
+      MetricSnapshot original =
+          createTestSnapshot(name, labelName, labelValue, help, 34.2, snapshotType);
       MetricSnapshot got = escapeMetricSnapshot(original, escapingScheme);
 
       assertThat(got.getMetadata().getName()).isEqualTo(expectedName);
       assertThat(got.getMetadata().getHelp()).isEqualTo(expectedHelp);
       assertThat(got.getDataPoints().size()).isEqualTo(1);
-      
+
       DataPointSnapshot escapedData = got.getDataPoints().get(0);
-      assertThat((Iterable<? extends Label>) escapedData.getLabels()).isEqualTo(Labels.builder()
-          .label("__name__", expectedName)
-          .label(expectedLabelName, expectedLabelValue)
-          .build());
+      assertThat((Iterable<? extends Label>) escapedData.getLabels())
+          .isEqualTo(
+              Labels.builder()
+                  .label("__name__", expectedName)
+                  .label(expectedLabelName, expectedLabelValue)
+                  .build());
 
       assertThat(original.getMetadata().getName()).isEqualTo(name);
       assertThat(original.getMetadata().getHelp()).isEqualTo(help);
       assertThat(original.getDataPoints().size()).isEqualTo(1);
-      
+
       DataPointSnapshot originalData = original.getDataPoints().get(0);
-      assertThat((Iterable<? extends Label>) originalData.getLabels()).isEqualTo(Labels.builder()
-          .label("__name__", name)
-          .label(labelName, labelValue)
-          .build());
+      assertThat((Iterable<? extends Label>) originalData.getLabels())
+          .isEqualTo(Labels.builder().label("__name__", name).label(labelName, labelValue).build());
     }
   }
 
-  private MetricSnapshot createTestSnapshot(String name, String labelName, String labelValue, String help, double value, Class<? extends MetricSnapshot> snapshotType) {
-    Labels labels = Labels.builder()
-        .label("__name__", name)
-        .label(labelName, labelValue)
-        .build();
+  private MetricSnapshot createTestSnapshot(
+      String name,
+      String labelName,
+      String labelValue,
+      String help,
+      double value,
+      Class<? extends MetricSnapshot> snapshotType) {
+    Labels labels = Labels.builder().label("__name__", name).label(labelName, labelValue).build();
 
     if (snapshotType.equals(CounterSnapshot.class)) {
       return CounterSnapshot.builder()
           .name(name)
           .help(help)
-          .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder()
-              .value(value)
-              .labels(labels)
-              .build())
+          .dataPoint(
+              CounterSnapshot.CounterDataPointSnapshot.builder()
+                  .value(value)
+                  .labels(labels)
+                  .build())
           .build();
     } else if (snapshotType.equals(GaugeSnapshot.class)) {
       return GaugeSnapshot.builder()
           .name(name)
           .help(help)
-          .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder()
-              .value(value)
-              .labels(labels)
-              .build())
+          .dataPoint(
+              GaugeSnapshot.GaugeDataPointSnapshot.builder().value(value).labels(labels).build())
           .build();
     }
-    
+
     throw new IllegalArgumentException("Unsupported snapshot type: " + snapshotType);
   }
 }

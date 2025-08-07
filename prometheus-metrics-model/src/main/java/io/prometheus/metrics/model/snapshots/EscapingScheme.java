@@ -1,7 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.ESCAPING_KEY;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.DEFAULT_ESCAPING_SCHEME;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.ESCAPING_KEY;
 
 public enum EscapingScheme {
   // NO_ESCAPING indicates that a name will not be escaped.
@@ -57,7 +57,7 @@ public enum EscapingScheme {
   }
 
   private static EscapingScheme forString(String value) {
-    switch(value) {
+    switch (value) {
       case "allow-utf-8":
         return NO_ESCAPING;
       case "underscores":

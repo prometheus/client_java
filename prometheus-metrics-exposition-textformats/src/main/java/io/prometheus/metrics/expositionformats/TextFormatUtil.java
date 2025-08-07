@@ -101,7 +101,11 @@ public class TextFormatUtil {
   }
 
   static void writeLabels(
-      Writer writer, Labels labels, String additionalLabelName, double additionalLabelValue, boolean metricInsideBraces)
+      Writer writer,
+      Labels labels,
+      String additionalLabelName,
+      double additionalLabelValue,
+      boolean metricInsideBraces)
       throws IOException {
     if (!metricInsideBraces) {
       writer.write('{');
@@ -136,7 +140,8 @@ public class TextFormatUtil {
         }
         break;
       case Label:
-        if (PrometheusNaming.isValidLegacyLabelName(name) && PrometheusNaming.getValidationScheme() == ValidationScheme.LEGACY_VALIDATION) {
+        if (PrometheusNaming.isValidLegacyLabelName(name)
+            && PrometheusNaming.getValidationScheme() == ValidationScheme.LEGACY_VALIDATION) {
           writer.write(name);
           return;
         }

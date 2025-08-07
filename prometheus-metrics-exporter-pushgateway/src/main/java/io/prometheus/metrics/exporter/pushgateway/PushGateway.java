@@ -13,7 +13,6 @@ import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.EscapingScheme;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -442,11 +441,16 @@ public class PushGateway {
       if (properties != null && properties.getEscapingScheme() != null) {
         String scheme = properties.getEscapingScheme();
         switch (scheme) {
-          case "no-escaping": return EscapingScheme.NO_ESCAPING;
-          case "values": return EscapingScheme.VALUE_ENCODING_ESCAPING;
-          case "underscores": return EscapingScheme.UNDERSCORE_ESCAPING;
-          case "dots": return EscapingScheme.DOTS_ESCAPING;
-          default: return EscapingScheme.NO_ESCAPING;
+          case "no-escaping":
+            return EscapingScheme.NO_ESCAPING;
+          case "values":
+            return EscapingScheme.VALUE_ENCODING_ESCAPING;
+          case "underscores":
+            return EscapingScheme.UNDERSCORE_ESCAPING;
+          case "dots":
+            return EscapingScheme.DOTS_ESCAPING;
+          default:
+            return EscapingScheme.NO_ESCAPING;
         }
       }
       return EscapingScheme.NO_ESCAPING;
@@ -472,11 +476,22 @@ public class PushGateway {
       if (groupingKey != null) {
         for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
           if (entry.getValue().isEmpty()) {
-            url += "/" + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING) + "@base64/=";
+            url +=
+                "/"
+                    + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING)
+                    + "@base64/=";
           } else if (entry.getValue().contains("/")) {
-            url += "/" + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING) + "@base64/" + base64url(entry.getValue());
+            url +=
+                "/"
+                    + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING)
+                    + "@base64/"
+                    + base64url(entry.getValue());
           } else {
-            url += "/" + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING) + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
+            url +=
+                "/"
+                    + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING)
+                    + "/"
+                    + URLEncoder.encode(entry.getValue(), "UTF-8");
           }
         }
       }

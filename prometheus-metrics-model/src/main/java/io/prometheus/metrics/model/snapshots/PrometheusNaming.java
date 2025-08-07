@@ -1,14 +1,13 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.config.PrometheusProperties;
+import static java.lang.Character.*;
 
+import io.prometheus.metrics.config.PrometheusProperties;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.lang.Character.*;
 
 /**
  * Utility for Prometheus Metric and Label naming.
@@ -20,39 +19,36 @@ import static java.lang.Character.*;
 public class PrometheusNaming {
 
   /**
-   * nameValidationScheme determines the method of name validation to be used by
-   * all calls to validateMetricName() and isValidMetricName(). Setting UTF-8 mode
-   * in isolation from other components that don't support UTF-8 may result in
-   * bugs or other undefined behavior. This value is intended to be set by
-   * UTF-8-aware binaries as part of their startup via a properties file.
+   * nameValidationScheme determines the method of name validation to be used by all calls to
+   * validateMetricName() and isValidMetricName(). Setting UTF-8 mode in isolation from other
+   * components that don't support UTF-8 may result in bugs or other undefined behavior. This value
+   * is intended to be set by UTF-8-aware binaries as part of their startup via a properties file.
    */
   public static final ValidationScheme nameValidationScheme = initValidationScheme();
 
-  /**
-   * Default escaping scheme for names when not specified.
-   */
-  public static final EscapingScheme DEFAULT_ESCAPING_SCHEME = EscapingScheme.VALUE_ENCODING_ESCAPING;
+  /** Default escaping scheme for names when not specified. */
+  public static final EscapingScheme DEFAULT_ESCAPING_SCHEME =
+      EscapingScheme.VALUE_ENCODING_ESCAPING;
 
   /**
-   * ESCAPING_KEY is the key in an Accept header that defines how
-   * metric and label names that do not conform to the legacy character
-   * requirements should be escaped when being scraped by a legacy Prometheus
-   * system. If a system does not explicitly pass an escaping parameter in the
-   * Accept header, the default nameEscapingScheme will be used.
+   * ESCAPING_KEY is the key in an Accept header that defines how metric and label names that do not
+   * conform to the legacy character requirements should be escaped when being scraped by a legacy
+   * Prometheus system. If a system does not explicitly pass an escaping parameter in the Accept
+   * header, the default nameEscapingScheme will be used.
    */
   public static final String ESCAPING_KEY = "escaping";
 
-  private static final String METRIC_NAME_LABEL= "__name__";
+  private static final String METRIC_NAME_LABEL = "__name__";
 
   /** Legal characters for metric names, including dot. */
   private static final Pattern LEGACY_METRIC_NAME_PATTERN =
       Pattern.compile("^[a-zA-Z_.:][a-zA-Z0-9_.:]*$");
 
-  private static final Pattern METRIC_NAME_PATTERN =
-    Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
+  private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
 
   /** Legal characters for label names, including dot. */
-  private static final Pattern LEGACY_LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
+  private static final Pattern LEGACY_LABEL_NAME_PATTERN =
+      Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
 
   /** Legal characters for unit names, including dot. */
   private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
@@ -78,7 +74,8 @@ public class PrometheusNaming {
   };
 
   static ValidationScheme initValidationScheme() {
-    String validationScheme = PrometheusProperties.get().getNamingProperties().getValidationScheme();
+    String validationScheme =
+        PrometheusProperties.get().getNamingProperties().getValidationScheme();
     if (validationScheme != null && validationScheme.equals("utf-8")) {
       return ValidationScheme.UTF_8_VALIDATION;
     }
@@ -87,9 +84,8 @@ public class PrometheusNaming {
   }
 
   /**
-   * Get the current validation scheme. This method exists primarily to enable
-   * testing different validation behaviors while keeping the validation scheme
-   * field final and immutable.
+   * Get the current validation scheme. This method exists primarily to enable testing different
+   * validation behaviors while keeping the validation scheme field final and immutable.
    */
   public static ValidationScheme getValidationScheme() {
     return nameValidationScheme;
@@ -124,12 +120,13 @@ public class PrometheusNaming {
       case LEGACY_VALIDATION:
         return validateLegacyMetricName(name);
       case UTF_8_VALIDATION:
-        if(name.isEmpty() || !StandardCharsets.UTF_8.newEncoder().canEncode(name)) {
+        if (name.isEmpty() || !StandardCharsets.UTF_8.newEncoder().canEncode(name)) {
           return "The metric name contains unsupported characters";
         }
         return null;
       default:
-        throw new RuntimeException("Invalid name validation scheme requested: " + getValidationScheme());
+        throw new RuntimeException(
+            "Invalid name validation scheme requested: " + getValidationScheme());
     }
   }
 
@@ -157,7 +154,8 @@ public class PrometheusNaming {
       case UTF_8_VALIDATION:
         return METRIC_NAME_PATTERN.matcher(name).matches();
       default:
-        throw new RuntimeException("Invalid name validation scheme requested: " + getValidationScheme());
+        throw new RuntimeException(
+            "Invalid name validation scheme requested: " + getValidationScheme());
     }
   }
 
@@ -168,7 +166,8 @@ public class PrometheusNaming {
       case UTF_8_VALIDATION:
         return StandardCharsets.UTF_8.newEncoder().canEncode(name);
       default:
-        throw new RuntimeException("Invalid name validation scheme requested: " + getValidationScheme());
+        throw new RuntimeException(
+            "Invalid name validation scheme requested: " + getValidationScheme());
     }
   }
 
@@ -371,10 +370,7 @@ public class PrometheusNaming {
     return new String(sanitized);
   }
 
-  /**
-   * Escapes the given metric names and labels with the given
-   * escaping scheme.
-   */
+  /** Escapes the given metric names and labels with the given escaping scheme. */
   public static MetricSnapshot escapeMetricSnapshot(MetricSnapshot v, EscapingScheme scheme) {
     if (v == null) {
       return null;
@@ -387,7 +383,8 @@ public class PrometheusNaming {
     String outName;
 
     // If the name is null, copy as-is, don't try to escape.
-    if (v.getMetadata().getPrometheusName() == null || isValidLegacyMetricName(v.getMetadata().getPrometheusName())) {
+    if (v.getMetadata().getPrometheusName() == null
+        || isValidLegacyMetricName(v.getMetadata().getPrometheusName())) {
       outName = v.getMetadata().getPrometheusName();
     } else {
       outName = escapeName(v.getMetadata().getPrometheusName(), scheme);
@@ -440,131 +437,143 @@ public class PrometheusNaming {
     return false;
   }
 
-  private static DataPointSnapshot createEscapedDataPointSnapshot(MetricSnapshot v, DataPointSnapshot d, Labels outLabels) {
+  private static DataPointSnapshot createEscapedDataPointSnapshot(
+      MetricSnapshot v, DataPointSnapshot d, Labels outLabels) {
     if (v instanceof CounterSnapshot) {
       return CounterSnapshot.CounterDataPointSnapshot.builder()
-        .value(((CounterSnapshot.CounterDataPointSnapshot) d).getValue())
-        .exemplar(((CounterSnapshot.CounterDataPointSnapshot) d).getExemplar())
-        .labels(outLabels)
-        .createdTimestampMillis(d.getCreatedTimestampMillis())
-        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-        .build();
+          .value(((CounterSnapshot.CounterDataPointSnapshot) d).getValue())
+          .exemplar(((CounterSnapshot.CounterDataPointSnapshot) d).getExemplar())
+          .labels(outLabels)
+          .createdTimestampMillis(d.getCreatedTimestampMillis())
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
     } else if (v instanceof GaugeSnapshot) {
       return GaugeSnapshot.GaugeDataPointSnapshot.builder()
-        .value(((GaugeSnapshot.GaugeDataPointSnapshot) d).getValue())
-        .exemplar(((GaugeSnapshot.GaugeDataPointSnapshot) d).getExemplar())
-        .labels(outLabels)
-        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-        .build();
+          .value(((GaugeSnapshot.GaugeDataPointSnapshot) d).getValue())
+          .exemplar(((GaugeSnapshot.GaugeDataPointSnapshot) d).getExemplar())
+          .labels(outLabels)
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
     } else if (v instanceof HistogramSnapshot) {
       return HistogramSnapshot.HistogramDataPointSnapshot.builder()
-        .classicHistogramBuckets(((HistogramSnapshot.HistogramDataPointSnapshot) d).getClassicBuckets())
-        .nativeSchema(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeSchema())
-        .nativeZeroCount(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroCount())
-        .nativeZeroThreshold(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroThreshold())
-        .nativeBucketsForPositiveValues(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeBucketsForPositiveValues())
-        .nativeBucketsForNegativeValues(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeBucketsForNegativeValues())
-        .count(((HistogramSnapshot.HistogramDataPointSnapshot) d).getCount())
-        .sum(((HistogramSnapshot.HistogramDataPointSnapshot) d).getSum())
-        .exemplars(((HistogramSnapshot.HistogramDataPointSnapshot) d).getExemplars())
-        .labels(outLabels)
-        .createdTimestampMillis(d.getCreatedTimestampMillis())
-        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-        .build();
+          .classicHistogramBuckets(
+              ((HistogramSnapshot.HistogramDataPointSnapshot) d).getClassicBuckets())
+          .nativeSchema(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeSchema())
+          .nativeZeroCount(((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroCount())
+          .nativeZeroThreshold(
+              ((HistogramSnapshot.HistogramDataPointSnapshot) d).getNativeZeroThreshold())
+          .nativeBucketsForPositiveValues(
+              ((HistogramSnapshot.HistogramDataPointSnapshot) d)
+                  .getNativeBucketsForPositiveValues())
+          .nativeBucketsForNegativeValues(
+              ((HistogramSnapshot.HistogramDataPointSnapshot) d)
+                  .getNativeBucketsForNegativeValues())
+          .count(((HistogramSnapshot.HistogramDataPointSnapshot) d).getCount())
+          .sum(((HistogramSnapshot.HistogramDataPointSnapshot) d).getSum())
+          .exemplars(((HistogramSnapshot.HistogramDataPointSnapshot) d).getExemplars())
+          .labels(outLabels)
+          .createdTimestampMillis(d.getCreatedTimestampMillis())
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
     } else if (v instanceof SummarySnapshot) {
       return SummarySnapshot.SummaryDataPointSnapshot.builder()
-        .quantiles(((SummarySnapshot.SummaryDataPointSnapshot) d).getQuantiles())
-        .count(((SummarySnapshot.SummaryDataPointSnapshot) d).getCount())
-        .sum(((SummarySnapshot.SummaryDataPointSnapshot) d).getSum())
-        .exemplars(((SummarySnapshot.SummaryDataPointSnapshot) d).getExemplars())
-        .labels(outLabels)
-        .createdTimestampMillis(d.getCreatedTimestampMillis())
-        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-        .build();
+          .quantiles(((SummarySnapshot.SummaryDataPointSnapshot) d).getQuantiles())
+          .count(((SummarySnapshot.SummaryDataPointSnapshot) d).getCount())
+          .sum(((SummarySnapshot.SummaryDataPointSnapshot) d).getSum())
+          .exemplars(((SummarySnapshot.SummaryDataPointSnapshot) d).getExemplars())
+          .labels(outLabels)
+          .createdTimestampMillis(d.getCreatedTimestampMillis())
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
     } else if (v instanceof InfoSnapshot) {
       return InfoSnapshot.InfoDataPointSnapshot.builder()
-        .labels(outLabels)
-        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-        .build();
+          .labels(outLabels)
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
     } else if (v instanceof StateSetSnapshot) {
-      StateSetSnapshot.StateSetDataPointSnapshot.Builder builder = StateSetSnapshot.StateSetDataPointSnapshot.builder()
-        .labels(outLabels)
-        .scrapeTimestampMillis(d.getScrapeTimestampMillis());
+      StateSetSnapshot.StateSetDataPointSnapshot.Builder builder =
+          StateSetSnapshot.StateSetDataPointSnapshot.builder()
+              .labels(outLabels)
+              .scrapeTimestampMillis(d.getScrapeTimestampMillis());
       for (StateSetSnapshot.State state : ((StateSetSnapshot.StateSetDataPointSnapshot) d)) {
         builder.state(state.getName(), state.isTrue());
       }
       return builder.build();
     } else if (v instanceof UnknownSnapshot) {
       return UnknownSnapshot.UnknownDataPointSnapshot.builder()
-        .labels(outLabels)
-        .value(((UnknownSnapshot.UnknownDataPointSnapshot) d).getValue())
-        .exemplar(((UnknownSnapshot.UnknownDataPointSnapshot) d).getExemplar())
-        .scrapeTimestampMillis(d.getScrapeTimestampMillis())
-        .build();
+          .labels(outLabels)
+          .value(((UnknownSnapshot.UnknownDataPointSnapshot) d).getValue())
+          .exemplar(((UnknownSnapshot.UnknownDataPointSnapshot) d).getExemplar())
+          .scrapeTimestampMillis(d.getScrapeTimestampMillis())
+          .build();
     } else {
       throw new IllegalArgumentException("Unknown MetricSnapshot type: " + v.getClass());
     }
   }
 
-  private static MetricSnapshot createEscapedMetricSnapshot(MetricSnapshot v, String outName, List<DataPointSnapshot> outDataPoints) {
+  private static MetricSnapshot createEscapedMetricSnapshot(
+      MetricSnapshot v, String outName, List<DataPointSnapshot> outDataPoints) {
     if (v instanceof CounterSnapshot) {
-      CounterSnapshot.Builder builder = CounterSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit());
+      CounterSnapshot.Builder builder =
+          CounterSnapshot.builder()
+              .name(outName)
+              .help(v.getMetadata().getHelp())
+              .unit(v.getMetadata().getUnit());
       for (DataPointSnapshot d : outDataPoints) {
         builder.dataPoint((CounterSnapshot.CounterDataPointSnapshot) d);
       }
       return builder.build();
     } else if (v instanceof GaugeSnapshot) {
-      GaugeSnapshot.Builder builder = GaugeSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit());
+      GaugeSnapshot.Builder builder =
+          GaugeSnapshot.builder()
+              .name(outName)
+              .help(v.getMetadata().getHelp())
+              .unit(v.getMetadata().getUnit());
       for (DataPointSnapshot d : outDataPoints) {
         builder.dataPoint((GaugeSnapshot.GaugeDataPointSnapshot) d);
       }
       return builder.build();
     } else if (v instanceof HistogramSnapshot) {
-      HistogramSnapshot.Builder builder = HistogramSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit())
-        .gaugeHistogram(((HistogramSnapshot) v).isGaugeHistogram());
+      HistogramSnapshot.Builder builder =
+          HistogramSnapshot.builder()
+              .name(outName)
+              .help(v.getMetadata().getHelp())
+              .unit(v.getMetadata().getUnit())
+              .gaugeHistogram(((HistogramSnapshot) v).isGaugeHistogram());
       for (DataPointSnapshot d : outDataPoints) {
         builder.dataPoint((HistogramSnapshot.HistogramDataPointSnapshot) d);
       }
       return builder.build();
     } else if (v instanceof SummarySnapshot) {
-      SummarySnapshot.Builder builder = SummarySnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit());
+      SummarySnapshot.Builder builder =
+          SummarySnapshot.builder()
+              .name(outName)
+              .help(v.getMetadata().getHelp())
+              .unit(v.getMetadata().getUnit());
       for (DataPointSnapshot d : outDataPoints) {
         builder.dataPoint((SummarySnapshot.SummaryDataPointSnapshot) d);
       }
       return builder.build();
     } else if (v instanceof InfoSnapshot) {
-      InfoSnapshot.Builder builder = InfoSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp());
+      InfoSnapshot.Builder builder =
+          InfoSnapshot.builder().name(outName).help(v.getMetadata().getHelp());
       for (DataPointSnapshot d : outDataPoints) {
         builder.dataPoint((InfoSnapshot.InfoDataPointSnapshot) d);
       }
       return builder.build();
     } else if (v instanceof StateSetSnapshot) {
-      StateSetSnapshot.Builder builder = StateSetSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp());
+      StateSetSnapshot.Builder builder =
+          StateSetSnapshot.builder().name(outName).help(v.getMetadata().getHelp());
       for (DataPointSnapshot d : outDataPoints) {
         builder.dataPoint((StateSetSnapshot.StateSetDataPointSnapshot) d);
       }
       return builder.build();
     } else if (v instanceof UnknownSnapshot) {
-      UnknownSnapshot.Builder builder = UnknownSnapshot.builder()
-        .name(outName)
-        .help(v.getMetadata().getHelp())
-        .unit(v.getMetadata().getUnit());
+      UnknownSnapshot.Builder builder =
+          UnknownSnapshot.builder()
+              .name(outName)
+              .help(v.getMetadata().getHelp())
+              .unit(v.getMetadata().getUnit());
       for (DataPointSnapshot d : outDataPoints) {
         builder.dataPoint((UnknownSnapshot.UnknownDataPointSnapshot) d);
       }
@@ -575,10 +584,9 @@ public class PrometheusNaming {
   }
 
   /**
-   * Escapes the incoming name according to the provided escaping
-   * scheme. Depending on the rules of escaping, this may cause no change in the
-   * string that is returned (especially NO_ESCAPING, which by definition is a
-   * noop). This method does not do any validation of the name.
+   * Escapes the incoming name according to the provided escaping scheme. Depending on the rules of
+   * escaping, this may cause no change in the string that is returned (especially NO_ESCAPING,
+   * which by definition is a noop). This method does not do any validation of the name.
    */
   public static String escapeName(String name, EscapingScheme scheme) {
     if (name.isEmpty()) {
@@ -645,9 +653,9 @@ public class PrometheusNaming {
   }
 
   /**
-   * Unescapes the incoming name according to the provided escaping
-   * scheme if possible. Some schemes are partially or totally non-roundtripable.
-   * If any error is encountered, returns the original input.
+   * Unescapes the incoming name according to the provided escaping scheme if possible. Some schemes
+   * are partially or totally non-roundtripable. If any error is encountered, returns the original
+   * input.
    */
   @SuppressWarnings("IncrementInForLoopAndHeader")
   static String unescapeName(String name, EscapingScheme scheme) {
@@ -697,7 +705,7 @@ public class PrometheusNaming {
               }
               // Found a closing underscore, convert to a char, check validity, and append.
               if (escapedName.codePointAt(i) == '_') {
-                //char utf8Char = (char) utf8Val;
+                // char utf8Char = (char) utf8Val;
                 foundClosingUnderscore = true;
                 if (!isValidUTF8Char(utf8Val)) {
                   return name;
@@ -731,7 +739,11 @@ public class PrometheusNaming {
   }
 
   static boolean isValidLegacyChar(int c, int i) {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == ':' || (c >= '0' && c <= '9' && i > 0);
+    return (c >= 'a' && c <= 'z')
+        || (c >= 'A' && c <= 'Z')
+        || c == '_'
+        || c == ':'
+        || (c >= '0' && c <= '9' && i > 0);
   }
 
   private static boolean isValidUTF8Char(int c) {

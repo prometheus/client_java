@@ -1,7 +1,8 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.metrics.model.snapshots.*;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.*;
 
+import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
@@ -22,8 +23,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.*;
 
 /**
  * Write the Prometheus text format. This is the default if you view a Prometheus endpoint with your
@@ -100,7 +99,9 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   }
 
   @Override
-  public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) throws IOException {
+  public void write(
+      OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)
+      throws IOException {
     // See https://prometheus.io/docs/instrumenting/exposition_formats/
     // "unknown", "gauge", "counter", "stateset", "info", "histogram", "gaugehistogram", and
     // "summary".
@@ -377,13 +378,15 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       Writer writer, String suffix, String typeString, MetricMetadata metadata) throws IOException {
     if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
       writer.write("# HELP ");
-      writeName(writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""), NameType.Metric);
+      writeName(
+          writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""), NameType.Metric);
       writer.write(' ');
       writeEscapedHelp(writer, metadata.getHelp());
       writer.write('\n');
     }
     writer.write("# TYPE ");
-    writeName(writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""), NameType.Metric);
+    writeName(
+        writer, metadata.getPrometheusName() + (suffix != null ? suffix : ""), NameType.Metric);
     writer.write(' ');
     writer.write(typeString);
     writer.write('\n');
