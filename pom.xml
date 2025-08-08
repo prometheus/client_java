@@ -25,7 +25,7 @@
     <automatic.module.name>--module-name-need-to-be-overridden--</automatic.module.name>
     <protobuf-java.version>4.31.1</protobuf-java.version>
     <guava.version>33.4.8-jre</guava.version>
-    <junit-jupiter.version>5.13.3</junit-jupiter.version>
+    <junit-jupiter.version>5.13.4</junit-jupiter.version>
     <otel.instrumentation.version>2.16.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
@@ -127,7 +127,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.6.0</version>
+          <version>3.6.1</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -274,7 +274,7 @@
             <path>
               <groupId>com.google.errorprone</groupId>
               <artifactId>error_prone_core</artifactId>
-              <version>2.39.0</version>
+              <version>2.41.0</version>
             </path>
             <!-- Other annotation processors go here.
 
@@ -381,7 +381,7 @@
         <dependency>
           <groupId>org.assertj</groupId>
           <artifactId>assertj-core</artifactId>
-          <version>3.27.3</version>
+          <version>3.27.4</version>
           <scope>test</scope>
         </dependency>
         <dependency>

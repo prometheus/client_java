@@ -12,9 +12,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@5cb1df66ed5e1fb3c670ea0b62fd17a76979826a # v2.3.1
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
+        with:
+          version: v2025.7.29
+          sha256: 72e9e76d0e52998b0dc084c6550aef472091975978586980d703a87240a87fde
       - name: Cache local Maven repository
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}

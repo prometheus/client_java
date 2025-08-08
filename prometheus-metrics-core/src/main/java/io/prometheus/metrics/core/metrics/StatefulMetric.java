@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -28,7 +29,8 @@ import java.util.function.Function;
  * because in Java <i>synchronous</i> and <i>asynchronous</i> usually refers to multi-threading, but
  * this has nothing to do with multi-threading.
  */
-abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWithFixedMetadata {
+public abstract class StatefulMetric<D extends DataPoint, T extends D>
+    extends MetricWithFixedMetadata {
 
   /** Map label values to data points. */
   private final ConcurrentHashMap<List<String>, T> data = new ConcurrentHashMap<>();
@@ -156,23 +158,26 @@ abstract class StatefulMetric<D extends DataPoint, T extends D> extends MetricWi
     return noLabels;
   }
 
+  /**
+   * Metric properties in effect by order of precedence with the highest precedence first. If a
+   * {@code MetricProperties} is configured for the metric name it has higher precedence than the
+   * builder configuration. A special case is the setting {@link Builder#withoutExemplars()} via the
+   * builder, which cannot be overridden by any configuration.
+   */
   protected MetricsProperties[] getMetricProperties(
       Builder<?, ?> builder, PrometheusProperties prometheusProperties) {
+    List<MetricsProperties> properties = new ArrayList<>();
+    if (Objects.equals(builder.exemplarsEnabled, false)) {
+      properties.add(MetricsProperties.builder().exemplarsEnabled(false).build());
+    }
     String metricName = getMetadata().getName();
     if (prometheusProperties.getMetricProperties(metricName) != null) {
-      return new MetricsProperties[] {
-        prometheusProperties.getMetricProperties(metricName), // highest precedence
-        builder.toProperties(), // second-highest precedence
-        prometheusProperties.getDefaultMetricProperties(), // third-highest precedence
-        builder.getDefaultProperties() // fallback
-      };
-    } else {
-      return new MetricsProperties[] {
-        builder.toProperties(), // highest precedence
-        prometheusProperties.getDefaultMetricProperties(), // second-highest precedence
-        builder.getDefaultProperties() // fallback
-      };
+      properties.add(prometheusProperties.getMetricProperties(metricName));
     }
+    properties.add(builder.toProperties());
+    properties.add(prometheusProperties.getDefaultMetricProperties());
+    properties.add(builder.getDefaultProperties()); // fallback
+    return properties.toArray(new MetricsProperties[0]);
   }
 
   protected <P> P getConfigProperty(

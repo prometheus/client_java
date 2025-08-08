@@ -6,7 +6,6 @@ import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.ExpositionFormats;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -55,16 +54,11 @@ public class PrometheusScrapeHandler {
     try {
       PrometheusHttpRequest request = exchange.getRequest();
       MetricSnapshots snapshots = scrape(request);
-      String acceptHeader = request.getHeader("Accept");
-      EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeader);
-      if (writeDebugResponse(snapshots, escapingScheme, exchange)) {
+      if (writeDebugResponse(snapshots, exchange)) {
         return;
       }
-      ByteArrayOutputStream responseBuffer =
-          new ByteArrayOutputStream(lastResponseSize.get() + 1024);
+      String acceptHeader = request.getHeader("Accept");
       ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeader);
-      writer.write(responseBuffer, snapshots, escapingScheme);
-      lastResponseSize.set(responseBuffer.size());
       PrometheusHttpResponse response = exchange.getResponse();
       response.setHeader("Content-Type", writer.getContentType());
 
@@ -72,9 +66,13 @@ public class PrometheusScrapeHandler {
         response.setHeader("Content-Encoding", "gzip");
         try (GZIPOutputStream gzipOutputStream =
             new GZIPOutputStream(response.sendHeadersAndGetBody(200, 0))) {
-          responseBuffer.writeTo(gzipOutputStream);
+          writer.write(gzipOutputStream, snapshots);
         }
       } else {
+        ByteArrayOutputStream responseBuffer =
+            new ByteArrayOutputStream(lastResponseSize.get() + 1024);
+        writer.write(responseBuffer, snapshots);
+        lastResponseSize.set(responseBuffer.size());
         int contentLength = responseBuffer.size();
         if (contentLength > 0) {
           response.setHeader("Content-Length", String.valueOf(contentLength));
@@ -138,8 +136,7 @@ public class PrometheusScrapeHandler {
     }
   }
 
-  private boolean writeDebugResponse(
-      MetricSnapshots snapshots, EscapingScheme escapingScheme, PrometheusHttpExchange exchange)
+  private boolean writeDebugResponse(MetricSnapshots snapshots, PrometheusHttpExchange exchange)
       throws IOException {
     String debugParam = exchange.getRequest().getParameter("debug");
     PrometheusHttpResponse response = exchange.getResponse();
@@ -151,16 +148,14 @@ public class PrometheusScrapeHandler {
       OutputStream body = response.sendHeadersAndGetBody(responseStatus, 0);
       switch (debugParam) {
         case "openmetrics":
-          expositionFormats.getOpenMetricsTextFormatWriter().write(body, snapshots, escapingScheme);
+          expositionFormats.getOpenMetricsTextFormatWriter().write(body, snapshots);
           break;
         case "text":
-          expositionFormats.getPrometheusTextFormatWriter().write(body, snapshots, escapingScheme);
+          expositionFormats.getPrometheusTextFormatWriter().write(body, snapshots);
           break;
         case "prometheus-protobuf":
           String debugString =
-              expositionFormats
-                  .getPrometheusProtobufWriter()
-                  .toDebugString(snapshots, escapingScheme);
+              expositionFormats.getPrometheusProtobufWriter().toDebugString(snapshots);
           body.write(debugString.getBytes(StandardCharsets.UTF_8));
           break;
         default:

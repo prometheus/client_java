@@ -37,6 +37,10 @@ public class PrometheusProperties {
     return instance;
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
   public PrometheusProperties(
       MetricsProperties defaultMetricsProperties,
       Map<String, MetricsProperties> metricProperties,
@@ -101,5 +105,78 @@ public class PrometheusProperties {
 
   public NamingProperties getNamingProperties() {
     return namingProperties;
+  }
+
+  public static class Builder {
+    private MetricsProperties defaultMetricsProperties;
+    private Map<String, MetricsProperties> metricProperties = new HashMap<>();
+    private ExemplarsProperties exemplarProperties;
+    private ExporterProperties exporterProperties;
+    private ExporterFilterProperties exporterFilterProperties;
+    private ExporterHttpServerProperties exporterHttpServerProperties;
+    private ExporterPushgatewayProperties pushgatewayProperties;
+    private ExporterOpenTelemetryProperties otelConfig;
+
+    private Builder() {}
+
+    public Builder defaultMetricsProperties(MetricsProperties defaultMetricsProperties) {
+      this.defaultMetricsProperties = defaultMetricsProperties;
+      return this;
+    }
+
+    public Builder metricProperties(Map<String, MetricsProperties> metricProperties) {
+      this.metricProperties = metricProperties;
+      return this;
+    }
+
+    /** Convenience for adding a single named MetricsProperties */
+    public Builder putMetricProperty(String name, MetricsProperties props) {
+      this.metricProperties.put(name, props);
+      return this;
+    }
+
+    public Builder exemplarProperties(ExemplarsProperties exemplarProperties) {
+      this.exemplarProperties = exemplarProperties;
+      return this;
+    }
+
+    public Builder exporterProperties(ExporterProperties exporterProperties) {
+      this.exporterProperties = exporterProperties;
+      return this;
+    }
+
+    public Builder exporterFilterProperties(ExporterFilterProperties exporterFilterProperties) {
+      this.exporterFilterProperties = exporterFilterProperties;
+      return this;
+    }
+
+    public Builder exporterHttpServerProperties(
+        ExporterHttpServerProperties exporterHttpServerProperties) {
+      this.exporterHttpServerProperties = exporterHttpServerProperties;
+      return this;
+    }
+
+    public Builder pushgatewayProperties(ExporterPushgatewayProperties pushgatewayProperties) {
+      this.pushgatewayProperties = pushgatewayProperties;
+      return this;
+    }
+
+    public Builder exporterOpenTelemetryProperties(
+        ExporterOpenTelemetryProperties exporterOpenTelemetryProperties) {
+      this.otelConfig = exporterOpenTelemetryProperties;
+      return this;
+    }
+
+    public PrometheusProperties build() {
+      return new PrometheusProperties(
+          defaultMetricsProperties,
+          metricProperties,
+          exemplarProperties,
+          exporterProperties,
+          exporterFilterProperties,
+          exporterHttpServerProperties,
+          pushgatewayProperties,
+          otelConfig);
+    }
   }
 }
