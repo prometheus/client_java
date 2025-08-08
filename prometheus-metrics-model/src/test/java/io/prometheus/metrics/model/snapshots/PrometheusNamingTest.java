@@ -26,6 +26,7 @@ class PrometheusNamingTest {
 
   @AfterEach
   void tearDown() {
+    System.clearProperty("io.prometheus.naming.validationScheme");
     PrometheusNaming.resetForTest();
   }
 

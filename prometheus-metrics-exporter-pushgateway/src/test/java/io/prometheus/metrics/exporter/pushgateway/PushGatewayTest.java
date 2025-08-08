@@ -37,6 +37,7 @@ class PushGatewayTest {
   @AfterEach
   void tearDown() {
     mockServerClient.stop();
+    System.clearProperty("io.prometheus.naming.validationScheme");
     PrometheusNaming.resetForTest();
   }
 
