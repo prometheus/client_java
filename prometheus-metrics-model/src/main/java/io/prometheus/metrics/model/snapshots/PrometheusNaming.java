@@ -1,6 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
- import static java.lang.Character.MAX_CODE_POINT;
+import static java.lang.Character.MAX_CODE_POINT;
 import static java.lang.Character.MAX_LOW_SURROGATE;
 import static java.lang.Character.MIN_HIGH_SURROGATE;
 
