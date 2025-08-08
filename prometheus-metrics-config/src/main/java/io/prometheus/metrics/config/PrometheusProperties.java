@@ -116,6 +116,7 @@ public class PrometheusProperties {
     private ExporterHttpServerProperties exporterHttpServerProperties;
     private ExporterPushgatewayProperties pushgatewayProperties;
     private ExporterOpenTelemetryProperties otelConfig;
+    private NamingProperties namingProperties;
 
     private Builder() {}
 
@@ -167,6 +168,11 @@ public class PrometheusProperties {
       return this;
     }
 
+    public Builder namingProperties(NamingProperties namingProperties) {
+      this.namingProperties = namingProperties;
+      return this;
+    }
+
     public PrometheusProperties build() {
       return new PrometheusProperties(
           defaultMetricsProperties,
@@ -176,7 +182,8 @@ public class PrometheusProperties {
           exporterFilterProperties,
           exporterHttpServerProperties,
           pushgatewayProperties,
-          otelConfig);
+          otelConfig,
+          namingProperties);
     }
   }
 }

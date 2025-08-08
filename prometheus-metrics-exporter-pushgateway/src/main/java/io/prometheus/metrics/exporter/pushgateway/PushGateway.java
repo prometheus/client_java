@@ -1,5 +1,8 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
+import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
+
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesException;
@@ -10,7 +13,6 @@ import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.EscapingScheme;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,9 +31,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
-import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
 
 /**
  * Export metrics via the <a href="https://github.com/prometheus/pushgateway">Prometheus
