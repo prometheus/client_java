@@ -1,8 +1,5 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
-import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.*;
-
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesException;
@@ -13,6 +10,7 @@ import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.EscapingScheme;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +29,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+
+import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
 
 /**
  * Export metrics via the <a href="https://github.com/prometheus/pushgateway">Prometheus
@@ -466,36 +467,34 @@ public class PushGateway {
 
     private URL makeUrl(ExporterPushgatewayProperties properties)
         throws UnsupportedEncodingException, MalformedURLException {
-      String url = getScheme(properties) + "://" + getAddress(properties) + "/metrics/";
+      StringBuilder url =
+          new StringBuilder(getScheme(properties) + "://" + getAddress(properties) + "/metrics/");
       String job = getJob(properties);
       if (job.contains("/")) {
-        url += "job@base64/" + base64url(job);
+        url.append("job@base64/").append(base64url(job));
       } else {
-        url += "job/" + URLEncoder.encode(job, "UTF-8");
+        url.append("job/").append(URLEncoder.encode(job, "UTF-8"));
       }
       if (groupingKey != null) {
         for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
           if (entry.getValue().isEmpty()) {
-            url +=
-                "/"
-                    + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING)
-                    + "@base64/=";
+            url.append("/")
+                .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
+                .append("@base64/=");
           } else if (entry.getValue().contains("/")) {
-            url +=
-                "/"
-                    + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING)
-                    + "@base64/"
-                    + base64url(entry.getValue());
+            url.append("/")
+                .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
+                .append("@base64/")
+                .append(base64url(entry.getValue()));
           } else {
-            url +=
-                "/"
-                    + escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING)
-                    + "/"
-                    + URLEncoder.encode(entry.getValue(), "UTF-8");
+            url.append("/")
+                .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
+                .append("/")
+                .append(URLEncoder.encode(entry.getValue(), "UTF-8"));
           }
         }
       }
-      return URI.create(url).normalize().toURL();
+      return URI.create(url.toString()).normalize().toURL();
     }
 
     private String base64url(String v) {
