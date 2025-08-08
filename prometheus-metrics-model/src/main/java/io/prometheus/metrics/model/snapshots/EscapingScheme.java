@@ -4,19 +4,23 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.DEFAULT_ESC
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.ESCAPING_KEY;
 
 public enum EscapingScheme {
-  // NO_ESCAPING indicates that a name will not be escaped.
+  /** NO_ESCAPING indicates that a name will not be escaped. */
   NO_ESCAPING("allow-utf-8"),
 
-  // UNDERSCORE_ESCAPING replaces all legacy-invalid characters with underscores.
+  /** UNDERSCORE_ESCAPING replaces all legacy-invalid characters with underscores. */
   UNDERSCORE_ESCAPING("underscores"),
 
-  // DOTS_ESCAPING is similar to UNDERSCORE_ESCAPING, except that dots are
-  // converted to `_dot_` and pre-existing underscores are converted to `__`.
+  /**
+   * DOTS_ESCAPING is similar to UNDERSCORE_ESCAPING, except that dots are converted to `_dot_` and
+   * pre-existing underscores are converted to `__`.
+   */
   DOTS_ESCAPING("dots"),
 
-  // VALUE_ENCODING_ESCAPING prepends the name with `U__` and replaces all invalid
-  // characters with the Unicode value, surrounded by underscores. Single
-  // underscores are replaced with double underscores.
+  /**
+   * VALUE_ENCODING_ESCAPING prepends the name with `U__` and replaces all invalid characters with
+   * the Unicode value, surrounded by underscores. Single underscores are replaced with double
+   * underscores.
+   */
   VALUE_ENCODING_ESCAPING("values"),
   ;
 
@@ -30,10 +34,11 @@ public enum EscapingScheme {
     this.value = value;
   }
 
-  // fromAcceptHeader returns an EscapingScheme depending on the Accept header. Iff the
-  // header contains an escaping=allow-utf-8 term, it will select NO_ESCAPING. If a valid
-  // "escaping" term exists, that will be used. Otherwise, the global default will
-  // be returned.
+  /**
+   * fromAcceptHeader returns an EscapingScheme depending on the Accept header. Iff the header
+   * contains an escaping=allow-utf-8 term, it will select NO_ESCAPING. If a valid "escaping" term
+   * exists, that will be used. Otherwise, the global default will be returned.
+   */
   public static EscapingScheme fromAcceptHeader(String acceptHeader) {
     if (acceptHeader != null) {
       for (String p : acceptHeader.split(";")) {
