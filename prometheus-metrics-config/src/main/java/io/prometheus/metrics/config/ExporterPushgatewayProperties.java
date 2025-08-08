@@ -78,7 +78,8 @@ public class ExporterPushgatewayProperties {
           && !escapingScheme.equals("dots")) {
         throw new PrometheusPropertiesException(
             String.format(
-                "%s.%s: Illegal value. Expecting 'no-escaping', 'values', 'underscores', or 'dots'. Found: %s",
+                "%s.%s: Illegal value. Expecting 'no-escaping', 'values', 'underscores', "
+                    + "or 'dots'. Found: %s",
                 PREFIX, ESCAPING_SCHEME, escapingScheme));
       }
     }
