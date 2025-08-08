@@ -1,15 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junitpioneer.jupiter.SetSystemProperty;
-
-import java.util.stream.Stream;
-
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeMetricSnapshot;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.isValidLabelName;
@@ -22,6 +12,15 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.validateMet
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.validateUnitName;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junitpioneer.jupiter.SetSystemProperty;
 
 class PrometheusNamingTest {
 
