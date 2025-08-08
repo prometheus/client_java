@@ -56,7 +56,7 @@ public enum EscapingScheme {
     return DEFAULT_ESCAPING_SCHEME;
   }
 
-  private static EscapingScheme forString(String value) {
+  static EscapingScheme forString(String value) {
     switch (value) {
       case "allow-utf-8":
         return NO_ESCAPING;
