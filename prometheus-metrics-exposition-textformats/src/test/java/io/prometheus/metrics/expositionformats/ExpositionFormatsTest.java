@@ -483,10 +483,10 @@ class ExpositionFormatsTest {
     PrometheusNaming.resetForTest();
     String prometheusText =
         """
-        # HELP \"gauge.name\" gauge\\ndoc\\nstr\"ing
-        # TYPE \"gauge.name\" gauge
-        {\"gauge.name\",\"name*2\"=\"val with \\\\backslash and \\\"quotes\\\"\",\"name.1\"=\"val with\\nnew line\"} +Inf
-        {\"gauge.name\",\"name*2\"=\"佖佥\",\"name.1\"=\"Björn\"} 3.14E42
+        # HELP "gauge.name" gauge\\ndoc\\nstr"ing
+        # TYPE "gauge.name" gauge
+        {"gauge.name","name*2"="val with \\\\backslash and \\"quotes\\"","name.1"="val with\\nnew line"} +Inf
+        {"gauge.name","name*2"="佖佥","name.1"="Björn"} 3.14E42
         """;
     GaugeSnapshot gauge =
         GaugeSnapshot.builder()
