@@ -1,16 +1,15 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.config.PrometheusProperties;
+import static java.lang.Character.MAX_CODE_POINT;
+import static java.lang.Character.MAX_LOW_SURROGATE;
+import static java.lang.Character.MIN_HIGH_SURROGATE;
 
+import io.prometheus.metrics.config.PrometheusProperties;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.lang.Character.MAX_CODE_POINT;
-import static java.lang.Character.MAX_LOW_SURROGATE;
-import static java.lang.Character.MIN_HIGH_SURROGATE;
 
 /**
  * Utility for Prometheus Metric and Label naming.
