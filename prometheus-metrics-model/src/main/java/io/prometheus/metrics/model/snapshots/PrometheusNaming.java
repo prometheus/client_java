@@ -1,13 +1,16 @@
 package io.prometheus.metrics.model.snapshots;
 
-import static java.lang.Character.*;
-
 import io.prometheus.metrics.config.PrometheusProperties;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.lang.Character.MAX_CODE_POINT;
+import static java.lang.Character.MAX_LOW_SURROGATE;
+import static java.lang.Character.MIN_HIGH_SURROGATE;
 
 /**
  * Utility for Prometheus Metric and Label naming.
@@ -637,7 +640,7 @@ public class PrometheusNaming {
             escaped.append("__");
           } else if (isValidLegacyChar(c, i)) {
             escaped.appendCodePoint(c);
-          } else if (!isValidUTF8Char(c)) {
+          } else if (!isValidUtf8Char(c)) {
             escaped.append("_FFFD_");
           } else {
             escaped.append('_');
@@ -707,7 +710,7 @@ public class PrometheusNaming {
               if (escapedName.codePointAt(i) == '_') {
                 // char utf8Char = (char) utf8Val;
                 foundClosingUnderscore = true;
-                if (!isValidUTF8Char(utf8Val)) {
+                if (!isValidUtf8Char(utf8Val)) {
                   return name;
                 }
                 unescaped.appendCodePoint(utf8Val);
@@ -746,7 +749,7 @@ public class PrometheusNaming {
         || (c >= '0' && c <= '9' && i > 0);
   }
 
-  private static boolean isValidUTF8Char(int c) {
+  private static boolean isValidUtf8Char(int c) {
     return (0 <= c && c < MIN_HIGH_SURROGATE) || (MAX_LOW_SURROGATE < c && c <= MAX_CODE_POINT);
   }
 }
