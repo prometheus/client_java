@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junitpioneer.jupiter.SetSystemProperty;
-import org.mockito.MockedStatic;
 
 import java.util.stream.Stream;
 
@@ -23,8 +22,6 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.validateMet
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.validateUnitName;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.mockStatic;
 
 class PrometheusNamingTest {
 
@@ -339,62 +336,58 @@ class PrometheusNamingTest {
     assertThat(original.getMetadata().getName()).isEqualTo("empty");
   }
 
+  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testEscapeMetricSnapshotSimpleNoEscapingNeeded() {
     testEscapeMetricSnapshot(
         "my_metric",
         "some_label",
         "labelvalue",
-        "some help text",
         "my_metric",
         "some_label",
         "labelvalue",
-        "some help text",
         EscapingScheme.VALUE_ENCODING_ESCAPING,
         CounterSnapshot.class);
   }
 
+  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testEscapeMetricSnapshotLabelNameEscapingNeeded() {
     testEscapeMetricSnapshot(
         "my_metric",
         "some.label",
         "labelvalue",
-        "some help text",
         "my_metric",
         "U__some_2e_label",
         "labelvalue",
-        "some help text",
         EscapingScheme.VALUE_ENCODING_ESCAPING,
         CounterSnapshot.class);
   }
 
+  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testEscapeMetricSnapshotCounterEscapingNeeded() {
     testEscapeMetricSnapshot(
         "my.metric",
         "some?label",
         "label??value",
-        "some help text",
         "U__my_2e_metric",
         "U__some_3f_label",
         "label??value",
-        "some help text",
         EscapingScheme.VALUE_ENCODING_ESCAPING,
         CounterSnapshot.class);
   }
 
+  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testEscapeMetricSnapshotGaugeEscapingNeeded() {
     testEscapeMetricSnapshot(
         "unicode.and.dots.花火",
         "some_label",
         "label??value",
-        "some help text",
         "unicode_dot_and_dot_dots_dot_____",
         "some_label",
         "label??value",
-        "some help text",
         EscapingScheme.DOTS_ESCAPING,
         GaugeSnapshot.class);
   }
@@ -403,70 +396,57 @@ class PrometheusNamingTest {
       String name,
       String labelName,
       String labelValue,
-      String help,
       String expectedName,
       String expectedLabelName,
       String expectedLabelValue,
-      String expectedHelp,
       EscapingScheme escapingScheme,
       Class<? extends MetricSnapshot> snapshotType) {
+    PrometheusNaming.resetForTest();
 
-    try (MockedStatic<PrometheusNaming> mock =
-        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
-      mock.when(PrometheusNaming::getValidationScheme)
-          .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+    MetricSnapshot original = createTestSnapshot(name, labelName, labelValue, snapshotType);
+    MetricSnapshot got = escapeMetricSnapshot(original, escapingScheme);
 
-      MetricSnapshot original =
-          createTestSnapshot(name, labelName, labelValue, help, 34.2, snapshotType);
-      MetricSnapshot got = escapeMetricSnapshot(original, escapingScheme);
+    assertThat(got.getMetadata().getName()).isEqualTo(expectedName);
+    assertThat(got.getMetadata().getHelp()).isEqualTo("some help text");
+    assertThat(got.getDataPoints()).hasSize(1);
 
-      assertThat(got.getMetadata().getName()).isEqualTo(expectedName);
-      assertThat(got.getMetadata().getHelp()).isEqualTo(expectedHelp);
-      assertThat(got.getDataPoints().size()).isEqualTo(1);
+    DataPointSnapshot escapedData = got.getDataPoints().get(0);
+    assertThat((Iterable<? extends Label>) escapedData.getLabels())
+        .isEqualTo(
+            Labels.builder()
+                .label("__name__", expectedName)
+                .label(expectedLabelName, expectedLabelValue)
+                .build());
 
-      DataPointSnapshot escapedData = got.getDataPoints().get(0);
-      assertThat((Iterable<? extends Label>) escapedData.getLabels())
-          .isEqualTo(
-              Labels.builder()
-                  .label("__name__", expectedName)
-                  .label(expectedLabelName, expectedLabelValue)
-                  .build());
+    assertThat(original.getMetadata().getName()).isEqualTo(name);
+    assertThat(original.getMetadata().getHelp()).isEqualTo("some help text");
+    assertThat(original.getDataPoints()).hasSize(1);
 
-      assertThat(original.getMetadata().getName()).isEqualTo(name);
-      assertThat(original.getMetadata().getHelp()).isEqualTo(help);
-      assertThat(original.getDataPoints().size()).isEqualTo(1);
-
-      DataPointSnapshot originalData = original.getDataPoints().get(0);
-      assertThat((Iterable<? extends Label>) originalData.getLabels())
-          .isEqualTo(Labels.builder().label("__name__", name).label(labelName, labelValue).build());
-    }
+    DataPointSnapshot originalData = original.getDataPoints().get(0);
+    assertThat((Iterable<? extends Label>) originalData.getLabels())
+        .isEqualTo(Labels.builder().label("__name__", name).label(labelName, labelValue).build());
   }
 
   private MetricSnapshot createTestSnapshot(
       String name,
       String labelName,
       String labelValue,
-      String help,
-      double value,
       Class<? extends MetricSnapshot> snapshotType) {
     Labels labels = Labels.builder().label("__name__", name).label(labelName, labelValue).build();
 
     if (snapshotType.equals(CounterSnapshot.class)) {
       return CounterSnapshot.builder()
           .name(name)
-          .help(help)
+          .help("some help text")
           .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                  .value(value)
-                  .labels(labels)
-                  .build())
+              CounterSnapshot.CounterDataPointSnapshot.builder().value(34.2).labels(labels).build())
           .build();
     } else if (snapshotType.equals(GaugeSnapshot.class)) {
       return GaugeSnapshot.builder()
           .name(name)
-          .help(help)
+          .help("some help text")
           .dataPoint(
-              GaugeSnapshot.GaugeDataPointSnapshot.builder().value(value).labels(labels).build())
+              GaugeSnapshot.GaugeDataPointSnapshot.builder().value(34.2).labels(labels).build())
           .build();
     }
 
