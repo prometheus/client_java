@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.MockedStatic;
@@ -179,7 +180,8 @@ class PrometheusNamingTest {
   @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @ParameterizedTest
   @MethodSource("escapeNameUtf8TestCases")
-  public void testEscapeNameUtf8(String input, EscapingScheme escapingScheme, String expected, String unescapeExpected) {
+  public void testEscapeNameUtf8(
+      String input, EscapingScheme escapingScheme, String expected, String unescapeExpected) {
     PrometheusNaming.resetForTest();
     assertEscape(input, escapingScheme, expected, unescapeExpected);
   }
@@ -294,49 +296,39 @@ class PrometheusNamingTest {
             "http.status:sum"));
   }
 
-  @Test
-  public void testValueUnescapeErrors() {
-    // empty string
-    assertThat(unescapeName("", EscapingScheme.VALUE_ENCODING_ESCAPING)).isEmpty();
-
-    // basic case, no error
-    assertThat(unescapeName("U__no:unescapingrequired", EscapingScheme.VALUE_ENCODING_ESCAPING))
-        .isEqualTo("no:unescapingrequired");
-
-    // capitals ok, no error
-    assertThat(unescapeName("U__capitals_2E_ok", EscapingScheme.VALUE_ENCODING_ESCAPING))
-        .isEqualTo("capitals.ok");
-
-    // underscores, no error
-    assertThat(unescapeName("U__underscores__doubled__", EscapingScheme.VALUE_ENCODING_ESCAPING))
-        .isEqualTo("underscores_doubled_");
-
-    // invalid single underscore
-    assertThat(unescapeName("U__underscores_doubled_", EscapingScheme.VALUE_ENCODING_ESCAPING))
-        .isEqualTo("U__underscores_doubled_");
-
-    // invalid single underscore, 2
-    assertThat(unescapeName("U__underscores__doubled_", EscapingScheme.VALUE_ENCODING_ESCAPING))
-        .isEqualTo("U__underscores__doubled_");
-
-    // giant fake UTF-8 code
-    assertThat(
-            unescapeName(
-                "U__my__hack_2e_attempt_872348732fabdabbab_",
-                EscapingScheme.VALUE_ENCODING_ESCAPING))
-        .isEqualTo("U__my__hack_2e_attempt_872348732fabdabbab_");
-
-    // trailing UTF-8
-    assertThat(unescapeName("U__my__hack_2e", EscapingScheme.VALUE_ENCODING_ESCAPING))
-        .isEqualTo("U__my__hack_2e");
-
-    // invalid UTF-8 value
-    assertThat(unescapeName("U__bad__utf_2eg_", EscapingScheme.VALUE_ENCODING_ESCAPING))
-        .isEqualTo("U__bad__utf_2eg_");
-
-    // surrogate UTF-8 value
-    assertThat(unescapeName("U__bad__utf_D900_", EscapingScheme.VALUE_ENCODING_ESCAPING))
-        .isEqualTo("U__bad__utf_D900_");
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        // empty string
+        ",",
+        // basic case, no error
+        "U__no:unescapingrequired,no:unescapingrequired",
+        // capitals ok, no error
+        "U__capitals_2E_ok,capitals.ok",
+        // underscores, no error
+        "U__underscores__doubled__,underscores_doubled_",
+        // invalid single underscore
+        "U__underscores_doubled_,U__underscores_doubled_",
+        // invalid single underscore, 2
+        "U__underscores__doubled_,U__underscores__doubled_",
+        // giant fake UTF-8 code
+        "U__my__hack_2e_attempt_872348732fabdabbab_,U__my__hack_2e_attempt_872348732fabdabbab_",
+        // trailing UTF-8
+        "U__my__hack_2e,U__my__hack_2e",
+        // invalid UTF-8 value
+        "U__bad__utf_2eg_,U__bad__utf_2eg_",
+        // surrogate UTF-8 value
+        "U__bad__utf_D900_,U__bad__utf_D900_",
+      })
+  public void testValueUnescapeErrors(String escapedName, String expectedUnescapedName) {
+    if (escapedName == null) {
+      escapedName = "";
+    }
+    if (expectedUnescapedName == null) {
+      expectedUnescapedName = "";
+    }
+    assertThat(unescapeName(escapedName, EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .isEqualTo(expectedUnescapedName);
   }
 
   @Test
