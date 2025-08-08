@@ -1,24 +1,39 @@
 package io.prometheus.metrics.expositionformats;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.mockStatic;
-
-import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
+import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Exemplars;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
+import io.prometheus.metrics.model.snapshots.InfoSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.Quantiles;
+import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryDataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.Unit;
+import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.MockedStatic;
+import org.junitpioneer.jupiter.SetSystemProperty;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ExpositionFormatsTest {
 
@@ -84,6 +99,11 @@ class ExpositionFormatsTest {
           .value(3.0)
           .timestampMillis(1690298864383L)
           .build();
+
+  @AfterEach
+  void tearDown() {
+    PrometheusNaming.resetForTest();
+  }
 
   @Test
   void init() {
@@ -457,42 +477,37 @@ class ExpositionFormatsTest {
     assertPrometheusProtobuf(prometheusProtobuf, gauge);
   }
 
+  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testGaugeUTF8() throws IOException {
-    try (MockedStatic<PrometheusNaming> mock =
-        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
-      mock.when(PrometheusNaming::getValidationScheme)
-          .thenReturn(ValidationScheme.UTF_8_VALIDATION);
-
-      String prometheusText =
-          """
+    PrometheusNaming.resetForTest();
+    String prometheusText =
+        """
         # HELP \"gauge.name\" gauge\\ndoc\\nstr\"ing
         # TYPE \"gauge.name\" gauge
         {\"gauge.name\",\"name*2\"=\"val with \\\\backslash and \\\"quotes\\\"\",\"name.1\"=\"val with\\nnew line\"} +Inf
         {\"gauge.name\",\"name*2\"=\"佖佥\",\"name.1\"=\"Björn\"} 3.14E42
         """;
-      GaugeSnapshot gauge =
-          GaugeSnapshot.builder()
-              .name("gauge.name")
-              .help("gauge\ndoc\nstr\"ing")
-              .dataPoint(
-                  GaugeDataPointSnapshot.builder()
-                      .value(Double.POSITIVE_INFINITY)
-                      .labels(
-                          Labels.builder()
-                              .label("name.1", "val with\nnew line")
-                              .label("name*2", "val with \\backslash and \"quotes\"")
-                              .build())
-                      .build())
-              .dataPoint(
-                  GaugeDataPointSnapshot.builder()
-                      .value(3.14e42)
-                      .labels(
-                          Labels.builder().label("name.1", "Björn").label("name*2", "佖佥").build())
-                      .build())
-              .build();
-      assertPrometheusText(prometheusText, gauge);
-    }
+    GaugeSnapshot gauge =
+        GaugeSnapshot.builder()
+            .name("gauge.name")
+            .help("gauge\ndoc\nstr\"ing")
+            .dataPoint(
+                GaugeDataPointSnapshot.builder()
+                    .value(Double.POSITIVE_INFINITY)
+                    .labels(
+                        Labels.builder()
+                            .label("name.1", "val with\nnew line")
+                            .label("name*2", "val with \\backslash and \"quotes\"")
+                            .build())
+                    .build())
+            .dataPoint(
+                GaugeDataPointSnapshot.builder()
+                    .value(3.14e42)
+                    .labels(Labels.builder().label("name.1", "Björn").label("name*2", "佖佥").build())
+                    .build())
+            .build();
+    assertPrometheusText(prometheusText, gauge);
   }
 
   @Test
