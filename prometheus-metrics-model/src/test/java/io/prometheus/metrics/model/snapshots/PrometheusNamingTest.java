@@ -1,15 +1,36 @@
 package io.prometheus.metrics.model.snapshots;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junitpioneer.jupiter.SetSystemProperty;
+import org.mockito.MockedStatic;
+
+import java.util.stream.Stream;
+
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeMetricSnapshot;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.isValidLabelName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeLabelName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeUnitName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.unescapeName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.validateMetricName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.validateUnitName;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mockStatic;
 
-import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-
 class PrometheusNamingTest {
+
+  @AfterEach
+  void tearDown() {
+    PrometheusNaming.resetForTest();
+  }
 
   @Test
   public void testSanitizeMetricName() {
@@ -27,7 +48,6 @@ class PrometheusNamingTest {
 
   @Test
   public void testSanitizeMetricNameWithUnit() {
-
     assertThat(prometheusName(sanitizeMetricName("0abc.def", Unit.RATIO)))
         .isEqualTo("_abc_def_" + Unit.RATIO);
     assertThat(prometheusName(sanitizeMetricName("___ab.:c0", Unit.RATIO)))
@@ -46,7 +66,6 @@ class PrometheusNamingTest {
 
   @Test
   public void testSanitizeLabelName() {
-
     assertThat(prometheusName(sanitizeLabelName("0abc.def"))).isEqualTo("_abc_def");
     assertThat(prometheusName(sanitizeLabelName("_abc"))).isEqualTo("_abc");
     assertThat(prometheusName(sanitizeLabelName("__abc"))).isEqualTo("_abc");
@@ -102,52 +121,50 @@ class PrometheusNamingTest {
         .isThrownBy(() -> sanitizeUnitName(""));
   }
 
-  @Test
-  public void testMetricNameIsValid() {
-    assertThat(validateMetricName("Avalid_23name")).isNull();
-    assertThat(validateMetricName("_Avalid_23name")).isNull();
-    assertThat(validateMetricName("1valid_23name"))
-        .isEqualTo("The metric name contains unsupported characters");
-    assertThat(validateMetricName("avalid_23name")).isNull();
-    assertThat(validateMetricName("Ava:lid_23name")).isNull();
-    assertThat(validateMetricName("a lid_23name"))
-        .isEqualTo("The metric name contains unsupported characters");
-    assertThat(validateMetricName(":leading_colon")).isNull();
-    assertThat(validateMetricName("colon:in:the:middle")).isNull();
-    assertThat(validateMetricName("")).isEqualTo("The metric name contains unsupported characters");
-    assertThat(validateMetricName("a\ud800z"))
-        .isEqualTo("The metric name contains unsupported characters");
+  @SuppressWarnings("unused")
+  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
+  @ParameterizedTest
+  @MethodSource("testLabelNameIsValid")
+  public void testLabelNameIsValidUtf8(
+      String labelName, boolean legacyValid, boolean utf8Valid, boolean legacyCharsetValid) {
+    PrometheusNaming.resetForTest();
+    assertMetricName(labelName, utf8Valid);
+    // for some reason, an empty label name is considered valid in UTF-8 validation
+    assertLabelName(labelName, utf8Valid || labelName.isEmpty());
   }
 
-  @Test
-  public void testLabelNameIsValid() {
-    try (MockedStatic<PrometheusNaming> mock =
-        mockStatic(PrometheusNaming.class, CALLS_REAL_METHODS)) {
-      // Mock the validation scheme to use UTF-8 validation for this test
-      mock.when(PrometheusNaming::getValidationScheme)
-          .thenReturn(ValidationScheme.UTF_8_VALIDATION);
+  @SuppressWarnings("unused")
+  @ParameterizedTest
+  @MethodSource("testLabelNameIsValid")
+  public void testLabelNameIsValidLegacy(
+      String labelName, boolean legacyValid, boolean utf8Valid, boolean legacyCharsetValid) {
+    assertMetricName(labelName, legacyCharsetValid);
+    assertLabelName(labelName, legacyValid);
+  }
 
-      // These assertions now use UTF-8 validation behavior
-      assertThat(isValidLabelName("Avalid_23name")).isTrue();
-      assertThat(isValidLabelName("_Avalid_23name")).isTrue();
-      assertThat(isValidLabelName("1valid_23name")).isTrue();
-      assertThat(isValidLabelName("avalid_23name")).isTrue();
-      assertThat(isValidLabelName("Ava:lid_23name")).isTrue();
-      assertThat(isValidLabelName("a lid_23name")).isTrue();
-      assertThat(isValidLabelName(":leading_colon")).isTrue();
-      assertThat(isValidLabelName("colon:in:the:middle")).isTrue();
-      assertThat(isValidLabelName("a\ud800z")).isFalse();
-    }
+  private static void assertLabelName(String labelName, boolean legacyValid) {
+    assertThat(isValidLabelName(labelName)).describedAs("isValidLabelName(%s)", labelName)
+        .isEqualTo(legacyValid);
+  }
 
-    assertThat(isValidLabelName("Avalid_23name")).isTrue();
-    assertThat(isValidLabelName("_Avalid_23name")).isTrue();
-    assertThat(isValidLabelName("1valid_23name")).isFalse();
-    assertThat(isValidLabelName("avalid_23name")).isTrue();
-    assertThat(isValidLabelName("Ava:lid_23name")).isFalse();
-    assertThat(isValidLabelName("a lid_23name")).isFalse();
-    assertThat(isValidLabelName(":leading_colon")).isFalse();
-    assertThat(isValidLabelName("colon:in:the:middle")).isFalse();
-    assertThat(isValidLabelName("a\ud800z")).isFalse();
+  private static void assertMetricName(String labelName, boolean valid) {
+    assertThat(validateMetricName(labelName)).describedAs("validateMetricName(%s)", labelName)
+        .isEqualTo(valid ? null : "The metric name contains unsupported characters");
+  }
+
+  static Stream<Arguments> testLabelNameIsValid() {
+    return Stream.of(
+        Arguments.of("", false, false, false),
+        Arguments.of("Avalid_23name", true, true, true),
+        Arguments.of("_Avalid_23name", true, true, true),
+        Arguments.of("1valid_23name", false, true, false),
+        Arguments.of("avalid_23name", true, true, true),
+        Arguments.of("Ava:lid_23name", false, true, true),
+        Arguments.of("a lid_23name", false, true, false),
+        Arguments.of(":leading_colon", false, true, true),
+        Arguments.of("colon:in:the:middle", false, true, true),
+        Arguments.of("aΩz", false, true, false),
+        Arguments.of("a\ud800z", false, false, false));
   }
 
   @Test

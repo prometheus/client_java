@@ -1,15 +1,17 @@
 package io.prometheus.metrics.model.snapshots;
 
-import static java.lang.Character.MAX_CODE_POINT;
-import static java.lang.Character.MAX_LOW_SURROGATE;
-import static java.lang.Character.MIN_HIGH_SURROGATE;
-
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.config.PrometheusPropertiesLoader;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.lang.Character.MAX_CODE_POINT;
+import static java.lang.Character.MAX_LOW_SURROGATE;
+import static java.lang.Character.MIN_HIGH_SURROGATE;
 
 /**
  * Utility for Prometheus Metric and Label naming.
@@ -26,7 +28,8 @@ public class PrometheusNaming {
    * components that don't support UTF-8 may result in bugs or other undefined behavior. This value
    * is intended to be set by UTF-8-aware binaries as part of their startup via a properties file.
    */
-  public static final ValidationScheme nameValidationScheme = initValidationScheme();
+  public static ValidationScheme nameValidationScheme =
+      initValidationScheme(PrometheusProperties.get());
 
   /** Default escaping scheme for names when not specified. */
   public static final EscapingScheme DEFAULT_ESCAPING_SCHEME =
@@ -75,14 +78,17 @@ public class PrometheusNaming {
     ".total", ".created", ".bucket", ".info"
   };
 
-  static ValidationScheme initValidationScheme() {
-    String validationScheme =
-        PrometheusProperties.get().getNamingProperties().getValidationScheme();
-    if (validationScheme != null && validationScheme.equals("utf-8")) {
+  static ValidationScheme initValidationScheme(PrometheusProperties properties) {
+    if ("utf-8".equals(properties.getNamingProperties().getValidationScheme())) {
       return ValidationScheme.UTF_8_VALIDATION;
     }
 
     return ValidationScheme.LEGACY_VALIDATION;
+  }
+
+  // VisibleForTesting
+  public static void resetForTest() {
+    nameValidationScheme = initValidationScheme(PrometheusPropertiesLoader.load());
   }
 
   /**
