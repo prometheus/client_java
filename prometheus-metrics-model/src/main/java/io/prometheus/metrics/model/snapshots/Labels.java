@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.isValidLabelName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
+import io.prometheus.metrics.config.ValidationScheme;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -119,7 +120,8 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
   static String[] makePrometheusNames(String[] names) {
     String[] prometheusNames = names;
     for (int i = 0; i < names.length; i++) {
-      if (names[i].contains(".")) {
+      if (names[i].contains(".")
+          && PrometheusNaming.getValidationScheme() == ValidationScheme.LEGACY_VALIDATION) {
         if (prometheusNames == names) {
           prometheusNames = Arrays.copyOf(names, names.length);
         }

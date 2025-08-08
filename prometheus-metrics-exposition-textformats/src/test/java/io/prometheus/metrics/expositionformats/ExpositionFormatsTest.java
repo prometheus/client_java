@@ -1,10 +1,12 @@
 package io.prometheus.metrics.expositionformats;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
@@ -25,7 +27,12 @@ import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junitpioneer.jupiter.SetSystemProperty;
 
 class ExpositionFormatsTest {
 
@@ -91,6 +98,12 @@ class ExpositionFormatsTest {
           .value(3.0)
           .timestampMillis(1690298864383L)
           .build();
+
+  @AfterEach
+  void tearDown() {
+    System.clearProperty("io.prometheus.naming.validationScheme");
+    PrometheusNaming.resetForTest();
+  }
 
   @Test
   void init() {
@@ -462,6 +475,39 @@ class ExpositionFormatsTest {
         openMetricsTextWithExemplarsOnAllTimeSeries, gauge);
     assertPrometheusText(prometheusText, gauge);
     assertPrometheusProtobuf(prometheusProtobuf, gauge);
+  }
+
+  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
+  @Test
+  public void testGaugeUTF8() throws IOException {
+    PrometheusNaming.resetForTest();
+    String prometheusText =
+        """
+        # HELP "gauge.name" gauge\\ndoc\\nstr"ing
+        # TYPE "gauge.name" gauge
+        {"gauge.name","name*2"="val with \\\\backslash and \\"quotes\\"","name.1"="val with\\nnew line"} +Inf
+        {"gauge.name","name*2"="佖佥","name.1"="Björn"} 3.14E42
+        """;
+    GaugeSnapshot gauge =
+        GaugeSnapshot.builder()
+            .name("gauge.name")
+            .help("gauge\ndoc\nstr\"ing")
+            .dataPoint(
+                GaugeDataPointSnapshot.builder()
+                    .value(Double.POSITIVE_INFINITY)
+                    .labels(
+                        Labels.builder()
+                            .label("name.1", "val with\nnew line")
+                            .label("name*2", "val with \\backslash and \"quotes\"")
+                            .build())
+                    .build())
+            .dataPoint(
+                GaugeDataPointSnapshot.builder()
+                    .value(3.14e42)
+                    .labels(Labels.builder().label("name.1", "Björn").label("name*2", "佖佥").build())
+                    .build())
+            .build();
+    assertPrometheusText(prometheusText, gauge);
   }
 
   @Test
@@ -2737,11 +2783,54 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheus, counter);
   }
 
+  @ParameterizedTest
+  @CsvSource({
+    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited', 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=values'",
+    "'text/plain;version=0.0.4', 'text/plain; version=0.0.4; charset=utf-8; escaping=values'",
+    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited; escaping=allow-utf-8', 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8'",
+    "'application/openmetrics-text', 'application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=values'",
+    "'application/openmetrics-text;version=0.0.1; escaping=underscores', 'application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores'",
+    "'text/plain;version=0.0.4; escaping=allow-utf-8', 'text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8'"
+  })
+  public void testFindWriter(String acceptHeaderValue, String expectedFmt) {
+    ExpositionFormats expositionFormats = ExpositionFormats.init();
+    EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+    ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeaderValue);
+    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
+  }
+
+  @Test
+  public void testWrite() throws IOException {
+    ByteArrayOutputStream buff = new ByteArrayOutputStream(new AtomicInteger(2 << 9).get() + 1024);
+    ExpositionFormats expositionFormats = ExpositionFormats.init();
+    UnknownSnapshot unknown =
+        UnknownSnapshot.builder()
+            .name("foo_metric")
+            .dataPoint(UnknownDataPointSnapshot.builder().value(1.234).build())
+            .build();
+
+    String acceptHeaderValue = "text/plain; version=0.0.4; charset=utf-8";
+    EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+    ExpositionFormatWriter textWriter = expositionFormats.findWriter(acceptHeaderValue);
+
+    textWriter.write(buff, MetricSnapshots.of(unknown), escapingScheme);
+    byte[] out = buff.toByteArray();
+    assertThat(out.length).isNotEqualTo(0);
+
+    String expected =
+        """
+      # TYPE foo_metric untyped
+      foo_metric 1.234
+      """;
+
+    assertThat(new String(out, UTF_8)).hasToString(expected);
+  }
+
   private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer =
         OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2753,7 +2842,7 @@ class ExpositionFormatsTest {
             .setCreatedTimestampsEnabled(true)
             .setExemplarsOnAllMetricTypesEnabled(true)
             .build();
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2761,15 +2850,14 @@ class ExpositionFormatsTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = OpenMetricsTextFormatWriter.create();
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
   private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-
     getPrometheusWriter(PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true))
-        .write(out, MetricSnapshots.of(snapshot));
+        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2783,7 +2871,7 @@ class ExpositionFormatsTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     getPrometheusWriter(PrometheusTextFormatWriter.builder())
-        .write(out, MetricSnapshots.of(snapshot));
+        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 

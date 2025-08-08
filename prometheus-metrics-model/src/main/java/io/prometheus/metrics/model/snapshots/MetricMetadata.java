@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.ValidationScheme;
+
 /** Immutable container for metric metadata: name, help, unit. */
 public final class MetricMetadata {
 
@@ -53,7 +55,11 @@ public final class MetricMetadata {
     this.help = help;
     this.unit = unit;
     validate();
-    this.prometheusName = name.contains(".") ? PrometheusNaming.prometheusName(name) : name;
+    this.prometheusName =
+        name.contains(".")
+                && PrometheusNaming.getValidationScheme() == ValidationScheme.LEGACY_VALIDATION
+            ? PrometheusNaming.prometheusName(name)
+            : name;
   }
 
   /**
