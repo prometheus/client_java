@@ -121,7 +121,7 @@ public class PrometheusNaming {
       case LEGACY_VALIDATION:
         return validateLegacyMetricName(name);
       case UTF_8_VALIDATION:
-        if (name.isEmpty() || !StandardCharsets.UTF_8.newEncoder().canEncode(name)) {
+        if (!isValidUtf8(name)) {
           return "The metric name contains unsupported characters";
         }
         return null;
@@ -165,11 +165,15 @@ public class PrometheusNaming {
       case LEGACY_VALIDATION:
         return isValidLegacyLabelName(name);
       case UTF_8_VALIDATION:
-        return StandardCharsets.UTF_8.newEncoder().canEncode(name);
+        return isValidUtf8(name);
       default:
         throw new RuntimeException(
             "Invalid name validation scheme requested: " + getValidationScheme());
     }
+  }
+
+  private static boolean isValidUtf8(String name) {
+    return !name.isEmpty() && StandardCharsets.UTF_8.newEncoder().canEncode(name);
   }
 
   public static boolean isValidLegacyLabelName(String name) {

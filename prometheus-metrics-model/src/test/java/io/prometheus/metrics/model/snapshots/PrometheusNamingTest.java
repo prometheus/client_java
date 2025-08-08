@@ -126,8 +126,7 @@ class PrometheusNamingTest {
       String labelName, boolean legacyValid, boolean utf8Valid, boolean legacyCharsetValid) {
     PrometheusNaming.resetForTest();
     assertMetricName(labelName, utf8Valid);
-    // for some reason, an empty label name is considered valid in UTF-8 validation
-    assertLabelName(labelName, utf8Valid || labelName.isEmpty());
+    assertLabelName(labelName, utf8Valid);
   }
 
   @SuppressWarnings("unused")
