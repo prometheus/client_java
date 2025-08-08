@@ -1,8 +1,8 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.config.ValidationScheme;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
-import io.prometheus.metrics.model.snapshots.ValidationScheme;
 import java.io.IOException;
 import java.io.Writer;
 

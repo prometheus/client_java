@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.ValidationScheme;
+
 /** Immutable container for metric metadata: name, help, unit. */
 public final class MetricMetadata {
 

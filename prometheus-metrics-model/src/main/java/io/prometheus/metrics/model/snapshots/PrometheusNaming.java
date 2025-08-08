@@ -6,6 +6,7 @@ import static java.lang.Character.MIN_HIGH_SURROGATE;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesLoader;
+import io.prometheus.metrics.config.ValidationScheme;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class PrometheusNaming {
    * is intended to be set by UTF-8-aware binaries as part of their startup via a properties file.
    */
   public static ValidationScheme nameValidationScheme =
-      initValidationScheme(PrometheusProperties.get());
+      PrometheusProperties.get().getNamingProperties().getValidationScheme();
 
   /** Default escaping scheme for names when not specified. */
   public static final EscapingScheme DEFAULT_ESCAPING_SCHEME =
@@ -77,17 +78,10 @@ public class PrometheusNaming {
     ".total", ".created", ".bucket", ".info"
   };
 
-  static ValidationScheme initValidationScheme(PrometheusProperties properties) {
-    if ("utf-8".equals(properties.getNamingProperties().getValidationScheme())) {
-      return ValidationScheme.UTF_8_VALIDATION;
-    }
-
-    return ValidationScheme.LEGACY_VALIDATION;
-  }
-
   // VisibleForTesting
   public static void resetForTest() {
-    nameValidationScheme = initValidationScheme(PrometheusPropertiesLoader.load());
+    nameValidationScheme =
+        PrometheusPropertiesLoader.load().getNamingProperties().getValidationScheme();
   }
 
   /**
