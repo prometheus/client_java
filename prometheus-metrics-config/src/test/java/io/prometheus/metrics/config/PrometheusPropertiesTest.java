@@ -62,6 +62,7 @@ class PrometheusPropertiesTest {
     assertThat(result.getExporterPushgatewayProperties())
         .isSameAs(defaults.getExporterPushgatewayProperties());
     assertThat(result.getMetricProperties("http_duration_seconds"))
+        .usingRecursiveComparison()
         .isEqualTo(
             MetricsProperties.builder().histogramClassicUpperBounds(0.1, 0.2, 0.5, 1.0).build());
     assertThat(result.getMetricProperties("unknown_metric")).isNull();
