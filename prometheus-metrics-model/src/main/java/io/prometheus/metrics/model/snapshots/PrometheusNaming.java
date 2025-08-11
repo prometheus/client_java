@@ -385,15 +385,10 @@ public class PrometheusNaming {
       return v;
     }
 
-    String outName;
-
-    // If the name is null, copy as-is, don't try to escape.
-    if (v.getMetadata().getPrometheusName() == null
-        || isValidLegacyMetricName(v.getMetadata().getPrometheusName())) {
-      outName = v.getMetadata().getPrometheusName();
-    } else {
-      outName = escapeName(v.getMetadata().getPrometheusName(), scheme);
-    }
+    String outName =
+        isValidLegacyMetricName(v.getMetadata().getPrometheusName())
+            ? v.getMetadata().getPrometheusName()
+            : escapeName(v.getMetadata().getPrometheusName(), scheme);
 
     List<DataPointSnapshot> outDataPoints = new ArrayList<>();
 
