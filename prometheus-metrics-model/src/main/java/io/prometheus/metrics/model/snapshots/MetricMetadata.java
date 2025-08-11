@@ -1,7 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.config.ValidationScheme;
-
 /** Immutable container for metric metadata: name, help, unit. */
 public final class MetricMetadata {
 
@@ -20,8 +18,11 @@ public final class MetricMetadata {
   private final String name;
 
   /**
-   * Same as name, except if name contains dots, then the prometheusName is {@code name.replace(".",
-   * "_")}.
+   * Same as name that all invalid char (without Unicode support) are replaced by _
+   *
+   * <p>Multiple metrics with the same prometheusName are not allowed, because they would end up in
+   * the same time series in Prometheus if {@link EscapingScheme#UNDERSCORE_ESCAPING} or {@link
+   * EscapingScheme#DOTS_ESCAPING} is used.
    */
   private final String prometheusName;
 
@@ -54,12 +55,8 @@ public final class MetricMetadata {
     this.name = name;
     this.help = help;
     this.unit = unit;
+    this.prometheusName = PrometheusNaming.prometheusName(name);
     validate();
-    this.prometheusName =
-        name.contains(".")
-                && PrometheusNaming.getValidationScheme() == ValidationScheme.LEGACY_VALIDATION
-            ? PrometheusNaming.prometheusName(name)
-            : name;
   }
 
   /**
