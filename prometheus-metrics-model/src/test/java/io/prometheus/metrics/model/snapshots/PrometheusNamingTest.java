@@ -379,7 +379,7 @@ class PrometheusNamingTest {
         "some_label",
         "label??value",
         "unicode_dot_and_dot_dots_dot_____",
-        "some_label",
+        "some__label",
         "label??value",
         EscapingScheme.DOTS_ESCAPING,
         GaugeSnapshot.class);

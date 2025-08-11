@@ -63,15 +63,15 @@ public final class MetricMetadata {
    * The name does not include the {@code _total} suffix for counter metrics or the {@code _info}
    * suffix for Info metrics.
    *
-   * <p>The name may contain dots. Use {@link #getPrometheusName()} to get the name in Prometheus
-   * format, i.e. with dots replaced by underscores.
+   * <p>The name may contain any Unicode chars. Use {@link #getPrometheusName()} to get the name in
+   * legacy Prometheus format, i.e. with all dots and all invalid chars replaced by underscores.
    */
   public String getName() {
     return name;
   }
 
   /**
-   * Same as {@link #getName()} but with all invalid characters replaced by underscores.
+   * Same as {@link #getName()} but with all invalid characters and dots replaced by underscores.
    *
    * <p>This is used by Prometheus exposition formats.
    */

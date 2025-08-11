@@ -576,7 +576,11 @@ public class PrometheusNaming {
    * which by definition is a noop). This method does not do any validation of the name.
    */
   public static String escapeName(String name, EscapingScheme scheme) {
-    if (name.isEmpty() || isValidLegacyMetricName(name)) {
+    boolean noEscapeNeeded =
+        isValidLegacyMetricName(name)
+            && !(scheme == EscapingScheme.DOTS_ESCAPING
+                && (name.contains(".") || name.contains("_")));
+    if (name.isEmpty() || noEscapeNeeded) {
       return name;
     }
 
