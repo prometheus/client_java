@@ -507,7 +507,10 @@ class ExpositionFormatsTest {
                     .labels(Labels.builder().label("name.1", "Björn").label("name*2", "佖佥").build())
                     .build())
             .build();
-    assertPrometheusText(prometheusText, gauge);
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    getPrometheusWriter(PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true))
+        .write(out, MetricSnapshots.of((MetricSnapshot) gauge), EscapingScheme.NO_ESCAPING);
+    assertThat(out).hasToString(prometheusText);
   }
 
   @Test
@@ -2830,7 +2833,7 @@ class ExpositionFormatsTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer =
         OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
-    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2842,7 +2845,7 @@ class ExpositionFormatsTest {
             .setCreatedTimestampsEnabled(true)
             .setExemplarsOnAllMetricTypesEnabled(true)
             .build();
-    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2850,14 +2853,14 @@ class ExpositionFormatsTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = OpenMetricsTextFormatWriter.create();
-    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
   private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     getPrometheusWriter(PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true))
-        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
+        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2871,7 +2874,7 @@ class ExpositionFormatsTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     getPrometheusWriter(PrometheusTextFormatWriter.builder())
-        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.NO_ESCAPING);
+        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
