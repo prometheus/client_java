@@ -384,11 +384,6 @@ public class PrometheusNaming {
       return v;
     }
 
-    String outName =
-        isValidLegacyMetricName(v.getMetadata().getPrometheusName())
-            ? v.getMetadata().getPrometheusName()
-            : escapeName(v.getMetadata().getPrometheusName(), scheme);
-
     List<DataPointSnapshot> outDataPoints = new ArrayList<>();
 
     for (DataPointSnapshot d : v.getDataPoints()) {
@@ -401,18 +396,10 @@ public class PrometheusNaming {
 
       for (Label l : d.getLabels()) {
         if (METRIC_NAME_LABEL.equals(l.getName())) {
-          if (l.getValue() == null || isValidLegacyMetricName(l.getValue())) {
-            outLabelsBuilder.label(l.getName(), l.getValue());
-            continue;
-          }
           outLabelsBuilder.label(l.getName(), escapeName(l.getValue(), scheme));
-          continue;
+        } else {
+          outLabelsBuilder.label(escapeName(l.getName(), scheme), l.getValue());
         }
-        if (l.getName() == null || isValidLegacyMetricName(l.getName())) {
-          outLabelsBuilder.label(l.getName(), l.getValue());
-          continue;
-        }
-        outLabelsBuilder.label(escapeName(l.getName(), scheme), l.getValue());
       }
 
       Labels outLabels = outLabelsBuilder.build();
@@ -420,7 +407,8 @@ public class PrometheusNaming {
       outDataPoints.add(outDataPointSnapshot);
     }
 
-    return createEscapedMetricSnapshot(v, outName, outDataPoints);
+    return createEscapedMetricSnapshot(
+        v, escapeName(v.getMetadata().getName(), scheme), outDataPoints);
   }
 
   static boolean metricNeedsEscaping(DataPointSnapshot d) {
@@ -588,9 +576,10 @@ public class PrometheusNaming {
    * which by definition is a noop). This method does not do any validation of the name.
    */
   public static String escapeName(String name, EscapingScheme scheme) {
-    if (name.isEmpty()) {
+    if (name.isEmpty() || isValidLegacyMetricName(name)) {
       return name;
     }
+
     StringBuilder escaped = new StringBuilder();
     switch (scheme) {
       case NO_ESCAPING:
