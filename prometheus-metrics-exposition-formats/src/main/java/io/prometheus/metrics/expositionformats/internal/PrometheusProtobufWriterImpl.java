@@ -63,7 +63,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     }
   }
 
-  public Metrics.MetricFamily convert(MetricSnapshot snapshot) {
+  Metrics.MetricFamily convert(MetricSnapshot snapshot) {
     Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
     if (snapshot instanceof CounterSnapshot) {
       for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getDataPoints()) {
@@ -102,7 +102,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
       for (StateSetSnapshot.StateSetDataPointSnapshot data :
           ((StateSetSnapshot) snapshot).getDataPoints()) {
         for (int i = 0; i < data.size(); i++) {
-          builder.addMetric(convert(data, snapshot.getMetadata().getPrometheusName(), i));
+          builder.addMetric(convert(data, snapshot.getMetadata().getName(), i));
         }
       }
       setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
@@ -272,9 +272,9 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
       return;
     }
     if (nameSuffix == null) {
-      builder.setName(metadata.getPrometheusName());
+      builder.setName(metadata.getName());
     } else {
-      builder.setName(metadata.getPrometheusName() + nameSuffix);
+      builder.setName(metadata.getName() + nameSuffix);
     }
     if (metadata.getHelp() != null) {
       builder.setHelp(metadata.getHelp());
@@ -351,7 +351,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     for (int i = 0; i < labels.size(); i++) {
       metricBuilder.addLabel(
           Metrics.LabelPair.newBuilder()
-              .setName(labels.getPrometheusName(i))
+              .setName(labels.getName(i))
               .setValue(labels.getValue(i))
               .build());
     }
@@ -361,7 +361,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     for (int i = 0; i < labels.size(); i++) {
       metricBuilder.addLabel(
           Metrics.LabelPair.newBuilder()
-              .setName(labels.getPrometheusName(i))
+              .setName(labels.getName(i))
               .setValue(labels.getValue(i))
               .build());
     }

@@ -114,7 +114,7 @@ public class TextFormatUtil {
       if (i > 0 || metricInsideBraces) {
         writer.write(",");
       }
-      writeName(writer, labels.getPrometheusName(i), NameType.Label);
+      writeName(writer, labels.getName(i), NameType.Label);
       writer.write("=\"");
       writeEscapedString(writer, labels.getValue(i));
       writer.write("\"");
