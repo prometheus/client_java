@@ -55,8 +55,8 @@ public final class MetricMetadata {
     this.name = name;
     this.help = help;
     this.unit = unit;
-    this.prometheusName = PrometheusNaming.prometheusName(name);
     validate();
+    this.prometheusName = PrometheusNaming.prometheusName(name);
   }
 
   /**
