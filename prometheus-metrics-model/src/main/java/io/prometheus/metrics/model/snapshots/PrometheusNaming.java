@@ -32,8 +32,7 @@ public class PrometheusNaming {
       PrometheusProperties.get().getNamingProperties().getValidationScheme();
 
   /** Default escaping scheme for names when not specified. */
-  public static final EscapingScheme DEFAULT_ESCAPING_SCHEME =
-      EscapingScheme.VALUE_ENCODING_ESCAPING;
+  public static final EscapingScheme DEFAULT_ESCAPING_SCHEME = EscapingScheme.UNDERSCORE_ESCAPING;
 
   /**
    * ESCAPING_KEY is the key in an Accept header that defines how metric and label names that do not

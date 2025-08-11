@@ -71,7 +71,7 @@ public final class MetricMetadata {
   }
 
   /**
-   * Same as {@link #getName()} but with dots replaced by underscores.
+   * Same as {@link #getName()} but with all invalid characters replaced by underscores.
    *
    * <p>This is used by Prometheus exposition formats.
    */
