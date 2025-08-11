@@ -217,7 +217,7 @@ public class PrometheusNaming {
    * @return the name with dots replaced by underscores.
    */
   public static String prometheusName(String name) {
-    return PrometheusNaming.escapeName(name, EscapingScheme.UNDERSCORE_ESCAPING);
+    return PrometheusNaming.escapeName(name.replace(".", "_"), EscapingScheme.UNDERSCORE_ESCAPING);
   }
 
   /**
