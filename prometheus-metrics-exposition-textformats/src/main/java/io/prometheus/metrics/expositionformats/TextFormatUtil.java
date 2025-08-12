@@ -1,7 +1,10 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
+
 import java.io.IOException;
 import java.io.Writer;
 
@@ -104,7 +107,8 @@ public class TextFormatUtil {
       Labels labels,
       String additionalLabelName,
       double additionalLabelValue,
-      boolean metricInsideBraces)
+      boolean metricInsideBraces,
+      EscapingScheme scheme)
       throws IOException {
     if (!metricInsideBraces) {
       writer.write('{');
@@ -113,7 +117,7 @@ public class TextFormatUtil {
       if (i > 0 || metricInsideBraces) {
         writer.write(",");
       }
-      writeName(writer, labels.getName(i), NameType.Label);
+      writeName(writer, SnapshotEscaper.getSnapshotLabelName(labels, i, scheme), NameType.Label);
       writer.write("=\"");
       writeEscapedString(writer, labels.getValue(i));
       writer.write("\"");

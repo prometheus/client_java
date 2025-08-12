@@ -20,7 +20,8 @@ public class SnapshotEscaper {
       return null;
     }
 
-    if (scheme == EscapingScheme.NO_ESCAPING) {
+    if (scheme == EscapingScheme.NO_ESCAPING || scheme == EscapingScheme.UNDERSCORE_ESCAPING) {
+      // we re-use the prometheus name for underscore escaping as an optimization
       return v;
     }
 
@@ -438,5 +439,21 @@ public class SnapshotEscaper {
 
   private static boolean isValidUtf8Char(int c) {
     return (0 <= c && c < MIN_HIGH_SURROGATE) || (MAX_LOW_SURROGATE < c && c <= MAX_CODE_POINT);
+  }
+
+  public static String getSnapshotLabelName(Labels labels, int index, EscapingScheme scheme) {
+    if (scheme == EscapingScheme.UNDERSCORE_ESCAPING) {
+      return labels.getPrometheusName(index);
+    } else {
+      return labels.getName(index);
+    }
+  }
+
+  public static String getMetadataName(MetricMetadata metadata, EscapingScheme scheme) {
+    if (scheme == EscapingScheme.UNDERSCORE_ESCAPING) {
+      return metadata.getPrometheusName();
+    } else {
+      return metadata.getName();
+    }
   }
 }
