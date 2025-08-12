@@ -100,7 +100,6 @@ public class PrometheusProperties {
     return exporterOpenTelemetryProperties;
   }
 
-
   public static class Builder {
     private MetricsProperties defaultMetricsProperties;
     private Map<String, MetricsProperties> metricProperties = new HashMap<>();
@@ -160,7 +159,6 @@ public class PrometheusProperties {
       this.otelConfig = exporterOpenTelemetryProperties;
       return this;
     }
-
 
     public PrometheusProperties build() {
       return new PrometheusProperties(

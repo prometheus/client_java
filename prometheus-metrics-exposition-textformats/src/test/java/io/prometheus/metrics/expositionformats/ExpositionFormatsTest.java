@@ -28,7 +28,6 @@ import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSna
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -476,8 +475,8 @@ class ExpositionFormatsTest {
         """
         # HELP "gauge.name" gauge\\ndoc\\nstr"ing
         # TYPE "gauge.name" gauge
-        {"gauge.name","name*2"="val with \\\\backslash and \\"quotes\\"","name.1"="val with\\nnew line"} +Inf
-        {"gauge.name","name*2"="佖佥","name.1"="Björn"} 3.14E42
+        {"gauge.name","name.1"="Björn","name*2"="佖佥"} 3.14E42
+        {"gauge.name","name.1"="val with\\nnew line","name*2"="val with \\\\backslash and \\"quotes\\""} +Inf
         """;
     GaugeSnapshot gauge =
         GaugeSnapshot.builder()

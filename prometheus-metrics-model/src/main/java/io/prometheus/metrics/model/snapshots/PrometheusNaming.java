@@ -1,7 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import javax.annotation.Nullable;
-
 import static java.lang.Character.MAX_CODE_POINT;
 import static java.lang.Character.MAX_LOW_SURROGATE;
 import static java.lang.Character.MIN_HIGH_SURROGATE;
@@ -11,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /**
  * Utility for Prometheus Metric and Label naming.
@@ -449,13 +448,15 @@ public class PrometheusNaming {
   private static Exemplars escapeExemplars(Exemplars exemplars, EscapingScheme scheme) {
     List<Exemplar> escapedExemplars = new ArrayList<>(exemplars.size());
     for (Exemplar exemplar : exemplars) {
-      Exemplar escaped = escapeExemplar(exemplar, scheme);
-      escapedExemplars.add(escaped);
+      escapedExemplars.add(escapeExemplar(exemplar, scheme));
     }
     return Exemplars.of(escapedExemplars);
   }
 
-  private static Exemplar escapeExemplar(Exemplar exemplar, EscapingScheme scheme) {
+  private static Exemplar escapeExemplar(@Nullable Exemplar exemplar, EscapingScheme scheme) {
+    if (exemplar == null) {
+      return null;
+    }
     return Exemplar.builder()
         .labels(escapeLabels(exemplar.getLabels(), scheme))
         .timestampMillis(exemplar.getTimestampMillis())

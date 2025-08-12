@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /** Immutable snapshot of a Counter. */
 public class CounterSnapshot extends MetricSnapshot {
@@ -97,7 +98,7 @@ public class CounterSnapshot extends MetricSnapshot {
         return this;
       }
 
-      public Builder exemplar(Exemplar exemplar) {
+      public Builder exemplar(@Nullable Exemplar exemplar) {
         this.exemplar = exemplar;
         return this;
       }

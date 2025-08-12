@@ -8,7 +8,6 @@ import static org.mockserver.model.HttpResponse.response;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.EscapingScheme;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
@@ -16,7 +15,6 @@ import java.net.URL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 
