@@ -350,8 +350,8 @@ my_application_namedCounter2_total 10.0
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
-      writer.write(out, _registry.scrape(), EscapingScheme.NO_ESCAPING);
-      return out.toString(StandardCharsets.UTF_8.name());
+      writer.write(out, _registry.scrape(), EscapingScheme.UNDERSCORE_ESCAPING);
+      return out.toString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
