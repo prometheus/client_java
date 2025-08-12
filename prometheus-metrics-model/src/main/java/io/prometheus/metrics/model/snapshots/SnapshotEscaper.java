@@ -12,8 +12,7 @@ import javax.annotation.Nullable;
 
 public class SnapshotEscaper {
 
-  private SnapshotEscaper() {
-  }
+  private SnapshotEscaper() {}
 
   /** Escapes the given metric names and labels with the given escaping scheme. */
   public static MetricSnapshot escapeMetricSnapshot(MetricSnapshot v, EscapingScheme scheme) {
@@ -33,13 +32,12 @@ public class SnapshotEscaper {
         continue;
       }
 
-      DataPointSnapshot outDataPointSnapshot =
-        createEscapedDataPointSnapshot(v, d, escapeLabels(d.getLabels(), scheme), scheme);
-      outDataPoints.add(outDataPointSnapshot);
+      outDataPoints.add(
+          createEscapedDataPointSnapshot(v, d, escapeLabels(d.getLabels(), scheme), scheme));
     }
 
     return createEscapedMetricSnapshot(
-      v, escapeName(v.getMetadata().getName(), scheme), outDataPoints);
+        v, escapeName(v.getMetadata().getName(), scheme), outDataPoints);
   }
 
   static MetricSnapshot createEscapedMetricSnapshot(
