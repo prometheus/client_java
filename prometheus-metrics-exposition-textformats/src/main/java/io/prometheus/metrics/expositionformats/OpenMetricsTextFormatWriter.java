@@ -362,7 +362,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     boolean metricInsideBraces = false;
     // If the name does not pass the legacy validity check, we must put the
     // metric name inside the braces.
-    if (PrometheusNaming.validateLegacyMetricName(name) != null) {
+    if (!PrometheusNaming.isValidLegacyMetricName(name)) {
       metricInsideBraces = true;
       writer.write('{');
     }

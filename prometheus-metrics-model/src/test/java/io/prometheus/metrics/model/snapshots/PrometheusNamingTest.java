@@ -14,28 +14,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterEach;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junitpioneer.jupiter.SetSystemProperty;
 
 class PrometheusNamingTest {
 
-  @AfterEach
-  void tearDown() {
-    System.clearProperty("io.prometheus.naming.validationScheme");
-    PrometheusNaming.resetForTest();
-  }
-
   @Test
   public void testSanitizeMetricName() {
-    assertThat(prometheusName(sanitizeMetricName("0abc.def"))).isEqualTo("_abc_def");
-    assertThat(prometheusName(sanitizeMetricName("___ab.:c0"))).isEqualTo("___ab__c0");
-    assertThat(sanitizeMetricName("my_prefix/my_metric")).isEqualTo("my_prefix_my_metric");
-    assertThat(prometheusName(sanitizeMetricName("my_counter_total"))).isEqualTo("my_counter");
+    assertThat(sanitizeMetricName("my_counter_total")).isEqualTo("my_counter");
     assertThat(sanitizeMetricName("jvm.info")).isEqualTo("jvm");
     assertThat(sanitizeMetricName("jvm_info")).isEqualTo("jvm");
     assertThat(sanitizeMetricName("jvm.info")).isEqualTo("jvm");
@@ -46,18 +36,11 @@ class PrometheusNamingTest {
 
   @Test
   public void testSanitizeMetricNameWithUnit() {
-    assertThat(prometheusName(sanitizeMetricName("0abc.def", Unit.RATIO)))
-        .isEqualTo("_abc_def_" + Unit.RATIO);
-    assertThat(prometheusName(sanitizeMetricName("___ab.:c0", Unit.RATIO)))
-        .isEqualTo("___ab__c0_" + Unit.RATIO);
-    assertThat(sanitizeMetricName("my_prefix/my_metric", Unit.RATIO))
-        .isEqualTo("my_prefix_my_metric_" + Unit.RATIO);
+    assertThat(prometheusName(sanitizeMetricName("def", Unit.RATIO)))
+        .isEqualTo("def_" + Unit.RATIO);
     assertThat(prometheusName(sanitizeMetricName("my_counter_total", Unit.RATIO)))
         .isEqualTo("my_counter_" + Unit.RATIO);
     assertThat(sanitizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm_" + Unit.RATIO);
-    assertThat(sanitizeMetricName("jvm_info", Unit.RATIO)).isEqualTo("jvm_" + Unit.RATIO);
-    assertThat(sanitizeMetricName("jvm.info", Unit.RATIO)).isEqualTo("jvm_" + Unit.RATIO);
-    assertThat(sanitizeMetricName("a.b", Unit.RATIO)).isEqualTo("a.b_" + Unit.RATIO);
     assertThat(sanitizeMetricName("_total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
     assertThat(sanitizeMetricName("total", Unit.RATIO)).isEqualTo("total_" + Unit.RATIO);
   }
@@ -119,24 +102,12 @@ class PrometheusNamingTest {
         .isThrownBy(() -> sanitizeUnitName(""));
   }
 
-  @SuppressWarnings("unused")
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @ParameterizedTest
   @MethodSource("nameIsValid")
   public void testLabelNameIsValidUtf8(
-      String labelName, boolean legacyValid, boolean utf8Valid, boolean legacyCharsetValid) {
-    PrometheusNaming.resetForTest();
+      String labelName, boolean utf8Valid) {
     assertMetricName(labelName, utf8Valid);
     assertLabelName(labelName, utf8Valid);
-  }
-
-  @SuppressWarnings("unused")
-  @ParameterizedTest
-  @MethodSource("nameIsValid")
-  public void testLabelNameIsValidLegacy(
-      String labelName, boolean legacyValid, boolean utf8Valid, boolean legacyCharsetValid) {
-    assertMetricName(labelName, legacyCharsetValid);
-    assertLabelName(labelName, legacyValid);
   }
 
   private static void assertLabelName(String labelName, boolean legacyValid) {
@@ -153,17 +124,17 @@ class PrometheusNamingTest {
 
   static Stream<Arguments> nameIsValid() {
     return Stream.of(
-        Arguments.of("", false, false, false),
-        Arguments.of("Avalid_23name", true, true, true),
-        Arguments.of("_Avalid_23name", true, true, true),
-        Arguments.of("1valid_23name", false, true, false),
-        Arguments.of("avalid_23name", true, true, true),
-        Arguments.of("Ava:lid_23name", false, true, true),
-        Arguments.of("a lid_23name", false, true, false),
-        Arguments.of(":leading_colon", false, true, true),
-        Arguments.of("colon:in:the:middle", false, true, true),
-        Arguments.of("aΩz", false, true, false),
-        Arguments.of("a\ud800z", false, false, false));
+        Arguments.of("", false),
+        Arguments.of("Avalid_23name", true),
+        Arguments.of("_Avalid_23name", true),
+        Arguments.of("1valid_23name", true),
+        Arguments.of("avalid_23name",  true),
+        Arguments.of("Ava:lid_23name",  true),
+        Arguments.of("a lid_23name", true),
+        Arguments.of(":leading_colon",  true),
+        Arguments.of("colon:in:the:middle",true),
+        Arguments.of("aΩz", true),
+        Arguments.of("a\ud800z",  false));
   }
 
   @ParameterizedTest
@@ -173,12 +144,10 @@ class PrometheusNamingTest {
     assertEscape(input, escapingScheme, expected, unescapeExpected);
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @ParameterizedTest
   @MethodSource("escapeNameUtf8TestCases")
   public void testEscapeNameUtf8(
       String input, EscapingScheme escapingScheme, String expected, String unescapeExpected) {
-    PrometheusNaming.resetForTest();
     assertEscape(input, escapingScheme, expected, unescapeExpected);
   }
 
@@ -329,7 +298,6 @@ class PrometheusNamingTest {
     assertThat(original.getMetadata().getName()).isEqualTo("empty");
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testEscapeMetricSnapshotSimpleNoEscapingNeeded() {
     testEscapeMetricSnapshot(
@@ -343,7 +311,6 @@ class PrometheusNamingTest {
         CounterSnapshot.class);
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testEscapeMetricSnapshotLabelNameEscapingNeeded() {
     testEscapeMetricSnapshot(
@@ -357,7 +324,6 @@ class PrometheusNamingTest {
         CounterSnapshot.class);
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testEscapeMetricSnapshotCounterEscapingNeeded() {
     testEscapeMetricSnapshot(
@@ -371,7 +337,6 @@ class PrometheusNamingTest {
         CounterSnapshot.class);
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testEscapeMetricSnapshotGaugeEscapingNeeded() {
     testEscapeMetricSnapshot(
@@ -394,7 +359,6 @@ class PrometheusNamingTest {
       String expectedLabelValue,
       EscapingScheme escapingScheme,
       Class<? extends MetricSnapshot> snapshotType) {
-    PrometheusNaming.resetForTest();
 
     MetricSnapshot original = createTestSnapshot(name, labelName, labelValue, snapshotType);
     MetricSnapshot got = escapeMetricSnapshot(original, escapingScheme);

@@ -119,10 +119,13 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
   static String[] makePrometheusNames(String[] names) {
     String[] prometheusNames = names;
     for (int i = 0; i < names.length; i++) {
-      if (prometheusNames == names) {
-        prometheusNames = Arrays.copyOf(names, names.length);
+      String name = names[i];
+      if (!PrometheusNaming.isValidLegacyLabelName(name)) {
+        if (prometheusNames == names) {
+          prometheusNames = Arrays.copyOf(names, names.length);
+        }
+        prometheusNames[i] = PrometheusNaming.prometheusName(name);
       }
-      prometheusNames[i] = PrometheusNaming.prometheusName(names[i]);
     }
     return prometheusNames;
   }

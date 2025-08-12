@@ -65,7 +65,7 @@ public class PrometheusNaming {
    * Test if a metric name is valid. Rules:
    *
    * <ul>
-   *   <li>The name must match {@link #LEGACY_METRIC_NAME_PATTERN}.
+   *   <li>The name must match {@link #METRIC_NAME_PATTERN}.
    *   <li>The name MUST NOT end with one of the {@link #RESERVED_METRIC_NAME_SUFFIXES}.
    * </ul>
    *
@@ -85,28 +85,21 @@ public class PrometheusNaming {
     return validateMetricName(name) == null;
   }
 
-  public static String validateMetricName(String name) {
-    if (isValidUtf8(name)) {
-      return null;
-    }
-    return "The metric name contains unsupported characters";
-  }
-
   /**
    * Same as {@link #isValidMetricName(String)}, but produces an error message.
    *
    * <p>The name is valid if the error message is {@code null}.
    */
-  public static String validateLegacyMetricName(String name) {
+  public static String validateMetricName(String name) {
     for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
       if (name.endsWith(reservedSuffix)) {
         return "The metric name must not include the '" + reservedSuffix + "' suffix.";
       }
     }
-    if (!isValidLegacyMetricName(name)) {
-      return "The metric name contains unsupported characters";
+    if (isValidUtf8(name)) {
+      return null;
     }
-    return null;
+    return "The metric name contains unsupported characters";
   }
 
   public static boolean isValidLegacyMetricName(String name) {
@@ -114,7 +107,11 @@ public class PrometheusNaming {
   }
 
   public static boolean isValidLabelName(String name) {
-    return isValidUtf8(name);
+    return isValidUtf8(name)
+        && !(name.startsWith("__")
+            || name.startsWith("._")
+            || name.startsWith("..")
+            || name.startsWith("_."));
   }
 
   private static boolean isValidUtf8(String name) {
@@ -122,17 +119,18 @@ public class PrometheusNaming {
   }
 
   public static boolean isValidLegacyLabelName(String name) {
-    return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches()
-        && !(name.startsWith("__")
-            || name.startsWith("._")
-            || name.startsWith("..")
-            || name.startsWith("_."));
+    return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches();
   }
 
   /**
    * Units may not have illegal characters, and they may not end with a reserved suffix like
    * 'total'.
    */
+  public static boolean isValidUnitName(String name) {
+    return validateUnitName(name) == null;
+  }
+
+  /** Same as {@link #isValidUnitName(String)} but returns an error message. */
   public static String validateUnitName(String name) {
     if (name.isEmpty()) {
       return "The unit name must not be empty.";

@@ -37,8 +37,6 @@ class PushGatewayTest {
   @AfterEach
   void tearDown() {
     mockServerClient.stop();
-    System.clearProperty("io.prometheus.naming.validationScheme");
-    PrometheusNaming.resetForTest();
   }
 
   @Test
@@ -146,10 +144,8 @@ class PushGatewayTest {
     pg.push();
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testPushWithEscapedGroupingKey() throws IOException {
-    PrometheusNaming.resetForTest();
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/U__l_2e_1/v1"))
         .respond(response().withStatusCode(202));
@@ -179,10 +175,8 @@ class PushGatewayTest {
     pg.push();
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testPushWithMultiEscapedGroupingKey() throws IOException {
-    PrometheusNaming.resetForTest();
 
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/U__l_2e_1/v1/U__l_2e_2/v2"))
@@ -246,10 +240,8 @@ class PushGatewayTest {
     pg.push(gauge);
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testPushCollectorWithEscapedGroupingKey() throws IOException {
-    PrometheusNaming.resetForTest();
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/U__l_2e_1/v1"))
         .respond(response().withStatusCode(202));
@@ -302,10 +294,8 @@ class PushGatewayTest {
     pg.pushAdd();
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testPushAddWithEscapedGroupingKey() throws IOException {
-    PrometheusNaming.resetForTest();
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j/U__l_2e_1/v1"))
         .respond(response().withStatusCode(202));
@@ -334,10 +324,8 @@ class PushGatewayTest {
     pg.pushAdd(gauge);
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testPushAddCollectorWithEscapedGroupingKey() throws IOException {
-    PrometheusNaming.resetForTest();
 
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j/U__l_2e_1/v1"))
@@ -376,10 +364,8 @@ class PushGatewayTest {
     pg.delete();
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testDeleteWithEscapedGroupingKey() throws IOException {
-    PrometheusNaming.resetForTest();
 
     mockServerClient
         .when(request().withMethod("DELETE").withPath("/metrics/job/j/U__l_2e_1/v1"))
@@ -410,10 +396,8 @@ class PushGatewayTest {
     pg.delete();
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testInstanceIpEscapedGroupingKey() throws IOException {
-    PrometheusNaming.resetForTest();
 
     String ip = InetAddress.getLocalHost().getHostAddress();
     assertThat(ip).isNotEmpty();

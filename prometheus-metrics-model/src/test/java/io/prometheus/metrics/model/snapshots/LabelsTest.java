@@ -77,12 +77,6 @@ class LabelsTest {
   }
 
   @Test
-  public void testIllegalLabelName() {
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> Labels.of("my_service/status", "200"));
-  }
-
-  @Test
   public void testReservedLabelName() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> Labels.of("__name__", "requests_total"));

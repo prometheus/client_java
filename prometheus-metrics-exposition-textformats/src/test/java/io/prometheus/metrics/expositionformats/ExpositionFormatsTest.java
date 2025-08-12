@@ -99,12 +99,6 @@ class ExpositionFormatsTest {
           .timestampMillis(1690298864383L)
           .build();
 
-  @AfterEach
-  void tearDown() {
-    System.clearProperty("io.prometheus.naming.validationScheme");
-    PrometheusNaming.resetForTest();
-  }
-
   @Test
   void init() {
     ExpositionFormats formats = ExpositionFormats.init();
@@ -477,10 +471,8 @@ class ExpositionFormatsTest {
     assertPrometheusProtobuf(prometheusProtobuf, gauge);
   }
 
-  @SetSystemProperty(key = "io.prometheus.naming.validationScheme", value = "utf-8")
   @Test
   public void testGaugeUTF8() throws IOException {
-    PrometheusNaming.resetForTest();
     String prometheusText =
         """
         # HELP "gauge.name" gauge\\ndoc\\nstr"ing
