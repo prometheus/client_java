@@ -30,8 +30,6 @@ public class PrometheusNaming {
    */
   public static final String ESCAPING_KEY = "escaping";
 
-  private static final String METRIC_NAME_LABEL = "__name__";
-
   private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
 
   /** Legal characters for label names. */
@@ -290,7 +288,7 @@ public class PrometheusNaming {
     List<DataPointSnapshot> outDataPoints = new ArrayList<>();
 
     for (DataPointSnapshot d : v.getDataPoints()) {
-      if (!metricNeedsEscaping(d)) {
+      if (!metricNeedsEscaping(d, scheme)) {
         outDataPoints.add(d);
         continue;
       }
@@ -298,11 +296,7 @@ public class PrometheusNaming {
       Labels.Builder outLabelsBuilder = Labels.builder();
 
       for (Label l : d.getLabels()) {
-        if (METRIC_NAME_LABEL.equals(l.getName())) {
-          outLabelsBuilder.label(l.getName(), escapeName(l.getValue(), scheme));
-        } else {
-          outLabelsBuilder.label(escapeName(l.getName(), scheme), l.getValue());
-        }
+        outLabelsBuilder.label(escapeName(l.getName(), scheme), l.getValue());
       }
 
       Labels outLabels = outLabelsBuilder.build();
@@ -314,13 +308,10 @@ public class PrometheusNaming {
         v, escapeName(v.getMetadata().getName(), scheme), outDataPoints);
   }
 
-  static boolean metricNeedsEscaping(DataPointSnapshot d) {
+  static boolean metricNeedsEscaping(DataPointSnapshot d, EscapingScheme scheme) {
     Labels labels = d.getLabels();
     for (Label l : labels) {
-      if (l.getName().equals(METRIC_NAME_LABEL) && !isValidLegacyMetricName(l.getValue())) {
-        return true;
-      }
-      if (!isValidLegacyMetricName(l.getName())) {
+      if (needsEscaping(l.getName(), scheme)) {
         return true;
       }
     }
@@ -479,11 +470,7 @@ public class PrometheusNaming {
    * which by definition is a noop). This method does not do any validation of the name.
    */
   public static String escapeName(String name, EscapingScheme scheme) {
-    boolean noEscapeNeeded =
-        isValidLegacyMetricName(name)
-            && !(scheme == EscapingScheme.DOTS_ESCAPING
-                && (name.contains(".") || name.contains("_")));
-    if (name.isEmpty() || noEscapeNeeded) {
+    if (name.isEmpty() || !needsEscaping(name, scheme)) {
       return name;
     }
 
@@ -545,6 +532,11 @@ public class PrometheusNaming {
       default:
         throw new IllegalArgumentException("Invalid escaping scheme " + scheme);
     }
+  }
+
+  private static boolean needsEscaping(String name, EscapingScheme scheme) {
+    return !isValidLegacyMetricName(name)
+        || (scheme == EscapingScheme.DOTS_ESCAPING && (name.contains(".") || name.contains("_")));
   }
 
   /**

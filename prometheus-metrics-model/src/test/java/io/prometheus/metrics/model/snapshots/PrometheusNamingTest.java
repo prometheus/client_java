@@ -104,8 +104,7 @@ class PrometheusNamingTest {
 
   @ParameterizedTest
   @MethodSource("nameIsValid")
-  public void testLabelNameIsValidUtf8(
-      String labelName, boolean utf8Valid) {
+  public void testLabelNameIsValidUtf8(String labelName, boolean utf8Valid) {
     assertMetricName(labelName, utf8Valid);
     assertLabelName(labelName, utf8Valid);
   }
@@ -128,13 +127,13 @@ class PrometheusNamingTest {
         Arguments.of("Avalid_23name", true),
         Arguments.of("_Avalid_23name", true),
         Arguments.of("1valid_23name", true),
-        Arguments.of("avalid_23name",  true),
-        Arguments.of("Ava:lid_23name",  true),
+        Arguments.of("avalid_23name", true),
+        Arguments.of("Ava:lid_23name", true),
         Arguments.of("a lid_23name", true),
-        Arguments.of(":leading_colon",  true),
-        Arguments.of("colon:in:the:middle",true),
+        Arguments.of(":leading_colon", true),
+        Arguments.of("colon:in:the:middle", true),
         Arguments.of("aΩz", true),
-        Arguments.of("a\ud800z",  false));
+        Arguments.of("a\ud800z", false));
   }
 
   @ParameterizedTest
@@ -369,11 +368,7 @@ class PrometheusNamingTest {
 
     DataPointSnapshot escapedData = got.getDataPoints().get(0);
     assertThat((Iterable<? extends Label>) escapedData.getLabels())
-        .isEqualTo(
-            Labels.builder()
-                .label("__name__", expectedName)
-                .label(expectedLabelName, expectedLabelValue)
-                .build());
+        .isEqualTo(Labels.builder().label(expectedLabelName, expectedLabelValue).build());
 
     assertThat(original.getMetadata().getName()).isEqualTo(name);
     assertThat(original.getMetadata().getHelp()).isEqualTo("some help text");
@@ -381,7 +376,7 @@ class PrometheusNamingTest {
 
     DataPointSnapshot originalData = original.getDataPoints().get(0);
     assertThat((Iterable<? extends Label>) originalData.getLabels())
-        .isEqualTo(Labels.builder().label("__name__", name).label(labelName, labelValue).build());
+        .isEqualTo(Labels.builder().label(labelName, labelValue).build());
   }
 
   private MetricSnapshot createTestSnapshot(
@@ -389,7 +384,7 @@ class PrometheusNamingTest {
       String labelName,
       String labelValue,
       Class<? extends MetricSnapshot> snapshotType) {
-    Labels labels = Labels.builder().label("__name__", name).label(labelName, labelValue).build();
+    Labels labels = Labels.builder().label(labelName, labelValue).build();
 
     if (snapshotType.equals(CounterSnapshot.class)) {
       return CounterSnapshot.builder()
