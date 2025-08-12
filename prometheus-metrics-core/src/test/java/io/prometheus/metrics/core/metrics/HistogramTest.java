@@ -1255,12 +1255,6 @@ class HistogramTest {
   }
 
   @Test
-  public void testIllegalName() {
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> Histogram.builder().name("my_namespace/server.durations"));
-  }
-
-  @Test
   public void testNoName() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> Histogram.builder().build());

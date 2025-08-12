@@ -63,7 +63,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     }
   }
 
-  Metrics.MetricFamily convert(MetricSnapshot snapshot) {
+  public Metrics.MetricFamily convert(MetricSnapshot snapshot) {
     Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
     if (snapshot instanceof CounterSnapshot) {
       for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getDataPoints()) {
