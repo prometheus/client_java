@@ -49,7 +49,6 @@ class PrometheusPropertiesTest {
     builder.exporterOpenTelemetryProperties(defaults.getExporterOpenTelemetryProperties());
     builder.pushgatewayProperties(defaults.getExporterPushgatewayProperties());
     builder.exporterProperties(defaults.getExporterProperties());
-    builder.namingProperties(defaults.getNamingProperties());
     PrometheusProperties result = builder.build();
     assertThat(result.getDefaultMetricProperties()).isSameAs(defaults.getDefaultMetricProperties());
     assertThat(result.getExemplarProperties()).isSameAs(defaults.getExemplarProperties());
@@ -67,6 +66,5 @@ class PrometheusPropertiesTest {
             MetricsProperties.builder().histogramClassicUpperBounds(0.1, 0.2, 0.5, 1.0).build());
     assertThat(result.getMetricProperties("unknown_metric")).isNull();
     assertThat(result.getExporterProperties()).isSameAs(defaults.getExporterProperties());
-    assertThat(result.getNamingProperties()).isSameAs(defaults.getNamingProperties());
   }
 }

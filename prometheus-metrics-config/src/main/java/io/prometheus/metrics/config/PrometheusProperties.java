@@ -20,7 +20,6 @@ public class PrometheusProperties {
   private final ExporterHttpServerProperties exporterHttpServerProperties;
   private final ExporterOpenTelemetryProperties exporterOpenTelemetryProperties;
   private final ExporterPushgatewayProperties exporterPushgatewayProperties;
-  private final NamingProperties namingProperties;
 
   /**
    * Get the properties instance. When called for the first time, {@code get()} loads the properties
@@ -49,8 +48,7 @@ public class PrometheusProperties {
       ExporterFilterProperties exporterFilterProperties,
       ExporterHttpServerProperties httpServerConfig,
       ExporterPushgatewayProperties pushgatewayProperties,
-      ExporterOpenTelemetryProperties otelConfig,
-      NamingProperties namingProperties) {
+      ExporterOpenTelemetryProperties otelConfig) {
     this.defaultMetricsProperties = defaultMetricsProperties;
     this.metricProperties.putAll(metricProperties);
     this.exemplarProperties = exemplarProperties;
@@ -59,7 +57,6 @@ public class PrometheusProperties {
     this.exporterHttpServerProperties = httpServerConfig;
     this.exporterPushgatewayProperties = pushgatewayProperties;
     this.exporterOpenTelemetryProperties = otelConfig;
-    this.namingProperties = namingProperties;
   }
 
   /**
@@ -103,9 +100,6 @@ public class PrometheusProperties {
     return exporterOpenTelemetryProperties;
   }
 
-  public NamingProperties getNamingProperties() {
-    return namingProperties;
-  }
 
   public static class Builder {
     private MetricsProperties defaultMetricsProperties;
@@ -116,7 +110,6 @@ public class PrometheusProperties {
     private ExporterHttpServerProperties exporterHttpServerProperties;
     private ExporterPushgatewayProperties pushgatewayProperties;
     private ExporterOpenTelemetryProperties otelConfig;
-    private NamingProperties namingProperties;
 
     private Builder() {}
 
@@ -168,10 +161,6 @@ public class PrometheusProperties {
       return this;
     }
 
-    public Builder namingProperties(NamingProperties namingProperties) {
-      this.namingProperties = namingProperties;
-      return this;
-    }
 
     public PrometheusProperties build() {
       return new PrometheusProperties(
@@ -182,8 +171,7 @@ public class PrometheusProperties {
           exporterFilterProperties,
           exporterHttpServerProperties,
           pushgatewayProperties,
-          otelConfig,
-          namingProperties);
+          otelConfig);
     }
   }
 }

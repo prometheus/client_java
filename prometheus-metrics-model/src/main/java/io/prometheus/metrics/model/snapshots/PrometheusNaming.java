@@ -4,9 +4,6 @@ import static java.lang.Character.MAX_CODE_POINT;
 import static java.lang.Character.MAX_LOW_SURROGATE;
 import static java.lang.Character.MIN_HIGH_SURROGATE;
 
-import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.config.PrometheusPropertiesLoader;
-import io.prometheus.metrics.config.ValidationScheme;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,15 +19,6 @@ import java.util.regex.Pattern;
  */
 public class PrometheusNaming {
 
-  /**
-   * nameValidationScheme determines the method of name validation to be used by all calls to
-   * validateMetricName() and isValidMetricName(). Setting UTF-8 mode in isolation from other
-   * components that don't support UTF-8 may result in bugs or other undefined behavior. This value
-   * is intended to be set by UTF-8-aware binaries as part of their startup via a properties file.
-   */
-  public static ValidationScheme nameValidationScheme =
-      PrometheusProperties.get().getNamingProperties().getValidationScheme();
-
   /** Default escaping scheme for names when not specified. */
   public static final EscapingScheme DEFAULT_ESCAPING_SCHEME = EscapingScheme.UNDERSCORE_ESCAPING;
 
@@ -44,15 +32,11 @@ public class PrometheusNaming {
 
   private static final String METRIC_NAME_LABEL = "__name__";
 
-  /** Legal characters for metric names, including dot. */
-  private static final Pattern LEGACY_METRIC_NAME_PATTERN =
-      Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
-
   private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
 
-  /** Legal characters for label names, including dot. */
+  /** Legal characters for label names. */
   private static final Pattern LEGACY_LABEL_NAME_PATTERN =
-      Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
+      Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
 
   /** Legal characters for unit names, including dot. */
   private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
@@ -76,20 +60,6 @@ public class PrometheusNaming {
     "_total", "_created", "_bucket", "_info",
     ".total", ".created", ".bucket", ".info"
   };
-
-  // VisibleForTesting
-  public static void resetForTest() {
-    nameValidationScheme =
-        PrometheusPropertiesLoader.load().getNamingProperties().getValidationScheme();
-  }
-
-  /**
-   * Get the current validation scheme. This method exists primarily to enable testing different
-   * validation behaviors while keeping the validation scheme field final and immutable.
-   */
-  public static ValidationScheme getValidationScheme() {
-    return nameValidationScheme;
-  }
 
   /**
    * Test if a metric name is valid. Rules:
@@ -116,18 +86,10 @@ public class PrometheusNaming {
   }
 
   public static String validateMetricName(String name) {
-    switch (getValidationScheme()) {
-      case LEGACY_VALIDATION:
-        return validateLegacyMetricName(name);
-      case UTF_8_VALIDATION:
-        if (!isValidUtf8(name)) {
-          return "The metric name contains unsupported characters";
-        }
-        return null;
-      default:
-        throw new RuntimeException(
-            "Invalid name validation scheme requested: " + getValidationScheme());
+    if (isValidUtf8(name)) {
+      return null;
     }
+    return "The metric name contains unsupported characters";
   }
 
   /**
@@ -148,27 +110,11 @@ public class PrometheusNaming {
   }
 
   public static boolean isValidLegacyMetricName(String name) {
-    switch (getValidationScheme()) {
-      case LEGACY_VALIDATION:
-        return LEGACY_METRIC_NAME_PATTERN.matcher(name).matches();
-      case UTF_8_VALIDATION:
-        return METRIC_NAME_PATTERN.matcher(name).matches();
-      default:
-        throw new RuntimeException(
-            "Invalid name validation scheme requested: " + getValidationScheme());
-    }
+    return METRIC_NAME_PATTERN.matcher(name).matches();
   }
 
   public static boolean isValidLabelName(String name) {
-    switch (getValidationScheme()) {
-      case LEGACY_VALIDATION:
-        return isValidLegacyLabelName(name);
-      case UTF_8_VALIDATION:
-        return isValidUtf8(name);
-      default:
-        throw new RuntimeException(
-            "Invalid name validation scheme requested: " + getValidationScheme());
-    }
+    return isValidUtf8(name);
   }
 
   private static boolean isValidUtf8(String name) {
@@ -187,11 +133,6 @@ public class PrometheusNaming {
    * Units may not have illegal characters, and they may not end with a reserved suffix like
    * 'total'.
    */
-  public static boolean isValidUnitName(String name) {
-    return validateUnitName(name) == null;
-  }
-
-  /** Same as {@link #isValidUnitName(String)} but returns an error message. */
   public static String validateUnitName(String name) {
     if (name.isEmpty()) {
       return "The unit name must not be empty.";
@@ -217,7 +158,7 @@ public class PrometheusNaming {
    * @return the name with dots replaced by underscores.
    */
   public static String prometheusName(String name) {
-    return PrometheusNaming.escapeName(name.replace(".", "_"), EscapingScheme.UNDERSCORE_ESCAPING);
+    return PrometheusNaming.escapeName(name, EscapingScheme.UNDERSCORE_ESCAPING);
   }
 
   /**
@@ -228,7 +169,7 @@ public class PrometheusNaming {
     if (metricName.isEmpty()) {
       throw new IllegalArgumentException("Cannot convert an empty string to a valid metric name.");
     }
-    String sanitizedName = replaceIllegalCharsInMetricName(metricName);
+    String sanitizedName = metricName;
     boolean modified = true;
     while (modified) {
       modified = false;
@@ -270,7 +211,7 @@ public class PrometheusNaming {
     if (labelName.isEmpty()) {
       throw new IllegalArgumentException("Cannot convert an empty string to a valid label name.");
     }
-    String sanitizedName = replaceIllegalCharsInLabelName(labelName);
+    String sanitizedName = labelName;
     while (sanitizedName.startsWith("__")
         || sanitizedName.startsWith("_.")
         || sanitizedName.startsWith("._")
@@ -281,8 +222,8 @@ public class PrometheusNaming {
   }
 
   /**
-   * Convert an arbitrary string to a name where {@link #isValidUnitName(String)
-   * isValidUnitName(name)} is true.
+   * Convert an arbitrary string to a name where {@link #validateUnitName(String)} is {@code null}
+   * (i.e. the name is valid).
    *
    * @throws IllegalArgumentException if the {@code unitName} cannot be converted, for example if
    *     you call {@code sanitizeUnitName("total")} or {@code sanitizeUnitName("")}.
@@ -317,42 +258,6 @@ public class PrometheusNaming {
           "Cannot convert '" + unitName + "' into a valid unit name.");
     }
     return sanitizedName;
-  }
-
-  /** Returns a string that matches {@link #LEGACY_METRIC_NAME_PATTERN}. */
-  private static String replaceIllegalCharsInMetricName(String name) {
-    int length = name.length();
-    char[] sanitized = new char[length];
-    for (int i = 0; i < length; i++) {
-      char ch = name.charAt(i);
-      if (ch == '.'
-          || (ch >= 'a' && ch <= 'z')
-          || (ch >= 'A' && ch <= 'Z')
-          || (i > 0 && ch >= '0' && ch <= '9')) {
-        sanitized[i] = ch;
-      } else {
-        sanitized[i] = '_';
-      }
-    }
-    return new String(sanitized);
-  }
-
-  /** Returns a string that matches {@link #LEGACY_LABEL_NAME_PATTERN}. */
-  private static String replaceIllegalCharsInLabelName(String name) {
-    int length = name.length();
-    char[] sanitized = new char[length];
-    for (int i = 0; i < length; i++) {
-      char ch = name.charAt(i);
-      if (ch == '.'
-          || (ch >= 'a' && ch <= 'z')
-          || (ch >= 'A' && ch <= 'Z')
-          || (i > 0 && ch >= '0' && ch <= '9')) {
-        sanitized[i] = ch;
-      } else {
-        sanitized[i] = '_';
-      }
-    }
-    return new String(sanitized);
   }
 
   /** Returns a string that matches {@link #UNIT_NAME_PATTERN}. */
