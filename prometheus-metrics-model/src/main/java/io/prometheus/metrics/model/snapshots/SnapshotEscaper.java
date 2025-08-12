@@ -106,7 +106,7 @@ class SnapshotEscaper {
       outDataPoints.add(outDataPointSnapshot);
     }
 
-    return SnapshotEscaper.createEscapedMetricSnapshot(
+    return createEscapedMetricSnapshot(
         v, escapeName(v.getMetadata().getName(), scheme), outDataPoints);
   }
 
