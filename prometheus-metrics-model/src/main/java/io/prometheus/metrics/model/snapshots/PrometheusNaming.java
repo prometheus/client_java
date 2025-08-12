@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import javax.annotation.Nullable;
+
 import static java.lang.Character.MAX_CODE_POINT;
 import static java.lang.Character.MAX_LOW_SURROGATE;
 import static java.lang.Character.MIN_HIGH_SURROGATE;
@@ -288,19 +290,13 @@ public class PrometheusNaming {
     List<DataPointSnapshot> outDataPoints = new ArrayList<>();
 
     for (DataPointSnapshot d : v.getDataPoints()) {
-      if (!metricNeedsEscaping(d, scheme)) {
+      if (!snapshotNeedsEscaping(d, scheme)) {
         outDataPoints.add(d);
         continue;
       }
 
-      Labels.Builder outLabelsBuilder = Labels.builder();
-
-      for (Label l : d.getLabels()) {
-        outLabelsBuilder.label(escapeName(l.getName(), scheme), l.getValue());
-      }
-
-      Labels outLabels = outLabelsBuilder.build();
-      DataPointSnapshot outDataPointSnapshot = createEscapedDataPointSnapshot(v, d, outLabels);
+      DataPointSnapshot outDataPointSnapshot =
+          createEscapedDataPointSnapshot(v, d, escapeLabels(d.getLabels(), scheme), scheme);
       outDataPoints.add(outDataPointSnapshot);
     }
 
@@ -308,8 +304,46 @@ public class PrometheusNaming {
         v, escapeName(v.getMetadata().getName(), scheme), outDataPoints);
   }
 
-  static boolean metricNeedsEscaping(DataPointSnapshot d, EscapingScheme scheme) {
+  private static Labels escapeLabels(Labels labels, EscapingScheme scheme) {
+    Labels.Builder outLabelsBuilder = Labels.builder();
+
+    for (Label l : labels) {
+      outLabelsBuilder.label(escapeName(l.getName(), scheme), l.getValue());
+    }
+
+    return outLabelsBuilder.build();
+  }
+
+  static boolean snapshotNeedsEscaping(DataPointSnapshot d, EscapingScheme scheme) {
     Labels labels = d.getLabels();
+    if (labelsNeedsEscaping(labels, scheme)) {
+      return true;
+    }
+    if (d instanceof SummarySnapshot.SummaryDataPointSnapshot) {
+      return exemplarsNeedsEscaping(
+          ((SummarySnapshot.SummaryDataPointSnapshot) d).getExemplars(), scheme);
+    }
+    if (d instanceof HistogramSnapshot.HistogramDataPointSnapshot) {
+      return exemplarsNeedsEscaping(
+          ((HistogramSnapshot.HistogramDataPointSnapshot) d).getExemplars(), scheme);
+    }
+    if (d instanceof CounterSnapshot.CounterDataPointSnapshot) {
+      return exemplarNeedsEscaping(
+          ((CounterSnapshot.CounterDataPointSnapshot) d).getExemplar(), scheme);
+    }
+    if (d instanceof UnknownSnapshot.UnknownDataPointSnapshot) {
+      return exemplarNeedsEscaping(
+          ((UnknownSnapshot.UnknownDataPointSnapshot) d).getExemplar(), scheme);
+    }
+    if (d instanceof GaugeSnapshot.GaugeDataPointSnapshot) {
+      return exemplarNeedsEscaping(
+          ((GaugeSnapshot.GaugeDataPointSnapshot) d).getExemplar(), scheme);
+    }
+
+    return false;
+  }
+
+  private static boolean labelsNeedsEscaping(Labels labels, EscapingScheme scheme) {
     for (Label l : labels) {
       if (needsEscaping(l.getName(), scheme)) {
         return true;
@@ -318,12 +352,26 @@ public class PrometheusNaming {
     return false;
   }
 
+  private static boolean exemplarNeedsEscaping(@Nullable Exemplar exemplar, EscapingScheme scheme) {
+    return exemplar != null && labelsNeedsEscaping(exemplar.getLabels(), scheme);
+  }
+
+  private static boolean exemplarsNeedsEscaping(Exemplars exemplars, EscapingScheme scheme) {
+    for (Exemplar exemplar : exemplars) {
+      if (labelsNeedsEscaping(exemplar.getLabels(), scheme)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private static DataPointSnapshot createEscapedDataPointSnapshot(
-      MetricSnapshot v, DataPointSnapshot d, Labels outLabels) {
+      MetricSnapshot v, DataPointSnapshot d, Labels outLabels, EscapingScheme scheme) {
     if (v instanceof CounterSnapshot) {
       return CounterSnapshot.CounterDataPointSnapshot.builder()
           .value(((CounterSnapshot.CounterDataPointSnapshot) d).getValue())
-          .exemplar(((CounterSnapshot.CounterDataPointSnapshot) d).getExemplar())
+          .exemplar(
+              escapeExemplar(((CounterSnapshot.CounterDataPointSnapshot) d).getExemplar(), scheme))
           .labels(outLabels)
           .createdTimestampMillis(d.getCreatedTimestampMillis())
           .scrapeTimestampMillis(d.getScrapeTimestampMillis())
@@ -331,7 +379,8 @@ public class PrometheusNaming {
     } else if (v instanceof GaugeSnapshot) {
       return GaugeSnapshot.GaugeDataPointSnapshot.builder()
           .value(((GaugeSnapshot.GaugeDataPointSnapshot) d).getValue())
-          .exemplar(((GaugeSnapshot.GaugeDataPointSnapshot) d).getExemplar())
+          .exemplar(
+              escapeExemplar(((GaugeSnapshot.GaugeDataPointSnapshot) d).getExemplar(), scheme))
           .labels(outLabels)
           .scrapeTimestampMillis(d.getScrapeTimestampMillis())
           .build();
@@ -351,7 +400,9 @@ public class PrometheusNaming {
                   .getNativeBucketsForNegativeValues())
           .count(((HistogramSnapshot.HistogramDataPointSnapshot) d).getCount())
           .sum(((HistogramSnapshot.HistogramDataPointSnapshot) d).getSum())
-          .exemplars(((HistogramSnapshot.HistogramDataPointSnapshot) d).getExemplars())
+          .exemplars(
+              escapeExemplars(
+                  ((HistogramSnapshot.HistogramDataPointSnapshot) d).getExemplars(), scheme))
           .labels(outLabels)
           .createdTimestampMillis(d.getCreatedTimestampMillis())
           .scrapeTimestampMillis(d.getScrapeTimestampMillis())
@@ -361,7 +412,9 @@ public class PrometheusNaming {
           .quantiles(((SummarySnapshot.SummaryDataPointSnapshot) d).getQuantiles())
           .count(((SummarySnapshot.SummaryDataPointSnapshot) d).getCount())
           .sum(((SummarySnapshot.SummaryDataPointSnapshot) d).getSum())
-          .exemplars(((SummarySnapshot.SummaryDataPointSnapshot) d).getExemplars())
+          .exemplars(
+              escapeExemplars(
+                  ((SummarySnapshot.SummaryDataPointSnapshot) d).getExemplars(), scheme))
           .labels(outLabels)
           .createdTimestampMillis(d.getCreatedTimestampMillis())
           .scrapeTimestampMillis(d.getScrapeTimestampMillis())
@@ -384,12 +437,30 @@ public class PrometheusNaming {
       return UnknownSnapshot.UnknownDataPointSnapshot.builder()
           .labels(outLabels)
           .value(((UnknownSnapshot.UnknownDataPointSnapshot) d).getValue())
-          .exemplar(((UnknownSnapshot.UnknownDataPointSnapshot) d).getExemplar())
+          .exemplar(
+              escapeExemplar(((UnknownSnapshot.UnknownDataPointSnapshot) d).getExemplar(), scheme))
           .scrapeTimestampMillis(d.getScrapeTimestampMillis())
           .build();
     } else {
       throw new IllegalArgumentException("Unknown MetricSnapshot type: " + v.getClass());
     }
+  }
+
+  private static Exemplars escapeExemplars(Exemplars exemplars, EscapingScheme scheme) {
+    List<Exemplar> escapedExemplars = new ArrayList<>(exemplars.size());
+    for (Exemplar exemplar : exemplars) {
+      Exemplar escaped = escapeExemplar(exemplar, scheme);
+      escapedExemplars.add(escaped);
+    }
+    return Exemplars.of(escapedExemplars);
+  }
+
+  private static Exemplar escapeExemplar(Exemplar exemplar, EscapingScheme scheme) {
+    return Exemplar.builder()
+        .labels(escapeLabels(exemplar.getLabels(), scheme))
+        .timestampMillis(exemplar.getTimestampMillis())
+        .value(exemplar.getValue())
+        .build();
   }
 
   private static MetricSnapshot createEscapedMetricSnapshot(
@@ -479,9 +550,6 @@ public class PrometheusNaming {
       case NO_ESCAPING:
         return name;
       case UNDERSCORE_ESCAPING:
-        if (isValidLegacyMetricName(name)) {
-          return name;
-        }
         for (int i = 0; i < name.length(); ) {
           int c = name.codePointAt(i);
           if (isValidLegacyChar(c, i)) {
@@ -509,9 +577,6 @@ public class PrometheusNaming {
         }
         return escaped.toString();
       case VALUE_ENCODING_ESCAPING:
-        if (isValidLegacyMetricName(name)) {
-          return name;
-        }
         escaped.append("U__");
         for (int i = 0; i < name.length(); ) {
           int c = name.codePointAt(i);

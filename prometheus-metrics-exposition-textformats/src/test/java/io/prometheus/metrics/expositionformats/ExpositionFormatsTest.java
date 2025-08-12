@@ -28,11 +28,10 @@ import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSna
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.jupiter.api.AfterEach;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junitpioneer.jupiter.SetSystemProperty;
 
 class ExpositionFormatsTest {
 
