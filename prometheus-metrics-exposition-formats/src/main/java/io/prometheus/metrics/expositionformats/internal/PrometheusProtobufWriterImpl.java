@@ -21,6 +21,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Quantiles;
+import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
@@ -43,7 +44,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
   public String toDebugString(MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) {
     StringBuilder stringBuilder = new StringBuilder();
     for (MetricSnapshot s : metricSnapshots) {
-      MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
+      MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         stringBuilder.append(TextFormat.printer().printToString(convert(snapshot)));
       }
@@ -56,7 +57,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
       OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)
       throws IOException {
     for (MetricSnapshot s : metricSnapshots) {
-      MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
+      MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         convert(snapshot).writeDelimitedTo(out);
       }

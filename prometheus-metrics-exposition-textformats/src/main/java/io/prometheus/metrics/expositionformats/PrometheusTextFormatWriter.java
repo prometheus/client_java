@@ -20,6 +20,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Quantile;
+import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
@@ -113,7 +114,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     // "summary".
     Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
     for (MetricSnapshot s : metricSnapshots) {
-      MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
+      MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         if (snapshot instanceof CounterSnapshot) {
           writeCounter(writer, (CounterSnapshot) snapshot);
@@ -134,7 +135,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     }
     if (writeCreatedTimestamps) {
       for (MetricSnapshot s : metricSnapshots) {
-        MetricSnapshot snapshot = PrometheusNaming.escapeMetricSnapshot(s, escapingScheme);
+        MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
         if (!snapshot.getDataPoints().isEmpty()) {
           if (snapshot instanceof CounterSnapshot) {
             writeCreated(writer, snapshot);

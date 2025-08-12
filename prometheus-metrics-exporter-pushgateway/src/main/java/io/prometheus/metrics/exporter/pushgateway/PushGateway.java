@@ -1,7 +1,7 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
 import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.escapeName;
 
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;

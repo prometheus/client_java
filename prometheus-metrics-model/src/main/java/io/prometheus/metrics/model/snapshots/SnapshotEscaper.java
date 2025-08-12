@@ -10,7 +10,38 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
-class SnapshotEscaper {
+public class SnapshotEscaper {
+
+  private SnapshotEscaper() {
+  }
+
+  /** Escapes the given metric names and labels with the given escaping scheme. */
+  public static MetricSnapshot escapeMetricSnapshot(MetricSnapshot v, EscapingScheme scheme) {
+    if (v == null) {
+      return null;
+    }
+
+    if (scheme == EscapingScheme.NO_ESCAPING) {
+      return v;
+    }
+
+    List<DataPointSnapshot> outDataPoints = new ArrayList<>();
+
+    for (DataPointSnapshot d : v.getDataPoints()) {
+      if (!snapshotNeedsEscaping(d, scheme)) {
+        outDataPoints.add(d);
+        continue;
+      }
+
+      DataPointSnapshot outDataPointSnapshot =
+        createEscapedDataPointSnapshot(v, d, escapeLabels(d.getLabels(), scheme), scheme);
+      outDataPoints.add(outDataPointSnapshot);
+    }
+
+    return createEscapedMetricSnapshot(
+      v, escapeName(v.getMetadata().getName(), scheme), outDataPoints);
+  }
+
   static MetricSnapshot createEscapedMetricSnapshot(
       MetricSnapshot v, String outName, List<DataPointSnapshot> outDataPoints) {
     if (v instanceof CounterSnapshot) {
@@ -81,33 +112,6 @@ class SnapshotEscaper {
     } else {
       throw new IllegalArgumentException("Unknown MetricSnapshot type: " + v.getClass());
     }
-  }
-
-  /** Escapes the given metric names and labels with the given escaping scheme. */
-  public static MetricSnapshot escapeMetricSnapshot(MetricSnapshot v, EscapingScheme scheme) {
-    if (v == null) {
-      return null;
-    }
-
-    if (scheme == EscapingScheme.NO_ESCAPING) {
-      return v;
-    }
-
-    List<DataPointSnapshot> outDataPoints = new ArrayList<>();
-
-    for (DataPointSnapshot d : v.getDataPoints()) {
-      if (!snapshotNeedsEscaping(d, scheme)) {
-        outDataPoints.add(d);
-        continue;
-      }
-
-      DataPointSnapshot outDataPointSnapshot =
-          createEscapedDataPointSnapshot(v, d, escapeLabels(d.getLabels(), scheme), scheme);
-      outDataPoints.add(outDataPointSnapshot);
-    }
-
-    return createEscapedMetricSnapshot(
-        v, escapeName(v.getMetadata().getName(), scheme), outDataPoints);
   }
 
   private static Labels escapeLabels(Labels labels, EscapingScheme scheme) {
