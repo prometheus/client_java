@@ -266,11 +266,11 @@ class ExpositionFormatsTest {
   @Test
   public void testCounterWithDots() throws IOException {
     String openMetricsText =
-        "# TYPE my_request_count counter\n"
-            + "my_request_count_total{http_path=\"/hello\"} 3.0 # "
-            + exemplarWithDotsString
-            + "\n"
-            + "# EOF\n";
+        """
+        # TYPE U__my_2e_request_2e_count counter
+        U__my_2e_request_2e_count_total{U__http_2e_path="/hello"} 3.0 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
+        # EOF
+        """;
     String prometheusText =
         """
         # TYPE my_request_count_total counter
@@ -417,10 +417,10 @@ class ExpositionFormatsTest {
   public void testGaugeWithDots() throws IOException {
     String openMetricsText =
         """
-        # TYPE my_temperature_celsius gauge
-        # UNIT my_temperature_celsius celsius
-        # HELP my_temperature_celsius Temperature
-        my_temperature_celsius{location_id="data-center-1"} 23.0
+        # TYPE U__my_2e_temperature_2e_celsius gauge
+        # UNIT U__my_2e_temperature_2e_celsius celsius
+        # HELP U__my_2e_temperature_2e_celsius Temperature
+        U__my_2e_temperature_2e_celsius{U__location_2e_id="data-center-1"} 23.0
         # EOF
         """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
@@ -1016,11 +1016,11 @@ class ExpositionFormatsTest {
   public void testSummaryWithDots() throws IOException {
     String openMetricsText =
         """
-        # TYPE my_request_duration_seconds summary
-        # UNIT my_request_duration_seconds seconds
-        # HELP my_request_duration_seconds Request duration in seconds
-        my_request_duration_seconds_count{http_path="/hello"} 1
-        my_request_duration_seconds_sum{http_path="/hello"} 0.03
+        # TYPE U__my_2e_request_2e_duration_2e_seconds summary
+        # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
+        # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
+        U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 1
+        U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 0.03
         # EOF
         """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
@@ -1878,15 +1878,15 @@ class ExpositionFormatsTest {
   @Test
   public void testClassicHistogramWithDots() throws IOException {
     String openMetricsText =
-        "# TYPE my_request_duration_seconds histogram\n"
-            + "# UNIT my_request_duration_seconds seconds\n"
-            + "# HELP my_request_duration_seconds Request duration in seconds\n"
-            + "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 130 # "
-            + exemplarWithDotsString
-            + "\n"
-            + "my_request_duration_seconds_count{http_path=\"/hello\"} 130\n"
-            + "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.01\n"
-            + "# EOF\n";
+        """
+      # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
+      # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
+      # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
+      U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 130 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
+      U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 130
+      U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 0.01
+      # EOF
+      """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_request_duration_seconds histogram\n"
             + "# UNIT my_request_duration_seconds seconds\n"
@@ -2299,15 +2299,15 @@ class ExpositionFormatsTest {
   @Test
   public void testNativeHistogramWithDots() throws IOException {
     String openMetricsText =
-        "# TYPE my_request_duration_seconds histogram\n"
-            + "# UNIT my_request_duration_seconds seconds\n"
-            + "# HELP my_request_duration_seconds Request duration in seconds\n"
-            + "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 4 # "
-            + exemplarWithDotsString
-            + "\n"
-            + "my_request_duration_seconds_count{http_path=\"/hello\"} 4\n"
-            + "my_request_duration_seconds_sum{http_path=\"/hello\"} 3.2\n"
-            + "# EOF\n";
+        """
+      # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
+      # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
+      # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
+      U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 4 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
+      U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 4
+      U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 3.2
+      # EOF
+      """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_request_duration_seconds histogram\n"
             + "# UNIT my_request_duration_seconds seconds\n"
@@ -2409,9 +2409,9 @@ class ExpositionFormatsTest {
   public void testInfoWithDots() throws IOException {
     String openMetricsText =
         """
-        # TYPE jvm_status info
-        # HELP jvm_status JVM status info
-        jvm_status_info{jvm_version="1.2.3"} 1
+        # TYPE U__jvm_2e_status info
+        # HELP U__jvm_2e_status JVM status info
+        U__jvm_2e_status_info{U__jvm_2e_version="1.2.3"} 1
         # EOF
         """;
     String prometheusText =
@@ -2536,10 +2536,10 @@ class ExpositionFormatsTest {
   public void testStateSetWithDots() throws IOException {
     String openMetricsText =
         """
-        # TYPE my_application_state stateset
-        # HELP my_application_state My application state
-        my_application_state{data_center="us east",my_application_state="feature.enabled"} 1
-        my_application_state{data_center="us east",my_application_state="is.alpha.version"} 0
+        # TYPE U__my_2e_application_2e_state stateset
+        # HELP U__my_2e_application_2e_state My application state
+        U__my_2e_application_2e_state{U__data_2e_center="us east",U__my_2e_application_2e_state="feature.enabled"} 1
+        U__my_2e_application_2e_state{U__data_2e_center="us east",U__my_2e_application_2e_state="is.alpha.version"} 0
         # EOF
         """;
     String prometheusText =
@@ -2673,10 +2673,10 @@ class ExpositionFormatsTest {
   public void testUnknownWithDots() throws IOException {
     String openMetrics =
         """
-        # TYPE some_unknown_metric_bytes unknown
-        # UNIT some_unknown_metric_bytes bytes
-        # HELP some_unknown_metric_bytes help message
-        some_unknown_metric_bytes{test_env="7"} 0.7
+        # TYPE U__some_2e_unknown_2e_metric__bytes unknown
+        # UNIT U__some_2e_unknown_2e_metric__bytes bytes
+        # HELP U__some_2e_unknown_2e_metric__bytes help message
+        U__some_2e_unknown_2e_metric__bytes{U__test_2e_env="7"} 0.7
         # EOF
         """;
     String openMetricsWithExemplarsOnAllTimeSeries =
@@ -2823,7 +2823,7 @@ class ExpositionFormatsTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer =
         OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
-    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
