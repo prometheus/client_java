@@ -15,7 +15,7 @@ replaced with underscores, so that the metric name `http.server.duration` become
 
 Prometheus servers that do not support Unicode at all will not pass the `encoding` header, and the
 Prometheus Java client library will replace dots, as well as any character that is not in the legacy
-character set (a-zA-Z0-9_:), with underscores by default.
+character set (`a-zA-Z0-9_:`), with underscores by default.
 
 When `escaping=allow-utf-8` is passed, add valid UTF-8 characters to the metric and label names
 without replacing them. This allows you to use dots in metric and label names, as well as
