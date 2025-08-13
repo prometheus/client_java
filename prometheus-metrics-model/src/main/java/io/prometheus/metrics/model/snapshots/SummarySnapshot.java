@@ -15,13 +15,28 @@ public final class SummarySnapshot extends MetricSnapshot {
    * @param data the constructor will create a sorted copy of the collection.
    */
   public SummarySnapshot(MetricMetadata metadata, Collection<SummaryDataPointSnapshot> data) {
-    super(metadata, data);
+    this(metadata, data, false);
+  }
+
+  private SummarySnapshot(
+      MetricMetadata metadata, Collection<SummaryDataPointSnapshot> data, boolean internal) {
+    super(metadata, data, internal);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public List<SummaryDataPointSnapshot> getDataPoints() {
     return (List<SummaryDataPointSnapshot>) dataPoints;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  MetricSnapshot escape(
+      EscapingScheme escapingScheme, List<? extends DataPointSnapshot> dataPointSnapshots) {
+    return new SummarySnapshot(
+        getMetadata().escape(escapingScheme),
+        (List<SummarySnapshot.SummaryDataPointSnapshot>) dataPointSnapshots,
+        true);
   }
 
   public static final class SummaryDataPointSnapshot extends DistributionDataPointSnapshot {
@@ -67,9 +82,29 @@ public final class SummarySnapshot extends MetricSnapshot {
         Exemplars exemplars,
         long createdTimestampMillis,
         long scrapeTimestampMillis) {
-      super(count, sum, exemplars, labels, createdTimestampMillis, scrapeTimestampMillis);
-      this.quantiles = quantiles;
+      this(
+          count,
+          sum,
+          quantiles,
+          labels,
+          exemplars,
+          createdTimestampMillis,
+          scrapeTimestampMillis,
+          false);
       validate();
+    }
+
+    private SummaryDataPointSnapshot(
+        long count,
+        double sum,
+        Quantiles quantiles,
+        Labels labels,
+        Exemplars exemplars,
+        long createdTimestampMillis,
+        long scrapeTimestampMillis,
+        boolean internal) {
+      super(count, sum, exemplars, labels, createdTimestampMillis, scrapeTimestampMillis, internal);
+      this.quantiles = quantiles;
     }
 
     public Quantiles getQuantiles() {
@@ -85,6 +120,19 @@ public final class SummarySnapshot extends MetricSnapshot {
       if (quantiles == null) {
         throw new NullPointerException();
       }
+    }
+
+    @Override
+    DataPointSnapshot escape(EscapingScheme escapingScheme) {
+      return new SummarySnapshot.SummaryDataPointSnapshot(
+          getCount(),
+          getSum(),
+          getQuantiles(),
+          SnapshotEscaper.escapeLabels(getLabels(), escapingScheme),
+          SnapshotEscaper.escapeExemplars(getExemplars(), escapingScheme),
+          getCreatedTimestampMillis(),
+          getScrapeTimestampMillis(),
+          true);
     }
 
     public static Builder builder() {

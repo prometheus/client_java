@@ -16,16 +16,31 @@ public final class InfoSnapshot extends MetricSnapshot {
    * @param data the constructor will create a sorted copy of the collection.
    */
   public InfoSnapshot(MetricMetadata metadata, Collection<InfoDataPointSnapshot> data) {
-    super(metadata, data);
+    this(metadata, data, false);
     if (metadata.hasUnit()) {
       throw new IllegalArgumentException("An Info metric cannot have a unit.");
     }
+  }
+
+  private InfoSnapshot(
+      MetricMetadata metadata, Collection<InfoDataPointSnapshot> data, boolean internal) {
+    super(metadata, data, internal);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public List<InfoDataPointSnapshot> getDataPoints() {
     return (List<InfoDataPointSnapshot>) dataPoints;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  MetricSnapshot escape(
+      EscapingScheme escapingScheme, List<? extends DataPointSnapshot> dataPointSnapshots) {
+    return new InfoSnapshot(
+        getMetadata().escape(escapingScheme),
+        (List<InfoSnapshot.InfoDataPointSnapshot>) dataPointSnapshots,
+        true);
   }
 
   public static class InfoDataPointSnapshot extends DataPointSnapshot {
@@ -46,11 +61,23 @@ public final class InfoSnapshot extends MetricSnapshot {
      * mirroring metrics with given timestamps from other metric sources.
      */
     public InfoDataPointSnapshot(Labels labels, long scrapeTimestampMillis) {
-      super(labels, 0L, scrapeTimestampMillis);
+      this(labels, scrapeTimestampMillis, false);
+    }
+
+    private InfoDataPointSnapshot(Labels labels, long scrapeTimestampMillis, boolean internal) {
+      super(labels, 0L, scrapeTimestampMillis, internal);
     }
 
     public static Builder builder() {
       return new Builder();
+    }
+
+    @Override
+    DataPointSnapshot escape(EscapingScheme escapingScheme) {
+      return new InfoSnapshot.InfoDataPointSnapshot(
+          SnapshotEscaper.escapeLabels(getLabels(), escapingScheme),
+          getScrapeTimestampMillis(),
+          true);
     }
 
     public static class Builder extends DataPointSnapshot.Builder<Builder> {
@@ -58,7 +85,7 @@ public final class InfoSnapshot extends MetricSnapshot {
       private Builder() {}
 
       public InfoDataPointSnapshot build() {
-        return new InfoDataPointSnapshot(labels, scrapeTimestampMillis);
+        return new InfoDataPointSnapshot(labels, scrapeTimestampMillis, true);
       }
 
       @Override

@@ -121,4 +121,8 @@ public final class MetricMetadata {
       }
     }
   }
+
+  MetricMetadata escape(EscapingScheme escapingScheme) {
+    return new MetricMetadata(PrometheusNaming.escapeName(name, escapingScheme), help, unit);
+  }
 }

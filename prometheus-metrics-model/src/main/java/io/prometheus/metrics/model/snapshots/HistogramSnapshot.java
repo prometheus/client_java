@@ -31,7 +31,15 @@ public final class HistogramSnapshot extends MetricSnapshot {
       boolean isGaugeHistogram,
       MetricMetadata metadata,
       Collection<HistogramDataPointSnapshot> data) {
-    super(metadata, data);
+    this(isGaugeHistogram, metadata, data, false);
+  }
+
+  private HistogramSnapshot(
+      boolean isGaugeHistogram,
+      MetricMetadata metadata,
+      Collection<HistogramDataPointSnapshot> data,
+      boolean internal) {
+    super(metadata, data, internal);
     this.gaugeHistogram = isGaugeHistogram;
   }
 
@@ -43,6 +51,17 @@ public final class HistogramSnapshot extends MetricSnapshot {
   @Override
   public List<HistogramDataPointSnapshot> getDataPoints() {
     return (List<HistogramDataPointSnapshot>) dataPoints;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  MetricSnapshot escape(
+      EscapingScheme escapingScheme, List<? extends DataPointSnapshot> dataPointSnapshots) {
+    return new HistogramSnapshot(
+        gaugeHistogram,
+        getMetadata().escape(escapingScheme),
+        (List<HistogramSnapshot.HistogramDataPointSnapshot>) dataPointSnapshots,
+        true);
   }
 
   public static final class HistogramDataPointSnapshot extends DistributionDataPointSnapshot {
@@ -222,31 +241,53 @@ public final class HistogramSnapshot extends MetricSnapshot {
         Exemplars exemplars,
         long createdTimestampMillis,
         long scrapeTimestampMillis) {
-      super(
+      this(
+          classicBuckets,
+          nativeSchema,
+          sum,
+          labels,
+          exemplars,
+          createdTimestampMillis,
+          scrapeTimestampMillis,
           calculateCount(
               classicBuckets,
               nativeSchema,
               nativeZeroCount,
               nativeBucketsForPositiveValues,
               nativeBucketsForNegativeValues),
-          sum,
-          exemplars,
-          labels,
-          createdTimestampMillis,
-          scrapeTimestampMillis);
+          nativeSchema == CLASSIC_HISTOGRAM
+              ? NativeHistogramBuckets.EMPTY
+              : nativeBucketsForPositiveValues,
+          nativeSchema == CLASSIC_HISTOGRAM
+              ? NativeHistogramBuckets.EMPTY
+              : nativeBucketsForNegativeValues,
+          nativeSchema == CLASSIC_HISTOGRAM ? 0 : nativeZeroCount,
+          nativeSchema == CLASSIC_HISTOGRAM ? 0 : nativeZeroThreshold,
+          false);
+      validate();
+    }
+
+    private HistogramDataPointSnapshot(
+        ClassicHistogramBuckets classicBuckets,
+        int nativeSchema,
+        double sum,
+        Labels labels,
+        Exemplars exemplars,
+        long createdTimestampMillis,
+        long scrapeTimestampMillis,
+        long count,
+        NativeHistogramBuckets nativeBucketsForPositiveValues,
+        NativeHistogramBuckets nativeBucketsForNegativeValues,
+        long nativeZeroCount,
+        double nativeZeroThreshold,
+        boolean internal) {
+      super(count, sum, exemplars, labels, createdTimestampMillis, scrapeTimestampMillis, internal);
       this.classicBuckets = classicBuckets;
       this.nativeSchema = nativeSchema;
-      this.nativeZeroCount = nativeSchema == CLASSIC_HISTOGRAM ? 0 : nativeZeroCount;
-      this.nativeZeroThreshold = nativeSchema == CLASSIC_HISTOGRAM ? 0 : nativeZeroThreshold;
-      this.nativeBucketsForPositiveValues =
-          nativeSchema == CLASSIC_HISTOGRAM
-              ? NativeHistogramBuckets.EMPTY
-              : nativeBucketsForPositiveValues;
-      this.nativeBucketsForNegativeValues =
-          nativeSchema == CLASSIC_HISTOGRAM
-              ? NativeHistogramBuckets.EMPTY
-              : nativeBucketsForNegativeValues;
-      validate();
+      this.nativeZeroCount = nativeZeroCount;
+      this.nativeZeroThreshold = nativeZeroThreshold;
+      this.nativeBucketsForPositiveValues = nativeBucketsForPositiveValues;
+      this.nativeBucketsForNegativeValues = nativeBucketsForNegativeValues;
     }
 
     private static long calculateCount(
@@ -376,6 +417,24 @@ public final class HistogramSnapshot extends MetricSnapshot {
               nativeZeroThreshold + ": illegal nativeZeroThreshold. Must be >= 0.");
         }
       }
+    }
+
+    @Override
+    DataPointSnapshot escape(EscapingScheme escapingScheme) {
+      return new HistogramSnapshot.HistogramDataPointSnapshot(
+          classicBuckets,
+          nativeSchema,
+          getSum(),
+          SnapshotEscaper.escapeLabels(getLabels(), escapingScheme),
+          SnapshotEscaper.escapeExemplars(getExemplars(), escapingScheme),
+          getCreatedTimestampMillis(),
+          getScrapeTimestampMillis(),
+          getCount(),
+          nativeBucketsForPositiveValues,
+          nativeBucketsForNegativeValues,
+          nativeZeroCount,
+          nativeZeroThreshold,
+          true);
     }
 
     public static Builder builder() {

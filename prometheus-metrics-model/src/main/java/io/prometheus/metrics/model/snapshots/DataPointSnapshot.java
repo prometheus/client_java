@@ -7,11 +7,13 @@ public abstract class DataPointSnapshot {
   private final long scrapeTimestampMillis;
 
   protected DataPointSnapshot(
-      Labels labels, long createdTimestampMillis, long scrapeTimestampMillis) {
+      Labels labels, long createdTimestampMillis, long scrapeTimestampMillis, boolean internal) {
     this.labels = labels;
     this.createdTimestampMillis = createdTimestampMillis;
     this.scrapeTimestampMillis = scrapeTimestampMillis;
-    validate();
+    if (!internal) {
+      validate();
+    }
   }
 
   private void validate() {
@@ -85,4 +87,6 @@ public abstract class DataPointSnapshot {
 
     protected abstract T self();
   }
+
+  abstract DataPointSnapshot escape(EscapingScheme escapingScheme);
 }

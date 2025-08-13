@@ -19,8 +19,13 @@ public final class StateSetSnapshot extends MetricSnapshot {
    * @param data the constructor will create a sorted copy of the collection.
    */
   public StateSetSnapshot(MetricMetadata metadata, Collection<StateSetDataPointSnapshot> data) {
-    super(metadata, data);
+    this(metadata, data, false);
     validate();
+  }
+
+  private StateSetSnapshot(
+      MetricMetadata metadata, Collection<StateSetDataPointSnapshot> data, boolean internal) {
+    super(metadata, data, internal);
   }
 
   private void validate() {
@@ -41,10 +46,20 @@ public final class StateSetSnapshot extends MetricSnapshot {
     return (List<StateSetDataPointSnapshot>) dataPoints;
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  MetricSnapshot escape(
+      EscapingScheme escapingScheme, List<? extends DataPointSnapshot> dataPointSnapshots) {
+    return new StateSetSnapshot(
+        getMetadata().escape(escapingScheme),
+        (List<StateSetSnapshot.StateSetDataPointSnapshot>) dataPointSnapshots,
+        true);
+  }
+
   public static class StateSetDataPointSnapshot extends DataPointSnapshot
       implements Iterable<State> {
-    private final String[] names;
-    private final boolean[] values;
+    final String[] names;
+    final boolean[] values;
 
     /**
      * To create a new {@link StateSetDataPointSnapshot}, you can either call the constructor
@@ -67,19 +82,34 @@ public final class StateSetSnapshot extends MetricSnapshot {
      */
     public StateSetDataPointSnapshot(
         String[] names, boolean[] values, Labels labels, long scrapeTimestampMillis) {
-      super(labels, 0L, scrapeTimestampMillis);
-      if (names.length == 0) {
-        throw new IllegalArgumentException("StateSet must have at least one state.");
+      this(names, values, labels, scrapeTimestampMillis, false);
+    }
+
+    private StateSetDataPointSnapshot(
+        String[] names,
+        boolean[] values,
+        Labels labels,
+        long scrapeTimestampMillis,
+        boolean internal) {
+      super(labels, 0L, scrapeTimestampMillis, false);
+      if (internal) {
+        this.names = names;
+        this.values = values;
+      } else {
+        if (names.length == 0) {
+          throw new IllegalArgumentException("StateSet must have at least one state.");
+        }
+        if (names.length != values.length) {
+          throw new IllegalArgumentException("names[] and values[] must have the same length");
+        }
+
+        String[] namesCopy = Arrays.copyOf(names, names.length);
+        boolean[] valuesCopy = Arrays.copyOf(values, names.length);
+        sort(namesCopy, valuesCopy);
+        this.names = namesCopy;
+        this.values = valuesCopy;
+        validate();
       }
-      if (names.length != values.length) {
-        throw new IllegalArgumentException("names[] and values[] must have the same length");
-      }
-      String[] namesCopy = Arrays.copyOf(names, names.length);
-      boolean[] valuesCopy = Arrays.copyOf(values, names.length);
-      sort(namesCopy, valuesCopy);
-      this.names = namesCopy;
-      this.values = valuesCopy;
-      validate();
     }
 
     public int size() {
@@ -103,6 +133,16 @@ public final class StateSetSnapshot extends MetricSnapshot {
           throw new IllegalArgumentException(names[i] + " duplicate state name");
         }
       }
+    }
+
+    @Override
+    DataPointSnapshot escape(EscapingScheme escapingScheme) {
+      return new StateSetSnapshot.StateSetDataPointSnapshot(
+          names,
+          values,
+          SnapshotEscaper.escapeLabels(getLabels(), escapingScheme),
+          getScrapeTimestampMillis(),
+          true);
     }
 
     private List<State> asList() {

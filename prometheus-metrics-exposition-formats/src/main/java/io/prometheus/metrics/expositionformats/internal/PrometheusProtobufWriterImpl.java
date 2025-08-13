@@ -1,11 +1,10 @@
 package io.prometheus.metrics.expositionformats.internal;
 
-import static io.prometheus.metrics.expositionformats.SnapshotEscaper.getSnapshotLabelName;
 import static io.prometheus.metrics.expositionformats.internal.ProtobufUtil.timestampFromMillis;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
 import com.google.protobuf.TextFormat;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
-import io.prometheus.metrics.expositionformats.SnapshotEscaper;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_31_1.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -22,6 +21,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.Quantiles;
+import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
