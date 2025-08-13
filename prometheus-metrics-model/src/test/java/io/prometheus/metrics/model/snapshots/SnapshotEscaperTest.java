@@ -5,7 +5,11 @@ import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotL
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class SnapshotEscaperTest {
 
@@ -125,13 +129,23 @@ class SnapshotEscaperTest {
     throw new IllegalArgumentException("Unsupported snapshot type: " + snapshotType);
   }
 
-  @Test
-  void escapeIsNoop() {
-    MetricSnapshot original = CounterSnapshot.builder().name("empty").build();
+  @ParameterizedTest
+  @MethodSource("emptySnapshots")
+  void escapeIsNoop(MetricSnapshot original) {
     assertThat(original)
         .isSameAs(escapeMetricSnapshot(original, EscapingScheme.NO_ESCAPING))
         .isSameAs(escapeMetricSnapshot(original, EscapingScheme.UNDERSCORE_ESCAPING));
     assertThat(escapeMetricSnapshot(null, EscapingScheme.NO_ESCAPING)).isNull();
+  }
+
+  public static Stream<Arguments> emptySnapshots() {
+    return Stream.of(
+        Arguments.of(CounterSnapshot.builder().name("empty").build()),
+        Arguments.of(GaugeSnapshot.builder().name("empty").build()),
+        Arguments.of(SummarySnapshot.builder().name("empty").build()),
+        Arguments.of(HistogramSnapshot.builder().name("empty").build()),
+        Arguments.of(StateSetSnapshot.builder().name("empty").build()),
+        Arguments.of(UnknownSnapshot.builder().name("empty").build()));
   }
 
   @Test

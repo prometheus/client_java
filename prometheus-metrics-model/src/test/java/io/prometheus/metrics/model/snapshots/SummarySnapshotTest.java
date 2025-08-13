@@ -110,4 +110,11 @@ class SummarySnapshotTest {
     assertThat(data.hasScrapeTimestamp()).isFalse();
     assertThat(data.getExemplars().size()).isZero();
   }
+
+  @Test
+  void escape() {
+    SummarySnapshot.SummaryDataPointSnapshot data =
+        SummarySnapshot.SummaryDataPointSnapshot.builder().build();
+    assertThat(data.escape(EscapingScheme.UNDERSCORE_ESCAPING)).isEqualTo(data);
+  }
 }
