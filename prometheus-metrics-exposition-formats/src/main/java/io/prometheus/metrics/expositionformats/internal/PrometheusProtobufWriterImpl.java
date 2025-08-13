@@ -64,7 +64,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     }
   }
 
-  Metrics.MetricFamily convert(MetricSnapshot snapshot, EscapingScheme scheme) {
+  public Metrics.MetricFamily convert(MetricSnapshot snapshot, EscapingScheme scheme) {
     Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
     if (snapshot instanceof CounterSnapshot) {
       for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getDataPoints()) {
@@ -136,7 +136,8 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     return metricBuilder;
   }
 
-  private Metrics.Metric.Builder convert(GaugeSnapshot.GaugeDataPointSnapshot data, EscapingScheme scheme) {
+  private Metrics.Metric.Builder convert(
+      GaugeSnapshot.GaugeDataPointSnapshot data, EscapingScheme scheme) {
     Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
     gaugeBuilder.setValue(data.getValue());
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
@@ -202,7 +203,8 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     return metricBuilder;
   }
 
-  private Metrics.Metric.Builder convert(SummarySnapshot.SummaryDataPointSnapshot data, EscapingScheme scheme) {
+  private Metrics.Metric.Builder convert(
+      SummarySnapshot.SummaryDataPointSnapshot data, EscapingScheme scheme) {
     Metrics.Summary.Builder summaryBuilder = Metrics.Summary.newBuilder();
     if (data.hasCount()) {
       summaryBuilder.setSampleCount(data.getCount());
@@ -225,7 +227,8 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     return metricBuilder;
   }
 
-  private Metrics.Metric.Builder convert(InfoSnapshot.InfoDataPointSnapshot data, EscapingScheme scheme) {
+  private Metrics.Metric.Builder convert(
+      InfoSnapshot.InfoDataPointSnapshot data, EscapingScheme scheme) {
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
     gaugeBuilder.setValue(1);
@@ -236,7 +239,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
   }
 
   private Metrics.Metric.Builder convert(
-    StateSetSnapshot.StateSetDataPointSnapshot data, String name, int i, EscapingScheme scheme) {
+      StateSetSnapshot.StateSetDataPointSnapshot data, String name, int i, EscapingScheme scheme) {
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
     addLabels(metricBuilder, data.getLabels(), scheme);

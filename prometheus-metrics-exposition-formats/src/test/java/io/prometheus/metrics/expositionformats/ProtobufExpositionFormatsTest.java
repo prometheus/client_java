@@ -7,7 +7,6 @@ import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriter
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 
 class ProtobufExpositionFormatsTest extends ExpositionFormatsTest {
@@ -17,7 +16,7 @@ class ProtobufExpositionFormatsTest extends ExpositionFormatsTest {
     PrometheusProtobufWriterImpl writer = new PrometheusProtobufWriterImpl();
     Metrics.MetricFamily protobufData =
         writer.convert(
-          SnapshotEscaper.escapeMetricSnapshot(snapshot, EscapingScheme.UNDERSCORE_ESCAPING));
+            snapshot, EscapingScheme.UNDERSCORE_ESCAPING);
     String actual = ProtobufUtil.shortDebugString(protobufData);
     assertThat(actual).isEqualTo(expected);
   }

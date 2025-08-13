@@ -175,7 +175,8 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       MetricMetadata metadata = snapshot.getMetadata();
       writeMetadata(writer, "_total", "counter", metadata, scheme);
       for (CounterSnapshot.CounterDataPointSnapshot data : snapshot.getDataPoints()) {
-        writeNameAndLabels(writer, getMetadataName(metadata, scheme), "_total", data.getLabels(), scheme);
+        writeNameAndLabels(
+            writer, getMetadataName(metadata, scheme), "_total", data.getLabels(), scheme);
         writeDouble(writer, data.getValue());
         writeScrapeTimestampAndNewline(writer, data);
       }
@@ -397,12 +398,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     writeName(writer, name + (suffix != null ? suffix : ""), NameType.Metric);
     if (!labels.isEmpty() || additionalLabelName != null) {
       writeLabels(
-          writer,
-          labels,
-          additionalLabelName,
-          additionalLabelValue,
-          metricInsideBraces,
-          scheme);
+          writer, labels, additionalLabelName, additionalLabelValue, metricInsideBraces, scheme);
     } else if (metricInsideBraces) {
       writer.write('}');
     }
