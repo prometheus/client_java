@@ -86,7 +86,8 @@ class HistogramTest {
         }
       }
       Metrics.MetricFamily protobufData =
-          new PrometheusProtobufWriterImpl().convert(histogram.collect());
+          new PrometheusProtobufWriterImpl()
+              .convert(histogram.collect(), EscapingScheme.NO_ESCAPING);
       String expectedWithMetadata =
           "name: \"test\" type: HISTOGRAM metric { histogram { " + expected + " } }";
       assertThat(ProtobufUtil.shortDebugString(protobufData))
@@ -941,7 +942,8 @@ class HistogramTest {
         """;
 
     // protobuf
-    Metrics.MetricFamily protobufData = new PrometheusProtobufWriterImpl().convert(snapshot);
+    Metrics.MetricFamily protobufData =
+        new PrometheusProtobufWriterImpl().convert(snapshot, EscapingScheme.NO_ESCAPING);
     assertThat(ProtobufUtil.shortDebugString(protobufData)).isEqualTo(expectedProtobuf);
 
     // text
