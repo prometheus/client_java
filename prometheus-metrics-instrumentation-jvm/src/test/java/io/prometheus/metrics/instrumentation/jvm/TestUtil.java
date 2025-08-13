@@ -1,7 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

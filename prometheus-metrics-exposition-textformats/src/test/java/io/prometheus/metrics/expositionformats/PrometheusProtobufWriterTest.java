@@ -3,7 +3,7 @@ package io.prometheus.metrics.expositionformats;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
+import io.prometheus.metrics.config.EscapingScheme;
 import org.junit.jupiter.api.Test;
 
 class PrometheusProtobufWriterTest {

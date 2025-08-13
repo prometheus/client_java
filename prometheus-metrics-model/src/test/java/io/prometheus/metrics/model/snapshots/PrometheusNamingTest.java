@@ -11,6 +11,7 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.validateUni
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

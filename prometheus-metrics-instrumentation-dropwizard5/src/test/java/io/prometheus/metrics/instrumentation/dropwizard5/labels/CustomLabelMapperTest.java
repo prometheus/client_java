@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.dropwizard.metrics5.MetricFilter;
 import io.dropwizard.metrics5.MetricRegistry;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

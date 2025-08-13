@@ -2,7 +2,7 @@ package io.prometheus.metrics.expositionformats;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

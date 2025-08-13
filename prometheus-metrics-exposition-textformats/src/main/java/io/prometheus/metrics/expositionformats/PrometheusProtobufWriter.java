@@ -1,6 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
 import java.io.OutputStream;

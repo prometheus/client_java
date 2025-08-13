@@ -4,13 +4,13 @@ import static io.prometheus.metrics.expositionformats.internal.ProtobufUtil.time
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
 import com.google.protobuf.TextFormat;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_31_1.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;

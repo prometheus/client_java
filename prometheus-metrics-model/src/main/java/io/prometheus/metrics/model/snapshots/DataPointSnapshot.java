@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.EscapingScheme;
+
 @SuppressWarnings("this-escape")
 public abstract class DataPointSnapshot {
   private final Labels labels;

@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 

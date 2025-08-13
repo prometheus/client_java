@@ -9,6 +9,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.*;

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
@@ -12,7 +13,6 @@ import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_3
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;

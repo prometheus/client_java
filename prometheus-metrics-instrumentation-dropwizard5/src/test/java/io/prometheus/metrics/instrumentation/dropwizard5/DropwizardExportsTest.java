@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
 import io.dropwizard.metrics5.*;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;

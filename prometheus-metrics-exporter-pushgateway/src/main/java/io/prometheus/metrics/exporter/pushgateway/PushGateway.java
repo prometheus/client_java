@@ -3,6 +3,7 @@ package io.prometheus.metrics.exporter.pushgateway;
 import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesException;
@@ -12,7 +13,6 @@ import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.MultiCollector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -439,19 +439,7 @@ public class PushGateway {
 
     private EscapingScheme getEscapingScheme(ExporterPushgatewayProperties properties) {
       if (properties != null && properties.getEscapingScheme() != null) {
-        String scheme = properties.getEscapingScheme();
-        switch (scheme) {
-          case "no-escaping":
-            return EscapingScheme.NO_ESCAPING;
-          case "values":
-            return EscapingScheme.VALUE_ENCODING_ESCAPING;
-          case "underscores":
-            return EscapingScheme.UNDERSCORE_ESCAPING;
-          case "dots":
-            return EscapingScheme.DOTS_ESCAPING;
-          default:
-            return EscapingScheme.NO_ESCAPING;
-        }
+        return properties.getEscapingScheme();
       }
       return EscapingScheme.NO_ESCAPING;
     }

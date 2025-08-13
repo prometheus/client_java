@@ -1,7 +1,4 @@
-package io.prometheus.metrics.model.snapshots;
-
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.DEFAULT_ESCAPING_SCHEME;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.ESCAPING_KEY;
+package io.prometheus.metrics.config;
 
 public enum EscapingScheme {
   /** NO_ESCAPING indicates that a name will not be escaped. */
@@ -21,8 +18,12 @@ public enum EscapingScheme {
    * the Unicode value, surrounded by underscores. Single underscores are replaced with double
    * underscores.
    */
-  VALUE_ENCODING_ESCAPING("values"),
-  ;
+  VALUE_ENCODING_ESCAPING("values");
+
+  private static final String ESCAPING_KEY = "escaping";
+
+  /** Default escaping scheme for names when not specified. */
+  public static final EscapingScheme DEFAULT = UNDERSCORE_ESCAPING;
 
   public final String getValue() {
     return value;
@@ -53,12 +54,12 @@ public enum EscapingScheme {
             return EscapingScheme.forString(value);
           } catch (IllegalArgumentException e) {
             // If the escaping parameter is unknown, ignore it.
-            return DEFAULT_ESCAPING_SCHEME;
+            return DEFAULT;
           }
         }
       }
     }
-    return DEFAULT_ESCAPING_SCHEME;
+    return DEFAULT;
   }
 
   static EscapingScheme forString(String value) {

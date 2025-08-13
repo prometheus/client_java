@@ -1,6 +1,7 @@
 package io.prometheus.metrics.config;
 
 import java.util.Map;
+import javax.annotation.Nullable;
 
 public class ExporterPushgatewayProperties {
 
@@ -9,13 +10,16 @@ public class ExporterPushgatewayProperties {
   private static final String SCHEME = "scheme";
   private static final String ESCAPING_SCHEME = "escapingScheme";
   private static final String PREFIX = "io.prometheus.exporter.pushgateway";
-  private final String scheme;
-  private final String address;
-  private final String job;
-  private final String escapingScheme;
+  @Nullable private final String scheme;
+  @Nullable private final String address;
+  @Nullable private final String job;
+  @Nullable private final EscapingScheme escapingScheme;
 
   private ExporterPushgatewayProperties(
-      String address, String job, String scheme, String escapingScheme) {
+      @Nullable String address,
+      @Nullable String job,
+      @Nullable String scheme,
+      @Nullable EscapingScheme escapingScheme) {
     this.address = address;
     this.job = job;
     this.scheme = scheme;
@@ -23,6 +27,7 @@ public class ExporterPushgatewayProperties {
   }
 
   /** Address of the Pushgateway in the form {@code host:port}. Default is {@code localhost:9091} */
+  @Nullable
   public String getAddress() {
     return address;
   }
@@ -31,6 +36,7 @@ public class ExporterPushgatewayProperties {
    * {@code job} label for metrics being pushed. Default is the name of the JAR file that is
    * running.
    */
+  @Nullable
   public String getJob() {
     return job;
   }
@@ -39,15 +45,14 @@ public class ExporterPushgatewayProperties {
    * Scheme to be used when pushing metrics to the pushgateway. Must be "http" or "https". Default
    * is "http".
    */
+  @Nullable
   public String getScheme() {
     return scheme;
   }
 
-  /**
-   * Escaping scheme to be used when pushing metric data to the pushgateway. Valid values:
-   * "no-escaping", "values", "underscores", "dots". Default is "no-escaping".
-   */
-  public String getEscapingScheme() {
+  /** Escaping scheme to be used when pushing metric data to the pushgateway. */
+  @Nullable
+  public EscapingScheme getEscapingScheme() {
     return escapingScheme;
   }
 
@@ -71,19 +76,29 @@ public class ExporterPushgatewayProperties {
       }
     }
 
-    if (escapingScheme != null) {
-      if (!escapingScheme.equals("no-escaping")
-          && !escapingScheme.equals("values")
-          && !escapingScheme.equals("underscores")
-          && !escapingScheme.equals("dots")) {
+    return new ExporterPushgatewayProperties(
+        address, job, scheme, parseEscapingScheme(escapingScheme));
+  }
+
+  private static @Nullable EscapingScheme parseEscapingScheme(@Nullable String scheme) {
+    if (scheme == null) {
+      return null;
+    }
+    switch (scheme) {
+      case "no-escaping":
+        return EscapingScheme.NO_ESCAPING;
+      case "values":
+        return EscapingScheme.VALUE_ENCODING_ESCAPING;
+      case "underscores":
+        return EscapingScheme.UNDERSCORE_ESCAPING;
+      case "dots":
+        return EscapingScheme.DOTS_ESCAPING;
+      default:
         throw new PrometheusPropertiesException(
             String.format(
                 "%s.%s: Illegal value. Expecting 'no-escaping', 'values', 'underscores', "
                     + "or 'dots'. Found: %s",
-                PREFIX, ESCAPING_SCHEME, escapingScheme));
-      }
+                PREFIX, ESCAPING_SCHEME, scheme));
     }
-
-    return new ExporterPushgatewayProperties(address, job, scheme, escapingScheme);
   }
 }

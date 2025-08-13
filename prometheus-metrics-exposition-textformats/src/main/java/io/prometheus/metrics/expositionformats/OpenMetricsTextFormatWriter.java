@@ -9,11 +9,11 @@ import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeOpenMe
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.DistributionDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;

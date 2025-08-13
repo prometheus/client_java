@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.codahale.metrics.*;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.instrumentation.dropwizard5.InvalidMetricHandler;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

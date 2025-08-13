@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

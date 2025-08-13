@@ -1,9 +1,9 @@
 package io.prometheus.metrics.benchmarks;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot.GaugeDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;

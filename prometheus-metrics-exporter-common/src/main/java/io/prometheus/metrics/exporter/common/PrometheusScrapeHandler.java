@@ -1,12 +1,12 @@
 package io.prometheus.metrics.exporter.common;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.ExporterFilterProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.ExpositionFormats;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

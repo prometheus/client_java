@@ -10,10 +10,10 @@ import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.escapeMetric
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;

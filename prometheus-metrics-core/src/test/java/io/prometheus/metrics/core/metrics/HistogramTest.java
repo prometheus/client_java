@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;

@@ -3,10 +3,10 @@ package io.prometheus.metrics.expositionformats;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;

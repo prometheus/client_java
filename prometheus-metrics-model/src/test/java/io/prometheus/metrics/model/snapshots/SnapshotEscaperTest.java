@@ -4,6 +4,7 @@ import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.escapeMetric
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,7 @@
 package io.prometheus.metrics.expositionformats;
 
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,7 +15,7 @@ public interface ExpositionFormatWriter {
 
   /** Writes the given metric snapshots to the output stream using the default escaping scheme. */
   default void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
-    write(out, metricSnapshots, PrometheusNaming.DEFAULT_ESCAPING_SCHEME);
+    write(out, metricSnapshots, EscapingScheme.DEFAULT);
   }
 
   /** Converts the metric snapshots to a debug string using the specified escaping scheme. */
@@ -32,7 +31,7 @@ public interface ExpositionFormatWriter {
 
   /** Converts the metric snapshots to a debug string using the default escaping scheme. */
   default String toDebugString(MetricSnapshots metricSnapshots) {
-    return toDebugString(metricSnapshots, PrometheusNaming.DEFAULT_ESCAPING_SCHEME);
+    return toDebugString(metricSnapshots, EscapingScheme.DEFAULT);
   }
 
   String getContentType();

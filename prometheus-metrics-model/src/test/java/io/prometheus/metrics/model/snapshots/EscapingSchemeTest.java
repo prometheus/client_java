@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import org.junit.jupiter.api.Test;
 
 class EscapingSchemeTest {
@@ -30,6 +31,6 @@ class EscapingSchemeTest {
     assertThat(EscapingScheme.fromAcceptHeader("application/json; escaping=values"))
         .isEqualTo(EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(EscapingScheme.fromAcceptHeader("application/json"))
-        .isEqualTo(PrometheusNaming.DEFAULT_ESCAPING_SCHEME);
+        .isEqualTo(EscapingScheme.DEFAULT);
   }
 }

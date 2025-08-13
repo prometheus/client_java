@@ -3,11 +3,11 @@ package io.prometheus.metrics.core.metrics;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_31_1.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
-import io.prometheus.metrics.model.snapshots.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Unit;

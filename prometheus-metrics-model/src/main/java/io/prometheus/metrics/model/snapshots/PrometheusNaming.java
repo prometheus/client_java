@@ -4,6 +4,7 @@ import static java.lang.Character.MAX_CODE_POINT;
 import static java.lang.Character.MAX_LOW_SURROGATE;
 import static java.lang.Character.MIN_HIGH_SURROGATE;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
@@ -15,17 +16,6 @@ import java.util.regex.Pattern;
  * OpenTelemetry format the dots are retained.
  */
 public class PrometheusNaming {
-
-  /** Default escaping scheme for names when not specified. */
-  public static final EscapingScheme DEFAULT_ESCAPING_SCHEME = EscapingScheme.UNDERSCORE_ESCAPING;
-
-  /**
-   * ESCAPING_KEY is the key in an Accept header that defines how metric and label names that do not
-   * conform to the legacy character requirements should be escaped when being scraped by a legacy
-   * Prometheus system. If a system does not explicitly pass an escaping parameter in the Accept
-   * header, the default escaping scheme will be used.
-   */
-  public static final String ESCAPING_KEY = "escaping";
 
   private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
 
