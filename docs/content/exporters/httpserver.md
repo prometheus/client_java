@@ -1,6 +1,6 @@
 ---
 title: HTTPServer
-weight: 3
+weight: 4
 ---
 
 The `HTTPServer` is a standalone server for exposing a metric endpoint. A minimal example
