@@ -162,7 +162,7 @@ class CacheMetricsCollectorTest {
     final OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
       writer.write(out, registry.scrape(), EscapingScheme.NO_ESCAPING);
-      return out.toString(StandardCharsets.UTF_8.name());
+      return out.toString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

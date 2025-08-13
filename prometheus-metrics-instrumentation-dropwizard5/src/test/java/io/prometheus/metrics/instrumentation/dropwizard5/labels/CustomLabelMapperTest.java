@@ -219,8 +219,8 @@ app_okhttpclient_client_HttpClient_greatService_total{client="sampleClient",serv
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
-      writer.write(out, snapshots, EscapingScheme.NO_ESCAPING);
-      return out.toString(StandardCharsets.UTF_8.name());
+      writer.write(out, snapshots, EscapingScheme.UNDERSCORE_ESCAPING);
+      return out.toString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
