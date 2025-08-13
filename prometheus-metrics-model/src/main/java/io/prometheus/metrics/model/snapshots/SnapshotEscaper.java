@@ -15,7 +15,8 @@ public class SnapshotEscaper {
   private SnapshotEscaper() {}
 
   /** Escapes the given metric names and labels with the given escaping scheme. */
-  public static MetricSnapshot escapeMetricSnapshot(MetricSnapshot v, EscapingScheme scheme) {
+  @Nullable
+  public static MetricSnapshot escapeMetricSnapshot(@Nullable MetricSnapshot v, EscapingScheme scheme) {
     if (v == null) {
       return null;
     }
@@ -338,7 +339,7 @@ public class SnapshotEscaper {
     }
   }
 
-  private static boolean needsEscaping(String name, EscapingScheme scheme) {
+  public static boolean needsEscaping(String name, EscapingScheme scheme) {
     return !PrometheusNaming.isValidLegacyMetricName(name)
         || (scheme == EscapingScheme.DOTS_ESCAPING && (name.contains(".") || name.contains("_")));
   }

@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.snapshots;
 
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.escapeMetricSnapshot;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.escapeName;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.unescapeName;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -281,5 +282,31 @@ class SnapshotEscaperTest {
     }
 
     throw new IllegalArgumentException("Unsupported snapshot type: " + snapshotType);
+  }
+
+  @Test
+  void escapeIsNoop() {
+    MetricSnapshot original = CounterSnapshot.builder().name("empty").build();
+    assertThat(original)
+        .isSameAs(escapeMetricSnapshot(original, EscapingScheme.NO_ESCAPING))
+        .isSameAs(escapeMetricSnapshot(original, EscapingScheme.UNDERSCORE_ESCAPING));
+    assertThat(escapeMetricSnapshot(null, EscapingScheme.NO_ESCAPING)).isNull();
+  }
+
+  @Test
+  void metadataName() {
+    MetricMetadata metadata = new MetricMetadata("test.");
+    assertThat(SnapshotEscaper.getMetadataName(metadata, EscapingScheme.NO_ESCAPING))
+        .isEqualTo("test.");
+    assertThat(SnapshotEscaper.getMetadataName(metadata, EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEqualTo("test_");
+  }
+
+  @Test
+  void snapshotLabelName() {
+    Labels labels = Labels.builder().label("test.", "value").build();
+    assertThat(getSnapshotLabelName(labels, 0, EscapingScheme.NO_ESCAPING)).isEqualTo("test.");
+    assertThat(getSnapshotLabelName(labels, 0, EscapingScheme.UNDERSCORE_ESCAPING))
+        .isEqualTo("test_");
   }
 }
