@@ -1,9 +1,18 @@
-package io.prometheus.metrics.model.snapshots;
+package io.prometheus.metrics.expositionformats;
 
-import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.escapeMetricSnapshot;
-import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
+import static io.prometheus.metrics.expositionformats.SnapshotEscaper.escapeMetricSnapshot;
+import static io.prometheus.metrics.expositionformats.SnapshotEscaper.getSnapshotLabelName;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.Label;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 
 class SnapshotEscaperTest {
@@ -12,7 +21,7 @@ class SnapshotEscaperTest {
   public void testEscapeMetricSnapshotEmpty() {
     MetricSnapshot original = CounterSnapshot.builder().name("empty").build();
     MetricSnapshot got = escapeMetricSnapshot(original, EscapingScheme.VALUE_ENCODING_ESCAPING);
-    assertThat(got.getMetadata().getName()).isEqualTo("empty");
+    assertThat(Objects.requireNonNull(got).getMetadata().getName()).isEqualTo("empty");
     assertThat(original.getMetadata().getName()).isEqualTo("empty");
   }
 

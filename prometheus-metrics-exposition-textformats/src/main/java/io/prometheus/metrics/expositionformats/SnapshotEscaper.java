@@ -1,5 +1,21 @@
-package io.prometheus.metrics.model.snapshots;
+package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.EscapingScheme;
+import io.prometheus.metrics.model.snapshots.Exemplar;
+import io.prometheus.metrics.model.snapshots.Exemplars;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
+import io.prometheus.metrics.model.snapshots.InfoSnapshot;
+import io.prometheus.metrics.model.snapshots.Label;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
+import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -203,7 +219,6 @@ public class SnapshotEscaper {
           .nativeBucketsForNegativeValues(
               ((HistogramSnapshot.HistogramDataPointSnapshot) d)
                   .getNativeBucketsForNegativeValues())
-          .count(((HistogramSnapshot.HistogramDataPointSnapshot) d).getCount())
           .sum(((HistogramSnapshot.HistogramDataPointSnapshot) d).getSum())
           .exemplars(
               escapeExemplars(
