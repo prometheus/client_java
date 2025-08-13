@@ -6,8 +6,6 @@ import static java.lang.Character.MIN_HIGH_SURROGATE;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 public class SnapshotEscaper {
@@ -342,92 +340,6 @@ public class SnapshotEscaper {
   public static boolean needsEscaping(String name, EscapingScheme scheme) {
     return !PrometheusNaming.isValidLegacyMetricName(name)
         || (scheme == EscapingScheme.DOTS_ESCAPING && (name.contains(".") || name.contains("_")));
-  }
-
-  /**
-   * Unescapes the incoming name according to the provided escaping scheme if possible. Some schemes
-   * are partially or totally non-roundtripable. If any error is encountered, returns the original
-   * input.
-   */
-  @SuppressWarnings("IncrementInForLoopAndHeader")
-  static String unescapeName(String name, EscapingScheme scheme) {
-    if (name.isEmpty()) {
-      return name;
-    }
-    switch (scheme) {
-      case NO_ESCAPING:
-        return name;
-      case UNDERSCORE_ESCAPING:
-        // It is not possible to unescape from underscore replacement.
-        return name;
-      case DOTS_ESCAPING:
-        name = name.replaceAll("_dot_", ".");
-        name = name.replaceAll("__", "_");
-        return name;
-      case VALUE_ENCODING_ESCAPING:
-        Matcher matcher = Pattern.compile("U__").matcher(name);
-        if (matcher.find()) {
-          String escapedName = name.substring(matcher.end());
-          StringBuilder unescaped = new StringBuilder();
-          for (int i = 0; i < escapedName.length(); ) {
-            // All non-underscores are treated normally.
-            int c = escapedName.codePointAt(i);
-            if (c != '_') {
-              unescaped.appendCodePoint(c);
-              i += Character.charCount(c);
-              continue;
-            }
-            i++;
-            if (i >= escapedName.length()) {
-              return name;
-            }
-            // A double underscore is a single underscore.
-            if (escapedName.codePointAt(i) == '_') {
-              unescaped.append('_');
-              i++;
-              continue;
-            }
-            // We think we are in a UTF-8 code, process it.
-            int utf8Val = 0;
-            boolean foundClosingUnderscore = false;
-            for (int j = 0; i < escapedName.length(); j++) {
-              // This is too many characters for a UTF-8 value.
-              if (j >= 6) {
-                return name;
-              }
-              // Found a closing underscore, convert to a char, check validity, and append.
-              if (escapedName.codePointAt(i) == '_') {
-                // char utf8Char = (char) utf8Val;
-                foundClosingUnderscore = true;
-                if (!isValidUtf8Char(utf8Val)) {
-                  return name;
-                }
-                unescaped.appendCodePoint(utf8Val);
-                i++;
-                break;
-              }
-              char r = Character.toLowerCase(escapedName.charAt(i));
-              utf8Val *= 16;
-              if (r >= '0' && r <= '9') {
-                utf8Val += r - '0';
-              } else if (r >= 'a' && r <= 'f') {
-                utf8Val += r - 'a' + 10;
-              } else {
-                return name;
-              }
-              i++;
-            }
-            if (!foundClosingUnderscore) {
-              return name;
-            }
-          }
-          return unescaped.toString();
-        } else {
-          return name;
-        }
-      default:
-        throw new IllegalArgumentException("Invalid escaping scheme " + scheme);
-    }
   }
 
   static boolean isValidLegacyChar(int c, int i) {
