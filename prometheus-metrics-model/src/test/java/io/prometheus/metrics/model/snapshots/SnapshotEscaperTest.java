@@ -131,21 +131,73 @@ class SnapshotEscaperTest {
 
   @ParameterizedTest
   @MethodSource("emptySnapshots")
-  void escapeIsNoop(MetricSnapshot original) {
+  void escape(MetricSnapshot original) {
     assertThat(original)
         .isSameAs(escapeMetricSnapshot(original, EscapingScheme.NO_ESCAPING))
         .isSameAs(escapeMetricSnapshot(original, EscapingScheme.UNDERSCORE_ESCAPING));
+    assertThat(escapeMetricSnapshot(original, EscapingScheme.VALUE_ENCODING_ESCAPING))
+        .usingRecursiveComparison()
+        .isEqualTo(original);
+  }
+
+  @Test
+  void escapeNull() {
     assertThat(escapeMetricSnapshot(null, EscapingScheme.NO_ESCAPING)).isNull();
   }
 
   public static Stream<Arguments> emptySnapshots() {
     return Stream.of(
-        Arguments.of(CounterSnapshot.builder().name("empty").build()),
-        Arguments.of(GaugeSnapshot.builder().name("empty").build()),
-        Arguments.of(SummarySnapshot.builder().name("empty").build()),
-        Arguments.of(HistogramSnapshot.builder().name("empty").build()),
-        Arguments.of(StateSetSnapshot.builder().name("empty").build()),
-        Arguments.of(UnknownSnapshot.builder().name("empty").build()));
+        Arguments.of(
+            CounterSnapshot.builder()
+                .name("empty")
+                .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(0).build())
+                .build()),
+        Arguments.of(
+            GaugeSnapshot.builder()
+                .name("empty")
+                .dataPoint(GaugeSnapshot.GaugeDataPointSnapshot.builder().value(0).build())
+                .build()),
+        Arguments.of(
+            SummarySnapshot.builder()
+                .name("empty")
+                .dataPoint(
+                    SummarySnapshot.SummaryDataPointSnapshot.builder().count(0).sum(0.0).build())
+                .build()),
+        Arguments.of(
+            HistogramSnapshot.builder()
+                .name("empty")
+                .dataPoint(
+                    HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                        .count(0)
+                        .sum(0.0)
+                        .classicHistogramBuckets(
+                            ClassicHistogramBuckets.builder()
+                                .bucket(0.0, 0)
+                                .bucket(1.0, 0)
+                                .bucket(2.0, 0)
+                                .bucket(Double.POSITIVE_INFINITY, 0)
+                                .build())
+                        .exemplars(
+                            Exemplars.builder()
+                                .exemplar(
+                                    Exemplar.builder()
+                                        .labels(Labels.of("exemplar_label", "exemplar_value"))
+                                        .value(0.0)
+                                        .build())
+                                .build())
+                        .build())
+                .build()),
+        Arguments.of(
+            StateSetSnapshot.builder()
+                .name("empty")
+                .dataPoint(
+                    StateSetSnapshot.StateSetDataPointSnapshot.builder().state("foo", true).build())
+                .build()),
+        Arguments.of(
+            UnknownSnapshot.builder()
+                .name("empty")
+                .dataPoint(UnknownSnapshot.UnknownDataPointSnapshot.builder().value(1.0).build())
+                .build()));
   }
 
   @Test
