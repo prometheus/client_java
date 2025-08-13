@@ -12,10 +12,10 @@ jobs:
       - name: Check out
         with:
           persist-credentials: false
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
         with:
-          version: v2025.7.29
-          sha256: 72e9e76d0e52998b0dc084c6550aef472091975978586980d703a87240a87fde
+          version: v2025.8.7
+          sha256: 665ab5b4401a052ecd248aa0788da337b2dc1b5cd15bf982882397b1ca5e0a5a
       - name: Run acceptance tests
         run: mise run acceptance-test

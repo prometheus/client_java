@@ -16,7 +16,7 @@
     Jetty Sample for the Exporter Integration Test
   </description>
   <properties>
-    <jetty-server.version>12.0.24</jetty-server.version>
+    <jetty-server.version>12.0.25</jetty-server.version>
     <java.version>17</java.version>
   </properties>
 
