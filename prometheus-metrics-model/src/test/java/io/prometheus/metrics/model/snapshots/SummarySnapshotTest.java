@@ -114,7 +114,9 @@ class SummarySnapshotTest {
   @Test
   void escape() {
     SummarySnapshot.SummaryDataPointSnapshot data =
-        SummarySnapshot.SummaryDataPointSnapshot.builder().build();
-    assertThat(data.escape(EscapingScheme.UNDERSCORE_ESCAPING)).isEqualTo(data);
+        SummarySnapshot.SummaryDataPointSnapshot.builder().sum(12.0).build();
+    assertThat(data.escape(EscapingScheme.UNDERSCORE_ESCAPING))
+        .usingRecursiveComparison()
+        .isEqualTo(data);
   }
 }
