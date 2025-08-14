@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import javax.annotation.Nullable;
 
 /**
  * Write the Prometheus text format. This is the default if you view a Prometheus endpoint with your
@@ -344,7 +345,11 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeNameAndLabels(Writer writer, String name, String suffix, Labels labels)
+  private void writeNameAndLabels(
+      Writer writer,
+      String name,
+      @Nullable String suffix,
+      Labels labels)
       throws IOException {
     writeNameAndLabels(writer, name, suffix, labels, null, 0.0);
   }
@@ -352,9 +357,9 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   private void writeNameAndLabels(
       Writer writer,
       String name,
-      String suffix,
+      @Nullable String suffix,
       Labels labels,
-      String additionalLabelName,
+      @Nullable String additionalLabelName,
       double additionalLabelValue)
       throws IOException {
     writer.write(name);
@@ -368,7 +373,8 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   }
 
   private void writeMetadata(
-      Writer writer, String suffix, String typeString, MetricMetadata metadata) throws IOException {
+      Writer writer,
+      @Nullable String suffix, String typeString, MetricMetadata metadata) throws IOException {
     if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
       writer.write("# HELP ");
       writer.write(metadata.getPrometheusName());

@@ -55,7 +55,7 @@ public class ExemplarSampler {
    * io.prometheus.metrics.tracer.initializer.SpanContextSupplier#getSpanContext()
    * SpanContextSupplier.getSpanContext()} is called to find a span context.
    */
-  public ExemplarSampler(ExemplarSamplerConfig config, SpanContext spanContext) {
+  public ExemplarSampler(ExemplarSamplerConfig config, @Nullable  SpanContext spanContext) {
     this.config = config;
     this.exemplars = new Exemplar[config.getNumberOfExemplars()];
     this.customExemplars = new Exemplar[exemplars.length];

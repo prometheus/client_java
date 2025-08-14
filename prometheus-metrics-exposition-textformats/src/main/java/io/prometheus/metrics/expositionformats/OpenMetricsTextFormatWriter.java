@@ -346,7 +346,11 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeNameAndLabels(Writer writer, String name, String suffix, Labels labels)
+  private void writeNameAndLabels(
+      Writer writer,
+      String name,
+      @Nullable String suffix,
+      Labels labels)
       throws IOException {
     writeNameAndLabels(writer, name, suffix, labels, null, 0.0);
   }
@@ -354,9 +358,9 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   private void writeNameAndLabels(
       Writer writer,
       String name,
-      String suffix,
+      @Nullable String suffix,
       Labels labels,
-      String additionalLabelName,
+      @Nullable String additionalLabelName,
       double additionalLabelValue)
       throws IOException {
     writer.write(name);

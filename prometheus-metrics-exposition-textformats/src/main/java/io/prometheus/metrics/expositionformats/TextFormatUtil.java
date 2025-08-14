@@ -3,6 +3,7 @@ package io.prometheus.metrics.expositionformats;
 import io.prometheus.metrics.model.snapshots.Labels;
 import java.io.IOException;
 import java.io.Writer;
+import javax.annotation.Nullable;
 
 public class TextFormatUtil {
 
@@ -99,7 +100,9 @@ public class TextFormatUtil {
   }
 
   static void writeLabels(
-      Writer writer, Labels labels, String additionalLabelName, double additionalLabelValue)
+      Writer writer,
+      Labels labels,
+      @Nullable String additionalLabelName, double additionalLabelValue)
       throws IOException {
     writer.write('{');
     for (int i = 0; i < labels.size(); i++) {
