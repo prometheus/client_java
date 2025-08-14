@@ -102,7 +102,8 @@ public class TextFormatUtil {
   static void writeLabels(
       Writer writer,
       Labels labels,
-      @Nullable String additionalLabelName, double additionalLabelValue)
+      @Nullable String additionalLabelName,
+      double additionalLabelValue)
       throws IOException {
     writer.write('{');
     for (int i = 0; i < labels.size(); i++) {

@@ -346,11 +346,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   }
 
   private void writeNameAndLabels(
-      Writer writer,
-      String name,
-      @Nullable String suffix,
-      Labels labels)
-      throws IOException {
+      Writer writer, String name, @Nullable String suffix, Labels labels) throws IOException {
     writeNameAndLabels(writer, name, suffix, labels, null, 0.0);
   }
 
@@ -373,8 +369,8 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   }
 
   private void writeMetadata(
-      Writer writer,
-      @Nullable String suffix, String typeString, MetricMetadata metadata) throws IOException {
+      Writer writer, @Nullable String suffix, String typeString, MetricMetadata metadata)
+      throws IOException {
     if (metadata.getHelp() != null && !metadata.getHelp().isEmpty()) {
       writer.write("# HELP ");
       writer.write(metadata.getPrometheusName());

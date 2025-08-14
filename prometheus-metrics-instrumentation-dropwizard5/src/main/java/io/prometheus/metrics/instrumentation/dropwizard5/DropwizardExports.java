@@ -6,7 +6,6 @@ import io.dropwizard.metrics5.Histogram;
 import io.dropwizard.metrics5.Meter;
 import io.dropwizard.metrics5.Metric;
 import io.dropwizard.metrics5.MetricFilter;
-import io.dropwizard.metrics5.MetricName;
 import io.dropwizard.metrics5.MetricRegistry;
 import io.dropwizard.metrics5.Snapshot;
 import io.dropwizard.metrics5.Timer;
@@ -69,9 +68,7 @@ public class DropwizardExports implements MultiCollector {
    * @param labelMapper a labelMapper to use to map labels.
    */
   public DropwizardExports(
-      MetricRegistry registry,
-      MetricFilter metricFilter,
-      @Nullable CustomLabelMapper labelMapper) {
+      MetricRegistry registry, MetricFilter metricFilter, @Nullable CustomLabelMapper labelMapper) {
     this.registry = registry;
     this.metricFilter = metricFilter;
     this.labelMapper = labelMapper;

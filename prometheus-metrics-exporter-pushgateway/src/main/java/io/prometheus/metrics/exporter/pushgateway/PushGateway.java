@@ -1,7 +1,6 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
 import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
 import static java.util.Objects.requireNonNull;
 
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
@@ -461,11 +460,11 @@ public class PushGateway {
       }
       for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
         if (entry.getValue().isEmpty()) {
-            url += "/" + entry.getKey() + "@base64/=";
+          url += "/" + entry.getKey() + "@base64/=";
         } else if (entry.getValue().contains("/")) {
-            url += "/" + entry.getKey() + "@base64/" + base64url(entry.getValue());
+          url += "/" + entry.getKey() + "@base64/" + base64url(entry.getValue());
         } else {
-            url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
+          url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
         }
       }
       return URI.create(url).normalize().toURL();
