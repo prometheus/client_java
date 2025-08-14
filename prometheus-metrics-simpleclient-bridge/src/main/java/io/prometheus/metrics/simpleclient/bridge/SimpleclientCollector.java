@@ -118,8 +118,9 @@ public class SimpleclientCollector implements MultiCollector {
       if (sample.name.endsWith("_created")) {
         dataPoint.createdTimestampMillis((long) Unit.secondsToMillis(sample.value));
       } else {
+        dataPoint.value(sample.value);
         if (sample.exemplar != null) {
-          dataPoint.value(sample.value).exemplar(convertExemplar(sample.exemplar));
+          dataPoint.exemplar(convertExemplar(sample.exemplar));
         }
         if (sample.timestampMs != null) {
           dataPoint.scrapeTimestampMillis(sample.timestampMs);
