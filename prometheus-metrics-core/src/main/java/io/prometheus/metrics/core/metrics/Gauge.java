@@ -8,6 +8,8 @@ import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +41,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     implements GaugeDataPoint {
 
-  private final ExemplarSamplerConfig exemplarSamplerConfig;
+  @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   private Gauge(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
@@ -95,23 +97,19 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
 
   @Override
   protected DataPoint newDataPoint() {
-    if (isExemplarsEnabled()) {
+    if (exemplarSamplerConfig != null) {
       return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
     } else {
       return new DataPoint(null);
     }
   }
 
-  @Override
-  protected boolean isExemplarsEnabled() {
-    return exemplarSamplerConfig != null;
-  }
-
   static class DataPoint implements GaugeDataPoint {
 
+    @Nullable
     private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
-    private DataPoint(ExemplarSampler exemplarSampler) {
+    private DataPoint(@Nullable ExemplarSampler exemplarSampler) {
       this.exemplarSampler = exemplarSampler;
     }
 
@@ -121,7 +119,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     public void inc(double amount) {
       long next =
           value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observe(Double.longBitsToDouble(next));
       }
     }
@@ -130,7 +128,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     public void incWithExemplar(double amount, Labels labels) {
       long next =
           value.updateAndGet(l -> Double.doubleToRawLongBits(Double.longBitsToDouble(l) + amount));
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar(Double.longBitsToDouble(next), labels);
       }
     }
@@ -138,7 +136,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     @Override
     public void set(double value) {
       this.value.set(Double.doubleToRawLongBits(value));
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observe(value);
       }
     }
@@ -151,7 +149,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
     @Override
     public void setWithExemplar(double value, Labels labels) {
       this.value.set(Double.doubleToRawLongBits(value));
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar(value, labels);
       }
     }
@@ -162,7 +160,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
       // If there are multiple Exemplars (by default it's just one), use the oldest
       // so that we don't violate min age.
       Exemplar oldest = null;
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         for (Exemplar exemplar : exemplarSampler.collect()) {
           if (oldest == null || exemplar.getTimestampMillis() < oldest.getTimestampMillis()) {
             oldest = exemplar;
@@ -172,9 +170,6 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
       return new GaugeSnapshot.GaugeDataPointSnapshot(get(), labels, oldest);
     }
 
-    private boolean isExemplarsEnabled() {
-      return exemplarSampler != null;
-    }
   }
 
   public static Builder builder() {

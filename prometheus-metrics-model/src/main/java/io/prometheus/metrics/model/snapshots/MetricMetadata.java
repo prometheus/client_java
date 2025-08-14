@@ -25,10 +25,7 @@ public final class MetricMetadata {
    */
   private final String prometheusName;
 
-  /** optional, may be {@code null}. */
   @Nullable private final String help;
-
-  /** optional, may be {@code null}. */
   @Nullable private final Unit unit;
 
   /** See {@link #MetricMetadata(String, String, Unit)} */

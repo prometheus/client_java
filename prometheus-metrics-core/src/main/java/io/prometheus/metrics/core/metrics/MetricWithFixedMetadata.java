@@ -5,6 +5,8 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Unit;
+
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
     return metadata;
   }
 
-  private String makeName(String name, Unit unit) {
+  private String makeName(@Nullable String name, @Nullable Unit unit) {
     if (name == null) {
       throw new IllegalArgumentException("Missing required field: name is null");
     }
@@ -50,9 +52,9 @@ public abstract class MetricWithFixedMetadata extends Metric {
   public abstract static class Builder<B extends Builder<B, M>, M extends MetricWithFixedMetadata>
       extends Metric.Builder<B, M> {
 
-    protected String name;
-    private Unit unit;
-    private String help;
+    @Nullable private String name;
+    @Nullable private Unit unit;
+    @Nullable private String help;
     private String[] labelNames = new String[0];
 
     protected Builder(List<String> illegalLabelNames, PrometheusProperties properties) {

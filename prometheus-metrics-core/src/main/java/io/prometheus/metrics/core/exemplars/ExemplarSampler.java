@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * The ExemplarSampler selects Spans as exemplars.
  *
@@ -55,7 +57,7 @@ public class ExemplarSampler {
    * io.prometheus.metrics.tracer.initializer.SpanContextSupplier#getSpanContext()
    * SpanContextSupplier.getSpanContext()} is called to find a span context.
    */
-  public ExemplarSampler(ExemplarSamplerConfig config, @Nullable  SpanContext spanContext) {
+  public ExemplarSampler(ExemplarSamplerConfig config, @Nullable SpanContext spanContext) {
     this.config = config;
     this.exemplars = new Exemplar[config.getNumberOfExemplars()];
     this.customExemplars = new Exemplar[exemplars.length];
@@ -116,10 +118,13 @@ public class ExemplarSampler {
   private long doObserve(double value) {
     if (exemplars.length == 1) {
       return doObserveSingleExemplar(value);
-    } else if (config.getHistogramClassicUpperBounds() != null) {
-      return doObserveWithUpperBounds(value);
     } else {
-      return doObserveWithoutUpperBounds(value);
+      double[] classicUpperBounds = config.getHistogramClassicUpperBounds();
+      if (classicUpperBounds != null) {
+        return doObserveWithUpperBounds(value, classicUpperBounds);
+      } else {
+        return doObserveWithoutUpperBounds(value);
+      }
     }
   }
 
@@ -143,11 +148,10 @@ public class ExemplarSampler {
     return 0;
   }
 
-  private long doObserveWithUpperBounds(double value) {
+  private long doObserveWithUpperBounds(double value, double[] classicUpperBounds) {
     long now = System.currentTimeMillis();
-    double[] upperBounds = config.getHistogramClassicUpperBounds();
-    for (int i = 0; i < upperBounds.length; i++) {
-      if (value <= upperBounds[i]) {
+    for (int i = 0; i < classicUpperBounds.length; i++) {
+      if (value <= classicUpperBounds[i]) {
         Exemplar previous = exemplars[i];
         if (previous == null
             || now - previous.getTimestampMillis() > config.getMinRetentionPeriodMillis()) {
@@ -188,11 +192,11 @@ public class ExemplarSampler {
     if (nullIndex >= 0) {
       return updateExemplar(nullIndex, value, now);
     }
-    if (now - smallest.getTimestampMillis() > config.getMinRetentionPeriodMillis()
+    if (now - requireNonNull(smallest).getTimestampMillis() > config.getMinRetentionPeriodMillis()
         && value < smallest.getValue()) {
       return updateExemplar(smallestIndex, value, now);
     }
-    if (now - largest.getTimestampMillis() > config.getMinRetentionPeriodMillis()
+    if (now - requireNonNull(largest).getTimestampMillis() > config.getMinRetentionPeriodMillis()
         && value > largest.getValue()) {
       return updateExemplar(largestIndex, value, now);
     }
@@ -218,18 +222,21 @@ public class ExemplarSampler {
   private long doObserveWithExemplar(double amount, Labels labels) {
     if (customExemplars.length == 1) {
       return doObserveSingleExemplar(amount, labels);
-    } else if (config.getHistogramClassicUpperBounds() != null) {
-      return doObserveWithExemplarWithUpperBounds(amount, labels);
     } else {
-      return doObserveWithExemplarWithoutUpperBounds(amount, labels);
+      double[] classicUpperBounds = config.getHistogramClassicUpperBounds();
+      if (classicUpperBounds != null) {
+        return doObserveWithExemplarWithUpperBounds(amount, labels, classicUpperBounds);
+      } else {
+        return doObserveWithExemplarWithoutUpperBounds(amount, labels);
+      }
     }
   }
 
-  private long doObserveWithExemplarWithUpperBounds(double value, Labels labels) {
+  private long doObserveWithExemplarWithUpperBounds(
+      double value, Labels labels, double[] classicUpperBounds) {
     long now = System.currentTimeMillis();
-    double[] upperBounds = config.getHistogramClassicUpperBounds();
-    for (int i = 0; i < upperBounds.length; i++) {
-      if (value <= upperBounds[i]) {
+    for (int i = 0; i < classicUpperBounds.length; i++) {
+      if (value <= classicUpperBounds[i]) {
         Exemplar previous = customExemplars[i];
         if (previous == null
             || now - previous.getTimestampMillis() > config.getMinRetentionPeriodMillis()) {
@@ -263,7 +270,8 @@ public class ExemplarSampler {
     }
     if (nullPos != -1) {
       return updateCustomExemplar(nullPos, amount, labels, now);
-    } else if (now - oldest.getTimestampMillis() > config.getMinRetentionPeriodMillis()) {
+    } else if (now - requireNonNull(oldest).getTimestampMillis()
+        > config.getMinRetentionPeriodMillis()) {
       return updateCustomExemplar(oldestPos, amount, labels, now);
     } else {
       return 0;

@@ -10,6 +10,8 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Quantile;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +46,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
   private final List<CKMSQuantiles.Quantile> quantiles; // May be empty, but cannot be null.
   private final long maxAgeSeconds;
   private final int ageBuckets;
+  @Nullable
   private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   private Summary(Builder builder, PrometheusProperties prometheusProperties) {
@@ -78,11 +81,6 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       }
     }
     return result;
-  }
-
-  @Override
-  protected boolean isExemplarsEnabled() {
-    return exemplarSamplerConfig != null;
   }
 
   @Override
@@ -137,7 +135,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       } else {
         quantileValues = null;
       }
-      if (isExemplarsEnabled()) {
+      if (exemplarSamplerConfig != null) {
         exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
       } else {
         exemplarSampler = null;
@@ -152,7 +150,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       if (!buffer.append(value)) {
         doObserve(value);
       }
-      if (isExemplarsEnabled()) {
+      if (exemplarSamplerConfig != null) {
         exemplarSampler.observe(value);
       }
     }
@@ -165,7 +163,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       if (!buffer.append(value)) {
         doObserve(value);
       }
-      if (isExemplarsEnabled()) {
+      if (exemplarSamplerConfig != null) {
         exemplarSampler.observeWithExemplar(value, labels);
       }
     }

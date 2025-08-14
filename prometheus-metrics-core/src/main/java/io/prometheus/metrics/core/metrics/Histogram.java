@@ -12,6 +12,8 @@ import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
+
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,6 +70,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
   // NATIVE_BOUNDS is used to look up the native bucket index depending on the current schema.
   private static final double[][] NATIVE_BOUNDS;
 
+  @Nullable
   private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   // Upper bounds for the classic histogram buckets. Contains at least +Inf.
@@ -179,11 +182,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     getNoLabels().observeWithExemplar(amount, labels);
   }
 
-  @Override
-  protected boolean isExemplarsEnabled() {
-    return exemplarSamplerConfig != null;
-  }
-
   public class DataPoint implements DistributionDataPoint {
     private final LongAdder[] classicBuckets;
     private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForPositiveValues =
@@ -202,7 +200,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     private final ExemplarSampler exemplarSampler;
 
     private DataPoint() {
-      if (isExemplarsEnabled()) {
+      if (exemplarSamplerConfig != null) {
         exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
       } else {
         exemplarSampler = null;
@@ -223,7 +221,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       if (!buffer.append(value)) {
         doObserve(value, false);
       }
-      if (isExemplarsEnabled()) {
+      if (exemplarSamplerConfig != null) {
         exemplarSampler.observe(value);
       }
     }
@@ -237,7 +235,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       if (!buffer.append(value)) {
         doObserve(value, false);
       }
-      if (isExemplarsEnabled()) {
+      if (exemplarSamplerConfig != null) {
         exemplarSampler.observeWithExemplar(value, labels);
       }
     }
