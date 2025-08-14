@@ -1,5 +1,7 @@
 package io.prometheus.metrics.config;
 
+import javax.annotation.Nullable;
+
 public enum EscapingScheme {
   /** NO_ESCAPING indicates that a name will not be escaped. */
   NO_ESCAPING("allow-utf-8"),
@@ -40,7 +42,7 @@ public enum EscapingScheme {
    * contains an escaping=allow-utf-8 term, it will select NO_ESCAPING. If a valid "escaping" term
    * exists, that will be used. Otherwise, the global default will be returned.
    */
-  public static EscapingScheme fromAcceptHeader(String acceptHeader) {
+  public static EscapingScheme fromAcceptHeader(@Nullable String acceptHeader) {
     if (acceptHeader != null) {
       for (String p : acceptHeader.split(";")) {
         String[] toks = p.split("=");

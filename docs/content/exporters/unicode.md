@@ -20,3 +20,10 @@ character set (`a-zA-Z0-9_:`), with underscores by default.
 When `escaping=allow-utf-8` is passed, add valid UTF-8 characters to the metric and label names
 without replacing them. This allows you to use dots in metric and label names, as well as
 other UTF-8 characters, without any replacements.
+
+## PushGateway
+
+When using the [Pushgateway](/exporters/pushgateway/), Unicode support has to be enabled
+explicitly by setting `io.prometheus.exporter.pushgateway.escapingScheme` to `allow-utf-8` in the
+Pushgateway configuration file - see 
+[Pushgateway configuration]({{< relref "/config/config.md#exporter-pushgateway-properties" >}})

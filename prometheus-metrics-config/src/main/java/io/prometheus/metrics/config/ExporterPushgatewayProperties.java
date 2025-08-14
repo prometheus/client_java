@@ -85,7 +85,7 @@ public class ExporterPushgatewayProperties {
       return null;
     }
     switch (scheme) {
-      case "no-escaping":
+      case "allow-utf-8":
         return EscapingScheme.NO_ESCAPING;
       case "values":
         return EscapingScheme.VALUE_ENCODING_ESCAPING;
@@ -96,7 +96,7 @@ public class ExporterPushgatewayProperties {
       default:
         throw new PrometheusPropertiesException(
             String.format(
-                "%s.%s: Illegal value. Expecting 'no-escaping', 'values', 'underscores', "
+                "%s.%s: Illegal value. Expecting 'allow-utf-8', 'values', 'underscores', "
                     + "or 'dots'. Found: %s",
                 PREFIX, ESCAPING_SCHEME, scheme));
     }
@@ -110,6 +110,7 @@ public class ExporterPushgatewayProperties {
     @Nullable private String address;
     @Nullable private String job;
     @Nullable private String scheme;
+    @Nullable private EscapingScheme escapingScheme;
 
     private Builder() {}
 
@@ -128,8 +129,13 @@ public class ExporterPushgatewayProperties {
       return this;
     }
 
+    public Builder escapingScheme(EscapingScheme escapingScheme) {
+      this.escapingScheme = escapingScheme;
+      return this;
+    }
+
     public ExporterPushgatewayProperties build() {
-      return new ExporterPushgatewayProperties(address, job, scheme);
+      return new ExporterPushgatewayProperties(address, job, scheme, escapingScheme);
     }
   }
 }

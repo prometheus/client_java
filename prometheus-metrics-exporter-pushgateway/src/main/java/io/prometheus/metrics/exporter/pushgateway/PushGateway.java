@@ -439,11 +439,11 @@ public class PushGateway {
       }
     }
 
-    private EscapingScheme getEscapingScheme(ExporterPushgatewayProperties properties) {
+    private EscapingScheme getEscapingScheme(@Nullable ExporterPushgatewayProperties properties) {
       if (properties != null && properties.getEscapingScheme() != null) {
         return properties.getEscapingScheme();
       }
-      return EscapingScheme.NO_ESCAPING;
+      return EscapingScheme.UNDERSCORE_ESCAPING;
     }
 
     private Format getFormat() {

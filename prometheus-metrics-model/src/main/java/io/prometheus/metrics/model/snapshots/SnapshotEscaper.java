@@ -10,13 +10,7 @@ public class SnapshotEscaper {
   private SnapshotEscaper() {}
 
   /** Escapes the given metric names and labels with the given escaping scheme. */
-  @Nullable
-  public static MetricSnapshot escapeMetricSnapshot(
-      @Nullable MetricSnapshot v, EscapingScheme scheme) {
-    if (v == null) {
-      return null;
-    }
-
+  public static MetricSnapshot escapeMetricSnapshot(MetricSnapshot v, EscapingScheme scheme) {
     if (scheme == EscapingScheme.NO_ESCAPING || scheme == EscapingScheme.UNDERSCORE_ESCAPING) {
       // we re-use the prometheus name for underscore escaping as an optimization
       return v;
@@ -120,6 +114,7 @@ public class SnapshotEscaper {
     return Exemplars.of(escapedExemplars);
   }
 
+  @Nullable
   public static Exemplar escapeExemplar(@Nullable Exemplar exemplar, EscapingScheme scheme) {
     if (exemplar == null) {
       return null;

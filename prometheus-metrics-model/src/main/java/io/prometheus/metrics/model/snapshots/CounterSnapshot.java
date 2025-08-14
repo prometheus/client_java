@@ -82,7 +82,7 @@ public class CounterSnapshot extends MetricSnapshot {
     public CounterDataPointSnapshot(
         double value,
         Labels labels,
-        Exemplar exemplar,
+        @Nullable Exemplar exemplar,
         long createdTimestampMillis,
         long scrapeTimestampMillis,
         boolean internal) {

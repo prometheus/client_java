@@ -72,7 +72,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
     private UnknownDataPointSnapshot(
         double value,
         Labels labels,
-        Exemplar exemplar,
+        @Nullable Exemplar exemplar,
         long scrapeTimestampMillis,
         boolean internal) {
       super(labels, 0L, scrapeTimestampMillis, internal);

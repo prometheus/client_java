@@ -71,7 +71,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
     private GaugeDataPointSnapshot(
         double value,
         Labels labels,
-        Exemplar exemplar,
+        @Nullable Exemplar exemplar,
         long scrapeTimestampMillis,
         boolean internal) {
       super(labels, 0L, scrapeTimestampMillis, internal);
