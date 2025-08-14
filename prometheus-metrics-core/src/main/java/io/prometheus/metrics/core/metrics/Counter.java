@@ -119,7 +119,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     private final long createdTimeMillis = System.currentTimeMillis();
 
     @Nullable
-    private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
+    private final ExemplarSampler exemplarSampler; // null if exemplarSamplerConfig is null
 
     private DataPoint(@Nullable ExemplarSampler exemplarSampler) {
       this.exemplarSampler = exemplarSampler;

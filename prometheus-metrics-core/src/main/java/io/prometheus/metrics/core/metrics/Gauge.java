@@ -107,7 +107,7 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
   static class DataPoint implements GaugeDataPoint {
 
     @Nullable
-    private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
+    private final ExemplarSampler exemplarSampler; // null if exemplarSamplerConfig is null
 
     private DataPoint(@Nullable ExemplarSampler exemplarSampler) {
       this.exemplarSampler = exemplarSampler;

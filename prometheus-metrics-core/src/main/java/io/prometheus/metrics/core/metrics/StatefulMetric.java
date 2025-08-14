@@ -5,6 +5,8 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DataPoint;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,7 +38,7 @@ public abstract class StatefulMetric<D extends DataPoint, T extends D>
   private final ConcurrentHashMap<List<String>, T> data = new ConcurrentHashMap<>();
 
   /** Shortcut for data.get(Collections.emptyList()) */
-  private volatile T noLabels;
+  @Nullable private volatile T noLabels;
 
   protected StatefulMetric(Builder<?, ?> builder) {
     super(builder);
@@ -193,12 +195,10 @@ public abstract class StatefulMetric<D extends DataPoint, T extends D>
         "Missing default config. This is a bug in the Prometheus metrics core library.");
   }
 
-  protected abstract boolean isExemplarsEnabled();
-
   abstract static class Builder<B extends Builder<B, M>, M extends StatefulMetric<?, ?>>
       extends MetricWithFixedMetadata.Builder<B, M> {
 
-    protected Boolean exemplarsEnabled;
+    @Nullable protected Boolean exemplarsEnabled;
 
     protected Builder(List<String> illegalLabelNames, PrometheusProperties config) {
       super(illegalLabelNames, config);

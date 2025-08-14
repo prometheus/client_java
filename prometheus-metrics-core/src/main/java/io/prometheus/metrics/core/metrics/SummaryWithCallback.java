@@ -4,6 +4,8 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,10 +46,10 @@ public class SummaryWithCallback extends CallbackMetric {
 
   private SummaryWithCallback(Builder builder) {
     super(builder);
-    this.callback = builder.callback;
-    if (callback == null) {
+    if (builder.callback == null) {
       throw new IllegalArgumentException("callback cannot be null");
     }
+    this.callback = builder.callback;
   }
 
   @Override
@@ -73,6 +75,7 @@ public class SummaryWithCallback extends CallbackMetric {
   public static class Builder
       extends CallbackMetric.Builder<SummaryWithCallback.Builder, SummaryWithCallback> {
 
+    @Nullable
     private Consumer<Callback> callback;
 
     public Builder callback(Consumer<Callback> callback) {

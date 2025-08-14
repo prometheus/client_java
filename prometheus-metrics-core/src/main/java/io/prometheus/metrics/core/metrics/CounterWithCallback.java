@@ -2,6 +2,8 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,10 +33,10 @@ public class CounterWithCallback extends CallbackMetric {
 
   private CounterWithCallback(Builder builder) {
     super(builder);
-    this.callback = builder.callback;
-    if (callback == null) {
+    if (builder.callback == null) {
       throw new IllegalArgumentException("callback cannot be null");
     }
+    this.callback = builder.callback;
   }
 
   @Override
@@ -60,6 +62,7 @@ public class CounterWithCallback extends CallbackMetric {
   public static class Builder
       extends CallbackMetric.Builder<CounterWithCallback.Builder, CounterWithCallback> {
 
+    @Nullable
     private Consumer<Callback> callback;
 
     public Builder callback(Consumer<Callback> callback) {

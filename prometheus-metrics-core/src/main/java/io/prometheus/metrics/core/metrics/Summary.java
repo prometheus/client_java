@@ -118,7 +118,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
     private final DoubleAdder sum = new DoubleAdder();
     private final SlidingWindow<CKMSQuantiles> quantileValues;
     private final Buffer buffer = new Buffer();
-    private final ExemplarSampler exemplarSampler;
+    @Nullable private final ExemplarSampler exemplarSampler;
 
     private final long createdTimeMillis = System.currentTimeMillis();
 
@@ -150,7 +150,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       if (!buffer.append(value)) {
         doObserve(value);
       }
-      if (exemplarSamplerConfig != null) {
+      if (exemplarSampler != null) {
         exemplarSampler.observe(value);
       }
     }
@@ -163,7 +163,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       if (!buffer.append(value)) {
         doObserve(value);
       }
-      if (exemplarSamplerConfig != null) {
+      if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar(value, labels);
       }
     }

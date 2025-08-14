@@ -197,7 +197,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     private volatile long createdTimeMillis = System.currentTimeMillis();
     private final Buffer buffer = new Buffer();
     private volatile boolean resetDurationExpired = false;
-    private final ExemplarSampler exemplarSampler;
+    @Nullable private final ExemplarSampler exemplarSampler;
 
     private DataPoint() {
       if (exemplarSamplerConfig != null) {
@@ -221,7 +221,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       if (!buffer.append(value)) {
         doObserve(value, false);
       }
-      if (exemplarSamplerConfig != null) {
+      if (exemplarSampler != null) {
         exemplarSampler.observe(value);
       }
     }
@@ -235,7 +235,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       if (!buffer.append(value)) {
         doObserve(value, false);
       }
-      if (exemplarSamplerConfig != null) {
+      if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar(value, labels);
       }
     }
@@ -676,14 +676,14 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     private static final int DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS = 160;
     private static final long DEFAULT_NATIVE_RESET_DURATION_SECONDS = 0; // 0 means no reset
 
-    private Boolean nativeOnly;
-    private Boolean classicOnly;
-    private double[] classicUpperBounds;
-    private Integer nativeInitialSchema;
-    private Double nativeMaxZeroThreshold;
-    private Double nativeMinZeroThreshold;
-    private Integer nativeMaxNumberOfBuckets;
-    private Long nativeResetDurationSeconds;
+    @Nullable private Boolean nativeOnly;
+    @Nullable private Boolean classicOnly;
+    @Nullable private double[] classicUpperBounds;
+    @Nullable private Integer nativeInitialSchema;
+    @Nullable private Double nativeMaxZeroThreshold;
+    @Nullable private Double nativeMinZeroThreshold;
+    @Nullable private Integer nativeMaxNumberOfBuckets;
+    @Nullable private Long nativeResetDurationSeconds;
 
     @Override
     public Histogram build() {
