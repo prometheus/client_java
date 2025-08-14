@@ -23,18 +23,18 @@ import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 /** Collect Dropwizard metrics from a MetricRegistry. */
 public class DropwizardExports implements MultiCollector {
   private static final Logger logger = Logger.getLogger(DropwizardExports.class.getName());
   private final MetricRegistry registry;
   private final MetricFilter metricFilter;
-  private final Optional<CustomLabelMapper> labelMapper;
+  @Nullable private final CustomLabelMapper labelMapper;
   private final InvalidMetricHandler invalidMetricHandler;
 
   /**
@@ -46,7 +46,7 @@ public class DropwizardExports implements MultiCollector {
     super();
     this.registry = registry;
     this.metricFilter = MetricFilter.ALL;
-    this.labelMapper = Optional.empty();
+    this.labelMapper = null;
     this.invalidMetricHandler = InvalidMetricHandler.ALWAYS_THROW;
   }
 
@@ -59,7 +59,7 @@ public class DropwizardExports implements MultiCollector {
   public DropwizardExports(MetricRegistry registry, MetricFilter metricFilter) {
     this.registry = registry;
     this.metricFilter = metricFilter;
-    this.labelMapper = Optional.empty();
+    this.labelMapper = null;
     this.invalidMetricHandler = InvalidMetricHandler.ALWAYS_THROW;
   }
 
@@ -69,10 +69,12 @@ public class DropwizardExports implements MultiCollector {
    * @param labelMapper a labelMapper to use to map labels.
    */
   public DropwizardExports(
-      MetricRegistry registry, MetricFilter metricFilter, CustomLabelMapper labelMapper) {
+      MetricRegistry registry,
+      MetricFilter metricFilter,
+      @Nullable CustomLabelMapper labelMapper) {
     this.registry = registry;
     this.metricFilter = metricFilter;
-    this.labelMapper = Optional.ofNullable(labelMapper);
+    this.labelMapper = labelMapper;
     this.invalidMetricHandler = InvalidMetricHandler.ALWAYS_THROW;
   }
 
@@ -84,11 +86,11 @@ public class DropwizardExports implements MultiCollector {
   private DropwizardExports(
       MetricRegistry registry,
       MetricFilter metricFilter,
-      CustomLabelMapper labelMapper,
+      @Nullable CustomLabelMapper labelMapper,
       InvalidMetricHandler invalidMetricHandler) {
     this.registry = registry;
     this.metricFilter = metricFilter;
-    this.labelMapper = Optional.ofNullable(labelMapper);
+    this.labelMapper = labelMapper;
     this.invalidMetricHandler = invalidMetricHandler;
   }
 
@@ -99,7 +101,7 @@ public class DropwizardExports implements MultiCollector {
   }
 
   private MetricMetadata getMetricMetaData(String metricName, Metric metric) {
-    String name = labelMapper.isPresent() ? labelMapper.get().getName(metricName) : metricName;
+    String name = labelMapper != null ? labelMapper.getName(metricName) : metricName;
     return new MetricMetadata(
         PrometheusNaming.sanitizeMetricName(name), getHelpMessage(metricName, metric));
   }
@@ -113,15 +115,15 @@ public class DropwizardExports implements MultiCollector {
     CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder =
         CounterSnapshot.CounterDataPointSnapshot.builder()
             .value(Long.valueOf(counter.getCount()).doubleValue());
-    labelMapper.ifPresent(
-        mapper ->
-            dataPointBuilder.labels(
-                mapper.getLabels(
-                    dropwizardName, Collections.emptyList(), Collections.emptyList())));
+    if (labelMapper != null) {
+      dataPointBuilder.labels(
+          labelMapper.getLabels(dropwizardName, Collections.emptyList(), Collections.emptyList()));
+    }
     return new CounterSnapshot(metadata, Collections.singletonList(dataPointBuilder.build()));
   }
 
   /** Export gauge as a prometheus gauge. */
+  @Nullable
   MetricSnapshot fromGauge(String dropwizardName, Gauge<?> gauge) {
     Object obj = gauge.getValue();
     double value;
@@ -141,11 +143,10 @@ public class DropwizardExports implements MultiCollector {
     MetricMetadata metadata = getMetricMetaData(dropwizardName, gauge);
     GaugeSnapshot.GaugeDataPointSnapshot.Builder dataPointBuilder =
         GaugeSnapshot.GaugeDataPointSnapshot.builder().value(value);
-    labelMapper.ifPresent(
-        mapper ->
-            dataPointBuilder.labels(
-                mapper.getLabels(
-                    dropwizardName, Collections.emptyList(), Collections.emptyList())));
+    if (labelMapper != null) {
+      dataPointBuilder.labels(
+          labelMapper.getLabels(dropwizardName, Collections.emptyList(), Collections.emptyList()));
+    }
     return new GaugeSnapshot(metadata, Collections.singletonList(dataPointBuilder.build()));
   }
 
@@ -169,17 +170,15 @@ public class DropwizardExports implements MultiCollector {
             .quantile(0.999, snapshot.get999thPercentile() * factor)
             .build();
 
-    String name =
-        labelMapper.isPresent() ? labelMapper.get().getName(dropwizardName) : dropwizardName;
+    String name = labelMapper != null ? labelMapper.getName(dropwizardName) : dropwizardName;
     MetricMetadata metadata =
         new MetricMetadata(PrometheusNaming.sanitizeMetricName(name), helpMessage);
     SummarySnapshot.SummaryDataPointSnapshot.Builder dataPointBuilder =
         SummarySnapshot.SummaryDataPointSnapshot.builder().quantiles(quantiles).count(count);
-    labelMapper.ifPresent(
-        mapper ->
-            dataPointBuilder.labels(
-                mapper.getLabels(
-                    dropwizardName, Collections.emptyList(), Collections.emptyList())));
+    if (labelMapper != null) {
+      dataPointBuilder.labels(
+          labelMapper.getLabels(dropwizardName, Collections.emptyList(), Collections.emptyList()));
+    }
     return new SummarySnapshot(metadata, Collections.singletonList(dataPointBuilder.build()));
   }
 
@@ -208,11 +207,10 @@ public class DropwizardExports implements MultiCollector {
     MetricMetadata metadata = getMetricMetaData(dropwizardName + "_total", meter);
     CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder =
         CounterSnapshot.CounterDataPointSnapshot.builder().value(meter.getCount());
-    labelMapper.ifPresent(
-        mapper ->
-            dataPointBuilder.labels(
-                mapper.getLabels(
-                    dropwizardName, Collections.emptyList(), Collections.emptyList())));
+    if (labelMapper != null) {
+      dataPointBuilder.labels(
+          labelMapper.getLabels(dropwizardName, Collections.emptyList(), Collections.emptyList()));
+    }
     return new CounterSnapshot(metadata, Collections.singletonList(dataPointBuilder.build()));
   }
 
@@ -229,10 +227,10 @@ public class DropwizardExports implements MultiCollector {
 
   private <T> void collectMetricKind(
       MetricSnapshots.Builder builder,
-      Map<MetricName, T> metric,
+      Map<String, T> metric,
       BiFunction<String, T, MetricSnapshot> toSnapshot) {
-    for (Map.Entry<MetricName, T> entry : metric.entrySet()) {
-      String metricName = entry.getKey().getKey();
+    for (Map.Entry<String, T> entry : metric.entrySet()) {
+      String metricName = entry.getKey();
       try {
         MetricSnapshot snapshot = toSnapshot.apply(metricName, entry.getValue());
         if (snapshot != null) {
@@ -252,9 +250,9 @@ public class DropwizardExports implements MultiCollector {
 
   // Builder class for DropwizardExports
   public static class Builder {
-    private MetricRegistry registry;
+    @Nullable private MetricRegistry registry;
     private MetricFilter metricFilter;
-    private CustomLabelMapper labelMapper;
+    @Nullable private CustomLabelMapper labelMapper;
     private InvalidMetricHandler invalidMetricHandler;
 
     private Builder() {
