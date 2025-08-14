@@ -375,7 +375,12 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
   }
 
   private void writeNameAndLabels(
-      Writer writer, String name, @Nullable String suffix, Labels labels, EscapingScheme escapingScheme) throws IOException {
+      Writer writer,
+      String name,
+      @Nullable String suffix,
+      Labels labels,
+      EscapingScheme escapingScheme)
+      throws IOException {
     writeNameAndLabels(writer, name, suffix, labels, escapingScheme, null, 0.0);
   }
 
@@ -407,7 +412,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
 
   private void writeMetadata(
       Writer writer,
-     @Nullable String suffix,
+      @Nullable String suffix,
       String typeString,
       MetricMetadata metadata,
       EscapingScheme scheme)

@@ -1,7 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
 import io.prometheus.metrics.config.EscapingScheme;
-
 import javax.annotation.Nullable;
 
 /** Immutable container for metric metadata: name, help, unit. */

@@ -466,19 +466,19 @@ public class PushGateway {
       }
       for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
         if (entry.getValue().isEmpty()) {
-            url.append("/")
-                .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
-                .append("@base64/=");
+          url.append("/")
+              .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
+              .append("@base64/=");
         } else if (entry.getValue().contains("/")) {
-            url.append("/")
-                .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
-                .append("@base64/")
-                .append(base64url(entry.getValue()));
+          url.append("/")
+              .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
+              .append("@base64/")
+              .append(base64url(entry.getValue()));
         } else {
-            url.append("/")
-                .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
-                .append("/")
-                .append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+          url.append("/")
+              .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
+              .append("/")
+              .append(URLEncoder.encode(entry.getValue(), "UTF-8"));
         }
       }
       return URI.create(url.toString()).normalize().toURL();

@@ -105,7 +105,7 @@ public class TextFormatUtil {
   static void writeLabels(
       Writer writer,
       Labels labels,
-     @Nullable String additionalLabelName,
+      @Nullable String additionalLabelName,
       double additionalLabelValue,
       boolean metricInsideBraces,
       EscapingScheme scheme)
