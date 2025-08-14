@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /** Immutable snapshot of an Unknown (Untyped) metric. */
 public final class UnknownSnapshot extends MetricSnapshot {
@@ -28,7 +29,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
   public static final class UnknownDataPointSnapshot extends DataPointSnapshot {
 
     private final double value;
-    private final Exemplar exemplar; // may be null
+    @Nullable private final Exemplar exemplar;
 
     /**
      * To create a new {@link UnknownDataPointSnapshot}, you can either call the constructor
@@ -38,7 +39,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
      * @param labels must not be null. Use {@link Labels#EMPTY} if there are no labels.
      * @param exemplar may be null.
      */
-    public UnknownDataPointSnapshot(double value, Labels labels, Exemplar exemplar) {
+    public UnknownDataPointSnapshot(double value, Labels labels, @Nullable Exemplar exemplar) {
       this(value, labels, exemplar, 0);
     }
 
@@ -48,8 +49,17 @@ public final class UnknownSnapshot extends MetricSnapshot {
      * mirroring metrics with given timestamps from other metric sources.
      */
     public UnknownDataPointSnapshot(
-        double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
-      super(labels, 0L, scrapeTimestampMillis);
+        double value, Labels labels, @Nullable Exemplar exemplar, long scrapeTimestampMillis) {
+      this(value, labels, exemplar, scrapeTimestampMillis, false);
+    }
+
+    private UnknownDataPointSnapshot(
+        double value,
+        Labels labels,
+        @Nullable Exemplar exemplar,
+        long scrapeTimestampMillis,
+        boolean internal) {
+      super(labels, 0L, scrapeTimestampMillis, internal);
       this.value = value;
       this.exemplar = exemplar;
     }
@@ -58,7 +68,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
       return value;
     }
 
-    /** May return {@code null}. */
+    @Nullable
     public Exemplar getExemplar() {
       return exemplar;
     }
@@ -69,8 +79,8 @@ public final class UnknownSnapshot extends MetricSnapshot {
 
     public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
-      private Exemplar exemplar = null;
-      private Double value = null;
+      @Nullable private Exemplar exemplar = null;
+      @Nullable private Double value = null;
 
       private Builder() {}
 

@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
 public class PrometheusRegistry {
 
@@ -66,7 +67,7 @@ public class PrometheusRegistry {
     return scrape((PrometheusScrapeRequest) null);
   }
 
-  public MetricSnapshots scrape(PrometheusScrapeRequest scrapeRequest) {
+  public MetricSnapshots scrape(@Nullable PrometheusScrapeRequest scrapeRequest) {
     MetricSnapshots.Builder result = MetricSnapshots.builder();
     for (Collector collector : collectors) {
       MetricSnapshot snapshot =
@@ -101,7 +102,7 @@ public class PrometheusRegistry {
   }
 
   public MetricSnapshots scrape(
-      Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
+      Predicate<String> includedNames, @Nullable PrometheusScrapeRequest scrapeRequest) {
     if (includedNames == null) {
       return scrape(scrapeRequest);
     }

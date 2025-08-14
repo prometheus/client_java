@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongSupplier;
+import javax.annotation.Nullable;
 
 /**
  * The ExemplarSampler selects Spans as exemplars.
@@ -37,6 +38,8 @@ public class ExemplarSampler {
   // to be overwritten by automatic exemplar sampling. exemplars.length == customExemplars.length
   private final AtomicBoolean acceptingNewExemplars = new AtomicBoolean(true);
   private final AtomicBoolean acceptingNewCustomExemplars = new AtomicBoolean(true);
+
+  @Nullable
   private final SpanContext
       spanContext; // may be null, in that case SpanContextSupplier.getSpanContext() is used.
 

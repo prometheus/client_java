@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import javax.annotation.Nullable;
+
 /** Immutable representation of an Exemplar. */
 public class Exemplar {
 
@@ -59,10 +61,10 @@ public class Exemplar {
 
   public static class Builder {
 
-    private Double value = null;
+    @Nullable private Double value = null;
     private Labels labels = Labels.EMPTY;
-    private String traceId = null;
-    private String spanId = null;
+    @Nullable private String traceId = null;
+    @Nullable private String spanId = null;
     private long timestampMillis = 0L;
 
     private Builder() {}

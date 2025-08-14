@@ -2,6 +2,7 @@ package io.prometheus.metrics.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * The Prometheus Java client library can be configured at runtime (e.g. using a properties file).
@@ -12,14 +13,14 @@ public class PrometheusProperties {
 
   private static final PrometheusProperties instance = PrometheusPropertiesLoader.load();
 
-  private final MetricsProperties defaultMetricsProperties;
+  @Nullable private final MetricsProperties defaultMetricsProperties;
   private final Map<String, MetricsProperties> metricProperties = new HashMap<>();
-  private final ExemplarsProperties exemplarProperties;
-  private final ExporterProperties exporterProperties;
-  private final ExporterFilterProperties exporterFilterProperties;
-  private final ExporterHttpServerProperties exporterHttpServerProperties;
-  private final ExporterOpenTelemetryProperties exporterOpenTelemetryProperties;
-  private final ExporterPushgatewayProperties exporterPushgatewayProperties;
+  @Nullable private final ExemplarsProperties exemplarProperties;
+  @Nullable private final ExporterProperties exporterProperties;
+  @Nullable private final ExporterFilterProperties exporterFilterProperties;
+  @Nullable private final ExporterHttpServerProperties exporterHttpServerProperties;
+  @Nullable private final ExporterOpenTelemetryProperties exporterOpenTelemetryProperties;
+  @Nullable private final ExporterPushgatewayProperties exporterPushgatewayProperties;
 
   /**
    * Get the properties instance. When called for the first time, {@code get()} loads the properties
@@ -41,14 +42,14 @@ public class PrometheusProperties {
   }
 
   public PrometheusProperties(
-      MetricsProperties defaultMetricsProperties,
+      @Nullable MetricsProperties defaultMetricsProperties,
       Map<String, MetricsProperties> metricProperties,
-      ExemplarsProperties exemplarProperties,
-      ExporterProperties exporterProperties,
-      ExporterFilterProperties exporterFilterProperties,
-      ExporterHttpServerProperties httpServerConfig,
-      ExporterPushgatewayProperties pushgatewayProperties,
-      ExporterOpenTelemetryProperties otelConfig) {
+      @Nullable ExemplarsProperties exemplarProperties,
+      @Nullable ExporterProperties exporterProperties,
+      @Nullable ExporterFilterProperties exporterFilterProperties,
+      @Nullable ExporterHttpServerProperties httpServerConfig,
+      @Nullable ExporterPushgatewayProperties pushgatewayProperties,
+      @Nullable ExporterOpenTelemetryProperties otelConfig) {
     this.defaultMetricsProperties = defaultMetricsProperties;
     this.metricProperties.putAll(metricProperties);
     this.exemplarProperties = exemplarProperties;
@@ -63,6 +64,7 @@ public class PrometheusProperties {
    * The default metric properties apply for metrics where {@link #getMetricProperties(String)} is
    * {@code null}.
    */
+  @Nullable
   public MetricsProperties getDefaultMetricProperties() {
     return defaultMetricsProperties;
   }
@@ -72,47 +74,54 @@ public class PrometheusProperties {
    * #getDefaultMetricProperties()}. May return {@code null} if no metric-specific properties are
    * configured for a metric name.
    */
+  @Nullable
   public MetricsProperties getMetricProperties(String metricName) {
     return metricProperties.get(metricName.replace(".", "_"));
   }
 
+  @Nullable
   public ExemplarsProperties getExemplarProperties() {
     return exemplarProperties;
   }
 
+  @Nullable
   public ExporterProperties getExporterProperties() {
     return exporterProperties;
   }
 
+  @Nullable
   public ExporterFilterProperties getExporterFilterProperties() {
     return exporterFilterProperties;
   }
 
+  @Nullable
   public ExporterHttpServerProperties getExporterHttpServerProperties() {
     return exporterHttpServerProperties;
   }
 
+  @Nullable
   public ExporterPushgatewayProperties getExporterPushgatewayProperties() {
     return exporterPushgatewayProperties;
   }
 
+  @Nullable
   public ExporterOpenTelemetryProperties getExporterOpenTelemetryProperties() {
     return exporterOpenTelemetryProperties;
   }
 
   public static class Builder {
-    private MetricsProperties defaultMetricsProperties;
+    @Nullable private MetricsProperties defaultMetricsProperties;
     private Map<String, MetricsProperties> metricProperties = new HashMap<>();
-    private ExemplarsProperties exemplarProperties;
-    private ExporterProperties exporterProperties;
-    private ExporterFilterProperties exporterFilterProperties;
-    private ExporterHttpServerProperties exporterHttpServerProperties;
-    private ExporterPushgatewayProperties pushgatewayProperties;
-    private ExporterOpenTelemetryProperties otelConfig;
+    @Nullable private ExemplarsProperties exemplarProperties;
+    @Nullable private ExporterProperties exporterProperties;
+    @Nullable private ExporterFilterProperties exporterFilterProperties;
+    @Nullable private ExporterHttpServerProperties exporterHttpServerProperties;
+    @Nullable private ExporterPushgatewayProperties pushgatewayProperties;
+    @Nullable private ExporterOpenTelemetryProperties otelConfig;
 
     private Builder() {}
 
-    public Builder defaultMetricsProperties(MetricsProperties defaultMetricsProperties) {
+    public Builder defaultMetricsProperties(@Nullable MetricsProperties defaultMetricsProperties) {
       this.defaultMetricsProperties = defaultMetricsProperties;
       return this;
     }
@@ -128,34 +137,36 @@ public class PrometheusProperties {
       return this;
     }
 
-    public Builder exemplarProperties(ExemplarsProperties exemplarProperties) {
+    public Builder exemplarProperties(@Nullable ExemplarsProperties exemplarProperties) {
       this.exemplarProperties = exemplarProperties;
       return this;
     }
 
-    public Builder exporterProperties(ExporterProperties exporterProperties) {
+    public Builder exporterProperties(@Nullable ExporterProperties exporterProperties) {
       this.exporterProperties = exporterProperties;
       return this;
     }
 
-    public Builder exporterFilterProperties(ExporterFilterProperties exporterFilterProperties) {
+    public Builder exporterFilterProperties(
+        @Nullable ExporterFilterProperties exporterFilterProperties) {
       this.exporterFilterProperties = exporterFilterProperties;
       return this;
     }
 
     public Builder exporterHttpServerProperties(
-        ExporterHttpServerProperties exporterHttpServerProperties) {
+        @Nullable ExporterHttpServerProperties exporterHttpServerProperties) {
       this.exporterHttpServerProperties = exporterHttpServerProperties;
       return this;
     }
 
-    public Builder pushgatewayProperties(ExporterPushgatewayProperties pushgatewayProperties) {
+    public Builder pushgatewayProperties(
+        @Nullable ExporterPushgatewayProperties pushgatewayProperties) {
       this.pushgatewayProperties = pushgatewayProperties;
       return this;
     }
 
     public Builder exporterOpenTelemetryProperties(
-        ExporterOpenTelemetryProperties exporterOpenTelemetryProperties) {
+        @Nullable ExporterOpenTelemetryProperties exporterOpenTelemetryProperties) {
       this.otelConfig = exporterOpenTelemetryProperties;
       return this;
     }

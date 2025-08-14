@@ -28,7 +28,7 @@ public class CounterSnapshot extends MetricSnapshot {
   public static class CounterDataPointSnapshot extends DataPointSnapshot {
 
     private final double value;
-    private final Exemplar exemplar; // may be null
+    @Nullable private final Exemplar exemplar;
 
     /**
      * To create a new {@link CounterDataPointSnapshot}, you can either call the constructor
@@ -42,7 +42,7 @@ public class CounterSnapshot extends MetricSnapshot {
      *     Use {@code 0L} if there is no created timestamp.
      */
     public CounterDataPointSnapshot(
-        double value, Labels labels, Exemplar exemplar, long createdTimestampMillis) {
+        double value, Labels labels, @Nullable Exemplar exemplar, long createdTimestampMillis) {
       this(value, labels, exemplar, createdTimestampMillis, 0);
     }
 
@@ -55,7 +55,7 @@ public class CounterSnapshot extends MetricSnapshot {
     public CounterDataPointSnapshot(
         double value,
         Labels labels,
-        Exemplar exemplar,
+        @Nullable Exemplar exemplar,
         long createdTimestampMillis,
         long scrapeTimestampMillis) {
       super(labels, createdTimestampMillis, scrapeTimestampMillis);
@@ -68,7 +68,7 @@ public class CounterSnapshot extends MetricSnapshot {
       return value;
     }
 
-    /** May be {@code null}. */
+    @Nullable
     public Exemplar getExemplar() {
       return exemplar;
     }
@@ -85,8 +85,8 @@ public class CounterSnapshot extends MetricSnapshot {
 
     public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
-      private Exemplar exemplar = null;
-      private Double value = null;
+      @Nullable private Exemplar exemplar = null;
+      @Nullable private Double value = null;
       private long createdTimestampMillis = 0L;
 
       private Builder() {}

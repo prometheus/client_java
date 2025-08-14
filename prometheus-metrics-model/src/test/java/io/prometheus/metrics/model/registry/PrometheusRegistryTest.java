@@ -1,8 +1,8 @@
 package io.prometheus.metrics.model.registry;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.fail;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
@@ -90,14 +90,9 @@ class PrometheusRegistryTest {
     registry.register(noName);
     // However, at scrape time the collector has to provide a metric name, and then we'll get a
     // duplicate name error.
-    try {
-      registry.scrape();
-    } catch (IllegalStateException e) {
-      assertThat(e.getMessage().contains("duplicate") && e.getMessage().contains("no_name_gauge"))
-          .isTrue();
-      return;
-    }
-    fail("Expected duplicate name exception");
+    assertThatCode(registry::scrape)
+        .hasMessageContaining("duplicate")
+        .hasMessageContaining("no_name_gauge");
   }
 
   @Test

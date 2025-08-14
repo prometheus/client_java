@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import javax.annotation.Nullable;
+
 /** Immutable container for metric metadata: name, help, unit. */
 public final class MetricMetadata {
 
@@ -24,10 +26,10 @@ public final class MetricMetadata {
   private final String prometheusName;
 
   /** optional, may be {@code null}. */
-  private final String help;
+  @Nullable private final String help;
 
   /** optional, may be {@code null}. */
-  private final Unit unit;
+  @Nullable private final Unit unit;
 
   /** See {@link #MetricMetadata(String, String, Unit)} */
   public MetricMetadata(String name) {
@@ -48,7 +50,7 @@ public final class MetricMetadata {
    * @param help optional. May be {@code null}.
    * @param unit optional. May be {@code null}.
    */
-  public MetricMetadata(String name, String help, Unit unit) {
+  public MetricMetadata(String name, @Nullable String help, @Nullable Unit unit) {
     this.name = name;
     this.help = help;
     this.unit = unit;
@@ -76,6 +78,7 @@ public final class MetricMetadata {
     return prometheusName;
   }
 
+  @Nullable
   public String getHelp() {
     return help;
   }
@@ -84,6 +87,7 @@ public final class MetricMetadata {
     return unit != null;
   }
 
+  @Nullable
   public Unit getUnit() {
     return unit;
   }

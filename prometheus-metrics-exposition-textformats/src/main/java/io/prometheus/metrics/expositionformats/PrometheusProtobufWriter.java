@@ -55,19 +55,18 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
   @Override
   public String toDebugString(MetricSnapshots metricSnapshots) {
-    checkAvailable();
-    return DELEGATE.toDebugString(metricSnapshots);
+    return getDelegate().toDebugString(metricSnapshots);
   }
 
   @Override
   public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
-    checkAvailable();
-    DELEGATE.write(out, metricSnapshots);
+    getDelegate().write(out, metricSnapshots);
   }
 
-  private void checkAvailable() {
+  private ExpositionFormatWriter getDelegate() {
     if (DELEGATE == null) {
       throw new UnsupportedOperationException("Prometheus protobuf writer not available");
     }
+    return DELEGATE;
   }
 }

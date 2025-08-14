@@ -4,6 +4,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanId;
 import io.opentelemetry.api.trace.TraceId;
 import io.prometheus.metrics.tracer.common.SpanContext;
+import javax.annotation.Nullable;
 
 /**
  * This is exactly the same as the {@code OpenTelemetrySpanContextSupplier}. However, the {@code
@@ -31,12 +32,14 @@ public class OpenTelemetryAgentSpanContext implements SpanContext {
   }
 
   @Override
+  @Nullable
   public String getCurrentTraceId() {
     String traceId = Span.current().getSpanContext().getTraceId();
     return TraceId.isValid(traceId) ? traceId : null;
   }
 
   @Override
+  @Nullable
   public String getCurrentSpanId() {
     String spanId = Span.current().getSpanContext().getSpanId();
     return SpanId.isValid(spanId) ? spanId : null;

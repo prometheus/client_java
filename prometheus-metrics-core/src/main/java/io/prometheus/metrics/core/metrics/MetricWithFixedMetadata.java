@@ -31,6 +31,9 @@ public abstract class MetricWithFixedMetadata extends Metric {
   }
 
   private String makeName(String name, Unit unit) {
+    if (name == null) {
+      throw new IllegalArgumentException("Missing required field: name is null");
+    }
     if (unit != null) {
       if (!name.endsWith("_" + unit) && !name.endsWith("." + unit)) {
         name += "_" + unit;

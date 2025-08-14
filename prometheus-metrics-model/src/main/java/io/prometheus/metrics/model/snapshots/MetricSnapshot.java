@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /** Base class for metric snapshots. */
 public abstract class MetricSnapshot {
@@ -48,9 +49,9 @@ public abstract class MetricSnapshot {
 
   public abstract static class Builder<T extends Builder<T>> {
 
-    private String name;
-    private String help;
-    private Unit unit;
+    @Nullable private String name;
+    @Nullable private String help;
+    @Nullable private Unit unit;
 
     /**
      * The name is required. If the name is missing or invalid, {@code build()} will throw an {@link
@@ -75,6 +76,9 @@ public abstract class MetricSnapshot {
     public abstract MetricSnapshot build();
 
     protected MetricMetadata buildMetadata() {
+      if (name == null) {
+        throw new IllegalArgumentException("Missing required field: name is null");
+      }
       return new MetricMetadata(name, help, unit);
     }
 

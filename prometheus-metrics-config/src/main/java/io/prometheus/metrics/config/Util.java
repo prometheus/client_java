@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
 class Util {
 
+  @Nullable
   static String getProperty(String name, Map<Object, Object> properties) {
     Object object = properties.remove(name);
     if (object != null) {
@@ -17,6 +19,7 @@ class Util {
     return null;
   }
 
+  @Nullable
   static Boolean loadBoolean(String name, Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     String property = getProperty(name, properties);
@@ -30,6 +33,7 @@ class Util {
     return null;
   }
 
+  @Nullable
   static List<Double> toList(double... values) {
     if (values == null) {
       return null;
@@ -41,11 +45,13 @@ class Util {
     return result;
   }
 
+  @Nullable
   static String loadString(String name, Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     return getProperty(name, properties);
   }
 
+  @Nullable
   static String loadStringAddSuffix(String name, Map<Object, Object> properties, String suffix) {
     Object object = properties.remove(name);
     if (object != null) {
@@ -54,6 +60,7 @@ class Util {
     return null;
   }
 
+  @Nullable
   static List<String> loadStringList(String name, Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     String property = getProperty(name, properties);
@@ -63,6 +70,7 @@ class Util {
     return null;
   }
 
+  @Nullable
   static List<Double> loadDoubleList(String name, Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     String property = getProperty(name, properties);
@@ -109,6 +117,7 @@ class Util {
     return result;
   }
 
+  @Nullable
   static Integer loadInteger(String name, Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     String property = getProperty(name, properties);
@@ -123,6 +132,7 @@ class Util {
     return null;
   }
 
+  @Nullable
   static Double loadDouble(String name, Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     String property = getProperty(name, properties);
@@ -136,6 +146,7 @@ class Util {
     return null;
   }
 
+  @Nullable
   static Long loadLong(String name, Map<Object, Object> properties)
       throws PrometheusPropertiesException {
     String property = getProperty(name, properties);
@@ -150,7 +161,7 @@ class Util {
   }
 
   static <T extends Number> void assertValue(
-      T number, Predicate<T> predicate, String message, String prefix, String name)
+      @Nullable T number, Predicate<T> predicate, String message, String prefix, String name)
       throws PrometheusPropertiesException {
     if (number != null && !predicate.test(number)) {
       String fullMessage =

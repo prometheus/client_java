@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /** Immutable snapshot of a Gauge. */
 public final class GaugeSnapshot extends MetricSnapshot {
@@ -27,7 +28,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
   public static final class GaugeDataPointSnapshot extends DataPointSnapshot {
 
     private final double value;
-    private final Exemplar exemplar; // may be null
+    @Nullable private final Exemplar exemplar;
 
     /**
      * To create a new {@link GaugeDataPointSnapshot}, you can either call the constructor directly
@@ -37,7 +38,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
      * @param labels must not be null. Use {@link Labels#EMPTY} if there are no labels.
      * @param exemplar may be null.
      */
-    public GaugeDataPointSnapshot(double value, Labels labels, Exemplar exemplar) {
+    public GaugeDataPointSnapshot(double value, Labels labels, @Nullable Exemplar exemplar) {
       this(value, labels, exemplar, 0);
     }
 
@@ -47,7 +48,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
      * mirroring metrics with given timestamps from other metric sources.
      */
     public GaugeDataPointSnapshot(
-        double value, Labels labels, Exemplar exemplar, long scrapeTimestampMillis) {
+        double value, Labels labels, @Nullable Exemplar exemplar, long scrapeTimestampMillis) {
       super(labels, 0L, scrapeTimestampMillis);
       this.value = value;
       this.exemplar = exemplar;
@@ -57,7 +58,7 @@ public final class GaugeSnapshot extends MetricSnapshot {
       return value;
     }
 
-    /** May be {@code null}. */
+    @Nullable
     public Exemplar getExemplar() {
       return exemplar;
     }
@@ -68,8 +69,8 @@ public final class GaugeSnapshot extends MetricSnapshot {
 
     public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
-      private Exemplar exemplar = null;
-      private Double value = null;
+      @Nullable private Exemplar exemplar = null;
+      @Nullable private Double value = null;
 
       private Builder() {}
 

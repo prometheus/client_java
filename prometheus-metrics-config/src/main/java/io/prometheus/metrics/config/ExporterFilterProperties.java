@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exporter.filter */
 public class ExporterFilterProperties {
@@ -15,16 +16,16 @@ public class ExporterFilterProperties {
   public static final String METRIC_NAME_MUST_NOT_START_WITH = "metricNameMustNotStartWith";
   private static final String PREFIX = "io.prometheus.exporter.filter";
 
-  private final List<String> allowedNames;
-  private final List<String> excludedNames;
-  private final List<String> allowedPrefixes;
-  private final List<String> excludedPrefixes;
+  @Nullable private final List<String> allowedNames;
+  @Nullable private final List<String> excludedNames;
+  @Nullable private final List<String> allowedPrefixes;
+  @Nullable private final List<String> excludedPrefixes;
 
   private ExporterFilterProperties(
-      List<String> allowedNames,
-      List<String> excludedNames,
-      List<String> allowedPrefixes,
-      List<String> excludedPrefixes) {
+      @Nullable List<String> allowedNames,
+      @Nullable List<String> excludedNames,
+      @Nullable List<String> allowedPrefixes,
+      @Nullable List<String> excludedPrefixes) {
     this.allowedNames =
         allowedNames == null ? null : Collections.unmodifiableList(new ArrayList<>(allowedNames));
     this.excludedNames =
@@ -39,18 +40,22 @@ public class ExporterFilterProperties {
             : Collections.unmodifiableList(new ArrayList<>(excludedPrefixes));
   }
 
+  @Nullable
   public List<String> getAllowedMetricNames() {
     return allowedNames;
   }
 
+  @Nullable
   public List<String> getExcludedMetricNames() {
     return excludedNames;
   }
 
+  @Nullable
   public List<String> getAllowedMetricNamePrefixes() {
     return allowedPrefixes;
   }
 
+  @Nullable
   public List<String> getExcludedMetricNamePrefixes() {
     return excludedPrefixes;
   }
@@ -79,10 +84,10 @@ public class ExporterFilterProperties {
 
   public static class Builder {
 
-    private List<String> allowedNames;
-    private List<String> excludedNames;
-    private List<String> allowedPrefixes;
-    private List<String> excludedPrefixes;
+    @Nullable private List<String> allowedNames;
+    @Nullable private List<String> excludedNames;
+    @Nullable private List<String> allowedPrefixes;
+    @Nullable private List<String> excludedPrefixes;
 
     private Builder() {}
 
