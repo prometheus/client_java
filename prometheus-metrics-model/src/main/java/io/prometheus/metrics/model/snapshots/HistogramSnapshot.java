@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /** Immutable snapshot of a Histogram. */
 public final class HistogramSnapshot extends MetricSnapshot {
@@ -398,7 +399,7 @@ public final class HistogramSnapshot extends MetricSnapshot {
         return this;
       }
 
-      public Builder classicHistogramBuckets(ClassicHistogramBuckets classicBuckets) {
+      public Builder classicHistogramBuckets(@Nullable ClassicHistogramBuckets classicBuckets) {
         this.classicHistogramBuckets = classicBuckets;
         return this;
       }
@@ -419,13 +420,13 @@ public final class HistogramSnapshot extends MetricSnapshot {
       }
 
       public Builder nativeBucketsForPositiveValues(
-          NativeHistogramBuckets bucketsForPositiveValues) {
+          @Nullable NativeHistogramBuckets bucketsForPositiveValues) {
         this.nativeBucketsForPositiveValues = bucketsForPositiveValues;
         return this;
       }
 
       public Builder nativeBucketsForNegativeValues(
-          NativeHistogramBuckets bucketsForNegativeValues) {
+          @Nullable NativeHistogramBuckets bucketsForNegativeValues) {
         this.nativeBucketsForNegativeValues = bucketsForNegativeValues;
         return this;
       }

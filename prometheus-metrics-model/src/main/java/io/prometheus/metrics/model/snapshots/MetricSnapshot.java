@@ -63,12 +63,12 @@ public abstract class MetricSnapshot {
       return self();
     }
 
-    public T help(String help) {
+    public T help(@Nullable String help) {
       this.help = help;
       return self();
     }
 
-    public T unit(Unit unit) {
+    public T unit(@Nullable Unit unit) {
       this.unit = unit;
       return self();
     }

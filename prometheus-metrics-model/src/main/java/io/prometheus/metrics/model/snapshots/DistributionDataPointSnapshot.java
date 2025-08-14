@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import javax.annotation.Nullable;
+
 /**
  * Common base class for histogram and summary data. Histograms and Summaries represent
  * distributions, like a latency distribution or a distribution of request sizes in Bytes.
@@ -73,7 +75,7 @@ public abstract class DistributionDataPointSnapshot extends DataPointSnapshot {
       return self();
     }
 
-    public T exemplars(Exemplars exemplars) {
+    public T exemplars(@Nullable Exemplars exemplars) {
       this.exemplars = exemplars;
       return self();
     }

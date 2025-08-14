@@ -82,7 +82,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
       }
 
       /** Optional */
-      public Builder exemplar(Exemplar exemplar) {
+      public Builder exemplar(@Nullable Exemplar exemplar) {
         this.exemplar = exemplar;
         return this;
       }

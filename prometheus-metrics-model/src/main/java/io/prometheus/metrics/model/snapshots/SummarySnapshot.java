@@ -3,6 +3,7 @@ package io.prometheus.metrics.model.snapshots;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /** Immutable snapshot of a Summary metric. */
 public final class SummarySnapshot extends MetricSnapshot {
@@ -102,7 +103,7 @@ public final class SummarySnapshot extends MetricSnapshot {
         return this;
       }
 
-      public Builder quantiles(Quantiles quantiles) {
+      public Builder quantiles(@Nullable Quantiles quantiles) {
         this.quantiles = quantiles;
         return this;
       }
