@@ -1,12 +1,12 @@
 package io.prometheus.metrics.config;
 
-import javax.annotation.Nullable;
+import static java.util.Collections.unmodifiableList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import static java.util.Collections.unmodifiableList;
+import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.metrics */
 public class MetricsProperties {
