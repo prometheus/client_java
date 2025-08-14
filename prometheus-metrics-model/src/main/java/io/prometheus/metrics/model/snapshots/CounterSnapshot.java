@@ -58,7 +58,17 @@ public class CounterSnapshot extends MetricSnapshot {
         Exemplar exemplar,
         long createdTimestampMillis,
         long scrapeTimestampMillis) {
-      super(labels, createdTimestampMillis, scrapeTimestampMillis);
+      this(null, value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis);
+    }
+
+    public CounterDataPointSnapshot(
+        String metricName,
+        double value,
+        Labels labels,
+        Exemplar exemplar,
+        long createdTimestampMillis,
+        long scrapeTimestampMillis) {
+      super(metricName, labels, createdTimestampMillis, scrapeTimestampMillis);
       this.value = value;
       this.exemplar = exemplar;
       validate();
@@ -75,7 +85,7 @@ public class CounterSnapshot extends MetricSnapshot {
 
     protected void validate() {
       if (value < 0.0) {
-        throw new IllegalArgumentException(value + ": counters cannot have a negative value");
+        throw new IllegalArgumentException((getMetricName() == null ? "" : getMetricName() + "=") + value + ": counters cannot have a negative value");
       }
     }
 
@@ -85,6 +95,7 @@ public class CounterSnapshot extends MetricSnapshot {
 
     public static class Builder extends DataPointSnapshot.Builder<Builder> {
 
+      private String metricName = null;
       private Exemplar exemplar = null;
       private Double value = null;
       private long createdTimestampMillis = 0L;
@@ -107,12 +118,17 @@ public class CounterSnapshot extends MetricSnapshot {
         return this;
       }
 
+      public Builder metricName(String metricName) {
+        this.metricName = metricName;
+        return this;
+      }
+
       public CounterDataPointSnapshot build() {
         if (value == null) {
           throw new IllegalArgumentException("Missing required field: value is null.");
         }
         return new CounterDataPointSnapshot(
-            value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis);
+            metricName, value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis);
       }
 
       @Override
