@@ -69,7 +69,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
       return self();
     }
 
-    public B unit(Unit unit) {
+    public B unit(@Nullable Unit unit) {
       this.unit = unit;
       return self();
     }

@@ -118,7 +118,9 @@ public class SimpleclientCollector implements MultiCollector {
       if (sample.name.endsWith("_created")) {
         dataPoint.createdTimestampMillis((long) Unit.secondsToMillis(sample.value));
       } else {
-        dataPoint.value(sample.value).exemplar(convertExemplar(sample.exemplar));
+        if (sample.exemplar != null) {
+          dataPoint.value(sample.value).exemplar(convertExemplar(sample.exemplar));
+        }
         if (sample.timestampMs != null) {
           dataPoint.scrapeTimestampMillis(sample.timestampMs);
         }
@@ -140,8 +142,10 @@ public class SimpleclientCollector implements MultiCollector {
       GaugeSnapshot.GaugeDataPointSnapshot.Builder dataPoint =
           GaugeSnapshot.GaugeDataPointSnapshot.builder()
               .value(sample.value)
-              .labels(Labels.of(sample.labelNames, sample.labelValues))
-              .exemplar(convertExemplar(sample.exemplar));
+              .labels(Labels.of(sample.labelNames, sample.labelValues));
+      if (sample.exemplar != null) {
+        dataPoint.exemplar(convertExemplar(sample.exemplar));
+      }
       if (sample.timestampMs != null) {
         dataPoint.scrapeTimestampMillis(sample.timestampMs);
       }
@@ -281,8 +285,10 @@ public class SimpleclientCollector implements MultiCollector {
       UnknownSnapshot.UnknownDataPointSnapshot.Builder dataPoint =
           UnknownSnapshot.UnknownDataPointSnapshot.builder()
               .value(sample.value)
-              .labels(Labels.of(sample.labelNames, sample.labelValues))
-              .exemplar(convertExemplar(sample.exemplar));
+              .labels(Labels.of(sample.labelNames, sample.labelValues));
+      if (sample.exemplar != null) {
+        dataPoint.exemplar(convertExemplar(sample.exemplar));
+      }
       if (sample.timestampMs != null) {
         dataPoint.scrapeTimestampMillis(sample.timestampMs);
       }
@@ -358,11 +364,7 @@ public class SimpleclientCollector implements MultiCollector {
     return info.build();
   }
 
-  @Nullable
-  private Exemplar convertExemplar(@Nullable io.prometheus.client.exemplars.Exemplar exemplar) {
-    if (exemplar == null) {
-      return null;
-    }
+  private Exemplar convertExemplar(io.prometheus.client.exemplars.Exemplar exemplar) {
     Exemplar.Builder result = Exemplar.builder().value(exemplar.getValue());
     if (exemplar.getTimestampMs() != null) {
       result.timestampMillis(exemplar.getTimestampMs());
