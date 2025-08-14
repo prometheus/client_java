@@ -2,6 +2,7 @@ package io.prometheus.metrics.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * The Prometheus Java client library can be configured at runtime (e.g. using a properties file).
@@ -72,6 +73,7 @@ public class PrometheusProperties {
    * #getDefaultMetricProperties()}. May return {@code null} if no metric-specific properties are
    * configured for a metric name.
    */
+  @Nullable
   public MetricsProperties getMetricProperties(String metricName) {
     return metricProperties.get(metricName.replace(".", "_"));
   }
@@ -109,7 +111,7 @@ public class PrometheusProperties {
         ExporterFilterProperties.builder().build();
     private ExporterHttpServerProperties exporterHttpServerProperties =
         ExporterHttpServerProperties.builder().build();
-    private ExporterPushgatewayProperties pushGatewayProperties =
+    private ExporterPushgatewayProperties pushgatewayProperties =
         ExporterPushgatewayProperties.builder().build();
     private ExporterOpenTelemetryProperties otelConfig =
         ExporterOpenTelemetryProperties.builder().build();
@@ -154,7 +156,7 @@ public class PrometheusProperties {
     }
 
     public Builder pushgatewayProperties(ExporterPushgatewayProperties pushgatewayProperties) {
-      this.pushGatewayProperties = pushgatewayProperties;
+      this.pushgatewayProperties = pushgatewayProperties;
       return this;
     }
 
@@ -172,7 +174,7 @@ public class PrometheusProperties {
           exporterProperties,
           exporterFilterProperties,
           exporterHttpServerProperties,
-          pushGatewayProperties,
+          pushgatewayProperties,
           otelConfig);
     }
   }
