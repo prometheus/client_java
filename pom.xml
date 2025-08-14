@@ -267,7 +267,7 @@
               -Xep:MissingSummary:OFF
               -Xep:LongDoubleConversion:OFF
               -Xep:StringSplitter:OFF
-              -XepExcludedPaths:(.*/generated/.*|.*/src/test/java/.*)
+              -XepExcludedPaths:(.*/generated/.*|.*/src/test/java/.*|.*/examples/.*|.*/integration-tests/.*)
               -XepOpt:NullAway:AnnotatedPackages=io.prometheus.metrics
             </arg>
           </compilerArgs>
