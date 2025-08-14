@@ -13,18 +13,18 @@ import java.util.Map;
 public class CustomLabelMapper {
   private final List<CompiledMapperConfig> compiledMapperConfigs;
 
-  public CustomLabelMapper(final List<MapperConfig> mapperConfigs) {
+  public CustomLabelMapper(List<MapperConfig> mapperConfigs) {
     if (mapperConfigs == null || mapperConfigs.isEmpty()) {
       throw new IllegalArgumentException("CustomLabelMapper needs some mapper configs!");
     }
 
-    this.compiledMapperConfigs = new ArrayList<CompiledMapperConfig>(mapperConfigs.size());
+    this.compiledMapperConfigs = new ArrayList<>(mapperConfigs.size());
     for (MapperConfig config : mapperConfigs) {
       this.compiledMapperConfigs.add(new CompiledMapperConfig(config));
     }
   }
 
-  public String getName(final String dropwizardName) {
+  public String getName(String dropwizardName) {
     if (dropwizardName == null) {
       throw new IllegalArgumentException("Dropwizard metric name cannot be null");
     }
@@ -73,8 +73,8 @@ public class CustomLabelMapper {
     return Labels.of(additionalLabelNames, additionalLabelValues);
   }
 
-  protected NameAndLabels getNameAndLabels(
-      final MapperConfig config, final Map<String, String> parameters) {
+  @SuppressWarnings("NullAway") // not sure if it can be null here
+  protected NameAndLabels getNameAndLabels(MapperConfig config, Map<String, String> parameters) {
     final String metricName = formatTemplate(config.getName(), parameters);
     final List<String> labels = new ArrayList<String>(config.getLabels().size());
     final List<String> labelValues = new ArrayList<String>(config.getLabels().size());
@@ -86,7 +86,7 @@ public class CustomLabelMapper {
     return new NameAndLabels(metricName, labels, labelValues);
   }
 
-  private String formatTemplate(final String template, final Map<String, String> params) {
+  private String formatTemplate(String template, Map<String, String> params) {
     String result = template;
     for (Map.Entry<String, String> entry : params.entrySet()) {
       result = result.replace(entry.getKey(), entry.getValue());
@@ -99,7 +99,8 @@ public class CustomLabelMapper {
     final MapperConfig mapperConfig;
     final GraphiteNamePattern pattern;
 
-    CompiledMapperConfig(final MapperConfig mapperConfig) {
+    @SuppressWarnings("NullAway") // not sure if it can be null here
+    CompiledMapperConfig(MapperConfig mapperConfig) {
       this.mapperConfig = mapperConfig;
       this.pattern = new GraphiteNamePattern(mapperConfig.getMatch());
     }

@@ -8,6 +8,7 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
+import javax.annotation.Nullable;
 
 /**
  * JVM Compilation metrics. The {@link JvmCompilationMetrics} are registered as part of the {@link
@@ -70,7 +71,7 @@ public class JvmCompilationMetrics {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private CompilationMXBean compilationBean;
+    @Nullable private CompilationMXBean compilationBean;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

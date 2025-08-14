@@ -5,9 +5,10 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import javax.annotation.Nullable;
 
 public interface ExpositionFormatWriter {
-  boolean accepts(String acceptHeader);
+  boolean accepts(@Nullable String acceptHeader);
 
   /** Writes the given metric snapshots to the output stream using the specified escaping scheme. */
   void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)

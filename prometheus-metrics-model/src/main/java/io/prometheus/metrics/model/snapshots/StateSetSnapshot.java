@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 /** Immutable snapshot of a StateSet metric. */
 public final class StateSetSnapshot extends MetricSnapshot {
@@ -253,7 +254,7 @@ public final class StateSetSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public Builder unit(Unit unit) {
+    public Builder unit(@Nullable Unit unit) {
       throw new IllegalArgumentException("StateSet metric cannot have a unit.");
     }
 

@@ -6,6 +6,7 @@ import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import java.io.IOException;
 import java.io.Writer;
+import javax.annotation.Nullable;
 
 public class TextFormatUtil {
 
@@ -104,7 +105,7 @@ public class TextFormatUtil {
   static void writeLabels(
       Writer writer,
       Labels labels,
-      String additionalLabelName,
+     @Nullable String additionalLabelName,
       double additionalLabelValue,
       boolean metricInsideBraces,
       EscapingScheme scheme)

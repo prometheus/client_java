@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import javax.annotation.Nullable;
 
 /**
  * Counter metric.
@@ -32,7 +33,7 @@ import java.util.concurrent.atomic.LongAdder;
 public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     implements CounterDataPoint {
 
-  private final ExemplarSamplerConfig exemplarSamplerConfig;
+  @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   private Counter(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);
@@ -92,13 +93,8 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
   }
 
   @Override
-  protected boolean isExemplarsEnabled() {
-    return exemplarSamplerConfig != null;
-  }
-
-  @Override
   protected DataPoint newDataPoint() {
-    if (isExemplarsEnabled()) {
+    if (exemplarSamplerConfig != null) {
       return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
     } else {
       return new DataPoint(null);
@@ -120,9 +116,11 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     // we will be using the LongAdder and get the best performance.
     private final LongAdder longValue = new LongAdder();
     private final long createdTimeMillis = System.currentTimeMillis();
-    private final ExemplarSampler exemplarSampler; // null if isExemplarsEnabled() is false
 
-    private DataPoint(ExemplarSampler exemplarSampler) {
+    @Nullable
+    private final ExemplarSampler exemplarSampler; // null if exemplarSamplerConfig is null
+
+    private DataPoint(@Nullable ExemplarSampler exemplarSampler) {
       this.exemplarSampler = exemplarSampler;
     }
 
@@ -139,7 +137,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     @Override
     public void inc(long amount) {
       validateAndAdd(amount);
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observe((double) amount);
       }
     }
@@ -147,7 +145,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     @Override
     public void inc(double amount) {
       validateAndAdd(amount);
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observe(amount);
       }
     }
@@ -155,7 +153,7 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     @Override
     public void incWithExemplar(long amount, Labels labels) {
       validateAndAdd(amount);
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar((double) amount, labels);
       }
     }
@@ -163,13 +161,9 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
     @Override
     public void incWithExemplar(double amount, Labels labels) {
       validateAndAdd(amount);
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar(amount, labels);
       }
-    }
-
-    private boolean isExemplarsEnabled() {
-      return exemplarSampler != null;
     }
 
     private void validateAndAdd(long amount) {

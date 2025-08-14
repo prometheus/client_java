@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 /**
  * Example:
@@ -36,10 +37,10 @@ public class GaugeWithCallback extends CallbackMetric {
 
   private GaugeWithCallback(Builder builder) {
     super(builder);
-    this.callback = builder.callback;
-    if (callback == null) {
+    if (builder.callback == null) {
       throw new IllegalArgumentException("callback cannot be null");
     }
+    this.callback = builder.callback;
   }
 
   @Override
@@ -64,7 +65,7 @@ public class GaugeWithCallback extends CallbackMetric {
   public static class Builder
       extends CallbackMetric.Builder<GaugeWithCallback.Builder, GaugeWithCallback> {
 
-    private Consumer<Callback> callback;
+    @Nullable private Consumer<Callback> callback;
 
     public Builder callback(Consumer<Callback> callback) {
       this.callback = callback;

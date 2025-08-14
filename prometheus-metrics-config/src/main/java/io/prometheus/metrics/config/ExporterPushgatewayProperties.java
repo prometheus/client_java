@@ -101,4 +101,35 @@ public class ExporterPushgatewayProperties {
                 PREFIX, ESCAPING_SCHEME, scheme));
     }
   }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    @Nullable private String address;
+    @Nullable private String job;
+    @Nullable private String scheme;
+
+    private Builder() {}
+
+    public Builder address(String address) {
+      this.address = address;
+      return this;
+    }
+
+    public Builder job(String job) {
+      this.job = job;
+      return this;
+    }
+
+    public Builder scheme(String scheme) {
+      this.scheme = scheme;
+      return this;
+    }
+
+    public ExporterPushgatewayProperties build() {
+      return new ExporterPushgatewayProperties(address, job, scheme);
+    }
+  }
 }

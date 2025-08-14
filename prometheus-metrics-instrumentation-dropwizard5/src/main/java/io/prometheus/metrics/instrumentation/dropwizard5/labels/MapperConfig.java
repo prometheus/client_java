@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.dropwizard5.labels;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /**
  * POJO containing info on how to map a graphite metric to a prometheus one. Example mapping in yaml
@@ -30,7 +31,7 @@ public final class MapperConfig {
    * allowed. E.g: org.company.controller.*.status.* Will be used to match
    * org.company.controller.controller1.status.200 and org.company.controller.controller2.status.400
    */
-  private String match;
+  @Nullable private String match;
 
   /**
    * New metric name. Can contain placeholders to be replaced with actual values from the incoming
@@ -41,7 +42,7 @@ public final class MapperConfig {
    * <p>A metric "test.dispatcher.old.test.yay" will be converted in a new metric with name
    * "dispatcher_events_total_test"
    */
-  private String name;
+  @Nullable private String name;
 
   /**
    * Labels to be extracted from the metric name. They should contain placeholders to be replaced
@@ -54,19 +55,19 @@ public final class MapperConfig {
    *
    * <p>Label names have to match the regex ^[a-zA-Z_][a-zA-Z0-9_]+$
    */
-  private Map<String, String> labels = new HashMap<String, String>();
+  private Map<String, String> labels = new HashMap<>();
 
   public MapperConfig() {
     // empty constructor
   }
 
   // for tests
-  MapperConfig(final String match) {
+  MapperConfig(String match) {
     validateMatch(match);
     this.match = match;
   }
 
-  public MapperConfig(final String match, final String name, final Map<String, String> labels) {
+  public MapperConfig(String match, String name, Map<String, String> labels) {
     this.name = name;
     validateMatch(match);
     this.match = match;
@@ -79,20 +80,22 @@ public final class MapperConfig {
     return String.format("MapperConfig{match=%s, name=%s, labels=%s}", match, name, labels);
   }
 
+  @Nullable
   public String getMatch() {
     return match;
   }
 
-  public void setMatch(final String match) {
+  public void setMatch(String match) {
     validateMatch(match);
     this.match = match;
   }
 
+  @Nullable
   public String getName() {
     return name;
   }
 
-  public void setName(final String name) {
+  public void setName(String name) {
     this.name = name;
   }
 
@@ -100,12 +103,12 @@ public final class MapperConfig {
     return labels;
   }
 
-  public void setLabels(final Map<String, String> labels) {
+  public void setLabels(Map<String, String> labels) {
     validateLabels(labels);
     this.labels = labels;
   }
 
-  private void validateMatch(final String match) {
+  private void validateMatch(String match) {
     if (!MATCH_EXPRESSION_PATTERN.matcher(match).matches()) {
       throw new IllegalArgumentException(
           String.format(
@@ -114,9 +117,9 @@ public final class MapperConfig {
     }
   }
 
-  private void validateLabels(final Map<String, String> labels) {
+  private void validateLabels(Map<String, String> labels) {
     if (labels != null) {
-      for (final String key : labels.keySet()) {
+      for (String key : labels.keySet()) {
         if (!LABEL_PATTERN.matcher(key).matches()) {
           throw new IllegalArgumentException(
               String.format("Label [%s] does not match required pattern %s", match, LABEL_PATTERN));
@@ -126,7 +129,7 @@ public final class MapperConfig {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }

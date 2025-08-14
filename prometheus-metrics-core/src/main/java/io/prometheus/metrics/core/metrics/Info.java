@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import javax.annotation.Nullable;
 
 /**
  * Info metric. Example:
@@ -144,7 +145,7 @@ public class Info extends MetricWithFixedMetadata {
 
     /** Throws an {@link UnsupportedOperationException} because Info metrics cannot have a unit. */
     @Override
-    public Builder unit(Unit unit) {
+    public Builder unit(@Nullable Unit unit) {
       if (unit != null) {
         throw new UnsupportedOperationException("Info metrics cannot have a unit.");
       }

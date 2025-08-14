@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import javax.annotation.Nullable;
 
 public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
 
@@ -18,6 +19,7 @@ public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
   String getMethod();
 
   /** See {@code jakarta.servlet.http.HttpServletRequest.getHeader(String)} */
+  @Nullable
   default String getHeader(String name) {
     Enumeration<String> headers = getHeaders(name);
     if (headers == null || !headers.hasMoreElements()) {
@@ -28,6 +30,7 @@ public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
   }
 
   /** See {@code jakarta.servlet.ServletRequest.getParameter(String)} */
+  @Nullable
   default String getParameter(String name) {
     String[] values = getParameterValues(name);
     if (values == null || values.length == 0) {
@@ -39,6 +42,7 @@ public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
 
   /** See {@code jakarta.servlet.ServletRequest.getParameterValues(String)} */
   @Override
+  @Nullable
   default String[] getParameterValues(String name) {
     try {
       ArrayList<String> result = new ArrayList<>();

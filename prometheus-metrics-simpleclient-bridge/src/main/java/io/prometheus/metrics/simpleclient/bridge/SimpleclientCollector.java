@@ -1,6 +1,7 @@
 package io.prometheus.metrics.simpleclient.bridge;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
+import static java.util.Objects.requireNonNull;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
@@ -29,6 +30,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * Bridge from {@code simpleclient} (version 0.16.0 and older) to the new {@code prometheus-metrics}
@@ -116,7 +118,10 @@ public class SimpleclientCollector implements MultiCollector {
       if (sample.name.endsWith("_created")) {
         dataPoint.createdTimestampMillis((long) Unit.secondsToMillis(sample.value));
       } else {
-        dataPoint.value(sample.value).exemplar(convertExemplar(sample.exemplar));
+        dataPoint.value(sample.value);
+        if (sample.exemplar != null) {
+          dataPoint.exemplar(convertExemplar(sample.exemplar));
+        }
         if (sample.timestampMs != null) {
           dataPoint.scrapeTimestampMillis(sample.timestampMs);
         }
@@ -138,8 +143,10 @@ public class SimpleclientCollector implements MultiCollector {
       GaugeSnapshot.GaugeDataPointSnapshot.Builder dataPoint =
           GaugeSnapshot.GaugeDataPointSnapshot.builder()
               .value(sample.value)
-              .labels(Labels.of(sample.labelNames, sample.labelValues))
-              .exemplar(convertExemplar(sample.exemplar));
+              .labels(Labels.of(sample.labelNames, sample.labelValues));
+      if (sample.exemplar != null) {
+        dataPoint.exemplar(convertExemplar(sample.exemplar));
+      }
       if (sample.timestampMs != null) {
         dataPoint.scrapeTimestampMillis(sample.timestampMs);
       }
@@ -183,10 +190,9 @@ public class SimpleclientCollector implements MultiCollector {
     }
     for (Labels labels : dataPoints.keySet()) {
       histogram.dataPoint(
-          dataPoints
-              .get(labels)
-              .classicHistogramBuckets(makeBuckets(cumulativeBuckets.get(labels)))
-              .exemplars(exemplars.get(labels).build())
+          requireNonNull(dataPoints.get(labels))
+              .classicHistogramBuckets(makeBuckets(requireNonNull(cumulativeBuckets.get(labels))))
+              .exemplars(requireNonNull(exemplars.get(labels)).build())
               .build());
     }
     return histogram.build();
@@ -233,10 +239,9 @@ public class SimpleclientCollector implements MultiCollector {
     }
     for (Labels labels : dataPoints.keySet()) {
       summary.dataPoint(
-          dataPoints
-              .get(labels)
-              .quantiles(quantiles.get(labels).build())
-              .exemplars(exemplars.get(labels).build())
+          requireNonNull(dataPoints.get(labels))
+              .quantiles(requireNonNull(quantiles.get(labels)).build())
+              .exemplars(requireNonNull(exemplars.get(labels)).build())
               .build());
     }
     return summary.build();
@@ -281,8 +286,10 @@ public class SimpleclientCollector implements MultiCollector {
       UnknownSnapshot.UnknownDataPointSnapshot.Builder dataPoint =
           UnknownSnapshot.UnknownDataPointSnapshot.builder()
               .value(sample.value)
-              .labels(Labels.of(sample.labelNames, sample.labelValues))
-              .exemplar(convertExemplar(sample.exemplar));
+              .labels(Labels.of(sample.labelNames, sample.labelValues));
+      if (sample.exemplar != null) {
+        dataPoint.exemplar(convertExemplar(sample.exemplar));
+      }
       if (sample.timestampMs != null) {
         dataPoint.scrapeTimestampMillis(sample.timestampMs);
       }
@@ -291,6 +298,7 @@ public class SimpleclientCollector implements MultiCollector {
     return unknown.build();
   }
 
+  @Nullable
   private Unit convertUnit(Collector.MetricFamilySamples samples) {
     if (samples.unit != null && !samples.unit.isEmpty()) {
       return new Unit(samples.unit);
@@ -306,7 +314,7 @@ public class SimpleclientCollector implements MultiCollector {
     ClassicHistogramBuckets.Builder result = ClassicHistogramBuckets.builder();
     long previousCount = 0L;
     for (Double upperBound : upperBounds) {
-      long cumulativeCount = cumulativeBuckets.get(upperBound);
+      long cumulativeCount = requireNonNull(cumulativeBuckets.get(upperBound));
       result.bucket(upperBound, cumulativeCount - previousCount);
       previousCount = cumulativeCount;
     }
@@ -358,9 +366,6 @@ public class SimpleclientCollector implements MultiCollector {
   }
 
   private Exemplar convertExemplar(io.prometheus.client.exemplars.Exemplar exemplar) {
-    if (exemplar == null) {
-      return null;
-    }
     Exemplar.Builder result = Exemplar.builder().value(exemplar.getValue());
     if (exemplar.getTimestampMs() != null) {
       result.timestampMillis(exemplar.getTimestampMs());
@@ -388,7 +393,7 @@ public class SimpleclientCollector implements MultiCollector {
 
   public static class Builder {
 
-    private CollectorRegistry collectorRegistry;
+    @Nullable private CollectorRegistry collectorRegistry;
 
     private Builder() {}
 

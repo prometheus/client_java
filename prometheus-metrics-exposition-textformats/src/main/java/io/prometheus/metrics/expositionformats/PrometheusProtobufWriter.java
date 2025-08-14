@@ -35,7 +35,7 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
   }
 
   @Override
-  public boolean accepts(String acceptHeader) {
+  public boolean accepts(@Nullable String acceptHeader) {
     if (acceptHeader == null) {
       return false;
     } else {
@@ -56,21 +56,20 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
 
   @Override
   public String toDebugString(MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) {
-    checkAvailable();
-    return DELEGATE.toDebugString(metricSnapshots, escapingScheme);
+    return getDelegate().toDebugString(metricSnapshots, escapingScheme);
   }
 
   @Override
   public void write(
       OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)
       throws IOException {
-    checkAvailable();
-    DELEGATE.write(out, metricSnapshots, escapingScheme);
+    getDelegate().write(out, metricSnapshots, escapingScheme);
   }
 
-  private void checkAvailable() {
+  private ExpositionFormatWriter getDelegate() {
     if (DELEGATE == null) {
       throw new UnsupportedOperationException("Prometheus protobuf writer not available");
     }
+    return DELEGATE;
   }
 }

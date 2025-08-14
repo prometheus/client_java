@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
 /** Filter samples (i.e. time series) by name. */
 public class MetricNameFilter implements Predicate<String> {
@@ -121,7 +122,7 @@ public class MetricNameFilter implements Predicate<String> {
      *
      * @param names empty means no restriction.
      */
-    public Builder nameMustBeEqualTo(Collection<String> names) {
+    public Builder nameMustBeEqualTo(@Nullable Collection<String> names) {
       if (names != null) {
         nameEqualTo.addAll(names);
       }
@@ -144,7 +145,7 @@ public class MetricNameFilter implements Predicate<String> {
      *
      * @param names empty means no name will be excluded.
      */
-    public Builder nameMustNotBeEqualTo(Collection<String> names) {
+    public Builder nameMustNotBeEqualTo(@Nullable Collection<String> names) {
       if (names != null) {
         nameNotEqualTo.addAll(names);
       }
@@ -163,7 +164,7 @@ public class MetricNameFilter implements Predicate<String> {
      *
      * @param prefixes empty means no restriction.
      */
-    public Builder nameMustStartWith(Collection<String> prefixes) {
+    public Builder nameMustStartWith(@Nullable Collection<String> prefixes) {
       if (prefixes != null) {
         nameStartsWith.addAll(prefixes);
       }
@@ -182,7 +183,7 @@ public class MetricNameFilter implements Predicate<String> {
      *
      * @param prefixes empty means no time series will be excluded.
      */
-    public Builder nameMustNotStartWith(Collection<String> prefixes) {
+    public Builder nameMustNotStartWith(@Nullable Collection<String> prefixes) {
       if (prefixes != null) {
         nameDoesNotStartWith.addAll(prefixes);
       }

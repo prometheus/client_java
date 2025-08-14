@@ -4,6 +4,7 @@ import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /** Immutable snapshot of an Info metric. */
 public final class InfoSnapshot extends MetricSnapshot {
@@ -113,7 +114,7 @@ public final class InfoSnapshot extends MetricSnapshot {
     }
 
     @Override
-    public Builder unit(Unit unit) {
+    public Builder unit(@Nullable Unit unit) {
       throw new IllegalArgumentException("Info metric cannot have a unit.");
     }
 

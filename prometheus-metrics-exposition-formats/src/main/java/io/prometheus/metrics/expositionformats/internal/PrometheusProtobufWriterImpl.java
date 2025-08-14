@@ -27,11 +27,12 @@ import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import java.io.IOException;
 import java.io.OutputStream;
+import javax.annotation.Nullable;
 
 public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
 
   @Override
-  public boolean accepts(String acceptHeader) {
+  public boolean accepts(@Nullable String acceptHeader) {
     throw new IllegalStateException("use PrometheusProtobufWriter instead");
   }
 
@@ -278,7 +279,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
   private void setMetadataUnlessEmpty(
       Metrics.MetricFamily.Builder builder,
       MetricMetadata metadata,
-      String nameSuffix,
+      @Nullable String nameSuffix,
       Metrics.MetricType type,
       EscapingScheme scheme) {
     if (builder.getMetricCount() == 0) {

@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import javax.annotation.Nullable;
 
 /**
  * Histogram metric. Example usage:
@@ -68,7 +69,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
   // NATIVE_BOUNDS is used to look up the native bucket index depending on the current schema.
   private static final double[][] NATIVE_BOUNDS;
 
-  private final ExemplarSamplerConfig exemplarSamplerConfig;
+  @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   // Upper bounds for the classic histogram buckets. Contains at least +Inf.
   // An empty array indicates that this is a native histogram only.
@@ -179,11 +180,6 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     getNoLabels().observeWithExemplar(amount, labels);
   }
 
-  @Override
-  protected boolean isExemplarsEnabled() {
-    return exemplarSamplerConfig != null;
-  }
-
   public class DataPoint implements DistributionDataPoint {
     private final LongAdder[] classicBuckets;
     private final ConcurrentHashMap<Integer, LongAdder> nativeBucketsForPositiveValues =
@@ -199,10 +195,10 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     private volatile long createdTimeMillis = System.currentTimeMillis();
     private final Buffer buffer = new Buffer();
     private volatile boolean resetDurationExpired = false;
-    private final ExemplarSampler exemplarSampler;
+    @Nullable private final ExemplarSampler exemplarSampler;
 
     private DataPoint() {
-      if (isExemplarsEnabled()) {
+      if (exemplarSamplerConfig != null) {
         exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
       } else {
         exemplarSampler = null;
@@ -223,7 +219,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       if (!buffer.append(value)) {
         doObserve(value, false);
       }
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observe(value);
       }
     }
@@ -237,7 +233,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       if (!buffer.append(value)) {
         doObserve(value, false);
       }
-      if (isExemplarsEnabled()) {
+      if (exemplarSampler != null) {
         exemplarSampler.observeWithExemplar(value, labels);
       }
     }
@@ -678,14 +674,14 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
     private static final int DEFAULT_NATIVE_MAX_NUMBER_OF_BUCKETS = 160;
     private static final long DEFAULT_NATIVE_RESET_DURATION_SECONDS = 0; // 0 means no reset
 
-    private Boolean nativeOnly;
-    private Boolean classicOnly;
-    private double[] classicUpperBounds;
-    private Integer nativeInitialSchema;
-    private Double nativeMaxZeroThreshold;
-    private Double nativeMinZeroThreshold;
-    private Integer nativeMaxNumberOfBuckets;
-    private Long nativeResetDurationSeconds;
+    @Nullable private Boolean nativeOnly;
+    @Nullable private Boolean classicOnly;
+    @Nullable private double[] classicUpperBounds;
+    @Nullable private Integer nativeInitialSchema;
+    @Nullable private Double nativeMaxZeroThreshold;
+    @Nullable private Double nativeMinZeroThreshold;
+    @Nullable private Integer nativeMaxNumberOfBuckets;
+    @Nullable private Long nativeResetDurationSeconds;
 
     @Override
     public Histogram build() {
@@ -694,11 +690,14 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
     @Override
     protected MetricsProperties toProperties() {
-      return MetricsProperties.builder()
+      MetricsProperties.Builder builder = MetricsProperties.builder();
+      if (classicUpperBounds != null) {
+        builder.histogramClassicUpperBounds(classicUpperBounds);
+      }
+      return builder
           .exemplarsEnabled(exemplarsEnabled)
           .histogramNativeOnly(nativeOnly)
           .histogramClassicOnly(classicOnly)
-          .histogramClassicUpperBounds(classicUpperBounds)
           .histogramNativeInitialSchema(nativeInitialSchema)
           .histogramNativeMinZeroThreshold(nativeMinZeroThreshold)
           .histogramNativeMaxZeroThreshold(nativeMaxZeroThreshold)

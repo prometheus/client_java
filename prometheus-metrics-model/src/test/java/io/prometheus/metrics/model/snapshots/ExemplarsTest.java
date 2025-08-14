@@ -16,9 +16,7 @@ class ExemplarsTest {
             Exemplar.builder().value(3.0).build(),
             Exemplar.builder().value(2.0).build());
     assertThat(exemplars.size()).isEqualTo(3);
-    assertThat(exemplars.get(0).getValue()).isEqualTo(1.0);
-    assertThat(exemplars.get(1).getValue()).isEqualTo(3.0);
-    assertThat(exemplars.get(2).getValue()).isEqualTo(2.0);
+    assertThat(exemplars).extracting(Exemplar::getValue).containsExactly(1.0, 3.0, 2.0);
     assertThat(exemplars.get(0.0, Double.POSITIVE_INFINITY).getValue()).isEqualTo(1.0);
     assertThat(exemplars.get(0.0, 1.0).getValue()).isEqualTo(1.0);
     assertThat(exemplars.get(1.0, 4.0).getValue()).isEqualTo(3.0);

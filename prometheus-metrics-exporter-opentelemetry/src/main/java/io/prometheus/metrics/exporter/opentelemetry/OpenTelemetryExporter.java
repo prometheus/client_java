@@ -5,6 +5,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 public class OpenTelemetryExporter implements AutoCloseable {
   private final MetricReader reader;
@@ -29,16 +30,16 @@ public class OpenTelemetryExporter implements AutoCloseable {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private PrometheusRegistry registry = null;
-    String protocol;
-    String endpoint;
+    @Nullable private PrometheusRegistry registry = null;
+    @Nullable String protocol;
+    @Nullable String endpoint;
     final Map<String, String> headers = new HashMap<>();
-    String interval;
-    String timeout;
-    String serviceName;
-    String serviceNamespace;
-    String serviceInstanceId;
-    String serviceVersion;
+    @Nullable String interval;
+    @Nullable String timeout;
+    @Nullable String serviceName;
+    @Nullable String serviceNamespace;
+    @Nullable String serviceInstanceId;
+    @Nullable String serviceVersion;
     final Map<String, String> resourceAttributes = new HashMap<>();
 
     private Builder(PrometheusProperties config) {

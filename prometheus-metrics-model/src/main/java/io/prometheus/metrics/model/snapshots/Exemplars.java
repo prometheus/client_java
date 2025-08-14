@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * Immutable container for Exemplars.
@@ -60,6 +61,7 @@ public class Exemplars implements Iterable<Exemplar> {
     return exemplars.size();
   }
 
+  @Nullable
   public Exemplar get(int index) {
     return exemplars.get(index);
   }
@@ -69,6 +71,7 @@ public class Exemplars implements Iterable<Exemplar> {
    * upperBound. If there is more than one exemplar within the bounds the one with the newest time
    * stamp is returned.
    */
+  @Nullable
   public Exemplar get(double lowerBound, double upperBound) {
     Exemplar result = null;
     for (Exemplar exemplar : exemplars) {
@@ -87,6 +90,7 @@ public class Exemplars implements Iterable<Exemplar> {
   }
 
   /** Find the Exemplar with the newest timestamp. May return {@code null}. */
+  @Nullable
   public Exemplar getLatest() {
     Exemplar latest = null;
     for (Exemplar candidate : exemplars) {

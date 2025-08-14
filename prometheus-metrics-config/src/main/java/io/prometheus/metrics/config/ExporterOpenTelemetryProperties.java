@@ -2,6 +2,7 @@ package io.prometheus.metrics.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 // TODO: JavaDoc is currently only in OpenTelemetryExporter.Builder. Look there for reference.
 public class ExporterOpenTelemetryProperties {
@@ -21,27 +22,27 @@ public class ExporterOpenTelemetryProperties {
       "resourceAttributes"; // otel.resource.attributes
   private static final String PREFIX = "io.prometheus.exporter.opentelemetry";
 
-  private final String protocol;
-  private final String endpoint;
+  @Nullable private final String endpoint;
+  @Nullable private final String protocol;
   private final Map<String, String> headers;
-  private final String interval;
-  private final String timeout;
-  private final String serviceName;
-  private final String serviceNamespace;
-  private final String serviceInstanceId;
-  private final String serviceVersion;
+  @Nullable private final String interval;
+  @Nullable private final String timeout;
+  @Nullable private final String serviceName;
+  @Nullable private final String serviceNamespace;
+  @Nullable private final String serviceInstanceId;
+  @Nullable private final String serviceVersion;
   private final Map<String, String> resourceAttributes;
 
   private ExporterOpenTelemetryProperties(
-      String protocol,
-      String endpoint,
+      @Nullable String protocol,
+      @Nullable String endpoint,
       Map<String, String> headers,
-      String interval,
-      String timeout,
-      String serviceName,
-      String serviceNamespace,
-      String serviceInstanceId,
-      String serviceVersion,
+      @Nullable String interval,
+      @Nullable String timeout,
+      @Nullable String serviceName,
+      @Nullable String serviceNamespace,
+      @Nullable String serviceInstanceId,
+      @Nullable String serviceVersion,
       Map<String, String> resourceAttributes) {
     this.protocol = protocol;
     this.endpoint = endpoint;
@@ -55,10 +56,12 @@ public class ExporterOpenTelemetryProperties {
     this.resourceAttributes = resourceAttributes;
   }
 
+  @Nullable
   public String getProtocol() {
     return protocol;
   }
 
+  @Nullable
   public String getEndpoint() {
     return endpoint;
   }
@@ -67,26 +70,32 @@ public class ExporterOpenTelemetryProperties {
     return headers;
   }
 
+  @Nullable
   public String getInterval() {
     return interval;
   }
 
+  @Nullable
   public String getTimeout() {
     return timeout;
   }
 
+  @Nullable
   public String getServiceName() {
     return serviceName;
   }
 
+  @Nullable
   public String getServiceNamespace() {
     return serviceNamespace;
   }
 
+  @Nullable
   public String getServiceInstanceId() {
     return serviceInstanceId;
   }
 
+  @Nullable
   public String getServiceVersion() {
     return serviceVersion;
   }
@@ -131,15 +140,15 @@ public class ExporterOpenTelemetryProperties {
 
   public static class Builder {
 
-    private String protocol;
-    private String endpoint;
+    @Nullable private String protocol;
+    @Nullable private String endpoint;
     private final Map<String, String> headers = new HashMap<>();
-    private String interval;
-    private String timeout;
-    private String serviceName;
-    private String serviceNamespace;
-    private String serviceInstanceId;
-    private String serviceVersion;
+    @Nullable private String interval;
+    @Nullable private String timeout;
+    @Nullable private String serviceName;
+    @Nullable private String serviceNamespace;
+    @Nullable private String serviceInstanceId;
+    @Nullable private String serviceVersion;
     private final Map<String, String> resourceAttributes = new HashMap<>();
 
     private Builder() {}

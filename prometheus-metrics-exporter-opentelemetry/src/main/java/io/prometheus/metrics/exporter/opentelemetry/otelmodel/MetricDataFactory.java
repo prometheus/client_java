@@ -10,6 +10,7 @@ import io.prometheus.metrics.model.snapshots.InfoSnapshot;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
+import javax.annotation.Nullable;
 
 public class MetricDataFactory {
 
@@ -42,6 +43,7 @@ public class MetricDataFactory {
         resource);
   }
 
+  @Nullable
   public MetricData create(HistogramSnapshot snapshot) {
     if (!snapshot.getDataPoints().isEmpty()) {
       HistogramSnapshot.HistogramDataPointSnapshot firstDataPoint = snapshot.getDataPoints().get(0);

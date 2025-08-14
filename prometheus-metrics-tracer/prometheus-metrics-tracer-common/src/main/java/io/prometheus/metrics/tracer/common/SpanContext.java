@@ -1,5 +1,7 @@
 package io.prometheus.metrics.tracer.common;
 
+import javax.annotation.Nullable;
+
 public interface SpanContext {
 
   String EXEMPLAR_ATTRIBUTE_NAME = "exemplar";
@@ -9,12 +11,14 @@ public interface SpanContext {
    * @return the current trace id, or {@code null} if this call is not happening within a span
    *     context.
    */
+  @Nullable
   String getCurrentTraceId();
 
   /**
    * @return the current span id, or {@code null} if this call is not happening within a span
    *     context.
    */
+  @Nullable
   String getCurrentSpanId();
 
   /**

@@ -1,6 +1,7 @@
 package io.prometheus.metrics.config;
 
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exporter */
 public class ExporterProperties {
@@ -11,14 +12,14 @@ public class ExporterProperties {
   private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplarsOnAllMetricTypes";
   private static final String PREFIX = "io.prometheus.exporter";
 
-  private final Boolean includeCreatedTimestamps;
-  private final Boolean prometheusTimestampsInMs;
-  private final Boolean exemplarsOnAllMetricTypes;
+  @Nullable private final Boolean includeCreatedTimestamps;
+  @Nullable private final Boolean prometheusTimestampsInMs;
+  @Nullable private final Boolean exemplarsOnAllMetricTypes;
 
   private ExporterProperties(
-      Boolean includeCreatedTimestamps,
-      Boolean prometheusTimestampsInMs,
-      Boolean exemplarsOnAllMetricTypes) {
+      @Nullable Boolean includeCreatedTimestamps,
+      @Nullable Boolean prometheusTimestampsInMs,
+      @Nullable Boolean exemplarsOnAllMetricTypes) {
     this.includeCreatedTimestamps = includeCreatedTimestamps;
     this.prometheusTimestampsInMs = prometheusTimestampsInMs;
     this.exemplarsOnAllMetricTypes = exemplarsOnAllMetricTypes;
@@ -64,8 +65,8 @@ public class ExporterProperties {
 
   public static class Builder {
 
-    private Boolean includeCreatedTimestamps;
-    private Boolean exemplarsOnAllMetricTypes;
+    @Nullable private Boolean includeCreatedTimestamps;
+    @Nullable private Boolean exemplarsOnAllMetricTypes;
     boolean prometheusTimestampsInMs;
 
     private Builder() {}

@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import javax.annotation.Nullable;
 
 /**
  * Process metrics.
@@ -192,6 +193,7 @@ public class ProcessMetrics {
     }
   }
 
+  @Nullable
   private Long callLongGetter(String getterName, Object obj)
       throws NoSuchMethodException, InvocationTargetException {
     return callLongGetter(obj.getClass().getMethod(getterName), obj);
@@ -211,6 +213,7 @@ public class ProcessMetrics {
    * assumption doesn't hold, the method might be called repeatedly and the returned value will be
    * the one produced by the last call.
    */
+  @Nullable
   private Long callLongGetter(Method method, Object obj) throws InvocationTargetException {
     try {
       return (Long) method.invoke(obj);
@@ -253,7 +256,8 @@ public class ProcessMetrics {
           line = reader.readLine();
         }
       }
-      return null;
+      throw new IllegalStateException(
+          String.format("File %s does not contain a line starting with '%s'.", file, prefix));
     }
   }
 
@@ -268,9 +272,9 @@ public class ProcessMetrics {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private OperatingSystemMXBean osBean;
-    private RuntimeMXBean runtimeBean;
-    private Grepper grepper;
+    @Nullable private OperatingSystemMXBean osBean;
+    @Nullable private RuntimeMXBean runtimeBean;
+    @Nullable private Grepper grepper;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 /** Immutable set of name/value pairs, sorted by name. */
 public final class Labels implements Comparable<Labels>, Iterable<Label> {
@@ -148,6 +149,7 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
    * <p>Dots are treated as underscores, so {@code get("my.label")} and {@code get("my_label")} are
    * the same.
    */
+  @Nullable
   public String get(String labelName) {
     labelName = prometheusName(labelName);
     for (int i = 0; i < prometheusNames.length; i++) {

@@ -7,6 +7,7 @@ import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.Arrays;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * Almost all metrics have fixed metadata, i.e. the metric name is known when the metric is created.
@@ -30,7 +31,10 @@ public abstract class MetricWithFixedMetadata extends Metric {
     return metadata;
   }
 
-  private String makeName(String name, Unit unit) {
+  private String makeName(@Nullable String name, @Nullable Unit unit) {
+    if (name == null) {
+      throw new IllegalArgumentException("Missing required field: name is null");
+    }
     if (unit != null) {
       if (!name.endsWith("_" + unit) && !name.endsWith("." + unit)) {
         name += "_" + unit;
@@ -47,9 +51,9 @@ public abstract class MetricWithFixedMetadata extends Metric {
   public abstract static class Builder<B extends Builder<B, M>, M extends MetricWithFixedMetadata>
       extends Metric.Builder<B, M> {
 
-    protected String name;
-    private Unit unit;
-    private String help;
+    @Nullable private String name;
+    @Nullable private Unit unit;
+    @Nullable private String help;
     private String[] labelNames = new String[0];
 
     protected Builder(List<String> illegalLabelNames, PrometheusProperties properties) {
@@ -65,7 +69,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
       return self();
     }
 
-    public B unit(Unit unit) {
+    public B unit(@Nullable Unit unit) {
       this.unit = unit;
       return self();
     }

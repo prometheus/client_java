@@ -31,7 +31,7 @@ class GraphiteNamePattern {
    *
    * @param pattern The glob style pattern to be used.
    */
-  GraphiteNamePattern(final String pattern) throws IllegalArgumentException {
+  GraphiteNamePattern(String pattern) throws IllegalArgumentException {
     if (!VALIDATION_PATTERN.matcher(pattern).matches()) {
       throw new IllegalArgumentException(
           String.format("Provided pattern [%s] does not matches [%s]", pattern, METRIC_GLOB_REGEX));

@@ -32,4 +32,18 @@ class ExporterPushgatewayPropertiesTest {
   private static ExporterPushgatewayProperties load(Map<String, String> map) {
     return ExporterPushgatewayProperties.load(new HashMap<>(map));
   }
+
+  @Test
+  void builder() {
+    ExporterPushgatewayProperties properties =
+        ExporterPushgatewayProperties.builder()
+            .address("http://localhost")
+            .job("job")
+            .scheme("http")
+            .build();
+
+    assertThat(properties.getAddress()).isEqualTo("http://localhost");
+    assertThat(properties.getJob()).isEqualTo("job");
+    assertThat(properties.getScheme()).isEqualTo("http");
+  }
 }

@@ -3,6 +3,7 @@ package io.prometheus.metrics.core.exemplars;
 import io.prometheus.metrics.config.ExemplarsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 
 public class ExemplarSamplerConfig {
 
@@ -18,11 +19,13 @@ public class ExemplarSamplerConfig {
   private final long minRetentionPeriodMillis;
   private final long maxRetentionPeriodMillis;
   private final long sampleIntervalMillis;
-  private final double[] histogramClassicUpperBounds; // null unless it's a classic histogram
-  private final int
-      numberOfExemplars; // if histogramClassicUpperBounds != null, then numberOfExemplars ==
 
-  // histogramClassicUpperBounds.length
+  @Nullable
+  private final double[] histogramClassicUpperBounds; // null unless it's a classic histogram
+
+  // if histogramClassicUpperBounds != null,
+  // then numberOfExemplars == histogramClassicUpperBounds.length
+  private final int numberOfExemplars;
 
   /**
    * Constructor for all metric types except classic histograms.
@@ -49,7 +52,9 @@ public class ExemplarSamplerConfig {
   }
 
   private ExemplarSamplerConfig(
-      ExemplarsProperties properties, int numberOfExemplars, double[] histogramClassicUpperBounds) {
+      ExemplarsProperties properties,
+      int numberOfExemplars,
+      @Nullable double[] histogramClassicUpperBounds) {
     this(
         TimeUnit.SECONDS.toMillis(
             getOrDefault(
@@ -68,7 +73,7 @@ public class ExemplarSamplerConfig {
       long maxRetentionPeriodMillis,
       long sampleIntervalMillis,
       int numberOfExemplars,
-      double[] histogramClassicUpperBounds) {
+      @Nullable double[] histogramClassicUpperBounds) {
     this.minRetentionPeriodMillis = minRetentionPeriodMillis;
     this.maxRetentionPeriodMillis = maxRetentionPeriodMillis;
     this.sampleIntervalMillis = sampleIntervalMillis;
@@ -110,11 +115,11 @@ public class ExemplarSamplerConfig {
     }
   }
 
-  private static <T> T getOrDefault(T result, T defaultValue) {
+  private static <T> T getOrDefault(@Nullable T result, T defaultValue) {
     return result != null ? result : defaultValue;
   }
 
-  /** May be {@code null}. */
+  @Nullable
   public double[] getHistogramClassicUpperBounds() {
     return histogramClassicUpperBounds;
   }
