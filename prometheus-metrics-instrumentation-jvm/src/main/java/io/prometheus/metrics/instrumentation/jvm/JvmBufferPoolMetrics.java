@@ -7,6 +7,7 @@ import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * JVM Buffer Pool metrics. The {@link JvmBufferPoolMetrics} are registered as part of the {@link
@@ -106,7 +107,7 @@ public class JvmBufferPoolMetrics {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private List<BufferPoolMXBean> bufferPoolBeans;
+    @Nullable private List<BufferPoolMXBean> bufferPoolBeans;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

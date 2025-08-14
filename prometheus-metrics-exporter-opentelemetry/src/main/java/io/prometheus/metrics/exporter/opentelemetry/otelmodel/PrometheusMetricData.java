@@ -8,14 +8,15 @@ import io.opentelemetry.sdk.metrics.data.SumData;
 import io.opentelemetry.sdk.resources.Resource;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.Unit;
+import javax.annotation.Nullable;
 
 class PrometheusMetricData<T extends PrometheusData<?>> implements MetricData {
 
   private final Resource resource;
   private final InstrumentationScopeInfo instrumentationScopeInfo;
   private final String name;
-  private final String description;
-  private final String unit;
+  @Nullable private final String description;
+  @Nullable private final String unit;
   T data;
 
   PrometheusMetricData(
@@ -48,7 +49,8 @@ class PrometheusMetricData<T extends PrometheusData<?>> implements MetricData {
 
   // See
   // https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6cf4dec6cb42d87d8840e9f67d4acf66d4eb8fda/pkg/translator/prometheus/normalize_name.go#L19
-  static String convertUnit(Unit unit) {
+  @Nullable
+  static String convertUnit(@Nullable Unit unit) {
     if (unit == null) {
       return null;
     }
@@ -129,11 +131,13 @@ class PrometheusMetricData<T extends PrometheusData<?>> implements MetricData {
   }
 
   @Override
+  @Nullable
   public String getDescription() {
     return description;
   }
 
   @Override
+  @Nullable
   public String getUnit() {
     return unit;
   }

@@ -5,6 +5,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
 /** Like {@link Collector}, but collecting multiple Snapshots at once. */
 @FunctionalInterface
@@ -39,7 +40,7 @@ public interface MultiCollector {
    * discarding it.
    */
   default MetricSnapshots collect(
-      Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
+      Predicate<String> includedNames, @Nullable PrometheusScrapeRequest scrapeRequest) {
     MetricSnapshots allSnapshots = scrapeRequest == null ? collect() : collect(scrapeRequest);
     MetricSnapshots.Builder result = MetricSnapshots.builder();
     for (MetricSnapshot snapshot : allSnapshots) {

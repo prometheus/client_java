@@ -5,15 +5,16 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 final class PropertiesResourceProvider {
 
   static Resource mergeResource(
       Map<String, String> resourceAttributes,
-      String serviceName,
-      String serviceNamespace,
-      String serviceInstanceId,
-      String serviceVersion) {
+      @Nullable String serviceName,
+      @Nullable String serviceNamespace,
+      @Nullable String serviceInstanceId,
+      @Nullable String serviceVersion) {
     Map<String, String> resource = new HashMap<>(resourceAttributes);
     if (serviceName != null) {
       resource.put("service.name", serviceName);

@@ -1,6 +1,7 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
 import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
+import static java.util.Objects.requireNonNull;
 
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
@@ -29,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.annotation.Nullable;
 
 /**
  * Export metrics via the <a href="https://github.com/prometheus/pushgateway">Prometheus
@@ -189,7 +191,7 @@ public class PushGateway {
     doRequest(null, "DELETE");
   }
 
-  private void doRequest(PrometheusRegistry registry, String method) throws IOException {
+  private void doRequest(@Nullable PrometheusRegistry registry, String method) throws IOException {
     try {
       HttpURLConnection connection = connectionFactory.create(url);
       requestHeaders.forEach(connection::setRequestProperty);
@@ -206,7 +208,7 @@ public class PushGateway {
       try {
         if (!method.equals("DELETE")) {
           OutputStream outputStream = connection.getOutputStream();
-          writer.write(outputStream, registry.scrape());
+          writer.write(outputStream, requireNonNull(registry).scrape());
           outputStream.flush();
           outputStream.close();
         }
@@ -266,15 +268,15 @@ public class PushGateway {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private Format format;
-    private String address;
-    private Scheme scheme;
-    private String job;
+    @Nullable private Format format;
+    @Nullable private String address;
+    @Nullable private Scheme scheme;
+    @Nullable private String job;
     private boolean prometheusTimestampsInMs;
     private final Map<String, String> requestHeaders = new HashMap<>();
     private PrometheusRegistry registry = PrometheusRegistry.defaultRegistry;
     private HttpConnectionFactory connectionFactory = new DefaultHttpConnectionFactory();
-    private Map<String, String> groupingKey = new TreeMap<>();
+    private final Map<String, String> groupingKey = new TreeMap<>();
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -402,7 +404,7 @@ public class PushGateway {
           || this.prometheusTimestampsInMs;
     }
 
-    private Scheme getScheme(ExporterPushgatewayProperties properties) {
+    private Scheme getScheme(@Nullable ExporterPushgatewayProperties properties) {
       if (properties != null && properties.getScheme() != null) {
         return Scheme.valueOf(properties.getScheme());
       } else if (this.scheme != null) {
@@ -412,7 +414,7 @@ public class PushGateway {
       }
     }
 
-    private String getAddress(ExporterPushgatewayProperties properties) {
+    private String getAddress(@Nullable ExporterPushgatewayProperties properties) {
       if (properties != null && properties.getAddress() != null) {
         return properties.getAddress();
       } else if (this.address != null) {
@@ -422,7 +424,7 @@ public class PushGateway {
       }
     }
 
-    private String getJob(ExporterPushgatewayProperties properties) {
+    private String getJob(@Nullable ExporterPushgatewayProperties properties) {
       if (properties != null && properties.getJob() != null) {
         return properties.getJob();
       } else if (this.job != null) {
@@ -440,7 +442,7 @@ public class PushGateway {
       return Format.PROMETHEUS_PROTOBUF;
     }
 
-    private URL makeUrl(ExporterPushgatewayProperties properties)
+    private URL makeUrl(@Nullable ExporterPushgatewayProperties properties)
         throws UnsupportedEncodingException, MalformedURLException {
       String url = getScheme(properties) + "://" + getAddress(properties) + "/metrics/";
       String job = getJob(properties);
@@ -449,15 +451,13 @@ public class PushGateway {
       } else {
         url += "job/" + URLEncoder.encode(job, "UTF-8");
       }
-      if (groupingKey != null) {
-        for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
-          if (entry.getValue().isEmpty()) {
-            url += "/" + entry.getKey() + "@base64/=";
-          } else if (entry.getValue().contains("/")) {
-            url += "/" + entry.getKey() + "@base64/" + base64url(entry.getValue());
-          } else {
-            url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
-          }
+      for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
+        if (entry.getValue().isEmpty()) {
+          url += "/" + entry.getKey() + "@base64/=";
+        } else if (entry.getValue().contains("/")) {
+          url += "/" + entry.getKey() + "@base64/" + base64url(entry.getValue());
+        } else {
+          url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
         }
       }
       return URI.create(url).normalize().toURL();

@@ -1,18 +1,20 @@
 package io.prometheus.metrics.config;
 
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exporter.httpServer */
 public class ExporterHttpServerProperties {
 
   private static final String PORT = "port";
   private static final String PREFIX = "io.prometheus.exporter.httpServer";
-  private final Integer port;
+  @Nullable private final Integer port;
 
-  private ExporterHttpServerProperties(Integer port) {
+  private ExporterHttpServerProperties(@Nullable Integer port) {
     this.port = port;
   }
 
+  @Nullable
   public Integer getPort() {
     return port;
   }
@@ -34,7 +36,7 @@ public class ExporterHttpServerProperties {
 
   public static class Builder {
 
-    private Integer port;
+    @Nullable private Integer port;
 
     private Builder() {}
 

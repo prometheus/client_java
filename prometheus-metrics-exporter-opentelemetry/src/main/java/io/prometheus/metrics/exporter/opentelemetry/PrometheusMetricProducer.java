@@ -22,6 +22,7 @@ import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
 
 class PrometheusMetricProducer implements CollectionRegistration {
 
@@ -93,6 +94,7 @@ class PrometheusMetricProducer implements CollectionRegistration {
     return result.build();
   }
 
+  @Nullable
   private InstrumentationScopeInfo instrumentationScopeFromOtelScopeInfo(
       MetricSnapshots snapshots) {
     for (MetricSnapshot snapshot : snapshots) {
@@ -125,7 +127,7 @@ class PrometheusMetricProducer implements CollectionRegistration {
     return null;
   }
 
-  private void addUnlessNull(List<MetricData> result, MetricData data) {
+  private void addUnlessNull(List<MetricData> result, @Nullable MetricData data) {
     if (data != null) {
       result.add(data);
     }

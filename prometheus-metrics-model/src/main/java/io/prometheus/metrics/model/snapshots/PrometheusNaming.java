@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 /**
  * Utility for Prometheus Metric and Label naming.
@@ -70,6 +71,7 @@ public class PrometheusNaming {
    *
    * <p>The name is valid if the error message is {@code null}.
    */
+  @Nullable
   public static String validateMetricName(String name) {
     for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
       if (name.endsWith(reservedSuffix)) {
@@ -99,6 +101,7 @@ public class PrometheusNaming {
   }
 
   /** Same as {@link #isValidUnitName(String)} but returns an error message. */
+  @Nullable
   public static String validateUnitName(String name) {
     if (name.isEmpty()) {
       return "The unit name must not be empty.";

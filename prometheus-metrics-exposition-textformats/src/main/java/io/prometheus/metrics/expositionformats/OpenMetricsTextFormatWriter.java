@@ -30,6 +30,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * Write the OpenMetrics text format as defined on <a
@@ -90,7 +91,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   }
 
   @Override
-  public boolean accepts(String acceptHeader) {
+  public boolean accepts(@Nullable String acceptHeader) {
     if (acceptHeader == null) {
       return false;
     }
@@ -345,17 +346,17 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     }
   }
 
-  private void writeNameAndLabels(Writer writer, String name, String suffix, Labels labels)
-      throws IOException {
+  private void writeNameAndLabels(
+      Writer writer, String name, @Nullable String suffix, Labels labels) throws IOException {
     writeNameAndLabels(writer, name, suffix, labels, null, 0.0);
   }
 
   private void writeNameAndLabels(
       Writer writer,
       String name,
-      String suffix,
+      @Nullable String suffix,
       Labels labels,
-      String additionalLabelName,
+      @Nullable String additionalLabelName,
       double additionalLabelValue)
       throws IOException {
     writer.write(name);
@@ -369,7 +370,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   }
 
   private void writeScrapeTimestampAndExemplar(
-      Writer writer, DataPointSnapshot data, Exemplar exemplar) throws IOException {
+      Writer writer, DataPointSnapshot data, @Nullable Exemplar exemplar) throws IOException {
     if (data.hasScrapeTimestamp()) {
       writer.write(' ');
       writeOpenMetricsTimestamp(writer, data.getScrapeTimestampMillis());

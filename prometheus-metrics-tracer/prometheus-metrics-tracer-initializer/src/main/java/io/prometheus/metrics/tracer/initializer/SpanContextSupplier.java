@@ -4,6 +4,7 @@ import io.prometheus.metrics.tracer.agent.OpenTelemetryAgentSpanContext;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.otel.OpenTelemetrySpanContext;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nullable;
 
 public class SpanContextSupplier {
 
@@ -18,6 +19,7 @@ public class SpanContextSupplier {
     return getSpanContext() != null;
   }
 
+  @Nullable
   public static SpanContext getSpanContext() {
     return spanContextRef.get();
   }

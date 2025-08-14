@@ -1,5 +1,7 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
+import static java.util.Objects.requireNonNull;
+
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
@@ -35,7 +37,7 @@ public class OtelAutoConfig {
             config.getExporterOpenTelemetryProperties(),
             instrumentationScopeInfo);
 
-    MetricReader reader = readerRef.get();
+    MetricReader reader = requireNonNull(readerRef.get());
     reader.register(
         new PrometheusMetricProducer(registry, instrumentationScopeInfo, getResourceField(sdk)));
     return reader;

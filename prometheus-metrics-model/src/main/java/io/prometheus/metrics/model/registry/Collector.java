@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.registry;
 
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
 /**
  * To be registered with the Prometheus collector registry. See <i>Overall Structure</i> on <a
@@ -28,6 +29,7 @@ public interface Collector {
    * <p>Override this if there is a more efficient way than first collecting the snapshot and then
    * discarding it.
    */
+  @Nullable
   default MetricSnapshot collect(Predicate<String> includedNames) {
     MetricSnapshot result = collect();
     if (includedNames.test(result.getMetadata().getPrometheusName())) {
@@ -43,6 +45,7 @@ public interface Collector {
    * <p>Override this if there is a more efficient way than first collecting the snapshot and then
    * discarding it.
    */
+  @Nullable
   default MetricSnapshot collect(
       Predicate<String> includedNames, PrometheusScrapeRequest scrapeRequest) {
     MetricSnapshot result = collect(scrapeRequest);
@@ -71,6 +74,7 @@ public interface Collector {
    *
    * <p>All metrics in {@code prometheus-metrics-core} override this.
    */
+  @Nullable
   default String getPrometheusName() {
     return null;
   }

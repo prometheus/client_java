@@ -1,6 +1,7 @@
 package io.prometheus.metrics.config;
 
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exemplars */
 public class ExemplarsProperties {
@@ -10,14 +11,14 @@ public class ExemplarsProperties {
   private static final String MAX_RETENTION_PERIOD_SECONDS = "maxRetentionPeriodSeconds";
   private static final String SAMPLE_INTERVAL_MILLISECONDS = "sampleIntervalMilliseconds";
 
-  private final Integer minRetentionPeriodSeconds;
-  private final Integer maxRetentionPeriodSeconds;
-  private final Integer sampleIntervalMilliseconds;
+  @Nullable private final Integer minRetentionPeriodSeconds;
+  @Nullable private final Integer maxRetentionPeriodSeconds;
+  @Nullable private final Integer sampleIntervalMilliseconds;
 
   private ExemplarsProperties(
-      Integer minRetentionPeriodSeconds,
-      Integer maxRetentionPeriodSeconds,
-      Integer sampleIntervalMilliseconds) {
+      @Nullable Integer minRetentionPeriodSeconds,
+      @Nullable Integer maxRetentionPeriodSeconds,
+      @Nullable Integer sampleIntervalMilliseconds) {
     this.minRetentionPeriodSeconds = minRetentionPeriodSeconds;
     this.maxRetentionPeriodSeconds = maxRetentionPeriodSeconds;
     this.sampleIntervalMilliseconds = sampleIntervalMilliseconds;
@@ -28,6 +29,7 @@ public class ExemplarsProperties {
    *
    * <p>Default see {@code ExemplarSamplerConfig.DEFAULT_MIN_RETENTION_PERIOD_SECONDS}
    */
+  @Nullable
   public Integer getMinRetentionPeriodSeconds() {
     return minRetentionPeriodSeconds;
   }
@@ -37,6 +39,7 @@ public class ExemplarsProperties {
    *
    * <p>Default see {@code ExemplarSamplerConfig.DEFAULT_MAX_RETENTION_PERIOD_SECONDS}
    */
+  @Nullable
   public Integer getMaxRetentionPeriodSeconds() {
     return maxRetentionPeriodSeconds;
   }
@@ -48,6 +51,7 @@ public class ExemplarsProperties {
    *
    * <p>Default see {@code ExemplarSamplerConfig.DEFAULT_SAMPLE_INTERVAL_MILLISECONDS}
    */
+  @Nullable
   public Integer getSampleIntervalMilliseconds() {
     return sampleIntervalMilliseconds;
   }
@@ -108,9 +112,9 @@ public class ExemplarsProperties {
 
   public static class Builder {
 
-    private Integer minRetentionPeriodSeconds;
-    private Integer maxRetentionPeriodSeconds;
-    private Integer sampleIntervalMilliseconds;
+    @Nullable private Integer minRetentionPeriodSeconds;
+    @Nullable private Integer maxRetentionPeriodSeconds;
+    @Nullable private Integer sampleIntervalMilliseconds;
 
     private Builder() {}
 

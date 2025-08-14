@@ -2,6 +2,7 @@ package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.config.ExporterProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
+import javax.annotation.Nullable;
 
 public class ExpositionFormats {
 
@@ -36,7 +37,7 @@ public class ExpositionFormats {
             .build());
   }
 
-  public ExpositionFormatWriter findWriter(String acceptHeader) {
+  public ExpositionFormatWriter findWriter(@Nullable String acceptHeader) {
     if (prometheusProtobufWriter.accepts(acceptHeader)) {
       return prometheusProtobufWriter;
     }

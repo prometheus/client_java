@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.metrics */
 public class MetricsProperties {
@@ -28,34 +29,34 @@ public class MetricsProperties {
   private static final String SUMMARY_MAX_AGE_SECONDS = "summaryMaxAgeSeconds";
   private static final String SUMMARY_NUMBER_OF_AGE_BUCKETS = "summaryNumberOfAgeBuckets";
 
-  private final Boolean exemplarsEnabled;
-  private final Boolean histogramNativeOnly;
-  private final Boolean histogramClassicOnly;
-  private final List<Double> histogramClassicUpperBounds;
-  private final Integer histogramNativeInitialSchema;
-  private final Double histogramNativeMinZeroThreshold;
-  private final Double histogramNativeMaxZeroThreshold;
-  private final Integer histogramNativeMaxNumberOfBuckets;
-  private final Long histogramNativeResetDurationSeconds;
-  private final List<Double> summaryQuantiles;
-  private final List<Double> summaryQuantileErrors;
-  private final Long summaryMaxAgeSeconds;
-  private final Integer summaryNumberOfAgeBuckets;
+  @Nullable private final Boolean exemplarsEnabled;
+  @Nullable private final Boolean histogramNativeOnly;
+  @Nullable private final Boolean histogramClassicOnly;
+  @Nullable private final List<Double> histogramClassicUpperBounds;
+  @Nullable private final Integer histogramNativeInitialSchema;
+  @Nullable private final Double histogramNativeMinZeroThreshold;
+  @Nullable private final Double histogramNativeMaxZeroThreshold;
+  @Nullable private final Integer histogramNativeMaxNumberOfBuckets;
+  @Nullable private final Long histogramNativeResetDurationSeconds;
+  @Nullable private final List<Double> summaryQuantiles;
+  @Nullable private final List<Double> summaryQuantileErrors;
+  @Nullable private final Long summaryMaxAgeSeconds;
+  @Nullable private final Integer summaryNumberOfAgeBuckets;
 
   public MetricsProperties(
-      Boolean exemplarsEnabled,
-      Boolean histogramNativeOnly,
-      Boolean histogramClassicOnly,
-      List<Double> histogramClassicUpperBounds,
-      Integer histogramNativeInitialSchema,
-      Double histogramNativeMinZeroThreshold,
-      Double histogramNativeMaxZeroThreshold,
-      Integer histogramNativeMaxNumberOfBuckets,
-      Long histogramNativeResetDurationSeconds,
-      List<Double> summaryQuantiles,
-      List<Double> summaryQuantileErrors,
-      Long summaryMaxAgeSeconds,
-      Integer summaryNumberOfAgeBuckets) {
+      @Nullable Boolean exemplarsEnabled,
+      @Nullable Boolean histogramNativeOnly,
+      @Nullable Boolean histogramClassicOnly,
+      @Nullable List<Double> histogramClassicUpperBounds,
+      @Nullable Integer histogramNativeInitialSchema,
+      @Nullable Double histogramNativeMinZeroThreshold,
+      @Nullable Double histogramNativeMaxZeroThreshold,
+      @Nullable Integer histogramNativeMaxNumberOfBuckets,
+      @Nullable Long histogramNativeResetDurationSeconds,
+      @Nullable List<Double> summaryQuantiles,
+      @Nullable List<Double> summaryQuantileErrors,
+      @Nullable Long summaryMaxAgeSeconds,
+      @Nullable Integer summaryNumberOfAgeBuckets) {
     this(
         exemplarsEnabled,
         histogramNativeOnly,
@@ -74,19 +75,19 @@ public class MetricsProperties {
   }
 
   private MetricsProperties(
-      Boolean exemplarsEnabled,
-      Boolean histogramNativeOnly,
-      Boolean histogramClassicOnly,
-      List<Double> histogramClassicUpperBounds,
-      Integer histogramNativeInitialSchema,
-      Double histogramNativeMinZeroThreshold,
-      Double histogramNativeMaxZeroThreshold,
-      Integer histogramNativeMaxNumberOfBuckets,
-      Long histogramNativeResetDurationSeconds,
-      List<Double> summaryQuantiles,
-      List<Double> summaryQuantileErrors,
-      Long summaryMaxAgeSeconds,
-      Integer summaryNumberOfAgeBuckets,
+      @Nullable Boolean exemplarsEnabled,
+      @Nullable Boolean histogramNativeOnly,
+      @Nullable Boolean histogramClassicOnly,
+      @Nullable List<Double> histogramClassicUpperBounds,
+      @Nullable Integer histogramNativeInitialSchema,
+      @Nullable Double histogramNativeMinZeroThreshold,
+      @Nullable Double histogramNativeMaxZeroThreshold,
+      @Nullable Integer histogramNativeMaxNumberOfBuckets,
+      @Nullable Long histogramNativeResetDurationSeconds,
+      @Nullable List<Double> summaryQuantiles,
+      @Nullable List<Double> summaryQuantileErrors,
+      @Nullable Long summaryMaxAgeSeconds,
+      @Nullable Integer summaryNumberOfAgeBuckets,
       String configPropertyPrefix) {
     this.exemplarsEnabled = exemplarsEnabled;
     this.histogramNativeOnly = isHistogramNativeOnly(histogramClassicOnly, histogramNativeOnly);
@@ -111,25 +112,28 @@ public class MetricsProperties {
     validate(configPropertyPrefix);
   }
 
+  @Nullable
   private Boolean isHistogramClassicOnly(
-      Boolean histogramClassicOnly, Boolean histogramNativeOnly) {
-    if (histogramClassicOnly == null && histogramNativeOnly == null) {
-      return null;
-    }
+      @Nullable Boolean histogramClassicOnly, @Nullable Boolean histogramNativeOnly) {
     if (histogramClassicOnly != null) {
       return histogramClassicOnly;
     }
-    return !histogramNativeOnly;
+    if (histogramNativeOnly != null) {
+      return !histogramNativeOnly;
+    }
+    return null;
   }
 
-  private Boolean isHistogramNativeOnly(Boolean histogramClassicOnly, Boolean histogramNativeOnly) {
-    if (histogramClassicOnly == null && histogramNativeOnly == null) {
-      return null;
-    }
+  @Nullable
+  private Boolean isHistogramNativeOnly(
+      @Nullable Boolean histogramClassicOnly, @Nullable Boolean histogramNativeOnly) {
     if (histogramNativeOnly != null) {
       return histogramNativeOnly;
     }
-    return !histogramClassicOnly;
+    if (histogramClassicOnly != null) {
+      return !histogramClassicOnly;
+    }
+    return null;
   }
 
   private void validate(String prefix) throws PrometheusPropertiesException {
@@ -242,51 +246,61 @@ public class MetricsProperties {
    * This is the only configuration property that can be applied to all metric types. You can use it
    * to turn Exemplar support off. Default is {@code true}.
    */
+  @Nullable
   public Boolean getExemplarsEnabled() {
     return exemplarsEnabled;
   }
 
   /** See {@code Histogram.Builder.nativeOnly()} */
+  @Nullable
   public Boolean getHistogramNativeOnly() {
     return histogramNativeOnly;
   }
 
   /** See {@code Histogram.Builder.classicOnly()} */
+  @Nullable
   public Boolean getHistogramClassicOnly() {
     return histogramClassicOnly;
   }
 
   /** See {@code Histogram.Builder.classicBuckets()} */
+  @Nullable
   public List<Double> getHistogramClassicUpperBounds() {
     return histogramClassicUpperBounds;
   }
 
   /** See {@code Histogram.Builder.nativeInitialSchema()} */
+  @Nullable
   public Integer getHistogramNativeInitialSchema() {
     return histogramNativeInitialSchema;
   }
 
   /** See {@code Histogram.Builder.nativeMinZeroThreshold()} */
+  @Nullable
   public Double getHistogramNativeMinZeroThreshold() {
     return histogramNativeMinZeroThreshold;
   }
 
   /** See {@code Histogram.Builder.nativeMaxZeroThreshold()} */
+  @Nullable
   public Double getHistogramNativeMaxZeroThreshold() {
     return histogramNativeMaxZeroThreshold;
   }
 
   /** See {@code Histogram.Builder.nativeMaxNumberOfBuckets()} */
+  @Nullable
   public Integer getHistogramNativeMaxNumberOfBuckets() {
     return histogramNativeMaxNumberOfBuckets;
   }
 
   /** See {@code Histogram.Builder.nativeResetDuration()} */
+  @Nullable
   public Long getHistogramNativeResetDurationSeconds() {
     return histogramNativeResetDurationSeconds;
   }
 
   /** See {@code Summary.Builder.quantile()} */
+  @Nullable
   public List<Double> getSummaryQuantiles() {
     return summaryQuantiles;
   }
@@ -298,6 +312,7 @@ public class MetricsProperties {
    * empty list if {@link #getSummaryQuantiles()} are specified without specifying errors. If the
    * list is not empty, it has the same size as {@link #getSummaryQuantiles()}.
    */
+  @Nullable
   public List<Double> getSummaryQuantileErrors() {
     if (summaryQuantiles != null) {
       if (summaryQuantileErrors == null) {
@@ -308,11 +323,13 @@ public class MetricsProperties {
   }
 
   /** See {@code Summary.Builder.maxAgeSeconds()} */
+  @Nullable
   public Long getSummaryMaxAgeSeconds() {
     return summaryMaxAgeSeconds;
   }
 
   /** See {@code Summary.Builder.numberOfAgeBuckets()} */
+  @Nullable
   public Integer getSummaryNumberOfAgeBuckets() {
     return summaryNumberOfAgeBuckets;
   }
@@ -345,19 +362,19 @@ public class MetricsProperties {
   }
 
   public static class Builder {
-    private Boolean exemplarsEnabled;
-    private Boolean histogramNativeOnly;
-    private Boolean histogramClassicOnly;
-    private List<Double> histogramClassicUpperBounds;
-    private Integer histogramNativeInitialSchema;
-    private Double histogramNativeMinZeroThreshold;
-    private Double histogramNativeMaxZeroThreshold;
-    private Integer histogramNativeMaxNumberOfBuckets;
-    private Long histogramNativeResetDurationSeconds;
-    private List<Double> summaryQuantiles;
-    private List<Double> summaryQuantileErrors;
-    private Long summaryMaxAgeSeconds;
-    private Integer summaryNumberOfAgeBuckets;
+    @Nullable private Boolean exemplarsEnabled;
+    @Nullable private Boolean histogramNativeOnly;
+    @Nullable private Boolean histogramClassicOnly;
+    @Nullable private List<Double> histogramClassicUpperBounds;
+    @Nullable private Integer histogramNativeInitialSchema;
+    @Nullable private Double histogramNativeMinZeroThreshold;
+    @Nullable private Double histogramNativeMaxZeroThreshold;
+    @Nullable private Integer histogramNativeMaxNumberOfBuckets;
+    @Nullable private Long histogramNativeResetDurationSeconds;
+    @Nullable private List<Double> summaryQuantiles;
+    @Nullable private List<Double> summaryQuantileErrors;
+    @Nullable private Long summaryMaxAgeSeconds;
+    @Nullable private Integer summaryNumberOfAgeBuckets;
 
     private Builder() {}
 
@@ -379,19 +396,19 @@ public class MetricsProperties {
     }
 
     /** See {@link MetricsProperties#getExemplarsEnabled()} */
-    public Builder exemplarsEnabled(Boolean exemplarsEnabled) {
+    public Builder exemplarsEnabled(@Nullable Boolean exemplarsEnabled) {
       this.exemplarsEnabled = exemplarsEnabled;
       return this;
     }
 
     /** See {@link MetricsProperties#getHistogramNativeOnly()} */
-    public Builder histogramNativeOnly(Boolean histogramNativeOnly) {
+    public Builder histogramNativeOnly(@Nullable Boolean histogramNativeOnly) {
       this.histogramNativeOnly = histogramNativeOnly;
       return this;
     }
 
     /** See {@link MetricsProperties#getHistogramClassicOnly()} */
-    public Builder histogramClassicOnly(Boolean histogramClassicOnly) {
+    public Builder histogramClassicOnly(@Nullable Boolean histogramClassicOnly) {
       this.histogramClassicOnly = histogramClassicOnly;
       return this;
     }
@@ -403,31 +420,35 @@ public class MetricsProperties {
     }
 
     /** See {@link MetricsProperties#getHistogramNativeInitialSchema()} */
-    public Builder histogramNativeInitialSchema(Integer histogramNativeInitialSchema) {
+    public Builder histogramNativeInitialSchema(@Nullable Integer histogramNativeInitialSchema) {
       this.histogramNativeInitialSchema = histogramNativeInitialSchema;
       return this;
     }
 
     /** See {@link MetricsProperties#getHistogramNativeMinZeroThreshold()} */
-    public Builder histogramNativeMinZeroThreshold(Double histogramNativeMinZeroThreshold) {
+    public Builder histogramNativeMinZeroThreshold(
+        @Nullable Double histogramNativeMinZeroThreshold) {
       this.histogramNativeMinZeroThreshold = histogramNativeMinZeroThreshold;
       return this;
     }
 
     /** See {@link MetricsProperties#getHistogramNativeMaxZeroThreshold()} */
-    public Builder histogramNativeMaxZeroThreshold(Double histogramNativeMaxZeroThreshold) {
+    public Builder histogramNativeMaxZeroThreshold(
+        @Nullable Double histogramNativeMaxZeroThreshold) {
       this.histogramNativeMaxZeroThreshold = histogramNativeMaxZeroThreshold;
       return this;
     }
 
     /** See {@link MetricsProperties#getHistogramNativeMaxNumberOfBuckets()} */
-    public Builder histogramNativeMaxNumberOfBuckets(Integer histogramNativeMaxNumberOfBuckets) {
+    public Builder histogramNativeMaxNumberOfBuckets(
+        @Nullable Integer histogramNativeMaxNumberOfBuckets) {
       this.histogramNativeMaxNumberOfBuckets = histogramNativeMaxNumberOfBuckets;
       return this;
     }
 
     /** See {@link MetricsProperties#getHistogramNativeResetDurationSeconds()} */
-    public Builder histogramNativeResetDurationSeconds(Long histogramNativeResetDurationSeconds) {
+    public Builder histogramNativeResetDurationSeconds(
+        @Nullable Long histogramNativeResetDurationSeconds) {
       this.histogramNativeResetDurationSeconds = histogramNativeResetDurationSeconds;
       return this;
     }
@@ -445,13 +466,13 @@ public class MetricsProperties {
     }
 
     /** See {@link MetricsProperties#getSummaryMaxAgeSeconds()} */
-    public Builder summaryMaxAgeSeconds(Long summaryMaxAgeSeconds) {
+    public Builder summaryMaxAgeSeconds(@Nullable Long summaryMaxAgeSeconds) {
       this.summaryMaxAgeSeconds = summaryMaxAgeSeconds;
       return this;
     }
 
     /** See {@link MetricsProperties#getSummaryNumberOfAgeBuckets()} */
-    public Builder summaryNumberOfAgeBuckets(Integer summaryNumberOfAgeBuckets) {
+    public Builder summaryNumberOfAgeBuckets(@Nullable Integer summaryNumberOfAgeBuckets) {
       this.summaryNumberOfAgeBuckets = summaryNumberOfAgeBuckets;
       return this;
     }

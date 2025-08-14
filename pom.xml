@@ -267,7 +267,8 @@
               -Xep:MissingSummary:OFF
               -Xep:LongDoubleConversion:OFF
               -Xep:StringSplitter:OFF
-              -XepExcludedPaths:.*/generated/.*
+              -XepExcludedPaths:(.*/generated/.*|.*/src/test/java/.*|.*/examples/.*|.*/integration-tests/.*)
+              -XepOpt:NullAway:AnnotatedPackages=io.prometheus.metrics
             </arg>
           </compilerArgs>
           <annotationProcessorPaths>
@@ -275,6 +276,11 @@
               <groupId>com.google.errorprone</groupId>
               <artifactId>error_prone_core</artifactId>
               <version>2.41.0</version>
+            </path>
+            <path>
+              <groupId>com.uber.nullaway</groupId>
+              <artifactId>nullaway</artifactId>
+              <version>0.12.8</version>
             </path>
             <!-- Other annotation processors go here.
 

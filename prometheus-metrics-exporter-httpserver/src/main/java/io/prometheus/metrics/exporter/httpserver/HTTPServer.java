@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import javax.security.auth.Subject;
 
 /**
@@ -54,9 +55,9 @@ public class HTTPServer implements Closeable {
       ExecutorService executorService,
       HttpServer httpServer,
       PrometheusRegistry registry,
-      Authenticator authenticator,
-      String authenticatedSubjectAttributeName,
-      HttpHandler defaultHandler) {
+      @Nullable Authenticator authenticator,
+      @Nullable String authenticatedSubjectAttributeName,
+      @Nullable HttpHandler defaultHandler) {
     if (httpServer.getAddress() == null) {
       throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
     }
@@ -88,14 +89,17 @@ public class HTTPServer implements Closeable {
   }
 
   private void registerHandler(
-      String path, HttpHandler handler, Authenticator authenticator, String subjectAttributeName) {
+      String path,
+      HttpHandler handler,
+      @Nullable Authenticator authenticator,
+      @Nullable String subjectAttributeName) {
     HttpContext context = server.createContext(path, wrapWithDoAs(handler, subjectAttributeName));
     if (authenticator != null) {
       context.setAuthenticator(authenticator);
     }
   }
 
-  private HttpHandler wrapWithDoAs(HttpHandler handler, String subjectAttributeName) {
+  private HttpHandler wrapWithDoAs(HttpHandler handler, @Nullable String subjectAttributeName) {
     if (subjectAttributeName == null) {
       return handler;
     }
@@ -169,15 +173,15 @@ public class HTTPServer implements Closeable {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private Integer port = null;
-    private String hostname = null;
-    private InetAddress inetAddress = null;
-    private ExecutorService executorService = null;
-    private PrometheusRegistry registry = null;
-    private Authenticator authenticator = null;
-    private HttpsConfigurator httpsConfigurator = null;
-    private HttpHandler defaultHandler = null;
-    private String authenticatedSubjectAttributeName = null;
+    @Nullable private Integer port = null;
+    @Nullable private String hostname = null;
+    @Nullable private InetAddress inetAddress = null;
+    @Nullable private ExecutorService executorService = null;
+    @Nullable private PrometheusRegistry registry = null;
+    @Nullable private Authenticator authenticator = null;
+    @Nullable private HttpsConfigurator httpsConfigurator = null;
+    @Nullable private HttpHandler defaultHandler = null;
+    @Nullable private String authenticatedSubjectAttributeName = null;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -313,7 +317,7 @@ public class HTTPServer implements Closeable {
       return 0; // random port will be selected
     }
 
-    private void assertNull(Object o, String msg) {
+    private void assertNull(@Nullable Object o, String msg) {
       if (o != null) {
         throw new IllegalStateException(msg);
       }

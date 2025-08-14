@@ -2,6 +2,7 @@ package io.prometheus.metrics.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * The Prometheus Java client library can be configured at runtime (e.g. using a properties file).
@@ -72,6 +73,7 @@ public class PrometheusProperties {
    * #getDefaultMetricProperties()}. May return {@code null} if no metric-specific properties are
    * configured for a metric name.
    */
+  @Nullable
   public MetricsProperties getMetricProperties(String metricName) {
     return metricProperties.get(metricName.replace(".", "_"));
   }
@@ -101,14 +103,18 @@ public class PrometheusProperties {
   }
 
   public static class Builder {
-    private MetricsProperties defaultMetricsProperties;
+    private MetricsProperties defaultMetricsProperties = MetricsProperties.builder().build();
     private Map<String, MetricsProperties> metricProperties = new HashMap<>();
-    private ExemplarsProperties exemplarProperties;
-    private ExporterProperties exporterProperties;
-    private ExporterFilterProperties exporterFilterProperties;
-    private ExporterHttpServerProperties exporterHttpServerProperties;
-    private ExporterPushgatewayProperties pushgatewayProperties;
-    private ExporterOpenTelemetryProperties otelConfig;
+    private ExemplarsProperties exemplarProperties = ExemplarsProperties.builder().build();
+    private ExporterProperties exporterProperties = ExporterProperties.builder().build();
+    private ExporterFilterProperties exporterFilterProperties =
+        ExporterFilterProperties.builder().build();
+    private ExporterHttpServerProperties exporterHttpServerProperties =
+        ExporterHttpServerProperties.builder().build();
+    private ExporterPushgatewayProperties pushgatewayProperties =
+        ExporterPushgatewayProperties.builder().build();
+    private ExporterOpenTelemetryProperties otelConfig =
+        ExporterOpenTelemetryProperties.builder().build();
 
     private Builder() {}
 

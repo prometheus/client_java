@@ -8,6 +8,7 @@ import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * JVM Garbage Collector metrics. The {@link JvmGarbageCollectorMetrics} are registered as part of
@@ -79,7 +80,7 @@ public class JvmGarbageCollectorMetrics {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private List<GarbageCollectorMXBean> garbageCollectorBeans;
+    @Nullable private List<GarbageCollectorMXBean> garbageCollectorBeans;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

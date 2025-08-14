@@ -6,6 +6,7 @@ import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
+import javax.annotation.Nullable;
 
 /**
  * JVM Class Loading metrics. The {@link JvmClassLoadingMetrics} are registered as part of the
@@ -84,7 +85,7 @@ public class JvmClassLoadingMetrics {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private ClassLoadingMXBean classLoadingBean;
+    @Nullable private ClassLoadingMXBean classLoadingBean;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 
 abstract class PrometheusData<T extends PointData> implements Data<T> {
 
@@ -45,7 +46,7 @@ abstract class PrometheusData<T extends PointData> implements Data<T> {
     }
   }
 
-  protected List<DoubleExemplarData> convertExemplar(Exemplar exemplar) {
+  protected List<DoubleExemplarData> convertExemplar(@Nullable Exemplar exemplar) {
     if (exemplar == null) {
       return Collections.emptyList();
     }
@@ -58,7 +59,8 @@ abstract class PrometheusData<T extends PointData> implements Data<T> {
         .collect(Collectors.toList());
   }
 
-  protected DoubleExemplarData toDoubleExemplarData(Exemplar exemplar) {
+  @Nullable
+  protected DoubleExemplarData toDoubleExemplarData(@Nullable Exemplar exemplar) {
     if (exemplar == null) {
       return null;
     }

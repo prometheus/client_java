@@ -6,6 +6,7 @@ import io.prometheus.metrics.config.PrometheusPropertiesException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 
 class PropertyMapper {
 
@@ -29,7 +30,8 @@ class PropertyMapper {
         .addString(builder.serviceName, properties.getServiceName(), "otel.service.name");
   }
 
-  PropertyMapper addString(String builderValue, String propertyValue, String otelKey) {
+  PropertyMapper addString(
+      @Nullable String builderValue, @Nullable String propertyValue, String otelKey) {
     if (builderValue != null) {
       // the low priority config should not be used for the metrics settings, so that both general
       // and metrics settings
@@ -42,6 +44,7 @@ class PropertyMapper {
     return this;
   }
 
+  @Nullable
   private static String mapToOtelString(Map<String, String> map) {
     if (map.isEmpty()) {
       return null;
