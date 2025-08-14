@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javax.annotation.Nullable;
 
 /**
  * The default {@code job} label is the name of the JAR file being executed.
@@ -27,6 +28,7 @@ class DefaultJobLabelDetector {
     return dotIndex == -1 ? jarName : jarName.substring(0, dotIndex);
   }
 
+  @Nullable
   private static Path getJarPathFromSunCommandLine() {
     String programArguments = System.getProperty("sun.java.command");
     if (programArguments == null) {
@@ -48,6 +50,7 @@ class DefaultJobLabelDetector {
     }
   }
 
+  @Nullable
   private static Path pathIfExists(String programArguments) {
     Path candidate;
     try {

@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 class PrometheusClassicHistogram extends PrometheusData<HistogramPointData>
     implements HistogramData {
@@ -36,6 +37,7 @@ class PrometheusClassicHistogram extends PrometheusData<HistogramPointData>
     return points;
   }
 
+  @Nullable
   private HistogramPointData toOtelDataPoint(
       HistogramSnapshot.HistogramDataPointSnapshot dataPoint, long currentTimeMillis) {
     if (!dataPoint.hasClassicHistogramData()) {

@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 class PrometheusNativeHistogram extends PrometheusData<ExponentialHistogramPointData>
     implements ExponentialHistogramData {
@@ -36,6 +37,7 @@ class PrometheusNativeHistogram extends PrometheusData<ExponentialHistogramPoint
     return points;
   }
 
+  @Nullable
   private ExponentialHistogramPointData toOtelDataPoint(
       HistogramSnapshot.HistogramDataPointSnapshot dataPoint, long currentTimeMillis) {
     if (!dataPoint.hasNativeHistogramData()) {
