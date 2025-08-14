@@ -414,7 +414,7 @@ public class MetricsProperties {
     }
 
     /** See {@link MetricsProperties#getHistogramClassicUpperBounds()} */
-    public Builder histogramClassicUpperBounds(@Nullable double... histogramClassicUpperBounds) {
+    public Builder histogramClassicUpperBounds(double... histogramClassicUpperBounds) {
       this.histogramClassicUpperBounds = Util.toList(histogramClassicUpperBounds);
       return this;
     }

@@ -690,11 +690,14 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
     @Override
     protected MetricsProperties toProperties() {
-      return MetricsProperties.builder()
+      MetricsProperties.Builder builder = MetricsProperties.builder();
+      if (classicUpperBounds != null) {
+        builder.histogramClassicUpperBounds(classicUpperBounds);
+      }
+      return builder
           .exemplarsEnabled(exemplarsEnabled)
           .histogramNativeOnly(nativeOnly)
           .histogramClassicOnly(classicOnly)
-          .histogramClassicUpperBounds(classicUpperBounds)
           .histogramNativeInitialSchema(nativeInitialSchema)
           .histogramNativeMinZeroThreshold(nativeMinZeroThreshold)
           .histogramNativeMaxZeroThreshold(nativeMaxZeroThreshold)

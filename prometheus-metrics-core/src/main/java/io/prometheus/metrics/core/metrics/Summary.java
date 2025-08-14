@@ -1,5 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
+import static java.util.Objects.requireNonNull;
+
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
@@ -43,6 +45,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
     implements DistributionDataPoint {
 
   private final List<CKMSQuantiles.Quantile> quantiles; // May be empty, but cannot be null.
+
   private final long maxAgeSeconds;
   private final int ageBuckets;
   @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
@@ -114,14 +117,16 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
 
     private final LongAdder count = new LongAdder();
     private final DoubleAdder sum = new DoubleAdder();
-    private final SlidingWindow<CKMSQuantiles> quantileValues;
+    @Nullable private final SlidingWindow<CKMSQuantiles> quantileValues;
     private final Buffer buffer = new Buffer();
     @Nullable private final ExemplarSampler exemplarSampler;
 
     private final long createdTimeMillis = System.currentTimeMillis();
 
     private DataPoint() {
-      if (quantiles.size() > 0) {
+      if (quantiles.isEmpty()) {
+        quantileValues = null;
+      } else {
         CKMSQuantiles.Quantile[] quantilesArray = quantiles.toArray(new CKMSQuantiles.Quantile[0]);
         quantileValues =
             new SlidingWindow<>(
@@ -130,8 +135,6 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
                 CKMSQuantiles::insert,
                 maxAgeSeconds,
                 ageBuckets);
-      } else {
-        quantileValues = null;
       }
       if (exemplarSamplerConfig != null) {
         exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
@@ -200,7 +203,8 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       for (int i = 0; i < getQuantiles().size(); i++) {
         CKMSQuantiles.Quantile quantile = getQuantiles().get(i);
         quantiles[i] =
-            new Quantile(quantile.quantile, quantileValues.current().get(quantile.quantile));
+            new Quantile(
+                quantile.quantile, requireNonNull(quantileValues).current().get(quantile.quantile));
       }
       return Quantiles.of(quantiles);
     }
@@ -223,8 +227,8 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
     public static final int DEFAULT_NUMBER_OF_AGE_BUCKETS = 5;
 
     private final List<CKMSQuantiles.Quantile> quantiles = new ArrayList<>();
-    private Long maxAgeSeconds;
-    private Integer ageBuckets;
+    @Nullable private Long maxAgeSeconds;
+    @Nullable private Integer ageBuckets;
 
     private Builder(PrometheusProperties properties) {
       super(Collections.singletonList("quantile"), properties);
@@ -325,10 +329,15 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
           quantileErrors[i] = this.quantiles.get(i).epsilon;
         }
       }
-      return MetricsProperties.builder()
+      MetricsProperties.Builder builder = MetricsProperties.builder();
+      if (quantiles != null) {
+        builder.summaryQuantiles(quantiles);
+      }
+      if (quantileErrors != null) {
+        builder.summaryQuantileErrors(quantileErrors);
+      }
+      return builder
           .exemplarsEnabled(exemplarsEnabled)
-          .summaryQuantiles(quantiles)
-          .summaryQuantileErrors(quantileErrors)
           .summaryNumberOfAgeBuckets(ageBuckets)
           .summaryMaxAgeSeconds(maxAgeSeconds)
           .build();

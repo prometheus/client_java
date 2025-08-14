@@ -2,7 +2,6 @@ package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
-import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.StateSetDataPoint;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -11,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 /**
  * StateSet metric. Example:
@@ -53,14 +53,11 @@ import java.util.stream.Stream;
 public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoint>
     implements StateSetDataPoint {
 
-  private final boolean exemplarsEnabled;
   private final String[] names;
 
-  private StateSet(Builder builder, PrometheusProperties prometheusProperties) {
+  private StateSet(Builder builder, String[] names) {
     super(builder);
-    MetricsProperties[] properties = getMetricProperties(builder, prometheusProperties);
-    exemplarsEnabled = getConfigProperty(properties, MetricsProperties::getExemplarsEnabled);
-    this.names = builder.names; // builder.names is already a validated copy
+    this.names = names;
     for (String name : names) {
       if (this.getMetadata().getPrometheusName().equals(prometheusName(name))) {
         throw new IllegalArgumentException(
@@ -139,7 +136,7 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
 
   public static class Builder extends StatefulMetric.Builder<Builder, StateSet> {
 
-    private String[] names;
+    @Nullable private String[] names;
 
     private Builder(PrometheusProperties config) {
       super(Collections.emptyList(), config);
@@ -165,7 +162,7 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
       if (names == null) {
         throw new IllegalStateException("State names are required when building a StateSet.");
       }
-      return new StateSet(this, properties);
+      return new StateSet(this, names);
     }
 
     @Override
