@@ -18,13 +18,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.zip.GZIPOutputStream;
+import javax.annotation.Nullable;
 
 /** Prometheus scrape endpoint. */
 public class PrometheusScrapeHandler {
 
   private final PrometheusRegistry registry;
   private final ExpositionFormats expositionFormats;
-  private final Predicate<String> nameFilter;
+  @Nullable private final Predicate<String> nameFilter;
   private final AtomicInteger lastResponseSize = new AtomicInteger(2 << 9); //  0.5 MB
   private final List<String> supportedFormats;
 
@@ -97,6 +98,7 @@ public class PrometheusScrapeHandler {
     }
   }
 
+  @Nullable
   private Predicate<String> makeNameFilter(ExporterFilterProperties props) {
     if (props.getAllowedMetricNames() == null
         && props.getExcludedMetricNames() == null
@@ -113,7 +115,8 @@ public class PrometheusScrapeHandler {
     }
   }
 
-  private Predicate<String> makeNameFilter(String[] includedNames) {
+  @Nullable
+  private Predicate<String> makeNameFilter(@Nullable String[] includedNames) {
     Predicate<String> result = null;
     if (includedNames != null && includedNames.length > 0) {
       result = MetricNameFilter.builder().nameMustBeEqualTo(includedNames).build();

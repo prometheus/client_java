@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
 public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
 
   @Override
-  public boolean accepts(String acceptHeader) {
+  public boolean accepts(@Nullable String acceptHeader) {
     throw new IllegalStateException("use PrometheusProtobufWriter instead");
   }
 

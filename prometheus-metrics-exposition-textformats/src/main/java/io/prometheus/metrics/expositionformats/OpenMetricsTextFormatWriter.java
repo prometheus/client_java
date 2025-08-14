@@ -91,7 +91,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   }
 
   @Override
-  public boolean accepts(String acceptHeader) {
+  public boolean accepts(@Nullable String acceptHeader) {
     if (acceptHeader == null) {
       return false;
     }
