@@ -39,7 +39,7 @@ The properties file is searched in the following locations:
 <!-- editorconfig-checker-disable -->
 
 | Name                                                      | Javadoc                                                                                                                                                                         | Note    |
-|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | io.prometheus.metrics.exemplarsEnabled                    | [Counter.Builder.withExemplars()](</client_java/api/io/prometheus/metrics/core/metrics/Counter.Builder.html#withExemplars()>)                                                   | (1) (2) |
 | io.prometheus.metrics.histogramNativeOnly                 | [Histogram.Builder.nativeOnly()](</client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeOnly()>)                                                     | (2)     |
 | io.prometheus.metrics.histogramClassicOnly                | [Histogram.Builder.classicOnly()](</client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicOnly()>)                                                   | (2)     |
@@ -89,7 +89,7 @@ This works for all Metrics properties.
 <!-- editorconfig-checker-disable -->
 
 | Name                                               | Javadoc                                                                                                                                                         | Note |
-|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------|
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exemplars.minRetentionPeriodSeconds  | [ExemplarsProperties.getMinRetentionPeriodSeconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getMinRetentionPeriodSeconds()>)   |      |
 | io.prometheus.exemplars.maxRetentionPeriodSeconds  | [ExemplarsProperties.getMaxRetentionPeriodSeconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getMaxRetentionPeriodSeconds()>)   |      |
 | io.prometheus.exemplars.sampleIntervalMilliseconds | [ExemplarsProperties.getSampleIntervalMilliseconds()](</client_java/api/io/prometheus/metrics/config/ExemplarsProperties.html#getSampleIntervalMilliseconds()>) |      |
@@ -101,7 +101,7 @@ This works for all Metrics properties.
 <!-- editorconfig-checker-disable -->
 
 | Name                                             | Javadoc                                                                                                                                                     | Note |
-|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|------|
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.includeCreatedTimestamps  | [ExporterProperties.getIncludeCreatedTimestamps()](</client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getIncludeCreatedTimestamps()>)   | (1)  |
 | io.prometheus.exporter.exemplarsOnAllMetricTypes | [ExporterProperties.getExemplarsOnAllMetricTypes()](</client_java/api/io/prometheus/metrics/config/ExporterProperties.html#getExemplarsOnAllMetricTypes()>) | (1)  |
 
@@ -114,7 +114,7 @@ This works for all Metrics properties.
 <!-- editorconfig-checker-disable -->
 
 | Name                                                     | Javadoc                                                                                                                                                                   | Note |
-|----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------|
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.filter.metricNameMustBeEqualTo    | [ExporterFilterProperties.getAllowedMetricNames()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getAllowedMetricNames()>)                 | (1)  |
 | io.prometheus.exporter.filter.metricNameMustNotBeEqualTo | [ExporterFilterProperties.getExcludedMetricNames()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getExcludedMetricNames()>)               | (2)  |
 | io.prometheus.exporter.filter.metricNameMustStartWith    | [ExporterFilterProperties.getAllowedMetricNamePrefixes()](</client_java/api/io/prometheus/metrics/config/ExporterFilterProperties.html#getAllowedMetricNamePrefixes()>)   | (3)  |
@@ -133,7 +133,7 @@ Only metrics starting with these prefixes will be exposed.<br/>
 <!-- editorconfig-checker-disable -->
 
 | Name                                   | Javadoc                                                                                                                     | Note |
-|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|------|
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.httpServer.port | [HTTPServer.Builder.port()](</client_java/api/io/prometheus/metrics/exporter/httpserver/HTTPServer.Builder.html#port(int)>) |      |
 
 <!-- editorconfig-checker-enable -->
@@ -143,7 +143,7 @@ Only metrics starting with these prefixes will be exposed.<br/>
 <!-- editorconfig-checker-disable -->
 
 | Name                                                    | Javadoc                                                                                                                                                                                                       | Note |
-|---------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------|
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | io.prometheus.exporter.opentelemetry.protocol           | [OpenTelemetryExporter.Builder.protocol()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#protocol(java.lang.String)>)                                     | (1)  |
 | io.prometheus.exporter.opentelemetry.endpoint           | [OpenTelemetryExporter.Builder.endpoint()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#endpoint(java.lang.String)>)                                     |      |
 | io.prometheus.exporter.opentelemetry.headers            | [OpenTelemetryExporter.Builder.headers()](</client_java/api/io/prometheus/metrics/exporter/opentelemetry/OpenTelemetryExporter.Builder.html#header(java.lang.String,java.lang.String)>)                       | (2)  |
@@ -171,7 +171,7 @@ See Javadoc for details.
 <!-- editorconfig-checker-disable -->
 
 | Name                                              | Javadoc                                                                                                                                                                                    | Note |
-|---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------|
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- |
 | io.prometheus.exporter.pushgateway.address        | [PushGateway.Builder.address()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#address(java.lang.String)>)                                          |      |
 | io.prometheus.exporter.pushgateway.scheme         | [PushGateway.Builder.scheme()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#scheme(java.lang.String)>)                                            |      |
 | io.prometheus.exporter.pushgateway.job            | [PushGateway.Builder.job()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#job(java.lang.String)>)                                                  |      |
