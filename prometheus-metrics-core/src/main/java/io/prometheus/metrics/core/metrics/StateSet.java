@@ -1,17 +1,16 @@
 package io.prometheus.metrics.core.metrics;
 
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.StateSetDataPoint;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
 /**
  * StateSet metric. Example:

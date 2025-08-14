@@ -8,12 +8,11 @@ import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nullable;
 
 /**
  * Gauge metric.
@@ -169,7 +168,6 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
       }
       return new GaugeSnapshot.GaugeDataPointSnapshot(get(), labels, oldest);
     }
-
   }
 
   public static Builder builder() {

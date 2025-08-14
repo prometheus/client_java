@@ -1,5 +1,7 @@
 package io.prometheus.metrics.core.exemplars;
 
+import static java.util.Objects.requireNonNull;
+
 import io.prometheus.metrics.core.util.Scheduler;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Exemplars;
@@ -11,8 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * The ExemplarSampler selects Spans as exemplars.

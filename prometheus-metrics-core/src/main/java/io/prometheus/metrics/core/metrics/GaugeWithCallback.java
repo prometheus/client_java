@@ -2,12 +2,11 @@ package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 /**
  * Example:
@@ -66,8 +65,7 @@ public class GaugeWithCallback extends CallbackMetric {
   public static class Builder
       extends CallbackMetric.Builder<GaugeWithCallback.Builder, GaugeWithCallback> {
 
-    @Nullable
-    private Consumer<Callback> callback;
+    @Nullable private Consumer<Callback> callback;
 
     public Builder callback(Consumer<Callback> callback) {
       this.callback = callback;

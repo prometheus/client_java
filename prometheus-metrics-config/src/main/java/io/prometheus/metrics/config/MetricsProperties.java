@@ -1,12 +1,12 @@
 package io.prometheus.metrics.config;
 
-import static java.util.Collections.unmodifiableList;
-
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
+
+import static java.util.Collections.unmodifiableList;
 
 /** Properties starting with io.prometheus.metrics */
 public class MetricsProperties {
@@ -414,7 +414,7 @@ public class MetricsProperties {
     }
 
     /** See {@link MetricsProperties#getHistogramClassicUpperBounds()} */
-    public Builder histogramClassicUpperBounds(double... histogramClassicUpperBounds) {
+    public Builder histogramClassicUpperBounds(@Nullable double... histogramClassicUpperBounds) {
       this.histogramClassicUpperBounds = Util.toList(histogramClassicUpperBounds);
       return this;
     }

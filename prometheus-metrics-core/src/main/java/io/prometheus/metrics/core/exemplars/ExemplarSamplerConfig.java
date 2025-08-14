@@ -2,9 +2,8 @@ package io.prometheus.metrics.core.exemplars;
 
 import io.prometheus.metrics.config.ExemplarsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
-
-import javax.annotation.Nullable;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 
 public class ExemplarSamplerConfig {
 

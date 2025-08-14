@@ -10,14 +10,13 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Quantile;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import javax.annotation.Nullable;
 
 /**
  * Summary metric. Example:
@@ -46,8 +45,7 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
   private final List<CKMSQuantiles.Quantile> quantiles; // May be empty, but cannot be null.
   private final long maxAgeSeconds;
   private final int ageBuckets;
-  @Nullable
-  private final ExemplarSamplerConfig exemplarSamplerConfig;
+  @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   private Summary(Builder builder, PrometheusProperties prometheusProperties) {
     super(builder);

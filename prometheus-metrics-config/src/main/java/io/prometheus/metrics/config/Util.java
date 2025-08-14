@@ -34,7 +34,7 @@ class Util {
   }
 
   @Nullable
-  static List<Double> toList(double... values) {
+  static List<Double> toList(@Nullable double... values) {
     if (values == null) {
       return null;
     }

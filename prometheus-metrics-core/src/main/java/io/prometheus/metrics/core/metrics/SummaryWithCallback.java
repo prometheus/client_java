@@ -75,8 +75,7 @@ public class SummaryWithCallback extends CallbackMetric {
   public static class Builder
       extends CallbackMetric.Builder<SummaryWithCallback.Builder, SummaryWithCallback> {
 
-    @Nullable
-    private Consumer<Callback> callback;
+    @Nullable private Consumer<Callback> callback;
 
     public Builder callback(Consumer<Callback> callback) {
       this.callback = callback;

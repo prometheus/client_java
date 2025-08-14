@@ -12,8 +12,6 @@ import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
-
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import javax.annotation.Nullable;
 
 /**
  * Histogram metric. Example usage:
@@ -70,8 +69,7 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
   // NATIVE_BOUNDS is used to look up the native bucket index depending on the current schema.
   private static final double[][] NATIVE_BOUNDS;
 
-  @Nullable
-  private final ExemplarSamplerConfig exemplarSamplerConfig;
+  @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
 
   // Upper bounds for the classic histogram buckets. Contains at least +Inf.
   // An empty array indicates that this is a native histogram only.
