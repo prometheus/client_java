@@ -12,7 +12,7 @@ class TestUtil {
   static String convertToOpenMetricsFormat(MetricSnapshots snapshots) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
-    writer.write(out, snapshots, EscapingScheme.NO_ESCAPING);
+    writer.write(out, snapshots, EscapingScheme.ALLOW_UTF8);
     return out.toString(StandardCharsets.UTF_8);
   }
 }

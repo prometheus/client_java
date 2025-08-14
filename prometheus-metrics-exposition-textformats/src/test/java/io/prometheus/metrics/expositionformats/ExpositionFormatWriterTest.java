@@ -16,7 +16,7 @@ class ExpositionFormatWriterTest {
   void write() throws IOException {
     MetricSnapshots snapshots = new MetricSnapshots();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    writer.write(out, snapshots, EscapingScheme.NO_ESCAPING);
+    writer.write(out, snapshots, EscapingScheme.ALLOW_UTF8);
     assertThat(out).hasToString("# EOF\n");
 
     out.reset();
@@ -26,7 +26,7 @@ class ExpositionFormatWriterTest {
 
   @Test
   void toDebugString() {
-    assertThat(writer.toDebugString(new MetricSnapshots(), EscapingScheme.NO_ESCAPING))
+    assertThat(writer.toDebugString(new MetricSnapshots(), EscapingScheme.ALLOW_UTF8))
         .isEqualTo("# EOF\n");
     assertThat(writer.toDebugString(new MetricSnapshots())).isEqualTo("# EOF\n");
   }

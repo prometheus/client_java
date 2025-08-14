@@ -277,7 +277,7 @@ public class PrometheusNaming {
 
     StringBuilder escaped = new StringBuilder();
     switch (scheme) {
-      case NO_ESCAPING:
+      case ALLOW_UTF8:
         return name;
       case UNDERSCORE_ESCAPING:
         for (int i = 0; i < name.length(); ) {

@@ -71,14 +71,14 @@ public class TextFormatUtilBenchmark {
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
     OPEN_METRICS_TEXT_FORMAT_WRITER.write(
-        byteArrayOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
+        byteArrayOutputStream, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return byteArrayOutputStream;
   }
 
   @Benchmark
   public OutputStream openMetricsWriteToNull() throws IOException {
     OutputStream nullOutputStream = NullOutputStream.INSTANCE;
-    OPEN_METRICS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
+    OPEN_METRICS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return nullOutputStream;
   }
 
@@ -88,14 +88,14 @@ public class TextFormatUtilBenchmark {
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
     PROMETHEUS_TEXT_FORMAT_WRITER.write(
-        byteArrayOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
+        byteArrayOutputStream, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return byteArrayOutputStream;
   }
 
   @Benchmark
   public OutputStream prometheusWriteToNull() throws IOException {
     OutputStream nullOutputStream = NullOutputStream.INSTANCE;
-    PROMETHEUS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS, EscapingScheme.NO_ESCAPING);
+    PROMETHEUS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return nullOutputStream;
   }
 

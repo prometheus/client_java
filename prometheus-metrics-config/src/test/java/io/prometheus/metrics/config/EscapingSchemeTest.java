@@ -9,7 +9,7 @@ class EscapingSchemeTest {
 
   @Test
   void forString() {
-    assertThat(EscapingScheme.forString("allow-utf-8")).isEqualTo(EscapingScheme.NO_ESCAPING);
+    assertThat(EscapingScheme.forString("allow-utf-8")).isEqualTo(EscapingScheme.ALLOW_UTF8);
     assertThat(EscapingScheme.forString("underscores"))
         .isEqualTo(EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(EscapingScheme.forString("dots")).isEqualTo(EscapingScheme.DOTS_ESCAPING);
@@ -22,7 +22,7 @@ class EscapingSchemeTest {
   @Test
   void fromAcceptHeader() {
     assertThat(EscapingScheme.fromAcceptHeader("application/json; escaping=allow-utf-8"))
-        .isEqualTo(EscapingScheme.NO_ESCAPING);
+        .isEqualTo(EscapingScheme.ALLOW_UTF8);
     assertThat(EscapingScheme.fromAcceptHeader("application/json; escaping=underscores"))
         .isEqualTo(EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(EscapingScheme.fromAcceptHeader("application/json; escaping=dots"))

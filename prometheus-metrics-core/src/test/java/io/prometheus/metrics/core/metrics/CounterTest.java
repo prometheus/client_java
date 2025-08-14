@@ -118,7 +118,7 @@ class CounterTest {
   public void testTotalStrippedFromName(String name) {
     Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
     Metrics.MetricFamily protobufData =
-        new PrometheusProtobufWriterImpl().convert(counter.collect(), EscapingScheme.NO_ESCAPING);
+        new PrometheusProtobufWriterImpl().convert(counter.collect(), EscapingScheme.ALLOW_UTF8);
     assertThat(ProtobufUtil.shortDebugString(protobufData))
         .isEqualTo(
             "name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");

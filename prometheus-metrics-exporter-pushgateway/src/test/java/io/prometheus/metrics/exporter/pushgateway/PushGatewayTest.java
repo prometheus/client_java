@@ -427,6 +427,6 @@ class PushGatewayTest {
     escapingSchemeField.setAccessible(true);
     EscapingScheme scheme = (EscapingScheme) escapingSchemeField.get(pg);
 
-    assertThat(scheme).isEqualTo(EscapingScheme.NO_ESCAPING);
+    assertThat(scheme).isEqualTo(EscapingScheme.UNDERSCORE_ESCAPING);
   }
 }

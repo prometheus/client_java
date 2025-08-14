@@ -134,7 +134,7 @@ class SnapshotEscaperTest {
   @MethodSource("emptySnapshots")
   void escape(MetricSnapshot original) {
     assertThat(original)
-        .isSameAs(escapeMetricSnapshot(original, EscapingScheme.NO_ESCAPING))
+        .isSameAs(escapeMetricSnapshot(original, EscapingScheme.ALLOW_UTF8))
         .isSameAs(escapeMetricSnapshot(original, EscapingScheme.UNDERSCORE_ESCAPING));
     assertThat(escapeMetricSnapshot(original, EscapingScheme.VALUE_ENCODING_ESCAPING))
         .usingRecursiveComparison()
@@ -143,7 +143,7 @@ class SnapshotEscaperTest {
 
   @Test
   void escapeNull() {
-    assertThat(escapeMetricSnapshot(null, EscapingScheme.NO_ESCAPING)).isNull();
+    assertThat(escapeMetricSnapshot(null, EscapingScheme.ALLOW_UTF8)).isNull();
   }
 
   public static Stream<Arguments> emptySnapshots() {
@@ -204,7 +204,7 @@ class SnapshotEscaperTest {
   @Test
   void metadataName() {
     MetricMetadata metadata = new MetricMetadata("test.");
-    assertThat(SnapshotEscaper.getMetadataName(metadata, EscapingScheme.NO_ESCAPING))
+    assertThat(SnapshotEscaper.getMetadataName(metadata, EscapingScheme.ALLOW_UTF8))
         .isEqualTo("test.");
     assertThat(SnapshotEscaper.getMetadataName(metadata, EscapingScheme.UNDERSCORE_ESCAPING))
         .isEqualTo("test_");
@@ -213,7 +213,7 @@ class SnapshotEscaperTest {
   @Test
   void snapshotLabelName() {
     Labels labels = Labels.builder().label("test.", "value").build();
-    assertThat(getSnapshotLabelName(labels, 0, EscapingScheme.NO_ESCAPING)).isEqualTo("test.");
+    assertThat(getSnapshotLabelName(labels, 0, EscapingScheme.ALLOW_UTF8)).isEqualTo("test.");
     assertThat(getSnapshotLabelName(labels, 0, EscapingScheme.UNDERSCORE_ESCAPING))
         .isEqualTo("test_");
   }

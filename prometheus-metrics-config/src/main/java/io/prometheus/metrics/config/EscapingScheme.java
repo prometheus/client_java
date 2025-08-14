@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 public enum EscapingScheme {
   /** NO_ESCAPING indicates that a name will not be escaped. */
-  NO_ESCAPING("allow-utf-8"),
+  ALLOW_UTF8("allow-utf-8"),
 
   /** UNDERSCORE_ESCAPING replaces all legacy-invalid characters with underscores. */
   UNDERSCORE_ESCAPING("underscores"),
@@ -67,7 +67,7 @@ public enum EscapingScheme {
   static EscapingScheme forString(String value) {
     switch (value) {
       case "allow-utf-8":
-        return NO_ESCAPING;
+        return ALLOW_UTF8;
       case "underscores":
         return UNDERSCORE_ESCAPING;
       case "dots":

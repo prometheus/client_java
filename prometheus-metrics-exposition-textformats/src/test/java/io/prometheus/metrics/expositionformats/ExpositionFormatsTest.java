@@ -499,7 +499,7 @@ class ExpositionFormatsTest {
             .build();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     getPrometheusWriter(PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true))
-        .write(out, MetricSnapshots.of((MetricSnapshot) gauge), EscapingScheme.NO_ESCAPING);
+        .write(out, MetricSnapshots.of((MetricSnapshot) gauge), EscapingScheme.ALLOW_UTF8);
     assertThat(out).hasToString(prometheusText);
   }
 

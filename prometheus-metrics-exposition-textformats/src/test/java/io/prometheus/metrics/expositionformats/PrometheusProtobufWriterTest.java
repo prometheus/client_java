@@ -25,13 +25,13 @@ class PrometheusProtobufWriterTest {
 
   @Test
   void write() {
-    assertThatCode(() -> writer.write(null, null, EscapingScheme.NO_ESCAPING))
+    assertThatCode(() -> writer.write(null, null, EscapingScheme.ALLOW_UTF8))
         .isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
   void toDebugString() {
-    assertThatCode(() -> writer.toDebugString(null, EscapingScheme.NO_ESCAPING))
+    assertThatCode(() -> writer.toDebugString(null, EscapingScheme.ALLOW_UTF8))
         .isInstanceOf(UnsupportedOperationException.class);
   }
 }

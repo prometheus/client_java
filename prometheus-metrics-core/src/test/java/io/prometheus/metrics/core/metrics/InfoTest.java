@@ -26,7 +26,7 @@ class InfoTest {
     Info info = Info.builder().name(name).labelNames("my.key").build();
     info.addLabelValues("value");
     Metrics.MetricFamily protobufData =
-        new PrometheusProtobufWriterImpl().convert(info.collect(), EscapingScheme.NO_ESCAPING);
+        new PrometheusProtobufWriterImpl().convert(info.collect(), EscapingScheme.ALLOW_UTF8);
     assertThat(ProtobufUtil.shortDebugString(protobufData))
         .isEqualTo(
             "name: \"jvm.runtime_info\" type: GAUGE metric { label { name: \"my.key\" value:"

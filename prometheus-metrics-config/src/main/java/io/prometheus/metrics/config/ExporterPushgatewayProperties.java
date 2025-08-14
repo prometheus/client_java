@@ -86,7 +86,7 @@ public class ExporterPushgatewayProperties {
     }
     switch (scheme) {
       case "allow-utf-8":
-        return EscapingScheme.NO_ESCAPING;
+        return EscapingScheme.ALLOW_UTF8;
       case "values":
         return EscapingScheme.VALUE_ENCODING_ESCAPING;
       case "underscores":
