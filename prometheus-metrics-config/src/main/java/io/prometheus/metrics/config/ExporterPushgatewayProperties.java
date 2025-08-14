@@ -58,4 +58,41 @@ public class ExporterPushgatewayProperties {
     }
     return new ExporterPushgatewayProperties(address, job, scheme);
   }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    @Nullable private String address;
+    @Nullable private String job;
+    @Nullable private String scheme;
+    @Nullable private EscapingScheme escapingScheme;
+
+    private Builder() {}
+
+    public Builder address(String address) {
+      this.address = address;
+      return this;
+    }
+
+    public Builder job(String job) {
+      this.job = job;
+      return this;
+    }
+
+    public Builder scheme(String scheme) {
+      this.scheme = scheme;
+      return this;
+    }
+
+    public Builder escapingScheme(EscapingScheme escapingScheme) {
+      this.escapingScheme = escapingScheme;
+      return this;
+    }
+
+    public ExporterPushgatewayProperties build() {
+      return new ExporterPushgatewayProperties(address, job, scheme, escapingScheme);
+    }
+  }
 }
