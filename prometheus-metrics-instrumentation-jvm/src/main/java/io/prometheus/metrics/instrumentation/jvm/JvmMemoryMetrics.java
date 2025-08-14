@@ -11,6 +11,7 @@ import java.lang.management.MemoryUsage;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 
 /**
  * JVM memory metrics. The {@link JvmMemoryMetrics} are registered as part of the {@link JvmMetrics}
@@ -285,8 +286,8 @@ public class JvmMemoryMetrics {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private MemoryMXBean memoryBean;
-    private List<MemoryPoolMXBean> poolBeans;
+    @Nullable private MemoryMXBean memoryBean;
+    @Nullable private List<MemoryPoolMXBean> poolBeans;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

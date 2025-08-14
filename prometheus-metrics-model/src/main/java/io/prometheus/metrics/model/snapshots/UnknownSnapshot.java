@@ -50,16 +50,7 @@ public final class UnknownSnapshot extends MetricSnapshot {
      */
     public UnknownDataPointSnapshot(
         double value, Labels labels, @Nullable Exemplar exemplar, long scrapeTimestampMillis) {
-      this(value, labels, exemplar, scrapeTimestampMillis, false);
-    }
-
-    private UnknownDataPointSnapshot(
-        double value,
-        Labels labels,
-        @Nullable Exemplar exemplar,
-        long scrapeTimestampMillis,
-        boolean internal) {
-      super(labels, 0L, scrapeTimestampMillis, internal);
+      super(labels, 0L, scrapeTimestampMillis);
       this.value = value;
       this.exemplar = exemplar;
     }

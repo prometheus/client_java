@@ -1,6 +1,7 @@
 package io.prometheus.metrics.config;
 
 import java.util.Map;
+import javax.annotation.Nullable;
 
 public class ExporterPushgatewayProperties {
 
@@ -8,17 +9,19 @@ public class ExporterPushgatewayProperties {
   private static final String JOB = "job";
   private static final String SCHEME = "scheme";
   private static final String PREFIX = "io.prometheus.exporter.pushgateway";
-  private final String scheme;
-  private final String address;
-  private final String job;
+  @Nullable private final String scheme;
+  @Nullable private final String address;
+  @Nullable private final String job;
 
-  private ExporterPushgatewayProperties(String address, String job, String scheme) {
+  private ExporterPushgatewayProperties(
+      @Nullable String address, @Nullable String job, @Nullable String scheme) {
     this.address = address;
     this.job = job;
     this.scheme = scheme;
   }
 
   /** Address of the Pushgateway in the form {@code host:port}. Default is {@code localhost:9091} */
+  @Nullable
   public String getAddress() {
     return address;
   }
@@ -27,6 +30,7 @@ public class ExporterPushgatewayProperties {
    * {@code job} label for metrics being pushed. Default is the name of the JAR file that is
    * running.
    */
+  @Nullable
   public String getJob() {
     return job;
   }
@@ -35,6 +39,7 @@ public class ExporterPushgatewayProperties {
    * Scheme to be used when pushing metrics to the pushgateway. Must be "http" or "https". Default
    * is "http".
    */
+  @Nullable
   public String getScheme() {
     return scheme;
   }
@@ -67,7 +72,6 @@ public class ExporterPushgatewayProperties {
     @Nullable private String address;
     @Nullable private String job;
     @Nullable private String scheme;
-    @Nullable private EscapingScheme escapingScheme;
 
     private Builder() {}
 
@@ -86,13 +90,8 @@ public class ExporterPushgatewayProperties {
       return this;
     }
 
-    public Builder escapingScheme(EscapingScheme escapingScheme) {
-      this.escapingScheme = escapingScheme;
-      return this;
-    }
-
     public ExporterPushgatewayProperties build() {
-      return new ExporterPushgatewayProperties(address, job, scheme, escapingScheme);
+      return new ExporterPushgatewayProperties(address, job, scheme);
     }
   }
 }

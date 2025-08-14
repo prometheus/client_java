@@ -11,6 +11,8 @@ import java.lang.management.MemoryUsage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import javax.annotation.Nullable;
 import javax.management.Notification;
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
@@ -93,7 +95,7 @@ public class JvmMemoryPoolAllocationMetrics {
       for (Map.Entry<String, MemoryUsage> entry : memoryUsageBeforeGc.entrySet()) {
         String memoryPool = entry.getKey();
         long before = entry.getValue().getUsed();
-        long after = memoryUsageAfterGc.get(memoryPool).getUsed();
+        long after = Objects.requireNonNull(memoryUsageAfterGc.get(memoryPool)).getUsed();
         handleMemoryPool(memoryPool, before, after);
       }
     }
@@ -149,7 +151,7 @@ public class JvmMemoryPoolAllocationMetrics {
   }
 
   public static class Builder {
-    private List<GarbageCollectorMXBean> garbageCollectorBeans;
+    @Nullable private List<GarbageCollectorMXBean> garbageCollectorBeans;
 
     private Builder() {}
 

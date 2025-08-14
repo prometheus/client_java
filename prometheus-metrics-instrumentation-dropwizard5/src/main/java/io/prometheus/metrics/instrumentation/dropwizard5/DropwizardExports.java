@@ -6,6 +6,7 @@ import io.dropwizard.metrics5.Histogram;
 import io.dropwizard.metrics5.Meter;
 import io.dropwizard.metrics5.Metric;
 import io.dropwizard.metrics5.MetricFilter;
+import io.dropwizard.metrics5.MetricName;
 import io.dropwizard.metrics5.MetricRegistry;
 import io.dropwizard.metrics5.Snapshot;
 import io.dropwizard.metrics5.Timer;
@@ -224,10 +225,10 @@ public class DropwizardExports implements MultiCollector {
 
   private <T> void collectMetricKind(
       MetricSnapshots.Builder builder,
-      Map<String, T> metric,
+      Map<MetricName, T> metric,
       BiFunction<String, T, MetricSnapshot> toSnapshot) {
-    for (Map.Entry<String, T> entry : metric.entrySet()) {
-      String metricName = entry.getKey();
+    for (Map.Entry<MetricName, T> entry : metric.entrySet()) {
+      String metricName = entry.getKey().getKey();
       try {
         MetricSnapshot snapshot = toSnapshot.apply(metricName, entry.getValue());
         if (snapshot != null) {

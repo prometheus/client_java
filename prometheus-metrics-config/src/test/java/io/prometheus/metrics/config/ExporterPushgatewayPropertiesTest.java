@@ -40,12 +40,10 @@ class ExporterPushgatewayPropertiesTest {
             .address("http://localhost")
             .job("job")
             .scheme("http")
-            .escapingScheme(EscapingScheme.DOTS_ESCAPING)
             .build();
 
     assertThat(properties.getAddress()).isEqualTo("http://localhost");
     assertThat(properties.getJob()).isEqualTo("job");
     assertThat(properties.getScheme()).isEqualTo("http");
-    assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.DOTS_ESCAPING);
   }
 }

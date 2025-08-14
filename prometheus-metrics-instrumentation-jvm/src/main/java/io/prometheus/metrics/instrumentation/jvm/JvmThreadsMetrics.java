@@ -1,5 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import static java.util.Objects.requireNonNull;
+
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
@@ -10,6 +12,7 @@ import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * JVM Thread metrics. The {@link JvmThreadsMetrics} are registered as part of the {@link
@@ -165,7 +168,8 @@ public class JvmThreadsMetrics {
     for (ThreadInfo curThread : allThreads) {
       if (curThread != null) {
         Thread.State threadState = curThread.getThreadState();
-        threadCounts.put(threadState.name(), threadCounts.get(threadState.name()) + 1);
+        threadCounts.put(
+            threadState.name(), requireNonNull(threadCounts.get(threadState.name())) + 1);
       }
     }
 
@@ -190,8 +194,8 @@ public class JvmThreadsMetrics {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private Boolean isNativeImage;
-    private ThreadMXBean threadBean;
+    @Nullable private Boolean isNativeImage;
+    @Nullable private ThreadMXBean threadBean;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

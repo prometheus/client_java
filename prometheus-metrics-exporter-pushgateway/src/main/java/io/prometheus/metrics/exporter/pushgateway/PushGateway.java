@@ -434,13 +434,6 @@ public class PushGateway {
       }
     }
 
-    private EscapingScheme getEscapingScheme(ExporterPushgatewayProperties properties) {
-      if (properties != null && properties.getEscapingScheme() != null) {
-        return properties.getEscapingScheme();
-      }
-      return EscapingScheme.NO_ESCAPING;
-    }
-
     private Format getFormat() {
       // currently not configurable via properties
       if (this.format != null) {

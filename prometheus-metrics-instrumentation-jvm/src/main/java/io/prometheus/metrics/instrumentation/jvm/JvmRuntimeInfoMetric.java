@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.Info;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import javax.annotation.Nullable;
 
 /**
  * JVM Runtime Info metric. The {@link JvmRuntimeInfoMetric} is registered as part of the {@link
@@ -64,9 +65,9 @@ public class JvmRuntimeInfoMetric {
   public static class Builder {
 
     private final PrometheusProperties config;
-    private String version;
-    private String vendor;
-    private String runtime;
+    @Nullable private String version;
+    @Nullable private String vendor;
+    @Nullable private String runtime;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
