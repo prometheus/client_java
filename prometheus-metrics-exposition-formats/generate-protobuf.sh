@@ -38,14 +38,14 @@ GENERATED_WITH=$(grep -oP '\/\/ Protobuf Java Version: \K.*' "$TARGET_DIR/${PACK
 if [[ $GENERATED_WITH != "$PROTOBUF_VERSION" ]]; then
 	echo "Generated protobuf sources version $GENERATED_WITH does not match provided version $PROTOBUF_VERSION"
 	echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
-	echo "Generated protobuf sources are not up-to-date. Please run 'mise up && mise run generater' and commit the changes."
+	echo "Generated protobuf sources are not up-to-date. Please run 'mise self-update && mise up && mise run generate' and commit the changes."
 	exit 1
 fi
 
 STATUS=$(git status --porcelain)
 if [[ ${REQUIRE_PROTO_UP_TO_DATE:-false} == "true" && -n "$STATUS" ]]; then
 	echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
-	echo "Generated protobuf sources are not up-to-date. Please run 'mise run generate' and commit the changes."
+	echo "Generated protobuf sources are not up-to-date. Please run 'mise self-update && mise up && mise run generate' and commit the changes."
 	echo "Local changes:"
 	echo "$STATUS"
 	exit 1
