@@ -180,4 +180,5 @@ See Javadoc for details.
 <!-- editorconfig-checker-enable -->
 
 (1) Escaping scheme can be `allow-utf-8`, `underscores`, `dots`, or `values` as described in
-[escaping schemes](https://github.com/prometheus/docs/blob/main/docs/instrumenting/escaping_schemes.md#escaping-schemes)
+[escaping schemes](https://github.com/prometheus/docs/blob/main/docs/instrumenting/escaping_schemes.md#escaping-schemes) <!-- editorconfig-checker-disable-line -->
+and in the [Unicode documentation]({{< relref "../exporters/unicode.md" >}}).
