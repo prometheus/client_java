@@ -3,6 +3,7 @@ package io.prometheus.metrics.core.metrics;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_32_0.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
@@ -14,27 +15,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class InfoTest {
 
-  @Test
-  public void testInfoStrippedFromName() {
-    for (String name :
-        new String[] {
-          "jvm.runtime", "jvm_runtime",
-          "jvm.runtime.info", "jvm_runtime_info"
-        }) {
-      for (String labelName : new String[] {"my.key", "my_key"}) {
-        Info info = Info.builder().name(name).labelNames(labelName).build();
-        info.addLabelValues("value");
-        Metrics.MetricFamily protobufData =
-            new PrometheusProtobufWriterImpl().convert(info.collect());
-        assertThat(ProtobufUtil.shortDebugString(protobufData))
-            .isEqualTo(
-                "name: \"jvm_runtime_info\" type: GAUGE metric { label { name: \"my_key\" value:"
-                    + " \"value\" } gauge { value: 1.0 } }");
-      }
-    }
+  @ParameterizedTest
+  @ValueSource(strings = {"jvm.runtime", "jvm.runtime.info"})
+  public void testInfoStrippedFromName(String name) {
+    Info info = Info.builder().name(name).labelNames("my.key").build();
+    info.addLabelValues("value");
+    Metrics.MetricFamily protobufData =
+        new PrometheusProtobufWriterImpl().convert(info.collect(), EscapingScheme.ALLOW_UTF8);
+    assertThat(ProtobufUtil.shortDebugString(protobufData))
+        .isEqualTo(
+            "name: \"jvm.runtime_info\" type: GAUGE metric { label { name: \"my.key\" value:"
+                + " \"value\" } gauge { value: 1.0 } }");
   }
 
   @Test
@@ -126,7 +122,8 @@ class InfoTest {
   private void assertTextFormat(String expected, Info info) throws IOException {
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    writer.write(outputStream, MetricSnapshots.of(info.collect()));
+    writer.write(
+        outputStream, MetricSnapshots.of(info.collect()), EscapingScheme.UNDERSCORE_ESCAPING);
     String result = outputStream.toString(StandardCharsets.UTF_8.name());
     if (!result.contains(expected)) {
       throw new AssertionError(expected + " is not contained in the following output:\n" + result);

@@ -1,8 +1,10 @@
 package io.prometheus.metrics.expositionformats.internal;
 
 import static io.prometheus.metrics.expositionformats.internal.ProtobufUtil.timestampFromMillis;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
 import com.google.protobuf.TextFormat;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_32_0.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
@@ -19,6 +21,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.Quantiles;
+import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
@@ -39,102 +42,114 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
   }
 
   @Override
-  public String toDebugString(MetricSnapshots metricSnapshots) {
+  public String toDebugString(MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) {
     StringBuilder stringBuilder = new StringBuilder();
-    for (MetricSnapshot snapshot : metricSnapshots) {
+    for (MetricSnapshot s : metricSnapshots) {
+      MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
-        stringBuilder.append(TextFormat.printer().printToString(convert(snapshot)));
+        stringBuilder.append(TextFormat.printer().printToString(convert(snapshot, escapingScheme)));
       }
     }
     return stringBuilder.toString();
   }
 
   @Override
-  public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
-    for (MetricSnapshot snapshot : metricSnapshots) {
+  public void write(
+      OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)
+      throws IOException {
+    for (MetricSnapshot s : metricSnapshots) {
+      MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
-        convert(snapshot).writeDelimitedTo(out);
+        convert(snapshot, escapingScheme).writeDelimitedTo(out);
       }
     }
   }
 
-  public Metrics.MetricFamily convert(MetricSnapshot snapshot) {
+  public Metrics.MetricFamily convert(MetricSnapshot snapshot, EscapingScheme scheme) {
     Metrics.MetricFamily.Builder builder = Metrics.MetricFamily.newBuilder();
     if (snapshot instanceof CounterSnapshot) {
       for (CounterDataPointSnapshot data : ((CounterSnapshot) snapshot).getDataPoints()) {
-        builder.addMetric(convert(data));
+        builder.addMetric(convert(data, scheme));
       }
-      setMetadataUnlessEmpty(builder, snapshot.getMetadata(), "_total", Metrics.MetricType.COUNTER);
+      setMetadataUnlessEmpty(
+          builder, snapshot.getMetadata(), "_total", Metrics.MetricType.COUNTER, scheme);
     } else if (snapshot instanceof GaugeSnapshot) {
       for (GaugeSnapshot.GaugeDataPointSnapshot data : ((GaugeSnapshot) snapshot).getDataPoints()) {
-        builder.addMetric(convert(data));
+        builder.addMetric(convert(data, scheme));
       }
-      setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
+      setMetadataUnlessEmpty(
+          builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE, scheme);
     } else if (snapshot instanceof HistogramSnapshot) {
       HistogramSnapshot histogram = (HistogramSnapshot) snapshot;
       for (HistogramSnapshot.HistogramDataPointSnapshot data : histogram.getDataPoints()) {
-        builder.addMetric(convert(data));
+        builder.addMetric(convert(data, scheme));
       }
       Metrics.MetricType type =
           histogram.isGaugeHistogram()
               ? Metrics.MetricType.GAUGE_HISTOGRAM
               : Metrics.MetricType.HISTOGRAM;
-      setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, type);
+      setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, type, scheme);
     } else if (snapshot instanceof SummarySnapshot) {
       for (SummarySnapshot.SummaryDataPointSnapshot data :
           ((SummarySnapshot) snapshot).getDataPoints()) {
         if (data.hasCount() || data.hasSum() || data.getQuantiles().size() > 0) {
-          builder.addMetric(convert(data));
+          builder.addMetric(convert(data, scheme));
         }
       }
-      setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.SUMMARY);
+      setMetadataUnlessEmpty(
+          builder, snapshot.getMetadata(), null, Metrics.MetricType.SUMMARY, scheme);
     } else if (snapshot instanceof InfoSnapshot) {
       for (InfoSnapshot.InfoDataPointSnapshot data : ((InfoSnapshot) snapshot).getDataPoints()) {
-        builder.addMetric(convert(data));
+        builder.addMetric(convert(data, scheme));
       }
-      setMetadataUnlessEmpty(builder, snapshot.getMetadata(), "_info", Metrics.MetricType.GAUGE);
+      setMetadataUnlessEmpty(
+          builder, snapshot.getMetadata(), "_info", Metrics.MetricType.GAUGE, scheme);
     } else if (snapshot instanceof StateSetSnapshot) {
       for (StateSetSnapshot.StateSetDataPointSnapshot data :
           ((StateSetSnapshot) snapshot).getDataPoints()) {
         for (int i = 0; i < data.size(); i++) {
-          builder.addMetric(convert(data, snapshot.getMetadata().getPrometheusName(), i));
+          builder.addMetric(convert(data, snapshot.getMetadata().getPrometheusName(), i, scheme));
         }
       }
-      setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE);
+      setMetadataUnlessEmpty(
+          builder, snapshot.getMetadata(), null, Metrics.MetricType.GAUGE, scheme);
     } else if (snapshot instanceof UnknownSnapshot) {
       for (UnknownSnapshot.UnknownDataPointSnapshot data :
           ((UnknownSnapshot) snapshot).getDataPoints()) {
-        builder.addMetric(convert(data));
+        builder.addMetric(convert(data, scheme));
       }
-      setMetadataUnlessEmpty(builder, snapshot.getMetadata(), null, Metrics.MetricType.UNTYPED);
+      setMetadataUnlessEmpty(
+          builder, snapshot.getMetadata(), null, Metrics.MetricType.UNTYPED, scheme);
     }
     return builder.build();
   }
 
-  private Metrics.Metric.Builder convert(CounterDataPointSnapshot data) {
+  private Metrics.Metric.Builder convert(CounterDataPointSnapshot data, EscapingScheme scheme) {
     Metrics.Counter.Builder counterBuilder = Metrics.Counter.newBuilder();
     counterBuilder.setValue(data.getValue());
     if (data.getExemplar() != null) {
-      counterBuilder.setExemplar(convert(data.getExemplar()));
+      counterBuilder.setExemplar(convert(data.getExemplar(), scheme));
     }
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
-    addLabels(metricBuilder, data.getLabels());
+    addLabels(metricBuilder, data.getLabels(), scheme);
     metricBuilder.setCounter(counterBuilder.build());
     setScrapeTimestamp(metricBuilder, data);
     return metricBuilder;
   }
 
-  private Metrics.Metric.Builder convert(GaugeSnapshot.GaugeDataPointSnapshot data) {
+  private Metrics.Metric.Builder convert(
+      GaugeSnapshot.GaugeDataPointSnapshot data, EscapingScheme scheme) {
     Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
     gaugeBuilder.setValue(data.getValue());
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
-    addLabels(metricBuilder, data.getLabels());
+    addLabels(metricBuilder, data.getLabels(), scheme);
     metricBuilder.setGauge(gaugeBuilder);
     setScrapeTimestamp(metricBuilder, data);
     return metricBuilder;
   }
 
-  private Metrics.Metric.Builder convert(HistogramSnapshot.HistogramDataPointSnapshot data) {
+  private Metrics.Metric.Builder convert(
+      HistogramSnapshot.HistogramDataPointSnapshot data, EscapingScheme scheme) {
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     Metrics.Histogram.Builder histogramBuilder = Metrics.Histogram.newBuilder();
     if (data.hasNativeHistogramData()) {
@@ -152,7 +167,7 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
               Metrics.Bucket.newBuilder()
                   .setCumulativeCount(getNativeCount(data))
                   .setUpperBound(Double.POSITIVE_INFINITY);
-          bucketBuilder.setExemplar(convert(exemplar));
+          bucketBuilder.setExemplar(convert(exemplar, scheme));
           histogramBuilder.addBucket(bucketBuilder);
         }
       }
@@ -171,13 +186,13 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
                 .setUpperBound(upperBound);
         Exemplar exemplar = data.getExemplars().get(lowerBound, upperBound);
         if (exemplar != null) {
-          bucketBuilder.setExemplar(convert(exemplar));
+          bucketBuilder.setExemplar(convert(exemplar, scheme));
         }
         histogramBuilder.addBucket(bucketBuilder);
         lowerBound = upperBound;
       }
     }
-    addLabels(metricBuilder, data.getLabels());
+    addLabels(metricBuilder, data.getLabels(), scheme);
     setScrapeTimestamp(metricBuilder, data);
     if (data.hasCount()) {
       histogramBuilder.setSampleCount(data.getCount());
@@ -189,7 +204,8 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     return metricBuilder;
   }
 
-  private Metrics.Metric.Builder convert(SummarySnapshot.SummaryDataPointSnapshot data) {
+  private Metrics.Metric.Builder convert(
+      SummarySnapshot.SummaryDataPointSnapshot data, EscapingScheme scheme) {
     Metrics.Summary.Builder summaryBuilder = Metrics.Summary.newBuilder();
     if (data.hasCount()) {
       summaryBuilder.setSampleCount(data.getCount());
@@ -206,27 +222,28 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
               .build());
     }
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
-    addLabels(metricBuilder, data.getLabels());
+    addLabels(metricBuilder, data.getLabels(), scheme);
     metricBuilder.setSummary(summaryBuilder.build());
     setScrapeTimestamp(metricBuilder, data);
     return metricBuilder;
   }
 
-  private Metrics.Metric.Builder convert(InfoSnapshot.InfoDataPointSnapshot data) {
+  private Metrics.Metric.Builder convert(
+      InfoSnapshot.InfoDataPointSnapshot data, EscapingScheme scheme) {
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
     gaugeBuilder.setValue(1);
-    addLabels(metricBuilder, data.getLabels());
+    addLabels(metricBuilder, data.getLabels(), scheme);
     metricBuilder.setGauge(gaugeBuilder);
     setScrapeTimestamp(metricBuilder, data);
     return metricBuilder;
   }
 
   private Metrics.Metric.Builder convert(
-      StateSetSnapshot.StateSetDataPointSnapshot data, String name, int i) {
+      StateSetSnapshot.StateSetDataPointSnapshot data, String name, int i, EscapingScheme scheme) {
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     Metrics.Gauge.Builder gaugeBuilder = Metrics.Gauge.newBuilder();
-    addLabels(metricBuilder, data.getLabels());
+    addLabels(metricBuilder, data.getLabels(), scheme);
     metricBuilder.addLabel(
         Metrics.LabelPair.newBuilder().setName(name).setValue(data.getName(i)).build());
     if (data.isTrue(i)) {
@@ -239,19 +256,20 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     return metricBuilder;
   }
 
-  private Metrics.Metric.Builder convert(UnknownSnapshot.UnknownDataPointSnapshot data) {
+  private Metrics.Metric.Builder convert(
+      UnknownSnapshot.UnknownDataPointSnapshot data, EscapingScheme scheme) {
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     Metrics.Untyped.Builder untypedBuilder = Metrics.Untyped.newBuilder();
     untypedBuilder.setValue(data.getValue());
-    addLabels(metricBuilder, data.getLabels());
+    addLabels(metricBuilder, data.getLabels(), scheme);
     metricBuilder.setUntyped(untypedBuilder);
     return metricBuilder;
   }
 
-  private Metrics.Exemplar.Builder convert(Exemplar exemplar) {
+  private Metrics.Exemplar.Builder convert(Exemplar exemplar, EscapingScheme scheme) {
     Metrics.Exemplar.Builder builder = Metrics.Exemplar.newBuilder();
     builder.setValue(exemplar.getValue());
-    addLabels(builder, exemplar.getLabels());
+    addLabels(builder, exemplar.getLabels(), scheme);
     if (exemplar.hasTimestamp()) {
       builder.setTimestamp(timestampFromMillis(exemplar.getTimestampMillis()));
     }
@@ -262,14 +280,15 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
       Metrics.MetricFamily.Builder builder,
       MetricMetadata metadata,
       @Nullable String nameSuffix,
-      Metrics.MetricType type) {
+      Metrics.MetricType type,
+      EscapingScheme scheme) {
     if (builder.getMetricCount() == 0) {
       return;
     }
     if (nameSuffix == null) {
-      builder.setName(metadata.getPrometheusName());
+      builder.setName(SnapshotEscaper.getMetadataName(metadata, scheme));
     } else {
-      builder.setName(metadata.getPrometheusName() + nameSuffix);
+      builder.setName(SnapshotEscaper.getMetadataName(metadata, scheme) + nameSuffix);
     }
     if (metadata.getHelp() != null) {
       builder.setHelp(metadata.getHelp());
@@ -342,21 +361,23 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     }
   }
 
-  private void addLabels(Metrics.Metric.Builder metricBuilder, Labels labels) {
+  private void addLabels(
+      Metrics.Metric.Builder metricBuilder, Labels labels, EscapingScheme scheme) {
     for (int i = 0; i < labels.size(); i++) {
       metricBuilder.addLabel(
           Metrics.LabelPair.newBuilder()
-              .setName(labels.getPrometheusName(i))
+              .setName(getSnapshotLabelName(labels, i, scheme))
               .setValue(labels.getValue(i))
               .build());
     }
   }
 
-  private void addLabels(Metrics.Exemplar.Builder metricBuilder, Labels labels) {
+  private void addLabels(
+      Metrics.Exemplar.Builder metricBuilder, Labels labels, EscapingScheme scheme) {
     for (int i = 0; i < labels.size(); i++) {
       metricBuilder.addLabel(
           Metrics.LabelPair.newBuilder()
-              .setName(labels.getPrometheusName(i))
+              .setName(getSnapshotLabelName(labels, i, scheme))
               .setValue(labels.getValue(i))
               .build());
     }

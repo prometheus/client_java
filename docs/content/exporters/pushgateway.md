@@ -1,6 +1,6 @@
 ---
 title: Pushgateway
-weight: 5
+weight: 6
 ---
 
 The [Prometheus Pushgateway](https://github.com/prometheus/pushgateway) exists to allow ephemeral

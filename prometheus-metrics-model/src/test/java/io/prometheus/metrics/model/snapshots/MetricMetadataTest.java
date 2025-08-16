@@ -21,26 +21,16 @@ class MetricMetadataTest {
   }
 
   @Test
-  public void testIllegalName() {
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(
-            () ->
-                new MetricMetadata(
-                    "my_namespace/http_server_duration")); // let's see when we decide to allow
-    // slashes :)
-  }
-
-  @Test
   public void testSanitizationIllegalCharacters() {
     MetricMetadata metadata =
         new MetricMetadata(
             sanitizeMetricName("my_namespace/http.server.duration", Unit.SECONDS),
             "help string",
             Unit.SECONDS);
-    assertThat(metadata.getName()).isEqualTo("my_namespace_http.server.duration_seconds");
+    assertThat(metadata.getName()).isEqualTo("my_namespace/http.server.duration_seconds");
     assertThat(metadata.getPrometheusName()).isEqualTo("my_namespace_http_server_duration_seconds");
     assertThat(metadata.getHelp()).isEqualTo("help string");
-    assertThat(metadata.getUnit().toString()).isEqualTo("seconds");
+    assertThat(metadata.getUnit()).hasToString("seconds");
   }
 
   @Test

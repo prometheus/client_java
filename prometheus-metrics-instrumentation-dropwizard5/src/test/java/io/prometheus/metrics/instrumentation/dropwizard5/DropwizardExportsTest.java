@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.data.Offset.offset;
 
 import io.dropwizard.metrics5.*;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -349,8 +350,8 @@ my_application_namedCounter2_total 10.0
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
-      writer.write(out, _registry.scrape());
-      return out.toString(StandardCharsets.UTF_8.name());
+      writer.write(out, _registry.scrape(), EscapingScheme.UNDERSCORE_ESCAPING);
+      return out.toString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

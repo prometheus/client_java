@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,13 +18,28 @@ public class CounterSnapshot extends MetricSnapshot {
    * @param dataPoints the constructor will create a sorted copy of the collection.
    */
   public CounterSnapshot(MetricMetadata metadata, Collection<CounterDataPointSnapshot> dataPoints) {
-    super(metadata, dataPoints);
+    this(metadata, dataPoints, false);
+  }
+
+  private CounterSnapshot(
+      MetricMetadata metadata, Collection<CounterDataPointSnapshot> dataPoints, boolean internal) {
+    super(metadata, dataPoints, internal);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public List<CounterDataPointSnapshot> getDataPoints() {
     return (List<CounterDataPointSnapshot>) dataPoints;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  MetricSnapshot escape(
+      EscapingScheme escapingScheme, List<? extends DataPointSnapshot> dataPointSnapshots) {
+    return new CounterSnapshot(
+        getMetadata().escape(escapingScheme),
+        (List<CounterDataPointSnapshot>) dataPointSnapshots,
+        true);
   }
 
   public static class CounterDataPointSnapshot extends DataPointSnapshot {
@@ -59,10 +75,23 @@ public class CounterSnapshot extends MetricSnapshot {
         @Nullable Exemplar exemplar,
         long createdTimestampMillis,
         long scrapeTimestampMillis) {
-      super(labels, createdTimestampMillis, scrapeTimestampMillis);
+      this(value, labels, exemplar, createdTimestampMillis, scrapeTimestampMillis, false);
+    }
+
+    @SuppressWarnings("this-escape")
+    public CounterDataPointSnapshot(
+        double value,
+        Labels labels,
+        @Nullable Exemplar exemplar,
+        long createdTimestampMillis,
+        long scrapeTimestampMillis,
+        boolean internal) {
+      super(labels, createdTimestampMillis, scrapeTimestampMillis, internal);
       this.value = value;
       this.exemplar = exemplar;
-      validate();
+      if (!internal) {
+        validate();
+      }
     }
 
     public double getValue() {
@@ -78,6 +107,17 @@ public class CounterSnapshot extends MetricSnapshot {
       if (value < 0.0) {
         throw new IllegalArgumentException(value + ": counters cannot have a negative value");
       }
+    }
+
+    @Override
+    DataPointSnapshot escape(EscapingScheme escapingScheme) {
+      return new CounterSnapshot.CounterDataPointSnapshot(
+          value,
+          SnapshotEscaper.escapeLabels(getLabels(), escapingScheme),
+          SnapshotEscaper.escapeExemplar(exemplar, escapingScheme),
+          getCreatedTimestampMillis(),
+          getScrapeTimestampMillis(),
+          true);
     }
 
     public static Builder builder() {
@@ -98,7 +138,7 @@ public class CounterSnapshot extends MetricSnapshot {
         return this;
       }
 
-      public Builder exemplar(Exemplar exemplar) {
+      public Builder exemplar(@Nullable Exemplar exemplar) {
         this.exemplar = exemplar;
         return this;
       }

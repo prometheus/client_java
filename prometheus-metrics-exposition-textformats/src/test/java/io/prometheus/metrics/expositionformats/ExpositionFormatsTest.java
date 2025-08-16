@@ -1,7 +1,9 @@
 package io.prometheus.metrics.expositionformats;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
@@ -25,7 +27,10 @@ import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot.UnknownDataPointSnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class ExpositionFormatsTest {
 
@@ -261,11 +266,11 @@ class ExpositionFormatsTest {
   @Test
   public void testCounterWithDots() throws IOException {
     String openMetricsText =
-        "# TYPE my_request_count counter\n"
-            + "my_request_count_total{http_path=\"/hello\"} 3.0 # "
-            + exemplarWithDotsString
-            + "\n"
-            + "# EOF\n";
+        """
+        # TYPE U__my_2e_request_2e_count counter
+        U__my_2e_request_2e_count_total{U__http_2e_path="/hello"} 3.0 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
+        # EOF
+        """;
     String prometheusText =
         """
         # TYPE my_request_count_total counter
@@ -412,10 +417,10 @@ class ExpositionFormatsTest {
   public void testGaugeWithDots() throws IOException {
     String openMetricsText =
         """
-        # TYPE my_temperature_celsius gauge
-        # UNIT my_temperature_celsius celsius
-        # HELP my_temperature_celsius Temperature
-        my_temperature_celsius{location_id="data-center-1"} 23.0
+        # TYPE U__my_2e_temperature_2e_celsius gauge
+        # UNIT U__my_2e_temperature_2e_celsius celsius
+        # HELP U__my_2e_temperature_2e_celsius Temperature
+        U__my_2e_temperature_2e_celsius{U__location_2e_id="data-center-1"} 23.0
         # EOF
         """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
@@ -462,6 +467,40 @@ class ExpositionFormatsTest {
         openMetricsTextWithExemplarsOnAllTimeSeries, gauge);
     assertPrometheusText(prometheusText, gauge);
     assertPrometheusProtobuf(prometheusProtobuf, gauge);
+  }
+
+  @Test
+  public void testGaugeUTF8() throws IOException {
+    String prometheusText =
+        """
+        # HELP "gauge.name" gauge\\ndoc\\nstr"ing
+        # TYPE "gauge.name" gauge
+        {"gauge.name","name.1"="Björn","name*2"="佖佥"} 3.14E42
+        {"gauge.name","name.1"="val with\\nnew line","name*2"="val with \\\\backslash and \\"quotes\\""} +Inf
+        """;
+    GaugeSnapshot gauge =
+        GaugeSnapshot.builder()
+            .name("gauge.name")
+            .help("gauge\ndoc\nstr\"ing")
+            .dataPoint(
+                GaugeDataPointSnapshot.builder()
+                    .value(Double.POSITIVE_INFINITY)
+                    .labels(
+                        Labels.builder()
+                            .label("name.1", "val with\nnew line")
+                            .label("name*2", "val with \\backslash and \"quotes\"")
+                            .build())
+                    .build())
+            .dataPoint(
+                GaugeDataPointSnapshot.builder()
+                    .value(3.14e42)
+                    .labels(Labels.builder().label("name.1", "Björn").label("name*2", "佖佥").build())
+                    .build())
+            .build();
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    getPrometheusWriter(PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true))
+        .write(out, MetricSnapshots.of((MetricSnapshot) gauge), EscapingScheme.ALLOW_UTF8);
+    assertThat(out).hasToString(prometheusText);
   }
 
   @Test
@@ -977,11 +1016,11 @@ class ExpositionFormatsTest {
   public void testSummaryWithDots() throws IOException {
     String openMetricsText =
         """
-        # TYPE my_request_duration_seconds summary
-        # UNIT my_request_duration_seconds seconds
-        # HELP my_request_duration_seconds Request duration in seconds
-        my_request_duration_seconds_count{http_path="/hello"} 1
-        my_request_duration_seconds_sum{http_path="/hello"} 0.03
+        # TYPE U__my_2e_request_2e_duration_2e_seconds summary
+        # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
+        # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
+        U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 1
+        U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 0.03
         # EOF
         """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
@@ -1839,15 +1878,15 @@ class ExpositionFormatsTest {
   @Test
   public void testClassicHistogramWithDots() throws IOException {
     String openMetricsText =
-        "# TYPE my_request_duration_seconds histogram\n"
-            + "# UNIT my_request_duration_seconds seconds\n"
-            + "# HELP my_request_duration_seconds Request duration in seconds\n"
-            + "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 130 # "
-            + exemplarWithDotsString
-            + "\n"
-            + "my_request_duration_seconds_count{http_path=\"/hello\"} 130\n"
-            + "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.01\n"
-            + "# EOF\n";
+        """
+      # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
+      # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
+      # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
+      U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 130 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
+      U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 130
+      U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 0.01
+      # EOF
+      """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_request_duration_seconds histogram\n"
             + "# UNIT my_request_duration_seconds seconds\n"
@@ -2260,15 +2299,15 @@ class ExpositionFormatsTest {
   @Test
   public void testNativeHistogramWithDots() throws IOException {
     String openMetricsText =
-        "# TYPE my_request_duration_seconds histogram\n"
-            + "# UNIT my_request_duration_seconds seconds\n"
-            + "# HELP my_request_duration_seconds Request duration in seconds\n"
-            + "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 4 # "
-            + exemplarWithDotsString
-            + "\n"
-            + "my_request_duration_seconds_count{http_path=\"/hello\"} 4\n"
-            + "my_request_duration_seconds_sum{http_path=\"/hello\"} 3.2\n"
-            + "# EOF\n";
+        """
+      # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
+      # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
+      # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
+      U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 4 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
+      U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 4
+      U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 3.2
+      # EOF
+      """;
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_request_duration_seconds histogram\n"
             + "# UNIT my_request_duration_seconds seconds\n"
@@ -2370,9 +2409,9 @@ class ExpositionFormatsTest {
   public void testInfoWithDots() throws IOException {
     String openMetricsText =
         """
-        # TYPE jvm_status info
-        # HELP jvm_status JVM status info
-        jvm_status_info{jvm_version="1.2.3"} 1
+        # TYPE U__jvm_2e_status info
+        # HELP U__jvm_2e_status JVM status info
+        U__jvm_2e_status_info{U__jvm_2e_version="1.2.3"} 1
         # EOF
         """;
     String prometheusText =
@@ -2497,10 +2536,10 @@ class ExpositionFormatsTest {
   public void testStateSetWithDots() throws IOException {
     String openMetricsText =
         """
-        # TYPE my_application_state stateset
-        # HELP my_application_state My application state
-        my_application_state{data_center="us east",my_application_state="feature.enabled"} 1
-        my_application_state{data_center="us east",my_application_state="is.alpha.version"} 0
+        # TYPE U__my_2e_application_2e_state stateset
+        # HELP U__my_2e_application_2e_state My application state
+        U__my_2e_application_2e_state{U__data_2e_center="us east",U__my_2e_application_2e_state="feature.enabled"} 1
+        U__my_2e_application_2e_state{U__data_2e_center="us east",U__my_2e_application_2e_state="is.alpha.version"} 0
         # EOF
         """;
     String prometheusText =
@@ -2634,10 +2673,10 @@ class ExpositionFormatsTest {
   public void testUnknownWithDots() throws IOException {
     String openMetrics =
         """
-        # TYPE some_unknown_metric_bytes unknown
-        # UNIT some_unknown_metric_bytes bytes
-        # HELP some_unknown_metric_bytes help message
-        some_unknown_metric_bytes{test_env="7"} 0.7
+        # TYPE U__some_2e_unknown_2e_metric__bytes unknown
+        # UNIT U__some_2e_unknown_2e_metric__bytes bytes
+        # HELP U__some_2e_unknown_2e_metric__bytes help message
+        U__some_2e_unknown_2e_metric__bytes{U__test_2e_env="7"} 0.7
         # EOF
         """;
     String openMetricsWithExemplarsOnAllTimeSeries =
@@ -2737,11 +2776,54 @@ class ExpositionFormatsTest {
     assertPrometheusText(prometheus, counter);
   }
 
+  @ParameterizedTest
+  @CsvSource({
+    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited', 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=underscores'",
+    "'text/plain;version=0.0.4', 'text/plain; version=0.0.4; charset=utf-8; escaping=underscores'",
+    "'application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited; escaping=allow-utf-8', 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited; escaping=allow-utf-8'",
+    "'application/openmetrics-text', 'application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores'",
+    "'application/openmetrics-text;version=0.0.1; escaping=underscores', 'application/openmetrics-text; version=1.0.0; charset=utf-8; escaping=underscores'",
+    "'text/plain;version=0.0.4; escaping=allow-utf-8', 'text/plain; version=0.0.4; charset=utf-8; escaping=allow-utf-8'"
+  })
+  public void testFindWriter(String acceptHeaderValue, String expectedFmt) {
+    ExpositionFormats expositionFormats = ExpositionFormats.init();
+    EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+    ExpositionFormatWriter writer = expositionFormats.findWriter(acceptHeaderValue);
+    assertThat(writer.getContentType() + escapingScheme.toHeaderFormat()).hasToString(expectedFmt);
+  }
+
+  @Test
+  public void testWrite() throws IOException {
+    ByteArrayOutputStream buff = new ByteArrayOutputStream(new AtomicInteger(2 << 9).get() + 1024);
+    ExpositionFormats expositionFormats = ExpositionFormats.init();
+    UnknownSnapshot unknown =
+        UnknownSnapshot.builder()
+            .name("foo_metric")
+            .dataPoint(UnknownDataPointSnapshot.builder().value(1.234).build())
+            .build();
+
+    String acceptHeaderValue = "text/plain; version=0.0.4; charset=utf-8";
+    EscapingScheme escapingScheme = EscapingScheme.fromAcceptHeader(acceptHeaderValue);
+    ExpositionFormatWriter textWriter = expositionFormats.findWriter(acceptHeaderValue);
+
+    textWriter.write(buff, MetricSnapshots.of(unknown), escapingScheme);
+    byte[] out = buff.toByteArray();
+    assertThat(out.length).isNotEqualTo(0);
+
+    String expected =
+        """
+      # TYPE foo_metric untyped
+      foo_metric 1.234
+      """;
+
+    assertThat(new String(out, UTF_8)).hasToString(expected);
+  }
+
   private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer =
         OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2753,7 +2835,7 @@ class ExpositionFormatsTest {
             .setCreatedTimestampsEnabled(true)
             .setExemplarsOnAllMetricTypesEnabled(true)
             .build();
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2761,15 +2843,14 @@ class ExpositionFormatsTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = OpenMetricsTextFormatWriter.create();
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
   private void assertPrometheusText(String expected, MetricSnapshot snapshot) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-
     getPrometheusWriter(PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true))
-        .write(out, MetricSnapshots.of(snapshot));
+        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 
@@ -2783,7 +2864,7 @@ class ExpositionFormatsTest {
       throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     getPrometheusWriter(PrometheusTextFormatWriter.builder())
-        .write(out, MetricSnapshots.of(snapshot));
+        .write(out, MetricSnapshots.of(snapshot), EscapingScheme.UNDERSCORE_ESCAPING);
     assertThat(out).hasToString(expected);
   }
 

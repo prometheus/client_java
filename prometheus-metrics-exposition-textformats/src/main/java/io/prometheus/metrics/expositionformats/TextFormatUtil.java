@@ -1,6 +1,9 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import java.io.IOException;
 import java.io.Writer;
 import javax.annotation.Nullable;
@@ -48,7 +51,7 @@ public class TextFormatUtil {
     writer.write(Long.toString(ms));
   }
 
-  static void writeEscapedLabelValue(Writer writer, String s) throws IOException {
+  static void writeEscapedString(Writer writer, String s) throws IOException {
     // optimize for the common case where no escaping is needed
     int start = 0;
     // #indexOf is a vectorized intrinsic
@@ -103,16 +106,20 @@ public class TextFormatUtil {
       Writer writer,
       Labels labels,
       @Nullable String additionalLabelName,
-      double additionalLabelValue)
+      double additionalLabelValue,
+      boolean metricInsideBraces,
+      EscapingScheme scheme)
       throws IOException {
-    writer.write('{');
+    if (!metricInsideBraces) {
+      writer.write('{');
+    }
     for (int i = 0; i < labels.size(); i++) {
-      if (i > 0) {
+      if (i > 0 || metricInsideBraces) {
         writer.write(",");
       }
-      writer.write(labels.getPrometheusName(i));
+      writeName(writer, SnapshotEscaper.getSnapshotLabelName(labels, i, scheme), NameType.Label);
       writer.write("=\"");
-      writeEscapedLabelValue(writer, labels.getValue(i));
+      writeEscapedString(writer, labels.getValue(i));
       writer.write("\"");
     }
     if (additionalLabelName != null) {
@@ -125,5 +132,27 @@ public class TextFormatUtil {
       writer.write("\"");
     }
     writer.write('}');
+  }
+
+  static void writeName(Writer writer, String name, NameType nameType) throws IOException {
+    switch (nameType) {
+      case Metric:
+        if (PrometheusNaming.isValidLegacyMetricName(name)) {
+          writer.write(name);
+          return;
+        }
+        break;
+      case Label:
+        if (PrometheusNaming.isValidLegacyLabelName(name)) {
+          writer.write(name);
+          return;
+        }
+        break;
+      default:
+        throw new RuntimeException("Invalid name type requested: " + nameType);
+    }
+    writer.write('"');
+    writeEscapedString(writer, name);
+    writer.write('"');
   }
 }

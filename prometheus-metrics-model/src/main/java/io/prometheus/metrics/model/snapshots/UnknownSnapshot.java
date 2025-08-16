@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,13 +18,28 @@ public final class UnknownSnapshot extends MetricSnapshot {
    * @param data the constructor will create a sorted copy of the collection.
    */
   public UnknownSnapshot(MetricMetadata metadata, Collection<UnknownDataPointSnapshot> data) {
-    super(metadata, data);
+    this(metadata, data, false);
+  }
+
+  private UnknownSnapshot(
+      MetricMetadata metadata, Collection<UnknownDataPointSnapshot> data, boolean internal) {
+    super(metadata, data, internal);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public List<UnknownDataPointSnapshot> getDataPoints() {
     return (List<UnknownDataPointSnapshot>) dataPoints;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  MetricSnapshot escape(
+      EscapingScheme escapingScheme, List<? extends DataPointSnapshot> dataPointSnapshots) {
+    return new UnknownSnapshot(
+        getMetadata().escape(escapingScheme),
+        (List<UnknownDataPointSnapshot>) dataPointSnapshots,
+        true);
   }
 
   public static final class UnknownDataPointSnapshot extends DataPointSnapshot {
@@ -50,7 +66,16 @@ public final class UnknownSnapshot extends MetricSnapshot {
      */
     public UnknownDataPointSnapshot(
         double value, Labels labels, @Nullable Exemplar exemplar, long scrapeTimestampMillis) {
-      super(labels, 0L, scrapeTimestampMillis);
+      this(value, labels, exemplar, scrapeTimestampMillis, false);
+    }
+
+    private UnknownDataPointSnapshot(
+        double value,
+        Labels labels,
+        @Nullable Exemplar exemplar,
+        long scrapeTimestampMillis,
+        boolean internal) {
+      super(labels, 0L, scrapeTimestampMillis, internal);
       this.value = value;
       this.exemplar = exemplar;
     }
@@ -66,6 +91,16 @@ public final class UnknownSnapshot extends MetricSnapshot {
 
     public static Builder builder() {
       return new Builder();
+    }
+
+    @Override
+    DataPointSnapshot escape(EscapingScheme escapingScheme) {
+      return new UnknownDataPointSnapshot(
+          value,
+          SnapshotEscaper.escapeLabels(getLabels(), escapingScheme),
+          SnapshotEscaper.escapeExemplar(exemplar, escapingScheme),
+          getScrapeTimestampMillis(),
+          true);
     }
 
     public static class Builder extends DataPointSnapshot.Builder<Builder> {

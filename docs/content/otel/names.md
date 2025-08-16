@@ -17,7 +17,7 @@ the Prometheus server as if you had exposed Prometheus metrics directly.
 
 The main steps when converting OpenTelemetry metric names to Prometheus metric names are:
 
-- Replace dots with underscores.
+- Escape illegal characters as described in [Unicode support]
 - If the metric has a unit, append the unit to the metric name, like `_seconds`.
 - If the metric type has a suffix, append it, like `_total` for counters.
 
@@ -29,14 +29,8 @@ OpenTelemetry's [Semantic Conventions for HTTP Metrics](https://opentelemetry.io
 say that if you instrument an HTTP server with OpenTelemetry, you must have a histogram named
 `http.server.duration`.
 
-Most names defined in semantic conventions use dots. In the Prometheus server, the dot is an illegal
-character (this might change in future versions of the Prometheus server).
+Most names defined in semantic conventions use dots.
+Dots in metric and label names are now supported in the Prometheus Java client library as
+described in [Unicode support].
 
-The Prometheus Java client library allows dots, so that you can use metric names and label names as
-defined in OpenTelemetry's semantic conventions.
-The dots will automatically be replaced with underscores if you expose metrics in Prometheus format,
-but you will see the original names with dots if you push your metrics in OpenTelemetry format.
-
-That way, you can use OTel-compliant metric and label names today when instrumenting your
-application with the Prometheus Java client, and you are prepared in case your monitoring backend
-adds features in the future that require OTel-compliant instrumentation.
+[Unicode support]: {{< relref "../exporters/unicode.md" >}}

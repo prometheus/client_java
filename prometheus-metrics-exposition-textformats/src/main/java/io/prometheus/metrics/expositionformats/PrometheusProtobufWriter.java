@@ -1,5 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -54,13 +55,15 @@ public class PrometheusProtobufWriter implements ExpositionFormatWriter {
   }
 
   @Override
-  public String toDebugString(MetricSnapshots metricSnapshots) {
-    return getDelegate().toDebugString(metricSnapshots);
+  public String toDebugString(MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) {
+    return getDelegate().toDebugString(metricSnapshots, escapingScheme);
   }
 
   @Override
-  public void write(OutputStream out, MetricSnapshots metricSnapshots) throws IOException {
-    getDelegate().write(out, metricSnapshots);
+  public void write(
+      OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)
+      throws IOException {
+    getDelegate().write(out, metricSnapshots, escapingScheme);
   }
 
   private ExpositionFormatWriter getDelegate() {

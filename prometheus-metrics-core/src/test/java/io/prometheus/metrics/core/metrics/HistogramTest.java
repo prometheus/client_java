@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
@@ -13,12 +14,7 @@ import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_32_0.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
-import io.prometheus.metrics.model.snapshots.ClassicHistogramBucket;
-import io.prometheus.metrics.model.snapshots.Exemplar;
-import io.prometheus.metrics.model.snapshots.Exemplars;
-import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
-import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.*;
 import io.prometheus.metrics.tracer.common.SpanContext;
 import io.prometheus.metrics.tracer.initializer.SpanContextSupplier;
 import java.io.ByteArrayOutputStream;
@@ -91,7 +87,8 @@ class HistogramTest {
         }
       }
       Metrics.MetricFamily protobufData =
-          new PrometheusProtobufWriterImpl().convert(histogram.collect());
+          new PrometheusProtobufWriterImpl()
+              .convert(histogram.collect(), EscapingScheme.ALLOW_UTF8);
       String expectedWithMetadata =
           "name: \"test\" type: HISTOGRAM metric { histogram { " + expected + " } }";
       assertThat(ProtobufUtil.shortDebugString(protobufData))
@@ -946,13 +943,14 @@ class HistogramTest {
         """;
 
     // protobuf
-    Metrics.MetricFamily protobufData = new PrometheusProtobufWriterImpl().convert(snapshot);
+    Metrics.MetricFamily protobufData =
+        new PrometheusProtobufWriterImpl().convert(snapshot, EscapingScheme.ALLOW_UTF8);
     assertThat(ProtobufUtil.shortDebugString(protobufData)).isEqualTo(expectedProtobuf);
 
     // text
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
-    writer.write(out, MetricSnapshots.of(snapshot));
+    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.ALLOW_UTF8);
     assertThat(out).hasToString(expectedTextFormat);
   }
 
@@ -1257,12 +1255,6 @@ class HistogramTest {
   public void testIllegalLabelNamePrefix() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> Histogram.builder().name("test").labelNames("__hello"));
-  }
-
-  @Test
-  public void testIllegalName() {
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> Histogram.builder().name("my_namespace/server.durations"));
   }
 
   @Test

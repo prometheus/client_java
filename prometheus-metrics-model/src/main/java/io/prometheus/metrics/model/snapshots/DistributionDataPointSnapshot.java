@@ -16,12 +16,15 @@ public abstract class DistributionDataPointSnapshot extends DataPointSnapshot {
       Exemplars exemplars,
       Labels labels,
       long createdTimestampMillis,
-      long scrapeTimestampMillis) {
-    super(labels, createdTimestampMillis, scrapeTimestampMillis);
+      long scrapeTimestampMillis,
+      boolean internal) {
+    super(labels, createdTimestampMillis, scrapeTimestampMillis, internal);
     this.count = count;
     this.sum = sum;
     this.exemplars = exemplars == null ? Exemplars.EMPTY : exemplars;
-    validate();
+    if (!internal) {
+      validate();
+    }
   }
 
   private void validate() {

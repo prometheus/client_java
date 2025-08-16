@@ -1,6 +1,6 @@
 ---
 title: Spring
-weight: 5
+weight: 7
 ---
 
 ## Alternative: Use Spring's Built-in Metrics Library

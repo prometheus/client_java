@@ -1,8 +1,10 @@
 package io.prometheus.metrics.exporter.pushgateway;
 
 import static io.prometheus.metrics.exporter.pushgateway.Scheme.HTTP;
+import static io.prometheus.metrics.model.snapshots.PrometheusNaming.escapeName;
 import static java.util.Objects.requireNonNull;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.ExporterPushgatewayProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.config.PrometheusPropertiesException;
@@ -86,6 +88,7 @@ public class PushGateway {
   private final Map<String, String> requestHeaders;
   private final PrometheusRegistry registry;
   private final HttpConnectionFactory connectionFactory;
+  private final EscapingScheme escapingScheme;
 
   private PushGateway(
       PrometheusRegistry registry,
@@ -93,12 +96,14 @@ public class PushGateway {
       URL url,
       HttpConnectionFactory connectionFactory,
       Map<String, String> requestHeaders,
-      boolean prometheusTimestampsInMs) {
+      boolean prometheusTimestampsInMs,
+      EscapingScheme escapingScheme) {
     this.registry = registry;
     this.url = url;
     this.requestHeaders = Collections.unmodifiableMap(new HashMap<>(requestHeaders));
     this.connectionFactory = connectionFactory;
     this.prometheusTimestampsInMs = prometheusTimestampsInMs;
+    this.escapingScheme = escapingScheme;
     writer = getWriter(format);
     if (!writer.isAvailable()) {
       throw new RuntimeException(writer.getClass() + " is not available");
@@ -208,7 +213,7 @@ public class PushGateway {
       try {
         if (!method.equals("DELETE")) {
           OutputStream outputStream = connection.getOutputStream();
-          writer.write(outputStream, requireNonNull(registry).scrape());
+          writer.write(outputStream, requireNonNull(registry).scrape(), this.escapingScheme);
           outputStream.flush();
           outputStream.close();
         }
@@ -434,6 +439,13 @@ public class PushGateway {
       }
     }
 
+    private EscapingScheme getEscapingScheme(@Nullable ExporterPushgatewayProperties properties) {
+      if (properties != null && properties.getEscapingScheme() != null) {
+        return properties.getEscapingScheme();
+      }
+      return EscapingScheme.UNDERSCORE_ESCAPING;
+    }
+
     private Format getFormat() {
       // currently not configurable via properties
       if (this.format != null) {
@@ -444,23 +456,32 @@ public class PushGateway {
 
     private URL makeUrl(@Nullable ExporterPushgatewayProperties properties)
         throws UnsupportedEncodingException, MalformedURLException {
-      String url = getScheme(properties) + "://" + getAddress(properties) + "/metrics/";
+      StringBuilder url =
+          new StringBuilder(getScheme(properties) + "://" + getAddress(properties) + "/metrics/");
       String job = getJob(properties);
       if (job.contains("/")) {
-        url += "job@base64/" + base64url(job);
+        url.append("job@base64/").append(base64url(job));
       } else {
-        url += "job/" + URLEncoder.encode(job, "UTF-8");
+        url.append("job/").append(URLEncoder.encode(job, "UTF-8"));
       }
       for (Map.Entry<String, String> entry : groupingKey.entrySet()) {
         if (entry.getValue().isEmpty()) {
-          url += "/" + entry.getKey() + "@base64/=";
+          url.append("/")
+              .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
+              .append("@base64/=");
         } else if (entry.getValue().contains("/")) {
-          url += "/" + entry.getKey() + "@base64/" + base64url(entry.getValue());
+          url.append("/")
+              .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
+              .append("@base64/")
+              .append(base64url(entry.getValue()));
         } else {
-          url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
+          url.append("/")
+              .append(escapeName(entry.getKey(), EscapingScheme.VALUE_ENCODING_ESCAPING))
+              .append("/")
+              .append(URLEncoder.encode(entry.getValue(), "UTF-8"));
         }
       }
-      return URI.create(url).normalize().toURL();
+      return URI.create(url.toString()).normalize().toURL();
     }
 
     private String base64url(String v) {
@@ -480,7 +501,8 @@ public class PushGateway {
             makeUrl(properties),
             connectionFactory,
             requestHeaders,
-            getPrometheusTimestampsInMs());
+            getPrometheusTimestampsInMs(),
+            getEscapingScheme(properties));
       } catch (MalformedURLException e) {
         throw new PrometheusPropertiesException(
             address + ": Invalid address. Expecting <host>:<port>");

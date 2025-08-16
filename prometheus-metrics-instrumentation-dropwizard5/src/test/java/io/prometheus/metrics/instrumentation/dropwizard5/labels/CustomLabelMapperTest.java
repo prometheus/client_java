@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.dropwizard.metrics5.MetricFilter;
 import io.dropwizard.metrics5.MetricRegistry;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExports;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -218,8 +219,8 @@ app_okhttpclient_client_HttpClient_greatService_total{client="sampleClient",serv
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
     try {
-      writer.write(out, snapshots);
-      return out.toString(StandardCharsets.UTF_8.name());
+      writer.write(out, snapshots, EscapingScheme.UNDERSCORE_ESCAPING);
+      return out.toString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

@@ -2,6 +2,7 @@ package io.prometheus.metrics.model.snapshots;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
@@ -109,5 +110,14 @@ class SummarySnapshotTest {
     assertThat(data.hasCreatedTimestamp()).isFalse();
     assertThat(data.hasScrapeTimestamp()).isFalse();
     assertThat(data.getExemplars().size()).isZero();
+  }
+
+  @Test
+  void escape() {
+    SummarySnapshot.SummaryDataPointSnapshot data =
+        SummarySnapshot.SummaryDataPointSnapshot.builder().sum(12.0).build();
+    assertThat(data.escape(EscapingScheme.UNDERSCORE_ESCAPING))
+        .usingRecursiveComparison()
+        .isEqualTo(data);
   }
 }

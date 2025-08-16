@@ -11,7 +11,7 @@ class MetricSnapshotsTest {
   @Test
   public void testEmpty() {
     MetricSnapshots snapshots = MetricSnapshots.builder().build();
-    assertThat(snapshots.stream().findAny().isPresent()).isFalse();
+    assertThat(snapshots.stream().findAny()).isNotPresent();
   }
 
   @Test
