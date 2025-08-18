@@ -8,11 +8,11 @@
   <parent>
     <groupId>io.prometheus</groupId>
     <artifactId>client_java_parent</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <relativePath>prometheus-metrics-parent/pom.xml</relativePath>
   </parent>
 
-  <version>1.4.0-SNAPSHOT</version>
+  <version>1.5.0-SNAPSHOT</version>
   <artifactId>client_java</artifactId>
 
   <name>Prometheus Metrics Library</name>

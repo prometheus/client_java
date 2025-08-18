@@ -94,7 +94,7 @@ run = [
 [tasks.build-release]
 description = "Build release"
 run = "./scripts/build-release.sh"
-env.TAG = "1.4.0-SNAPSHOT"
+env.TAG = "1.5.0-SNAPSHOT"
 
 [settings]
 # to get lock file support and for go backend
