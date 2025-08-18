@@ -282,6 +282,7 @@ public class PushGateway {
     private PrometheusRegistry registry = PrometheusRegistry.defaultRegistry;
     private HttpConnectionFactory connectionFactory = new DefaultHttpConnectionFactory();
     private final Map<String, String> groupingKey = new TreeMap<>();
+    @Nullable private EscapingScheme escapingScheme;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -289,10 +290,7 @@ public class PushGateway {
 
     /** Default is {@link Format#PROMETHEUS_PROTOBUF}. */
     public Builder format(Format format) {
-      if (format == null) {
-        throw new NullPointerException();
-      }
-      this.format = format;
+      this.format = requireNonNull(format, "format must not be null");
       return this;
     }
 
@@ -302,19 +300,17 @@ public class PushGateway {
      * property.
      */
     public Builder address(String address) {
-      if (address == null) {
-        throw new NullPointerException();
-      }
-      this.address = address;
+      this.address = requireNonNull(address, "address must not be null");
       return this;
     }
 
     /** Username and password for HTTP basic auth when pushing to the Pushgateway. */
     public Builder basicAuth(String user, String password) {
-      if (user == null || password == null) {
-        throw new NullPointerException();
-      }
-      byte[] credentialsBytes = (user + ":" + password).getBytes(StandardCharsets.UTF_8);
+      byte[] credentialsBytes =
+          (requireNonNull(user, "user must not be null")
+                  + ":"
+                  + requireNonNull(password, "password must not be null"))
+              .getBytes(StandardCharsets.UTF_8);
       String encoded = Base64.getEncoder().encodeToString(credentialsBytes);
       requestHeaders.put("Authorization", String.format("Basic %s", encoded));
       return this;
@@ -322,10 +318,9 @@ public class PushGateway {
 
     /** Bearer token authorization when pushing to the Pushgateway. */
     public Builder bearerToken(String token) {
-      if (token == null) {
-        throw new NullPointerException();
-      }
-      requestHeaders.put("Authorization", String.format("Bearer %s", token));
+      requestHeaders.put(
+          "Authorization",
+          String.format("Bearer %s", requireNonNull(token, "token must not be null")));
       return this;
     }
 
@@ -334,10 +329,7 @@ public class PushGateway {
      * at runtime with the {@code io.prometheus.exporter.pushgateway.scheme} property.
      */
     public Builder scheme(Scheme scheme) {
-      if (scheme == null) {
-        throw new NullPointerException();
-      }
-      this.scheme = scheme;
+      this.scheme = requireNonNull(scheme, "scheme must not be null");
       return this;
     }
 
@@ -348,10 +340,8 @@ public class PushGateway {
      * of a custom connection factory that skips SSL certificate validation for HTTPS connections.
      */
     public Builder connectionFactory(HttpConnectionFactory connectionFactory) {
-      if (connectionFactory == null) {
-        throw new NullPointerException();
-      }
-      this.connectionFactory = connectionFactory;
+      this.connectionFactory =
+          requireNonNull(connectionFactory, "connectionFactory must not be null");
       return this;
     }
 
@@ -361,10 +351,7 @@ public class PushGateway {
      * io.prometheus.exporter.pushgateway.job} property.
      */
     public Builder job(String job) {
-      if (job == null) {
-        throw new NullPointerException();
-      }
-      this.job = job;
+      this.job = requireNonNull(job, "job must not be null");
       return this;
     }
 
@@ -373,10 +360,9 @@ public class PushGateway {
      * adding multiple grouping keys.
      */
     public Builder groupingKey(String name, String value) {
-      if (name == null || value == null) {
-        throw new NullPointerException();
-      }
-      groupingKey.put(name, value);
+      groupingKey.put(
+          requireNonNull(name, "name must not be null"),
+          requireNonNull(value, "value must not be null"));
       return this;
     }
 
@@ -387,10 +373,16 @@ public class PushGateway {
 
     /** Push metrics from this registry instead of {@link PrometheusRegistry#defaultRegistry}. */
     public Builder registry(PrometheusRegistry registry) {
-      if (registry == null) {
-        throw new NullPointerException();
-      }
-      this.registry = registry;
+      this.registry = requireNonNull(registry, "registry must not be null");
+      return this;
+    }
+
+    /**
+     * Specify the escaping scheme to be used when pushing metrics. Default is {@link
+     * EscapingScheme#UNDERSCORE_ESCAPING}.
+     */
+    public Builder escapingScheme(EscapingScheme escapingScheme) {
+      this.escapingScheme = requireNonNull(escapingScheme, "escapingScheme must not be null");
       return this;
     }
 
@@ -442,6 +434,8 @@ public class PushGateway {
     private EscapingScheme getEscapingScheme(@Nullable ExporterPushgatewayProperties properties) {
       if (properties != null && properties.getEscapingScheme() != null) {
         return properties.getEscapingScheme();
+      } else if (this.escapingScheme != null) {
+        return this.escapingScheme;
       }
       return EscapingScheme.UNDERSCORE_ESCAPING;
     }

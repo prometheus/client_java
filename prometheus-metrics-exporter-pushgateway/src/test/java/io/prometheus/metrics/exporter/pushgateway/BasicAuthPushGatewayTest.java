@@ -3,6 +3,7 @@ package io.prometheus.metrics.exporter.pushgateway;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.core.metrics.Gauge;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.IOException;
@@ -30,6 +31,7 @@ class BasicAuthPushGatewayTest {
             .basicAuth("testUser", "testPwd")
             .registry(registry)
             .prometheusTimestampsInMs(true)
+            .escapingScheme(EscapingScheme.ALLOW_UTF8)
             .job("j")
             .build();
   }

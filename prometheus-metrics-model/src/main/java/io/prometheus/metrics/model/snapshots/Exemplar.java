@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
+import static java.util.Objects.requireNonNull;
+
 import javax.annotation.Nullable;
 
 /** Immutable representation of an Exemplar. */
@@ -85,10 +87,7 @@ public class Exemplar {
     }
 
     public Builder labels(Labels labels) {
-      if (labels == null) {
-        throw new NullPointerException();
-      }
-      this.labels = labels;
+      this.labels = requireNonNull(labels, "Labels must not be null.");
       return this;
     }
 
