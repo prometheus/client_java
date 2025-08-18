@@ -9,8 +9,8 @@ if [ -z "$VERSION" ]; then
 	exit 1
 fi
 
-# replace all occurrences '<version>1.4.0-SNAPSHOT</version>' with '<version>$VERSION</version>'
+# replace all occurrences '<version>1.5.0-SNAPSHOT</version>' with '<version>$VERSION</version>'
 # in all pom.xml files in the current directory and subdirectories
 
 find . -name 'pom.xml' -exec \
-	sed -i "s/<version>1.4.0-SNAPSHOT<\/version>/<version>$VERSION<\/version>/g" {} +
+	sed -i "s/<version>1.5.0-SNAPSHOT<\/version>/<version>$VERSION<\/version>/g" {} +
