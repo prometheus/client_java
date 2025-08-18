@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import javax.annotation.Nullable;
 
 /** Immutable container for metric metadata: name, help, unit. */
@@ -20,8 +21,11 @@ public final class MetricMetadata {
   private final String name;
 
   /**
-   * Same as name, except if name contains dots, then the prometheusName is {@code name.replace(".",
-   * "_")}.
+   * Same as name that all invalid char (without Unicode support) are replaced by _
+   *
+   * <p>Multiple metrics with the same prometheusName are not allowed, because they would end up in
+   * the same time series in Prometheus if {@link EscapingScheme#UNDERSCORE_ESCAPING} or {@link
+   * EscapingScheme#DOTS_ESCAPING} is used.
    */
   private final String prometheusName;
 
@@ -52,22 +56,22 @@ public final class MetricMetadata {
     this.help = help;
     this.unit = unit;
     validate();
-    this.prometheusName = name.contains(".") ? PrometheusNaming.prometheusName(name) : name;
+    this.prometheusName = PrometheusNaming.prometheusName(name);
   }
 
   /**
    * The name does not include the {@code _total} suffix for counter metrics or the {@code _info}
    * suffix for Info metrics.
    *
-   * <p>The name may contain dots. Use {@link #getPrometheusName()} to get the name in Prometheus
-   * format, i.e. with dots replaced by underscores.
+   * <p>The name may contain any Unicode chars. Use {@link #getPrometheusName()} to get the name in
+   * legacy Prometheus format, i.e. with all dots and all invalid chars replaced by underscores.
    */
   public String getName() {
     return name;
   }
 
   /**
-   * Same as {@link #getName()} but with dots replaced by underscores.
+   * Same as {@link #getName()} but with all invalid characters and dots replaced by underscores.
    *
    * <p>This is used by Prometheus exposition formats.
    */
@@ -118,5 +122,9 @@ public final class MetricMetadata {
                 + ".sanitizeMetricName(name, unit) to avoid this error.");
       }
     }
+  }
+
+  MetricMetadata escape(EscapingScheme escapingScheme) {
+    return new MetricMetadata(PrometheusNaming.escapeName(name, escapingScheme), help, unit);
   }
 }

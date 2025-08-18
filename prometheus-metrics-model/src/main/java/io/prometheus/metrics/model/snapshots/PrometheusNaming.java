@@ -1,5 +1,11 @@
 package io.prometheus.metrics.model.snapshots;
 
+import static java.lang.Character.MAX_CODE_POINT;
+import static java.lang.Character.MAX_LOW_SURROGATE;
+import static java.lang.Character.MIN_HIGH_SURROGATE;
+
+import io.prometheus.metrics.config.EscapingScheme;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
@@ -12,12 +18,11 @@ import javax.annotation.Nullable;
  */
 public class PrometheusNaming {
 
-  /** Legal characters for metric names, including dot. */
-  private static final Pattern METRIC_NAME_PATTERN =
-      Pattern.compile("^[a-zA-Z_.:][a-zA-Z0-9_.:]*$");
+  private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
 
-  /** Legal characters for label names, including dot. */
-  private static final Pattern LABEL_NAME_PATTERN = Pattern.compile("^[a-zA-Z_.][a-zA-Z0-9_.]*$");
+  /** Legal characters for label names. */
+  private static final Pattern LEGACY_LABEL_NAME_PATTERN =
+      Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
 
   /** Legal characters for unit names, including dot. */
   private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
@@ -78,18 +83,30 @@ public class PrometheusNaming {
         return "The metric name must not include the '" + reservedSuffix + "' suffix.";
       }
     }
-    if (!METRIC_NAME_PATTERN.matcher(name).matches()) {
-      return "The metric name contains unsupported characters";
+    if (isValidUtf8(name)) {
+      return null;
     }
-    return null;
+    return "The metric name contains unsupported characters";
+  }
+
+  public static boolean isValidLegacyMetricName(String name) {
+    return METRIC_NAME_PATTERN.matcher(name).matches();
   }
 
   public static boolean isValidLabelName(String name) {
-    return LABEL_NAME_PATTERN.matcher(name).matches()
+    return isValidUtf8(name)
         && !(name.startsWith("__")
             || name.startsWith("._")
             || name.startsWith("..")
             || name.startsWith("_."));
+  }
+
+  private static boolean isValidUtf8(String name) {
+    return !name.isEmpty() && StandardCharsets.UTF_8.newEncoder().canEncode(name);
+  }
+
+  public static boolean isValidLegacyLabelName(String name) {
+    return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches();
   }
 
   /**
@@ -127,7 +144,7 @@ public class PrometheusNaming {
    * @return the name with dots replaced by underscores.
    */
   public static String prometheusName(String name) {
-    return name.replace(".", "_");
+    return escapeName(name, EscapingScheme.UNDERSCORE_ESCAPING);
   }
 
   /**
@@ -138,7 +155,7 @@ public class PrometheusNaming {
     if (metricName.isEmpty()) {
       throw new IllegalArgumentException("Cannot convert an empty string to a valid metric name.");
     }
-    String sanitizedName = replaceIllegalCharsInMetricName(metricName);
+    String sanitizedName = metricName;
     boolean modified = true;
     while (modified) {
       modified = false;
@@ -180,7 +197,7 @@ public class PrometheusNaming {
     if (labelName.isEmpty()) {
       throw new IllegalArgumentException("Cannot convert an empty string to a valid label name.");
     }
-    String sanitizedName = replaceIllegalCharsInLabelName(labelName);
+    String sanitizedName = labelName;
     while (sanitizedName.startsWith("__")
         || sanitizedName.startsWith("_.")
         || sanitizedName.startsWith("._")
@@ -191,8 +208,8 @@ public class PrometheusNaming {
   }
 
   /**
-   * Convert an arbitrary string to a name where {@link #isValidUnitName(String)
-   * isValidUnitName(name)} is true.
+   * Convert an arbitrary string to a name where {@link #validateUnitName(String)} is {@code null}
+   * (i.e. the name is valid).
    *
    * @throws IllegalArgumentException if the {@code unitName} cannot be converted, for example if
    *     you call {@code sanitizeUnitName("total")} or {@code sanitizeUnitName("")}.
@@ -229,42 +246,6 @@ public class PrometheusNaming {
     return sanitizedName;
   }
 
-  /** Returns a string that matches {@link #METRIC_NAME_PATTERN}. */
-  private static String replaceIllegalCharsInMetricName(String name) {
-    int length = name.length();
-    char[] sanitized = new char[length];
-    for (int i = 0; i < length; i++) {
-      char ch = name.charAt(i);
-      if (ch == '.'
-          || (ch >= 'a' && ch <= 'z')
-          || (ch >= 'A' && ch <= 'Z')
-          || (i > 0 && ch >= '0' && ch <= '9')) {
-        sanitized[i] = ch;
-      } else {
-        sanitized[i] = '_';
-      }
-    }
-    return new String(sanitized);
-  }
-
-  /** Returns a string that matches {@link #LABEL_NAME_PATTERN}. */
-  private static String replaceIllegalCharsInLabelName(String name) {
-    int length = name.length();
-    char[] sanitized = new char[length];
-    for (int i = 0; i < length; i++) {
-      char ch = name.charAt(i);
-      if (ch == '.'
-          || (ch >= 'a' && ch <= 'z')
-          || (ch >= 'A' && ch <= 'Z')
-          || (i > 0 && ch >= '0' && ch <= '9')) {
-        sanitized[i] = ch;
-      } else {
-        sanitized[i] = '_';
-      }
-    }
-    return new String(sanitized);
-  }
-
   /** Returns a string that matches {@link #UNIT_NAME_PATTERN}. */
   private static String replaceIllegalCharsInUnitName(String name) {
     int length = name.length();
@@ -282,5 +263,86 @@ public class PrometheusNaming {
       }
     }
     return new String(sanitized);
+  }
+
+  /**
+   * Escapes the incoming name according to the provided escaping scheme. Depending on the rules of
+   * escaping, this may cause no change in the string that is returned (especially NO_ESCAPING,
+   * which by definition is a noop). This method does not do any validation of the name.
+   */
+  public static String escapeName(String name, EscapingScheme scheme) {
+    if (name.isEmpty() || !needsEscaping(name, scheme)) {
+      return name;
+    }
+
+    StringBuilder escaped = new StringBuilder();
+    switch (scheme) {
+      case ALLOW_UTF8:
+        return name;
+      case UNDERSCORE_ESCAPING:
+        for (int i = 0; i < name.length(); ) {
+          int c = name.codePointAt(i);
+          if (isValidLegacyChar(c, i)) {
+            escaped.appendCodePoint(c);
+          } else {
+            escaped.append('_');
+          }
+          i += Character.charCount(c);
+        }
+        return escaped.toString();
+      case DOTS_ESCAPING:
+        // Do not early return for legacy valid names, we still escape underscores.
+        for (int i = 0; i < name.length(); ) {
+          int c = name.codePointAt(i);
+          if (c == '_') {
+            escaped.append("__");
+          } else if (c == '.') {
+            escaped.append("_dot_");
+          } else if (isValidLegacyChar(c, i)) {
+            escaped.appendCodePoint(c);
+          } else {
+            escaped.append("__");
+          }
+          i += Character.charCount(c);
+        }
+        return escaped.toString();
+      case VALUE_ENCODING_ESCAPING:
+        escaped.append("U__");
+        for (int i = 0; i < name.length(); ) {
+          int c = name.codePointAt(i);
+          if (c == '_') {
+            escaped.append("__");
+          } else if (isValidLegacyChar(c, i)) {
+            escaped.appendCodePoint(c);
+          } else if (!isValidUtf8Char(c)) {
+            escaped.append("_FFFD_");
+          } else {
+            escaped.append('_');
+            escaped.append(Integer.toHexString(c));
+            escaped.append('_');
+          }
+          i += Character.charCount(c);
+        }
+        return escaped.toString();
+      default:
+        throw new IllegalArgumentException("Invalid escaping scheme " + scheme);
+    }
+  }
+
+  public static boolean needsEscaping(String name, EscapingScheme scheme) {
+    return !isValidLegacyMetricName(name)
+        || (scheme == EscapingScheme.DOTS_ESCAPING && (name.contains(".") || name.contains("_")));
+  }
+
+  static boolean isValidLegacyChar(int c, int i) {
+    return (c >= 'a' && c <= 'z')
+        || (c >= 'A' && c <= 'Z')
+        || c == '_'
+        || c == ':'
+        || (c >= '0' && c <= '9' && i > 0);
+  }
+
+  private static boolean isValidUtf8Char(int c) {
+    return (0 <= c && c < MIN_HIGH_SURROGATE) || (MAX_LOW_SURROGATE < c && c <= MAX_CODE_POINT);
   }
 }

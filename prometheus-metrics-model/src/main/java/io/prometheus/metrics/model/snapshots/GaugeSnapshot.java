@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,13 +17,28 @@ public final class GaugeSnapshot extends MetricSnapshot {
    * @param data the constructor will create a sorted copy of the collection.
    */
   public GaugeSnapshot(MetricMetadata metadata, Collection<GaugeDataPointSnapshot> data) {
-    super(metadata, data);
+    this(metadata, data, false);
+  }
+
+  private GaugeSnapshot(
+      MetricMetadata metadata, Collection<GaugeDataPointSnapshot> data, boolean internal) {
+    super(metadata, data, internal);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public List<GaugeDataPointSnapshot> getDataPoints() {
     return (List<GaugeDataPointSnapshot>) dataPoints;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  MetricSnapshot escape(
+      EscapingScheme escapingScheme, List<? extends DataPointSnapshot> dataPointSnapshots) {
+    return new GaugeSnapshot(
+        getMetadata().escape(escapingScheme),
+        (List<GaugeDataPointSnapshot>) dataPointSnapshots,
+        true);
   }
 
   public static final class GaugeDataPointSnapshot extends DataPointSnapshot {
@@ -49,7 +65,16 @@ public final class GaugeSnapshot extends MetricSnapshot {
      */
     public GaugeDataPointSnapshot(
         double value, Labels labels, @Nullable Exemplar exemplar, long scrapeTimestampMillis) {
-      super(labels, 0L, scrapeTimestampMillis);
+      this(value, labels, exemplar, scrapeTimestampMillis, false);
+    }
+
+    private GaugeDataPointSnapshot(
+        double value,
+        Labels labels,
+        @Nullable Exemplar exemplar,
+        long scrapeTimestampMillis,
+        boolean internal) {
+      super(labels, 0L, scrapeTimestampMillis, internal);
       this.value = value;
       this.exemplar = exemplar;
     }
@@ -65,6 +90,16 @@ public final class GaugeSnapshot extends MetricSnapshot {
 
     public static Builder builder() {
       return new Builder();
+    }
+
+    @Override
+    DataPointSnapshot escape(EscapingScheme escapingScheme) {
+      return new GaugeSnapshot.GaugeDataPointSnapshot(
+          value,
+          SnapshotEscaper.escapeLabels(getLabels(), escapingScheme),
+          SnapshotEscaper.escapeExemplar(exemplar, escapingScheme),
+          getCreatedTimestampMillis(),
+          true);
     }
 
     public static class Builder extends DataPointSnapshot.Builder<Builder> {

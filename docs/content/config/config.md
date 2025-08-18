@@ -15,7 +15,7 @@ Future releases will add more options, like configuration via environment variab
 Example:
 
 ```properties
-io.prometheus.exporter.httpServer.port = 9401
+io.prometheus.exporter.httpServer.port=9401
 ```
 
 The property above changes the port for the
@@ -71,13 +71,13 @@ metric only by specifying the metric name. Example:
 Let's say you have a histogram named `latency_seconds`.
 
 ```properties
-io.prometheus.metrics.histogramClassicUpperBounds = 0.2, 0.4, 0.8, 1.0
+io.prometheus.metrics.histogramClassicUpperBounds=0.2, 0.4, 0.8, 1.0
 ```
 
 The line above sets histogram buckets for all histograms. However:
 
 ```properties
-io.prometheus.metrics.latency_seconds.histogramClassicUpperBounds = 0.2, 0.4, 0.8, 1.0
+io.prometheus.metrics.latency_seconds.histogramClassicUpperBounds=0.2, 0.4, 0.8, 1.0
 ```
 
 The line above sets histogram buckets only for the histogram named `latency_seconds`.
@@ -170,10 +170,15 @@ See Javadoc for details.
 
 <!-- editorconfig-checker-disable -->
 
-| Name                                       | Javadoc                                                                                                                                           | Note |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| io.prometheus.exporter.pushgateway.address | [PushGateway.Builder.address()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#address(java.lang.String)>) |      |
-| io.prometheus.exporter.pushgateway.scheme  | [PushGateway.Builder.scheme()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#scheme(java.lang.String)>)   |      |
-| io.prometheus.exporter.pushgateway.job     | [PushGateway.Builder.job()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#job(java.lang.String)>)         |      |
+| Name                                              | Javadoc                                                                                                                                                                                    | Note |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- |
+| io.prometheus.exporter.pushgateway.address        | [PushGateway.Builder.address()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#address(java.lang.String)>)                                          |      |
+| io.prometheus.exporter.pushgateway.scheme         | [PushGateway.Builder.scheme()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#scheme(java.lang.String)>)                                            |      |
+| io.prometheus.exporter.pushgateway.job            | [PushGateway.Builder.job()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#job(java.lang.String)>)                                                  |      |
+| io.prometheus.exporter.pushgateway.escapingScheme | [PushGateway.Builder.escapingScheme()](</client_java/api/io/prometheus/metrics/exporter/pushgateway/PushGateway.Builder.html#escapingScheme(io.prometheus.metrics.config.EscapingScheme)>) | (1)  |
 
 <!-- editorconfig-checker-enable -->
+
+(1) Escaping scheme can be `allow-utf-8`, `underscores`, `dots`, or `values` as described in
+[escaping schemes](https://github.com/prometheus/docs/blob/main/docs/instrumenting/escaping_schemes.md#escaping-schemes) <!-- editorconfig-checker-disable-line -->
+and in the [Unicode documentation]({{< relref "../exporters/unicode.md" >}}).

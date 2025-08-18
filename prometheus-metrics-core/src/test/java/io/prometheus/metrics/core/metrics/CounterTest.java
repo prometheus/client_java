@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
@@ -23,6 +24,8 @@ import java.util.Iterator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class CounterTest {
 
@@ -104,22 +107,21 @@ class CounterTest {
     assertThat(getValue(labels, "l", "b")).isCloseTo(3.0, offset(.001));
   }
 
-  @Test
-  public void testTotalStrippedFromName() {
-    for (String name :
-        new String[] {
-          "my_counter_total", "my.counter.total",
-          "my_counter_seconds_total", "my.counter.seconds.total",
-          "my_counter", "my.counter",
-          "my_counter_seconds", "my.counter.seconds"
-        }) {
-      Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
-      Metrics.MetricFamily protobufData =
-          new PrometheusProtobufWriterImpl().convert(counter.collect());
-      assertThat(ProtobufUtil.shortDebugString(protobufData))
-          .isEqualTo(
-              "name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");
-    }
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "my_counter_total",
+        "my_counter_seconds_total",
+        "my_counter",
+        "my_counter_seconds",
+      })
+  public void testTotalStrippedFromName(String name) {
+    Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
+    Metrics.MetricFamily protobufData =
+        new PrometheusProtobufWriterImpl().convert(counter.collect(), EscapingScheme.ALLOW_UTF8);
+    assertThat(ProtobufUtil.shortDebugString(protobufData))
+        .isEqualTo(
+            "name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");
   }
 
   @Test

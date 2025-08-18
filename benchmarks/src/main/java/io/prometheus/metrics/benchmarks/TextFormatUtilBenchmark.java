@@ -1,5 +1,6 @@
 package io.prometheus.metrics.benchmarks;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.PrometheusTextFormatWriter;
@@ -69,14 +70,15 @@ public class TextFormatUtilBenchmark {
     // avoid growing the array
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
-    OPEN_METRICS_TEXT_FORMAT_WRITER.write(byteArrayOutputStream, SNAPSHOTS);
+    OPEN_METRICS_TEXT_FORMAT_WRITER.write(
+        byteArrayOutputStream, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return byteArrayOutputStream;
   }
 
   @Benchmark
   public OutputStream openMetricsWriteToNull() throws IOException {
     OutputStream nullOutputStream = NullOutputStream.INSTANCE;
-    OPEN_METRICS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS);
+    OPEN_METRICS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return nullOutputStream;
   }
 
@@ -85,14 +87,15 @@ public class TextFormatUtilBenchmark {
     // avoid growing the array
     ByteArrayOutputStream byteArrayOutputStream = writerState.byteArrayOutputStream;
     byteArrayOutputStream.reset();
-    PROMETHEUS_TEXT_FORMAT_WRITER.write(byteArrayOutputStream, SNAPSHOTS);
+    PROMETHEUS_TEXT_FORMAT_WRITER.write(
+        byteArrayOutputStream, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return byteArrayOutputStream;
   }
 
   @Benchmark
   public OutputStream prometheusWriteToNull() throws IOException {
     OutputStream nullOutputStream = NullOutputStream.INSTANCE;
-    PROMETHEUS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS);
+    PROMETHEUS_TEXT_FORMAT_WRITER.write(nullOutputStream, SNAPSHOTS, EscapingScheme.ALLOW_UTF8);
     return nullOutputStream;
   }
 

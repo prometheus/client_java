@@ -10,6 +10,7 @@ import io.prometheus.client.Histogram;
 import io.prometheus.client.Info;
 import io.prometheus.client.Summary;
 import io.prometheus.client.exporter.common.TextFormat;
+import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import java.io.ByteArrayOutputStream;
@@ -266,7 +267,7 @@ class SimpleclientCollectorTest {
   private String newOpenMetrics() throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, false);
-    writer.write(out, newRegistry.scrape());
-    return out.toString(StandardCharsets.UTF_8.name());
+    writer.write(out, newRegistry.scrape(), EscapingScheme.ALLOW_UTF8);
+    return out.toString(StandardCharsets.UTF_8);
   }
 }

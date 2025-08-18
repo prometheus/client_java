@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
+import io.prometheus.metrics.config.EscapingScheme;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,23 +10,28 @@ import javax.annotation.Nullable;
 
 /** Base class for metric snapshots. */
 public abstract class MetricSnapshot {
-
   private final MetricMetadata metadata;
   protected final List<? extends DataPointSnapshot> dataPoints;
 
   protected MetricSnapshot(
-      MetricMetadata metadata, Collection<? extends DataPointSnapshot> dataPoints) {
-    if (metadata == null) {
-      throw new NullPointerException("metadata");
-    }
-    if (dataPoints == null) {
-      throw new NullPointerException("dataPoints");
-    }
+      MetricMetadata metadata,
+      Collection<? extends DataPointSnapshot> dataPoints,
+      boolean internal) {
     this.metadata = metadata;
-    List<? extends DataPointSnapshot> dataCopy = new ArrayList<>(dataPoints);
-    dataCopy.sort(Comparator.comparing(DataPointSnapshot::getLabels));
-    this.dataPoints = Collections.unmodifiableList(dataCopy);
-    validateLabels(this.dataPoints, metadata);
+    if (internal) {
+      this.dataPoints = (List<? extends DataPointSnapshot>) dataPoints;
+    } else {
+      if (metadata == null) {
+        throw new NullPointerException("metadata");
+      }
+      if (dataPoints == null) {
+        throw new NullPointerException("dataPoints");
+      }
+      List<? extends DataPointSnapshot> dataCopy = new ArrayList<>(dataPoints);
+      dataCopy.sort(Comparator.comparing(DataPointSnapshot::getLabels));
+      this.dataPoints = Collections.unmodifiableList(dataCopy);
+      validateLabels(this.dataPoints, metadata);
+    }
   }
 
   public MetricMetadata getMetadata() {
@@ -84,4 +90,7 @@ public abstract class MetricSnapshot {
 
     protected abstract T self();
   }
+
+  abstract MetricSnapshot escape(
+      EscapingScheme escapingScheme, List<? extends DataPointSnapshot> dataPointSnapshots);
 }

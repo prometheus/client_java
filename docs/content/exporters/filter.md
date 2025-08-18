@@ -1,6 +1,6 @@
 ---
 title: Filter
-weight: 2
+weight: 3
 ---
 
 All exporters support a `name[]` URL parameter for querying only specific metric names. Examples:
