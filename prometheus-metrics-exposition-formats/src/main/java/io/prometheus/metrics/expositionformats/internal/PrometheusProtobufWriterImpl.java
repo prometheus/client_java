@@ -130,6 +130,10 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
     if (data.getExemplar() != null) {
       counterBuilder.setExemplar(convert(data.getExemplar(), scheme));
     }
+    if (data.hasCreatedTimestamp()) {
+      counterBuilder.setCreatedTimestamp(
+          ProtobufUtil.timestampFromMillis(data.getCreatedTimestampMillis()));
+    }
     Metrics.Metric.Builder metricBuilder = Metrics.Metric.newBuilder();
     addLabels(metricBuilder, data.getLabels(), scheme);
     metricBuilder.setCounter(counterBuilder.build());
