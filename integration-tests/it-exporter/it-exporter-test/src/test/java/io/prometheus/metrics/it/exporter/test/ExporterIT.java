@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -101,11 +102,22 @@ abstract class ExporterIT extends ExporterTest {
     assertThat(response.status).isEqualTo(200);
     assertContentType(
         "text/plain;charset=utf-8", response.getHeader("Content-Type").replace(" ", ""));
-    assertThat(response.stringBody().trim())
-        .isEqualTo(
-            Resources.toString(Resources.getResource(expected), UTF_8)
-                .trim()
-                .replace("<app>", sampleApp));
+
+    String actualResponse = response.stringBody().trim();
+    String expectedResponse =
+        Resources.toString(Resources.getResource(expected), UTF_8)
+            .trim()
+            .replace("<app>", sampleApp);
+
+    if ("prometheus-protobuf".equals(format)) {
+      assertThat(actualResponse)
+          .matches(
+              Pattern.quote(expectedResponse)
+                  .replace("<CREATED_TIMESTAMP_SECONDS>", "\\E\\d+\\Q")
+                  .replace("<CREATED_TIMESTAMP_NANOS>", "\\E\\d+\\Q"));
+    } else {
+      assertThat(actualResponse).isEqualTo(expectedResponse);
+    }
   }
 
   @Test
