@@ -6,6 +6,14 @@
    the last release.
 4. Click on "Publish release".
 
+## Major or minor release
+
+After the release is created, do a text replace everywhere in the repository to update the
+snapshot version in the `pom.xml` files (and some other files) to the next version.
+For example, if the last release was `1.4.0`, the next snapshot version should be `1.5.0-SNAPSHOT`.
+
+Replace `1.4.0-SNAPSHOT` with `1.5.0-SNAPSHOT` in all following files.
+
 ## If the GPG key expired
 
 1. Generate a new key:
