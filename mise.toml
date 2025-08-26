@@ -1,5 +1,4 @@
 [tools]
-"cargo:zizmor" = "1.9.0"
 "go:github.com/gohugoio/hugo" = "v0.148.2"
 "go:github.com/grafana/oats" = "0.4.0"
 java = "temurin-21.0.8+9.0.LTS"
@@ -47,15 +46,12 @@ run = "scripts/super-linter.sh"
 [tasks.lint-links]
 run = "lychee --include-fragments ."
 
-[tasks.lint-gh-actions]
-run = "zizmor .github/"
-
 [tasks.lint-bom]
 run = "scripts/lint-bom.sh"
 
 [tasks.lint-rest]
 description = "All lints not covered by super linter"
-depends = ["lint-links", "lint-gh-actions", "lint-bom"]
+depends = ["lint-links", "lint-bom"]
 
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
