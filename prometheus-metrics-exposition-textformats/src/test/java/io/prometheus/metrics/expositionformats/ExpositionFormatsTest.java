@@ -192,6 +192,7 @@ class ExpositionFormatsTest {
             + "value: 0.8 "
             + exemplar1protoString
             + " "
+            + "created_timestamp { seconds: 1672850385 nanos: 800000000 } "
             + "} "
             + "timestamp_ms: 1672850685829 "
             + "} "
@@ -202,6 +203,7 @@ class ExpositionFormatsTest {
             + "value: 0.9 "
             + exemplar2protoString
             + " "
+            + "created_timestamp { seconds: 1672850285 } "
             + "} "
             + "timestamp_ms: 1672850585820 "
             + "}";
