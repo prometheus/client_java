@@ -120,8 +120,8 @@ class CounterTest {
     Metrics.MetricFamily protobufData =
         new PrometheusProtobufWriterImpl().convert(counter.collect(), EscapingScheme.ALLOW_UTF8);
     assertThat(ProtobufUtil.shortDebugString(protobufData))
-        .isEqualTo(
-            "name: \"my_counter_seconds_total\" type: COUNTER metric { counter { value: 0.0 } }");
+        .matches(
+            "^name: \"my_counter_seconds_total\" type: COUNTER metric \\{ counter \\{ value: 0.0 created_timestamp \\{ seconds: \\d+ nanos: \\d+ } } }$");
   }
 
   @Test

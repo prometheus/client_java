@@ -37,6 +37,10 @@ type: COUNTER
 metric {
   counter {
     value: 17.0
+    created_timestamp {
+      seconds: <CREATED_TIMESTAMP_SECONDS>
+      nanos: <CREATED_TIMESTAMP_NANOS>
+    }
   }
 }
 
