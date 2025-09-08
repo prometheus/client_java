@@ -1,7 +1,7 @@
 package io.prometheus.metrics.config;
 
-import javax.annotation.Nullable;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exporter */
 public class ExporterProperties {
