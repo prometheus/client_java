@@ -1,14 +1,5 @@
 package io.prometheus.metrics.expositionformats;
 
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeDouble;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscapedString;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeName;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeOpenMetricsTimestamp;
-import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
-import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
-
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -29,6 +20,8 @@ import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
+
+import javax.annotation.Nullable;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,7 +29,15 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import javax.annotation.Nullable;
+
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeDouble;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscapedString;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeName;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeOpenMetricsTimestamp;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
+import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
 /**
  * Write the OpenMetrics text format as defined on <a
@@ -47,6 +48,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   public static class Builder {
     boolean createdTimestampsEnabled;
     boolean exemplarsOnAllMetricTypesEnabled;
+    boolean addSuffixesToMetricNames = true;
 
     private Builder() {}
 
@@ -67,9 +69,19 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       return this;
     }
 
+    /**
+     * @param addSuffixesToMetricNames whether to add the conventional suffixes to metric names,
+     *     like _total for counters, _bucket for histogram buckets, _count and _sum for histograms
+     *     and summaries, _info for info metrics. This is enabled by default.
+     */
+    public Builder setAddSuffixesToMetricNames(boolean addSuffixesToMetricNames) {
+      this.addSuffixesToMetricNames = addSuffixesToMetricNames;
+      return this;
+    }
+
     public OpenMetricsTextFormatWriter build() {
       return new OpenMetricsTextFormatWriter(
-          createdTimestampsEnabled, exemplarsOnAllMetricTypesEnabled);
+          createdTimestampsEnabled, exemplarsOnAllMetricTypesEnabled, addSuffixesToMetricNames);
     }
   }
 
@@ -77,15 +89,27 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       "application/openmetrics-text; version=1.0.0; charset=utf-8";
   private final boolean createdTimestampsEnabled;
   private final boolean exemplarsOnAllMetricTypesEnabled;
+  private final boolean addSuffixesToMetricNames;
 
   /**
    * @param createdTimestampsEnabled whether to include the _created timestamp in the output - This
    *     will produce an invalid OpenMetrics output, but is kept for backwards compatibility.
+   * @deprecated this constructor is deprecated and will be removed in the next major version - use
+   *     {@link #builder()} or {@link #create()} instead
    */
+  @Deprecated
   public OpenMetricsTextFormatWriter(
       boolean createdTimestampsEnabled, boolean exemplarsOnAllMetricTypesEnabled) {
+    this(createdTimestampsEnabled, exemplarsOnAllMetricTypesEnabled, true);
+  }
+
+  private OpenMetricsTextFormatWriter(
+      boolean createdTimestampsEnabled,
+      boolean exemplarsOnAllMetricTypesEnabled,
+      boolean addSuffixesToMetricNames) {
     this.createdTimestampsEnabled = createdTimestampsEnabled;
     this.exemplarsOnAllMetricTypesEnabled = exemplarsOnAllMetricTypesEnabled;
+    this.addSuffixesToMetricNames = addSuffixesToMetricNames;
   }
 
   public static Builder builder() {
@@ -400,7 +424,8 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
       metricInsideBraces = true;
       writer.write('{');
     }
-    writeName(writer, name + (suffix != null ? suffix : ""), NameType.Metric);
+    writeName(
+        writer, name + (suffix != null && addSuffixesToMetricNames ? suffix : ""), NameType.Metric);
     if (!labels.isEmpty() || additionalLabelName != null) {
       writeLabels(
           writer,

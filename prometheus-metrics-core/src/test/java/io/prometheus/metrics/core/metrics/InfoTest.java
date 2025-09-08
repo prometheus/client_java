@@ -1,8 +1,5 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_32_0.Metrics;
@@ -11,12 +8,16 @@ import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Unit;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class InfoTest {
 
@@ -120,11 +121,15 @@ class InfoTest {
   }
 
   private void assertTextFormat(String expected, Info info) throws IOException {
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
+    OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder()
+            .setCreatedTimestampsEnabled(true)
+            .setExemplarsOnAllMetricTypesEnabled(true)
+            .build();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     writer.write(
         outputStream, MetricSnapshots.of(info.collect()), EscapingScheme.UNDERSCORE_ESCAPING);
-    String result = outputStream.toString(StandardCharsets.UTF_8.name());
+    String result = outputStream.toString(StandardCharsets.UTF_8);
     if (!result.contains(expected)) {
       throw new AssertionError(expected + " is not contained in the following output:\n" + result);
     }

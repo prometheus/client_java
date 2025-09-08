@@ -1,7 +1,7 @@
 package io.prometheus.metrics.config;
 
-import java.util.Map;
 import javax.annotation.Nullable;
+import java.util.Map;
 
 /** Properties starting with io.prometheus.exporter */
 public class ExporterProperties {
@@ -10,19 +10,23 @@ public class ExporterProperties {
   // milliseconds is the default - we only provide a boolean flag to avoid a breaking change
   private static final String PROMETHEUS_TIMESTAMPS_IN_MS = "prometheusTimestampsInMs";
   private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplarsOnAllMetricTypes";
+  private static final String ADD_SUFFIXES_TO_METRIC_NAMES = "addSuffixesToMetricNames";
   private static final String PREFIX = "io.prometheus.exporter";
 
   @Nullable private final Boolean includeCreatedTimestamps;
   @Nullable private final Boolean prometheusTimestampsInMs;
   @Nullable private final Boolean exemplarsOnAllMetricTypes;
+  @Nullable private final Boolean addSuffixesToMetricNames;
 
   private ExporterProperties(
       @Nullable Boolean includeCreatedTimestamps,
       @Nullable Boolean prometheusTimestampsInMs,
-      @Nullable Boolean exemplarsOnAllMetricTypes) {
+      @Nullable Boolean exemplarsOnAllMetricTypes,
+      @Nullable Boolean addSuffixesToMetricNames) {
     this.includeCreatedTimestamps = includeCreatedTimestamps;
     this.prometheusTimestampsInMs = prometheusTimestampsInMs;
     this.exemplarsOnAllMetricTypes = exemplarsOnAllMetricTypes;
+    this.addSuffixesToMetricNames = addSuffixesToMetricNames;
   }
 
   /** Include the {@code _created} timestamps in text format? Default is {@code false}. */
@@ -43,6 +47,10 @@ public class ExporterProperties {
     return exemplarsOnAllMetricTypes != null && exemplarsOnAllMetricTypes;
   }
 
+  public boolean isAddSuffixesToMetricNames() {
+    return addSuffixesToMetricNames == null || addSuffixesToMetricNames;
+  }
+
   /**
    * Note that this will remove entries from {@code properties}. This is because we want to know if
    * there are unused properties remaining after all properties have been loaded.
@@ -55,8 +63,13 @@ public class ExporterProperties {
         Util.loadBoolean(PREFIX + "." + PROMETHEUS_TIMESTAMPS_IN_MS, properties);
     Boolean exemplarsOnAllMetricTypes =
         Util.loadBoolean(PREFIX + "." + EXEMPLARS_ON_ALL_METRIC_TYPES, properties);
+    Boolean addSuffixesToMetricNames =
+        Util.loadBoolean(PREFIX + "." + ADD_SUFFIXES_TO_METRIC_NAMES, properties);
     return new ExporterProperties(
-        includeCreatedTimestamps, timestampsInMs, exemplarsOnAllMetricTypes);
+        includeCreatedTimestamps,
+        timestampsInMs,
+        exemplarsOnAllMetricTypes,
+        addSuffixesToMetricNames);
   }
 
   public static Builder builder() {
@@ -68,6 +81,7 @@ public class ExporterProperties {
     @Nullable private Boolean includeCreatedTimestamps;
     @Nullable private Boolean exemplarsOnAllMetricTypes;
     boolean prometheusTimestampsInMs;
+    @Nullable private Boolean addSuffixesToMetricNames;
 
     private Builder() {}
 
@@ -89,9 +103,18 @@ public class ExporterProperties {
       return this;
     }
 
+    /** See {@link #isAddSuffixesToMetricNames()}. */
+    public Builder addSuffixesToMetricNames(boolean addSuffixesToMetricNames) {
+      this.addSuffixesToMetricNames = addSuffixesToMetricNames;
+      return this;
+    }
+
     public ExporterProperties build() {
       return new ExporterProperties(
-          includeCreatedTimestamps, prometheusTimestampsInMs, exemplarsOnAllMetricTypes);
+          includeCreatedTimestamps,
+          prometheusTimestampsInMs,
+          exemplarsOnAllMetricTypes,
+          addSuffixesToMetricNames);
     }
   }
 }

@@ -348,7 +348,11 @@ my_application_namedCounter2_total 10.0
 
   private String convertToOpenMetricsFormat(PrometheusRegistry _registry) {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
+    OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder()
+            .setCreatedTimestampsEnabled(true)
+            .setExemplarsOnAllMetricTypesEnabled(true)
+            .build();
     try {
       writer.write(out, _registry.scrape(), EscapingScheme.UNDERSCORE_ESCAPING);
       return out.toString(StandardCharsets.UTF_8);
