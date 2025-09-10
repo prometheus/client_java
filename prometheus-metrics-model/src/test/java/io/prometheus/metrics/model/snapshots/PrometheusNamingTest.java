@@ -126,4 +126,18 @@ class PrometheusNamingTest {
     assertThat(PrometheusNaming.isValidMetricName("invalid_metric_name_total")).isFalse();
     assertThat(PrometheusNaming.isValidMetricName("0abc.def")).isFalse();
   }
+
+  @Test
+  void testValidLabelName() {
+    assertThat(PrometheusNaming.isValidLabelName("valid_label_name")).isTrue();
+    assertThat(PrometheusNaming.isValidLabelName("0invalid_label_name")).isFalse();
+    assertThat(PrometheusNaming.isValidLabelName("invalid-label-name")).isFalse();
+  }
+
+  @Test
+  void testValidUnitName() {
+    assertThat(PrometheusNaming.isValidUnitName("seconds")).isTrue();
+    assertThat(PrometheusNaming.isValidUnitName("seconds_total")).isFalse();
+    assertThat(PrometheusNaming.isValidUnitName("2")).isTrue();
+  }
 }
