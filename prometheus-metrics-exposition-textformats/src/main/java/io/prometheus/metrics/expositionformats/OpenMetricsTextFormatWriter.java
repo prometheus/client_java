@@ -23,7 +23,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.PrometheusNames;
 import io.prometheus.metrics.model.snapshots.Quantile;
 import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
@@ -396,7 +396,7 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
     boolean metricInsideBraces = false;
     // If the name does not pass the legacy validity check, we must put the
     // metric name inside the braces.
-    if (!PrometheusNaming.isValidLegacyMetricName(name)) {
+    if (!PrometheusNames.isValidLegacyMetricName(name)) {
       metricInsideBraces = true;
       writer.write('{');
     }

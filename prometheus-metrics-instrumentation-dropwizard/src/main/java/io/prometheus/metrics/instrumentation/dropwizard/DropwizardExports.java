@@ -18,7 +18,7 @@ import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.PrometheusNames;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.util.Collections;
@@ -101,7 +101,7 @@ public class DropwizardExports implements MultiCollector {
   private MetricMetadata getMetricMetaData(String metricName, Metric metric) {
     String name = labelMapper != null ? labelMapper.getName(metricName) : metricName;
     return new MetricMetadata(
-        PrometheusNaming.sanitizeMetricName(name), getHelpMessage(metricName, metric));
+        PrometheusNames.sanitizeMetricName(name), getHelpMessage(metricName, metric));
   }
 
   /**
@@ -134,7 +134,7 @@ public class DropwizardExports implements MultiCollector {
           Level.FINE,
           String.format(
               "Invalid type for Gauge %s: %s",
-              PrometheusNaming.sanitizeMetricName(dropwizardName),
+              PrometheusNames.sanitizeMetricName(dropwizardName),
               obj == null ? "null" : obj.getClass().getName()));
       return null;
     }
@@ -170,7 +170,7 @@ public class DropwizardExports implements MultiCollector {
 
     String name = labelMapper != null ? labelMapper.getName(dropwizardName) : dropwizardName;
     MetricMetadata metadata =
-        new MetricMetadata(PrometheusNaming.sanitizeMetricName(name), helpMessage);
+        new MetricMetadata(PrometheusNames.sanitizeMetricName(name), helpMessage);
     SummarySnapshot.SummaryDataPointSnapshot.Builder dataPointBuilder =
         SummarySnapshot.SummaryDataPointSnapshot.builder().quantiles(quantiles).count(count);
     if (labelMapper != null) {

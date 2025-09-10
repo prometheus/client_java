@@ -1,6 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNames.prometheusName;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.StateSetDataPoint;

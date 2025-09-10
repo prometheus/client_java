@@ -1,6 +1,6 @@
 package io.prometheus.metrics.model.registry;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNames.prometheusName;
 
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;

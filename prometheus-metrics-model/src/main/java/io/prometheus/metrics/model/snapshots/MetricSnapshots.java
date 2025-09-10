@@ -1,6 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNames.prometheusName;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 

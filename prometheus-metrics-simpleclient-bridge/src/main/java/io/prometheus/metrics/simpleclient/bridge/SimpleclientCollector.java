@@ -1,6 +1,6 @@
 package io.prometheus.metrics.simpleclient.bridge;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNames.sanitizeMetricName;
 import static java.util.Objects.requireNonNull;
 
 import io.prometheus.client.Collector;

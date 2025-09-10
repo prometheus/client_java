@@ -3,7 +3,7 @@ package io.prometheus.metrics.core.metrics;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.PrometheusNames;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.Arrays;
 import java.util.List;
@@ -61,7 +61,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
     }
 
     public B name(String name) {
-      String error = PrometheusNaming.validateMetricName(name);
+      String error = PrometheusNames.validateMetricName(name);
       if (error != null) {
         throw new IllegalArgumentException("'" + name + "': Illegal metric name: " + error);
       }
@@ -81,7 +81,7 @@ public abstract class MetricWithFixedMetadata extends Metric {
 
     public B labelNames(String... labelNames) {
       for (String labelName : labelNames) {
-        if (!PrometheusNaming.isValidLabelName(labelName)) {
+        if (!PrometheusNames.isValidLabelName(labelName)) {
           throw new IllegalArgumentException(labelName + ": illegal label name");
         }
         if (illegalLabelNames.contains(labelName)) {

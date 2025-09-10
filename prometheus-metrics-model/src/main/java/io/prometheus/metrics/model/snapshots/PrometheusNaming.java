@@ -1,12 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import static java.lang.Character.MAX_CODE_POINT;
-import static java.lang.Character.MAX_LOW_SURROGATE;
-import static java.lang.Character.MIN_HIGH_SURROGATE;
-
-import io.prometheus.metrics.config.EscapingScheme;
-import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 /**
@@ -15,44 +8,20 @@ import javax.annotation.Nullable;
  * <p>Note that this library allows dots in metric and label names. Dots will automatically be
  * replaced with underscores in Prometheus exposition formats. However, if metrics are exposed in
  * OpenTelemetry format the dots are retained.
+ *
+ * @deprecated use {@link PrometheusNames} instead.
  */
+@Deprecated
+@SuppressWarnings("InlineMeSuggester")
 public class PrometheusNaming {
-
-  private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
-
-  /** Legal characters for label names. */
-  private static final Pattern LEGACY_LABEL_NAME_PATTERN =
-      Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
-
-  /** Legal characters for unit names, including dot. */
-  private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
-
-  /**
-   * According to OpenMetrics {@code _count} and {@code _sum} (and {@code _gcount}, {@code _gsum})
-   * should also be reserved metric name suffixes. However, popular instrumentation libraries have
-   * Gauges with names ending in {@code _count}. Examples:
-   *
-   * <ul>
-   *   <li>Micrometer: {@code jvm_buffer_count}
-   *   <li>OpenTelemetry: {@code process_runtime_jvm_buffer_count}
-   * </ul>
-   *
-   * We do not treat {@code _count} and {@code _sum} as reserved suffixes here for compatibility
-   * with these libraries. However, there is a risk of name conflict if someone creates a gauge
-   * named {@code my_data_count} and a histogram or summary named {@code my_data}, because the
-   * histogram or summary will implicitly have a sample named {@code my_data_count}.
-   */
-  private static final String[] RESERVED_METRIC_NAME_SUFFIXES = {
-    "_total", "_created", "_bucket", "_info",
-    ".total", ".created", ".bucket", ".info"
-  };
 
   /**
    * Test if a metric name is valid. Rules:
    *
    * <ul>
-   *   <li>The name must match {@link #METRIC_NAME_PATTERN}.
-   *   <li>The name MUST NOT end with one of the {@link #RESERVED_METRIC_NAME_SUFFIXES}.
+   *   <li>The name must match {@link PrometheusNames#METRIC_NAME_PATTERN}.
+   *   <li>The name MUST NOT end with one of the {@link
+   *       PrometheusNames#RESERVED_METRIC_NAME_SUFFIXES}.
    * </ul>
    *
    * If a metric has a {@link Unit}, the metric name SHOULD end with the unit as a suffix. Note that
@@ -66,7 +35,10 @@ public class PrometheusNaming {
    * counter value, and the optional {@code processing_time_seconds_created} timestamp.
    *
    * <p>Use {@link #sanitizeMetricName(String)} to convert arbitrary Strings to valid metric names.
+   *
+   * @deprecated use {@link PrometheusNames#isValidMetricName(String)} instead.
    */
+  @Deprecated
   public static boolean isValidMetricName(String name) {
     return validateMetricName(name) == null;
   }
@@ -75,64 +47,60 @@ public class PrometheusNaming {
    * Same as {@link #isValidMetricName(String)}, but produces an error message.
    *
    * <p>The name is valid if the error message is {@code null}.
+   *
+   * @deprecated use {@link PrometheusNames#validateMetricName(String)} instead.
    */
+  @Deprecated
   @Nullable
   public static String validateMetricName(String name) {
-    for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
-      if (name.endsWith(reservedSuffix)) {
-        return "The metric name must not include the '" + reservedSuffix + "' suffix.";
-      }
+    String reservedSuffix = PrometheusNames.findReservedSuffix(name);
+    if (reservedSuffix != null) {
+      return reservedSuffix;
     }
-    if (isValidUtf8(name)) {
-      return null;
+    if (!PrometheusNames.isValidLegacyMetricName(name)) {
+      return "The metric name contains unsupported characters";
     }
-    return "The metric name contains unsupported characters";
+    return null;
   }
 
-  public static boolean isValidLegacyMetricName(String name) {
-    return METRIC_NAME_PATTERN.matcher(name).matches();
-  }
-
+  /**
+   * Test if a label name is valid. Rules:
+   *
+   * <ul>
+   *   <li>The name must match {@link PrometheusNames#LEGACY_LABEL_NAME_PATTERN _PATTERN}.
+   *   <li>The name MUST NOT start with {@code __}, {@code ._}, or {@code _.} or {@code ..}
+   * </ul>
+   *
+   * @deprecated use {@link PrometheusNames#isValidLabelName(String)} instead.
+   */
+  @Deprecated
   public static boolean isValidLabelName(String name) {
-    return isValidUtf8(name)
-        && !(name.startsWith("__")
-            || name.startsWith("._")
-            || name.startsWith("..")
-            || name.startsWith("_."));
-  }
-
-  private static boolean isValidUtf8(String name) {
-    return !name.isEmpty() && StandardCharsets.UTF_8.newEncoder().canEncode(name);
-  }
-
-  public static boolean isValidLegacyLabelName(String name) {
-    return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches();
+    return PrometheusNames.isValidLegacyLabelName(name)
+        && !PrometheusNames.hasInvalidLabelPrefix(name);
   }
 
   /**
    * Units may not have illegal characters, and they may not end with a reserved suffix like
    * 'total'.
+   *
+   * @deprecated use {@link PrometheusNames#isValidUnitName(String)} instead.
    */
+  @Deprecated
   public static boolean isValidUnitName(String name) {
-    return validateUnitName(name) == null;
+    // no Unicode support for unit names
+    return PrometheusNames.isValidUnitName(name);
   }
 
-  /** Same as {@link #isValidUnitName(String)} but returns an error message. */
+  /**
+   * Same as {@link #isValidUnitName(String)} but returns an error message.
+   *
+   * @deprecated use {@link PrometheusNames#validateUnitName(String)} instead.
+   */
+  @Deprecated
   @Nullable
   public static String validateUnitName(String name) {
-    if (name.isEmpty()) {
-      return "The unit name must not be empty.";
-    }
-    for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
-      String suffixName = reservedSuffix.substring(1);
-      if (name.endsWith(suffixName)) {
-        return suffixName + " is a reserved suffix in Prometheus";
-      }
-    }
-    if (!UNIT_NAME_PATTERN.matcher(name).matches()) {
-      return "The unit name contains unsupported characters";
-    }
-    return null;
+    // no Unicode support for unit names
+    return PrometheusNames.validateUnitName(name);
   }
 
   /**
@@ -142,121 +110,77 @@ public class PrometheusNaming {
    *     isValidMetricName(name)} or {@link #isValidLabelName(String) isValidLabelName(name)} must
    *     be true.
    * @return the name with dots replaced by underscores.
+   * @deprecated use {@link PrometheusNames#prometheusName(String)} instead.
    */
+  @Deprecated
   public static String prometheusName(String name) {
-    return escapeName(name, EscapingScheme.UNDERSCORE_ESCAPING);
+    return name.replace(".", "_");
   }
 
   /**
    * Convert an arbitrary string to a name where {@link #isValidMetricName(String)
    * isValidMetricName(name)} is true.
+   *
+   * @deprecated use {@link PrometheusNames#sanitizeMetricName(String)} instead.
    */
+  @Deprecated
   public static String sanitizeMetricName(String metricName) {
     if (metricName.isEmpty()) {
       throw new IllegalArgumentException("Cannot convert an empty string to a valid metric name.");
     }
-    String sanitizedName = metricName;
-    boolean modified = true;
-    while (modified) {
-      modified = false;
-      for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
-        if (sanitizedName.equals(reservedSuffix)) {
-          // This is for the corner case when you call sanitizeMetricName("_total").
-          // In that case the result will be "total".
-          return reservedSuffix.substring(1);
-        }
-        if (sanitizedName.endsWith(reservedSuffix)) {
-          sanitizedName =
-              sanitizedName.substring(0, sanitizedName.length() - reservedSuffix.length());
-          modified = true;
-        }
-      }
-    }
-    return sanitizedName;
+    return PrometheusNames.sanitizeMetricName(replaceIllegalCharsInMetricName(metricName));
   }
 
   /**
    * Like {@link #sanitizeMetricName(String)}, but also makes sure that the unit is appended as a
    * suffix if the unit is not {@code null}.
+   *
+   * @deprecated use {@link PrometheusNames#sanitizeMetricName(String, Unit)} instead.
    */
+  @Deprecated
   public static String sanitizeMetricName(String metricName, Unit unit) {
-    String result = sanitizeMetricName(metricName);
-    if (unit != null) {
-      if (!result.endsWith("_" + unit) && !result.endsWith("." + unit)) {
-        result += "_" + unit;
-      }
-    }
-    return result;
+    return PrometheusNames.sanitizeMetricName(replaceIllegalCharsInMetricName(metricName), unit);
   }
 
   /**
    * Convert an arbitrary string to a name where {@link #isValidLabelName(String)
    * isValidLabelName(name)} is true.
+   *
+   * @deprecated use {@link PrometheusNames#sanitizeLabelName(String)} instead.
    */
+  @Deprecated
   public static String sanitizeLabelName(String labelName) {
     if (labelName.isEmpty()) {
       throw new IllegalArgumentException("Cannot convert an empty string to a valid label name.");
     }
-    String sanitizedName = labelName;
-    while (sanitizedName.startsWith("__")
-        || sanitizedName.startsWith("_.")
-        || sanitizedName.startsWith("._")
-        || sanitizedName.startsWith("..")) {
-      sanitizedName = sanitizedName.substring(1);
-    }
-    return sanitizedName;
+    return PrometheusNames.sanitizeLabelName(replaceIllegalCharsInLabelName(labelName));
   }
 
   /**
-   * Convert an arbitrary string to a name where {@link #validateUnitName(String)} is {@code null}
-   * (i.e. the name is valid).
+   * Convert an arbitrary string to a name where {@link #isValidUnitName(String)
+   * isValidUnitName(name)} is true.
    *
    * @throws IllegalArgumentException if the {@code unitName} cannot be converted, for example if
    *     you call {@code sanitizeUnitName("total")} or {@code sanitizeUnitName("")}.
    * @throws NullPointerException if {@code unitName} is null.
+   * @deprecated use {@link PrometheusNames#sanitizeUnitName(String)} instead.
    */
+  @Deprecated
   public static String sanitizeUnitName(String unitName) {
-    if (unitName.isEmpty()) {
-      throw new IllegalArgumentException("Cannot convert an empty string to a valid unit name.");
-    }
-    String sanitizedName = replaceIllegalCharsInUnitName(unitName);
-    boolean modified = true;
-    while (modified) {
-      modified = false;
-      while (sanitizedName.startsWith("_") || sanitizedName.startsWith(".")) {
-        sanitizedName = sanitizedName.substring(1);
-        modified = true;
-      }
-      while (sanitizedName.endsWith(".") || sanitizedName.endsWith("_")) {
-        sanitizedName = sanitizedName.substring(0, sanitizedName.length() - 1);
-        modified = true;
-      }
-      for (String reservedSuffix : RESERVED_METRIC_NAME_SUFFIXES) {
-        String suffixName = reservedSuffix.substring(1);
-        if (sanitizedName.endsWith(suffixName)) {
-          sanitizedName = sanitizedName.substring(0, sanitizedName.length() - suffixName.length());
-          modified = true;
-        }
-      }
-    }
-    if (sanitizedName.isEmpty()) {
-      throw new IllegalArgumentException(
-          "Cannot convert '" + unitName + "' into a valid unit name.");
-    }
-    return sanitizedName;
+    // no Unicode support for unit names
+    return PrometheusNames.sanitizeUnitName(unitName);
   }
 
-  /** Returns a string that matches {@link #UNIT_NAME_PATTERN}. */
-  private static String replaceIllegalCharsInUnitName(String name) {
+  /** Returns a string that matches {@link PrometheusNames#METRIC_NAME_PATTERN}. */
+  private static String replaceIllegalCharsInMetricName(String name) {
     int length = name.length();
     char[] sanitized = new char[length];
     for (int i = 0; i < length; i++) {
       char ch = name.charAt(i);
-      if (ch == ':'
-          || ch == '.'
+      if (ch == '.'
           || (ch >= 'a' && ch <= 'z')
           || (ch >= 'A' && ch <= 'Z')
-          || (ch >= '0' && ch <= '9')) {
+          || (i > 0 && ch >= '0' && ch <= '9')) {
         sanitized[i] = ch;
       } else {
         sanitized[i] = '_';
@@ -265,84 +189,21 @@ public class PrometheusNaming {
     return new String(sanitized);
   }
 
-  /**
-   * Escapes the incoming name according to the provided escaping scheme. Depending on the rules of
-   * escaping, this may cause no change in the string that is returned (especially NO_ESCAPING,
-   * which by definition is a noop). This method does not do any validation of the name.
-   */
-  public static String escapeName(String name, EscapingScheme scheme) {
-    if (name.isEmpty() || !needsEscaping(name, scheme)) {
-      return name;
+  /** Returns a string that matches {@link PrometheusNames#LEGACY_LABEL_NAME_PATTERN}. */
+  private static String replaceIllegalCharsInLabelName(String name) {
+    int length = name.length();
+    char[] sanitized = new char[length];
+    for (int i = 0; i < length; i++) {
+      char ch = name.charAt(i);
+      if (ch == '.'
+          || (ch >= 'a' && ch <= 'z')
+          || (ch >= 'A' && ch <= 'Z')
+          || (i > 0 && ch >= '0' && ch <= '9')) {
+        sanitized[i] = ch;
+      } else {
+        sanitized[i] = '_';
+      }
     }
-
-    StringBuilder escaped = new StringBuilder();
-    switch (scheme) {
-      case ALLOW_UTF8:
-        return name;
-      case UNDERSCORE_ESCAPING:
-        for (int i = 0; i < name.length(); ) {
-          int c = name.codePointAt(i);
-          if (isValidLegacyChar(c, i)) {
-            escaped.appendCodePoint(c);
-          } else {
-            escaped.append('_');
-          }
-          i += Character.charCount(c);
-        }
-        return escaped.toString();
-      case DOTS_ESCAPING:
-        // Do not early return for legacy valid names, we still escape underscores.
-        for (int i = 0; i < name.length(); ) {
-          int c = name.codePointAt(i);
-          if (c == '_') {
-            escaped.append("__");
-          } else if (c == '.') {
-            escaped.append("_dot_");
-          } else if (isValidLegacyChar(c, i)) {
-            escaped.appendCodePoint(c);
-          } else {
-            escaped.append("__");
-          }
-          i += Character.charCount(c);
-        }
-        return escaped.toString();
-      case VALUE_ENCODING_ESCAPING:
-        escaped.append("U__");
-        for (int i = 0; i < name.length(); ) {
-          int c = name.codePointAt(i);
-          if (c == '_') {
-            escaped.append("__");
-          } else if (isValidLegacyChar(c, i)) {
-            escaped.appendCodePoint(c);
-          } else if (!isValidUtf8Char(c)) {
-            escaped.append("_FFFD_");
-          } else {
-            escaped.append('_');
-            escaped.append(Integer.toHexString(c));
-            escaped.append('_');
-          }
-          i += Character.charCount(c);
-        }
-        return escaped.toString();
-      default:
-        throw new IllegalArgumentException("Invalid escaping scheme " + scheme);
-    }
-  }
-
-  public static boolean needsEscaping(String name, EscapingScheme scheme) {
-    return !isValidLegacyMetricName(name)
-        || (scheme == EscapingScheme.DOTS_ESCAPING && (name.contains(".") || name.contains("_")));
-  }
-
-  static boolean isValidLegacyChar(int c, int i) {
-    return (c >= 'a' && c <= 'z')
-        || (c >= 'A' && c <= 'Z')
-        || c == '_'
-        || c == ':'
-        || (c >= '0' && c <= '9' && i > 0);
-  }
-
-  private static boolean isValidUtf8Char(int c) {
-    return (0 <= c && c < MIN_HIGH_SURROGATE) || (MAX_LOW_SURROGATE < c && c <= MAX_CODE_POINT);
+    return new String(sanitized);
   }
 }

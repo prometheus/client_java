@@ -88,7 +88,7 @@ public class CounterWithCallback extends CallbackMetric {
      * Prometheus.
      *
      * <p>Throws an {@link IllegalArgumentException} if {@link
-     * io.prometheus.metrics.model.snapshots.PrometheusNaming#isValidMetricName(String)
+     * io.prometheus.metrics.model.snapshots.PrometheusNames#isValidMetricName(String)
      * MetricMetadata.isValidMetricName(name)} is {@code false}.
      */
     @Override

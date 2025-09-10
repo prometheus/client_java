@@ -60,7 +60,7 @@ public class SnapshotEscaper {
 
   private static boolean labelsNeedsEscaping(Labels labels, EscapingScheme scheme) {
     for (Label l : labels) {
-      if (PrometheusNaming.needsEscaping(l.getName(), scheme)) {
+      if (PrometheusNames.needsEscaping(l.getName(), scheme)) {
         return true;
       }
     }
@@ -100,7 +100,7 @@ public class SnapshotEscaper {
     Labels.Builder outLabelsBuilder = Labels.builder();
 
     for (Label l : labels) {
-      outLabelsBuilder.label(PrometheusNaming.escapeName(l.getName(), scheme), l.getValue());
+      outLabelsBuilder.label(PrometheusNames.escapeName(l.getName(), scheme), l.getValue());
     }
 
     return outLabelsBuilder.build();

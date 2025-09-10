@@ -2,7 +2,7 @@ package io.prometheus.metrics.expositionformats;
 
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.model.snapshots.Labels;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.PrometheusNames;
 import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import java.io.IOException;
 import java.io.Writer;
@@ -137,13 +137,13 @@ public class TextFormatUtil {
   static void writeName(Writer writer, String name, NameType nameType) throws IOException {
     switch (nameType) {
       case Metric:
-        if (PrometheusNaming.isValidLegacyMetricName(name)) {
+        if (PrometheusNames.isValidLegacyMetricName(name)) {
           writer.write(name);
           return;
         }
         break;
       case Label:
-        if (PrometheusNaming.isValidLegacyLabelName(name)) {
+        if (PrometheusNames.isValidLegacyLabelName(name)) {
           writer.write(name);
           return;
         }

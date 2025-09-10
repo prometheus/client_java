@@ -45,9 +45,9 @@ public final class MetricMetadata {
   /**
    * Constructor.
    *
-   * @param name must not be {@code null}. {@link PrometheusNaming#isValidMetricName(String)
+   * @param name must not be {@code null}. {@link PrometheusNames#isValidMetricName(String)
    *     isValidMetricName(name)} must be {@code true}. Use {@link
-   *     PrometheusNaming#sanitizeMetricName(String)} to convert arbitrary strings into valid names.
+   *     PrometheusNames#sanitizeMetricName(String)} to convert arbitrary strings into valid names.
    * @param help optional. May be {@code null}.
    * @param unit optional. May be {@code null}.
    */
@@ -56,7 +56,7 @@ public final class MetricMetadata {
     this.help = help;
     this.unit = unit;
     validate();
-    this.prometheusName = PrometheusNaming.prometheusName(name);
+    this.prometheusName = PrometheusNames.prometheusName(name);
   }
 
   /**
@@ -97,7 +97,7 @@ public final class MetricMetadata {
     if (name == null) {
       throw new IllegalArgumentException("Missing required field: name is null");
     }
-    String error = PrometheusNaming.validateMetricName(name);
+    String error = PrometheusNames.validateMetricName(name);
     if (error != null) {
       throw new IllegalArgumentException(
           "'"
@@ -105,7 +105,7 @@ public final class MetricMetadata {
               + "': Illegal metric name. "
               + error
               + " Call "
-              + PrometheusNaming.class.getSimpleName()
+              + PrometheusNames.class.getSimpleName()
               + ".sanitizeMetricName(name) to avoid this error.");
     }
     if (hasUnit()) {
@@ -118,13 +118,13 @@ public final class MetricMetadata {
                 + unit
                 + "."
                 + " Call "
-                + PrometheusNaming.class.getSimpleName()
+                + PrometheusNames.class.getSimpleName()
                 + ".sanitizeMetricName(name, unit) to avoid this error.");
       }
     }
   }
 
   MetricMetadata escape(EscapingScheme escapingScheme) {
-    return new MetricMetadata(PrometheusNaming.escapeName(name, escapingScheme), help, unit);
+    return new MetricMetadata(PrometheusNames.escapeName(name, escapingScheme), help, unit);
   }
 }
