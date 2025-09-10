@@ -1,13 +1,5 @@
 package io.prometheus.metrics.model.snapshots;
 
-import io.prometheus.metrics.config.EscapingScheme;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.stream.Stream;
-
 import static io.prometheus.metrics.model.snapshots.PrometheusNames.escapeName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNames.isValidLabelName;
 import static io.prometheus.metrics.model.snapshots.PrometheusNames.prometheusName;
@@ -18,6 +10,13 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNames.validateMetr
 import static io.prometheus.metrics.model.snapshots.PrometheusNames.validateUnitName;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import io.prometheus.metrics.config.EscapingScheme;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class PrometheusNamesTest {
 
