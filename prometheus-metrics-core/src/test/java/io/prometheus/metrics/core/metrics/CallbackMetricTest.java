@@ -1,11 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-import io.prometheus.metrics.expositionformats.ExpositionFormats;
-import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import java.io.IOException;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class CallbackMetricTest {
 
@@ -48,16 +45,5 @@ class CallbackMetricTest {
         .withMessage(
             "Cannot pass label values to a CounterWithCallback that was created without label"
                 + " names.");
-  }
-
-  @Test
-  void manual() throws IOException {
-    PrometheusRegistry prometheusRegistry = new PrometheusRegistry();
-    Counter counter =
-        Counter.builder().name("te:st").labelNames("test").register(prometheusRegistry);
-    counter.labelValues("te:st").inc();
-    ExpositionFormats.init()
-        .getPrometheusTextFormatWriter()
-        .write(System.out, prometheusRegistry.scrape());
   }
 }
