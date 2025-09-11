@@ -125,6 +125,6 @@ public final class MetricMetadata {
   }
 
   MetricMetadata escape(EscapingScheme escapingScheme) {
-    return new MetricMetadata(PrometheusNames.escapeName(name, escapingScheme), help, unit);
+    return new MetricMetadata(NameEscaper.escapeName(name, escapingScheme), help, unit);
   }
 }

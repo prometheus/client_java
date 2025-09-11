@@ -155,7 +155,7 @@ public class PrometheusNames {
    * @return the name with dots replaced by underscores.
    */
   public static String prometheusName(String name) {
-    return escapeName(name, EscapingScheme.UNDERSCORE_ESCAPING);
+    return NameEscaper.escapeName(name, EscapingScheme.UNDERSCORE_ESCAPING);
   }
 
   /**
@@ -273,75 +273,6 @@ public class PrometheusNames {
     return new String(sanitized);
   }
 
-  /**
-   * Escapes the incoming name according to the provided escaping scheme. Depending on the rules of
-   * escaping, this may cause no change in the string that is returned (especially NO_ESCAPING,
-   * which by definition is a noop). This method does not do any validation of the name.
-   */
-  public static String escapeName(String name, EscapingScheme scheme) {
-    if (name.isEmpty() || !needsEscaping(name, scheme)) {
-      return name;
-    }
-
-    StringBuilder escaped = new StringBuilder();
-    switch (scheme) {
-      case ALLOW_UTF8:
-        return name;
-      case UNDERSCORE_ESCAPING:
-        for (int i = 0; i < name.length(); ) {
-          int c = name.codePointAt(i);
-          if (isValidLegacyChar(c, i)) {
-            escaped.appendCodePoint(c);
-          } else {
-            escaped.append('_');
-          }
-          i += Character.charCount(c);
-        }
-        return escaped.toString();
-      case DOTS_ESCAPING:
-        // Do not early return for legacy valid names, we still escape underscores.
-        for (int i = 0; i < name.length(); ) {
-          int c = name.codePointAt(i);
-          if (c == '_') {
-            escaped.append("__");
-          } else if (c == '.') {
-            escaped.append("_dot_");
-          } else if (isValidLegacyChar(c, i)) {
-            escaped.appendCodePoint(c);
-          } else {
-            escaped.append("__");
-          }
-          i += Character.charCount(c);
-        }
-        return escaped.toString();
-      case VALUE_ENCODING_ESCAPING:
-        escaped.append("U__");
-        for (int i = 0; i < name.length(); ) {
-          int c = name.codePointAt(i);
-          if (c == '_') {
-            escaped.append("__");
-          } else if (isValidLegacyChar(c, i)) {
-            escaped.appendCodePoint(c);
-          } else if (!isValidUtf8Char(c)) {
-            escaped.append("_FFFD_");
-          } else {
-            escaped.append('_');
-            escaped.append(Integer.toHexString(c));
-            escaped.append('_');
-          }
-          i += Character.charCount(c);
-        }
-        return escaped.toString();
-      default:
-        throw new IllegalArgumentException("Invalid escaping scheme " + scheme);
-    }
-  }
-
-  public static boolean needsEscaping(String name, EscapingScheme scheme) {
-    return !isValidLegacyMetricName(name)
-        || (scheme == EscapingScheme.DOTS_ESCAPING && (name.contains(".") || name.contains("_")));
-  }
-
   static boolean isValidLegacyChar(int c, int i) {
     return (c >= 'a' && c <= 'z')
         || (c >= 'A' && c <= 'Z')
@@ -350,7 +281,7 @@ public class PrometheusNames {
         || (c >= '0' && c <= '9' && i > 0);
   }
 
-  private static boolean isValidUtf8Char(int c) {
+  static boolean isValidUtf8Char(int c) {
     return (0 <= c && c < MIN_HIGH_SURROGATE) || (MAX_LOW_SURROGATE < c && c <= MAX_CODE_POINT);
   }
 }

@@ -1,8 +1,8 @@
 package io.prometheus.metrics.core.metrics;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import org.junit.jupiter.api.Test;
 
 class CallbackMetricTest {
 
