@@ -217,7 +217,11 @@ app_okhttpclient_client_HttpClient_greatService_total{client="sampleClient",serv
 
   private String convertToOpenMetricsFormat(MetricSnapshots snapshots) {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
+    OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder()
+            .setCreatedTimestampsEnabled(true)
+            .setExemplarsOnAllMetricTypesEnabled(true)
+            .build();
     try {
       writer.write(out, snapshots, EscapingScheme.UNDERSCORE_ESCAPING);
       return out.toString(StandardCharsets.UTF_8);
