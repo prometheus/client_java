@@ -21,7 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class PrometheusNamesTest {
 
   @Test
-  public void testSanitizeMetricName() {
+ void testSanitizeMetricName() {
     assertThat(sanitizeMetricName("my_counter_total")).isEqualTo("my_counter");
     assertThat(sanitizeMetricName("jvm.info")).isEqualTo("jvm");
     assertThat(sanitizeMetricName("jvm_info")).isEqualTo("jvm");
