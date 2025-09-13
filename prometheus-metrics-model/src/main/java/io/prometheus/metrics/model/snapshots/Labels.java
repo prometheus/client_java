@@ -1,7 +1,7 @@
 package io.prometheus.metrics.model.snapshots;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.isValidLabelName;
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNames.isValidLabelName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNames.prometheusName;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,8 +48,8 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
    * Labels.of(...)} methods, or you can use the {@link Labels#builder()}.
    *
    * @param keyValuePairs as in {@code {name1, value1, name2, value2}}. Length must be even. {@link
-   *     PrometheusNaming#isValidLabelName(String)} must be true for each name. Use {@link
-   *     PrometheusNaming#sanitizeLabelName(String)} to convert arbitrary strings to valid label
+   *     PrometheusNames#isValidLabelName(String)} must be true for each name. Use {@link
+   *     PrometheusNames#sanitizeLabelName(String)} to convert arbitrary strings to valid label
    *     names. Label names must be unique (no duplicate label names).
    */
   public static Labels of(String... keyValuePairs) {
@@ -75,8 +75,8 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
    * Create a new Labels instance. You can either create Labels with one of the static {@code
    * Labels.of(...)} methods, or you can use the {@link Labels#builder()}.
    *
-   * @param names label names. {@link PrometheusNaming#isValidLabelName(String)} must be true for
-   *     each name. Use {@link PrometheusNaming#sanitizeLabelName(String)} to convert arbitrary
+   * @param names label names. {@link PrometheusNames#isValidLabelName(String)} must be true for
+   *     each name. Use {@link PrometheusNames#sanitizeLabelName(String)} to convert arbitrary
    *     strings to valid label names. Label names must be unique (no duplicate label names).
    * @param values label values. {@code names.size()} must be equal to {@code values.size()}.
    */
@@ -98,8 +98,8 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
    * Create a new Labels instance. You can either create Labels with one of the static {@code
    * Labels.of(...)} methods, or you can use the {@link Labels#builder()}.
    *
-   * @param names label names. {@link PrometheusNaming#isValidLabelName(String)} must be true for
-   *     each name. Use {@link PrometheusNaming#sanitizeLabelName(String)} to convert arbitrary
+   * @param names label names. {@link PrometheusNames#isValidLabelName(String)} must be true for
+   *     each name. Use {@link PrometheusNames#sanitizeLabelName(String)} to convert arbitrary
    *     strings to valid label names. Label names must be unique (no duplicate label names).
    * @param values label values. {@code names.length} must be equal to {@code values.length}.
    */
@@ -121,11 +121,11 @@ public final class Labels implements Comparable<Labels>, Iterable<Label> {
     String[] prometheusNames = names;
     for (int i = 0; i < names.length; i++) {
       String name = names[i];
-      if (!PrometheusNaming.isValidLegacyLabelName(name)) {
+      if (!PrometheusNames.isValidLegacyLabelName(name)) {
         if (prometheusNames == names) {
           prometheusNames = Arrays.copyOf(names, names.length);
         }
-        prometheusNames[i] = PrometheusNaming.prometheusName(name);
+        prometheusNames[i] = PrometheusNames.prometheusName(name);
       }
     }
     return prometheusNames;
