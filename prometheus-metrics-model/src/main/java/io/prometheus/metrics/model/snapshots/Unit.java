@@ -31,7 +31,7 @@ public final class Unit {
       throw new NullPointerException("Unit name cannot be null.");
     }
     name = name.trim();
-    String error = PrometheusNaming.validateUnitName(name);
+    String error = PrometheusNames.validateUnitName(name);
     if (error != null) {
       throw new IllegalArgumentException(name + ": Illegal unit name: " + error);
     }

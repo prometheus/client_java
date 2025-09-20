@@ -61,7 +61,7 @@ public abstract class MetricSnapshot {
 
     /**
      * The name is required. If the name is missing or invalid, {@code build()} will throw an {@link
-     * IllegalArgumentException}. See {@link PrometheusNaming#isValidMetricName(String)} for info on
+     * IllegalArgumentException}. See {@link PrometheusNames#isValidMetricName(String)} for info on
      * valid metric names.
      */
     public T name(String name) {
