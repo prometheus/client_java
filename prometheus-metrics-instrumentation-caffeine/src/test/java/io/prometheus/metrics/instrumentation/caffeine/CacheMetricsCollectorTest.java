@@ -12,7 +12,12 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.OpenMetricsTextFormatWriter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.*;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -310,10 +315,14 @@ caffeine_cache_eviction_weight{cache="users"} 31.0
 
   private String convertToOpenMetricsFormat(PrometheusRegistry registry) {
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    final OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
+    final OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder()
+            .setCreatedTimestampsEnabled(true)
+            .setExemplarsOnAllMetricTypesEnabled(true)
+            .build();
     try {
       writer.write(out, registry.scrape(), EscapingScheme.ALLOW_UTF8);
-      return out.toString(StandardCharsets.UTF_8.name());
+      return out.toString(StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
