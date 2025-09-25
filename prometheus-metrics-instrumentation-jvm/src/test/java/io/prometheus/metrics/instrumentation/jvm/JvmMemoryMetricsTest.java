@@ -88,7 +88,7 @@ class JvmMemoryMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        """
+"""
 # TYPE jvm_memory_committed_bytes gauge
 # UNIT jvm_memory_committed_bytes bytes
 # HELP jvm_memory_committed_bytes Committed (bytes) of a given JVM memory area.

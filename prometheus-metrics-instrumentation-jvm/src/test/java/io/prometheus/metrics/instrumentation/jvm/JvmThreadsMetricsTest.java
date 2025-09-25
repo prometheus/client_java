@@ -55,7 +55,7 @@ class JvmThreadsMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        """
+"""
 # TYPE jvm_threads_current gauge
 # HELP jvm_threads_current Current thread count of a JVM
 jvm_threads_current 300.0

@@ -75,7 +75,7 @@ class CacheMetricsCollectorTest {
     if (options.collectEvictionWeightAsCounter) {
       assertCounterMetric(registry, "caffeine_cache_eviction_weight", "users", 2.0);
       openMetricEvictionWeightExpectedText =
-          """
+"""
 # TYPE caffeine_cache_eviction_weight counter
 # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
 caffeine_cache_eviction_weight_total{cache="users"} 2.0
@@ -83,7 +83,7 @@ caffeine_cache_eviction_weight_total{cache="users"} 2.0
     } else {
       assertGaugeMetric(registry, "caffeine_cache_eviction_weight", "users", 2.0);
       openMetricEvictionWeightExpectedText =
-          """
+"""
 # TYPE caffeine_cache_eviction_weight gauge
 # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
 caffeine_cache_eviction_weight{cache="users"} 2.0
@@ -153,7 +153,7 @@ caffeine_cache_eviction_weight{cache="users"} 2.0
     if (options.collectEvictionWeightAsCounter) {
       assertCounterMetric(registry, "caffeine_cache_eviction_weight", "users", 31.0);
       openMetricEvictionWeightExpectedText =
-          """
+"""
 # TYPE caffeine_cache_eviction_weight counter
 # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
 caffeine_cache_eviction_weight_total{cache="users"} 31.0
@@ -161,7 +161,7 @@ caffeine_cache_eviction_weight_total{cache="users"} 31.0
     } else {
       assertGaugeMetric(registry, "caffeine_cache_eviction_weight", "users", 31.0);
       openMetricEvictionWeightExpectedText =
-          """
+"""
 # TYPE caffeine_cache_eviction_weight gauge
 # HELP caffeine_cache_eviction_weight Weight of evicted cache entries, doesn't include manually removed entries
 caffeine_cache_eviction_weight{cache="users"} 31.0
