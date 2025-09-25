@@ -49,7 +49,7 @@ class DropwizardExportsTest {
   public void testCounter() {
     metricRegistry.counter("foo.bar").inc(1);
     String expected =
-        """
+"""
 # TYPE foo_bar counter
 # HELP foo_bar Generated from Dropwizard metric import (metric=foo.bar, type=com.codahale.metrics.Counter)
 foo_bar_total 1.0
@@ -105,7 +105,7 @@ foo_bar_total 1.0
     metricRegistry.register("boolean.gauge", booleanGauge);
 
     String expected =
-        """
+"""
 # TYPE boolean_gauge gauge
 # HELP boolean_gauge Generated from Dropwizard metric import (metric=boolean.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$5)
 boolean_gauge 1.0
@@ -161,7 +161,7 @@ long_gauge 1234.0
 
     // The result should look like this
     String expected1 =
-        """
+"""
 # TYPE hist summary
 # HELP hist Generated from Dropwizard metric import (metric=hist, type=com.codahale.metrics.Histogram)
 hist{quantile="0.5"} 49.0
@@ -177,7 +177,7 @@ hist_count 100
     // However, Dropwizard uses a random reservoir sampling algorithm, so the values could as well
     // be off-by-one
     String expected2 =
-        """
+"""
 # TYPE hist summary
 # HELP hist Generated from Dropwizard metric import (metric=hist, type=com.codahale.metrics.Histogram)
 hist{quantile="0.5"} 50.0
@@ -205,7 +205,7 @@ hist_count 100
     meter.mark();
 
     String expected =
-        """
+"""
 # TYPE meter counter
 # HELP meter Generated from Dropwizard metric import (metric=meter_total, type=com.codahale.metrics.Meter)
 meter_total 2.0
@@ -247,7 +247,7 @@ meter_total 2.0
     metricRegistry.register("my.application.namedGauge1", new ExampleDoubleGauge());
 
     String expected =
-        """
+"""
 # TYPE my_application_namedCounter1 counter
 # HELP my_application_namedCounter1 Generated from Dropwizard metric import (metric=my.application.namedCounter1, type=com.codahale.metrics.Counter)
 my_application_namedCounter1_total 0.0
@@ -286,7 +286,7 @@ my_application_namedTimer1_count 0
     registry.register(DropwizardExports.builder().dropwizardRegistry(metricRegistry).build());
     assertThat(convertToOpenMetricsFormat(registry))
         .isEqualTo(
-            """
+"""
 # EOF
 """);
   }
@@ -320,7 +320,7 @@ my_application_namedTimer1_count 0
         .register(registry);
     assertThat(convertToOpenMetricsFormat(registry))
         .isEqualTo(
-            """
+"""
 # TYPE my_application_namedCounter2 counter
 # HELP my_application_namedCounter2 Generated from Dropwizard metric import (metric=my.application.namedCounter2, type=com.codahale.metrics.Counter)
 my_application_namedCounter2_total 10.0

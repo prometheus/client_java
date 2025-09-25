@@ -33,7 +33,7 @@ class JvmClassLoadingMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        """
+"""
 # TYPE jvm_classes_currently_loaded gauge
 # HELP jvm_classes_currently_loaded The number of classes that are currently loaded in the JVM
 jvm_classes_currently_loaded 1000.0

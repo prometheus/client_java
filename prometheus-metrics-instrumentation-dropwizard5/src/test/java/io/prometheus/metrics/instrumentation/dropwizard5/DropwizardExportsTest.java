@@ -33,7 +33,7 @@ class DropwizardExportsTest {
   public void testCounter() {
     metricRegistry.counter("foo.bar").inc(1);
     String expected =
-        """
+"""
 # TYPE foo_bar counter
 # HELP foo_bar Generated from Dropwizard metric import (metric=foo.bar, type=io.dropwizard.metrics5.Counter)
 foo_bar_total 1.0
@@ -89,7 +89,7 @@ foo_bar_total 1.0
     metricRegistry.register(MetricName.parse("boolean.gauge"), booleanGauge);
 
     String expected =
-        """
+"""
 # TYPE boolean_gauge gauge
 # HELP boolean_gauge Generated from Dropwizard metric import (metric=boolean.gauge, type=io.prometheus.metrics.instrumentation.dropwizard5.DropwizardExportsTest$5)
 boolean_gauge 1.0
@@ -210,7 +210,7 @@ long_gauge 1234.0
     meter.mark();
 
     String expected =
-        """
+"""
 # TYPE meter counter
 # HELP meter Generated from Dropwizard metric import (metric=meter_total, type=io.dropwizard.metrics5.Meter)
 meter_total 2.0
@@ -256,7 +256,7 @@ meter_total 2.0
         MetricName.parse("my.application.namedGauge1"), new ExampleDoubleGauge());
 
     String expected =
-        """
+"""
 # TYPE my_application_namedCounter1 counter
 # HELP my_application_namedCounter1 Generated from Dropwizard metric import (metric=my.application.namedCounter1, type=io.dropwizard.metrics5.Counter)
 my_application_namedCounter1_total 0.0
@@ -295,7 +295,7 @@ my_application_namedTimer1_count 0
     registry.register(DropwizardExports.builder().dropwizardRegistry(metricRegistry).build());
     assertThat(convertToOpenMetricsFormat(registry))
         .isEqualTo(
-            """
+"""
 # EOF
 """);
   }
@@ -329,7 +329,7 @@ my_application_namedTimer1_count 0
         .register(registry);
     assertThat(convertToOpenMetricsFormat(registry))
         .isEqualTo(
-            """
+"""
 # TYPE my_application_namedCounter2 counter
 # HELP my_application_namedCounter2 Generated from Dropwizard metric import (metric=my.application.namedCounter2, type=io.dropwizard.metrics5.Counter)
 my_application_namedCounter2_total 10.0

@@ -32,7 +32,7 @@ class JvmCompilationMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        """
+"""
 # TYPE jvm_compilation_time_seconds counter
 # UNIT jvm_compilation_time_seconds seconds
 # HELP jvm_compilation_time_seconds The total time in seconds taken for HotSpot class compilation

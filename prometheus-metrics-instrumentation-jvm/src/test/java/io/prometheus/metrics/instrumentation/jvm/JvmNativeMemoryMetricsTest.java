@@ -182,7 +182,7 @@ class JvmNativeMemoryMetricsTest {
     MetricSnapshots snapshots = registry.scrape();
 
     String expected =
-        """
+"""
 # TYPE jvm_native_memory_committed_bytes gauge
 # UNIT jvm_native_memory_committed_bytes bytes
 # HELP jvm_native_memory_committed_bytes Committed bytes of a given JVM. Committed memory represents the amount of memory the JVM is using right now.
