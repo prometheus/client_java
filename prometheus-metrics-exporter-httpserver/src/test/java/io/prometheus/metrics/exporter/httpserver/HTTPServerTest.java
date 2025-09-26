@@ -16,7 +16,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.security.AccessController;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.concurrent.Executors;
@@ -46,7 +45,7 @@ public class HTTPServerTest {
     HttpHandler handler =
         exchange -> {
           boolean found = false;
-          Subject current = Subject.getSubject(AccessController.getContext());
+          Subject current = Subject.current();
           for (Principal p : current.getPrincipals()) {
             if (user.equals(p.getName())) {
               found = true;
