@@ -9,8 +9,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +68,7 @@ public abstract class ExporterTest {
       throws IOException {
     return scrape(
         method,
-        new URL(
+        URI.create(
             "http://localhost:"
                 + sampleAppContainer.getMappedPort(9400)
                 + "/metrics?"
@@ -76,10 +76,10 @@ public abstract class ExporterTest {
         requestHeaders);
   }
 
-  public static Response scrape(String method, URL url, String... requestHeaders)
+  public static Response scrape(String method, URI uri, String... requestHeaders)
       throws IOException {
     long timeoutMillis = TimeUnit.SECONDS.toMillis(5);
-    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    HttpURLConnection con = (HttpURLConnection) uri.toURL().openConnection();
     con.setRequestMethod(method);
     for (int i = 0; i < requestHeaders.length; i += 2) {
       con.setRequestProperty(requestHeaders[i], requestHeaders[i + 1]);
@@ -111,7 +111,7 @@ public abstract class ExporterTest {
     if (exception != null) {
       exception.printStackTrace();
     }
-    fail("timeout while getting metrics from " + url);
+    fail("timeout while getting metrics from " + uri);
     return null; // will not happen
   }
 
