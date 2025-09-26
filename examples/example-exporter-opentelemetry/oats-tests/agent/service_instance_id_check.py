@@ -1,53 +1,51 @@
 #!/usr/bin/env python3
-
-"""This script is used to check if the service instance id is present in the exported data
-The script will return 0 if the service instance id is present in the exported data"""
-
+"""
+Check if the service instance id is present in the exported data.
+Returns 0 if the service instance id is present in the exported data.
+"""
 import json
 import urllib.parse
 from urllib.request import urlopen
 
 
-def get(url):
-    global response, res
+def get_json(url):
     with urlopen(url) as response:
-        # read the response
-        res = response.read()
-        # decode the response
-        res = json.loads(res.decode("utf-8"))
-    return res
+        return json.loads(response.read().decode("utf-8"))
 
 
-res = get(" http://localhost:9090/api/v1/query?query=target_info")
+def main():
+    # Query Prometheus for target_info
+    res = get_json("http://localhost:9090/api/v1/query?query=target_info")
 
-# uncomment the following line to use the local file instead of the url - for debugging
-# with open('example_target_info.json') as f:
-#   res = json.load(f)
+    # Uncomment for local debugging
+    # with open('example_target_info.json') as f:
+    #     res = json.load(f)
 
-values = list(
-    {
+    instance_ids = {
         r["metric"]["instance"]
         for r in res["data"]["result"]
-        if not r["metric"]["service_name"] == "otelcol-contrib"
+        if r["metric"].get("service_name") != "otelcol-contrib"
     }
-)
+    instance_ids = list(instance_ids)
 
-print("Instance ids found:")
-print(values)
-if len(values) > 1:
-    print("More than one instance id found")
-    print(res)
+    print(f'Instance ids found:{instance_ids}')
+    if len(instance_ids) > 1:
+        print("More than one instance id found")
+        print(res)
 
-# both the agent and the exporter should report the same instance id
-assert len(values) == 1
+    # Both the agent and the exporter should report the same instance id
+    assert len(instance_ids) == 1, "Expected exactly one instance id"
 
-path = f'target_info{{instance="{values[0]}"}}'
-path = urllib.parse.quote_plus(path)
-res = get(f"http://localhost:9090/api/v1/query?query={path}")
+    query = f'target_info{{instance="{instance_ids[0]}"}}'
+    encoded_query = urllib.parse.quote_plus(query)
+    res = get_json(f"http://localhost:9090/api/v1/query?query={encoded_query}")
 
-infos = res["data"]["result"]
-print(infos)
+    infos = res["data"]["result"]
+    print(infos)
 
-# they should not have the same target info
-# e.g. only the agent has telemetry_distro_name
-assert len(infos) == 2
+    # They should not have the same target info (e.g. only the agent has telemetry_distro_name)
+    assert len(infos) == 2, "Expected two target info results"
+
+
+if __name__ == "__main__":
+    main()
