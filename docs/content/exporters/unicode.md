@@ -3,6 +3,11 @@ title: Unicode
 weight: 2
 ---
 
+{{< hint type=warning >}}
+Unicode support is experimental, because [OpenMetrics specification](https://openmetrics.io/) is not
+updated yet to support Unicode characters in metric and label names.
+{{< /hint >}}
+
 The Prometheus Java client library allows all Unicode characters, that can be encoded as UTF-8.
 
 At scrape time, some characters are replaced based on the `encoding` header according
