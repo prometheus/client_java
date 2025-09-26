@@ -41,7 +41,7 @@ public class PushGatewayIT {
             .withLogConsumer(LogConsumer.withPrefix("pushgateway"))
             .waitingFor(Wait.forListeningPort());
     sampleAppContainer =
-        new GenericContainer<>("openjdk:17")
+        new GenericContainer<>("openjdk:25")
             .withFileSystemBind(sampleAppVolume.getHostPath(), "/app", BindMode.READ_ONLY)
             .withNetwork(network)
             .withWorkingDirectory("/app")

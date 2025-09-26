@@ -34,7 +34,7 @@ public abstract class ExporterTest {
         Volume.create("it-exporter")
             .copy("../../it-" + sampleApp + "/target/" + sampleApp + ".jar");
     this.sampleAppContainer =
-        new GenericContainer<>("openjdk:17")
+        new GenericContainer<>("openjdk:25")
             .withFileSystemBind(sampleAppVolume.getHostPath(), "/app", BindMode.READ_ONLY)
             .withWorkingDirectory("/app")
             .withLogConsumer(LogConsumer.withPrefix(sampleApp))
