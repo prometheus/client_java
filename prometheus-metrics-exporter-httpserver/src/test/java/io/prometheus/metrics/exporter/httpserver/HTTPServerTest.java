@@ -47,7 +47,6 @@ public class HTTPServerTest {
           boolean found = false;
           Subject current = Subject.current();
           for (Principal p : current.getPrincipals()) {
-            System.out.println("p=" + p.getName());
             if (user.equals(p.getName())) {
               found = true;
               break;
