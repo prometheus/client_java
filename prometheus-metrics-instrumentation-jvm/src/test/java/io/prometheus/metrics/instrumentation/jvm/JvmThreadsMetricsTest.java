@@ -174,6 +174,7 @@ jvm_threads_state{state="WAITING"} 0.0
      * Note that only Java versions < 21 call this to get the thread id. With Java 21 and newer it's
      * no longer possible to make an invalid thread id.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public long getId() {
       return this.id;

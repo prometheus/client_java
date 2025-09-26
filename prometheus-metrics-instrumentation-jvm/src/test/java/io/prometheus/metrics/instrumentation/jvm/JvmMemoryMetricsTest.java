@@ -30,6 +30,7 @@ class JvmMemoryMetricsTest {
   private final MemoryUsage memoryUsagePoolCollectionEdenSpace = Mockito.mock(MemoryUsage.class);
   private final MemoryUsage memoryUsagePoolCollectionOldGen = Mockito.mock(MemoryUsage.class);
 
+  @SuppressWarnings("deprecation")
   @BeforeEach
   public void setUp() {
     when(mockMemoryBean.getHeapMemoryUsage()).thenReturn(memoryUsageHeap);
