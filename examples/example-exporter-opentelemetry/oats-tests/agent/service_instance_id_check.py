@@ -31,7 +31,12 @@ values = list(
         if not r["metric"]["service_name"] == "otelcol-contrib"
     }
 )
+
+print("Instance ids found:")
 print(values)
+if len(values) > 1:
+    print("More than one instance id found")
+    print(res)
 
 # both the agent and the exporter should report the same instance id
 assert len(values) == 1
