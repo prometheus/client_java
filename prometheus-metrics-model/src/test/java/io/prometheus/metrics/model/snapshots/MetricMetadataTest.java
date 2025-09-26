@@ -1,6 +1,6 @@
 package io.prometheus.metrics.model.snapshots;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.sanitizeMetricName;
+import static io.prometheus.metrics.model.snapshots.PrometheusNames.sanitizeMetricName;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
