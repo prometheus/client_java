@@ -1,5 +1,8 @@
 package io.prometheus.metrics.exporter.httpserver;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import com.sun.net.httpserver.Authenticator;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -8,10 +11,6 @@ import com.sun.net.httpserver.HttpsConfigurator;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import org.junit.jupiter.api.Test;
-
-import javax.net.ssl.SSLContext;
-import javax.security.auth.Subject;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -20,9 +19,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.concurrent.Executors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import javax.net.ssl.SSLContext;
+import javax.security.auth.Subject;
+import org.junit.jupiter.api.Test;
 
 public class HTTPServerTest {
 
