@@ -19,7 +19,7 @@
 
   <properties>
     <automatic.module.name>io.prometheus.metrics.exporter.servlet.jakarta</automatic.module.name>
-    <java.version>17</java.version>
+    <java.version>25</java.version>
   </properties>
 
   <dependencies>

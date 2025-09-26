@@ -17,7 +17,7 @@
   </description>
   <properties>
     <jetty-server.version>12.1.1</jetty-server.version>
-    <java.version>17</java.version>
+    <java.version>25</java.version>
   </properties>
 
   <dependencies>
