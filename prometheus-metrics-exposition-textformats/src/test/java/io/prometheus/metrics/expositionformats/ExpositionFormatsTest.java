@@ -17,7 +17,7 @@ import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.NativeHistogramBuckets;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.PrometheusNames;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
@@ -2707,7 +2707,7 @@ class ExpositionFormatsTest {
     // @formatter:on
     UnknownSnapshot unknown =
         UnknownSnapshot.builder()
-            .name(PrometheusNaming.sanitizeMetricName("some.unknown.metric", Unit.BYTES))
+            .name(PrometheusNames.sanitizeMetricName("some.unknown.metric", Unit.BYTES))
             .help("help message")
             .unit(Unit.BYTES)
             .dataPoint(
