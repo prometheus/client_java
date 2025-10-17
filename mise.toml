@@ -3,7 +3,7 @@
 "go:github.com/grafana/oats" = "0.4.1"
 java = "temurin-25.0.0+36.0.LTS"
 lychee = "0.20.1"
-protoc = "32.1"
+protoc = "33.0"
 
 [tasks.ci]
 description = "CI Build"
