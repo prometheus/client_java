@@ -36,14 +36,14 @@ services:
       - -jar
       - /example-greeting-service.jar
   collector:
-    image: otel/opentelemetry-collector-contrib:0.136.0@sha256:45392d534c1edcc809c2d112394029246bc679d2ae5ea7081414a1fc74f2c621
+    image: otel/opentelemetry-collector-contrib:0.138.0@sha256:4a951ff0a9772f4fa8e9c7a326434370301b98b2b813933468dcb54aa6a6b5e5
     network_mode: host
     volumes:
       - ./config/otelcol-config.yaml:/config.yaml
     command:
       - --config=file:/config.yaml
   prometheus:
-    image: prom/prometheus:v3.6.0@sha256:76947e7ef22f8a698fc638f706685909be425dbe09bd7a2cd7aca849f79b5f64
+    image: prom/prometheus:v3.7.2@sha256:23031bfe0e74a13004252caaa74eccd0d62b6c6e7a04711d5b8bf5b7e113adc7
     network_mode: host
     volumes:
       - ./config/prometheus.yaml:/prometheus.yaml
@@ -52,14 +52,14 @@ services:
       - --enable-feature=native-histograms
       - --config.file=/prometheus.yaml
   tempo:
-    image: grafana/tempo:2.8.2@sha256:0ef775495967cd5d7a6b2e146b6ea695d624803c8db8349fb8ce4164f719f9b7
+    image: grafana/tempo:2.9.0@sha256:65a5789759435f1ef696f1953258b9bbdb18eb571d5ce711ff812d2e128288a4
     network_mode: host
     volumes:
       - ./config/tempo-config.yaml:/config.yaml
     command:
       - --config.file=/config.yaml
   grafana:
-    image: grafana/grafana:12.2.0@sha256:74144189b38447facf737dfd0f3906e42e0776212bf575dc3334c3609183adf7
+    image: grafana/grafana:12.2.1@sha256:35c41e0fd0295f5d0ee5db7e780cf33506abfaf47686196f825364889dee878b
     network_mode: host
     ports:
       - "3000:3000"

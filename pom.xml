@@ -25,7 +25,7 @@
     <automatic.module.name>--module-name-need-to-be-overridden--</automatic.module.name>
     <protobuf-java.version>4.32.1</protobuf-java.version>
     <guava.version>33.5.0-jre</guava.version>
-    <junit-jupiter.version>5.13.4</junit-jupiter.version>
+    <junit-jupiter.version>6.0.0</junit-jupiter.version>
     <otel.instrumentation.version>2.16.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
@@ -119,7 +119,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.8.1</version>
+          <version>3.9.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
@@ -127,7 +127,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.6.1</version>
+          <version>3.6.2</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -137,7 +137,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
-          <version>3.5.1</version>
+          <version>3.6.2</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -167,7 +167,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.13</version>
+        <version>0.8.14</version>
         <configuration>
           <skip>${coverage.skip}</skip>
           <excludes>
@@ -275,7 +275,7 @@
             <path>
               <groupId>com.google.errorprone</groupId>
               <artifactId>error_prone_core</artifactId>
-              <version>2.42.0</version>
+              <version>2.43.0</version>
             </path>
             <path>
               <groupId>com.uber.nullaway</groupId>

@@ -37,10 +37,10 @@ jobs:
           persist-credentials: false
           fetch-tags: "true"
           fetch-depth: 0
-      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+      - uses: jdx/mise-action@e3d7b8d67a7958d1207f6ed871e83b1ea780e7b0 # v3.3.1
         with:
-          version: v2025.9.15
-          sha256: ea3be29bf97e4a11f57706fcd779dcc719598c22125d47e99182092c83814baa
+          version: v2025.10.11
+          sha256: 589cac941160e404d13be6f5699a25ffdb25b732084430338bc384df9f0a4438
           cache: "false"
       - name: Setup Pages
         id: pages
