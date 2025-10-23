@@ -28,7 +28,7 @@ def main():
     }
     instance_ids = list(instance_ids)
 
-    print(f'Instance ids found:{instance_ids}')
+    print(f"Instance ids found:{instance_ids}")
     if len(instance_ids) > 1:
         print("More than one instance id found")
         print(res)
