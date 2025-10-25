@@ -1,7 +1,7 @@
 [tools]
 "go:github.com/gohugoio/hugo" = "v0.152.2"
 "go:github.com/grafana/oats" = "0.4.1"
-java = "temurin-25.0.0+36.0.LTS"
+java = "temurin-25.0.1+8.0.LTS"
 lychee = "0.21.0"
 protoc = "32.1"
 
