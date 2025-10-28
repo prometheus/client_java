@@ -27,7 +27,7 @@ jobs:
       - name: Set Up JDK
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5
         with:
-          java-version: 17
+          java-version: 21
           distribution: temurin
 
       - name: Build with Maven
@@ -39,7 +39,7 @@ jobs:
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5
         with:
           distribution: "temurin"
-          java-version: "17"
+          java-version: "21"
           server-id: ossrh
           server-username: MAVEN_USERNAME
           server-password: MAVEN_CENTRAL_TOKEN
