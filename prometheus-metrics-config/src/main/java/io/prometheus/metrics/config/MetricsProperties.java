@@ -263,7 +263,7 @@ public class MetricsProperties {
     return histogramClassicOnly;
   }
 
-  /** See {@code Histogram.Builder.classicBuckets()} */
+  /** See {@code Histogram.Builder.classicUpperBounds()} */
   @Nullable
   public List<Double> getHistogramClassicUpperBounds() {
     return histogramClassicUpperBounds;

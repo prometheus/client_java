@@ -109,9 +109,9 @@ most cases you don't need them, defaults are good. The following is an incomplet
 most important options:
 
 - `nativeOnly()` / `classicOnly()`: Create a histogram with one representation only.
-- `classicBuckets(...)`: Set the classic bucket boundaries. Default buckets are `.005`, `.01`,
-  `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The default bucket boundaries are
-  designed for measuring request durations in seconds.
+- `classicUpperBounds(...)`: Set the classic bucket upper boundaries. Default bucket upper
+  boundaries are `.005`, `.01`, `.025`, `.05`, `.1`, `.25`, `.5`, `1`, `2.5`, `5`, `and 10`. The
+  default bucket boundaries are designed for measuring request durations in seconds.
 - `nativeMaxNumberOfBuckets()`: Upper limit for the number of native histogram buckets.
   Default is 160. When the maximum is reached, the native histogram automatically
   reduces resolution to stay below the limit.
