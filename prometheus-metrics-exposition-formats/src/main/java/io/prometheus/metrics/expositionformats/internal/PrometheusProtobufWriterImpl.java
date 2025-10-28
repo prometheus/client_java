@@ -6,7 +6,7 @@ import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotL
 import com.google.protobuf.TextFormat;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_32_1.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_0.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;

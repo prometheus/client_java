@@ -3,7 +3,7 @@
 "go:github.com/grafana/oats" = "0.4.1"
 java = "temurin-25.0.1+8.0.LTS"
 lychee = "0.21.0"
-protoc = "32.1"
+protoc = "33.0"
 
 [tasks.ci]
 description = "CI Build"
@@ -25,7 +25,10 @@ run = "./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=tru
 
 [tasks.generate]
 description = "bare compile, ignoring formatting and linters"
-run = "./mvnw clean install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+run = [
+  "mise use --pin protoc@latest",
+  "./mvnw clean install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn"
+]
 env.PROTO_GENERATION = "true"
 
 [tasks.test]
