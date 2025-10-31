@@ -37,7 +37,7 @@ jobs:
           persist-credentials: false
           fetch-tags: "true"
           fetch-depth: 0
-      - uses: jdx/mise-action@e3d7b8d67a7958d1207f6ed871e83b1ea780e7b0 # v3.3.1
+      - uses: jdx/mise-action@be3be2260bc02bc3fbf94c5e2fed8b7964baf074 # v3.4.0
         with:
           version: v2025.10.18
           sha256: 3790805b8041fdd831c904ffeb9c11a9b5ddaaea85f8cba775d4f344a61d5014
