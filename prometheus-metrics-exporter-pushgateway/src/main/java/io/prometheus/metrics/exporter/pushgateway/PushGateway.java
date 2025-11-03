@@ -27,12 +27,12 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
@@ -80,9 +80,6 @@ import javax.annotation.Nullable;
  * href="https://github.com/prometheus/pushgateway">https://github.com/prometheus/pushgateway</a>.
  */
 public class PushGateway {
-
-  private static final int MILLISECONDS_PER_SECOND = 1000;
-
   private final URL url;
   private final ExpositionFormatWriter writer;
   private final boolean prometheusTimestampsInMs;
@@ -90,8 +87,8 @@ public class PushGateway {
   private final PrometheusRegistry registry;
   private final HttpConnectionFactory connectionFactory;
   private final EscapingScheme escapingScheme;
-  private final Integer connectionTimeout;
-  private final Integer readTimeout;
+  private final Duration connectionTimeout;
+  private final Duration readTimeout;
 
   private PushGateway(
       PrometheusRegistry registry,
@@ -101,16 +98,16 @@ public class PushGateway {
       Map<String, String> requestHeaders,
       boolean prometheusTimestampsInMs,
       EscapingScheme escapingScheme,
-      @Nullable Integer connectionTimeout,
-      @Nullable Integer readTimeout) {
+      Duration connectionTimeout,
+      Duration readTimeout) {
     this.registry = registry;
     this.url = url;
     this.requestHeaders = Collections.unmodifiableMap(new HashMap<>(requestHeaders));
     this.connectionFactory = connectionFactory;
     this.prometheusTimestampsInMs = prometheusTimestampsInMs;
     this.escapingScheme = escapingScheme;
-    this.connectionTimeout = Optional.ofNullable(connectionTimeout).orElse(10 * MILLISECONDS_PER_SECOND);
-    this.readTimeout = Optional.ofNullable(readTimeout).orElse(10 * MILLISECONDS_PER_SECOND);
+    this.connectionTimeout = connectionTimeout;
+    this.readTimeout = readTimeout;
     writer = getWriter(format);
     if (!writer.isAvailable()) {
       throw new RuntimeException(writer.getClass() + " is not available");
@@ -213,8 +210,8 @@ public class PushGateway {
       }
       connection.setRequestMethod(method);
 
-      connection.setConnectTimeout(this.connectionTimeout);
-      connection.setReadTimeout(this.readTimeout);
+      connection.setConnectTimeout((int) this.connectionTimeout.toMillis());
+      connection.setReadTimeout((int) this.readTimeout.toMillis());
       connection.connect();
 
       try {
@@ -284,8 +281,8 @@ public class PushGateway {
     @Nullable private String address;
     @Nullable private Scheme scheme;
     @Nullable private String job;
-    @Nullable private Integer connectionTimeout;
-    @Nullable private Integer readTimeout;
+    @Nullable private Duration connectionTimeout;
+    @Nullable private Duration readTimeout;
     private boolean prometheusTimestampsInMs;
     private final Map<String, String> requestHeaders = new HashMap<>();
     private PrometheusRegistry registry = PrometheusRegistry.defaultRegistry;
@@ -405,27 +402,46 @@ public class PushGateway {
     }
 
     /**
-     * Specify the connection timeout (in milliseconds) for HTTP connections to the PushGateway.
-     * Default is {@code 10000} (10 seconds).
+     * Specify the connection timeout for HTTP connections to the PushGateway. Default is 10
+     * seconds.
      *
-     * @param connectionTimeout timeout value in milliseconds
+     * @param connectionTimeout timeout value
      * @return this {@link Builder} instance
      */
-    public Builder connectionTimeout(Integer connectionTimeout) {
+    public Builder connectionTimeout(Duration connectionTimeout) {
       this.connectionTimeout = connectionTimeout;
       return this;
     }
 
+    private Duration getConnectionTimeout(@Nullable ExporterPushgatewayProperties properties) {
+      if (properties != null && properties.getConnectTimeout() != null) {
+        return properties.getConnectTimeout();
+      } else if (this.connectionTimeout != null) {
+        return this.connectionTimeout;
+      } else {
+        return Duration.ofSeconds(10);
+      }
+    }
+
     /**
-     * Specify the read timeout (in milliseconds) for reading the response from the PushGateway.
-     * Default is {@code 10000} (10 seconds).
+     * Specify the read timeout for HTTP connections to the PushGateway. Default is 10 seconds.
      *
-     * @param readTimeout timeout value in milliseconds
+     * @param readTimeout timeout value
      * @return this {@link Builder} instance
      */
-    public Builder readTimeout(Integer readTimeout) {
+    public Builder readTimeout(Duration readTimeout) {
       this.readTimeout = readTimeout;
       return this;
+    }
+
+    private Duration getReadTimeout(@Nullable ExporterPushgatewayProperties properties) {
+      if (properties != null && properties.getReadTimeout() != null) {
+        return properties.getReadTimeout();
+      } else if (this.readTimeout != null) {
+        return this.readTimeout;
+      } else {
+        return Duration.ofSeconds(10);
+      }
     }
 
     private boolean getPrometheusTimestampsInMs() {
@@ -530,8 +546,8 @@ public class PushGateway {
             requestHeaders,
             getPrometheusTimestampsInMs(),
             getEscapingScheme(properties),
-            connectionTimeout,
-            readTimeout);
+            getConnectionTimeout(properties),
+            getReadTimeout(properties));
       } catch (MalformedURLException e) {
         throw new PrometheusPropertiesException(
             address + ": Invalid address. Expecting <host>:<port>");
