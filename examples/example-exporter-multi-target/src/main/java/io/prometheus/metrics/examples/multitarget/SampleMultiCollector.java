@@ -7,7 +7,7 @@ import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import io.prometheus.metrics.model.snapshots.PrometheusNaming;
+import io.prometheus.metrics.model.snapshots.PrometheusNames;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +34,7 @@ public class SampleMultiCollector implements MultiCollector {
     gaugeBuilder.name("x_load").help("process load");
 
     CounterSnapshot.Builder counterBuilder = CounterSnapshot.builder();
-    counterBuilder.name(PrometheusNaming.sanitizeMetricName("x_calls_total")).help("invocations");
+    counterBuilder.name(PrometheusNames.sanitizeMetricName("x_calls_total")).help("invocations");
 
     String[] targetNames = scrapeRequest.getParameterValues("target");
     String targetName;
