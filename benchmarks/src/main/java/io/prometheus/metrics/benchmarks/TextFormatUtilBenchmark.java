@@ -12,13 +12,25 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot.SummaryDataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.Unit;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
+/**
+ * Results on a machine with dedicated Ubuntu 24.04 LTS, AMD Ryzen™ 9 7900 × 24, 96.0 GiB RAM:
+ *
+ * <pre>
+ * Benchmark                                             Mode  Cnt       Score       Error  Units
+ * TextFormatUtilBenchmark.openMetricsWriteToByteArray  thrpt   25  846397.071 ±  8835.379  ops/s
+ * TextFormatUtilBenchmark.openMetricsWriteToNull       thrpt   25  862205.960 ± 14185.181  ops/s
+ * TextFormatUtilBenchmark.prometheusWriteToByteArray   thrpt   25  916443.104 ±  7359.549  ops/s
+ * TextFormatUtilBenchmark.prometheusWriteToNull        thrpt   25  907473.591 ± 12615.214  ops/s
+ * </pre>
+ */
 public class TextFormatUtilBenchmark {
 
   private static final MetricSnapshots SNAPSHOTS;
