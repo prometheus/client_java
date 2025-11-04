@@ -40,7 +40,7 @@ description = "run all tests"
 run = "./mvnw verify"
 
 [tasks.build]
-description = "build all modules wihthout tests"
+description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
 [tasks.lint-links]
