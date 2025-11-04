@@ -27,8 +27,8 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Run the Maven verify phase
-        run: ./scripts/build-release.sh
+      - name: Build release version
+        run: mise run build-release
         env:
           # don't ues the current snapshot version, to test a more realistic release
           TAG: ${{ github.run_number }}
