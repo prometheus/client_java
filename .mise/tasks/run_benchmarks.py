@@ -166,7 +166,18 @@ def main(argv: List[str]):
     parser.add_argument('--jmh-args', default='', help='Extra arguments to pass to the JMH main (e.g. "-f 1 -wi 0 -i 1")')
     args = parser.parse_args(argv)
 
-    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    # Determine repository root by searching upwards for a marker (mvnw or pom.xml).
+    start_dir = os.path.abspath(os.path.dirname(__file__))
+    repo_root = start_dir
+    while True:
+        if os.path.exists(os.path.join(repo_root, 'mvnw')) or os.path.exists(os.path.join(repo_root, 'pom.xml')):
+            break
+        parent = os.path.dirname(repo_root)
+        if parent == repo_root:
+            # reached filesystem root; fallback to original heuristic (one level up)
+            repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+            break
+        repo_root = parent
     os.chdir(repo_root)
 
     build_benchmarks(args.mvnw, args.module)
