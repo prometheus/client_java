@@ -6,7 +6,6 @@ import static java.lang.Character.MIN_HIGH_SURROGATE;
 
 import io.prometheus.metrics.config.EscapingScheme;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 /**
@@ -17,16 +16,6 @@ import javax.annotation.Nullable;
  * OpenTelemetry format the dots are retained.
  */
 public class PrometheusNaming {
-
-  /**
-   * Legal characters for unit names, including dot.
-   *
-   * @deprecated Not used anymore. Kept for backward compatibility. The validation is now done
-   *     without regex for better performance.
-   */
-  @Deprecated
-  @SuppressWarnings("UnusedVariable")
-  private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
 
   /**
    * According to OpenMetrics {@code _count} and {@code _sum} (and {@code _gcount}, {@code _gsum})
