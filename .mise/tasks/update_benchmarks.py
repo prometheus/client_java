@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 #MISE description="Run and update JMH benchmark outputs in the benchmarks module"
+#MISE alias="update-benchmarks"
 
 """
 Run benchmarks for the `benchmarks` module, capture JMH text output, and update
 any <pre>...</pre> blocks containing "thrpt" under the `benchmarks/` module
 (files such as Java sources with embedded example output in javadocs).
 
-Usage: ./scripts/run_benchmarks.py [--mvnw ./mvnw] [--module benchmarks] [--java java] [--jmh-args "-f 1 -wi 0 -i 1"]
+Usage: ./scripts/update_benchmarks.py [--mvnw ./mvnw] [--module benchmarks] [--java java] [--jmh-args "-f 1 -wi 0 -i 1"]
 
 By default this will:
  - run the maven wrapper to package the benchmarks: `./mvnw -pl benchmarks -am -DskipTests package`
