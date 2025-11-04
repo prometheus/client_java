@@ -173,7 +173,6 @@ def update_pre_blocks_under_module(module: str, table: str) -> List[str]:
             continue
 
         original = content
-        new_content = content
 
         # Determine the class name from the filename (e.g. TextFormatUtilBenchmark.java -> TextFormatUtilBenchmark)
         base = os.path.basename(path)
