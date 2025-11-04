@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#MISE description="Make sure the BOM has all necessary modules"
+# [MISE] description="Make sure the BOM has all necessary modules"
 
 import os
 import re

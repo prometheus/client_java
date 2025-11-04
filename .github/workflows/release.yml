@@ -28,6 +28,7 @@ jobs:
         with:
           version: v2025.11.1
           sha256: d4bec11aeb5b13180c596b70abf59716acda20131dbc3df8b9146f97cecf645c
+          cache: false
 
       - name: Build release version
         run: mise run build-release

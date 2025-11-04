@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-#MISE description="Run and update JMH benchmark outputs in the benchmarks module"
-#MISE alias="update-benchmarks"
+# [MISE] description="Run and update JMH benchmark outputs in the benchmarks module"
+# [MISE] alias="update-benchmarks"
 
 """
 Run benchmarks for the `benchmarks` module, capture JMH text output, and update
