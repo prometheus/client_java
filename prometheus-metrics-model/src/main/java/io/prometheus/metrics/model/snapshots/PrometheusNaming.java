@@ -18,7 +18,14 @@ import javax.annotation.Nullable;
  */
 public class PrometheusNaming {
 
-  /** Legal characters for unit names, including dot. */
+  /**
+   * Legal characters for unit names, including dot.
+   *
+   * @deprecated Not used anymore. Kept for backward compatibility. The validation is now done
+   *     without regex for better performance.
+   */
+  @Deprecated
+  @SuppressWarnings("UnusedVariable")
   private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
 
   /**
@@ -165,8 +172,17 @@ public class PrometheusNaming {
         return suffixName + " is a reserved suffix in Prometheus";
       }
     }
-    if (!UNIT_NAME_PATTERN.matcher(name).matches()) {
-      return "The unit name contains unsupported characters";
+    // Check if all characters are [a-zA-Z0-9_.:]+
+    for (int i = 0; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (!((c >= 'a' && c <= 'z')
+          || (c >= 'A' && c <= 'Z')
+          || (c >= '0' && c <= '9')
+          || c == '_'
+          || c == '.'
+          || c == ':')) {
+        return "The unit name contains unsupported characters";
+      }
     }
     return null;
   }
@@ -282,7 +298,7 @@ public class PrometheusNaming {
     return sanitizedName;
   }
 
-  /** Returns a string that matches {@link #UNIT_NAME_PATTERN}. */
+  /** Returns a string with only valid unit name characters [a-zA-Z0-9_.:]. */
   private static String replaceIllegalCharsInUnitName(String name) {
     int length = name.length();
     char[] sanitized = new char[length];
