@@ -17,7 +17,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 
 /**
- * Results on a machine with dedicated Core i7 1265U:
+ * Results on a machine with dedicated Ubuntu 24.04 LTS, AMD Ryzen™ 9 7900 × 24, 96.0 GiB RAM:
  *
  * <pre>
  * Benchmark                                             Mode  Cnt       Score   Error  Units
