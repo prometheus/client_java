@@ -1,4 +1,15 @@
-# Create a Release
+# Releasing Instructions for Prometheus Java Client
+
+## Before the Release
+
+If there have been significant changes since the last release, update the
+benchmarks before creating a new release:
+
+```shell
+mise run update-benchmarks
+```
+
+## Create a Release
 
 1. Go to <https://github.com/prometheus/client_java/releases/new>
 2. Click on "Choose a tag", enter the tag name (e.g. `v0.1.0`), and click "Create a new tag".

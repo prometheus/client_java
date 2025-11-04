@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+#MISE description="Run GitHub Super Linter on the repository"
 
-pushd "$(dirname "$0")/.."
+set -euo pipefail
 
 docker pull ghcr.io/super-linter/super-linter:latest
 
@@ -12,5 +12,3 @@ docker run --rm \
 	--env-file ".github/super-linter.env" \
 	-v "$(pwd)":/tmp/lint \
 	ghcr.io/super-linter/super-linter:latest
-
-popd

@@ -40,17 +40,12 @@ description = "run all tests"
 run = "./mvnw verify"
 
 [tasks.build]
-description = "build all modules wihthout tests"
+description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
-[tasks.lint]
-run = "scripts/super-linter.sh"
-
 [tasks.lint-links]
+description = "Lint markdown links"
 run = "lychee --include-fragments ."
-
-[tasks.lint-bom]
-run = "scripts/lint-bom.sh"
 
 [tasks.lint-rest]
 description = "All lints not covered by super linter"
@@ -61,18 +56,13 @@ description = "Run OATs acceptance tests"
 depends = "build"
 run = "oats -timeout 5m examples/"
 
-[tasks.set-version]
-run = './scripts/set-version.sh {{arg(name="version")}}'
-
 [tasks.javadoc]
+description = "Generate Javadoc"
 run = [
   "./mvnw -B clean compile javadoc:javadoc javadoc:aggregate -P 'javadoc,!default'",
   "rm -rf ./docs/static/api",
   "mv ./target/reports/apidocs ./docs/static/api && echo && echo 'ls ./docs/static/api' && ls ./docs/static/api"
 ]
-
-[tasks.set-gh-pages-version]
-run = "./scripts/set-release-version-github-pages.sh"
 
 [tasks.gh-pages-dev]
 description = "Build GitHub pages for dev"
@@ -81,7 +71,7 @@ dir = "docs"
 
 [tasks.build-gh-pages]
 description = "Build GitHub pages"
-depends = ["javadoc", "set-gh-pages-version"]
+depends = ["javadoc", "set-release-version-github-pages"]
 # For maximum backward compatibility with Hugo modules
 env = { HUGO_ENVIRONMENT = "production", HUGO_ENV = "production" }
 dir = "docs"
@@ -89,13 +79,3 @@ run = [
   "hugo --gc --minify --baseURL ${BASE_URL}/",
   "echo 'ls ./public/api' && ls ./public/api"
 ]
-
-[tasks.build-release]
-description = "Build release"
-run = "./scripts/build-release.sh"
-env.TAG = "1.5.0-SNAPSHOT"
-
-[settings]
-# to get lock file support and for go backend
-experimental = true
-

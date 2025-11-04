@@ -16,3 +16,4 @@ max_line_length = 110
 [*.py]
 # checked by black
 indent_size = 4
+max_line_length = 120

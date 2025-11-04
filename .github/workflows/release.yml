@@ -24,14 +24,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set Up JDK
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5
+      - uses: jdx/mise-action@be3be2260bc02bc3fbf94c5e2fed8b7964baf074 # v3.4.0
         with:
-          java-version: 21
-          distribution: temurin
+          version: v2025.11.1
+          sha256: d4bec11aeb5b13180c596b70abf59716acda20131dbc3df8b9146f97cecf645c
+          cache: false
 
-      - name: Build with Maven
-        run: ./scripts/build-release.sh
+      - name: Build release version
+        run: mise run build-release
         env:
           TAG: ${{ github.ref_name }}
 
