@@ -21,17 +21,17 @@ import org.openjdk.jmh.annotations.Threads;
  * Results on a machine with dedicated Ubuntu 24.04 LTS, AMD Ryzen™ 9 7900 × 24, 96.0 GiB RAM:
  *
  * <pre>
- * Benchmark                                             Mode  Cnt       Score   Error  Units
- * CounterBenchmark.codahaleIncNoLabels                 thrpt        57881.585          ops/s
- * CounterBenchmark.openTelemetryAdd                    thrpt         9771.577          ops/s
- * CounterBenchmark.openTelemetryInc                    thrpt         9627.961          ops/s
- * CounterBenchmark.openTelemetryIncNoLabels            thrpt        10303.562          ops/s
- * CounterBenchmark.prometheusAdd                       thrpt        31623.420          ops/s
- * CounterBenchmark.prometheusInc                       thrpt        54090.469          ops/s
- * CounterBenchmark.prometheusNoLabelsInc               thrpt        50913.426          ops/s
- * CounterBenchmark.simpleclientAdd                     thrpt         4564.419          ops/s
- * CounterBenchmark.simpleclientInc                     thrpt         4645.809          ops/s
- * CounterBenchmark.simpleclientNoLabelsInc             thrpt         4581.249          ops/s
+ * Benchmark                                             Mode  Cnt       Score       Error  Units
+ * CounterBenchmark.codahaleIncNoLabels                 thrpt   25  144632.191 ±  2778.333  ops/s
+ * CounterBenchmark.openTelemetryAdd                    thrpt   25    2165.775 ±   168.554  ops/s
+ * CounterBenchmark.openTelemetryInc                    thrpt   25    1940.143 ±    86.223  ops/s
+ * CounterBenchmark.openTelemetryIncNoLabels            thrpt   25    1880.089 ±   192.395  ops/s
+ * CounterBenchmark.prometheusAdd                       thrpt   25  122427.789 ±  1377.485  ops/s
+ * CounterBenchmark.prometheusInc                       thrpt   25  183603.131 ±  2812.874  ops/s
+ * CounterBenchmark.prometheusNoLabelsInc               thrpt   25  169733.499 ±   670.495  ops/s
+ * CounterBenchmark.simpleclientAdd                     thrpt   25   13771.151 ±    77.473  ops/s
+ * CounterBenchmark.simpleclientInc                     thrpt   25   14255.342 ±   117.339  ops/s
+ * CounterBenchmark.simpleclientNoLabelsInc             thrpt   25   14175.465 ±    56.575  ops/s
  * </pre>
  *
  * Prometheus counters are faster than counters of other libraries. For example, incrementing a

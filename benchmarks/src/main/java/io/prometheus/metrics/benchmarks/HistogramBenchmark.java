@@ -20,12 +20,12 @@ import org.openjdk.jmh.annotations.Threads;
  * Results on a machine with dedicated Ubuntu 24.04 LTS, AMD Ryzen™ 9 7900 × 24, 96.0 GiB RAM:
  *
  * <pre>
- * Benchmark                                             Mode  Cnt       Score   Error  Units
- * HistogramBenchmark.openTelemetryClassic              thrpt         6725.610          ops/s
- * HistogramBenchmark.openTelemetryExponential          thrpt         5280.926          ops/s
- * HistogramBenchmark.prometheusClassic                 thrpt        14286.384          ops/s
- * HistogramBenchmark.prometheusNative                  thrpt         2385.134          ops/s
- * HistogramBenchmark.simpleclient                      thrpt         4062.732          ops/s
+ * Benchmark                                             Mode  Cnt       Score       Error  Units
+ * HistogramBenchmark.openTelemetryClassic              thrpt   25     968.178 ±    28.582  ops/s
+ * HistogramBenchmark.openTelemetryExponential          thrpt   25     836.000 ±    17.709  ops/s
+ * HistogramBenchmark.prometheusClassic                 thrpt   25    7010.393 ±   683.782  ops/s
+ * HistogramBenchmark.prometheusNative                  thrpt   25    5040.572 ±   284.433  ops/s
+ * HistogramBenchmark.simpleclient                      thrpt   25   10485.462 ±    41.265  ops/s
  * </pre>
  *
  * The simpleclient (i.e. client_java version 0.16.0 and older) histograms perform about the same as
