@@ -64,7 +64,7 @@ public class PrometheusNaming {
    * Test if a metric name is valid. Rules:
    *
    * <ul>
-   *   <li>The name must match {@link #METRIC_NAME_PATTERN}.
+   *   <li>The name must be valid UTF-8.
    *   <li>The name MUST NOT end with one of the {@link #RESERVED_METRIC_NAME_SUFFIXES}.
    * </ul>
    *
