@@ -6,7 +6,6 @@ import static java.lang.Character.MIN_HIGH_SURROGATE;
 
 import io.prometheus.metrics.config.EscapingScheme;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 /**
@@ -17,15 +16,6 @@ import javax.annotation.Nullable;
  * OpenTelemetry format the dots are retained.
  */
 public class PrometheusNaming {
-
-  private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
-
-  /** Legal characters for label names. */
-  private static final Pattern LEGACY_LABEL_NAME_PATTERN =
-      Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
-
-  /** Legal characters for unit names, including dot. */
-  private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
 
   /**
    * According to OpenMetrics {@code _count} and {@code _sum} (and {@code _gcount}, {@code _gsum})
@@ -51,7 +41,9 @@ public class PrometheusNaming {
    * Test if a metric name is valid. Rules:
    *
    * <ul>
-   *   <li>The name must match {@link #METRIC_NAME_PATTERN}.
+   *   <li>The name must match <a
+   *       href="https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels">Metric
+   *       names</a>.
    *   <li>The name MUST NOT end with one of the {@link #RESERVED_METRIC_NAME_SUFFIXES}.
    * </ul>
    *
@@ -90,7 +82,29 @@ public class PrometheusNaming {
   }
 
   public static boolean isValidLegacyMetricName(String name) {
-    return METRIC_NAME_PATTERN.matcher(name).matches();
+    if (name.isEmpty()) {
+      return false;
+    }
+    // First character must be [a-zA-Z_:]
+    char first = name.charAt(0);
+    if (!((first >= 'a' && first <= 'z')
+        || (first >= 'A' && first <= 'Z')
+        || first == '_'
+        || first == ':')) {
+      return false;
+    }
+    // Remaining characters must be [a-zA-Z0-9_:]
+    for (int i = 1; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (!((c >= 'a' && c <= 'z')
+          || (c >= 'A' && c <= 'Z')
+          || (c >= '0' && c <= '9')
+          || c == '_'
+          || c == ':')) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public static boolean isValidLabelName(String name) {
@@ -106,7 +120,25 @@ public class PrometheusNaming {
   }
 
   public static boolean isValidLegacyLabelName(String name) {
-    return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches();
+    if (name.isEmpty()) {
+      return false;
+    }
+    // First character must be [a-zA-Z_]
+    char first = name.charAt(0);
+    if (!((first >= 'a' && first <= 'z') || (first >= 'A' && first <= 'Z') || first == '_')) {
+      return false;
+    }
+    // Remaining characters must be [a-zA-Z0-9_]
+    for (int i = 1; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (!((c >= 'a' && c <= 'z')
+          || (c >= 'A' && c <= 'Z')
+          || (c >= '0' && c <= '9')
+          || c == '_')) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -129,8 +161,17 @@ public class PrometheusNaming {
         return suffixName + " is a reserved suffix in Prometheus";
       }
     }
-    if (!UNIT_NAME_PATTERN.matcher(name).matches()) {
-      return "The unit name contains unsupported characters";
+    // Check if all characters are [a-zA-Z0-9_.:]+
+    for (int i = 0; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (!((c >= 'a' && c <= 'z')
+          || (c >= 'A' && c <= 'Z')
+          || (c >= '0' && c <= '9')
+          || c == '_'
+          || c == '.'
+          || c == ':')) {
+        return "The unit name contains unsupported characters";
+      }
     }
     return null;
   }
@@ -246,7 +287,7 @@ public class PrometheusNaming {
     return sanitizedName;
   }
 
-  /** Returns a string that matches {@link #UNIT_NAME_PATTERN}. */
+  /** Returns a string with only valid unit name characters [a-zA-Z0-9_.:]. */
   private static String replaceIllegalCharsInUnitName(String name) {
     int length = name.length();
     char[] sanitized = new char[length];
