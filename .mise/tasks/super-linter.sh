@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+#MISE description="Run GitHub Super Linter on the repository"
+
 set -euo pipefail
 
 pushd "$(dirname "$0")/.."

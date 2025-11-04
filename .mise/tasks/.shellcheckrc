@@ -1,0 +1,3 @@
+# shellcheck configuration for mise tasks
+# SC2154: usage_* variables are set by mise framework
+disable=SC2154

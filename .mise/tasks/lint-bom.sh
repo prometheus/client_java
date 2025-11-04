@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#MISE description="Make sure the BOM has all necessary modules"
 
 set -euo pipefail
 

@@ -1,6 +1,16 @@
 # Benchmarks
 
 ## How to Run
+                               
+### Running benchmarks
+
+Run benchmarks and update the results in the Javadoc of the benchmark classes:
+
+```shell
+mise run run-benchmarks
+``` 
+
+### Running benchmarks manually
 
 ```shell
 java -jar ./benchmarks/target/benchmarks.jar
