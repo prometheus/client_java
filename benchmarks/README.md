@@ -1,14 +1,14 @@
 # Benchmarks
 
 ## How to Run
-                               
+
 ### Running benchmarks
 
 Run benchmarks and update the results in the Javadoc of the benchmark classes:
 
 ```shell
 mise run update-benchmarks
-``` 
+```
 
 ### Running benchmarks manually
 
@@ -28,7 +28,7 @@ See Javadoc of the benchmark classes:
 
 - [CounterBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/CounterBenchmark.java) <!-- editorconfig-checker-disable-line -->
 - [HistogramBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/HistogramBenchmark.java) <!-- editorconfig-checker-disable-line -->
-- [TextFormatUtilBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/TextFormatUtilBenchmark.java)  <!-- editorconfig-checker-disable-line -->
+- [TextFormatUtilBenchmark](https://github.com/prometheus/client_java/blob/main/benchmarks/src/main/java/io/prometheus/metrics/benchmarks/TextFormatUtilBenchmark.java) <!-- editorconfig-checker-disable-line -->
 
 ## What Prometheus Java client optimizes for
 
@@ -43,7 +43,7 @@ multiple threads recording data in shared
 metrics.
 
 ## Test the benchmark creation script
-                                              
+
 To test the benchmark creation script, run:
 
 ```shell

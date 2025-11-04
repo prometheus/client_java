@@ -4,8 +4,6 @@
 
 set -euo pipefail
 
-pushd "$(dirname "$0")/.."
-
 docker pull ghcr.io/super-linter/super-linter:latest
 
 docker run --rm \

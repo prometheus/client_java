@@ -77,7 +77,9 @@ def collect_have(bom_pom: Path) -> List[str]:
 
     text = bom_pom.read_text(encoding="utf-8")
     # find artifactId values that start with MODULE_PREFIX
-    matches = re.findall(r"<artifactId>\s*(%s[^<\s]*)\s*</artifactId>" % re.escape(MODULE_PREFIX), text)
+    matches = re.findall(
+        r"<artifactId>\s*(%s[^<\s]*)\s*</artifactId>" % re.escape(MODULE_PREFIX), text
+    )
     return sorted(matches)
 
 
@@ -90,13 +92,20 @@ def main() -> int:
         have_text = "\n".join(have)
 
         if want_text != have_text:
-            print("The BOM file prometheus-metrics-bom/bom.xml does not match the current directory contents.")
+            print(
+                "The BOM file prometheus-metrics-bom/bom.xml does not match the current directory contents."
+            )
             print("Expected:")
             print(want_text)
             print("Found:")
             print(have_text)
             print()
-            diff = difflib.unified_diff(have_text.splitlines(keepends=True), want_text.splitlines(keepends=True), fromfile="found", tofile="expected")
+            diff = difflib.unified_diff(
+                have_text.splitlines(keepends=True),
+                want_text.splitlines(keepends=True),
+                fromfile="found",
+                tofile="expected",
+            )
             sys.stdout.writelines(diff)
             return 1
         else:
@@ -110,4 +119,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
