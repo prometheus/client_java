@@ -18,25 +18,6 @@ import javax.annotation.Nullable;
  */
 public class PrometheusNaming {
 
-  /**
-   * @deprecated Not used anymore. Kept for backward compatibility. The validation is now done
-   *     without regex for better performance.
-   */
-  @Deprecated
-  @SuppressWarnings("UnusedVariable")
-  private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
-
-  /**
-   * Legal characters for label names.
-   *
-   * @deprecated Not used anymore. Kept for backward compatibility. The validation is now done
-   *     without regex for better performance.
-   */
-  @Deprecated
-  @SuppressWarnings("UnusedVariable")
-  private static final Pattern LEGACY_LABEL_NAME_PATTERN =
-      Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
-
   /** Legal characters for unit names, including dot. */
   private static final Pattern UNIT_NAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_.:]+$");
 
@@ -64,7 +45,9 @@ public class PrometheusNaming {
    * Test if a metric name is valid. Rules:
    *
    * <ul>
-   *   <li>The name must be valid UTF-8.
+   *   <li>The name must match <a
+   *       href="https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels">Metric
+   *       names</a>.
    *   <li>The name MUST NOT end with one of the {@link #RESERVED_METRIC_NAME_SUFFIXES}.
    * </ul>
    *
@@ -146,9 +129,7 @@ public class PrometheusNaming {
     }
     // First character must be [a-zA-Z_]
     char first = name.charAt(0);
-    if (!((first >= 'a' && first <= 'z')
-        || (first >= 'A' && first <= 'Z')
-        || first == '_')) {
+    if (!((first >= 'a' && first <= 'z') || (first >= 'A' && first <= 'Z') || first == '_')) {
       return false;
     }
     // Remaining characters must be [a-zA-Z0-9_]
