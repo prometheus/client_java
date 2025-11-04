@@ -2,13 +2,12 @@
 
 # [MISE] description="Make sure the BOM has all necessary modules"
 
-import os
+import difflib
 import re
 import sys
 from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
-import difflib
 
 ROOT = Path(__file__).resolve().parents[2]  # repo root (.. from .mise/tasks)
 IGNORE_DIRS = {"prometheus-metrics-parent"}

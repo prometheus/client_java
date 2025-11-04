@@ -4,13 +4,12 @@ import sys
 import tempfile
 import unittest
 
+from update_benchmarks import update_pre_blocks_under_module
+
 # Ensure the tasks directory is importable when running the test directly
 here = os.path.dirname(__file__)
 if here not in sys.path:
     sys.path.insert(0, here)
-
-from update_benchmarks import update_pre_blocks_under_module
-
 
 class TestRunBenchmarksFiltering(unittest.TestCase):
     def setUp(self):

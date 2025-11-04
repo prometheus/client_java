@@ -108,15 +108,15 @@ def extract_first_table(jmh_output: str) -> str:
     m = re.search(r"(\nBenchmark\s+Mode[\s\S]*?)(?:\n\s*\n|\Z)", jmh_output)
     if not m:
         # fallback: collect all lines that contain 'thrpt' plus a header if present
-        lines = [l for l in jmh_output.splitlines() if "thrpt" in l]
+        lines = [line for line in jmh_output.splitlines() if "thrpt" in line]
         if not lines:
             raise ValueError('Could not find any "thrpt" lines in JMH output')
         # try to find header
         header = next(
             (
-                l
-                for l in jmh_output.splitlines()
-                if l.startswith("Benchmark") and "Mode" in l
+                line
+                for line in jmh_output.splitlines()
+                if line.startswith("Benchmark") and "Mode" in line
             ),
             "Benchmark                                     Mode  Cnt      Score     Error  Units",
         )
