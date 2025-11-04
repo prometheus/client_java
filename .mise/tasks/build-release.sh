@@ -5,6 +5,7 @@
 
 set -euo pipefail
 
+# shellcheck disable=SC2154 # is set by mise
 VERSION=${usage_tag#v}
 
 mise run set-version "$VERSION"

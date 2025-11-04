@@ -12,5 +12,3 @@ docker run --rm \
 	--env-file ".github/super-linter.env" \
 	-v "$(pwd)":/tmp/lint \
 	ghcr.io/super-linter/super-linter:latest
-
-popd

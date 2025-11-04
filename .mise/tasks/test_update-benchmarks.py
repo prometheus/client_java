@@ -11,6 +11,7 @@ here = os.path.dirname(__file__)
 if here not in sys.path:
     sys.path.insert(0, here)
 
+
 class TestRunBenchmarksFiltering(unittest.TestCase):
     def setUp(self):
         # sample JMH table with mixed-class lines
