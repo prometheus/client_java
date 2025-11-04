@@ -8,7 +8,7 @@ Run benchmarks for the `benchmarks` module, capture JMH text output, and update
 any <pre>...</pre> blocks containing "thrpt" under the `benchmarks/` module
 (files such as Java sources with embedded example output in javadocs).
 
-Usage: ./scripts/update_benchmarks.py [--mvnw ./mvnw] [--module benchmarks] [--java java] [--jmh-args "-f 1 -wi 0 -i 1"]
+Usage: ./.mise/tasks/update_benchmarks.py [--mvnw ./mvnw] [--module benchmarks] [--java java] [--jmh-args "-f 1 -wi 0 -i 1"]
 
 By default this will:
  - run the maven wrapper to package the benchmarks: `./mvnw -pl benchmarks -am -DskipTests package`
@@ -32,11 +32,39 @@ from typing import List, Optional
 
 
 def run_cmd(cmd: List[str], cwd: Optional[str] = None) -> str:
-    proc = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    """Run a command, stream stdout/stderr to the console for progress, and return the full output.
+
+    This replaces the previous blocking subprocess.run approach so users can see build / JMH
+    progress in real time while the command runs.
+    """
+    try:
+        proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    except FileNotFoundError:
+        # Helpful message if the executable is not found
+        print(f"Command not found: {cmd[0]}")
+        raise
+
+    output_lines: List[str] = []
+    try:
+        assert proc.stdout is not None
+        # Stream lines as they appear and capture them for returning
+        for line in proc.stdout:
+            # Print immediately so callers (and CI) can observe progress
+            print(line, end='')
+            output_lines.append(line)
+        proc.wait()
+    except KeyboardInterrupt:
+        # If the user interrupts, ensure the child process is terminated
+        proc.kill()
+        proc.wait()
+        print('\nCommand interrupted by user.')
+        raise
+
+    output = ''.join(output_lines)
     if proc.returncode != 0:
-        print(f"Command failed: {' '.join(cmd)}\nExit: {proc.returncode}\nOutput:\n{proc.stdout}")
+        print(f"Command failed: {' '.join(cmd)}\nExit: {proc.returncode}\nOutput:\n{output}")
         raise SystemExit(proc.returncode)
-    return proc.stdout
+    return output
 
 
 def build_benchmarks(mvnw: str, module: str) -> None:
