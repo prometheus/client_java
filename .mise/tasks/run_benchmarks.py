@@ -82,6 +82,31 @@ def extract_first_table(jmh_output: str) -> str:
     return table
 
 
+def filter_table_for_class(table: str, class_name: str) -> Optional[str]:
+    """
+    Return a table string that contains only the header and the lines belonging to `class_name`.
+    If no matching lines are found, return None.
+    """
+    lines = table.splitlines()
+    # find header line index (starts with 'Benchmark' and contains 'Mode')
+    header_idx = None
+    for i, ln in enumerate(lines):
+        if ln.strip().startswith('Benchmark') and 'Mode' in ln:
+            header_idx = i
+            break
+    header = lines[header_idx] if header_idx is not None else 'Benchmark                                     Mode  Cnt      Score     Error  Units'
+
+    matched = []
+    pattern = re.compile(r'^\s*' + re.escape(class_name) + r'\.')
+    for ln in lines[header_idx + 1 if header_idx is not None else 0:]:
+        if 'thrpt' in ln and pattern.search(ln):
+            matched.append(ln)
+
+    if not matched:
+        return None
+    return header + '\n' + '\n'.join(matched)
+
+
 def update_pre_blocks_under_module(module: str, table: str) -> List[str]:
     # Find files under module and update any <pre>...</pre> block that contains 'thrpt'
     updated_files = []
@@ -100,6 +125,16 @@ def update_pre_blocks_under_module(module: str, table: str) -> List[str]:
         original = content
         new_content = content
 
+        # Determine the class name from the filename (e.g. TextFormatUtilBenchmark.java -> TextFormatUtilBenchmark)
+        base = os.path.basename(path)
+        class_name = os.path.splitext(base)[0]
+
+        # Build a filtered table for this class; if no matching lines, skip updating this file
+        filtered_table = filter_table_for_class(table, class_name)
+        if filtered_table is None:
+            # nothing to update for this class
+            continue
+
         # Regex to find any line-starting Javadoc prefix like " * " before <pre>
         # This will match patterns like: " * <pre>... </pre>" and capture the prefix (e.g. " * ")
         pattern = re.compile(r'(?m)^(?P<prefix>[ \t]*\*[ \t]*)<pre>[\s\S]*?</pre>')
@@ -107,7 +142,7 @@ def update_pre_blocks_under_module(module: str, table: str) -> List[str]:
         def repl(m: re.Match) -> str:
             prefix = m.group('prefix')
             # Build the new block with the same prefix on each line
-            lines = table.splitlines()
+            lines = filtered_table.splitlines()
             replaced = prefix + '<pre>\n'
             for ln in lines:
                 replaced += prefix + ln.rstrip() + '\n'
