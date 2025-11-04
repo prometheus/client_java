@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #MISE description="Build release package"
-#MISE arg "<tag>" env="TAG" default="1.5.0-SNAPSHOT"
+#USAGE arg "<tag>" env="TAG" default="1.5.0-SNAPSHOT"
 
 set -euo pipefail
 
