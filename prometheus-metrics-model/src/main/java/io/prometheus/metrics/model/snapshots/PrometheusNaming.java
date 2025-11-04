@@ -146,7 +146,9 @@ public class PrometheusNaming {
     }
     // First character must be [a-zA-Z_]
     char first = name.charAt(0);
-    if (!((first >= 'a' && first <= 'z') || (first >= 'A' && first <= 'Z') || first == '_')) {
+    if (!((first >= 'a' && first <= 'z')
+        || (first >= 'A' && first <= 'Z')
+        || first == '_')) {
       return false;
     }
     // Remaining characters must be [a-zA-Z0-9_]
