@@ -18,9 +18,22 @@ import javax.annotation.Nullable;
  */
 public class PrometheusNaming {
 
+  /**
+   * @deprecated Not used anymore. Kept for backward compatibility. The validation is now done
+   *     without regex for better performance.
+   */
+  @Deprecated
+  @SuppressWarnings("UnusedVariable")
   private static final Pattern METRIC_NAME_PATTERN = Pattern.compile("^[a-zA-Z_:][a-zA-Z0-9_:]*$");
 
-  /** Legal characters for label names. */
+  /**
+   * Legal characters for label names.
+   *
+   * @deprecated Not used anymore. Kept for backward compatibility. The validation is now done
+   *     without regex for better performance.
+   */
+  @Deprecated
+  @SuppressWarnings("UnusedVariable")
   private static final Pattern LEGACY_LABEL_NAME_PATTERN =
       Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
 
@@ -90,7 +103,29 @@ public class PrometheusNaming {
   }
 
   public static boolean isValidLegacyMetricName(String name) {
-    return METRIC_NAME_PATTERN.matcher(name).matches();
+    if (name.isEmpty()) {
+      return false;
+    }
+    // First character must be [a-zA-Z_:]
+    char first = name.charAt(0);
+    if (!((first >= 'a' && first <= 'z')
+        || (first >= 'A' && first <= 'Z')
+        || first == '_'
+        || first == ':')) {
+      return false;
+    }
+    // Remaining characters must be [a-zA-Z0-9_:]
+    for (int i = 1; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (!((c >= 'a' && c <= 'z')
+          || (c >= 'A' && c <= 'Z')
+          || (c >= '0' && c <= '9')
+          || c == '_'
+          || c == ':')) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public static boolean isValidLabelName(String name) {
@@ -106,7 +141,25 @@ public class PrometheusNaming {
   }
 
   public static boolean isValidLegacyLabelName(String name) {
-    return LEGACY_LABEL_NAME_PATTERN.matcher(name).matches();
+    if (name.isEmpty()) {
+      return false;
+    }
+    // First character must be [a-zA-Z_]
+    char first = name.charAt(0);
+    if (!((first >= 'a' && first <= 'z') || (first >= 'A' && first <= 'Z') || first == '_')) {
+      return false;
+    }
+    // Remaining characters must be [a-zA-Z0-9_]
+    for (int i = 1; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (!((c >= 'a' && c <= 'z')
+          || (c >= 'A' && c <= 'Z')
+          || (c >= '0' && c <= '9')
+          || c == '_')) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
