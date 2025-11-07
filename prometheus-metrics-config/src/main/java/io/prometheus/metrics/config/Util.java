@@ -1,5 +1,6 @@
 package io.prometheus.metrics.config;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -160,14 +161,30 @@ class Util {
     return null;
   }
 
+  @Nullable
+  static Duration loadOptionalDuration(String name, Map<Object, Object> properties)
+      throws PrometheusPropertiesException {
+
+    Long value = loadLong(name, properties);
+
+    assertValue(value, t -> t >= 0, "Expecting value >= 0.", null, name);
+
+    if (value == null || value == 0) {
+      return null;
+    }
+    return Duration.ofSeconds(value);
+  }
+
   static <T extends Number> void assertValue(
-      @Nullable T number, Predicate<T> predicate, String message, String prefix, String name)
+      @Nullable T number,
+      Predicate<T> predicate,
+      String message,
+      @Nullable String prefix,
+      String name)
       throws PrometheusPropertiesException {
     if (number != null && !predicate.test(number)) {
-      String fullMessage =
-          prefix == null
-              ? name + ": " + message
-              : String.format("%s.%s: %s Found: %s", prefix, name, message, number);
+      String fullKey = prefix == null ? name : prefix + "." + name;
+      String fullMessage = String.format("%s: %s Found: %s", fullKey, message, number);
       throw new PrometheusPropertiesException(fullMessage);
     }
   }

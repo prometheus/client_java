@@ -3,6 +3,7 @@ package io.prometheus.metrics.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -41,11 +42,15 @@ class ExporterPushgatewayPropertiesTest {
             .job("job")
             .scheme("http")
             .escapingScheme(EscapingScheme.DOTS_ESCAPING)
+            .connectTimeout(Duration.ofSeconds(1))
+            .readTimeout(Duration.ofSeconds(2))
             .build();
 
     assertThat(properties.getAddress()).isEqualTo("http://localhost");
     assertThat(properties.getJob()).isEqualTo("job");
     assertThat(properties.getScheme()).isEqualTo("http");
     assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.DOTS_ESCAPING);
+    assertThat(properties.getConnectTimeout()).isEqualTo(Duration.ofSeconds(1));
+    assertThat(properties.getReadTimeout()).isEqualTo(Duration.ofSeconds(2));
   }
 }
