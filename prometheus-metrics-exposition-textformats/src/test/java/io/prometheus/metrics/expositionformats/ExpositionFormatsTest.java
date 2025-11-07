@@ -111,78 +111,78 @@ class ExpositionFormatsTest {
   @Test
   public void testCounterComplete() throws IOException {
     String openMetricsText =
-        "# TYPE service_time_seconds counter\n"
-            + "# UNIT service_time_seconds seconds\n"
-            + "# HELP service_time_seconds total time spent serving\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
+        "# TYPE service:time_seconds counter\n"
+            + "# UNIT service:time_seconds seconds\n"
+            + "# HELP service:time_seconds total time spent serving\n"
+            + "service:time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
             + scrapeTimestamp1s
             + " # "
             + exemplar1String
             + "\n"
-            + "service_time_seconds_created{path=\"/hello\",status=\"200\"} "
+            + "service:time_seconds_created{path=\"/hello\",status=\"200\"} "
             + createdTimestamp1s
             + " "
             + scrapeTimestamp1s
             + "\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
+            + "service:time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
             + scrapeTimestamp2s
             + " # "
             + exemplar2String
             + "\n"
-            + "service_time_seconds_created{path=\"/hello\",status=\"500\"} "
+            + "service:time_seconds_created{path=\"/hello\",status=\"500\"} "
             + createdTimestamp2s
             + " "
             + scrapeTimestamp2s
             + "\n"
             + "# EOF\n";
     String prometheusText =
-        "# HELP service_time_seconds_total total time spent serving\n"
-            + "# TYPE service_time_seconds_total counter\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
+        "# HELP service:time_seconds_total total time spent serving\n"
+            + "# TYPE service:time_seconds_total counter\n"
+            + "service:time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
             + scrapeTimestamp1s
             + "\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
+            + "service:time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
             + scrapeTimestamp2s
             + "\n"
-            + "# HELP service_time_seconds_created total time spent serving\n"
-            + "# TYPE service_time_seconds_created gauge\n"
-            + "service_time_seconds_created{path=\"/hello\",status=\"200\"} "
+            + "# HELP service:time_seconds_created total time spent serving\n"
+            + "# TYPE service:time_seconds_created gauge\n"
+            + "service:time_seconds_created{path=\"/hello\",status=\"200\"} "
             + createdTimestamp1s
             + " "
             + scrapeTimestamp1s
             + "\n"
-            + "service_time_seconds_created{path=\"/hello\",status=\"500\"} "
+            + "service:time_seconds_created{path=\"/hello\",status=\"500\"} "
             + createdTimestamp2s
             + " "
             + scrapeTimestamp2s
             + "\n";
     String openMetricsTextWithoutCreated =
-        "# TYPE service_time_seconds counter\n"
-            + "# UNIT service_time_seconds seconds\n"
-            + "# HELP service_time_seconds total time spent serving\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
+        "# TYPE service:time_seconds counter\n"
+            + "# UNIT service:time_seconds seconds\n"
+            + "# HELP service:time_seconds total time spent serving\n"
+            + "service:time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
             + scrapeTimestamp1s
             + " # "
             + exemplar1String
             + "\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
+            + "service:time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
             + scrapeTimestamp2s
             + " # "
             + exemplar2String
             + "\n"
             + "# EOF\n";
     String prometheusTextWithoutCreated =
-        "# HELP service_time_seconds_total total time spent serving\n"
-            + "# TYPE service_time_seconds_total counter\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
+        "# HELP service:time_seconds_total total time spent serving\n"
+            + "# TYPE service:time_seconds_total counter\n"
+            + "service:time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
             + scrapeTimestamp1s
             + "\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
+            + "service:time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
             + scrapeTimestamp2s
             + "\n";
     String prometheusProtobuf =
         // @formatter:off
-        "name: \"service_time_seconds_total\" "
+        "name: \"service:time_seconds_total\" "
             + "help: \"total time spent serving\" "
             + "type: COUNTER "
             + "metric { "
@@ -211,7 +211,7 @@ class ExpositionFormatsTest {
 
     CounterSnapshot counter =
         CounterSnapshot.builder()
-            .name("service_time_seconds")
+            .name("service:time_seconds")
             .help("total time spent serving")
             .unit(Unit.SECONDS)
             .dataPoint(
@@ -1424,6 +1424,37 @@ class ExpositionFormatsTest {
     assertOpenMetricsTextWithoutCreated(openMetricsText, histogram);
     assertPrometheusTextWithoutCreated(prometheusText, histogram);
     assertPrometheusProtobuf(prometheusProtobuf, histogram);
+  }
+
+  @Test
+  public void testClassicHistogramMinimalWithDots() throws Exception {
+    String openMetricsText =
+        """
+        # TYPE "request.latency_seconds" histogram
+        {"request.latency_seconds_bucket",le="+Inf"} 2
+        # EOF
+        """;
+    String prometheusText =
+        """
+        # TYPE request_latency_seconds histogram
+        request_latency_seconds_bucket{le="+Inf"} 2
+        request_latency_seconds_count 2
+        """;
+    HistogramSnapshot histogram =
+        HistogramSnapshot.builder()
+            .name("request.latency_seconds")
+            .dataPoint(
+                HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                    .classicHistogramBuckets(
+                        ClassicHistogramBuckets.builder()
+                            .bucket(Double.POSITIVE_INFINITY, 2)
+                            .build())
+                    .build())
+            .build();
+    // test that the name and label are separated with commas
+    assertOpenMetricsText(openMetricsText, histogram, EscapingScheme.ALLOW_UTF8);
+    assertPrometheusText(prometheusText, histogram);
+    assertPrometheusTextWithoutCreated(prometheusText, histogram);
   }
 
   @Test
@@ -2822,10 +2853,15 @@ class ExpositionFormatsTest {
   }
 
   private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
+    assertOpenMetricsText(expected, snapshot, EscapingScheme.VALUE_ENCODING_ESCAPING);
+  }
+
+  private void assertOpenMetricsText(
+      String expected, MetricSnapshot snapshot, EscapingScheme escapingScheme) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer =
         OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
-    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.VALUE_ENCODING_ESCAPING);
+    writer.write(out, MetricSnapshots.of(snapshot), escapingScheme);
     assertThat(out).hasToString(expected);
   }
 

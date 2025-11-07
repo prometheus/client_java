@@ -396,7 +396,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
     boolean metricInsideBraces = false;
     // If the name does not pass the legacy validity check, we must put the
     // metric name inside the braces.
-    if (!PrometheusNaming.isValidLegacyLabelName(name)) {
+    if (!PrometheusNaming.isValidLegacyMetricName(name)) {
       metricInsideBraces = true;
       writer.write('{');
     }

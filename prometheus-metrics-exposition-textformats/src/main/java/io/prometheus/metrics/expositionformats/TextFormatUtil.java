@@ -123,7 +123,7 @@ public class TextFormatUtil {
       writer.write("\"");
     }
     if (additionalLabelName != null) {
-      if (!labels.isEmpty()) {
+      if (!labels.isEmpty() || metricInsideBraces) {
         writer.write(",");
       }
       writer.write(additionalLabelName);
