@@ -85,6 +85,16 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
   }
 
   @Override
+  public double getSum() {
+    return getNoLabels().getSum();
+  }
+
+  @Override
+  public long getCount() {
+    return getNoLabels().getCount();
+  }
+
+  @Override
   public void observe(double amount) {
     getNoLabels().observe(amount);
   }
@@ -141,6 +151,16 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       } else {
         exemplarSampler = null;
       }
+    }
+
+    @Override
+    public double getSum() {
+      return sum.sum();
+    }
+
+    @Override
+    public long getCount() {
+      return count.sum();
     }
 
     @Override

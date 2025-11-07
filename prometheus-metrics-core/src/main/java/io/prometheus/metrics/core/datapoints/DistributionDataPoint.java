@@ -19,6 +19,12 @@ import io.prometheus.metrics.model.snapshots.Labels;
  */
 public interface DistributionDataPoint extends DataPoint, TimerApi {
 
+  /** Get the count of observations. */
+  long getCount();
+
+  /** Get the sum of all observed values. */
+  double getSum();
+
   /** Observe {@code value}. */
   void observe(double value);
 

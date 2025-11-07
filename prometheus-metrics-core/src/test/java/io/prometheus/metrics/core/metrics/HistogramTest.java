@@ -1366,6 +1366,8 @@ class HistogramTest {
   public void testObserve() {
     Histogram noLabels = Histogram.builder().name("test").build();
     noLabels.observe(2);
+    assertThat(noLabels.getCount()).isOne();
+    assertThat(noLabels.getSum()).isCloseTo(2.0, offset(.0));
     assertThat(getData(noLabels).getCount()).isOne();
     assertThat(getData(noLabels).getSum()).isCloseTo(2.0, offset(.0));
     assertThat(getBucket(noLabels, 1).getCount()).isZero();
@@ -1450,6 +1452,9 @@ class HistogramTest {
             .labelNames("path", "status")
             .build();
     histogram.labelValues("/hello", "200").observe(0.11);
+    DistributionDataPoint distributionDataPoint = histogram.labelValues("/hello", "200");
+    assertThat(distributionDataPoint.getCount()).isOne();
+    assertThat(distributionDataPoint.getSum()).isCloseTo(0.11, offset(.0));
     histogram.labelValues("/hello", "200").observe(0.2);
     histogram.labelValues("/hello", "500").observe(0.19);
     HistogramSnapshot.HistogramDataPointSnapshot data200 =
