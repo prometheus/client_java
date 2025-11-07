@@ -111,78 +111,78 @@ class ExpositionFormatsTest {
   @Test
   public void testCounterComplete() throws IOException {
     String openMetricsText =
-        "# TYPE service_time_seconds counter\n"
-            + "# UNIT service_time_seconds seconds\n"
-            + "# HELP service_time_seconds total time spent serving\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
+        "# TYPE service:time_seconds counter\n"
+            + "# UNIT service:time_seconds seconds\n"
+            + "# HELP service:time_seconds total time spent serving\n"
+            + "service:time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
             + scrapeTimestamp1s
             + " # "
             + exemplar1String
             + "\n"
-            + "service_time_seconds_created{path=\"/hello\",status=\"200\"} "
+            + "service:time_seconds_created{path=\"/hello\",status=\"200\"} "
             + createdTimestamp1s
             + " "
             + scrapeTimestamp1s
             + "\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
+            + "service:time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
             + scrapeTimestamp2s
             + " # "
             + exemplar2String
             + "\n"
-            + "service_time_seconds_created{path=\"/hello\",status=\"500\"} "
+            + "service:time_seconds_created{path=\"/hello\",status=\"500\"} "
             + createdTimestamp2s
             + " "
             + scrapeTimestamp2s
             + "\n"
             + "# EOF\n";
     String prometheusText =
-        "# HELP service_time_seconds_total total time spent serving\n"
-            + "# TYPE service_time_seconds_total counter\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
+        "# HELP service:time_seconds_total total time spent serving\n"
+            + "# TYPE service:time_seconds_total counter\n"
+            + "service:time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
             + scrapeTimestamp1s
             + "\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
+            + "service:time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
             + scrapeTimestamp2s
             + "\n"
-            + "# HELP service_time_seconds_created total time spent serving\n"
-            + "# TYPE service_time_seconds_created gauge\n"
-            + "service_time_seconds_created{path=\"/hello\",status=\"200\"} "
+            + "# HELP service:time_seconds_created total time spent serving\n"
+            + "# TYPE service:time_seconds_created gauge\n"
+            + "service:time_seconds_created{path=\"/hello\",status=\"200\"} "
             + createdTimestamp1s
             + " "
             + scrapeTimestamp1s
             + "\n"
-            + "service_time_seconds_created{path=\"/hello\",status=\"500\"} "
+            + "service:time_seconds_created{path=\"/hello\",status=\"500\"} "
             + createdTimestamp2s
             + " "
             + scrapeTimestamp2s
             + "\n";
     String openMetricsTextWithoutCreated =
-        "# TYPE service_time_seconds counter\n"
-            + "# UNIT service_time_seconds seconds\n"
-            + "# HELP service_time_seconds total time spent serving\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
+        "# TYPE service:time_seconds counter\n"
+            + "# UNIT service:time_seconds seconds\n"
+            + "# HELP service:time_seconds total time spent serving\n"
+            + "service:time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
             + scrapeTimestamp1s
             + " # "
             + exemplar1String
             + "\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
+            + "service:time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
             + scrapeTimestamp2s
             + " # "
             + exemplar2String
             + "\n"
             + "# EOF\n";
     String prometheusTextWithoutCreated =
-        "# HELP service_time_seconds_total total time spent serving\n"
-            + "# TYPE service_time_seconds_total counter\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
+        "# HELP service:time_seconds_total total time spent serving\n"
+            + "# TYPE service:time_seconds_total counter\n"
+            + "service:time_seconds_total{path=\"/hello\",status=\"200\"} 0.8 "
             + scrapeTimestamp1s
             + "\n"
-            + "service_time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
+            + "service:time_seconds_total{path=\"/hello\",status=\"500\"} 0.9 "
             + scrapeTimestamp2s
             + "\n";
     String prometheusProtobuf =
         // @formatter:off
-        "name: \"service_time_seconds_total\" "
+        "name: \"service:time_seconds_total\" "
             + "help: \"total time spent serving\" "
             + "type: COUNTER "
             + "metric { "
@@ -211,7 +211,7 @@ class ExpositionFormatsTest {
 
     CounterSnapshot counter =
         CounterSnapshot.builder()
-            .name("service_time_seconds")
+            .name("service:time_seconds")
             .help("total time spent serving")
             .unit(Unit.SECONDS)
             .dataPoint(
