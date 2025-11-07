@@ -171,6 +171,16 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
   }
 
   @Override
+  public double getSum() {
+    return getNoLabels().getSum();
+  }
+
+  @Override
+  public long getCount() {
+    return getNoLabels().getCount();
+  }
+
+  @Override
   public void observe(double amount) {
     getNoLabels().observe(amount);
   }
@@ -208,6 +218,16 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
         classicBuckets[i] = new LongAdder();
       }
       maybeScheduleNextReset();
+    }
+
+    @Override
+    public double getSum() {
+      return sum.sum();
+    }
+
+    @Override
+    public long getCount() {
+      return count.sum();
     }
 
     @Override

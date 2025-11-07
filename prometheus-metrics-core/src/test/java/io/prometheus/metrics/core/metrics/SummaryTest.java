@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.data.Offset.offset;
 
+import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.datapoints.Timer;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Label;
@@ -64,6 +65,8 @@ class SummaryTest {
   @Test
   public void testObserve() {
     noLabels.observe(2);
+    assertThat(noLabels.getCount()).isOne();
+    assertThat(noLabels.getSum()).isCloseTo(2.0, offset(.0));
     assertThat(getCount(noLabels, Labels.EMPTY)).isOne();
     assertThat(getSum(noLabels, Labels.EMPTY)).isCloseTo(2.0, offset(.001));
     noLabels.observe(3);
@@ -71,6 +74,9 @@ class SummaryTest {
     assertThat(getSum(noLabels, Labels.EMPTY)).isCloseTo(5.0, offset(.001));
 
     withLabels.labelValues(label.getValue()).observe(4);
+    DistributionDataPoint distributionDataPoint = withLabels.labelValues(label.getValue());
+    assertThat(distributionDataPoint.getCount()).isOne();
+    assertThat(distributionDataPoint.getSum()).isCloseTo(4.0, offset(.0));
     assertThat(getCount(withLabels, labels)).isOne();
     assertThat(getSum(withLabels, labels)).isCloseTo(4.0, offset(.001));
 
