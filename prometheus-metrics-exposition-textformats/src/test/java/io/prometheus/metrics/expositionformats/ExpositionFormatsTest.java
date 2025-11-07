@@ -1427,6 +1427,37 @@ class ExpositionFormatsTest {
   }
 
   @Test
+  public void testClassicHistogramMinimalWithDots() throws Exception {
+    String openMetricsText =
+        """
+        # TYPE "request.latency_seconds" histogram
+        {"request.latency_seconds_bucket",le="+Inf"} 2
+        # EOF
+        """;
+    String prometheusText =
+        """
+        # TYPE request_latency_seconds histogram
+        request_latency_seconds_bucket{le="+Inf"} 2
+        request_latency_seconds_count 2
+        """;
+    HistogramSnapshot histogram =
+        HistogramSnapshot.builder()
+            .name("request.latency_seconds")
+            .dataPoint(
+                HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                    .classicHistogramBuckets(
+                        ClassicHistogramBuckets.builder()
+                            .bucket(Double.POSITIVE_INFINITY, 2)
+                            .build())
+                    .build())
+            .build();
+    // test that the name and label are separated with commas
+    assertOpenMetricsText(openMetricsText, histogram, EscapingScheme.ALLOW_UTF8);
+    assertPrometheusText(prometheusText, histogram);
+    assertPrometheusTextWithoutCreated(prometheusText, histogram);
+  }
+
+  @Test
   public void testClassicHistogramCountAndSum() throws Exception {
     String openMetricsText =
         """
@@ -2822,10 +2853,15 @@ class ExpositionFormatsTest {
   }
 
   private void assertOpenMetricsText(String expected, MetricSnapshot snapshot) throws IOException {
+    assertOpenMetricsText(expected, snapshot, EscapingScheme.VALUE_ENCODING_ESCAPING);
+  }
+
+  private void assertOpenMetricsText(
+      String expected, MetricSnapshot snapshot, EscapingScheme escapingScheme) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer =
         OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
-    writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.VALUE_ENCODING_ESCAPING);
+    writer.write(out, MetricSnapshots.of(snapshot), escapingScheme);
     assertThat(out).hasToString(expected);
   }
 
