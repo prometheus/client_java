@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25.0.1_8-jre@sha256:1d1ef205d1b0556fb16299ccf7621994d11df3a1330059b6b7482ae2fe998bbd
+FROM eclipse-temurin:25.0.1_8-jre@sha256:31fb090d244e9167d22fb90755423c54934fb6b6a22edeb413e2201882259d1b
 
 COPY target/example-exporter-opentelemetry.jar ./app.jar
 
