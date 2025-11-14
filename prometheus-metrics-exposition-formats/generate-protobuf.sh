@@ -35,17 +35,24 @@ sed -i -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' "$(find src/main/generated/io -ty
 
 GENERATED_WITH=$(grep -oP '\/\/ Protobuf Java Version: \K.*' "$TARGET_DIR/${PACKAGE//\.//}"/Metrics.java)
 
-if [[ $GENERATED_WITH != "$PROTOBUF_VERSION" ]]; then
-	echo "Generated protobuf sources version $GENERATED_WITH does not match provided version $PROTOBUF_VERSION"
+function help() {
 	echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
 	echo "Generated protobuf sources are not up-to-date. Please run 'mise run generate' and commit the changes."
+	echo "NOTE:"
+	echo "1. You should only run 'mise run generate' in a PR from renovate"
+	echo "2. The PR should update both '<protobuf-java.version>' in pom.xml and protoc in mise.toml"
+	echo "   - but at least <protobuf-java.version>. If not, wait until renovate updates the PR."
+}
+
+if [[ $GENERATED_WITH != "$PROTOBUF_VERSION" ]]; then
+	echo "Generated protobuf sources version $GENERATED_WITH does not match provided version $PROTOBUF_VERSION"
+	help
 	exit 1
 fi
 
 STATUS=$(git status --porcelain)
 if [[ ${REQUIRE_PROTO_UP_TO_DATE:-false} == "true" && -n "$STATUS" ]]; then
-	echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"
-	echo "Generated protobuf sources are not up-to-date. Please run 'mise run generate' and commit the changes."
+	help
 	echo "Local changes:"
 	echo "$STATUS"
 	exit 1
