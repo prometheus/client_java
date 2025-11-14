@@ -43,13 +43,17 @@ run = "./mvnw verify"
 description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
-[tasks.lint-links]
+[tasks."lint:links"]
 description = "Lint markdown links"
 run = "lychee --include-fragments ."
 
-[tasks.lint-rest]
+[tasks."lint:rest"]
 description = "All lints not covered by super linter"
-depends = ["lint-links", "lint-bom"]
+depends = ["lint:links", "lint:bom"]
+
+[tasks."lint:all"]
+description = "All lints"
+depends = ["lint:rest", "lint:super-linter"]
 
 [tasks.acceptance-test]
 description = "Run OATs acceptance tests"
