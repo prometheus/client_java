@@ -9,7 +9,7 @@ from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
 
-ROOT = Path(__file__).resolve().parents[2]  # repo root (.. from .mise/tasks)
+ROOT = Path(__file__).resolve().parents[3]  # repo root (.. from .mise/tasks/lint)
 IGNORE_DIRS = {"prometheus-metrics-parent"}
 MODULE_PREFIX = "prometheus-metrics"
 BOM_POM = ROOT / "prometheus-metrics-bom" / "pom.xml"
