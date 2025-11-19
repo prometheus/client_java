@@ -34,15 +34,27 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    *     Builder#metricSnapshot(MetricSnapshot)}.
    */
   public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
+    this(snapshots, true);
+  }
+
+  /**
+   * Private constructor with option to skip duplicate validation.
+   *
+   * @param snapshots the snapshots to include
+   * @param validateDuplicates if false, allows duplicate metric names
+   */
+  private MetricSnapshots(Collection<MetricSnapshot> snapshots, boolean validateDuplicates) {
     List<MetricSnapshot> list = new ArrayList<>(snapshots);
     list.sort(comparing(s -> s.getMetadata().getPrometheusName()));
-    for (int i = 0; i < snapshots.size() - 1; i++) {
-      if (list.get(i)
-          .getMetadata()
-          .getPrometheusName()
-          .equals(list.get(i + 1).getMetadata().getPrometheusName())) {
-        throw new IllegalArgumentException(
-            list.get(i).getMetadata().getPrometheusName() + ": duplicate metric name");
+    if (validateDuplicates) {
+      for (int i = 0; i < snapshots.size() - 1; i++) {
+        if (list.get(i)
+            .getMetadata()
+            .getPrometheusName()
+            .equals(list.get(i + 1).getMetadata().getPrometheusName())) {
+          throw new IllegalArgumentException(
+              list.get(i).getMetadata().getPrometheusName() + ": duplicate metric name");
+        }
       }
     }
     this.snapshots = unmodifiableList(list);
@@ -77,6 +89,7 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
 
     private final List<MetricSnapshot> snapshots = new ArrayList<>();
     private final Set<String> prometheusNames = new HashSet<>();
+    private boolean allowDuplicates = false;
 
     private Builder() {}
 
@@ -95,8 +108,20 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
       return this;
     }
 
+    /**
+     * Allow duplicate metric names in the snapshots collection.
+     *
+     * <p>By default, duplicate metric names are not allowed. Call this method to allow multiple
+     * snapshots with the same metric name, which is useful when different collectors produce
+     * metrics with the same name but different label sets.
+     */
+    public Builder allowDuplicates(boolean allowDuplicates) {
+      this.allowDuplicates = allowDuplicates;
+      return this;
+    }
+
     public MetricSnapshots build() {
-      return new MetricSnapshots(snapshots);
+      return new MetricSnapshots(snapshots, !allowDuplicates);
     }
   }
 }

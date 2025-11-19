@@ -18,10 +18,26 @@ public class PrometheusRegistry {
   private final Set<String> prometheusNames = ConcurrentHashMap.newKeySet();
   private final List<Collector> collectors = new CopyOnWriteArrayList<>();
   private final List<MultiCollector> multiCollectors = new CopyOnWriteArrayList<>();
+  private final boolean allowDuplicateRegistration;
+
+  public PrometheusRegistry() {
+    this(false);
+  }
+
+  /**
+   * Create a new PrometheusRegistry.
+   *
+   * @param allowDuplicateRegistration if true, allows registering multiple collectors with the same
+   *     metric name but potentially different label sets. Default is false for backward
+   *     compatibility. When enabled, metrics with the same name but different labels can coexist.
+   */
+  public PrometheusRegistry(boolean allowDuplicateRegistration) {
+    this.allowDuplicateRegistration = allowDuplicateRegistration;
+  }
 
   public void register(Collector collector) {
     String prometheusName = collector.getPrometheusName();
-    if (prometheusName != null) {
+    if (prometheusName != null && !allowDuplicateRegistration) {
       if (!prometheusNames.add(prometheusName)) {
         throw new IllegalStateException(
             "Can't register "
@@ -33,10 +49,12 @@ public class PrometheusRegistry {
   }
 
   public void register(MultiCollector collector) {
-    for (String prometheusName : collector.getPrometheusNames()) {
-      if (!prometheusNames.add(prometheusName)) {
-        throw new IllegalStateException(
-            "Can't register " + prometheusName + " because that name is already registered.");
+    if (!allowDuplicateRegistration) {
+      for (String prometheusName : collector.getPrometheusNames()) {
+        if (!prometheusNames.add(prometheusName)) {
+          throw new IllegalStateException(
+              "Can't register " + prometheusName + " because that name is already registered.");
+        }
       }
     }
     multiCollectors.add(collector);
@@ -68,12 +86,14 @@ public class PrometheusRegistry {
   }
 
   public MetricSnapshots scrape(@Nullable PrometheusScrapeRequest scrapeRequest) {
-    MetricSnapshots.Builder result = MetricSnapshots.builder();
+    MetricSnapshots.Builder result =
+        MetricSnapshots.builder().allowDuplicates(allowDuplicateRegistration);
     for (Collector collector : collectors) {
       MetricSnapshot snapshot =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
       if (snapshot != null) {
-        if (result.containsMetricName(snapshot.getMetadata().getName())) {
+        if (!allowDuplicateRegistration
+            && result.containsMetricName(snapshot.getMetadata().getName())) {
           throw new IllegalStateException(
               snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
         }
@@ -84,7 +104,8 @@ public class PrometheusRegistry {
       MetricSnapshots snapshots =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
       for (MetricSnapshot snapshot : snapshots) {
-        if (result.containsMetricName(snapshot.getMetadata().getName())) {
+        if (!allowDuplicateRegistration
+            && result.containsMetricName(snapshot.getMetadata().getName())) {
           throw new IllegalStateException(
               snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
         }
@@ -106,7 +127,8 @@ public class PrometheusRegistry {
     if (includedNames == null) {
       return scrape(scrapeRequest);
     }
-    MetricSnapshots.Builder result = MetricSnapshots.builder();
+    MetricSnapshots.Builder result =
+        MetricSnapshots.builder().allowDuplicates(allowDuplicateRegistration);
     for (Collector collector : collectors) {
       String prometheusName = collector.getPrometheusName();
       // prometheusName == null means the name is unknown, and we have to scrape to learn the name.
