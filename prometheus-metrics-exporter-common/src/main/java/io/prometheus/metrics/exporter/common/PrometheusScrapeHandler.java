@@ -46,7 +46,7 @@ public class PrometheusScrapeHandler {
   public PrometheusScrapeHandler(PrometheusProperties config, PrometheusRegistry registry) {
     this.expositionFormats = ExpositionFormats.init(config.getExporterProperties());
     this.preferUncompressedResponse =
-      config.getExporterHttpServerProperties().isPreferUncompressedResponse();
+        config.getExporterHttpServerProperties().isPreferUncompressedResponse();
     this.registry = registry;
     this.nameFilter = makeNameFilter(config.getExporterFilterProperties());
     supportedFormats = new ArrayList<>(Arrays.asList("openmetrics", "text"));

@@ -24,12 +24,13 @@ class ExporterHttpServerPropertiesTest {
   @Test
   void builder() {
     ExporterHttpServerProperties properties =
-      ExporterHttpServerProperties.builder().port(1).build();
+        ExporterHttpServerProperties.builder().port(1).build();
 
-    assertSoftly(softly -> {
-      softly.assertThat(properties.getPort()).isOne();
-      softly.assertThat(properties.isPreferUncompressedResponse()).isFalse();
-    });
+    assertSoftly(
+        softly -> {
+          softly.assertThat(properties.getPort()).isOne();
+          softly.assertThat(properties.isPreferUncompressedResponse()).isFalse();
+        });
   }
 
   private static ExporterHttpServerProperties load(Map<String, String> map) {

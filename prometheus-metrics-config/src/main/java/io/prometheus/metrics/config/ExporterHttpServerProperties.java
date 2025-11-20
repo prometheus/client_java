@@ -36,12 +36,10 @@ public class ExporterHttpServerProperties {
     Util.assertValue(port, t -> t > 0, "Expecting value > 0.", PREFIX, PORT);
 
     Boolean preferUncompressedResponse =
-      Util.loadBoolean(PREFIX + "." + PREFER_UNCOMPRESSED_RESPONSE, properties);
+        Util.loadBoolean(PREFIX + "." + PREFER_UNCOMPRESSED_RESPONSE, properties);
 
     return new ExporterHttpServerProperties(
-      port,
-      preferUncompressedResponse != null && preferUncompressedResponse
-    );
+        port, preferUncompressedResponse != null && preferUncompressedResponse);
   }
 
   public static Builder builder() {
