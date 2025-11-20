@@ -2,9 +2,15 @@ package io.prometheus.metrics.model.registry;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
+import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -18,45 +24,12 @@ public class PrometheusRegistry {
   private final Set<String> prometheusNames = ConcurrentHashMap.newKeySet();
   private final List<Collector> collectors = new CopyOnWriteArrayList<>();
   private final List<MultiCollector> multiCollectors = new CopyOnWriteArrayList<>();
-  private final boolean allowDuplicateRegistration;
-
-  public PrometheusRegistry() {
-    this(false);
-  }
-
-  /**
-   * Create a new PrometheusRegistry.
-   *
-   * @param allowDuplicateRegistration if true, allows registering multiple collectors with the same
-   *     metric name but potentially different label sets. Default is false for backward
-   *     compatibility. When enabled, metrics with the same name but different labels can coexist.
-   */
-  public PrometheusRegistry(boolean allowDuplicateRegistration) {
-    this.allowDuplicateRegistration = allowDuplicateRegistration;
-  }
 
   public void register(Collector collector) {
-    String prometheusName = collector.getPrometheusName();
-    if (prometheusName != null && !allowDuplicateRegistration) {
-      if (!prometheusNames.add(prometheusName)) {
-        throw new IllegalStateException(
-            "Can't register "
-                + prometheusName
-                + " because a metric with that name is already registered.");
-      }
-    }
     collectors.add(collector);
   }
 
   public void register(MultiCollector collector) {
-    if (!allowDuplicateRegistration) {
-      for (String prometheusName : collector.getPrometheusNames()) {
-        if (!prometheusNames.add(prometheusName)) {
-          throw new IllegalStateException(
-              "Can't register " + prometheusName + " because that name is already registered.");
-        }
-      }
-    }
     multiCollectors.add(collector);
   }
 
@@ -81,22 +54,73 @@ public class PrometheusRegistry {
     prometheusNames.clear();
   }
 
+  /**
+   * Validates that there are no duplicate time series (same metric name + same label set) across
+   * all collected snapshots, and that all metrics with the same name have the same type.
+   */
+  private void validateNoDuplicateTimeSeries(MetricSnapshots snapshots) {
+    // Group snapshots by Prometheus name
+    Map<String, List<MetricSnapshot>> groupedByName = new HashMap<>();
+    for (MetricSnapshot snapshot : snapshots) {
+      String prometheusName = snapshot.getMetadata().getPrometheusName();
+      groupedByName.computeIfAbsent(prometheusName, k -> new ArrayList<>()).add(snapshot);
+    }
+
+    // For each group with multiple snapshots, validate type consistency and check for duplicate
+    // labels
+    for (Map.Entry<String, List<MetricSnapshot>> entry : groupedByName.entrySet()) {
+      if (entry.getValue().size() > 1) {
+        String prometheusName = entry.getKey();
+        List<MetricSnapshot> snapshotsWithSameName = entry.getValue();
+
+        // Check that all snapshots with the same name have the same type
+        // Q: What if you have a counter named "foo" and a gauge named "foo"?
+        // A: This is invalid. While counter produces "foo_total" and gauge produces "foo",
+        //    they both use the same name for HELP/TYPE/UNIT metadata, creating a conflict.
+        Class<?> firstType = snapshotsWithSameName.get(0).getClass();
+        for (int i = 1; i < snapshotsWithSameName.size(); i++) {
+          MetricSnapshot snapshot = snapshotsWithSameName.get(i);
+          if (!firstType.equals(snapshot.getClass())) {
+            throw new IllegalStateException(
+                "Conflicting metric types for Prometheus name '"
+                    + prometheusName
+                    + "': "
+                    + firstType.getSimpleName()
+                    + " vs "
+                    + snapshot.getClass().getSimpleName()
+                    + ". All metrics with the same Prometheus name must have the same type.");
+          }
+        }
+
+        // Check for duplicate label sets
+        Set<Labels> seenLabels = new HashSet<>();
+        for (MetricSnapshot snapshot : snapshotsWithSameName) {
+          for (DataPointSnapshot dataPoint : snapshot.getDataPoints()) {
+            Labels labels = dataPoint.getLabels();
+            if (!seenLabels.add(labels)) {
+              throw new IllegalStateException(
+                  "Duplicate labels detected for metric '"
+                      + prometheusName
+                      + "': "
+                      + labels
+                      + ". Each time series (metric name + label set) must be unique.");
+            }
+          }
+        }
+      }
+    }
+  }
+
   public MetricSnapshots scrape() {
     return scrape((PrometheusScrapeRequest) null);
   }
 
   public MetricSnapshots scrape(@Nullable PrometheusScrapeRequest scrapeRequest) {
-    MetricSnapshots.Builder result =
-        MetricSnapshots.builder().allowDuplicates(allowDuplicateRegistration);
+    MetricSnapshots.Builder result = MetricSnapshots.builder();
     for (Collector collector : collectors) {
       MetricSnapshot snapshot =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
       if (snapshot != null) {
-        if (!allowDuplicateRegistration
-            && result.containsMetricName(snapshot.getMetadata().getName())) {
-          throw new IllegalStateException(
-              snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
-        }
         result.metricSnapshot(snapshot);
       }
     }
@@ -104,15 +128,12 @@ public class PrometheusRegistry {
       MetricSnapshots snapshots =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
       for (MetricSnapshot snapshot : snapshots) {
-        if (!allowDuplicateRegistration
-            && result.containsMetricName(snapshot.getMetadata().getName())) {
-          throw new IllegalStateException(
-              snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
-        }
         result.metricSnapshot(snapshot);
       }
     }
-    return result.build();
+    MetricSnapshots snapshots = result.build();
+    validateNoDuplicateTimeSeries(snapshots);
+    return snapshots;
   }
 
   public MetricSnapshots scrape(Predicate<String> includedNames) {
@@ -127,8 +148,7 @@ public class PrometheusRegistry {
     if (includedNames == null) {
       return scrape(scrapeRequest);
     }
-    MetricSnapshots.Builder result =
-        MetricSnapshots.builder().allowDuplicates(allowDuplicateRegistration);
+    MetricSnapshots.Builder result = MetricSnapshots.builder();
     for (Collector collector : collectors) {
       String prometheusName = collector.getPrometheusName();
       // prometheusName == null means the name is unknown, and we have to scrape to learn the name.
@@ -168,6 +188,8 @@ public class PrometheusRegistry {
         }
       }
     }
-    return result.build();
+    MetricSnapshots snapshots = result.build();
+    validateNoDuplicateTimeSeries(snapshots);
+    return snapshots;
   }
 }

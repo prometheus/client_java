@@ -14,19 +14,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests to verify exposition format output when duplicate metric names are allowed.
- *
- * <p>These tests verify that the Prometheus text format correctly handles metrics with the same
- * name but different label sets.
- */
 class DuplicateNamesExpositionTest {
 
-  @Test
-  void testDuplicateNames_differentLabels_producesValidOutput() throws IOException {
-    PrometheusRegistry registry = new PrometheusRegistry(true);
+  private static PrometheusRegistry getPrometheusRegistry() {
+    PrometheusRegistry registry = new PrometheusRegistry();
 
-    // Counter 1: api_responses_total with labels {uri, outcome}
     registry.register(
         new Collector() {
           @Override
@@ -48,7 +40,6 @@ class DuplicateNamesExpositionTest {
           }
         });
 
-    // Counter 2: api_responses_total with labels {uri, outcome, error}
     registry.register(
         new Collector() {
           @Override
@@ -70,11 +61,16 @@ class DuplicateNamesExpositionTest {
             return "api_responses_total";
           }
         });
+    return registry;
+  }
 
-    // Scrape and write to text format
+  @Test
+  void testDuplicateNames_differentLabels_producesValidOutput() throws IOException {
+    PrometheusRegistry registry = getPrometheusRegistry();
+
     MetricSnapshots snapshots = registry.scrape();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(false);
+    PrometheusTextFormatWriter writer = PrometheusTextFormatWriter.create();
     writer.write(out, snapshots);
     String output = out.toString(UTF_8);
 
@@ -101,7 +97,7 @@ class DuplicateNamesExpositionTest {
 
   @Test
   void testDuplicateNames_sameLabels_producesOutput() throws IOException {
-    PrometheusRegistry registry = new PrometheusRegistry(true);
+    PrometheusRegistry registry = new PrometheusRegistry();
 
     // Counter 1
     registry.register(
@@ -150,7 +146,7 @@ class DuplicateNamesExpositionTest {
     // Scrape and write to text format
     MetricSnapshots snapshots = registry.scrape();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(false);
+    PrometheusTextFormatWriter writer = PrometheusTextFormatWriter.create();
     writer.write(out, snapshots);
     String output = out.toString(UTF_8);
 
@@ -180,7 +176,7 @@ class DuplicateNamesExpositionTest {
 
   @Test
   void testDuplicateNames_multipleDataPoints_producesValidOutput() throws IOException {
-    PrometheusRegistry registry = new PrometheusRegistry(true);
+    PrometheusRegistry registry = new PrometheusRegistry();
 
     // Counter 1: Multiple data points
     registry.register(
@@ -241,7 +237,7 @@ class DuplicateNamesExpositionTest {
     // Scrape and write to text format
     MetricSnapshots snapshots = registry.scrape();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(false);
+    PrometheusTextFormatWriter writer = PrometheusTextFormatWriter.create();
     writer.write(out, snapshots);
     String output = out.toString(UTF_8);
 
@@ -249,12 +245,10 @@ class DuplicateNamesExpositionTest {
     System.out.println(output);
     System.out.println("=== End Output ===\n");
 
-    // Verify all 4 data points appear
     long metricLines =
         output.lines().filter(line -> line.startsWith("api_responses_total{")).count();
     assertThat(metricLines).isEqualTo(4);
 
-    // Verify specific values
     assertThat(output).contains(" 100");
     assertThat(output).contains(" 200");
     assertThat(output).contains(" 10");
@@ -263,7 +257,7 @@ class DuplicateNamesExpositionTest {
 
   @Test
   void testBackwardCompatibility_strictModeWorksAsExpected() throws IOException {
-    PrometheusRegistry registry = new PrometheusRegistry(false); // Strict mode
+    PrometheusRegistry registry = new PrometheusRegistry(); // Strict mode
 
     registry.register(
         new Collector() {
@@ -307,10 +301,9 @@ class DuplicateNamesExpositionTest {
           }
         });
 
-    // Scrape and write to text format
     MetricSnapshots snapshots = registry.scrape();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    PrometheusTextFormatWriter writer = new PrometheusTextFormatWriter(false);
+    PrometheusTextFormatWriter writer = PrometheusTextFormatWriter.create();
     writer.write(out, snapshots);
     String output = out.toString(UTF_8);
 
@@ -327,53 +320,8 @@ class DuplicateNamesExpositionTest {
 
   @Test
   void testOpenMetricsFormat_withDuplicateNames() throws IOException {
-    PrometheusRegistry registry = new PrometheusRegistry(true);
+    PrometheusRegistry registry = getPrometheusRegistry();
 
-    // Register two counters with same name
-    registry.register(
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder()
-                .name("api_responses")
-                .help("API responses")
-                .dataPoint(
-                    CounterSnapshot.CounterDataPointSnapshot.builder()
-                        .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                        .value(100)
-                        .build())
-                .build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "api_responses_total";
-          }
-        });
-
-    registry.register(
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder()
-                .name("api_responses")
-                .help("API responses")
-                .dataPoint(
-                    CounterSnapshot.CounterDataPointSnapshot.builder()
-                        .labels(
-                            Labels.of("uri", "/hello", "outcome", "FAILURE", "error", "TIMEOUT"))
-                        .value(10)
-                        .build())
-                .build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "api_responses_total";
-          }
-        });
-
-    // Scrape and write to OpenMetrics format
     MetricSnapshots snapshots = registry.scrape();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, false);
@@ -384,14 +332,12 @@ class DuplicateNamesExpositionTest {
     System.out.println(output);
     System.out.println("=== End Output ===\n");
 
-    // Verify output
-    assertThat(output).contains("# TYPE api_responses_total counter");
+    assertThat(output).contains("# TYPE api_responses counter");
     assertThat(output).contains("api_responses_total{");
     assertThat(output).contains("outcome=\"SUCCESS\"");
     assertThat(output).contains("outcome=\"FAILURE\"");
     assertThat(output).contains("# EOF");
 
-    // Count metric lines
     long metricLines =
         output.lines().filter(line -> line.startsWith("api_responses_total{")).count();
     assertThat(metricLines).isEqualTo(2);
