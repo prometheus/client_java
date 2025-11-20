@@ -29,6 +29,7 @@ public class PrometheusScrapeHandler {
   @Nullable private final Predicate<String> nameFilter;
   private final AtomicInteger lastResponseSize = new AtomicInteger(2 << 9); //  0.5 MB
   private final List<String> supportedFormats;
+  private final boolean preferUncompressedResponse;
 
   public PrometheusScrapeHandler() {
     this(PrometheusProperties.get(), PrometheusRegistry.defaultRegistry);
@@ -44,6 +45,8 @@ public class PrometheusScrapeHandler {
 
   public PrometheusScrapeHandler(PrometheusProperties config, PrometheusRegistry registry) {
     this.expositionFormats = ExpositionFormats.init(config.getExporterProperties());
+    this.preferUncompressedResponse =
+        config.getExporterHttpServerProperties().isPreferUncompressedResponse();
     this.registry = registry;
     this.nameFilter = makeNameFilter(config.getExporterFilterProperties());
     supportedFormats = new ArrayList<>(Arrays.asList("openmetrics", "text"));
@@ -180,6 +183,10 @@ public class PrometheusScrapeHandler {
   }
 
   private boolean shouldUseCompression(PrometheusHttpRequest request) {
+    if (preferUncompressedResponse) {
+      return false;
+    }
+
     Enumeration<String> encodingHeaders = request.getHeaders("Accept-Encoding");
     if (encodingHeaders == null) {
       return false;
