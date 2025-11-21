@@ -9,11 +9,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.actuate.observability.AutoConfigureObservability;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@AutoConfigureObservability
 class ApplicationTest {
   @Test
   public void testPrometheusProtobufFormat() throws IOException {
