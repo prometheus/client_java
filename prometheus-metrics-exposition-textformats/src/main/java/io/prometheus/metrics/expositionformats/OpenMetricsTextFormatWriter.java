@@ -1,11 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeDouble;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscapedString;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLong;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeName;
-import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeOpenMetricsTimestamp;
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.*;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getMetadataName;
 import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotLabelName;
 
@@ -35,7 +30,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Nullable;
 
 /**
@@ -107,91 +104,6 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   @Override
   public String getContentType() {
     return CONTENT_TYPE;
-  }
-
-  /**
-   * Merges snapshots with duplicate Prometheus names by combining their data points. This ensures
-   * only one HELP/TYPE declaration per metric family.
-   */
-  private MetricSnapshots mergeDuplicates(MetricSnapshots metricSnapshots) {
-    java.util.Map<String, java.util.List<MetricSnapshot>> grouped = new java.util.LinkedHashMap<>();
-
-    // Group snapshots by Prometheus name
-    for (MetricSnapshot snapshot : metricSnapshots) {
-      String prometheusName = snapshot.getMetadata().getPrometheusName();
-      grouped.computeIfAbsent(prometheusName, k -> new java.util.ArrayList<>()).add(snapshot);
-    }
-
-    // Merge groups with multiple snapshots
-    MetricSnapshots.Builder builder = MetricSnapshots.builder();
-    for (java.util.List<MetricSnapshot> group : grouped.values()) {
-      if (group.size() == 1) {
-        builder.metricSnapshot(group.get(0));
-      } else {
-        // Merge multiple snapshots with same name
-        MetricSnapshot merged = mergeSnapshots(group);
-        builder.metricSnapshot(merged);
-      }
-    }
-
-    return builder.build();
-  }
-
-  /**
-   * Merges multiple snapshots of the same type into a single snapshot with combined data points.
-   * Note: Duplicate label validation is performed at the registry level during scrape().
-   */
-  @SuppressWarnings("unchecked")
-  private MetricSnapshot mergeSnapshots(java.util.List<MetricSnapshot> snapshots) {
-    if (snapshots.isEmpty()) {
-      throw new IllegalArgumentException("Cannot merge empty list of snapshots");
-    }
-
-    MetricSnapshot first = snapshots.get(0);
-    if (snapshots.size() == 1) {
-      return first;
-    }
-
-    // Combine all data points from all snapshots
-    java.util.List<DataPointSnapshot> allDataPoints = new java.util.ArrayList<>();
-    for (MetricSnapshot snapshot : snapshots) {
-      allDataPoints.addAll((java.util.Collection<DataPointSnapshot>) snapshot.getDataPoints());
-    }
-
-    // Create merged snapshot based on type
-    if (first instanceof CounterSnapshot) {
-      return new CounterSnapshot(
-          first.getMetadata(),
-          (java.util.Collection<CounterSnapshot.CounterDataPointSnapshot>) (Object) allDataPoints);
-    } else if (first instanceof GaugeSnapshot) {
-      return new GaugeSnapshot(
-          first.getMetadata(),
-          (java.util.Collection<GaugeSnapshot.GaugeDataPointSnapshot>) (Object) allDataPoints);
-    } else if (first instanceof HistogramSnapshot) {
-      return new HistogramSnapshot(
-          first.getMetadata(),
-          (java.util.Collection<HistogramSnapshot.HistogramDataPointSnapshot>)
-              (Object) allDataPoints);
-    } else if (first instanceof SummarySnapshot) {
-      return new SummarySnapshot(
-          first.getMetadata(),
-          (java.util.Collection<SummarySnapshot.SummaryDataPointSnapshot>) (Object) allDataPoints);
-    } else if (first instanceof InfoSnapshot) {
-      return new InfoSnapshot(
-          first.getMetadata(),
-          (java.util.Collection<InfoSnapshot.InfoDataPointSnapshot>) (Object) allDataPoints);
-    } else if (first instanceof StateSetSnapshot) {
-      return new StateSetSnapshot(
-          first.getMetadata(),
-          (java.util.Collection<StateSetSnapshot.StateSetDataPointSnapshot>)
-              (Object) allDataPoints);
-    } else if (first instanceof UnknownSnapshot) {
-      return new UnknownSnapshot(
-          first.getMetadata(),
-          (java.util.Collection<UnknownSnapshot.UnknownDataPointSnapshot>) (Object) allDataPoints);
-    } else {
-      throw new IllegalArgumentException("Unknown snapshot type: " + first.getClass().getName());
-    }
   }
 
   @Override

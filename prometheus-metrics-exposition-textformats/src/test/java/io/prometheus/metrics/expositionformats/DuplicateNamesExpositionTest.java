@@ -2,6 +2,7 @@ package io.prometheus.metrics.expositionformats;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -96,7 +97,7 @@ class DuplicateNamesExpositionTest {
   }
 
   @Test
-  void testDuplicateNames_sameLabels_producesOutput() throws IOException {
+  void testDuplicateNames_sameLabels_throwsException() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     // Counter 1
@@ -121,7 +122,7 @@ class DuplicateNamesExpositionTest {
           }
         });
 
-    // Counter 2: SAME labels, different value
+    // Counter 2: SAME labels, different value - this should cause an exception during scrape
     registry.register(
         new Collector() {
           @Override
@@ -143,35 +144,11 @@ class DuplicateNamesExpositionTest {
           }
         });
 
-    // Scrape and write to text format
-    MetricSnapshots snapshots = registry.scrape();
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    PrometheusTextFormatWriter writer = PrometheusTextFormatWriter.create();
-    writer.write(out, snapshots);
-    String output = out.toString(UTF_8);
-
-    System.out.println("=== Duplicate Names (Same Labels) Output ===");
-    System.out.println(output);
-    System.out.println("=== End Output ===\n");
-    System.out.println("⚠️  WARNING: This produces duplicate time series with identical labels!");
-    System.out.println("    Prometheus may only keep one value, which could be confusing.\n");
-
-    // Verify both values appear in output
-    assertThat(output).contains("api_responses_total{");
-    assertThat(output).contains(" 100");
-    assertThat(output).contains(" 50");
-
-    // Both have identical label sets
-    long matchingLines =
-        output
-            .lines()
-            .filter(
-                line ->
-                    line.contains("api_responses_total{")
-                        && line.contains("outcome=\"SUCCESS\"")
-                        && line.contains("uri=\"/hello\""))
-            .count();
-    assertThat(matchingLines).isEqualTo(2);
+    // Scraping should throw exception due to duplicate time series (same name + same labels)
+    assertThatThrownBy(registry::scrape)
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Duplicate labels detected")
+        .hasMessageContaining("api_responses");
   }
 
   @Test

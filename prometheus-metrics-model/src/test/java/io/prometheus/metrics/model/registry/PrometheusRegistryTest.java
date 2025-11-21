@@ -290,7 +290,7 @@ class PrometheusRegistryTest {
 
     // Scraping should throw exception due to duplicate time series (same name + same labels)
     assertThatThrownBy(registry::scrape)
-        .isInstanceOf(IllegalStateException.class)
+        .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Duplicate labels detected")
         .hasMessageContaining("api_responses")
         .hasMessageContaining("uri=\"/hello\"")
@@ -480,7 +480,7 @@ class PrometheusRegistryTest {
 
     // Scraping should throw exception due to conflicting metric types
     assertThatThrownBy(() -> registry.scrape())
-        .isInstanceOf(IllegalStateException.class)
+        .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Conflicting metric types")
         .hasMessageContaining("api_metrics")
         .hasMessageContaining("CounterSnapshot")
