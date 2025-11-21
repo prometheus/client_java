@@ -641,6 +641,11 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
   }
 
   @Override
+  public io.prometheus.metrics.model.registry.MetricType getMetricType() {
+    return io.prometheus.metrics.model.registry.MetricType.HISTOGRAM;
+  }
+
+  @Override
   protected HistogramSnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
     List<HistogramSnapshot.HistogramDataPointSnapshot> data = new ArrayList<>(labels.size());
     for (int i = 0; i < labels.size(); i++) {

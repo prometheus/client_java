@@ -105,6 +105,11 @@ public class Info extends MetricWithFixedMetadata {
     return new InfoSnapshot(getMetadata(), data);
   }
 
+  @Override
+  public io.prometheus.metrics.model.registry.MetricType getMetricType() {
+    return io.prometheus.metrics.model.registry.MetricType.INFO;
+  }
+
   public static Builder builder() {
     return new Builder(PrometheusProperties.get());
   }

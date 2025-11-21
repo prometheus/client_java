@@ -74,6 +74,11 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
   }
 
   @Override
+  public io.prometheus.metrics.model.registry.MetricType getMetricType() {
+    return io.prometheus.metrics.model.registry.MetricType.STATESET;
+  }
+
+  @Override
   protected StateSetSnapshot collect(List<Labels> labels, List<DataPoint> metricDataList) {
     List<StateSetSnapshot.StateSetDataPointSnapshot> data = new ArrayList<>(labels.size());
     for (int i = 0; i < labels.size(); i++) {
