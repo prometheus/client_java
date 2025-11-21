@@ -78,4 +78,23 @@ public interface Collector {
   default String getPrometheusName() {
     return null;
   }
+
+  /**
+   * Returns the type of metric this collector produces.
+   *
+   * <p>This is used during registration to validate that all collectors with the same Prometheus
+   * name have the same metric type. If two collectors return the same non-null Prometheus name but
+   * different metric types, registration will fail with an exception.
+   *
+   * <p>Returning {@code null} means the type is unknown, and type validation will be skipped for
+   * this collector.
+   *
+   * <p>All metrics in {@code prometheus-metrics-core} override this to return their specific type.
+   *
+   * @return the metric type, or {@code null} if unknown
+   */
+  @Nullable
+  default MetricType getMetricType() {
+    return null;
+  }
 }

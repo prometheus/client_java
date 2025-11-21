@@ -110,6 +110,11 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
   }
 
   @Override
+  public io.prometheus.metrics.model.registry.MetricType getMetricType() {
+    return io.prometheus.metrics.model.registry.MetricType.SUMMARY;
+  }
+
+  @Override
   protected SummarySnapshot collect(List<Labels> labels, List<DataPoint> metricData) {
     List<SummarySnapshot.SummaryDataPointSnapshot> data = new ArrayList<>(labels.size());
     for (int i = 0; i < labels.size(); i++) {

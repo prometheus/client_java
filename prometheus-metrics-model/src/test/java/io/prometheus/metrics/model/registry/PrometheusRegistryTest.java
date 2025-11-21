@@ -1,17 +1,23 @@
 package io.prometheus.metrics.model.registry;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.prometheus.metrics.model.snapshots.*;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import org.junit.jupiter.api.Test;
 
 class PrometheusRegistryTest {
-
-  Collector noName = () -> GaugeSnapshot.builder().name("no_name_gauge").build();
 
   Collector counterA1 =
       new Collector() {
@@ -74,18 +80,109 @@ class PrometheusRegistryTest {
 
         @Override
         public List<String> getPrometheusNames() {
-          return Arrays.asList(gaugeA.getPrometheusName(), counterB.getPrometheusName());
+          return asList(gaugeA.getPrometheusName(), counterB.getPrometheusName());
         }
       };
 
   @Test
-  public void registerDuplicateNameIsAllowed() {
+  public void register_duplicateName_IsAllowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counterA1);
     registry.register(counterA2);
 
     MetricSnapshots snapshots = registry.scrape();
     assertThat(snapshots.size()).isEqualTo(2);
+  }
+
+  @Test
+  public void register_duplicateName_differentTypeIsNotAllowed() {
+    Collector counter =
+      new Collector() {
+        @Override
+        public MetricSnapshot collect() {
+          return CounterSnapshot.builder().name("my_metric").build();
+        }
+
+        @Override
+        public String getPrometheusName() {
+          return "my_metric";
+        }
+
+        @Override
+        public MetricType getMetricType() {
+          return MetricType.COUNTER;
+        }
+      };
+
+    Collector gauge =
+      new Collector() {
+        @Override
+        public MetricSnapshot collect() {
+          return GaugeSnapshot.builder().name("my_metric").build();
+        }
+
+        @Override
+        public String getPrometheusName() {
+          return "my_metric";
+        }
+
+        @Override
+        public MetricType getMetricType() {
+          return MetricType.GAUGE;
+        }
+      };
+
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(counter);
+
+    assertThatThrownBy(() -> registry.register(gauge))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessageContaining("Collector with Prometheus name 'my_metric' is already registered with type COUNTER, but you are trying to register a new collector with type GAUGE.")
+      .hasMessageContaining("All collectors with the same Prometheus name must have the same type.");
+  }
+
+  @Test
+  public void register_duplicateName_sameLabelsNotAllowed() {
+    Collector counter1 =
+      new Collector() {
+        @Override
+        public MetricSnapshot collect() {
+          return CounterSnapshot.builder()
+              .name("my_metric")
+              .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1).build())
+              .build();
+        }
+
+        @Override
+        public String getPrometheusName() {
+          return "my_metric_total";
+        }
+      };
+
+    Collector counter2 =
+      new Collector() {
+        @Override
+        public MetricSnapshot collect() {
+          return CounterSnapshot.builder()
+              .name("my_metric")
+              .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(2).build())
+              .build();
+        }
+
+        @Override
+        public String getPrometheusName() {
+          return "my_metric_total";
+        }
+      };
+
+    PrometheusRegistry registry = new PrometheusRegistry();
+    registry.register(counter1);
+    registry.register(counter2);
+
+    assertThatThrownBy(registry::scrape)
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessageContaining("Duplicate labels detected for metric 'my_metric'")
+      .hasMessageContaining("Each time series (metric name + label set) must be unique.");
   }
 
   @Test
@@ -175,69 +272,6 @@ class PrometheusRegistryTest {
     assertThat(firstName).isEqualTo("counter_a");
     assertThat(secondName).isEqualTo("counter_a");
   }
-
-  //  @Test
-  //  void testDuplicateNames_differentLabels_scrapesSuccessfully() {
-  //    PrometheusRegistry registry = new PrometheusRegistry();
-  //
-  //    Collector counter1 =
-  //        new Collector() {
-  //          @Override
-  //          public MetricSnapshot collect() {
-  //            return CounterSnapshot.builder()
-  //                .name("api_responses")
-  //                .help("API responses")
-  //                .dataPoint(
-  //                    CounterSnapshot.CounterDataPointSnapshot.builder()
-  //                        .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-  //                        .value(100)
-  //                        .build())
-  //                .build();
-  //          }
-  //
-  //          @Override
-  //          public String getPrometheusName() {
-  //            return "api_responses_total";
-  //          }
-  //        };
-  //
-  //    Collector counter2 =
-  //        new Collector() {
-  //          @Override
-  //          public MetricSnapshot collect() {
-  //            return CounterSnapshot.builder()
-  //                .name("api_responses")
-  //                .help("API responses")
-  //                .dataPoint(
-  //                    CounterSnapshot.CounterDataPointSnapshot.builder()
-  //                        .labels(
-  //                            Labels.of("uri", "/hello", "outcome", "FAILURE", "error",
-  // "TIMEOUT"))
-  //                        .value(10)
-  //                        .build())
-  //                .build();
-  //          }
-  //
-  //          @Override
-  //          public String getPrometheusName() {
-  //            return "api_responses_total";
-  //          }
-  //        };
-  //
-  //    registry.register(counter1);
-  //    registry.register(counter2);
-  //
-  //    MetricSnapshots snapshots = registry.scrape();
-  //    assertThat(snapshots.size()).isEqualTo(2);
-  //
-  //
-  // assertThat(snapshots.get(0).getMetadata().getPrometheusName()).isEqualTo("api_responses_total");
-  //
-  // assertThat(snapshots.get(1).getMetadata().getPrometheusName()).isEqualTo("api_responses_total");
-  //
-  //    assertThat(snapshots.get(0).getDataPoints()).hasSize(1);
-  //    assertThat(snapshots.get(1).getDataPoints()).hasSize(1);
-  //  }
 
   @Test
   void testDuplicateNames_sameLabels_throwsException() {
@@ -361,11 +395,9 @@ class PrometheusRegistryTest {
     MetricSnapshots snapshots = registry.scrape();
     assertThat(snapshots.size()).isEqualTo(2);
 
-    // Verify data points
     assertThat(snapshots.get(0).getDataPoints()).hasSize(2);
     assertThat(snapshots.get(1).getDataPoints()).hasSize(2);
 
-    // Total of 4 data points across 2 snapshots
     int totalDataPoints = snapshots.stream().mapToInt(s -> s.getDataPoints().size()).sum();
     assertThat(totalDataPoints).isEqualTo(4);
   }
@@ -374,7 +406,6 @@ class PrometheusRegistryTest {
   void testDuplicateNames_mixedMetricTypes_scrapesSuccessfully() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
-    // Counter with name "requests_total"
     Collector counter =
         new Collector() {
           @Override
@@ -396,7 +427,6 @@ class PrometheusRegistryTest {
           }
         };
 
-    // Gauge with same base name (will be "requests_total" in prometheus format for counter)
     Collector gauge =
         new Collector() {
           @Override
@@ -422,7 +452,6 @@ class PrometheusRegistryTest {
     registry.register(counter);
     registry.register(gauge);
 
-    // Scrape
     MetricSnapshots snapshots = registry.scrape();
     assertThat(snapshots.size()).isEqualTo(2);
   }
@@ -431,7 +460,6 @@ class PrometheusRegistryTest {
   void testDuplicateNames_samePrometheusNameDifferentTypes_throwsException() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
-    // Counter with Prometheus name "api_metrics"
     Collector counter =
         new Collector() {
           @Override
@@ -453,7 +481,6 @@ class PrometheusRegistryTest {
           }
         };
 
-    // Gauge with SAME Prometheus name "api_metrics"
     Collector gauge =
         new Collector() {
           @Override
@@ -471,7 +498,7 @@ class PrometheusRegistryTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_metrics"; // Same Prometheus name as counter!
+            return "api_metrics"; // Same Prometheus name as counter
           }
         };
 
@@ -479,7 +506,7 @@ class PrometheusRegistryTest {
     registry.register(gauge);
 
     // Scraping should throw exception due to conflicting metric types
-    assertThatThrownBy(() -> registry.scrape())
+    assertThatThrownBy(registry::scrape)
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Conflicting metric types")
         .hasMessageContaining("api_metrics")
@@ -564,5 +591,302 @@ class PrometheusRegistryTest {
 
     registry.clear();
     assertThat(registry.scrape().size()).isEqualTo(0);
+  }
+
+  @Test
+  void testMultiCollector_withTypeInfo_validatesAtRegistration() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    // MultiCollector that declares its types
+    MultiCollector multiCollector =
+        new MultiCollector() {
+          @Override
+          public MetricSnapshots collect() {
+            return new MetricSnapshots(
+                CounterSnapshot.builder().name("api_counter").build(),
+                GaugeSnapshot.builder().name("api_gauge").build());
+          }
+
+          @Override
+          public List<String> getPrometheusNames() {
+            return asList("api_counter_total", "api_gauge");
+          }
+
+          @Override
+          public MetricType getMetricType(String prometheusName) {
+            switch (prometheusName) {
+              case "api_counter_total":
+                return MetricType.COUNTER;
+              case "api_gauge":
+                return MetricType.GAUGE;
+              default:
+                return null;
+            }
+          }
+        };
+
+    assertThatCode(() -> registry.register(multiCollector)).doesNotThrowAnyException();
+
+    Collector conflictingCounter =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("api_counter").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "api_counter_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+        };
+
+    assertThatThrownBy(() -> registry.register(conflictingCounter))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("api_counter_total")
+        .hasMessageContaining("COUNTER")
+        .hasMessageContaining("GAUGE");
+  }
+
+  @Test
+  void testMultiCollector_withoutTypeInfo_skipsValidation() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    // MultiCollector without type info (returns null)
+    MultiCollector multiCollector =
+        new MultiCollector() {
+          @Override
+          public MetricSnapshots collect() {
+            return new MetricSnapshots(
+                CounterSnapshot.builder().name("my_metric").build(),
+                GaugeSnapshot.builder().name("other_metric").build());
+          }
+
+          @Override
+          public List<String> getPrometheusNames() {
+            return asList("my_metric_total", "other_metric");
+          }
+          // getMetricType() returns null by default
+        };
+
+    // Should register successfully (no validation)
+    assertThatCode(() -> registry.register(multiCollector)).doesNotThrowAnyException();
+
+    // Another collector with same name should also succeed (no validation)
+    Collector collector =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("my_metric").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "my_metric_total";
+          }
+          // getMetricType() returns null by default
+        };
+
+    assertThatCode(() -> registry.register(collector)).doesNotThrowAnyException();
+  }
+
+  @Test
+  void testTypeValidation_cacheIsClearedOnClear() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector counter =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("my_metric").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "my_metric_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+        };
+
+    registry.register(counter);
+
+    // Clear should remove from cache
+    registry.clear();
+
+    // Now we should be able to register a Gauge with the same name
+    Collector gauge =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("my_metric").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "my_metric_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+        };
+
+    assertThatCode(() -> registry.register(gauge)).doesNotThrowAnyException();
+  }
+
+  @Test
+  void testMultiCollector_conflictBetweenItsOwnMetrics_detectedAtRegistration() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector counter =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("shared").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "shared_metric";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+        };
+
+    registry.register(counter);
+
+    MultiCollector conflictingMulti =
+        new MultiCollector() {
+          @Override
+          public MetricSnapshots collect() {
+            return new MetricSnapshots(
+                GaugeSnapshot.builder().name("shared").build(),
+                HistogramSnapshot.builder().name("other").build());
+          }
+
+          @Override
+          public List<String> getPrometheusNames() {
+            return asList("shared_metric", "other_histogram");
+          }
+
+          @Override
+          public MetricType getMetricType(String prometheusName) {
+            switch (prometheusName) {
+              case "shared_metric":
+                return MetricType.GAUGE; // Conflict!
+              case "other_histogram":
+                return MetricType.HISTOGRAM;
+              default:
+                return null;
+            }
+          }
+        };
+
+    assertThatThrownBy(() -> registry.register(conflictingMulti))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("shared_metric")
+        .hasMessageContaining("COUNTER")
+        .hasMessageContaining("GAUGE");
+  }
+
+  @Test
+  void testMultiCollector_withEmptyNames_noValidation() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    // MultiCollector with empty getPrometheusNames()
+    MultiCollector emptyNamesCollector =
+        new MultiCollector() {
+          @Override
+          public MetricSnapshots collect() {
+            return new MetricSnapshots(CounterSnapshot.builder().name("dynamic").build());
+          }
+
+          @Override
+          public List<String> getPrometheusNames() {
+            return emptyList(); // Unknown names
+          }
+
+          @Override
+          public MetricType getMetricType(String prometheusName) {
+            return MetricType.COUNTER;
+          }
+        };
+
+    assertThatCode(() -> registry.register(emptyNamesCollector)).doesNotThrowAnyException();
+  }
+
+  @Test
+  void testTypeValidation_sameTypeAllowed() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector counter1 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("requests")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(Labels.of("path", "/api"))
+                        .value(100)
+                        .build())
+                .build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+        };
+
+    registry.register(counter1);
+
+    // same name but different labels - should succeed
+    Collector counter2 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("requests")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(Labels.of("path", "/web"))
+                        .value(50)
+                        .build())
+                .build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+        };
+
+    assertThatCode(() -> registry.register(counter2)).doesNotThrowAnyException();
+
+    MetricSnapshots snapshots = registry.scrape();
+    assertThat(snapshots.size()).isEqualTo(2);
   }
 }

@@ -93,6 +93,11 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
   }
 
   @Override
+  public io.prometheus.metrics.model.registry.MetricType getMetricType() {
+    return io.prometheus.metrics.model.registry.MetricType.COUNTER;
+  }
+
+  @Override
   protected DataPoint newDataPoint() {
     if (exemplarSamplerConfig != null) {
       return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));

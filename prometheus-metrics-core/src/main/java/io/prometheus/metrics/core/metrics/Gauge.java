@@ -95,6 +95,11 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
   }
 
   @Override
+  public io.prometheus.metrics.model.registry.MetricType getMetricType() {
+    return io.prometheus.metrics.model.registry.MetricType.GAUGE;
+  }
+
+  @Override
   protected DataPoint newDataPoint() {
     if (exemplarSamplerConfig != null) {
       return new DataPoint(new ExemplarSampler(exemplarSamplerConfig));
