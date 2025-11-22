@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.registry;
 
+import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.List;
@@ -30,33 +31,63 @@ public class PrometheusRegistry {
 
   /**
    * Validates that the new collector's type is consistent with any existing collectors that have
-   * the same Prometheus name. This prevents registering, for example, a Counter and a Gauge with
-   * the same name.
-   *
-   * <p>Uses O(1) lookup via cached metric identifiers for efficiency.
+   * the same Prometheus name, and that there are no duplicate label sets.
    */
   private void validateTypeConsistency(Collector newCollector) {
     String newName = newCollector.getPrometheusName();
     MetricType newType = newCollector.getMetricType();
 
-    // If name or type is null, skip validation
-    if (newName == null || newType == null) {
+    if (newName == null) {
       return;
     }
 
-    MetricIdentifier newIdentifier = new MetricIdentifier(newName, newType);
+    // Validate type consistency if type is provided
+    if (newType != null) {
+      MetricIdentifier newIdentifier = new MetricIdentifier(newName, newType);
+      MetricIdentifier existing = registeredMetrics.get(newName);
+      if (existing != null && !newIdentifier.isCompatibleWith(existing)) {
+        throw new IllegalArgumentException(
+            "Collector with Prometheus name '"
+                + newName
+                + "' is already registered with type "
+                + existing.getType()
+                + ", but you are trying to register a new collector with type "
+                + newType
+                + ". All collectors with the same Prometheus name must have the same type.");
+      }
+    }
 
-    // O(1) lookup in cache
-    MetricIdentifier existing = registeredMetrics.get(newName);
-    if (existing != null && !newIdentifier.isCompatibleWith(existing)) {
-      throw new IllegalArgumentException(
-          "Collector with Prometheus name '"
-              + newName
-              + "' is already registered with type "
-              + existing.getType()
-              + ", but you are trying to register a new collector with type "
-              + newType
-              + ". All collectors with the same Prometheus name must have the same type.");
+    // Validate no duplicate labels by collecting and comparing snapshots
+    MetricSnapshot newSnapshot = newCollector.collect();
+    if (newSnapshot != null) {
+      for (Collector existingCollector : collectors) {
+        if (newName.equals(existingCollector.getPrometheusName())) {
+          MetricSnapshot existingSnapshot = existingCollector.collect();
+          if (existingSnapshot != null) {
+            validateNoDuplicateLabels(newSnapshot, existingSnapshot);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Validates that two snapshots with the same Prometheus name don't have overlapping label sets.
+   */
+  private void validateNoDuplicateLabels(MetricSnapshot snapshot1, MetricSnapshot snapshot2) {
+    String metricName = snapshot1.getMetadata().getName();
+
+    for (DataPointSnapshot dp1 : snapshot1.getDataPoints()) {
+      for (DataPointSnapshot dp2 : snapshot2.getDataPoints()) {
+        if (dp1.getLabels().equals(dp2.getLabels())) {
+          throw new IllegalArgumentException(
+              "Duplicate labels detected for metric '"
+                  + metricName
+                  + "' with labels "
+                  + dp1.getLabels()
+                  + ". Each time series (metric name + label set) must be unique.");
+        }
+      }
     }
   }
 
@@ -65,7 +96,7 @@ public class PrometheusRegistry {
    *
    * <p>Validates each Prometheus name returned by the MultiCollector. If the MultiCollector
    * provides type information via {@link MultiCollector#getMetricType(String)}, validation happens
-   * at registration time. Otherwise, validation is deferred to scrape time.
+   * at registration time.
    */
   private void validateTypeConsistency(MultiCollector newCollector) {
     List<String> names = newCollector.getPrometheusNames();
@@ -73,14 +104,12 @@ public class PrometheusRegistry {
     for (String name : names) {
       MetricType type = newCollector.getMetricType(name);
 
-      // Skip validation if type is unknown
       if (type == null) {
         continue;
       }
 
       MetricIdentifier newIdentifier = new MetricIdentifier(name, type);
 
-      // O(1) lookup in cache
       MetricIdentifier existing = registeredMetrics.get(name);
       if (existing != null && !newIdentifier.isCompatibleWith(existing)) {
         throw new IllegalArgumentException(
@@ -94,13 +123,12 @@ public class PrometheusRegistry {
                 + " the same type.");
       }
 
-      // Cache the identifier for future lookups
       registeredMetrics.putIfAbsent(name, newIdentifier);
     }
   }
 
   /**
-   * Caches the metric identifier for fast O(1) lookup during future registrations.
+   * Caches the metric identifier for lookup during future registrations.
    *
    * <p>Only caches if the collector provides both a Prometheus name and type.
    */
@@ -116,8 +144,7 @@ public class PrometheusRegistry {
   public void unregister(Collector collector) {
     collectors.remove(collector);
     // Note: We don't remove from cache because another collector with the same name might exist
-    // The cache will be cleaned up when clear() is called or can be left as-is (it's just
-    // metadata)
+    // The cache will be cleaned up when clear() is called
   }
 
   public void unregister(MultiCollector collector) {
