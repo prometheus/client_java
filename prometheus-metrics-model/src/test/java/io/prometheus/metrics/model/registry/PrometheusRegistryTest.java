@@ -177,9 +177,8 @@ class PrometheusRegistryTest {
 
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counter1);
-    registry.register(counter2);
 
-    assertThatThrownBy(registry::scrape)
+    assertThatThrownBy(() -> registry.register(counter2))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessageContaining("Duplicate labels detected for metric 'my_metric'")
       .hasMessageContaining("Each time series (metric name + label set) must be unique.");
@@ -320,15 +319,12 @@ class PrometheusRegistryTest {
         };
 
     registry.register(counter1);
-    registry.register(counter2);
 
-    // Scraping should throw exception due to duplicate time series (same name + same labels)
-    assertThatThrownBy(registry::scrape)
+    // Registration should throw exception due to duplicate time series (same name + same labels)
+    assertThatThrownBy(() -> registry.register(counter2))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Duplicate labels detected")
-        .hasMessageContaining("api_responses")
-        .hasMessageContaining("uri=\"/hello\"")
-        .hasMessageContaining("outcome=\"SUCCESS\"");
+        .hasMessageContaining("api_responses");
   }
 
   @Test
@@ -479,6 +475,11 @@ class PrometheusRegistryTest {
           public String getPrometheusName() {
             return "api_metrics";
           }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
         };
 
     Collector gauge =
@@ -500,18 +501,21 @@ class PrometheusRegistryTest {
           public String getPrometheusName() {
             return "api_metrics"; // Same Prometheus name as counter
           }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
         };
 
     registry.register(counter);
-    registry.register(gauge);
 
-    // Scraping should throw exception due to conflicting metric types
-    assertThatThrownBy(registry::scrape)
+    // Registration should throw exception due to conflicting metric types
+    assertThatThrownBy(() -> registry.register(gauge))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Conflicting metric types")
         .hasMessageContaining("api_metrics")
-        .hasMessageContaining("CounterSnapshot")
-        .hasMessageContaining("GaugeSnapshot");
+        .hasMessageContaining("COUNTER")
+        .hasMessageContaining("GAUGE");
   }
 
   @Test

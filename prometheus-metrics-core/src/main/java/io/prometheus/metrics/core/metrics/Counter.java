@@ -5,6 +5,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.CounterDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
+import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -93,8 +94,8 @@ public class Counter extends StatefulMetric<CounterDataPoint, Counter.DataPoint>
   }
 
   @Override
-  public io.prometheus.metrics.model.registry.MetricType getMetricType() {
-    return io.prometheus.metrics.model.registry.MetricType.COUNTER;
+  public MetricType getMetricType() {
+    return MetricType.COUNTER;
   }
 
   @Override

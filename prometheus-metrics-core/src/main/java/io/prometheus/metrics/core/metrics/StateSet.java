@@ -4,6 +4,7 @@ import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusN
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.StateSetDataPoint;
+import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import java.util.ArrayList;
@@ -74,8 +75,8 @@ public class StateSet extends StatefulMetric<StateSetDataPoint, StateSet.DataPoi
   }
 
   @Override
-  public io.prometheus.metrics.model.registry.MetricType getMetricType() {
-    return io.prometheus.metrics.model.registry.MetricType.STATESET;
+  public MetricType getMetricType() {
+    return MetricType.STATESET;
   }
 
   @Override
