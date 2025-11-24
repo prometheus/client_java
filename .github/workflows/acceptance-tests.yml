@@ -13,7 +13,7 @@ jobs:
         with:
           persist-credentials: false
         uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
-      - uses: jdx/mise-action@d16887ba50704baed7de72bd1e82e04391e4457a # v3.5.0
+      - uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
         with:
           version: v2025.11.7
           sha256: b2fb7d4c8dad559ede4fb346fb12171298a8ec8648f7923730abcd92e9dda15c
