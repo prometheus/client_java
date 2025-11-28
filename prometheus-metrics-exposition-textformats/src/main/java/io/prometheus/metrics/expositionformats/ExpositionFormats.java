@@ -30,10 +30,12 @@ public class ExpositionFormats {
         PrometheusTextFormatWriter.builder()
             .setIncludeCreatedTimestamps(properties.getIncludeCreatedTimestamps())
             .setTimestampsInMs(properties.getPrometheusTimestampsInMs())
+            .setAddSuffixesToMetricNames(properties.isAddSuffixesToMetricNames())
             .build(),
         OpenMetricsTextFormatWriter.builder()
             .setCreatedTimestampsEnabled(properties.getIncludeCreatedTimestamps())
             .setExemplarsOnAllMetricTypesEnabled(properties.getExemplarsOnAllMetricTypes())
+            .setAddSuffixesToMetricNames(properties.isAddSuffixesToMetricNames())
             .build());
   }
 
