@@ -280,7 +280,7 @@
             <path>
               <groupId>com.uber.nullaway</groupId>
               <artifactId>nullaway</artifactId>
-              <version>0.12.12</version>
+              <version>0.12.13</version>
             </path>
             <!-- Other annotation processors go here.
 
