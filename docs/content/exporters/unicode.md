@@ -28,7 +28,7 @@ other UTF-8 characters, without any replacements.
 
 ## PushGateway
 
-When using the [Pushgateway](/client_java/exporters/pushgateway/), Unicode support has to be enabled
+When using the [Pushgateway]({{< relref "pushgateway.md" >}}), Unicode support has to be enabled
 explicitly by setting `io.prometheus.exporter.pushgateway.escapingScheme` to `allow-utf-8` in the
 Pushgateway configuration file - see
 [Pushgateway configuration]({{< relref "/config/config.md#exporter-pushgateway-properties" >}})
