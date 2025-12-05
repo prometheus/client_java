@@ -14,10 +14,13 @@ import io.prometheus.metrics.model.snapshots.SnapshotEscaper;
 import io.prometheus.metrics.model.snapshots.StateSetSnapshot;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
 import io.prometheus.metrics.model.snapshots.UnknownSnapshot;
-
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import javax.annotation.Nullable;
 
 public class TextFormatUtil {
@@ -172,7 +175,7 @@ public class TextFormatUtil {
    * Merges snapshots with duplicate Prometheus names by combining their data points. This ensures
    * only one HELP/TYPE declaration per metric family.
    */
-  static MetricSnapshots mergeDuplicates(MetricSnapshots metricSnapshots) {
+  public static MetricSnapshots mergeDuplicates(MetricSnapshots metricSnapshots) {
     Map<String, List<MetricSnapshot>> grouped = new LinkedHashMap<>();
 
     // Group snapshots by Prometheus name
@@ -218,34 +221,32 @@ public class TextFormatUtil {
     // Create merged snapshot based on type
     if (first instanceof CounterSnapshot) {
       return new CounterSnapshot(
-        first.getMetadata(),
-        (Collection<CounterSnapshot.CounterDataPointSnapshot>) (Object) allDataPoints);
+          first.getMetadata(),
+          (Collection<CounterSnapshot.CounterDataPointSnapshot>) (Object) allDataPoints);
     } else if (first instanceof GaugeSnapshot) {
       return new GaugeSnapshot(
-        first.getMetadata(),
-        (Collection<GaugeSnapshot.GaugeDataPointSnapshot>) (Object) allDataPoints);
+          first.getMetadata(),
+          (Collection<GaugeSnapshot.GaugeDataPointSnapshot>) (Object) allDataPoints);
     } else if (first instanceof HistogramSnapshot) {
       return new HistogramSnapshot(
-        first.getMetadata(),
-        (Collection<HistogramSnapshot.HistogramDataPointSnapshot>)
-          (Object) allDataPoints);
+          first.getMetadata(),
+          (Collection<HistogramSnapshot.HistogramDataPointSnapshot>) (Object) allDataPoints);
     } else if (first instanceof SummarySnapshot) {
       return new SummarySnapshot(
-        first.getMetadata(),
-        (Collection<SummarySnapshot.SummaryDataPointSnapshot>) (Object) allDataPoints);
+          first.getMetadata(),
+          (Collection<SummarySnapshot.SummaryDataPointSnapshot>) (Object) allDataPoints);
     } else if (first instanceof InfoSnapshot) {
       return new InfoSnapshot(
-        first.getMetadata(),
-        (Collection<InfoSnapshot.InfoDataPointSnapshot>) (Object) allDataPoints);
+          first.getMetadata(),
+          (Collection<InfoSnapshot.InfoDataPointSnapshot>) (Object) allDataPoints);
     } else if (first instanceof StateSetSnapshot) {
       return new StateSetSnapshot(
-        first.getMetadata(),
-        (Collection<StateSetSnapshot.StateSetDataPointSnapshot>)
-          (Object) allDataPoints);
+          first.getMetadata(),
+          (Collection<StateSetSnapshot.StateSetDataPointSnapshot>) (Object) allDataPoints);
     } else if (first instanceof UnknownSnapshot) {
       return new UnknownSnapshot(
-        first.getMetadata(),
-        (Collection<UnknownSnapshot.UnknownDataPointSnapshot>) (Object) allDataPoints);
+          first.getMetadata(),
+          (Collection<UnknownSnapshot.UnknownDataPointSnapshot>) (Object) allDataPoints);
     } else {
       throw new IllegalArgumentException("Unknown snapshot type: " + first.getClass().getName());
     }

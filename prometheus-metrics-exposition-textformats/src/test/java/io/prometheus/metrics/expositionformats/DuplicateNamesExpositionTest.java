@@ -7,7 +7,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
-import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -75,7 +74,8 @@ class DuplicateNamesExpositionTest {
     writer.write(out, snapshots);
     String output = out.toString(UTF_8);
 
-    String expected = """
+    String expected =
+        """
       # HELP api_responses_total API responses
       # TYPE api_responses_total counter
       api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
@@ -149,7 +149,8 @@ class DuplicateNamesExpositionTest {
     writer.write(out, snapshots);
     String output = out.toString(UTF_8);
 
-    String expected = """
+    String expected =
+        """
       # HELP api_responses_total API responses
       # TYPE api_responses_total counter
       api_responses_total{error="NOT_FOUND",outcome="FAILURE",uri="/world"} 5.0
@@ -158,7 +159,6 @@ class DuplicateNamesExpositionTest {
       api_responses_total{outcome="SUCCESS",uri="/world"} 200.0
       """;
     assertThat(output).isEqualTo(expected);
-
   }
 
   @Test
@@ -171,7 +171,8 @@ class DuplicateNamesExpositionTest {
     writer.write(out, snapshots);
     String output = out.toString(UTF_8);
 
-    String expected = """
+    String expected =
+        """
       # TYPE api_responses counter
       # HELP api_responses API responses
       api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
@@ -186,51 +187,51 @@ class DuplicateNamesExpositionTest {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     registry.register(
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder()
-            .name("api_responses")
-            .help("API responses")
-            .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                .value(100)
-                .build())
-            .build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("api_responses")
+                .help("API responses")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
+                        .value(100)
+                        .build())
+                .build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "api_responses_total";
-        }
-      });
+          @Override
+          public String getPrometheusName() {
+            return "api_responses_total";
+          }
+        });
 
-    registry.register(
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder()
-            .name("api_responses")
-            .help("API responses")
-            .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                .value(50)
-                .build())
-            .build();
-        }
+    // Registration should throw exception due to duplicate time series (same name + same labels)
+    assertThatThrownBy(
+            () ->
+                registry.register(
+                    new Collector() {
+                      @Override
+                      public MetricSnapshot collect() {
+                        return CounterSnapshot.builder()
+                            .name("api_responses")
+                            .help("API responses")
+                            .dataPoint(
+                                CounterSnapshot.CounterDataPointSnapshot.builder()
+                                    .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
+                                    .value(50)
+                                    .build())
+                            .build();
+                      }
 
-        @Override
-        public String getPrometheusName() {
-          return "api_responses_total";
-        }
-      });
-
-    // Scraping should throw exception due to duplicate time series (same name + same labels)
-    assertThatThrownBy(registry::scrape)
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessageContaining("Duplicate labels detected")
-      .hasMessageContaining("api_responses");
+                      @Override
+                      public String getPrometheusName() {
+                        return "api_responses_total";
+                      }
+                    }))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Duplicate labels detected")
+        .hasMessageContaining("api_responses");
   }
 }

@@ -6,6 +6,7 @@ import static io.prometheus.metrics.model.snapshots.SnapshotEscaper.getSnapshotL
 import com.google.protobuf.TextFormat;
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.expositionformats.ExpositionFormatWriter;
+import io.prometheus.metrics.expositionformats.TextFormatUtil;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_1.Metrics;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -43,8 +44,9 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
 
   @Override
   public String toDebugString(MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) {
+    MetricSnapshots merged = TextFormatUtil.mergeDuplicates(metricSnapshots);
     StringBuilder stringBuilder = new StringBuilder();
-    for (MetricSnapshot s : metricSnapshots) {
+    for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         stringBuilder.append(TextFormat.printer().printToString(convert(snapshot, escapingScheme)));
@@ -57,7 +59,8 @@ public class PrometheusProtobufWriterImpl implements ExpositionFormatWriter {
   public void write(
       OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme escapingScheme)
       throws IOException {
-    for (MetricSnapshot s : metricSnapshots) {
+    MetricSnapshots merged = TextFormatUtil.mergeDuplicates(metricSnapshots);
+    for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, escapingScheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         convert(snapshot, escapingScheme).writeDelimitedTo(out);

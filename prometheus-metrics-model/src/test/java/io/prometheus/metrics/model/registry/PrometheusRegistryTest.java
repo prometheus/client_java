@@ -6,15 +6,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.Collections;
-import java.util.List;
-
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PrometheusRegistryTest {
@@ -97,91 +95,93 @@ class PrometheusRegistryTest {
   @Test
   public void register_duplicateName_differentTypeIsNotAllowed() {
     Collector counter =
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder().name("my_metric").build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("my_metric").build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "my_metric";
-        }
+          @Override
+          public String getPrometheusName() {
+            return "my_metric";
+          }
 
-        @Override
-        public MetricType getMetricType() {
-          return MetricType.COUNTER;
-        }
-      };
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+        };
 
     Collector gauge =
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return GaugeSnapshot.builder().name("my_metric").build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("my_metric").build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "my_metric";
-        }
+          @Override
+          public String getPrometheusName() {
+            return "my_metric";
+          }
 
-        @Override
-        public MetricType getMetricType() {
-          return MetricType.GAUGE;
-        }
-      };
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+        };
 
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counter);
 
     assertThatThrownBy(() -> registry.register(gauge))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessageContaining("Collector with Prometheus name 'my_metric' is already registered with type COUNTER, but you are trying to register a new collector with type GAUGE.")
-      .hasMessageContaining("All collectors with the same Prometheus name must have the same type.");
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining(
+            "Collector with Prometheus name 'my_metric' is already registered with type COUNTER, but you are trying to register a new collector with type GAUGE.")
+        .hasMessageContaining(
+            "All collectors with the same Prometheus name must have the same type.");
   }
 
   @Test
   public void register_duplicateName_sameLabelsNotAllowed() {
     Collector counter1 =
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder()
-              .name("my_metric")
-              .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1).build())
-              .build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("my_metric")
+                .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1).build())
+                .build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "my_metric_total";
-        }
-      };
+          @Override
+          public String getPrometheusName() {
+            return "my_metric_total";
+          }
+        };
 
     Collector counter2 =
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder()
-              .name("my_metric")
-              .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(2).build())
-              .build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("my_metric")
+                .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(2).build())
+                .build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "my_metric_total";
-        }
-      };
+          @Override
+          public String getPrometheusName() {
+            return "my_metric_total";
+          }
+        };
 
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counter1);
 
     assertThatThrownBy(() -> registry.register(counter2))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessageContaining("Duplicate labels detected for metric 'my_metric'")
-      .hasMessageContaining("Each time series (metric name + label set) must be unique.");
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Duplicate labels detected for metric 'my_metric'")
+        .hasMessageContaining("Each time series (metric name + label set) must be unique.");
   }
 
   @Test
