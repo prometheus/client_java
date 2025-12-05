@@ -30,7 +30,8 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    * #builder()}.
    *
    * @param snapshots the constructor creates a sorted copy of snapshots.
-   * @throws IllegalArgumentException if snapshots with the same Prometheus name have conflicting types
+   * @throws IllegalArgumentException if snapshots with the same Prometheus name have conflicting
+   *     types
    */
   public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
     validateTypeConsistency(snapshots);
@@ -39,9 +40,7 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
     this.snapshots = unmodifiableList(list);
   }
 
-  /**
-   * Validates that all snapshots with the same Prometheus name have the same type.
-   */
+  /** Validates that all snapshots with the same Prometheus name have the same type. */
   private static void validateTypeConsistency(Collection<MetricSnapshot> snapshots) {
     Map<String, Class<? extends MetricSnapshot>> typesByName = new HashMap<>();
     for (MetricSnapshot snapshot : snapshots) {

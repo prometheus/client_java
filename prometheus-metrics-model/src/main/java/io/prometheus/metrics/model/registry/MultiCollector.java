@@ -78,9 +78,9 @@ public interface MultiCollector {
    * name have the same metric type. If this method returns {@code null} for a given name, type
    * validation will be skipped for that metric.
    *
-   * <p>If your collector returns metrics with constant types that do not change at runtime, it is
-   * a good idea to override this method to enable early type validation at registration time
-   * instead of at scrape time.
+   * <p>If your collector returns metrics with constant types that do not change at runtime, it is a
+   * good idea to override this method to enable early type validation at registration time instead
+   * of at scrape time.
    *
    * @param prometheusName the Prometheus name to get the type for
    * @return the metric type, or {@code null} if unknown

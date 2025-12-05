@@ -72,26 +72,6 @@ public class PrometheusRegistry {
   }
 
   /**
-   * Validates that two snapshots with the same Prometheus name don't have overlapping label sets.
-   */
-  private void validateNoDuplicateLabels(MetricSnapshot snapshot1, MetricSnapshot snapshot2) {
-    String metricName = snapshot1.getMetadata().getName();
-
-    for (DataPointSnapshot dp1 : snapshot1.getDataPoints()) {
-      for (DataPointSnapshot dp2 : snapshot2.getDataPoints()) {
-        if (dp1.getLabels().equals(dp2.getLabels())) {
-          throw new IllegalArgumentException(
-              "Duplicate labels detected for metric '"
-                  + metricName
-                  + "' with labels "
-                  + dp1.getLabels()
-                  + ". Each time series (metric name + label set) must be unique.");
-        }
-      }
-    }
-  }
-
-  /**
    * Validates type consistency for MultiCollector.
    *
    * <p>Validates each Prometheus name returned by the MultiCollector. If the MultiCollector
@@ -124,6 +104,26 @@ public class PrometheusRegistry {
       }
 
       registeredMetrics.putIfAbsent(name, newIdentifier);
+    }
+  }
+
+  /**
+   * Validates that two snapshots with the same Prometheus name don't have overlapping label sets.
+   */
+  private void validateNoDuplicateLabels(MetricSnapshot snapshot1, MetricSnapshot snapshot2) {
+    String metricName = snapshot1.getMetadata().getName();
+
+    for (DataPointSnapshot dp1 : snapshot1.getDataPoints()) {
+      for (DataPointSnapshot dp2 : snapshot2.getDataPoints()) {
+        if (dp1.getLabels().equals(dp2.getLabels())) {
+          throw new IllegalArgumentException(
+              "Duplicate labels detected for metric '"
+                  + metricName
+                  + "' with labels "
+                  + dp1.getLabels()
+                  + ". Each time series (metric name + label set) must be unique.");
+        }
+      }
     }
   }
 

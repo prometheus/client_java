@@ -5,8 +5,8 @@ import javax.annotation.Nullable;
 /**
  * Identifies a registered metric by its Prometheus name and type.
  *
- * <p>Used internally by PrometheusRegistry to track registered metrics and validate that
- * collectors with the same Prometheus name have consistent types.
+ * <p>Used internally by PrometheusRegistry to track registered metrics and validate that collectors
+ * with the same Prometheus name have consistent types.
  */
 class MetricIdentifier {
   private final String prometheusName;
