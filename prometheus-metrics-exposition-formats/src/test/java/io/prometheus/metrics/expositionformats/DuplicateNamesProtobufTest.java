@@ -105,8 +105,7 @@ class DuplicateNamesProtobufTest {
                     m.getLabelList().stream()
                             .anyMatch(
                                 l ->
-                                    l.getName().equals("outcome")
-                                        && l.getValue().equals("FAILURE"))
+                                    l.getName().equals("outcome") && l.getValue().equals("FAILURE"))
                         && m.getLabelList().stream()
                             .anyMatch(
                                 l -> l.getName().equals("error") && l.getValue().equals("TIMEOUT")))
@@ -208,8 +207,7 @@ class DuplicateNamesProtobufTest {
   }
 
   @Test
-  void testDifferentMetrics_producesSeparateMetricFamilies()
-      throws IOException {
+  void testDifferentMetrics_producesSeparateMetricFamilies() throws IOException {
     MetricSnapshots snapshots = getMetricSnapshots();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     PrometheusProtobufWriterImpl writer = new PrometheusProtobufWriterImpl();
