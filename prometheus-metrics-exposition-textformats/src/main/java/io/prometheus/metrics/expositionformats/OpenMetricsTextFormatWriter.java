@@ -1,5 +1,6 @@
 package io.prometheus.metrics.expositionformats;
 
+import static io.prometheus.metrics.expositionformats.TextFormatUtil.mergeDuplicates;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeDouble;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeEscapedString;
 import static io.prometheus.metrics.expositionformats.TextFormatUtil.writeLabels;
@@ -112,8 +113,11 @@ public class OpenMetricsTextFormatWriter implements ExpositionFormatWriter {
   @Override
   public void write(OutputStream out, MetricSnapshots metricSnapshots, EscapingScheme scheme)
       throws IOException {
+    // Merge duplicate metric names to ensure single HELP/TYPE per metric family
+    MetricSnapshots merged = mergeDuplicates(metricSnapshots);
+
     Writer writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-    for (MetricSnapshot s : metricSnapshots) {
+    for (MetricSnapshot s : merged) {
       MetricSnapshot snapshot = SnapshotEscaper.escapeMetricSnapshot(s, scheme);
       if (!snapshot.getDataPoints().isEmpty()) {
         if (snapshot instanceof CounterSnapshot) {
