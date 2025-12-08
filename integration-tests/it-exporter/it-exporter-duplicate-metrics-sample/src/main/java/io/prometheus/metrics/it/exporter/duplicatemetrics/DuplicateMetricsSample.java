@@ -91,4 +91,3 @@ public class DuplicateMetricsSample {
     return 0; // this won't happen
   }
 }
-

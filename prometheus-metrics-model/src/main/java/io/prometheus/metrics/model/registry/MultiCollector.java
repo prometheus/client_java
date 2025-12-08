@@ -76,14 +76,21 @@ public interface MultiCollector {
    *
    * <p>This is used during registration to validate that all collectors with the same Prometheus
    * name have the same metric type. If this method returns {@code null} for a given name, type
-   * validation will be skipped for that metric.
+   * validation at registration time will be skipped for that metric. Note that type validation will
+   * still occur at scrape time when metrics are collected, but returning {@code null} means errors
+   * won't be detected until then.
    *
-   * <p>If your collector returns metrics with constant types that do not change at runtime, it is a
-   * good idea to override this method to enable early type validation at registration time instead
-   * of at scrape time.
+   * <p>The default implementation returns {@code null}, which defers all type validation to scrape
+   * time.
+   *
+   * <p>If your collector returns metrics with constant types that do not change at runtime, it is
+   * recommended to override this method to enable early type validation at registration time
+   * instead of at scrape time. This provides faster feedback when incompatible metrics are
+   * registered.
    *
    * @param prometheusName the Prometheus name to get the type for
-   * @return the metric type, or {@code null} if unknown
+   * @return the metric type, or {@code null} if unknown or if validation should be deferred to
+   *     scrape time
    */
   @Nullable
   default MetricType getMetricType(String prometheusName) {

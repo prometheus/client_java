@@ -307,7 +307,7 @@ class PrometheusRegistryTest {
                 .dataPoint(
                     CounterSnapshot.CounterDataPointSnapshot.builder()
                         .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                        .value(50) // Different value!
+                        .value(50) // different value
                         .build())
                 .build();
           }
