@@ -3,7 +3,7 @@ package io.prometheus.metrics.it.springboot;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.prometheus.client.it.common.ExporterTest;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_1.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_2.Metrics;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
