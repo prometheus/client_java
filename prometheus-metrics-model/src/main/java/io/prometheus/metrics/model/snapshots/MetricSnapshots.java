@@ -7,9 +7,11 @@ import static java.util.Comparator.comparing;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -28,24 +30,34 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    * #builder()}.
    *
    * @param snapshots the constructor creates a sorted copy of snapshots.
-   * @throws IllegalArgumentException if snapshots contains duplicate metric names. To avoid
-   *     duplicate metric names use {@link #builder()} and check {@link
-   *     Builder#containsMetricName(String)} before calling {@link
-   *     Builder#metricSnapshot(MetricSnapshot)}.
+   * @throws IllegalArgumentException if snapshots with the same Prometheus name have conflicting
+   *     types
    */
   public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
+    validateTypeConsistency(snapshots);
     List<MetricSnapshot> list = new ArrayList<>(snapshots);
     list.sort(comparing(s -> s.getMetadata().getPrometheusName()));
-    for (int i = 0; i < snapshots.size() - 1; i++) {
-      if (list.get(i)
-          .getMetadata()
-          .getPrometheusName()
-          .equals(list.get(i + 1).getMetadata().getPrometheusName())) {
-        throw new IllegalArgumentException(
-            list.get(i).getMetadata().getPrometheusName() + ": duplicate metric name");
-      }
-    }
     this.snapshots = unmodifiableList(list);
+  }
+
+  /** Validates that all snapshots with the same Prometheus name have the same type. */
+  private static void validateTypeConsistency(Collection<MetricSnapshot> snapshots) {
+    Map<String, Class<? extends MetricSnapshot>> typesByName = new HashMap<>();
+    for (MetricSnapshot snapshot : snapshots) {
+      String prometheusName = snapshot.getMetadata().getPrometheusName();
+      Class<? extends MetricSnapshot> existingType = typesByName.get(prometheusName);
+      if (existingType != null && !existingType.equals(snapshot.getClass())) {
+        throw new IllegalArgumentException(
+            "Conflicting metric types for Prometheus name '"
+                + prometheusName
+                + "': "
+                + existingType.getSimpleName()
+                + " vs "
+                + snapshot.getClass().getSimpleName()
+                + ". All metrics with the same Prometheus name must have the same type.");
+      }
+      typesByName.put(prometheusName, snapshot.getClass());
+    }
   }
 
   public static MetricSnapshots of(MetricSnapshot... snapshots) {
