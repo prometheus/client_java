@@ -21,6 +21,7 @@
     <module>it-exporter-servlet-tomcat-sample</module>
     <module>it-exporter-servlet-jetty-sample</module>
     <module>it-exporter-httpserver-sample</module>
+    <module>it-exporter-duplicate-metrics-sample</module>
     <module>it-exporter-no-protobuf</module>
     <module>it-exporter-test</module>
     <module>it-no-protobuf-test</module>
