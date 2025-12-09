@@ -252,9 +252,9 @@
           <release>${java.version}</release>
           <source>${java.version}</source>
           <target>${java.version}</target>
-          <testRelease>21</testRelease>
-          <testSource>21</testSource>
-          <testTarget>21</testTarget>
+          <testRelease>25</testRelease>
+          <testSource>25</testSource>
+          <testTarget>25</testTarget>
           <showWarnings>true</showWarnings>
           <compilerArgs>
             <arg>-Xlint:all,-serial,-processing,-options</arg>
