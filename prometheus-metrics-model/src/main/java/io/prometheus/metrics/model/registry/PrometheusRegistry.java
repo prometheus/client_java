@@ -1,6 +1,5 @@
 package io.prometheus.metrics.model.registry;
 
-import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.List;
@@ -31,7 +30,7 @@ public class PrometheusRegistry {
 
   /**
    * Validates that the new collector's type is consistent with any existing collectors that have
-   * the same Prometheus name, and that there are no duplicate label sets.
+   * the same Prometheus name.
    */
   private void validateTypeConsistency(Collector newCollector) {
     String newName = newCollector.getPrometheusName();
@@ -54,19 +53,6 @@ public class PrometheusRegistry {
                 + ", but you are trying to register a new collector with type "
                 + newType
                 + ". All collectors with the same Prometheus name must have the same type.");
-      }
-    }
-
-    // Validate no duplicate labels by collecting and comparing snapshots
-    MetricSnapshot newSnapshot = newCollector.collect();
-    if (newSnapshot != null) {
-      for (Collector existingCollector : collectors) {
-        if (newName.equals(existingCollector.getPrometheusName())) {
-          MetricSnapshot existingSnapshot = existingCollector.collect();
-          if (existingSnapshot != null) {
-            validateNoDuplicateLabels(newSnapshot, existingSnapshot);
-          }
-        }
       }
     }
   }
@@ -107,25 +93,6 @@ public class PrometheusRegistry {
     }
   }
 
-  /**
-   * Validates that two snapshots with the same Prometheus name don't have overlapping label sets.
-   */
-  private void validateNoDuplicateLabels(MetricSnapshot snapshot1, MetricSnapshot snapshot2) {
-    String metricName = snapshot1.getMetadata().getName();
-
-    for (DataPointSnapshot dp1 : snapshot1.getDataPoints()) {
-      for (DataPointSnapshot dp2 : snapshot2.getDataPoints()) {
-        if (dp1.getLabels().equals(dp2.getLabels())) {
-          throw new IllegalArgumentException(
-              "Duplicate labels detected for metric '"
-                  + metricName
-                  + "' with labels "
-                  + dp1.getLabels()
-                  + ". Each time series (metric name + label set) must be unique.");
-        }
-      }
-    }
-  }
 
   /**
    * Caches the metric identifier for lookup during future registrations.

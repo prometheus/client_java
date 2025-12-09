@@ -142,49 +142,6 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_duplicateName_sameLabelsNotAllowed() {
-    Collector counter1 =
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder()
-                .name("my_metric")
-                .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(1).build())
-                .build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "my_metric_total";
-          }
-        };
-
-    Collector counter2 =
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder()
-                .name("my_metric")
-                .dataPoint(CounterSnapshot.CounterDataPointSnapshot.builder().value(2).build())
-                .build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "my_metric_total";
-          }
-        };
-
-    PrometheusRegistry registry = new PrometheusRegistry();
-    registry.register(counter1);
-
-    assertThatThrownBy(() -> registry.register(counter2))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Duplicate labels detected for metric 'my_metric'")
-        .hasMessageContaining("Each time series (metric name + label set) must be unique.");
-  }
-
-  @Test
   public void registerOk() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counterA1);
@@ -307,7 +264,7 @@ class PrometheusRegistryTest {
                 .dataPoint(
                     CounterSnapshot.CounterDataPointSnapshot.builder()
                         .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                        .value(50) // Different value!
+                        .value(50)
                         .build())
                 .build();
           }
@@ -319,9 +276,10 @@ class PrometheusRegistryTest {
         };
 
     registry.register(counter1);
+    registry.register(counter2);
 
-    // Registration should throw exception due to duplicate time series (same name + same labels)
-    assertThatThrownBy(() -> registry.register(counter2))
+    // Scrape should throw exception due to duplicate time series (same name + same labels)
+    assertThatThrownBy(registry::scrape)
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Duplicate labels detected")
         .hasMessageContaining("api_responses");

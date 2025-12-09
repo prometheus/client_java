@@ -207,29 +207,29 @@ class DuplicateNamesExpositionTest {
           }
         });
 
-    // Registration should throw exception due to duplicate time series (same name + same labels)
-    assertThatThrownBy(
-            () ->
-                registry.register(
-                    new Collector() {
-                      @Override
-                      public MetricSnapshot collect() {
-                        return CounterSnapshot.builder()
-                            .name("api_responses")
-                            .help("API responses")
-                            .dataPoint(
-                                CounterSnapshot.CounterDataPointSnapshot.builder()
-                                    .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                                    .value(50)
-                                    .build())
-                            .build();
-                      }
+    registry.register(
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("api_responses")
+                .help("API responses")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
+                        .value(50)
+                        .build())
+                .build();
+          }
 
-                      @Override
-                      public String getPrometheusName() {
-                        return "api_responses_total";
-                      }
-                    }))
+          @Override
+          public String getPrometheusName() {
+            return "api_responses_total";
+          }
+        });
+
+    // Scrape should throw exception due to duplicate time series (same name + same labels)
+    assertThatThrownBy(() -> registry.scrape())
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Duplicate labels detected")
         .hasMessageContaining("api_responses");
