@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.exemplars;
 
 import java.lang.reflect.Field;
+import java.util.function.LongSupplier;
 
 public class ExemplarSamplerConfigTestUtil {
 
@@ -28,5 +29,12 @@ public class ExemplarSamplerConfigTestUtil {
       throws NoSuchFieldException, IllegalAccessException {
     ExemplarSamplerConfig config = getConfig(metric, "exemplarSamplerConfig");
     setRetentionPeriod(config, "sampleIntervalMillis", value);
+  }
+
+  public static void setExemplarSamplerTimeSource(Object metric, LongSupplier timeSource)
+      throws NoSuchFieldException, IllegalAccessException {
+    Field timeSourceField = metric.getClass().getDeclaredField("exemplarSamplerTimeSource");
+    timeSourceField.setAccessible(true);
+    timeSourceField.set(metric, timeSource);
   }
 }

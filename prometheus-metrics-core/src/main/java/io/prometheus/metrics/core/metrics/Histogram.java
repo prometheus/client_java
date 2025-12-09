@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
 
 /**
@@ -70,6 +71,9 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
   private static final double[][] NATIVE_BOUNDS;
 
   @Nullable private final ExemplarSamplerConfig exemplarSamplerConfig;
+
+  // For testing: allows injecting a custom time source for exemplar sampling
+  @Nullable LongSupplier exemplarSamplerTimeSource = null;
 
   // Upper bounds for the classic histogram buckets. Contains at least +Inf.
   // An empty array indicates that this is a native histogram only.
@@ -199,7 +203,12 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
 
     private DataPoint() {
       if (exemplarSamplerConfig != null) {
-        exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
+        if (exemplarSamplerTimeSource != null) {
+          exemplarSampler =
+              new ExemplarSampler(exemplarSamplerConfig, null, exemplarSamplerTimeSource);
+        } else {
+          exemplarSampler = new ExemplarSampler(exemplarSamplerConfig);
+        }
       } else {
         exemplarSampler = null;
       }

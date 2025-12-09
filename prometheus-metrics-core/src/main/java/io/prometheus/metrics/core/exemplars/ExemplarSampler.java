@@ -40,13 +40,14 @@ public class ExemplarSampler {
   // to be overwritten by automatic exemplar sampling. exemplars.length == customExemplars.length
   private final AtomicBoolean acceptingNewExemplars = new AtomicBoolean(true);
   private final AtomicBoolean acceptingNewCustomExemplars = new AtomicBoolean(true);
+  private final LongSupplier currentTimeMillis;
 
   @Nullable
   private final SpanContext
       spanContext; // may be null, in that case SpanContextSupplier.getSpanContext() is used.
 
   public ExemplarSampler(ExemplarSamplerConfig config) {
-    this(config, null);
+    this(config, null, System::currentTimeMillis);
   }
 
   /**
@@ -58,15 +59,32 @@ public class ExemplarSampler {
    * SpanContextSupplier.getSpanContext()} is called to find a span context.
    */
   public ExemplarSampler(ExemplarSamplerConfig config, @Nullable SpanContext spanContext) {
+    this(config, spanContext, System::currentTimeMillis);
+  }
+
+  /**
+   * Constructor with an additional {code currentTimeMillis} argument for testing. This allows
+   * injecting a custom time source to make tests deterministic and avoid flaky tests caused by
+   * timing issues.
+   *
+   * @param config the exemplar sampler configuration
+   * @param spanContext the span context, may be null
+   * @param currentTimeMillis time source function that returns current time in milliseconds
+   */
+  public ExemplarSampler(
+      ExemplarSamplerConfig config,
+      @Nullable SpanContext spanContext,
+      LongSupplier currentTimeMillis) {
     this.config = config;
     this.exemplars = new Exemplar[config.getNumberOfExemplars()];
     this.customExemplars = new Exemplar[exemplars.length];
     this.spanContext = spanContext;
+    this.currentTimeMillis = currentTimeMillis;
   }
 
   public Exemplars collect() {
     // this may run in parallel with observe()
-    long now = System.currentTimeMillis();
+    long now = currentTimeMillis.getAsLong();
     List<Exemplar> result = new ArrayList<>(exemplars.length);
     for (int i = 0; i < customExemplars.length; i++) {
       Exemplar exemplar = customExemplars[i];
@@ -129,7 +147,7 @@ public class ExemplarSampler {
   }
 
   private long doObserveSingleExemplar(double value) {
-    long now = System.currentTimeMillis();
+    long now = currentTimeMillis.getAsLong();
     Exemplar current = exemplars[0];
     if (current == null
         || now - current.getTimestampMillis() > config.getMinRetentionPeriodMillis()) {
@@ -139,7 +157,7 @@ public class ExemplarSampler {
   }
 
   private long doObserveSingleExemplar(double amount, Labels labels) {
-    long now = System.currentTimeMillis();
+    long now = currentTimeMillis.getAsLong();
     Exemplar current = customExemplars[0];
     if (current == null
         || now - current.getTimestampMillis() > config.getMinRetentionPeriodMillis()) {
@@ -149,7 +167,7 @@ public class ExemplarSampler {
   }
 
   private long doObserveWithUpperBounds(double value, double[] classicUpperBounds) {
-    long now = System.currentTimeMillis();
+    long now = currentTimeMillis.getAsLong();
     for (int i = 0; i < classicUpperBounds.length; i++) {
       if (value <= classicUpperBounds[i]) {
         Exemplar previous = exemplars[i];
@@ -165,7 +183,7 @@ public class ExemplarSampler {
   }
 
   private long doObserveWithoutUpperBounds(double value) {
-    final long now = System.currentTimeMillis();
+    final long now = currentTimeMillis.getAsLong();
     Exemplar smallest = null;
     int smallestIndex = -1;
     Exemplar largest = null;
@@ -234,7 +252,7 @@ public class ExemplarSampler {
 
   private long doObserveWithExemplarWithUpperBounds(
       double value, Labels labels, double[] classicUpperBounds) {
-    long now = System.currentTimeMillis();
+    long now = currentTimeMillis.getAsLong();
     for (int i = 0; i < classicUpperBounds.length; i++) {
       if (value <= classicUpperBounds[i]) {
         Exemplar previous = customExemplars[i];
@@ -250,7 +268,7 @@ public class ExemplarSampler {
   }
 
   private long doObserveWithExemplarWithoutUpperBounds(double amount, Labels labels) {
-    final long now = System.currentTimeMillis();
+    final long now = currentTimeMillis.getAsLong();
     int nullPos = -1;
     int oldestPos = -1;
     Exemplar oldest = null;

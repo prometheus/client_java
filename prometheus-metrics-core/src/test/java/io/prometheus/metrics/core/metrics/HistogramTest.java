@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -956,6 +957,21 @@ class HistogramTest {
 
   @Test
   public void testExemplarsClassicHistogram() throws Exception {
+    class MockTimeSource implements LongSupplier {
+      private long currentTimeMillis = 0;
+
+      @Override
+      public long getAsLong() {
+        return currentTimeMillis;
+      }
+
+      void advance(long millis) {
+        currentTimeMillis += millis;
+      }
+    }
+
+    MockTimeSource mockTime = new MockTimeSource();
+
     SpanContext spanContext =
         new SpanContext() {
           int callCount = 0;
@@ -990,6 +1006,7 @@ class HistogramTest {
 
     long sampleIntervalMillis = 10;
     ExemplarSamplerConfigTestUtil.setSampleIntervalMillis(histogram, sampleIntervalMillis);
+    ExemplarSamplerConfigTestUtil.setExemplarSamplerTimeSource(histogram, mockTime);
     SpanContextSupplier.setSpanContext(spanContext);
 
     Exemplar ex1a = Exemplar.builder().value(0.5).spanId("spanId-1").traceId("traceId-1").build();
@@ -1020,7 +1037,9 @@ class HistogramTest {
     assertThat(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello")).isNull();
     assertThat(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world")).isNull();
 
-    Thread.sleep(sampleIntervalMillis + 1);
+    mockTime.advance(sampleIntervalMillis + 1);
+    // Small wait to let the scheduler re-enable accepting new exemplars
+    Thread.sleep(50);
     histogram.labelValues("/hello").observe(4.5);
     histogram.labelValues("/world").observe(4.5);
 
@@ -1036,13 +1055,16 @@ class HistogramTest {
     assertExemplarEquals(ex2a, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello"));
     assertExemplarEquals(ex2b, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
-    Thread.sleep(sampleIntervalMillis + 1);
+    mockTime.advance(sampleIntervalMillis + 1);
+    Thread.sleep(50);
     histogram.labelValues("/hello").observe(1.5);
     histogram.labelValues("/world").observe(1.5);
-    Thread.sleep(sampleIntervalMillis + 1);
+    mockTime.advance(sampleIntervalMillis + 1);
+    Thread.sleep(50);
     histogram.labelValues("/hello").observe(2.5);
     histogram.labelValues("/world").observe(2.5);
-    Thread.sleep(sampleIntervalMillis + 1);
+    mockTime.advance(sampleIntervalMillis + 1);
+    Thread.sleep(50);
     histogram.labelValues("/hello").observe(3.5);
     histogram.labelValues("/world").observe(3.5);
 
@@ -1072,7 +1094,8 @@ class HistogramTest {
                     "span_id",
                     "spanId-11"))
             .build();
-    Thread.sleep(sampleIntervalMillis + 1);
+    mockTime.advance(sampleIntervalMillis + 1);
+    Thread.sleep(50);
     histogram
         .labelValues("/hello")
         .observeWithExemplar(3.4, Labels.of("key1", "value1", "key2", "value2"));
