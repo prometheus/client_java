@@ -5,9 +5,6 @@ on: [ pull_request ]
 
 permissions: {}
 
-env:
-  MISE_ENV: native
-
 jobs:
   native-tests:
     runs-on: ubuntu-24.04
@@ -20,5 +17,7 @@ jobs:
         with:
           version: v2025.12.0
           sha256: 5b7b9992950b65569b4f6f1c78b05abceea2506f15b750a4b9781f33c6cc1ae4
+        env:
+          MISE_ENV: native
       - name: Run native tests
-        run: mise run test
+        run: mise --env native test
