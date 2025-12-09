@@ -3,6 +3,6 @@ java = "graalvm-community-25.0.1"
 
 [tasks.native-test]
 depends = "build"
-run = "../../../mvnw test -PnativeTest"
+run = "../../mvnw test -PnativeTest"
 dir = "../../../integration-tests/it-spring-boot-smoke-test"
 
