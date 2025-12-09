@@ -29,7 +29,7 @@ If you're getting errors when running tests:
 ### Running native tests
 
 ```shell
-mise --env native test
+mise --cd .mise/envs/native run native-test
 ```
 
 ### Avoid failures while running tests
