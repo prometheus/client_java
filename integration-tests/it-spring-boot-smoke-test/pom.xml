@@ -136,6 +136,21 @@
             <buildArg>
               --initialize-at-build-time=org.junit.platform.suite.engine.SuiteTestDescriptor$LifecycleMethods
             </buildArg>
+            <buildArg>
+              --initialize-at-build-time=org.junit.platform.commons.logging.LoggerFactory$DelegatingLogger
+            </buildArg>
+            <buildArg>
+              --initialize-at-build-time=org.junit.jupiter.engine.execution.ConditionEvaluator
+            </buildArg>
+            <buildArg>
+              --initialize-at-build-time=org.junit.jupiter.engine.execution.InterceptingExecutableInvoker
+            </buildArg>
+            <buildArg>
+              --initialize-at-build-time=org.junit.jupiter.api.extension.ConditionEvaluationResult
+            </buildArg>
+            <buildArg>
+              --initialize-at-build-time=org.junit.jupiter.engine.execution.InvocationInterceptorChain
+            </buildArg>
           </buildArgs>
           <!-- editorconfig-checker-enable -->
         </configuration>
