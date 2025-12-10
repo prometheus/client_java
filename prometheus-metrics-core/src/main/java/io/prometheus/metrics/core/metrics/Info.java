@@ -1,7 +1,6 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
-import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.InfoSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
@@ -104,11 +103,6 @@ public class Info extends MetricWithFixedMetadata {
       }
     }
     return new InfoSnapshot(getMetadata(), data);
-  }
-
-  @Override
-  public MetricType getMetricType() {
-    return MetricType.INFO;
   }
 
   public static Builder builder() {
