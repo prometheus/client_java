@@ -94,7 +94,5 @@ public interface Collector {
    * @return the metric type, or {@code null} if unknown
    */
   @Nullable
-  default MetricType getMetricType() {
-    return null;
-  }
+  MetricType getMetricType();
 }

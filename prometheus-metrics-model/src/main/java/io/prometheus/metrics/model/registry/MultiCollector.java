@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 /** Like {@link Collector}, but collecting multiple Snapshots at once. */
-@FunctionalInterface
 public interface MultiCollector {
 
   /** Called when the Prometheus server scrapes metrics. */
@@ -86,7 +85,5 @@ public interface MultiCollector {
    * @return the metric type, or {@code null} if unknown
    */
   @Nullable
-  default MetricType getMetricType(String prometheusName) {
-    return null;
-  }
+  MetricType getMetricType(String prometheusName);
 }

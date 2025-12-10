@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 public class PrometheusRegistry {
@@ -26,6 +27,7 @@ public class PrometheusRegistry {
   public void register(MultiCollector collector) {
     validateTypeConsistency(collector);
     multiCollectors.add(collector);
+    cacheMetricIdentifier(collector);
   }
 
   /**
@@ -105,6 +107,19 @@ public class PrometheusRegistry {
 
     if (name != null && type != null) {
       registeredMetrics.putIfAbsent(name, new MetricIdentifier(name, type));
+    }
+  }
+
+  /**
+   * Caches the metric identifier for lookup during future registrations.
+   */
+  private void cacheMetricIdentifier(MultiCollector collector) {
+    for (String name : collector.getPrometheusNames()) {
+      MetricType type = collector.getMetricType(name);
+
+      if (name != null) {
+        registeredMetrics.putIfAbsent(name, new MetricIdentifier(name, type));
+      }
     }
   }
 
