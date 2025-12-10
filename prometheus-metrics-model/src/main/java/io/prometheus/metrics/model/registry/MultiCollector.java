@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 /** Like {@link Collector}, but collecting multiple Snapshots at once. */
+@FunctionalInterface
 public interface MultiCollector {
 
   /** Called when the Prometheus server scrapes metrics. */
@@ -69,21 +70,4 @@ public interface MultiCollector {
   default List<String> getPrometheusNames() {
     return Collections.emptyList();
   }
-
-  /**
-   * Returns the metric type for a given Prometheus name produced by this MultiCollector.
-   *
-   * <p>This is used during registration to validate that all collectors with the same Prometheus
-   * name have the same metric type. If this method returns {@code null} for a given name, type
-   * validation will be skipped for that metric.
-   *
-   * <p>If your collector returns metrics with constant types that do not change at runtime, it is a
-   * good idea to override this method to enable early type validation at registration time instead
-   * of at scrape time.
-   *
-   * @param prometheusName the Prometheus name to get the type for
-   * @return the metric type, or {@code null} if unknown
-   */
-  @Nullable
-  MetricType getMetricType(String prometheusName);
 }
