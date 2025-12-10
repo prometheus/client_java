@@ -55,7 +55,6 @@ public interface MultiCollector {
    * This is called in two places:
    *
    * <ol>
-   *   <li>During registration to check if a metric with that name already exists.
    *   <li>During scrape to check if the collector can be skipped because a name filter is present
    *       and all names are excluded.
    * </ol>
