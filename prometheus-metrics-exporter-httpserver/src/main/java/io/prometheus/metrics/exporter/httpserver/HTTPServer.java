@@ -57,24 +57,29 @@ public class HTTPServer implements Closeable {
       PrometheusRegistry registry,
       @Nullable Authenticator authenticator,
       @Nullable String authenticatedSubjectAttributeName,
-      @Nullable HttpHandler defaultHandler) {
+      @Nullable HttpHandler defaultHandler,
+      @Nullable String metricsHandlerEndpoint,
+      @Nullable Boolean registerHealthHandler) {
     if (httpServer.getAddress() == null) {
       throw new IllegalArgumentException("HttpServer hasn't been bound to an address");
     }
     this.server = httpServer;
     this.executorService = executorService;
+    String metricsPath = metricsHandlerEndpoint == null ? "/metrics" : metricsHandlerEndpoint;
     registerHandler(
         "/",
-        defaultHandler == null ? new DefaultHandler() : defaultHandler,
+        defaultHandler == null ? new DefaultHandler(metricsPath) : defaultHandler,
         authenticator,
         authenticatedSubjectAttributeName);
     registerHandler(
-        "/metrics",
+        metricsPath,
         new MetricsHandler(config, registry),
         authenticator,
         authenticatedSubjectAttributeName);
-    registerHandler(
-        "/-/healthy", new HealthyHandler(), authenticator, authenticatedSubjectAttributeName);
+    if (registerHealthHandler == null || registerHealthHandler) {
+      registerHandler(
+          "/-/healthy", new HealthyHandler(), authenticator, authenticatedSubjectAttributeName);
+    }
     try {
       // HttpServer.start() starts the HttpServer in a new background thread.
       // If we call HttpServer.start() from a thread of the executorService,
@@ -179,9 +184,11 @@ public class HTTPServer implements Closeable {
     @Nullable private ExecutorService executorService = null;
     @Nullable private PrometheusRegistry registry = null;
     @Nullable private Authenticator authenticator = null;
+    @Nullable private String authenticatedSubjectAttributeName = null;
     @Nullable private HttpsConfigurator httpsConfigurator = null;
     @Nullable private HttpHandler defaultHandler = null;
-    @Nullable private String authenticatedSubjectAttributeName = null;
+    @Nullable private String metricsHandlerEndpoint = null;
+    @Nullable private Boolean registerHealthHandler = null;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -254,6 +261,18 @@ public class HTTPServer implements Closeable {
       return this;
     }
 
+    /** Optional: Override default metrics endpoint. Default is {@code /metrics}. */
+    public Builder metricsHandlerPath(String metricsHandlerEndpoint) {
+      this.metricsHandlerEndpoint = metricsHandlerEndpoint;
+      return this;
+    }
+
+    /** Optional: Override if the health handler should be registered. Default is {@code true}. */
+    public Builder registerHealthHandler(boolean registerHealthHandler) {
+      this.registerHealthHandler = registerHealthHandler;
+      return this;
+    }
+
     /** Build and start the HTTPServer. */
     public HTTPServer buildAndStart() throws IOException {
       if (registry == null) {
@@ -275,7 +294,9 @@ public class HTTPServer implements Closeable {
           registry,
           authenticator,
           authenticatedSubjectAttributeName,
-          defaultHandler);
+          defaultHandler,
+          metricsHandlerEndpoint,
+          registerHealthHandler);
     }
 
     private InetSocketAddress makeInetSocketAddress() {
