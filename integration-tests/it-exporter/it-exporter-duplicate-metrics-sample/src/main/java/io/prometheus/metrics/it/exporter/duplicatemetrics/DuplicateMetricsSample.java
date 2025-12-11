@@ -6,16 +6,12 @@ import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.IOException;
 
-/**
- * Integration test sample demonstrating metrics with duplicate names but different label sets. This
- * validates that the duplicate metrics feature works end-to-end.
- */
+/** Integration test sample demonstrating metrics with duplicate names but different label sets. */
 public class DuplicateMetricsSample {
 
   public static void main(String[] args) throws IOException, InterruptedException {
     if (args.length < 1 || args.length > 2) {
-      System.err.println("Usage: java -jar duplicate-metrics-sample.jar <port> [mode]");
-      System.err.println("Where mode is optional (ignored for this sample).");
+      System.err.println("Usage: java -jar duplicate-metrics-sample.jar <port>");
       System.exit(1);
     }
 

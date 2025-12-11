@@ -15,7 +15,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-/** Immutable list of metric snapshots. */
+/**
+ * Immutable list of metric snapshots.
+ *
+ * <p>Snapshots are automatically sorted by Prometheus name. The constructor validates:
+ *
+ * <ul>
+ *   <li>Metrics with the same Prometheus name must have the same type
+ *   <li>Each time series (metric name + label set) must be unique
+ * </ul>
+ *
+ * throws IllegalArgumentException if validation fails
+ */
 public class MetricSnapshots implements Iterable<MetricSnapshot> {
 
   private final List<MetricSnapshot> snapshots;
@@ -34,55 +45,56 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    *     types or have duplicate label sets
    */
   public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
-    validateTypeConsistency(snapshots);
-    validateNoDuplicateLabelsAcrossSnapshots(snapshots);
     List<MetricSnapshot> list = new ArrayList<>(snapshots);
+    if (snapshots.size() <= 1) {
+      this.snapshots = unmodifiableList(list);
+      return;
+    }
+
+    validateSnapshots(snapshots);
     list.sort(comparing(s -> s.getMetadata().getPrometheusName()));
     this.snapshots = unmodifiableList(list);
   }
 
-  /** Validates that all snapshots with the same Prometheus name have the same type. */
-  private static void validateTypeConsistency(Collection<MetricSnapshot> snapshots) {
-    Map<String, Class<? extends MetricSnapshot>> typesByName = new HashMap<>();
+  /** Validates type consistency and duplicate labels. */
+  private static void validateSnapshots(Collection<MetricSnapshot> snapshots) {
+    Map<String, ValidationGroup> groupsByName = new HashMap<>();
+
     for (MetricSnapshot snapshot : snapshots) {
       String prometheusName = snapshot.getMetadata().getPrometheusName();
-      Class<? extends MetricSnapshot> existingType = typesByName.get(prometheusName);
-      if (existingType != null && !existingType.equals(snapshot.getClass())) {
+      ValidationGroup group =
+          groupsByName.computeIfAbsent(
+              prometheusName, k -> new ValidationGroup(snapshot.getClass()));
+
+      if (!group.type.equals(snapshot.getClass())) {
         throw new IllegalArgumentException(
             "Conflicting metric types for Prometheus name '"
                 + prometheusName
                 + "': "
-                + existingType.getSimpleName()
+                + group.type.getSimpleName()
                 + " vs "
                 + snapshot.getClass().getSimpleName()
                 + ". All metrics with the same Prometheus name must have the same type.");
       }
-      typesByName.put(prometheusName, snapshot.getClass());
+
+      group.snapshots.add(snapshot);
+    }
+
+    for (Map.Entry<String, ValidationGroup> entry : groupsByName.entrySet()) {
+      ValidationGroup group = entry.getValue();
+      if (group.snapshots.size() > 1) {
+        validateNoDuplicateLabelsInGroup(entry.getKey(), group.snapshots);
+      }
     }
   }
 
-  /**
-   * Validates that snapshots with the same Prometheus name don't have overlapping label sets.
-   *
-   * <p>This validation ensures that when multiple collectors with the same metric name are
-   * registered, each time series (metric name + label set) is unique. Validation happens at scrape
-   * time rather than registration time for efficiency.
-   */
-  private static void validateNoDuplicateLabelsAcrossSnapshots(
-      Collection<MetricSnapshot> snapshots) {
-    // Group snapshots by Prometheus name
-    Map<String, List<MetricSnapshot>> snapshotsByName = new HashMap<>();
-    for (MetricSnapshot snapshot : snapshots) {
-      String prometheusName = snapshot.getMetadata().getPrometheusName();
-      snapshotsByName.computeIfAbsent(prometheusName, k -> new ArrayList<>()).add(snapshot);
-    }
+  /** Helper class to track snapshots and their type during validation. */
+  private static class ValidationGroup {
+    final Class<? extends MetricSnapshot> type;
+    final List<MetricSnapshot> snapshots = new ArrayList<>();
 
-    // For each group with multiple snapshots, check for duplicate labels
-    for (Map.Entry<String, List<MetricSnapshot>> entry : snapshotsByName.entrySet()) {
-      List<MetricSnapshot> group = entry.getValue();
-      if (group.size() > 1) {
-        validateNoDuplicateLabelsInGroup(group);
-      }
+    ValidationGroup(Class<? extends MetricSnapshot> type) {
+      this.type = type;
     }
   }
 
@@ -90,8 +102,8 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    * Validates that a group of snapshots with the same Prometheus name don't have duplicate label
    * sets.
    */
-  private static void validateNoDuplicateLabelsInGroup(List<MetricSnapshot> snapshots) {
-    String metricName = snapshots.get(0).getMetadata().getName();
+  private static void validateNoDuplicateLabelsInGroup(
+      String prometheusName, List<MetricSnapshot> snapshots) {
     Set<Labels> seenLabels = new HashSet<>();
 
     for (MetricSnapshot snapshot : snapshots) {
@@ -100,7 +112,7 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
         if (!seenLabels.add(labels)) {
           throw new IllegalArgumentException(
               "Duplicate labels detected for metric '"
-                  + metricName
+                  + prometheusName
                   + "' with labels "
                   + labels
                   + ". Each time series (metric name + label set) must be unique.");

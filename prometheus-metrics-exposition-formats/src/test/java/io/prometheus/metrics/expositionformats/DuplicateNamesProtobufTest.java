@@ -271,7 +271,7 @@ class DuplicateNamesProtobufTest {
                 .help("Active sessions gauge")
                 .dataPoint(
                     GaugeSnapshot.GaugeDataPointSnapshot.builder()
-                        .labels(Labels.of("method", "POST"))
+                        .labels(Labels.of("region", "us-east-1"))
                         .value(50)
                         .build())
                 .build();
@@ -286,12 +286,14 @@ class DuplicateNamesProtobufTest {
     return registry.scrape();
   }
 
-  private List<Metrics.MetricFamily> parseProtobufOutput(ByteArrayOutputStream out)
+  private static List<Metrics.MetricFamily> parseProtobufOutput(ByteArrayOutputStream out)
       throws IOException {
     List<Metrics.MetricFamily> metricFamilies = new ArrayList<>();
-    ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-    while (in.available() > 0) {
-      metricFamilies.add(Metrics.MetricFamily.parseDelimitedFrom(in));
+    try (ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray())) {
+      Metrics.MetricFamily family;
+      while ((family = Metrics.MetricFamily.parseDelimitedFrom(in)) != null) {
+        metricFamilies.add(family);
+      }
     }
     return metricFamilies;
   }

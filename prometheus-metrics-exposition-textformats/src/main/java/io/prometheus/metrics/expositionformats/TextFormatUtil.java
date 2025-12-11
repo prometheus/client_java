@@ -23,7 +23,41 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 
+/**
+ * Utility methods for writing Prometheus text exposition formats.
+ *
+ * <p>This class provides low-level formatting utilities used by both Prometheus text format and
+ * OpenMetrics format writers. It handles escaping, label formatting, timestamp conversion, and
+ * merging of duplicate metric names.
+ */
 public class TextFormatUtil {
+  /**
+   * Merges snapshots with duplicate Prometheus names by combining their data points. This ensures
+   * only one HELP/TYPE declaration per metric family.
+   */
+  public static MetricSnapshots mergeDuplicates(MetricSnapshots metricSnapshots) {
+    Map<String, List<MetricSnapshot>> grouped = new LinkedHashMap<>();
+
+    // Group snapshots by Prometheus name
+    for (MetricSnapshot snapshot : metricSnapshots) {
+      String prometheusName = snapshot.getMetadata().getPrometheusName();
+      grouped.computeIfAbsent(prometheusName, k -> new ArrayList<>()).add(snapshot);
+    }
+
+    // Merge groups with multiple snapshots
+    MetricSnapshots.Builder builder = MetricSnapshots.builder();
+    for (List<MetricSnapshot> group : grouped.values()) {
+      if (group.size() == 1) {
+        builder.metricSnapshot(group.get(0));
+      } else {
+        // Merge multiple snapshots with same name
+        MetricSnapshot merged = mergeSnapshots(group);
+        builder.metricSnapshot(merged);
+      }
+    }
+
+    return builder.build();
+  }
 
   static void writeLong(Writer writer, long value) throws IOException {
     writer.append(Long.toString(value));
@@ -172,45 +206,21 @@ public class TextFormatUtil {
   }
 
   /**
-   * Merges snapshots with duplicate Prometheus names by combining their data points. This ensures
-   * only one HELP/TYPE declaration per metric family.
-   */
-  public static MetricSnapshots mergeDuplicates(MetricSnapshots metricSnapshots) {
-    Map<String, List<MetricSnapshot>> grouped = new LinkedHashMap<>();
-
-    // Group snapshots by Prometheus name
-    for (MetricSnapshot snapshot : metricSnapshots) {
-      String prometheusName = snapshot.getMetadata().getPrometheusName();
-      grouped.computeIfAbsent(prometheusName, k -> new ArrayList<>()).add(snapshot);
-    }
-
-    // Merge groups with multiple snapshots
-    MetricSnapshots.Builder builder = MetricSnapshots.builder();
-    for (List<MetricSnapshot> group : grouped.values()) {
-      if (group.size() == 1) {
-        builder.metricSnapshot(group.get(0));
-      } else {
-        // Merge multiple snapshots with same name
-        MetricSnapshot merged = mergeSnapshots(group);
-        builder.metricSnapshot(merged);
-      }
-    }
-
-    return builder.build();
-  }
-
-  /**
    * Merges multiple snapshots of the same type into a single snapshot with combined data points.
    */
   @SuppressWarnings("unchecked")
   private static MetricSnapshot mergeSnapshots(List<MetricSnapshot> snapshots) {
-    if (snapshots.isEmpty()) {
-      throw new IllegalArgumentException("Cannot merge empty list of snapshots");
-    }
-
     MetricSnapshot first = snapshots.get(0);
-    if (snapshots.size() == 1) {
-      return first;
+
+    // Validate all snapshots are the same type
+    for (MetricSnapshot snapshot : snapshots) {
+      if (snapshot.getClass() != first.getClass()) {
+        throw new IllegalArgumentException(
+            "Cannot merge snapshots of different types: "
+                + first.getClass().getName()
+                + " and "
+                + snapshot.getClass().getName());
+      }
     }
 
     List<DataPointSnapshot> allDataPoints = new ArrayList<>();
