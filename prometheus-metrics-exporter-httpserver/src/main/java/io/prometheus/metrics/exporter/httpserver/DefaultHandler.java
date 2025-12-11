@@ -11,24 +11,27 @@ public class DefaultHandler implements HttpHandler {
   private final byte[] responseBytes;
   private final String contentType;
 
-  public DefaultHandler() {
+  public DefaultHandler(String metricsPath) {
+    String metrics = metricsPath.startsWith("/") ? metricsPath.substring(1) : metricsPath;
     String responseString =
         "<html>\n"
             + "<head><title>Prometheus Java Client</title></head>\n"
             + "<body>\n"
             + "<h1>Prometheus Java Client</h1>\n"
             + "<h2>Metrics Path</h2>\n"
-            + "The metrics path is <a href=\"metrics\">/metrics</a>.\n"
+            + String.format("The metrics path is <a href=\"%s\">%s</a>.\n", metrics, metricsPath)
             + "<h2>Name Filter</h2>\n"
             + "If you want to scrape only specific metrics, "
             + "use the <tt>name[]</tt> parameter like this:\n"
             + "<ul>\n"
-            + "<li><a href=\"metrics?name[]=my_metric\">/metrics?name[]=my_metric</a></li>\n"
+            + String.format(
+                "<li><a href=\"%s?name[]=my_metric\">%s?name[]=my_metric</a></li>\n",
+                metrics, metricsPath)
             + "</ul>\n"
             + "You can also use multiple <tt>name[]</tt> parameters to query multiple metrics:\n"
             + "<ul>\n"
-            + "<li><a href=\"metrics?name[]=my_metric_a&name=my_metrics_b\">"
-            + "/metrics?name[]=my_metric_a&amp;name=[]=my_metric_b</a></li>\n"
+            + String.format("<li><a href=\"%s?name[]=my_metric_a&name[]=my_metric_b\">", metrics)
+            + String.format("%s?name[]=my_metric_a&amp;name[]=my_metric_b</a></li>\n", metricsPath)
             + "</ul>\n"
             + "The <tt>name[]</tt> parameter can be used by the Prometheus server for scraping. "
             + "Add the following snippet to your scrape job configuration in "
@@ -50,13 +53,17 @@ public class DefaultHandler implements HttpHandler {
             + "The Prometheus Java metrics library supports a <tt>debug</tt> query parameter "
             + "for viewing the different formats in a Web browser:\n"
             + "<ul>\n"
-            + "<li><a href=\"metrics?debug=openmetrics\">/metrics?debug=openmetrics</a>: "
+            + String.format(
+                "<li><a href=\"%s?debug=openmetrics\">%s?debug=openmetrics</a>: ",
+                metrics, metricsPath)
             + "View OpenMetrics text format.</li>\n"
-            + "<li><a href=\"metrics?debug=text\">/metrics?debug=text</a>: "
+            + String.format(
+                "<li><a href=\"%s?debug=text\">%s?debug=text</a>: ", metrics, metricsPath)
             + "View Prometheus text format (this is the default when accessing the "
-            + "<a href=\"metrics\">/metrics</a> endpoint with a Web browser).</li>\n"
-            + "<li><a href=\"metrics?debug=prometheus-protobuf\">"
-            + "/metrics?debug=prometheus-protobuf</a>: "
+            + String.format(
+                "<a href=\"%s\">%s</a> endpoint with a Web browser).</li>\n", metrics, metricsPath)
+            + String.format("<li><a href=\"%s?debug=prometheus-protobuf\">", metrics)
+            + String.format("%s?debug=prometheus-protobuf</a>: ", metricsPath)
             + "View a text representation of the Prometheus protobuf format.</li>\n"
             + "</ul>\n"
             + "Note that the <tt>debug</tt> parameter is only for viewing different formats in a "
