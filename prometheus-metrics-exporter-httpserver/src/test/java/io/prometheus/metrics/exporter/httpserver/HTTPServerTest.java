@@ -106,6 +106,19 @@ public class HTTPServerTest {
   }
 
   @Test
+  void metricsCustomPath() throws IOException {
+    run(
+        HTTPServer.builder()
+            .port(0)
+            .registry(new PrometheusRegistry())
+            .metricsHandlerPath("/my-metrics")
+            .executorService(Executors.newFixedThreadPool(1))
+            .buildAndStart(),
+        "200",
+        "/my-metrics");
+  }
+
+  @Test
   void registryThrows() throws IOException {
     HTTPServer server =
         HTTPServer.builder()
@@ -146,5 +159,31 @@ public class HTTPServerTest {
   @Test
   void health() throws IOException {
     run(HTTPServer.builder().port(0).buildAndStart(), "200", "/-/healthy");
+  }
+
+  @Test
+  void healthEnabled() throws IOException {
+    HttpHandler handler = exchange -> exchange.sendResponseHeaders(204, -1);
+    run(
+        HTTPServer.builder()
+            .port(0)
+            .defaultHandler(handler)
+            .registerHealthHandler(true)
+            .buildAndStart(),
+        "200",
+        "/-/healthy");
+  }
+
+  @Test
+  void healthDisabled() throws IOException {
+    HttpHandler handler = exchange -> exchange.sendResponseHeaders(204, -1);
+    run(
+        HTTPServer.builder()
+            .port(0)
+            .defaultHandler(handler)
+            .registerHealthHandler(false)
+            .buildAndStart(),
+        "204",
+        "/-/healthy");
   }
 }
