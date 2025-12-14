@@ -100,24 +100,24 @@ public class JvmGarbageCollectorMetrics {
         continue;
       }
 
-      NotificationEmitter notificationEmitter = (NotificationEmitter) gcBean;
+      ((NotificationEmitter) gcBean)
+          .addNotificationListener(
+              (notification, handback) -> {
+                if (!GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION.equals(
+                    notification.getType())) {
+                  return;
+                }
 
-      notificationEmitter.addNotificationListener(
-          (notification, handback) -> {
-            if (!GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION.equals(
-                notification.getType())) {
-              return;
-            }
+                GarbageCollectionNotificationInfo info =
+                    GarbageCollectionNotificationInfo.from(
+                        (CompositeData) notification.getUserData());
 
-            GarbageCollectionNotificationInfo info =
-                GarbageCollectionNotificationInfo.from((CompositeData) notification.getUserData());
-
-            gcDurationHistogram
-                .labelValues(info.getGcName(), info.getGcAction(), info.getGcCause())
-                .observe(Unit.millisToSeconds(info.getGcInfo().getDuration()));
-          },
-          null,
-          null);
+                gcDurationHistogram
+                    .labelValues(info.getGcName(), info.getGcAction(), info.getGcCause())
+                    .observe(Unit.millisToSeconds(info.getGcInfo().getDuration()));
+              },
+              null,
+              null);
     }
   }
 
