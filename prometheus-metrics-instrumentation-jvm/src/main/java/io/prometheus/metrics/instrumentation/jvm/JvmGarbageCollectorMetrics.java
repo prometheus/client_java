@@ -84,7 +84,7 @@ public class JvmGarbageCollectorMetrics {
             .name(JVM_GC_DURATION_SECONDS)
             .help("JVM GC pause duration histogram.")
             .unit(Unit.SECONDS)
-            .labelNames("gc", "action", "cause")
+            .labelNames("name", "action", "cause")
             .classicUpperBounds(buckets)
             .register(registry);
 
