@@ -58,7 +58,9 @@ class JvmGarbageCollectorMetricsTest {
   @Test
   void testIgnoredMetricNotScraped() {
     MetricNameFilter filter =
-        MetricNameFilter.builder().nameMustNotBeEqualTo("jvm_gc_collection_seconds").build();
+        MetricNameFilter.builder()
+            .nameMustNotBeEqualTo("jvm_gc_collection_seconds", "jvm_gc_duration_seconds")
+            .build();
 
     PrometheusRegistry registry = new PrometheusRegistry();
     JvmGarbageCollectorMetrics.builder()

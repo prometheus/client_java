@@ -1,6 +1,8 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import com.sun.management.GarbageCollectionNotificationInfo;
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.core.metrics.SummaryWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -10,6 +12,8 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import javax.annotation.Nullable;
+import javax.management.NotificationEmitter;
+import javax.management.openmbean.CompositeData;
 
 /**
  * JVM Garbage Collector metrics. The {@link JvmGarbageCollectorMetrics} are registered as part of
@@ -40,6 +44,7 @@ import javax.annotation.Nullable;
 public class JvmGarbageCollectorMetrics {
 
   private static final String JVM_GC_COLLECTION_SECONDS = "jvm_gc_collection_seconds";
+  private static final String JVM_GC_DURATION_SECONDS = "jvm_gc_duration_seconds";
 
   private final PrometheusProperties config;
   private final List<GarbageCollectorMXBean> garbageCollectorBeans;
@@ -73,6 +78,47 @@ public class JvmGarbageCollectorMetrics {
             })
         .constLabels(constLabels)
         .register(registry);
+
+    registerGCDurationHistogram(registry);
+  }
+
+  private void registerGCDurationHistogram(PrometheusRegistry registry) {
+    double[] buckets = {0.01, 0.1, 1, 10};
+
+    Histogram gcDurationHistogram =
+        Histogram.builder(config)
+            .name(JVM_GC_DURATION_SECONDS)
+            .help("JVM GC pause duration histogram.")
+            .unit(Unit.SECONDS)
+            .labelNames("gc", "action", "cause")
+            .classicUpperBounds(buckets)
+            .register(registry);
+
+    for (GarbageCollectorMXBean gcBean : garbageCollectorBeans) {
+
+      if (!(gcBean instanceof NotificationEmitter)) {
+        continue;
+      }
+
+      NotificationEmitter notificationEmitter = (NotificationEmitter) gcBean;
+
+      notificationEmitter.addNotificationListener(
+          (notification, handback) -> {
+            if (!GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION.equals(
+                notification.getType())) {
+              return;
+            }
+
+            GarbageCollectionNotificationInfo info =
+                GarbageCollectionNotificationInfo.from((CompositeData) notification.getUserData());
+
+            gcDurationHistogram
+                .labelValues(info.getGcName(), info.getGcAction(), info.getGcCause())
+                .observe(Unit.millisToSeconds(info.getGcInfo().getDuration()));
+          },
+          null,
+          null);
+    }
   }
 
   public static Builder builder() {
