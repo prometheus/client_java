@@ -59,7 +59,7 @@ class JvmGarbageCollectorMetricsTest {
   public void testIgnoredMetricNotScraped() {
     MetricNameFilter filter =
         MetricNameFilter.builder()
-            .nameMustNotBeEqualTo("jvm_gc_collection_seconds", "jvm_gc_duration_seconds")
+            .nameMustNotBeEqualTo("jvm_gc_collection_seconds", "jvm_gc_duration")
             .build();
 
     PrometheusRegistry registry = new PrometheusRegistry();

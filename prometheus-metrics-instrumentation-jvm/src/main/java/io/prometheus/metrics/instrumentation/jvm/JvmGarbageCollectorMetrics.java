@@ -43,7 +43,7 @@ import javax.management.openmbean.CompositeData;
 public class JvmGarbageCollectorMetrics {
 
   private static final String JVM_GC_COLLECTION_SECONDS = "jvm_gc_collection_seconds";
-  private static final String JVM_GC_DURATION_SECONDS = "jvm_gc_duration_seconds";
+  private static final String JVM_GC_DURATION = "jvm_gc_duration";
 
   private final PrometheusProperties config;
   private final List<GarbageCollectorMXBean> garbageCollectorBeans;
@@ -81,10 +81,9 @@ public class JvmGarbageCollectorMetrics {
 
     Histogram gcDurationHistogram =
         Histogram.builder(config)
-            .name(JVM_GC_DURATION_SECONDS)
-            .help("JVM GC pause duration histogram.")
-            .unit(Unit.SECONDS)
-            .labelNames("name", "action", "cause")
+            .name(JVM_GC_DURATION)
+            .help("Duration of JVM garbage collection actions.")
+            .labelNames("jvm_gc_action", "jvm_gc_name", "jvm_gc_cause")
             .classicUpperBounds(buckets)
             .register(registry);
 
@@ -107,7 +106,7 @@ public class JvmGarbageCollectorMetrics {
                         (CompositeData) notification.getUserData());
 
                 gcDurationHistogram
-                    .labelValues(info.getGcName(), info.getGcAction(), info.getGcCause())
+                    .labelValues(info.getGcAction(), info.getGcName(), info.getGcCause())
                     .observe(Unit.millisToSeconds(info.getGcInfo().getDuration()));
               },
               null,
