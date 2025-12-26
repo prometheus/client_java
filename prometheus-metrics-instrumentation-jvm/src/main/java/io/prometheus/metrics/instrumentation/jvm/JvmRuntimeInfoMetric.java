@@ -37,7 +37,11 @@ public class JvmRuntimeInfoMetric {
   private final Labels constLabels;
 
   private JvmRuntimeInfoMetric(
-      String version, String vendor, String runtime, PrometheusProperties config, Labels constLabels) {
+      String version,
+      String vendor,
+      String runtime,
+      PrometheusProperties config,
+      Labels constLabels) {
     this.config = config;
     this.version = version;
     this.vendor = vendor;
@@ -47,13 +51,13 @@ public class JvmRuntimeInfoMetric {
 
   private void register(PrometheusRegistry registry) {
 
-  Info jvmInfo =
-    Info.builder(config)
-      .name(JVM_RUNTIME_INFO)
-      .help("JVM runtime info")
-      .labelNames("version", "vendor", "runtime")
-      .constLabels(constLabels)
-      .register(registry);
+    Info jvmInfo =
+        Info.builder(config)
+            .name(JVM_RUNTIME_INFO)
+            .help("JVM runtime info")
+            .labelNames("version", "vendor", "runtime")
+            .constLabels(constLabels)
+            .register(registry);
 
     jvmInfo.setLabelValues(version, vendor, runtime);
   }
@@ -68,11 +72,11 @@ public class JvmRuntimeInfoMetric {
 
   public static class Builder {
 
-  private final PrometheusProperties config;
-  @Nullable private String version;
-  @Nullable private String vendor;
-  @Nullable private String runtime;
-  private Labels constLabels = Labels.EMPTY;
+    private final PrometheusProperties config;
+    @Nullable private String version;
+    @Nullable private String vendor;
+    @Nullable private String runtime;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

@@ -3,8 +3,8 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -100,7 +100,8 @@ public class JvmNativeMemoryMetrics {
   private final PlatformMBeanServerAdapter adapter;
   private final Labels constLabels;
 
-  private JvmNativeMemoryMetrics(PrometheusProperties config, PlatformMBeanServerAdapter adapter, Labels constLabels) {
+  private JvmNativeMemoryMetrics(
+      PrometheusProperties config, PlatformMBeanServerAdapter adapter, Labels constLabels) {
     this.config = config;
     this.adapter = adapter;
     this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
@@ -110,7 +111,7 @@ public class JvmNativeMemoryMetrics {
     // first call will check if enabled and set the flag
     vmNativeMemorySummaryInBytesOrEmpty();
     if (isEnabled.get()) {
-    GaugeWithCallback.builder(config)
+      GaugeWithCallback.builder(config)
           .name(JVM_NATIVE_MEMORY_RESERVED_BYTES)
           .help(
               "Reserved bytes of a given JVM. Reserved memory represents the total amount of "
@@ -121,7 +122,7 @@ public class JvmNativeMemoryMetrics {
           .constLabels(constLabels)
           .register(registry);
 
-    GaugeWithCallback.builder(config)
+      GaugeWithCallback.builder(config)
           .name(JVM_NATIVE_MEMORY_COMMITTED_BYTES)
           .help(
               "Committed bytes of a given JVM. Committed memory represents the amount of "
