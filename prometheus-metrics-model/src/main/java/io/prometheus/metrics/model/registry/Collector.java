@@ -60,7 +60,6 @@ public interface Collector {
    * This is called in two places:
    *
    * <ol>
-   *   <li>During registration to check if a metric with that name already exists.
    *   <li>During scrape to check if this collector can be skipped because a name filter is present
    *       and the metric name is excluded.
    * </ol>
