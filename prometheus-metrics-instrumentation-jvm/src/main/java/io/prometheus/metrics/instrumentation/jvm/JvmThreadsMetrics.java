@@ -6,6 +6,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -74,57 +75,65 @@ public class JvmThreadsMetrics {
   private final PrometheusProperties config;
   private final ThreadMXBean threadBean;
   private final boolean isNativeImage;
+  private final Labels constLabels;
 
   private JvmThreadsMetrics(
-      boolean isNativeImage, ThreadMXBean threadBean, PrometheusProperties config) {
+      boolean isNativeImage, ThreadMXBean threadBean, PrometheusProperties config, Labels constLabels) {
     this.config = config;
     this.threadBean = threadBean;
     this.isNativeImage = isNativeImage;
+    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
 
-    GaugeWithCallback.builder(config)
+  GaugeWithCallback.builder(config)
         .name(JVM_THREADS_CURRENT)
         .help("Current thread count of a JVM")
         .callback(callback -> callback.call(threadBean.getThreadCount()))
-        .register(registry);
+    .constLabels(constLabels)
+    .register(registry);
 
-    GaugeWithCallback.builder(config)
+  GaugeWithCallback.builder(config)
         .name(JVM_THREADS_DAEMON)
         .help("Daemon thread count of a JVM")
         .callback(callback -> callback.call(threadBean.getDaemonThreadCount()))
-        .register(registry);
+    .constLabels(constLabels)
+    .register(registry);
 
-    GaugeWithCallback.builder(config)
+  GaugeWithCallback.builder(config)
         .name(JVM_THREADS_PEAK)
         .help("Peak thread count of a JVM")
         .callback(callback -> callback.call(threadBean.getPeakThreadCount()))
-        .register(registry);
+    .constLabels(constLabels)
+    .register(registry);
 
-    CounterWithCallback.builder(config)
+  CounterWithCallback.builder(config)
         .name(JVM_THREADS_STARTED_TOTAL)
         .help("Started thread count of a JVM")
         .callback(callback -> callback.call(threadBean.getTotalStartedThreadCount()))
-        .register(registry);
+    .constLabels(constLabels)
+    .register(registry);
 
     if (!isNativeImage) {
-      GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
           .name(JVM_THREADS_DEADLOCKED)
           .help(
               "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or "
                   + "ownable synchronizers")
           .callback(
               callback -> callback.call(nullSafeArrayLength(threadBean.findDeadlockedThreads())))
-          .register(registry);
+      .constLabels(constLabels)
+      .register(registry);
 
-      GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
           .name(JVM_THREADS_DEADLOCKED_MONITOR)
           .help("Cycles of JVM-threads that are in deadlock waiting to acquire object monitors")
           .callback(
               callback ->
                   callback.call(nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())))
-          .register(registry);
+      .constLabels(constLabels)
+      .register(registry);
 
       GaugeWithCallback.builder(config)
           .name(JVM_THREADS_STATE)
@@ -137,6 +146,7 @@ public class JvmThreadsMetrics {
                   callback.call(entry.getValue(), entry.getKey());
                 }
               })
+          .constLabels(constLabels)
           .register(registry);
     }
   }
@@ -196,9 +206,15 @@ public class JvmThreadsMetrics {
     private final PrometheusProperties config;
     @Nullable private Boolean isNativeImage;
     @Nullable private ThreadMXBean threadBean;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
+    }
+    
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      return this;
     }
 
     /** Package private. For testing only. */
@@ -222,7 +238,7 @@ public class JvmThreadsMetrics {
           this.threadBean != null ? this.threadBean : ManagementFactory.getThreadMXBean();
       boolean isNativeImage =
           this.isNativeImage != null ? this.isNativeImage : NativeImageChecker.isGraalVmNativeImage;
-      new JvmThreadsMetrics(isNativeImage, threadBean, config).register(registry);
+      new JvmThreadsMetrics(isNativeImage, threadBean, config, constLabels).register(registry);
     }
   }
 }

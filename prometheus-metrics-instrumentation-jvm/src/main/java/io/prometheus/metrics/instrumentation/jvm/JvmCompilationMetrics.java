@@ -6,6 +6,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Unit;
+import io.prometheus.metrics.model.snapshots.Labels;
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
 import javax.annotation.Nullable;
@@ -39,10 +40,13 @@ public class JvmCompilationMetrics {
 
   private final PrometheusProperties config;
   private final CompilationMXBean compilationBean;
+  private final Labels constLabels;
 
-  private JvmCompilationMetrics(CompilationMXBean compilationBean, PrometheusProperties config) {
+  private JvmCompilationMetrics(
+      CompilationMXBean compilationBean, PrometheusProperties config, Labels constLabels) {
     this.compilationBean = compilationBean;
     this.config = config;
+    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -51,13 +55,14 @@ public class JvmCompilationMetrics {
       return;
     }
 
-    CounterWithCallback.builder(config)
+  CounterWithCallback.builder(config)
         .name(JVM_COMPILATION_TIME_SECONDS_TOTAL)
         .help("The total time in seconds taken for HotSpot class compilation")
         .unit(Unit.SECONDS)
         .callback(
             callback -> callback.call(millisToSeconds(compilationBean.getTotalCompilationTime())))
-        .register(registry);
+    .constLabels(constLabels)
+    .register(registry);
   }
 
   public static Builder builder() {
@@ -70,11 +75,17 @@ public class JvmCompilationMetrics {
 
   public static class Builder {
 
-    private final PrometheusProperties config;
-    @Nullable private CompilationMXBean compilationBean;
+  private final PrometheusProperties config;
+  @Nullable private CompilationMXBean compilationBean;
+  private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
+    }
+
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      return this;
     }
 
     /** Package private. For testing only. */
@@ -92,7 +103,7 @@ public class JvmCompilationMetrics {
           this.compilationBean != null
               ? this.compilationBean
               : ManagementFactory.getCompilationMXBean();
-      new JvmCompilationMetrics(compilationBean, config).register(registry);
+      new JvmCompilationMetrics(compilationBean, config, constLabels).register(registry);
     }
   }
 }
