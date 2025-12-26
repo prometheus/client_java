@@ -4,6 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import java.lang.management.ManagementFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +34,25 @@ class JvmMetricsTest {
     JvmMemoryPoolAllocationMetrics.builder(PrometheusProperties.get())
         .withGarbageCollectorBeans(ManagementFactory.getGarbageCollectorMXBeans())
         .register();
+  }
+
+  @Test
+  void testConstLabelsApplied() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+    Labels labels = Labels.of("env", "dev");
+    JvmMetrics.builder().constLabels(labels).register(registry);
+    MetricSnapshots snapshots = registry.scrape();
+    boolean found = false;
+    for (MetricSnapshot snapshot : snapshots) {
+      for (DataPointSnapshot dp : snapshot.getDataPoints()) {
+        if ("dev".equals(dp.getLabels().get("env"))) {
+          found = true;
+          break;
+        }
+      }
+      if (found) break;
+    }
+    assertThat(found).isTrue();
   }
 
   @Test

@@ -4,6 +4,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
 import javax.annotation.Nullable;
@@ -44,34 +45,40 @@ public class JvmClassLoadingMetrics {
 
   private final PrometheusProperties config;
   private final ClassLoadingMXBean classLoadingBean;
+  private final Labels constLabels;
 
-  private JvmClassLoadingMetrics(ClassLoadingMXBean classLoadingBean, PrometheusProperties config) {
+  private JvmClassLoadingMetrics(
+      ClassLoadingMXBean classLoadingBean, PrometheusProperties config, Labels constLabels) {
     this.classLoadingBean = classLoadingBean;
     this.config = config;
+    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
 
-    GaugeWithCallback.builder(config)
+  GaugeWithCallback.builder(config)
         .name(JVM_CLASSES_CURRENTLY_LOADED)
         .help("The number of classes that are currently loaded in the JVM")
         .callback(callback -> callback.call(classLoadingBean.getLoadedClassCount()))
-        .register(registry);
+    .constLabels(constLabels)
+    .register(registry);
 
-    CounterWithCallback.builder(config)
+  CounterWithCallback.builder(config)
         .name(JVM_CLASSES_LOADED_TOTAL)
         .help(
             "The total number of classes that have been loaded since the JVM has started execution")
         .callback(callback -> callback.call(classLoadingBean.getTotalLoadedClassCount()))
-        .register(registry);
+    .constLabels(constLabels)
+    .register(registry);
 
-    CounterWithCallback.builder(config)
+  CounterWithCallback.builder(config)
         .name(JVM_CLASSES_UNLOADED_TOTAL)
         .help(
             "The total number of classes that have been unloaded since the JVM has "
                 + "started execution")
         .callback(callback -> callback.call(classLoadingBean.getUnloadedClassCount()))
-        .register(registry);
+    .constLabels(constLabels)
+    .register(registry);
   }
 
   public static Builder builder() {
@@ -84,11 +91,17 @@ public class JvmClassLoadingMetrics {
 
   public static class Builder {
 
-    private final PrometheusProperties config;
-    @Nullable private ClassLoadingMXBean classLoadingBean;
+  private final PrometheusProperties config;
+  @Nullable private ClassLoadingMXBean classLoadingBean;
+  private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
+    }
+
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      return this;
     }
 
     /** Package private. For testing only. */
@@ -106,7 +119,7 @@ public class JvmClassLoadingMetrics {
           this.classLoadingBean != null
               ? this.classLoadingBean
               : ManagementFactory.getClassLoadingMXBean();
-      new JvmClassLoadingMetrics(classLoadingBean, config).register(registry);
+      new JvmClassLoadingMetrics(classLoadingBean, config, constLabels).register(registry);
     }
   }
 }
