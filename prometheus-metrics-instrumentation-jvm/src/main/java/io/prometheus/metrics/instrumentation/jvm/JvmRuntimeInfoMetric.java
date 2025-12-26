@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.Info;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import javax.annotation.Nullable;
 
 /**
@@ -33,23 +34,26 @@ public class JvmRuntimeInfoMetric {
   private final String version;
   private final String vendor;
   private final String runtime;
+  private final Labels constLabels;
 
   private JvmRuntimeInfoMetric(
-      String version, String vendor, String runtime, PrometheusProperties config) {
+      String version, String vendor, String runtime, PrometheusProperties config, Labels constLabels) {
     this.config = config;
     this.version = version;
     this.vendor = vendor;
     this.runtime = runtime;
+    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
 
-    Info jvmInfo =
-        Info.builder(config)
-            .name(JVM_RUNTIME_INFO)
-            .help("JVM runtime info")
-            .labelNames("version", "vendor", "runtime")
-            .register(registry);
+  Info jvmInfo =
+    Info.builder(config)
+      .name(JVM_RUNTIME_INFO)
+      .help("JVM runtime info")
+      .labelNames("version", "vendor", "runtime")
+      .constLabels(constLabels)
+      .register(registry);
 
     jvmInfo.setLabelValues(version, vendor, runtime);
   }
@@ -64,13 +68,19 @@ public class JvmRuntimeInfoMetric {
 
   public static class Builder {
 
-    private final PrometheusProperties config;
-    @Nullable private String version;
-    @Nullable private String vendor;
-    @Nullable private String runtime;
+  private final PrometheusProperties config;
+  @Nullable private String version;
+  @Nullable private String vendor;
+  @Nullable private String runtime;
+  private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
+    }
+
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      return this;
     }
 
     /** Package private. For testing only. */
@@ -104,7 +114,7 @@ public class JvmRuntimeInfoMetric {
           this.vendor != null ? this.vendor : System.getProperty("java.vm.vendor", "unknown");
       String runtime =
           this.runtime != null ? this.runtime : System.getProperty("java.runtime.name", "unknown");
-      new JvmRuntimeInfoMetric(version, vendor, runtime, config).register(registry);
+      new JvmRuntimeInfoMetric(version, vendor, runtime, config, constLabels).register(registry);
     }
   }
 }

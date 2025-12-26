@@ -4,6 +4,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Unit;
+import io.prometheus.metrics.model.snapshots.Labels;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -97,17 +98,19 @@ public class JvmNativeMemoryMetrics {
 
   private final PrometheusProperties config;
   private final PlatformMBeanServerAdapter adapter;
+  private final Labels constLabels;
 
-  private JvmNativeMemoryMetrics(PrometheusProperties config, PlatformMBeanServerAdapter adapter) {
+  private JvmNativeMemoryMetrics(PrometheusProperties config, PlatformMBeanServerAdapter adapter, Labels constLabels) {
     this.config = config;
     this.adapter = adapter;
+    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
     // first call will check if enabled and set the flag
     vmNativeMemorySummaryInBytesOrEmpty();
     if (isEnabled.get()) {
-      GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
           .name(JVM_NATIVE_MEMORY_RESERVED_BYTES)
           .help(
               "Reserved bytes of a given JVM. Reserved memory represents the total amount of "
@@ -115,9 +118,10 @@ public class JvmNativeMemoryMetrics {
           .unit(Unit.BYTES)
           .labelNames("pool")
           .callback(makeCallback(true))
+          .constLabels(constLabels)
           .register(registry);
 
-      GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
           .name(JVM_NATIVE_MEMORY_COMMITTED_BYTES)
           .help(
               "Committed bytes of a given JVM. Committed memory represents the amount of "
@@ -125,6 +129,7 @@ public class JvmNativeMemoryMetrics {
           .unit(Unit.BYTES)
           .labelNames("pool")
           .callback(makeCallback(false))
+          .constLabels(constLabels)
           .register(registry);
     }
   }
@@ -200,6 +205,7 @@ public class JvmNativeMemoryMetrics {
 
     private final PrometheusProperties config;
     private final PlatformMBeanServerAdapter adapter;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this(config, new DefaultPlatformMBeanServerAdapter());
@@ -211,12 +217,17 @@ public class JvmNativeMemoryMetrics {
       this.adapter = adapter;
     }
 
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      return this;
+    }
+
     public void register() {
       register(PrometheusRegistry.defaultRegistry);
     }
 
     public void register(PrometheusRegistry registry) {
-      new JvmNativeMemoryMetrics(config, adapter).register(registry);
+      new JvmNativeMemoryMetrics(config, adapter, constLabels).register(registry);
     }
   }
 }
