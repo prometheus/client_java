@@ -5,8 +5,8 @@ import static io.prometheus.metrics.model.snapshots.Unit.millisToSeconds;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
 import javax.annotation.Nullable;
@@ -55,14 +55,14 @@ public class JvmCompilationMetrics {
       return;
     }
 
-  CounterWithCallback.builder(config)
+    CounterWithCallback.builder(config)
         .name(JVM_COMPILATION_TIME_SECONDS_TOTAL)
         .help("The total time in seconds taken for HotSpot class compilation")
         .unit(Unit.SECONDS)
         .callback(
             callback -> callback.call(millisToSeconds(compilationBean.getTotalCompilationTime())))
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
   }
 
   public static Builder builder() {
@@ -75,9 +75,9 @@ public class JvmCompilationMetrics {
 
   public static class Builder {
 
-  private final PrometheusProperties config;
-  @Nullable private CompilationMXBean compilationBean;
-  private Labels constLabels = Labels.EMPTY;
+    private final PrometheusProperties config;
+    @Nullable private CompilationMXBean compilationBean;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

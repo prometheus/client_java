@@ -3,8 +3,8 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.List;
@@ -112,9 +112,9 @@ public class JvmBufferPoolMetrics {
 
   public static class Builder {
 
-  private final PrometheusProperties config;
-  @Nullable private List<BufferPoolMXBean> bufferPoolBeans;
-  private Labels constLabels = Labels.EMPTY;
+    private final PrometheusProperties config;
+    @Nullable private List<BufferPoolMXBean> bufferPoolBeans;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

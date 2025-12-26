@@ -32,8 +32,8 @@ public class JvmMetrics {
 
   public static class Builder {
 
-  private final PrometheusProperties config;
-  private Labels constLabels = Labels.EMPTY;
+    private final PrometheusProperties config;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
