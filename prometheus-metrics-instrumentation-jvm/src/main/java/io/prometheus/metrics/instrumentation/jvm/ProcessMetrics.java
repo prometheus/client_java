@@ -4,8 +4,8 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
-import io.prometheus.metrics.model.snapshots.Unit;
 import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -101,7 +101,7 @@ public class ProcessMetrics {
 
   private void register(PrometheusRegistry registry) {
 
-  CounterWithCallback.builder(config)
+    CounterWithCallback.builder(config)
         .name(PROCESS_CPU_SECONDS_TOTAL)
         .help("Total user and system CPU time spent in seconds.")
         .unit(Unit.SECONDS)
@@ -121,19 +121,19 @@ public class ProcessMetrics {
               } catch (Exception ignored) {
                 // Ignored
               }
-      })
-    .constLabels(constLabels)
-    .register(registry);
+            })
+        .constLabels(constLabels)
+        .register(registry);
 
-  GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
         .name(PROCESS_START_TIME_SECONDS)
         .help("Start time of the process since unix epoch in seconds.")
         .unit(Unit.SECONDS)
         .callback(callback -> callback.call(Unit.millisToSeconds(runtimeBean.getStartTime())))
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
 
-  GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
         .name(PROCESS_OPEN_FDS)
         .help("Number of open file descriptors.")
         .callback(
@@ -146,11 +146,11 @@ public class ProcessMetrics {
               } catch (Exception ignored) {
                 // Ignored
               }
-      })
-    .constLabels(constLabels)
-    .register(registry);
+            })
+        .constLabels(constLabels)
+        .register(registry);
 
-  GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
         .name(PROCESS_MAX_FDS)
         .help("Maximum number of open file descriptors.")
         .callback(
@@ -163,13 +163,13 @@ public class ProcessMetrics {
               } catch (Exception ignored) {
                 // Ignored
               }
-      })
-    .constLabels(constLabels)
-    .register(registry);
+            })
+        .constLabels(constLabels)
+        .register(registry);
 
     if (linux) {
 
-    GaugeWithCallback.builder(config)
+      GaugeWithCallback.builder(config)
           .name(PROCESS_VIRTUAL_MEMORY_BYTES)
           .help("Virtual memory size in bytes.")
           .unit(Unit.BYTES)
@@ -182,10 +182,10 @@ public class ProcessMetrics {
                   // Ignored
                 }
               })
-              .constLabels(constLabels)
-              .register(registry);
+          .constLabels(constLabels)
+          .register(registry);
 
-    GaugeWithCallback.builder(config)
+      GaugeWithCallback.builder(config)
           .name(PROCESS_RESIDENT_MEMORY_BYTES)
           .help("Resident memory size in bytes.")
           .unit(Unit.BYTES)
@@ -198,8 +198,8 @@ public class ProcessMetrics {
                   // Ignored
                 }
               })
-              .constLabels(constLabels)
-              .register(registry);
+          .constLabels(constLabels)
+          .register(registry);
     }
   }
 

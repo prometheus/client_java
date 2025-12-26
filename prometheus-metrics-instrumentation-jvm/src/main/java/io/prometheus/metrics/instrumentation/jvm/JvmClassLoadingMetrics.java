@@ -56,29 +56,29 @@ public class JvmClassLoadingMetrics {
 
   private void register(PrometheusRegistry registry) {
 
-  GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
         .name(JVM_CLASSES_CURRENTLY_LOADED)
         .help("The number of classes that are currently loaded in the JVM")
         .callback(callback -> callback.call(classLoadingBean.getLoadedClassCount()))
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
 
-  CounterWithCallback.builder(config)
+    CounterWithCallback.builder(config)
         .name(JVM_CLASSES_LOADED_TOTAL)
         .help(
             "The total number of classes that have been loaded since the JVM has started execution")
         .callback(callback -> callback.call(classLoadingBean.getTotalLoadedClassCount()))
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
 
-  CounterWithCallback.builder(config)
+    CounterWithCallback.builder(config)
         .name(JVM_CLASSES_UNLOADED_TOTAL)
         .help(
             "The total number of classes that have been unloaded since the JVM has "
                 + "started execution")
         .callback(callback -> callback.call(classLoadingBean.getUnloadedClassCount()))
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
   }
 
   public static Builder builder() {
@@ -91,9 +91,9 @@ public class JvmClassLoadingMetrics {
 
   public static class Builder {
 
-  private final PrometheusProperties config;
-  @Nullable private ClassLoadingMXBean classLoadingBean;
-  private Labels constLabels = Labels.EMPTY;
+    private final PrometheusProperties config;
+    @Nullable private ClassLoadingMXBean classLoadingBean;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

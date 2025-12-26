@@ -3,9 +3,9 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.SummaryWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.Unit;
-import io.prometheus.metrics.model.snapshots.Labels;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.List;
@@ -46,7 +46,9 @@ public class JvmGarbageCollectorMetrics {
   private final Labels constLabels;
 
   private JvmGarbageCollectorMetrics(
-      List<GarbageCollectorMXBean> garbageCollectorBeans, PrometheusProperties config, Labels constLabels) {
+      List<GarbageCollectorMXBean> garbageCollectorBeans,
+      PrometheusProperties config,
+      Labels constLabels) {
     this.config = config;
     this.garbageCollectorBeans = garbageCollectorBeans;
     this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
@@ -54,7 +56,7 @@ public class JvmGarbageCollectorMetrics {
 
   private void register(PrometheusRegistry registry) {
 
-  SummaryWithCallback.builder(config)
+    SummaryWithCallback.builder(config)
         .name(JVM_GC_COLLECTION_SECONDS)
         .help("Time spent in a given JVM garbage collector in seconds.")
         .unit(Unit.SECONDS)
@@ -69,8 +71,8 @@ public class JvmGarbageCollectorMetrics {
                     gc.getName());
               }
             })
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
   }
 
   public static Builder builder() {
@@ -83,9 +85,9 @@ public class JvmGarbageCollectorMetrics {
 
   public static class Builder {
 
-  private final PrometheusProperties config;
-  @Nullable private List<GarbageCollectorMXBean> garbageCollectorBeans;
-  private Labels constLabels = Labels.EMPTY;
+    private final PrometheusProperties config;
+    @Nullable private List<GarbageCollectorMXBean> garbageCollectorBeans;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;

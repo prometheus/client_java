@@ -78,7 +78,10 @@ public class JvmThreadsMetrics {
   private final Labels constLabels;
 
   private JvmThreadsMetrics(
-      boolean isNativeImage, ThreadMXBean threadBean, PrometheusProperties config, Labels constLabels) {
+      boolean isNativeImage,
+      ThreadMXBean threadBean,
+      PrometheusProperties config,
+      Labels constLabels) {
     this.config = config;
     this.threadBean = threadBean;
     this.isNativeImage = isNativeImage;
@@ -87,53 +90,53 @@ public class JvmThreadsMetrics {
 
   private void register(PrometheusRegistry registry) {
 
-  GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
         .name(JVM_THREADS_CURRENT)
         .help("Current thread count of a JVM")
         .callback(callback -> callback.call(threadBean.getThreadCount()))
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
 
-  GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
         .name(JVM_THREADS_DAEMON)
         .help("Daemon thread count of a JVM")
         .callback(callback -> callback.call(threadBean.getDaemonThreadCount()))
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
 
-  GaugeWithCallback.builder(config)
+    GaugeWithCallback.builder(config)
         .name(JVM_THREADS_PEAK)
         .help("Peak thread count of a JVM")
         .callback(callback -> callback.call(threadBean.getPeakThreadCount()))
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
 
-  CounterWithCallback.builder(config)
+    CounterWithCallback.builder(config)
         .name(JVM_THREADS_STARTED_TOTAL)
         .help("Started thread count of a JVM")
         .callback(callback -> callback.call(threadBean.getTotalStartedThreadCount()))
-    .constLabels(constLabels)
-    .register(registry);
+        .constLabels(constLabels)
+        .register(registry);
 
     if (!isNativeImage) {
-    GaugeWithCallback.builder(config)
+      GaugeWithCallback.builder(config)
           .name(JVM_THREADS_DEADLOCKED)
           .help(
               "Cycles of JVM-threads that are in deadlock waiting to acquire object monitors or "
                   + "ownable synchronizers")
           .callback(
               callback -> callback.call(nullSafeArrayLength(threadBean.findDeadlockedThreads())))
-      .constLabels(constLabels)
-      .register(registry);
+          .constLabels(constLabels)
+          .register(registry);
 
-    GaugeWithCallback.builder(config)
+      GaugeWithCallback.builder(config)
           .name(JVM_THREADS_DEADLOCKED_MONITOR)
           .help("Cycles of JVM-threads that are in deadlock waiting to acquire object monitors")
           .callback(
               callback ->
                   callback.call(nullSafeArrayLength(threadBean.findMonitorDeadlockedThreads())))
-      .constLabels(constLabels)
-      .register(registry);
+          .constLabels(constLabels)
+          .register(registry);
 
       GaugeWithCallback.builder(config)
           .name(JVM_THREADS_STATE)
@@ -211,7 +214,7 @@ public class JvmThreadsMetrics {
     private Builder(PrometheusProperties config) {
       this.config = config;
     }
-    
+
     public Builder constLabels(Labels constLabels) {
       this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
       return this;

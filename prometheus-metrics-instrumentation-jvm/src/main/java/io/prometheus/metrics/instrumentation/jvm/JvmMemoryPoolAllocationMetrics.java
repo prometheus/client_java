@@ -55,21 +55,22 @@ public class JvmMemoryPoolAllocationMetrics {
   private final List<GarbageCollectorMXBean> garbageCollectorBeans;
   private final Labels constLabels;
 
-  private JvmMemoryPoolAllocationMetrics(List<GarbageCollectorMXBean> garbageCollectorBeans, Labels constLabels) {
+  private JvmMemoryPoolAllocationMetrics(
+      List<GarbageCollectorMXBean> garbageCollectorBeans, Labels constLabels) {
     this.garbageCollectorBeans = garbageCollectorBeans;
     this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
-  Counter allocatedCounter =
-    Counter.builder()
-      .name(JVM_MEMORY_POOL_ALLOCATED_BYTES_TOTAL)
-      .help(
-        "Total bytes allocated in a given JVM memory pool. Only updated after GC, "
-          + "not continuously.")
-      .labelNames("pool")
-      .constLabels(constLabels)
-      .register(registry);
+    Counter allocatedCounter =
+        Counter.builder()
+            .name(JVM_MEMORY_POOL_ALLOCATED_BYTES_TOTAL)
+            .help(
+                "Total bytes allocated in a given JVM memory pool. Only updated after GC, "
+                    + "not continuously.")
+            .labelNames("pool")
+            .constLabels(constLabels)
+            .register(registry);
 
     AllocationCountingNotificationListener listener =
         new AllocationCountingNotificationListener(allocatedCounter);
@@ -159,7 +160,7 @@ public class JvmMemoryPoolAllocationMetrics {
     private Labels constLabels = Labels.EMPTY;
 
     private Builder() {}
-    
+
     public Builder constLabels(Labels constLabels) {
       this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
       return this;
