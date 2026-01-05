@@ -74,7 +74,7 @@ def run_cmd(cmd: List[str], cwd: Optional[str] = None) -> str:
 
 def build_benchmarks(mvnw: str, module: str) -> None:
     print(f"Building Maven module '{module}' using {mvnw} (this may take a while)...")
-    cmd = [mvnw, "-pl", module, "-am", "-DskipTests", "package"]
+    cmd = [mvnw, "-pl", module, "-am", "-DskipTests", "clean", "package"]
     run_cmd(cmd)
     print("Build completed.")
 
