@@ -87,7 +87,7 @@ public class PrometheusScrapeHandler {
           // The HTTPServer implementation will throw an Exception if we close the output stream
           // without sending a response body, so let's not close the output stream in case of a HEAD
           // response.
-          response.sendHeadersAndGetBody(200, -1);
+          try (OutputStream unused = response.sendHeadersAndGetBody(200, -1)) {}
         } else {
           try (OutputStream outputStream = response.sendHeadersAndGetBody(200, contentLength)) {
             responseBuffer.writeTo(outputStream);
@@ -154,29 +154,34 @@ public class PrometheusScrapeHandler {
     } else {
       response.setHeader("Content-Type", "text/plain; charset=utf-8");
       int responseStatus = supportedFormats.contains(debugParam) ? 200 : 500;
-      OutputStream body = response.sendHeadersAndGetBody(responseStatus, 0);
-      switch (debugParam) {
-        case "openmetrics":
-          expositionFormats.getOpenMetricsTextFormatWriter().write(body, snapshots, escapingScheme);
-          break;
-        case "text":
-          expositionFormats.getPrometheusTextFormatWriter().write(body, snapshots, escapingScheme);
-          break;
-        case "prometheus-protobuf":
-          String debugString =
-              expositionFormats
-                  .getPrometheusProtobufWriter()
-                  .toDebugString(snapshots, escapingScheme);
-          body.write(debugString.getBytes(StandardCharsets.UTF_8));
-          break;
-        default:
-          body.write(
-              ("debug="
-                      + debugParam
-                      + ": Unsupported query parameter. Valid values are 'openmetrics', "
-                      + "'text', and 'prometheus-protobuf'.")
-                  .getBytes(StandardCharsets.UTF_8));
-          break;
+      try (OutputStream body = response.sendHeadersAndGetBody(responseStatus, 0)) {
+        switch (debugParam) {
+          case "openmetrics":
+            expositionFormats
+                .getOpenMetricsTextFormatWriter()
+                .write(body, snapshots, escapingScheme);
+            break;
+          case "text":
+            expositionFormats
+                .getPrometheusTextFormatWriter()
+                .write(body, snapshots, escapingScheme);
+            break;
+          case "prometheus-protobuf":
+            String debugString =
+                expositionFormats
+                    .getPrometheusProtobufWriter()
+                    .toDebugString(snapshots, escapingScheme);
+            body.write(debugString.getBytes(StandardCharsets.UTF_8));
+            break;
+          default:
+            body.write(
+                ("debug="
+                        + debugParam
+                        + ": Unsupported query parameter. Valid values are 'openmetrics', "
+                        + "'text', and 'prometheus-protobuf'.")
+                    .getBytes(StandardCharsets.UTF_8));
+            break;
+        }
       }
       return true;
     }
