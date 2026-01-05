@@ -10,7 +10,7 @@ import java.io.IOException;
 public class DuplicateMetricsSample {
 
   public static void main(String[] args) throws IOException, InterruptedException {
-    if (args.length < 1 || args.length > 2) {
+    if (args.length != 1) {
       System.err.println("Usage: java -jar duplicate-metrics-sample.jar <port>");
       System.exit(1);
     }

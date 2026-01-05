@@ -57,14 +57,10 @@ public interface Collector {
   }
 
   /**
-   * This is called in two places:
+   * This is called during scrape to check if this collector can be skipped because a name filter is
+   * present and the metric name is excluded.
    *
-   * <ol>
-   *   <li>During scrape to check if this collector can be skipped because a name filter is present
-   *       and the metric name is excluded.
-   * </ol>
-   *
-   * Returning {@code null} means checks are omitted (registration the metric always succeeds), and
+   * <p>Returning {@code null} means checks are omitted (registration the metric always succeeds), and
    * the collector is always scraped (the result is dropped after scraping if a name filter is
    * present and the metric name is excluded).
    *
