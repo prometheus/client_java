@@ -51,7 +51,7 @@ public class JvmGarbageCollectorMetrics {
       Labels constLabels) {
     this.config = config;
     this.garbageCollectorBeans = garbageCollectorBeans;
-    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -94,7 +94,7 @@ public class JvmGarbageCollectorMetrics {
     }
 
     public Builder constLabels(Labels constLabels) {
-      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      this.constLabels = constLabels;
       return this;
     }
 

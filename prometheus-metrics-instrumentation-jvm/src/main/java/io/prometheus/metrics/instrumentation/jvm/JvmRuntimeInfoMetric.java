@@ -46,7 +46,7 @@ public class JvmRuntimeInfoMetric {
     this.version = version;
     this.vendor = vendor;
     this.runtime = runtime;
-    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -83,7 +83,7 @@ public class JvmRuntimeInfoMetric {
     }
 
     public Builder constLabels(Labels constLabels) {
-      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      this.constLabels = constLabels;
       return this;
     }
 

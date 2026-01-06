@@ -58,7 +58,7 @@ public class JvmMemoryPoolAllocationMetrics {
   private JvmMemoryPoolAllocationMetrics(
       List<GarbageCollectorMXBean> garbageCollectorBeans, Labels constLabels) {
     this.garbageCollectorBeans = garbageCollectorBeans;
-    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -162,7 +162,7 @@ public class JvmMemoryPoolAllocationMetrics {
     private Builder() {}
 
     public Builder constLabels(Labels constLabels) {
-      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      this.constLabels = constLabels;
       return this;
     }
 

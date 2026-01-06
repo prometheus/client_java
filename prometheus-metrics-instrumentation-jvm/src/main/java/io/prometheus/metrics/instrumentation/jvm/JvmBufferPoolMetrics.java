@@ -55,7 +55,7 @@ public class JvmBufferPoolMetrics {
       List<BufferPoolMXBean> bufferPoolBeans, PrometheusProperties config, Labels constLabels) {
     this.config = config;
     this.bufferPoolBeans = bufferPoolBeans;
-    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -121,7 +121,7 @@ public class JvmBufferPoolMetrics {
     }
 
     public Builder constLabels(Labels constLabels) {
-      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      this.constLabels = constLabels;
       return this;
     }
 

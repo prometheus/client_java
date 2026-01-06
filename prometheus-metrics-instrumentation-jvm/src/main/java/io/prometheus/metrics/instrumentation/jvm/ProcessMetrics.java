@@ -96,7 +96,7 @@ public class ProcessMetrics {
     this.grepper = grepper;
     this.config = config;
     this.linux = PROC_SELF_STATUS.canRead();
-    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -310,7 +310,7 @@ public class ProcessMetrics {
     }
 
     public Builder constLabels(Labels constLabels) {
-      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      this.constLabels = constLabels;
       return this;
     }
 
