@@ -266,7 +266,8 @@ class SimpleclientCollectorTest {
 
   private String newOpenMetrics() throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, false);
+    OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder().setCreatedTimestampsEnabled(true).build();
     writer.write(out, newRegistry.scrape(), EscapingScheme.ALLOW_UTF8);
     return out.toString(StandardCharsets.UTF_8);
   }
