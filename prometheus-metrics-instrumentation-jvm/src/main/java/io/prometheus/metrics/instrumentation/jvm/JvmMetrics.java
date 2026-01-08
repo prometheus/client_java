@@ -2,6 +2,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,9 +33,16 @@ public class JvmMetrics {
   public static class Builder {
 
     private final PrometheusProperties config;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
+    }
+
+    /** Set constant labels that will be applied to all JVM metrics registered by this builder. */
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels;
+      return this;
     }
 
     /**
@@ -55,16 +63,16 @@ public class JvmMetrics {
      */
     public void register(PrometheusRegistry registry) {
       if (REGISTERED.add(registry)) {
-        JvmThreadsMetrics.builder(config).register(registry);
-        JvmBufferPoolMetrics.builder(config).register(registry);
-        JvmClassLoadingMetrics.builder(config).register(registry);
-        JvmCompilationMetrics.builder(config).register(registry);
-        JvmGarbageCollectorMetrics.builder(config).register(registry);
-        JvmMemoryPoolAllocationMetrics.builder(config).register(registry);
-        JvmMemoryMetrics.builder(config).register(registry);
-        JvmNativeMemoryMetrics.builder(config).register(registry);
-        JvmRuntimeInfoMetric.builder(config).register(registry);
-        ProcessMetrics.builder(config).register(registry);
+        JvmThreadsMetrics.builder(config).constLabels(constLabels).register(registry);
+        JvmBufferPoolMetrics.builder(config).constLabels(constLabels).register(registry);
+        JvmClassLoadingMetrics.builder(config).constLabels(constLabels).register(registry);
+        JvmCompilationMetrics.builder(config).constLabels(constLabels).register(registry);
+        JvmGarbageCollectorMetrics.builder(config).constLabels(constLabels).register(registry);
+        JvmMemoryPoolAllocationMetrics.builder(config).constLabels(constLabels).register(registry);
+        JvmMemoryMetrics.builder(config).constLabels(constLabels).register(registry);
+        JvmNativeMemoryMetrics.builder(config).constLabels(constLabels).register(registry);
+        JvmRuntimeInfoMetric.builder(config).constLabels(constLabels).register(registry);
+        ProcessMetrics.builder(config).constLabels(constLabels).register(registry);
       }
     }
   }

@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -97,10 +98,13 @@ public class JvmNativeMemoryMetrics {
 
   private final PrometheusProperties config;
   private final PlatformMBeanServerAdapter adapter;
+  private final Labels constLabels;
 
-  private JvmNativeMemoryMetrics(PrometheusProperties config, PlatformMBeanServerAdapter adapter) {
+  private JvmNativeMemoryMetrics(
+      PrometheusProperties config, PlatformMBeanServerAdapter adapter, Labels constLabels) {
     this.config = config;
     this.adapter = adapter;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -115,6 +119,7 @@ public class JvmNativeMemoryMetrics {
           .unit(Unit.BYTES)
           .labelNames("pool")
           .callback(makeCallback(true))
+          .constLabels(constLabels)
           .register(registry);
 
       GaugeWithCallback.builder(config)
@@ -125,6 +130,7 @@ public class JvmNativeMemoryMetrics {
           .unit(Unit.BYTES)
           .labelNames("pool")
           .callback(makeCallback(false))
+          .constLabels(constLabels)
           .register(registry);
     }
   }
@@ -200,6 +206,7 @@ public class JvmNativeMemoryMetrics {
 
     private final PrometheusProperties config;
     private final PlatformMBeanServerAdapter adapter;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this(config, new DefaultPlatformMBeanServerAdapter());
@@ -211,12 +218,17 @@ public class JvmNativeMemoryMetrics {
       this.adapter = adapter;
     }
 
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels;
+      return this;
+    }
+
     public void register() {
       register(PrometheusRegistry.defaultRegistry);
     }
 
     public void register(PrometheusRegistry registry) {
-      new JvmNativeMemoryMetrics(config, adapter).register(registry);
+      new JvmNativeMemoryMetrics(config, adapter, constLabels).register(registry);
     }
   }
 }

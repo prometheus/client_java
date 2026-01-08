@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
@@ -48,11 +49,13 @@ public class JvmBufferPoolMetrics {
 
   private final PrometheusProperties config;
   private final List<BufferPoolMXBean> bufferPoolBeans;
+  private final Labels constLabels;
 
   private JvmBufferPoolMetrics(
-      List<BufferPoolMXBean> bufferPoolBeans, PrometheusProperties config) {
+      List<BufferPoolMXBean> bufferPoolBeans, PrometheusProperties config, Labels constLabels) {
     this.config = config;
     this.bufferPoolBeans = bufferPoolBeans;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -68,6 +71,7 @@ public class JvmBufferPoolMetrics {
                 callback.call(pool.getMemoryUsed(), pool.getName());
               }
             })
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -81,6 +85,7 @@ public class JvmBufferPoolMetrics {
                 callback.call(pool.getTotalCapacity(), pool.getName());
               }
             })
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -93,6 +98,7 @@ public class JvmBufferPoolMetrics {
                 callback.call(pool.getCount(), pool.getName());
               }
             })
+        .constLabels(constLabels)
         .register(registry);
   }
 
@@ -108,9 +114,15 @@ public class JvmBufferPoolMetrics {
 
     private final PrometheusProperties config;
     @Nullable private List<BufferPoolMXBean> bufferPoolBeans;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
+    }
+
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels;
+      return this;
     }
 
     /** Package private. For testing only. */
@@ -128,7 +140,7 @@ public class JvmBufferPoolMetrics {
       if (bufferPoolBeans == null) {
         bufferPoolBeans = ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class);
       }
-      new JvmBufferPoolMetrics(bufferPoolBeans, config).register(registry);
+      new JvmBufferPoolMetrics(bufferPoolBeans, config, constLabels).register(registry);
     }
   }
 }

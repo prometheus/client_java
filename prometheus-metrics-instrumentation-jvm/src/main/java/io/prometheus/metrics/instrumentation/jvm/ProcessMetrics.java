@@ -4,6 +4,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.BufferedReader;
 import java.io.File;
@@ -82,17 +83,20 @@ public class ProcessMetrics {
   private final RuntimeMXBean runtimeBean;
   private final Grepper grepper;
   private final boolean linux;
+  private final Labels constLabels;
 
   private ProcessMetrics(
       OperatingSystemMXBean osBean,
       RuntimeMXBean runtimeBean,
       Grepper grepper,
-      PrometheusProperties config) {
+      PrometheusProperties config,
+      Labels constLabels) {
     this.osBean = osBean;
     this.runtimeBean = runtimeBean;
     this.grepper = grepper;
     this.config = config;
     this.linux = PROC_SELF_STATUS.canRead();
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -118,6 +122,7 @@ public class ProcessMetrics {
                 // Ignored
               }
             })
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -125,6 +130,7 @@ public class ProcessMetrics {
         .help("Start time of the process since unix epoch in seconds.")
         .unit(Unit.SECONDS)
         .callback(callback -> callback.call(Unit.millisToSeconds(runtimeBean.getStartTime())))
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -141,6 +147,7 @@ public class ProcessMetrics {
                 // Ignored
               }
             })
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -157,6 +164,7 @@ public class ProcessMetrics {
                 // Ignored
               }
             })
+        .constLabels(constLabels)
         .register(registry);
 
     if (linux) {
@@ -174,6 +182,7 @@ public class ProcessMetrics {
                   // Ignored
                 }
               })
+          .constLabels(constLabels)
           .register(registry);
 
       GaugeWithCallback.builder(config)
@@ -189,6 +198,7 @@ public class ProcessMetrics {
                   // Ignored
                 }
               })
+          .constLabels(constLabels)
           .register(registry);
     }
   }
@@ -275,6 +285,7 @@ public class ProcessMetrics {
     @Nullable private OperatingSystemMXBean osBean;
     @Nullable private RuntimeMXBean runtimeBean;
     @Nullable private Grepper grepper;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
@@ -298,6 +309,11 @@ public class ProcessMetrics {
       return this;
     }
 
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels;
+      return this;
+    }
+
     public void register() {
       register(PrometheusRegistry.defaultRegistry);
     }
@@ -308,7 +324,7 @@ public class ProcessMetrics {
       RuntimeMXBean bean =
           this.runtimeBean != null ? this.runtimeBean : ManagementFactory.getRuntimeMXBean();
       Grepper grepper = this.grepper != null ? this.grepper : new FileGrepper();
-      new ProcessMetrics(osBean, bean, grepper, config).register(registry);
+      new ProcessMetrics(osBean, bean, grepper, config, constLabels).register(registry);
     }
   }
 }
