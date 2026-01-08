@@ -85,7 +85,7 @@ public class JvmThreadsMetrics {
     this.config = config;
     this.threadBean = threadBean;
     this.isNativeImage = isNativeImage;
-    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -216,7 +216,7 @@ public class JvmThreadsMetrics {
     }
 
     public Builder constLabels(Labels constLabels) {
-      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      this.constLabels = constLabels;
       return this;
     }
 

@@ -104,7 +104,7 @@ public class JvmNativeMemoryMetrics {
       PrometheusProperties config, PlatformMBeanServerAdapter adapter, Labels constLabels) {
     this.config = config;
     this.adapter = adapter;
-    this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -219,7 +219,7 @@ public class JvmNativeMemoryMetrics {
     }
 
     public Builder constLabels(Labels constLabels) {
-      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      this.constLabels = constLabels;
       return this;
     }
 

@@ -41,7 +41,7 @@ public class JvmMetrics {
 
     /** Set constant labels that will be applied to all JVM metrics registered by this builder. */
     public Builder constLabels(Labels constLabels) {
-      this.constLabels = constLabels == null ? Labels.EMPTY : constLabels;
+      this.constLabels = constLabels;
       return this;
     }
 
