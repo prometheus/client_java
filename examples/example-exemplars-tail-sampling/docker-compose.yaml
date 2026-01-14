@@ -36,14 +36,14 @@ services:
       - -jar
       - /example-greeting-service.jar
   collector:
-    image: otel/opentelemetry-collector-contrib:0.142.0@sha256:38c349c3b7a2fd7ea46700cde8fa13d35b699ef2ce245bdf34dae2a413512f76
+    image: otel/opentelemetry-collector-contrib:0.143.1@sha256:f051aff195ad50ed5ad9d95bcdd51d7258200c937def3797cf830366ed62e034
     network_mode: host
     volumes:
       - ./config/otelcol-config.yaml:/config.yaml
     command:
       - --config=file:/config.yaml
   prometheus:
-    image: prom/prometheus:v3.8.1@sha256:2b6f734e372c1b4717008f7d0a0152316aedd4d13ae17ef1e3268dbfaf68041b
+    image: prom/prometheus:v3.9.1@sha256:1f0f50f06acaceb0f5670d2c8a658a599affe7b0d8e78b898c1035653849a702
     network_mode: host
     volumes:
       - ./config/prometheus.yaml:/prometheus.yaml
@@ -68,7 +68,7 @@ services:
       - ./config/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/grafana-dashboards.yaml
       - ./config/grafana-example-dashboard.json:/etc/grafana/example-dashboard.json
   k6:
-    image: grafana/k6@sha256:16bc2347c323b1155a200d6fe9c2b801a570b6e0e647203cf382a083782b904f
+    image: grafana/k6@sha256:a7c79af2b374c9a3afa8b0fae9ec2899277d066612029b7b0fcd2fcb724ba86f
     network_mode: host
     volumes:
       - ./config/k6-script.js:/k6-script.js

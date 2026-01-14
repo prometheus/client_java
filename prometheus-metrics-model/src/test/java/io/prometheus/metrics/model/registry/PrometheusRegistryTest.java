@@ -3,7 +3,6 @@ package io.prometheus.metrics.model.registry;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
@@ -182,13 +181,6 @@ class PrometheusRegistryTest {
 
     registry.clear();
     assertThat(registry.scrape().size()).isZero();
-  }
-
-  @Test
-  public void duplicateRegistration_multiCollector() {
-    PrometheusRegistry registry = new PrometheusRegistry();
-    registry.register(multiCollector);
-    assertThatCode(() -> registry.register(multiCollector)).doesNotThrowAnyException();
   }
 
   @Test

@@ -23,9 +23,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <automatic.module.name>--module-name-need-to-be-overridden--</automatic.module.name>
-    <protobuf-java.version>4.33.2</protobuf-java.version>
+    <protobuf-java.version>4.33.4</protobuf-java.version>
     <guava.version>33.5.0-jre</guava.version>
-    <junit-jupiter.version>6.0.1</junit-jupiter.version>
+    <junit-jupiter.version>6.0.2</junit-jupiter.version>
     <otel.instrumentation.version>2.16.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
@@ -275,7 +275,7 @@
             <path>
               <groupId>com.google.errorprone</groupId>
               <artifactId>error_prone_core</artifactId>
-              <version>2.45.0</version>
+              <version>2.46.0</version>
             </path>
             <path>
               <groupId>com.uber.nullaway</groupId>

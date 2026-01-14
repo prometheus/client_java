@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -127,12 +128,17 @@ public class JvmMemoryMetrics {
   private final PrometheusProperties config;
   private final MemoryMXBean memoryBean;
   private final List<MemoryPoolMXBean> poolBeans;
+  private final Labels constLabels;
 
   private JvmMemoryMetrics(
-      List<MemoryPoolMXBean> poolBeans, MemoryMXBean memoryBean, PrometheusProperties config) {
+      List<MemoryPoolMXBean> poolBeans,
+      MemoryMXBean memoryBean,
+      PrometheusProperties config,
+      Labels constLabels) {
     this.config = config;
     this.poolBeans = poolBeans;
     this.memoryBean = memoryBean;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -141,6 +147,7 @@ public class JvmMemoryMetrics {
         .name(JVM_MEMORY_OBJECTS_PENDING_FINALIZATION)
         .help("The number of objects waiting in the finalizer queue.")
         .callback(callback -> callback.call(memoryBean.getObjectPendingFinalizationCount()))
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -153,6 +160,7 @@ public class JvmMemoryMetrics {
               callback.call(memoryBean.getHeapMemoryUsage().getUsed(), "heap");
               callback.call(memoryBean.getNonHeapMemoryUsage().getUsed(), "nonheap");
             })
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -165,6 +173,7 @@ public class JvmMemoryMetrics {
               callback.call(memoryBean.getHeapMemoryUsage().getCommitted(), "heap");
               callback.call(memoryBean.getNonHeapMemoryUsage().getCommitted(), "nonheap");
             })
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -177,6 +186,7 @@ public class JvmMemoryMetrics {
               callback.call(memoryBean.getHeapMemoryUsage().getMax(), "heap");
               callback.call(memoryBean.getNonHeapMemoryUsage().getMax(), "nonheap");
             })
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -189,6 +199,7 @@ public class JvmMemoryMetrics {
               callback.call(memoryBean.getHeapMemoryUsage().getInit(), "heap");
               callback.call(memoryBean.getNonHeapMemoryUsage().getInit(), "nonheap");
             })
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -197,6 +208,7 @@ public class JvmMemoryMetrics {
         .unit(Unit.BYTES)
         .labelNames("pool")
         .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getUsed))
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -205,6 +217,7 @@ public class JvmMemoryMetrics {
         .unit(Unit.BYTES)
         .labelNames("pool")
         .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getCommitted))
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -213,6 +226,7 @@ public class JvmMemoryMetrics {
         .unit(Unit.BYTES)
         .labelNames("pool")
         .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getMax))
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -221,6 +235,7 @@ public class JvmMemoryMetrics {
         .unit(Unit.BYTES)
         .labelNames("pool")
         .callback(makeCallback(poolBeans, MemoryPoolMXBean::getUsage, MemoryUsage::getInit))
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -230,6 +245,7 @@ public class JvmMemoryMetrics {
         .labelNames("pool")
         .callback(
             makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getUsed))
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -240,6 +256,7 @@ public class JvmMemoryMetrics {
         .callback(
             makeCallback(
                 poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getCommitted))
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -249,6 +266,7 @@ public class JvmMemoryMetrics {
         .labelNames("pool")
         .callback(
             makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getMax))
+        .constLabels(constLabels)
         .register(registry);
 
     GaugeWithCallback.builder(config)
@@ -258,6 +276,7 @@ public class JvmMemoryMetrics {
         .labelNames("pool")
         .callback(
             makeCallback(poolBeans, MemoryPoolMXBean::getCollectionUsage, MemoryUsage::getInit))
+        .constLabels(constLabels)
         .register(registry);
   }
 
@@ -288,9 +307,15 @@ public class JvmMemoryMetrics {
     private final PrometheusProperties config;
     @Nullable private MemoryMXBean memoryBean;
     @Nullable private List<MemoryPoolMXBean> poolBeans;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
+    }
+
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels;
+      return this;
     }
 
     /** Package private. For testing only. */
@@ -314,7 +339,7 @@ public class JvmMemoryMetrics {
           this.memoryBean != null ? this.memoryBean : ManagementFactory.getMemoryMXBean();
       List<MemoryPoolMXBean> poolBeans =
           this.poolBeans != null ? this.poolBeans : ManagementFactory.getMemoryPoolMXBeans();
-      new JvmMemoryMetrics(poolBeans, bean, config).register(registry);
+      new JvmMemoryMetrics(poolBeans, bean, config, constLabels).register(registry);
     }
   }
 }
