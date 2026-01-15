@@ -36,4 +36,4 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build and test on Java ${{ matrix.java }}
-        run: ./mvnw clean install -Dtest.java.version=${{ matrix.java }} -Dspotless.check.skip=true -Dcheckstyle.skip=true -Dmaven.compiler.proc=none -Dwarnings=-nowarn
+        run: ./mvnw clean install -Dtest.java.version=${{ matrix.java }} -Dspotless.skip=true -Dcheckstyle.skip=true -Dmaven.compiler.proc=none -Dwarnings=-nowarn
