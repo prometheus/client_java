@@ -36,10 +36,4 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build and test on Java ${{ matrix.java }}
-        run: |
-          if [ "${{ matrix.java }}" = "11" ]; then
-            echo "Building on Java 11 - excluding integration-tests module (GraalVM plugin requires Java 17+)"
-            ./mvnw clean install -Dtest.java.version=11 -pl '!integration-tests'
-          else
-            ./mvnw clean install -Dtest.java.version=${{ matrix.java }}
-          fi
+        run: ./mvnw clean install -Dtest.java.version=${{ matrix.java }}
