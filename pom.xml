@@ -262,33 +262,7 @@
             <arg>${warnings}</arg>
             <arg>--should-stop=ifError=FLOW</arg>
             <arg>-XDcompilePolicy=simple</arg>
-            <arg>
-              -Xplugin:ErrorProne
-              -Xep:AlmostJavadoc:OFF
-              -Xep:MissingSummary:OFF
-              -Xep:LongDoubleConversion:OFF
-              -Xep:StringSplitter:OFF
-              -XepExcludedPaths:(.*/generated/.*|.*/src/test/java/.*|.*/examples/.*|.*/integration-tests/.*)
-              -XepOpt:NullAway:AnnotatedPackages=io.prometheus.metrics
-            </arg>
           </compilerArgs>
-          <annotationProcessorPaths>
-            <path>
-              <groupId>com.google.errorprone</groupId>
-              <artifactId>error_prone_core</artifactId>
-              <version>2.46.0</version>
-            </path>
-            <path>
-              <groupId>com.uber.nullaway</groupId>
-              <artifactId>nullaway</artifactId>
-              <version>0.12.15</version>
-            </path>
-            <!-- Other annotation processors go here.
-
-            If 'annotationProcessorPaths' is set, processors will no longer be
-            discovered on the regular -classpath; see also 'Using Error Prone
-            together with other annotation processors' below. -->
-          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>
@@ -444,6 +418,44 @@
               <excludePackageNames>io.prometheus.metrics.expositionformats.generated.*
               </excludePackageNames>
               <source>8</source>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>errorprone</id>
+      <activation>
+        <jdk>[21,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <compilerArgs combine.children="append">
+                <arg>
+                  -Xplugin:ErrorProne
+                  -Xep:AlmostJavadoc:OFF
+                  -Xep:MissingSummary:OFF
+                  -Xep:LongDoubleConversion:OFF
+                  -Xep:StringSplitter:OFF
+                  -XepExcludedPaths:(.*/generated/.*|.*/src/test/java/.*|.*/examples/.*|.*/integration-tests/.*)
+                  -XepOpt:NullAway:AnnotatedPackages=io.prometheus.metrics
+                </arg>
+              </compilerArgs>
+              <annotationProcessorPaths>
+                <path>
+                  <groupId>com.google.errorprone</groupId>
+                  <artifactId>error_prone_core</artifactId>
+                  <version>2.46.0</version>
+                </path>
+                <path>
+                  <groupId>com.uber.nullaway</groupId>
+                  <artifactId>nullaway</artifactId>
+                  <version>0.12.15</version>
+                </path>
+              </annotationProcessorPaths>
             </configuration>
           </plugin>
         </plugins>
