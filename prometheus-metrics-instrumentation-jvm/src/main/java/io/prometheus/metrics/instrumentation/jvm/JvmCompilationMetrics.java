@@ -5,6 +5,7 @@ import static io.prometheus.metrics.model.snapshots.Unit.millisToSeconds;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.CounterWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.CompilationMXBean;
 import java.lang.management.ManagementFactory;
@@ -39,10 +40,13 @@ public class JvmCompilationMetrics {
 
   private final PrometheusProperties config;
   private final CompilationMXBean compilationBean;
+  private final Labels constLabels;
 
-  private JvmCompilationMetrics(CompilationMXBean compilationBean, PrometheusProperties config) {
+  private JvmCompilationMetrics(
+      CompilationMXBean compilationBean, PrometheusProperties config, Labels constLabels) {
     this.compilationBean = compilationBean;
     this.config = config;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -57,6 +61,7 @@ public class JvmCompilationMetrics {
         .unit(Unit.SECONDS)
         .callback(
             callback -> callback.call(millisToSeconds(compilationBean.getTotalCompilationTime())))
+        .constLabels(constLabels)
         .register(registry);
   }
 
@@ -72,9 +77,15 @@ public class JvmCompilationMetrics {
 
     private final PrometheusProperties config;
     @Nullable private CompilationMXBean compilationBean;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
+    }
+
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels;
+      return this;
     }
 
     /** Package private. For testing only. */
@@ -92,7 +103,7 @@ public class JvmCompilationMetrics {
           this.compilationBean != null
               ? this.compilationBean
               : ManagementFactory.getCompilationMXBean();
-      new JvmCompilationMetrics(compilationBean, config).register(registry);
+      new JvmCompilationMetrics(compilationBean, config, constLabels).register(registry);
     }
   }
 }

@@ -3,6 +3,7 @@ package io.prometheus.metrics.instrumentation.jvm;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.SummaryWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
+import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.GarbageCollectorMXBean;
@@ -42,11 +43,15 @@ public class JvmGarbageCollectorMetrics {
 
   private final PrometheusProperties config;
   private final List<GarbageCollectorMXBean> garbageCollectorBeans;
+  private final Labels constLabels;
 
   private JvmGarbageCollectorMetrics(
-      List<GarbageCollectorMXBean> garbageCollectorBeans, PrometheusProperties config) {
+      List<GarbageCollectorMXBean> garbageCollectorBeans,
+      PrometheusProperties config,
+      Labels constLabels) {
     this.config = config;
     this.garbageCollectorBeans = garbageCollectorBeans;
+    this.constLabels = constLabels;
   }
 
   private void register(PrometheusRegistry registry) {
@@ -66,6 +71,7 @@ public class JvmGarbageCollectorMetrics {
                     gc.getName());
               }
             })
+        .constLabels(constLabels)
         .register(registry);
   }
 
@@ -81,9 +87,15 @@ public class JvmGarbageCollectorMetrics {
 
     private final PrometheusProperties config;
     @Nullable private List<GarbageCollectorMXBean> garbageCollectorBeans;
+    private Labels constLabels = Labels.EMPTY;
 
     private Builder(PrometheusProperties config) {
       this.config = config;
+    }
+
+    public Builder constLabels(Labels constLabels) {
+      this.constLabels = constLabels;
+      return this;
     }
 
     /** Package private. For testing only. */
@@ -101,7 +113,7 @@ public class JvmGarbageCollectorMetrics {
       if (garbageCollectorBeans == null) {
         garbageCollectorBeans = ManagementFactory.getGarbageCollectorMXBeans();
       }
-      new JvmGarbageCollectorMetrics(garbageCollectorBeans, config).register(registry);
+      new JvmGarbageCollectorMetrics(garbageCollectorBeans, config, constLabels).register(registry);
     }
   }
 }
