@@ -1,0 +1,45 @@
+---
+name: Multi-Version Compatibility Tests
+
+on: [pull_request]
+
+permissions: {}
+
+jobs:
+  compatibility-test:
+    name: Test on Java ${{ matrix.java }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [11, 17, 21, 25]
+    steps:
+      - name: Check out
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Java ${{ matrix.java }}
+        id: setup-java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
+
+      - name: Cache local Maven repository
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-java${{ matrix.java }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-java${{ matrix.java }}-
+            ${{ runner.os }}-maven-
+
+      - name: Build and test on Java ${{ matrix.java }}
+        run: |
+          if [ "${{ matrix.java }}" = "11" ]; then
+            echo "Building on Java 11 - excluding integration-tests module (GraalVM plugin requires Java 17+)"
+            ./mvnw clean install -Dtest.java.version=11 -pl '!integration-tests'
+          else
+            ./mvnw clean install -Dtest.java.version=${{ matrix.java }}
+          fi

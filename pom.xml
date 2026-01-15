@@ -28,6 +28,7 @@
     <junit-jupiter.version>6.0.1</junit-jupiter.version>
     <otel.instrumentation.version>2.16.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
+    <test.java.version>25</test.java.version>
     <jacoco.line-coverage>0.70</jacoco.line-coverage>
     <checkstyle.skip>false</checkstyle.skip>
     <coverage.skip>false</coverage.skip>
@@ -252,9 +253,9 @@
           <release>${java.version}</release>
           <source>${java.version}</source>
           <target>${java.version}</target>
-          <testRelease>25</testRelease>
-          <testSource>25</testSource>
-          <testTarget>25</testTarget>
+          <testRelease>${test.java.version}</testRelease>
+          <testSource>${test.java.version}</testSource>
+          <testTarget>${test.java.version}</testTarget>
           <showWarnings>true</showWarnings>
           <compilerArgs>
             <arg>-Xlint:all,-serial,-processing,-options</arg>
