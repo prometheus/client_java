@@ -276,6 +276,31 @@
     </plugins>
   </build>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit-jupiter.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+        <version>${otel.instrumentation.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-proto</artifactId>
+        <version>1.7.1-alpha</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <reporting>
     <plugins>
       <plugin>
@@ -315,30 +340,6 @@
         <module>benchmarks</module>
         <module>integration-tests</module>
       </modules>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit</groupId>
-            <artifactId>junit-bom</artifactId>
-            <version>${junit-jupiter.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-          </dependency>
-          <dependency>
-            <groupId>io.opentelemetry.instrumentation</groupId>
-            <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
-            <version>${otel.instrumentation.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-          </dependency>
-          <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-proto</artifactId>
-            <version>1.7.1-alpha</version>
-            <scope>test</scope>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
       <dependencies>
         <!-- test dependencies -->
         <dependency>
