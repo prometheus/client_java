@@ -12,6 +12,7 @@ import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -45,7 +46,7 @@ public class HTTPServerTest {
     HttpHandler handler =
         exchange -> {
           boolean found = false;
-          Subject current = Subject.current();
+          Subject current = getCurrentSubject();
           for (Principal p : current.getPrincipals()) {
             if (user.equals(p.getName())) {
               found = true;
@@ -185,5 +186,28 @@ public class HTTPServerTest {
             .buildAndStart(),
         "204",
         "/-/healthy");
+  }
+
+  /**
+   * Get current Subject using reflection to support both Java 17 and Java 18+.
+   *
+   * <p>Java 18+ has Subject.current(), but Java 17 and earlier require
+   * Subject.getSubject(AccessController.getContext()).
+   */
+  @SuppressWarnings({"removal"})
+  private static Subject getCurrentSubject() {
+    try {
+      Method currentMethod = Subject.class.getMethod("current");
+      return (Subject) currentMethod.invoke(null);
+    } catch (NoSuchMethodException e) {
+      // Fall back to pre-Java 18 API
+      try {
+        return Subject.getSubject(java.security.AccessController.getContext());
+      } catch (Exception ex) {
+        throw new RuntimeException("Failed to get current Subject", ex);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to invoke Subject.current()", e);
+    }
   }
 }
