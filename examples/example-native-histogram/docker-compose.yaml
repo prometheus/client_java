@@ -1,7 +1,7 @@
 version: "3"
 services:
   example-application:
-    image: eclipse-temurin:25.0.1_8-jre@sha256:968f1917fcfa8250e72c39c68118798a5c86923a709c174578179b318f9033e6
+    image: eclipse-temurin:25.0.1_8-jre@sha256:96bccca442e8842a7366df338f5960e3342862ea6b8d42b97009a3dfd8602547
     network_mode: host
     volumes:
       - ./target/example-native-histogram.jar:/example-native-histogram.jar
