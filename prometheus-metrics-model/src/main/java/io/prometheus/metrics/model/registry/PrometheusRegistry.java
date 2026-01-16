@@ -1,12 +1,8 @@
 package io.prometheus.metrics.model.registry;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
-
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -15,52 +11,28 @@ public class PrometheusRegistry {
 
   public static final PrometheusRegistry defaultRegistry = new PrometheusRegistry();
 
-  private final Set<String> prometheusNames = ConcurrentHashMap.newKeySet();
   private final List<Collector> collectors = new CopyOnWriteArrayList<>();
   private final List<MultiCollector> multiCollectors = new CopyOnWriteArrayList<>();
 
   public void register(Collector collector) {
-    String prometheusName = collector.getPrometheusName();
-    if (prometheusName != null) {
-      if (!prometheusNames.add(prometheusName)) {
-        throw new IllegalStateException(
-            "Can't register "
-                + prometheusName
-                + " because a metric with that name is already registered.");
-      }
-    }
     collectors.add(collector);
   }
 
   public void register(MultiCollector collector) {
-    for (String prometheusName : collector.getPrometheusNames()) {
-      if (!prometheusNames.add(prometheusName)) {
-        throw new IllegalStateException(
-            "Can't register " + prometheusName + " because that name is already registered.");
-      }
-    }
     multiCollectors.add(collector);
   }
 
   public void unregister(Collector collector) {
     collectors.remove(collector);
-    String prometheusName = collector.getPrometheusName();
-    if (prometheusName != null) {
-      prometheusNames.remove(collector.getPrometheusName());
-    }
   }
 
   public void unregister(MultiCollector collector) {
     multiCollectors.remove(collector);
-    for (String prometheusName : collector.getPrometheusNames()) {
-      prometheusNames.remove(prometheusName(prometheusName));
-    }
   }
 
   public void clear() {
     collectors.clear();
     multiCollectors.clear();
-    prometheusNames.clear();
   }
 
   public MetricSnapshots scrape() {
@@ -73,10 +45,6 @@ public class PrometheusRegistry {
       MetricSnapshot snapshot =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
       if (snapshot != null) {
-        if (result.containsMetricName(snapshot.getMetadata().getName())) {
-          throw new IllegalStateException(
-              snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
-        }
         result.metricSnapshot(snapshot);
       }
     }
@@ -84,10 +52,6 @@ public class PrometheusRegistry {
       MetricSnapshots snapshots =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
       for (MetricSnapshot snapshot : snapshots) {
-        if (result.containsMetricName(snapshot.getMetadata().getName())) {
-          throw new IllegalStateException(
-              snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
-        }
         result.metricSnapshot(snapshot);
       }
     }

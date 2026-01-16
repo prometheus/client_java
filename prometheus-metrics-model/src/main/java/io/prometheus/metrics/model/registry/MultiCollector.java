@@ -52,17 +52,12 @@ public interface MultiCollector {
   }
 
   /**
-   * This is called in two places:
+   * This is called during scrape to check if this collector can be skipped because a name filter is
+   * present and the metric name is excluded.
    *
-   * <ol>
-   *   <li>During registration to check if a metric with that name already exists.
-   *   <li>During scrape to check if the collector can be skipped because a name filter is present
-   *       and all names are excluded.
-   * </ol>
-   *
-   * Returning an empty list means checks are omitted (registration metric always succeeds), and the
-   * collector is always scraped (if a name filter is present and all names are excluded the result
-   * is dropped).
+   * <p>Returning an empty list means checks are omitted (registration metric always succeeds), and
+   * the collector is always scraped (if a name filter is present and all names are excluded the
+   * result is dropped).
    *
    * <p>If your collector returns a constant list of metrics that have names that do not change at
    * runtime it is a good idea to overwrite this and return the names.
