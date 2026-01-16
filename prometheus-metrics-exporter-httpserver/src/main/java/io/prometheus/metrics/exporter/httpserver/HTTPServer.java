@@ -66,11 +66,13 @@ public class HTTPServer implements Closeable {
     this.server = httpServer;
     this.executorService = executorService;
     String metricsPath = getMetricsPath(metricsHandlerPath);
-    registerHandler(
-        "/",
-        defaultHandler == null ? new DefaultHandler(metricsPath) : defaultHandler,
-        authenticator,
-        authenticatedSubjectAttributeName);
+    if (!metricsPath.equals("/")) {
+      registerHandler(
+          "/",
+          defaultHandler == null ? new DefaultHandler(metricsPath) : defaultHandler,
+          authenticator,
+          authenticatedSubjectAttributeName);
+    }
     registerHandler(
         metricsPath,
         new MetricsHandler(config, registry),
