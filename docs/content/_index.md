@@ -30,7 +30,7 @@ synchronization. See Javadoc comments in
 **More Info**
 
 The Grafana Labs Blog has a post
-[Introducing the Prometheus Java Client 1.0.0](https://grafana.com/blog/2023/09/27/introducing-the-prometheus-java-client-1.0.0/) <!-- editorconfig-checker-disable-line -->
+[Introducing the Prometheus Java Client 1.0.0](https://grafana.com/blog/2023/09/27/introducing-the-prometheus-java-client-1-0-0/) <!-- editorconfig-checker-disable-line -->
 with a good overview of the release.
 
 There will also be a presentation at the [PromCon](https://promcon.io) conference on 29 Sep 2023.
