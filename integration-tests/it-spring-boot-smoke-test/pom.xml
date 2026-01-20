@@ -21,7 +21,7 @@
     Spring Smoke Tests
   </description>
   <properties>
-    <java.version>${test.java.version}</java.version>
+    <java.version>25</java.version>
     <junit-jupiter.version>6.0.2</junit-jupiter.version>
   </properties>
 
