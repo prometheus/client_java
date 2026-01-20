@@ -24,10 +24,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
         with:
-          version: v2026.1.1
-          sha256: 986e4630dfdfaae41d09c0317507e252c7403d72839fc66844b534c120a3dc57
+          version: v2026.1.4
+          sha256: 79c798e39b83f0dd80108eaa88c6ca63689695ae975fd6786e7a353ef9f87002
           cache: false
 
       - name: Build release version
