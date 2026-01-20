@@ -2,9 +2,14 @@ package io.prometheus.metrics.model.registry;
 
 import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
 
+import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -55,10 +60,6 @@ public class PrometheusRegistry {
   }
 
   public void register(Collector collector) {
-    if (collectors.contains(collector)) {
-      return;
-    }
-
     String prometheusName = collector.getPrometheusName();
     MetricType metricType = collector.getMetricType();
     Set<String> labelNames = collector.getLabelNames();
@@ -102,10 +103,6 @@ public class PrometheusRegistry {
   }
 
   public void register(MultiCollector collector) {
-    if (multiCollectors.contains(collector)) {
-      return;
-    }
-
     List<String> names = collector.getPrometheusNames();
 
     for (String prometheusName : names) {
@@ -200,28 +197,28 @@ public class PrometheusRegistry {
   }
 
   public MetricSnapshots scrape(@Nullable PrometheusScrapeRequest scrapeRequest) {
-    MetricSnapshots.Builder result = MetricSnapshots.builder();
+    List<MetricSnapshot> allSnapshots = new ArrayList<>();
     for (Collector collector : collectors) {
       MetricSnapshot snapshot =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
       if (snapshot != null) {
-        if (result.containsMetricName(snapshot.getMetadata().getName())) {
-          throw new IllegalStateException(
-              snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
-        }
-        result.metricSnapshot(snapshot);
+        allSnapshots.add(snapshot);
       }
     }
     for (MultiCollector collector : multiCollectors) {
       MetricSnapshots snapshots =
           scrapeRequest == null ? collector.collect() : collector.collect(scrapeRequest);
       for (MetricSnapshot snapshot : snapshots) {
-        if (result.containsMetricName(snapshot.getMetadata().getName())) {
-          throw new IllegalStateException(
-              snapshot.getMetadata().getPrometheusName() + ": duplicate metric name.");
-        }
-        result.metricSnapshot(snapshot);
+        allSnapshots.add(snapshot);
       }
+    }
+
+    // Validate no duplicate label schemas for same metric name
+    validateNoDuplicateLabelSchemas(allSnapshots);
+
+    MetricSnapshots.Builder result = MetricSnapshots.builder();
+    for (MetricSnapshot snapshot : allSnapshots) {
+      result.metricSnapshot(snapshot);
     }
     return result.build();
   }
@@ -279,5 +276,75 @@ public class PrometheusRegistry {
       }
     }
     return result.build();
+  }
+
+  /**
+   * Validates that snapshots with the same metric name don't have identical label schemas. This
+   * prevents duplicate time series which would occur if two snapshots produce data points with
+   * identical label sets.
+   */
+  private void validateNoDuplicateLabelSchemas(List<MetricSnapshot> snapshots) {
+    // Group snapshots by prometheus name
+    Map<String, List<MetricSnapshot>> snapshotsByName = new HashMap<>();
+    for (MetricSnapshot snapshot : snapshots) {
+      String name = snapshot.getMetadata().getPrometheusName();
+      snapshotsByName.computeIfAbsent(name, k -> new ArrayList<>()).add(snapshot);
+    }
+
+    // For each group with the same name, check for duplicate label schemas
+    for (Map.Entry<String, List<MetricSnapshot>> entry : snapshotsByName.entrySet()) {
+      List<MetricSnapshot> group = entry.getValue();
+      if (group.size() <= 1) {
+        continue; // No duplicates possible with only one snapshot
+      }
+
+      // Extract label schemas from each snapshot
+      List<Set<String>> labelSchemas = new ArrayList<>();
+      for (MetricSnapshot snapshot : group) {
+        Set<String> labelSchema = extractLabelSchema(snapshot);
+        if (labelSchema != null) {
+          // Check if this label schema already exists
+          if (labelSchemas.contains(labelSchema)) {
+            throw new IllegalStateException(
+                snapshot.getMetadata().getPrometheusName()
+                    + ": duplicate metric name with identical label schema "
+                    + labelSchema);
+          }
+          labelSchemas.add(labelSchema);
+        }
+      }
+    }
+  }
+
+  /**
+   * Extracts the label schema (set of label names) from a snapshot's data points. Returns null if
+   * the snapshot has no data points or if data points have inconsistent label schemas.
+   */
+  private Set<String> extractLabelSchema(MetricSnapshot snapshot) {
+    if (snapshot.getDataPoints().isEmpty()) {
+      return null;
+    }
+
+    // Get label names from the first data point
+    DataPointSnapshot firstDataPoint = snapshot.getDataPoints().get(0);
+    Set<String> labelNames = new HashSet<>();
+    for (int i = 0; i < firstDataPoint.getLabels().size(); i++) {
+      labelNames.add(firstDataPoint.getLabels().getName(i));
+    }
+
+    // Verify all data points have the same label schema
+    for (DataPointSnapshot dataPoint : snapshot.getDataPoints()) {
+      Set<String> currentLabelNames = new HashSet<>();
+      for (int i = 0; i < dataPoint.getLabels().size(); i++) {
+        currentLabelNames.add(dataPoint.getLabels().getName(i));
+      }
+      if (!currentLabelNames.equals(labelNames)) {
+        // Data points have inconsistent label schemas - this is unusual but valid
+        // We can't determine a single label schema, so return null
+        return null;
+      }
+    }
+
+    return labelNames;
   }
 }

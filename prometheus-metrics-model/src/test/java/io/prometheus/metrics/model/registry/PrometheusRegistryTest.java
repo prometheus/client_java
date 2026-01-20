@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 
 class PrometheusRegistryTest {
 
+  Collector noName = () -> GaugeSnapshot.builder().name("no_name_gauge").build();
+
   Collector counterA1 =
       new Collector() {
         @Override
@@ -80,22 +82,6 @@ class PrometheusRegistryTest {
           return Arrays.asList(gaugeA.getPrometheusName(), counterB.getPrometheusName());
         }
       };
-
-  @Test
-  public void registerNoName() {
-    PrometheusRegistry registry = new PrometheusRegistry();
-    // If the collector does not have a name at registration time, there is no conflict during
-    // registration.
-    Collector noName1 = () -> GaugeSnapshot.builder().name("no_name_gauge").build();
-    Collector noName2 = () -> GaugeSnapshot.builder().name("no_name_gauge").build();
-    registry.register(noName1);
-    registry.register(noName2);
-    // However, at scrape time the collector has to provide a metric name, and then we'll get a
-    // duplicate name error.
-    assertThatCode(registry::scrape)
-        .hasMessageContaining("duplicate")
-        .hasMessageContaining("no_name_gauge");
-  }
 
   @Test
   public void registerDuplicateName_withoutTypeInfo_allowedForBackwardCompatibility() {

@@ -28,23 +28,10 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    * #builder()}.
    *
    * @param snapshots the constructor creates a sorted copy of snapshots.
-   * @throws IllegalArgumentException if snapshots contains duplicate metric names. To avoid
-   *     duplicate metric names use {@link #builder()} and check {@link
-   *     Builder#containsMetricName(String)} before calling {@link
-   *     Builder#metricSnapshot(MetricSnapshot)}.
    */
   public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
     List<MetricSnapshot> list = new ArrayList<>(snapshots);
     list.sort(comparing(s -> s.getMetadata().getPrometheusName()));
-    for (int i = 0; i < snapshots.size() - 1; i++) {
-      if (list.get(i)
-          .getMetadata()
-          .getPrometheusName()
-          .equals(list.get(i + 1).getMetadata().getPrometheusName())) {
-        throw new IllegalArgumentException(
-            list.get(i).getMetadata().getPrometheusName() + ": duplicate metric name");
-      }
-    }
     this.snapshots = unmodifiableList(list);
   }
 
