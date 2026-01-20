@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,6 +53,11 @@ public class GaugeWithCallback extends CallbackMetric {
               new GaugeSnapshot.GaugeDataPointSnapshot(value, makeLabels(labelValues), null, 0L));
         });
     return new GaugeSnapshot(getMetadata(), dataPoints);
+  }
+
+  @Override
+  public MetricType getMetricType() {
+    return MetricType.GAUGE;
   }
 
   public static Builder builder() {

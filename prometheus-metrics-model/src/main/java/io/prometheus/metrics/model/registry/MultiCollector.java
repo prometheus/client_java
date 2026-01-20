@@ -4,6 +4,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
@@ -69,5 +70,39 @@ public interface MultiCollector {
    */
   default List<String> getPrometheusNames() {
     return Collections.emptyList();
+  }
+
+  /**
+   * Returns the metric type for the given Prometheus name.
+   *
+   * <p>This is used for per-name type validation during registration. Returning {@code null} means
+   * type validation is skipped for that specific metric name.
+   *
+   * @param prometheusName the Prometheus metric name
+   * @return the metric type for the given name, or {@code null} to skip validation
+   */
+  @Nullable
+  default MetricType getMetricType(String prometheusName) {
+    return null;
+  }
+
+  /**
+   * Returns the complete set of label names for the given Prometheus name.
+   *
+   * <p>This includes both dynamic label names and constant label names. Label names are normalized
+   * using Prometheus naming conventions (dots converted to underscores).
+   *
+   * <p>This is used for per-name label schema validation during registration. Two collectors with
+   * the same name and type can coexist if they have different label name sets.
+   *
+   * <p>Returning {@code null} means label schema validation is skipped for that specific metric
+   * name.
+   *
+   * @param prometheusName the Prometheus metric name
+   * @return the set of all label names for the given name, or {@code null} to skip validation
+   */
+  @Nullable
+  default Set<String> getLabelNames(String prometheusName) {
+    return null;
   }
 }

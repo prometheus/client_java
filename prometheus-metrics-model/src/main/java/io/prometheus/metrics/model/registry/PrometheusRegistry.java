@@ -18,27 +18,133 @@ public class PrometheusRegistry {
   private final Set<String> prometheusNames = ConcurrentHashMap.newKeySet();
   private final List<Collector> collectors = new CopyOnWriteArrayList<>();
   private final List<MultiCollector> multiCollectors = new CopyOnWriteArrayList<>();
+  private final ConcurrentHashMap<String, RegistrationInfo> registered = new ConcurrentHashMap<>();
 
-  public void register(Collector collector) {
-    String prometheusName = collector.getPrometheusName();
-    if (prometheusName != null) {
-      if (!prometheusNames.add(prometheusName)) {
-        throw new IllegalStateException(
-            "Can't register "
-                + prometheusName
-                + " because a metric with that name is already registered.");
+  /**
+   * Tracks registration information for each metric name to enable validation of type consistency
+   * and label schema uniqueness.
+   */
+  private static class RegistrationInfo {
+    private final MetricType type;
+    private final Set<Set<String>> labelSets;
+
+    RegistrationInfo(MetricType type, @Nullable Set<String> labelNames) {
+      this.type = type;
+      this.labelSets = ConcurrentHashMap.newKeySet();
+      if (labelNames != null) {
+        this.labelSets.add(labelNames);
       }
     }
+
+    /**
+     * Adds a new label schema to this registration.
+     *
+     * @param labelNames the label names to add
+     * @return true if the label schema was added, false if it already exists
+     */
+    boolean addLabelSet(@Nullable Set<String> labelNames) {
+      if (labelNames == null) {
+        return true;
+      }
+      return labelSets.add(labelNames);
+    }
+
+    MetricType getType() {
+      return type;
+    }
+  }
+
+  public void register(Collector collector) {
+    if (collectors.contains(collector)) {
+      return;
+    }
+
+    String prometheusName = collector.getPrometheusName();
+    MetricType metricType = collector.getMetricType();
+    Set<String> labelNames = collector.getLabelNames();
+
+    if (prometheusName != null && metricType != null) {
+      registered.compute(
+          prometheusName,
+          (name, existingInfo) -> {
+            if (existingInfo == null) {
+              return new RegistrationInfo(metricType, labelNames);
+            } else {
+              if (existingInfo.getType() != metricType) {
+                throw new IllegalArgumentException(
+                    prometheusName
+                        + ": Conflicting metric types. Existing: "
+                        + existingInfo.getType()
+                        + ", new: "
+                        + metricType);
+              }
+
+              // Check label schema uniqueness (if label names provided)
+              if (labelNames != null) {
+                if (!existingInfo.addLabelSet(labelNames)) {
+                  throw new IllegalArgumentException(
+                      prometheusName
+                          + ": Duplicate label schema. A metric with the same name, type, and label"
+                          + " names is already registered.");
+                }
+              }
+
+              return existingInfo;
+            }
+          });
+    }
+
+    if (prometheusName != null) {
+      prometheusNames.add(prometheusName);
+    }
+
     collectors.add(collector);
   }
 
   public void register(MultiCollector collector) {
-    for (String prometheusName : collector.getPrometheusNames()) {
-      if (!prometheusNames.add(prometheusName)) {
-        throw new IllegalStateException(
-            "Can't register " + prometheusName + " because that name is already registered.");
-      }
+    if (multiCollectors.contains(collector)) {
+      return;
     }
+
+    List<String> names = collector.getPrometheusNames();
+
+    for (String prometheusName : names) {
+      MetricType metricType = collector.getMetricType(prometheusName);
+      Set<String> labelNames = collector.getLabelNames(prometheusName);
+
+      if (metricType != null) {
+        registered.compute(
+            prometheusName,
+            (name, existingInfo) -> {
+              if (existingInfo == null) {
+                return new RegistrationInfo(metricType, labelNames);
+              } else {
+                if (existingInfo.getType() != metricType) {
+                  throw new IllegalArgumentException(
+                      prometheusName
+                          + ": Conflicting metric types. Existing: "
+                          + existingInfo.getType()
+                          + ", new: "
+                          + metricType);
+                }
+
+                if (labelNames != null) {
+                  if (!existingInfo.addLabelSet(labelNames)) {
+                    throw new IllegalArgumentException(
+                        prometheusName
+                            + ": Duplicate label schema. A metric with the same name, type, and"
+                            + " label names is already registered.");
+                  }
+                }
+
+                return existingInfo;
+              }
+            });
+      }
+
+      prometheusNames.add(prometheusName);
+    }
+
     multiCollectors.add(collector);
   }
 
@@ -46,14 +152,39 @@ public class PrometheusRegistry {
     collectors.remove(collector);
     String prometheusName = collector.getPrometheusName();
     if (prometheusName != null) {
-      prometheusNames.remove(collector.getPrometheusName());
+      // Check if any other collectors are still using this name
+      nameInUse(prometheusName);
     }
   }
 
   public void unregister(MultiCollector collector) {
     multiCollectors.remove(collector);
     for (String prometheusName : collector.getPrometheusNames()) {
-      prometheusNames.remove(prometheusName(prometheusName));
+      // Check if any other collectors are still using this name
+      nameInUse(prometheusName);
+    }
+  }
+
+  private void nameInUse(String prometheusName) {
+    boolean nameStillInUse = false;
+    for (Collector c : collectors) {
+      if (prometheusName.equals(c.getPrometheusName())) {
+        nameStillInUse = true;
+        break;
+      }
+    }
+    if (!nameStillInUse) {
+      for (MultiCollector mc : multiCollectors) {
+        if (mc.getPrometheusNames().contains(prometheusName)) {
+          nameStillInUse = true;
+          break;
+        }
+      }
+    }
+    if (!nameStillInUse) {
+      prometheusNames.remove(prometheusName);
+      // Also remove from registered since no collectors use this name anymore
+      registered.remove(prometheusName);
     }
   }
 
@@ -61,6 +192,7 @@ public class PrometheusRegistry {
     collectors.clear();
     multiCollectors.clear();
     prometheusNames.clear();
+    registered.clear();
   }
 
   public MetricSnapshots scrape() {
