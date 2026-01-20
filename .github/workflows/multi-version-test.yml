@@ -23,7 +23,7 @@ jobs:
         id: setup-java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: ${{ matrix.java }}
 
       - name: Cache local Maven repository
