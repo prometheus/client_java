@@ -85,8 +85,8 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
-          <compilerArgs>
-            <!-- need to add parameters to prevent inheritance -->
+          <compilerArgs combine.self="override">
+            <!-- Override parent to prevent ErrorProne inheritance -->
             <arg>-parameters</arg>
           </compilerArgs>
           <annotationProcessorPaths>
