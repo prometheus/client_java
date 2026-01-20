@@ -331,15 +331,10 @@
 
   <profiles>
     <profile>
-      <id>default</id>
+      <id>test-dependencies</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
-      <modules>
-        <module>examples</module>
-        <module>benchmarks</module>
-        <module>integration-tests</module>
-      </modules>
       <dependencies>
         <!-- test dependencies -->
         <dependency>
@@ -403,6 +398,17 @@
           </exclusions>
         </dependency>
       </dependencies>
+    </profile>
+    <profile>
+      <id>examples-and-integration-tests</id>
+      <activation>
+        <jdk>[25,)</jdk>
+      </activation>
+      <modules>
+        <module>examples</module>
+        <module>benchmarks</module>
+        <module>integration-tests</module>
+      </modules>
     </profile>
     <profile>
       <id>javadoc</id>
