@@ -441,6 +441,7 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
               <compilerArgs combine.children="append">
+                <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
                 <arg>
                   -Xplugin:ErrorProne
                   -Xep:AlmostJavadoc:OFF
