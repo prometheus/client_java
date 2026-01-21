@@ -11,7 +11,7 @@ max_line_length = 200
 max_line_length = 300
 
 [pom.xml]
-max_line_length = 110
+max_line_length = 120
 
 [*.py]
 # checked by black
