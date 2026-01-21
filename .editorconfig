@@ -18,5 +18,5 @@ max_line_length = 120
 indent_size = 4
 max_line_length = 120
 
-[.mise/tasks/build-release.sh]
+[{.mise/tasks/build-release.sh,.github/workflows/multi-version-test.yml}]
 max_line_length = 200
