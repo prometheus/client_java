@@ -10,16 +10,18 @@ import java.io.IOException;
 public class DuplicateMetricsSample {
 
   public static void main(String[] args) throws IOException, InterruptedException {
-    if (args.length != 1) {
-      System.err.println("Usage: java -jar duplicate-metrics-sample.jar <port>");
+    if (args.length != 2) {
+      System.err.println("Usage: java -jar duplicate-metrics-sample.jar <port> <outcome>");
+      System.err.println("Where outcome is \"success\" or \"error\".");
       System.exit(1);
     }
 
     int port = parsePortOrExit(args[0]);
-    run(port);
+    String outcome = args[1];
+    run(port, outcome);
   }
 
-  private static void run(int port) throws IOException, InterruptedException {
+  private static void run(int port, String outcome) throws IOException, InterruptedException {
     // Register multiple counters with the same Prometheus name "http_requests_total"
     // but different label sets
     Counter requestsSuccess =

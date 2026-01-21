@@ -1,7 +1,5 @@
 package io.prometheus.metrics.model.registry;
 
-import static io.prometheus.metrics.model.snapshots.PrometheusNaming.prometheusName;
-
 import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -60,7 +58,6 @@ public class PrometheusRegistry {
   }
 
   public void register(Collector collector) {
-    // Check if this exact instance is already registered
     if (collectors.contains(collector)) {
       throw new IllegalArgumentException("Collector instance is already registered");
     }
@@ -108,7 +105,6 @@ public class PrometheusRegistry {
   }
 
   public void register(MultiCollector collector) {
-    // Check if this exact instance is already registered
     if (multiCollectors.contains(collector)) {
       throw new IllegalArgumentException("MultiCollector instance is already registered");
     }
@@ -223,7 +219,6 @@ public class PrometheusRegistry {
       }
     }
 
-    // Validate no duplicate label schemas for same metric name
     validateNoDuplicateLabelSchemas(allSnapshots);
 
     MetricSnapshots.Builder result = MetricSnapshots.builder();
@@ -341,7 +336,6 @@ public class PrometheusRegistry {
       labelNames.add(firstDataPoint.getLabels().getName(i));
     }
 
-    // Verify all data points have the same label schema
     for (DataPointSnapshot dataPoint : snapshot.getDataPoints()) {
       Set<String> currentLabelNames = new HashSet<>();
       for (int i = 0; i < dataPoint.getLabels().size(); i++) {

@@ -26,11 +26,6 @@ class DuplicateMetricsIT extends ExporterTest {
     super("exporter-duplicate-metrics-sample");
   }
 
-  @Override
-  protected void start(String outcome) {
-    sampleAppContainer.withCommand("java", "-jar", "/app/" + sampleApp + ".jar", "9400").start();
-  }
-
   @Test
   void testDuplicateMetricsInPrometheusTextFormat() throws IOException {
     start();
