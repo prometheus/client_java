@@ -19,12 +19,19 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Java ${{ matrix.java }}
-        id: setup-java
-        uses: actions/setup-java@v4
+      - name: Set up Java ${{ matrix.java }} for testing
+        id: setup-test-java
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
         with:
           distribution: "temurin"
           java-version: ${{ matrix.java }}
+
+      - name: Set up Java 25 for Maven
+        id: setup-build-java
+        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
+        with:
+          distribution: "temurin"
+          java-version: "25"
 
       - name: Cache local Maven repository
         uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
@@ -38,7 +45,7 @@ jobs:
       - name: Build and test on Java ${{ matrix.java }}
         run: >-
           ./mvnw clean install
-          -Dtest.java.version=${{ matrix.java }}
+          -Djvm=${{ steps.setup-test-java.outputs.path }}/bin/java
           -Dspotless.skip=true
           -Dcheckstyle.skip=true
           -Dwarnings=-nowarn
