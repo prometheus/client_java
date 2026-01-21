@@ -312,6 +312,7 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
+          <!-- For Java 9+, use release flag. For Java 8, this will be overridden by java8-11 profile -->
           <release>${java.version}</release>
           <source>${java.version}</source>
           <target>${java.version}</target>
@@ -431,6 +432,28 @@
       <properties>
         <junit-jupiter.version>${junit-jupiter.version.java8}</junit-jupiter.version>
       </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <!-- Java 8 doesn't support release flag, use source/target instead -->
+              <!-- Note: release is set but will be ignored by Java 8 compiler -->
+              <source>${java.version}</source>
+              <target>${java.version}</target>
+              <testSource>${test.java.version}</testSource>
+              <testTarget>${test.java.version}</testTarget>
+              <showWarnings>true</showWarnings>
+              <compilerArgs>
+                <arg>-Xlint:all,-serial,-processing,-options</arg>
+                <arg>${warnings}</arg>
+                <!-- Java 8 doesn't support should-stop flag -->
+                <arg>-XDcompilePolicy=simple</arg>
+              </compilerArgs>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
     <profile>
       <id>errorprone</id>
