@@ -11,28 +11,33 @@ class ExemplarsPropertiesTest {
 
   @Test
   void load() {
-    ExemplarsProperties properties =
-        load(
-            Map.of(
-                "io.prometheus.exemplars.minRetentionPeriodSeconds", "1",
-                "io.prometheus.exemplars.maxRetentionPeriodSeconds", "2",
-                "io.prometheus.exemplars.sampleIntervalMilliseconds", "3"));
+    Map<String, String> props1 = new HashMap<>();
+    props1.put("io.prometheus.exemplars.minRetentionPeriodSeconds", "1");
+    props1.put("io.prometheus.exemplars.maxRetentionPeriodSeconds", "2");
+    props1.put("io.prometheus.exemplars.sampleIntervalMilliseconds", "3");
+    ExemplarsProperties properties = load(props1);
     assertThat(properties.getMinRetentionPeriodSeconds()).isOne();
     assertThat(properties.getMaxRetentionPeriodSeconds()).isEqualTo(2);
     assertThat(properties.getSampleIntervalMilliseconds()).isEqualTo(3);
 
+    Map<String, String> props2 = new HashMap<>();
+    props2.put("io.prometheus.exemplars.minRetentionPeriodSeconds", "-1");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> load(Map.of("io.prometheus.exemplars.minRetentionPeriodSeconds", "-1")))
+        .isThrownBy(() -> load(props2))
         .withMessage(
             "io.prometheus.exemplars.minRetentionPeriodSeconds: Expecting value > 0. Found: -1");
 
+    Map<String, String> props3 = new HashMap<>();
+    props3.put("io.prometheus.exemplars.maxRetentionPeriodSeconds", "0");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> load(Map.of("io.prometheus.exemplars.maxRetentionPeriodSeconds", "0")))
+        .isThrownBy(() -> load(props3))
         .withMessage(
             "io.prometheus.exemplars.maxRetentionPeriodSeconds: Expecting value > 0. Found: 0");
 
+    Map<String, String> props4 = new HashMap<>();
+    props4.put("io.prometheus.exemplars.sampleIntervalMilliseconds", "-1");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> load(Map.of("io.prometheus.exemplars.sampleIntervalMilliseconds", "-1")))
+        .isThrownBy(() -> load(props4))
         .withMessage(
             "io.prometheus.exemplars.sampleIntervalMilliseconds: Expecting value > 0. Found: -1");
   }

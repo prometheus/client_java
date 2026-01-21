@@ -10,13 +10,12 @@ class ExporterFilterPropertiesTest {
 
   @Test
   void load() {
-    ExporterFilterProperties properties =
-        load(
-            Map.of(
-                "io.prometheus.exporter.filter.metricNameMustBeEqualTo", "a,b,c",
-                "io.prometheus.exporter.filter.metricNameMustNotBeEqualTo", "d,e,f",
-                "io.prometheus.exporter.filter.metricNameMustStartWith", "g,h,i",
-                "io.prometheus.exporter.filter.metricNameMustNotStartWith", "j,k,l"));
+    Map<String, String> props = new HashMap<>();
+    props.put("io.prometheus.exporter.filter.metricNameMustBeEqualTo", "a,b,c");
+    props.put("io.prometheus.exporter.filter.metricNameMustNotBeEqualTo", "d,e,f");
+    props.put("io.prometheus.exporter.filter.metricNameMustStartWith", "g,h,i");
+    props.put("io.prometheus.exporter.filter.metricNameMustNotStartWith", "j,k,l");
+    ExporterFilterProperties properties = load(props);
     assertThat(properties.getAllowedMetricNames()).containsExactly("a", "b", "c");
     assertThat(properties.getExcludedMetricNames()).containsExactly("d", "e", "f");
     assertThat(properties.getAllowedMetricNamePrefixes()).containsExactly("g", "h", "i");

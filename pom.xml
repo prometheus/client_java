@@ -26,6 +26,7 @@
     <protobuf-java.version>4.33.4</protobuf-java.version>
     <guava.version>33.5.0-jre</guava.version>
     <junit-jupiter.version>6.0.2</junit-jupiter.version>
+    <junit-jupiter.version.java8>5.9.3</junit-jupiter.version.java8>
     <otel.instrumentation.version>2.16.0-alpha</otel.instrumentation.version>
     <java.version>8</java.version>
     <test.java.version>25</test.java.version>
@@ -69,6 +70,67 @@
       <artifactId>jsr305</artifactId>
       <version>3.0.2</version>
       <scope>provided</scope>
+    </dependency>
+    <!-- test dependencies - moved from profile to be always available -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>5.21.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.27.6</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>${guava.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>2.0.17</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit-pioneer</groupId>
+      <artifactId>junit-pioneer</artifactId>
+      <version>2.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>4.3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock</artifactId>
+      <version>3.13.2</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
@@ -340,69 +402,6 @@
         <module>benchmarks</module>
         <module>integration-tests</module>
       </modules>
-      <dependencies>
-        <!-- test dependencies -->
-        <dependency>
-          <groupId>org.junit.jupiter</groupId>
-          <artifactId>junit-jupiter</artifactId>
-          <version>${junit-jupiter.version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.junit.jupiter</groupId>
-          <artifactId>junit-jupiter-params</artifactId>
-          <version>${junit-jupiter.version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-core</artifactId>
-          <version>5.21.0</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.assertj</groupId>
-          <artifactId>assertj-core</artifactId>
-          <version>3.27.6</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-          <version>${guava.version}</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-simple</artifactId>
-          <version>2.0.17</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.junit-pioneer</groupId>
-          <artifactId>junit-pioneer</artifactId>
-          <version>2.3.0</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.awaitility</groupId>
-          <artifactId>awaitility</artifactId>
-          <version>4.3.0</version>
-          <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.wiremock</groupId>
-          <artifactId>wiremock</artifactId>
-          <version>3.13.2</version>
-          <scope>test</scope>
-          <exclusions>
-            <exclusion>
-              <groupId>org.hamcrest</groupId>
-              <artifactId>hamcrest-core</artifactId>
-            </exclusion>
-          </exclusions>
-        </dependency>
-      </dependencies>
     </profile>
     <profile>
       <id>javadoc</id>
@@ -423,6 +422,15 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>java8-11</id>
+      <activation>
+        <jdk>[1.8,12)</jdk>
+      </activation>
+      <properties>
+        <junit-jupiter.version>${junit-jupiter.version.java8}</junit-jupiter.version>
+      </properties>
     </profile>
     <profile>
       <id>errorprone</id>

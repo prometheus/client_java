@@ -12,19 +12,20 @@ class ExporterPushgatewayPropertiesTest {
 
   @Test
   void load() {
-    ExporterPushgatewayProperties properties =
-        load(
-            Map.of(
-                "io.prometheus.exporter.pushgateway.address", "http://localhost",
-                "io.prometheus.exporter.pushgateway.job", "job",
-                "io.prometheus.exporter.pushgateway.scheme", "http"));
+    Map<String, String> props1 = new HashMap<>();
+    props1.put("io.prometheus.exporter.pushgateway.address", "http://localhost");
+    props1.put("io.prometheus.exporter.pushgateway.job", "job");
+    props1.put("io.prometheus.exporter.pushgateway.scheme", "http");
+    ExporterPushgatewayProperties properties = load(props1);
 
     assertThat(properties.getAddress()).isEqualTo("http://localhost");
     assertThat(properties.getJob()).isEqualTo("job");
     assertThat(properties.getScheme()).isEqualTo("http");
 
+    Map<String, String> props2 = new HashMap<>();
+    props2.put("io.prometheus.exporter.pushgateway.scheme", "foo");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> load(Map.of("io.prometheus.exporter.pushgateway.scheme", "foo")))
+        .isThrownBy(() -> load(props2))
         .withMessage(
             "io.prometheus.exporter.pushgateway.scheme: Illegal value. Expecting 'http' or 'https'."
                 + " Found: foo");

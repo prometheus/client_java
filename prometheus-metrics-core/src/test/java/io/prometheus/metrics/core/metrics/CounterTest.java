@@ -220,24 +220,34 @@ class CounterTest {
 
           @Override
           public String getCurrentTraceId() {
-            return switch (callNumber) {
-              case 1 -> "abc";
-              case 3 -> "def";
-              case 4 -> "123";
-              case 5 -> "bab";
-              default -> throw new RuntimeException("unexpected call");
-            };
+            switch (callNumber) {
+              case 1:
+                return "abc";
+              case 3:
+                return "def";
+              case 4:
+                return "123";
+              case 5:
+                return "bab";
+              default:
+                throw new RuntimeException("unexpected call");
+            }
           }
 
           @Override
           public String getCurrentSpanId() {
-            return switch (callNumber) {
-              case 1 -> "123";
-              case 3 -> "456";
-              case 4 -> "abc";
-              case 5 -> "cdc";
-              default -> throw new RuntimeException("unexpected call");
-            };
+            switch (callNumber) {
+              case 1:
+                return "123";
+              case 3:
+                return "456";
+              case 4:
+                return "abc";
+              case 5:
+                return "cdc";
+              default:
+                throw new RuntimeException("unexpected call");
+            }
           }
 
           @Override

@@ -11,14 +11,16 @@ import org.junit.jupiter.api.Test;
 class UtilTest {
   @Test
   void loadOptionalDuration_positive() {
-    Map<Object, Object> properties = new HashMap<>(Map.of("foo", "5"));
+    Map<Object, Object> properties = new HashMap<>();
+    properties.put("foo", "5");
 
     assertThat(Util.loadOptionalDuration("foo", properties)).isEqualTo(Duration.ofSeconds(5));
   }
 
   @Test
   void loadOptionalDuration_zero() {
-    Map<Object, Object> properties = new HashMap<>(Map.of("foo", "0"));
+    Map<Object, Object> properties = new HashMap<>();
+    properties.put("foo", "0");
 
     assertThat(Util.loadOptionalDuration("foo", properties)).isNull();
   }
@@ -32,7 +34,8 @@ class UtilTest {
 
   @Test
   void loadOptionalDuration_negative_throws() {
-    Map<Object, Object> properties = new HashMap<>(Map.of("foo", "-1"));
+    Map<Object, Object> properties = new HashMap<>();
+    properties.put("foo", "-1");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> Util.loadOptionalDuration("foo", properties))
@@ -41,7 +44,8 @@ class UtilTest {
 
   @Test
   void loadOptionalDuration_invalidNumber_throws() {
-    Map<Object, Object> properties = new HashMap<>(Map.of("foo", "abc"));
+    Map<Object, Object> properties = new HashMap<>();
+    properties.put("foo", "abc");
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(() -> Util.loadOptionalDuration("foo", properties))

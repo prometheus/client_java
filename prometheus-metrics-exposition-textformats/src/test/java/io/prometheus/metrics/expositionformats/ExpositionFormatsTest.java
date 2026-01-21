@@ -240,17 +240,8 @@ class ExpositionFormatsTest {
 
   @Test
   public void testCounterMinimal() throws IOException {
-    String openMetricsText =
-        """
-        # TYPE my_counter counter
-        my_counter_total 1.1
-        # EOF
-        """;
-    String prometheusText =
-        """
-        # TYPE my_counter_total counter
-        my_counter_total 1.1
-        """;
+    String openMetricsText = "# TYPE my_counter counter\n" + "my_counter_total 1.1\n" + "# EOF\n";
+    String prometheusText = "# TYPE my_counter_total counter\n" + "my_counter_total 1.1\n";
     String prometheusProtobuf =
         "name: \"my_counter_total\" type: COUNTER metric { counter { value: 1.1 } }";
     CounterSnapshot counter =
@@ -268,16 +259,12 @@ class ExpositionFormatsTest {
   @Test
   public void testCounterWithDots() throws IOException {
     String openMetricsText =
-        """
-        # TYPE U__my_2e_request_2e_count counter
-        U__my_2e_request_2e_count_total{U__http_2e_path="/hello"} 3.0 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
-        # EOF
-        """;
+        "# TYPE U__my_2e_request_2e_count counter\n"
+            + "U__my_2e_request_2e_count_total{U__http_2e_path=\"/hello\"} 3.0 # {U__some_2e_exemplar_2e_key=\"some value\"} 3.0 1690298864.383\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE my_request_count_total counter
-        my_request_count_total{http_path="/hello"} 3.0
-        """;
+        "# TYPE my_request_count_total counter\n"
+            + "my_request_count_total{http_path=\"/hello\"} 3.0\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"my_request_count_total\" "
@@ -391,16 +378,9 @@ class ExpositionFormatsTest {
   @Test
   public void testGaugeMinimal() throws IOException {
     String openMetricsText =
-        """
-        # TYPE temperature_centigrade gauge
-        temperature_centigrade 22.3
-        # EOF
-        """;
+        "# TYPE temperature_centigrade gauge\n" + "temperature_centigrade 22.3\n" + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE temperature_centigrade gauge
-        temperature_centigrade 22.3
-        """;
+        "# TYPE temperature_centigrade gauge\n" + "temperature_centigrade 22.3\n";
     String prometheusProtobuf =
         "name: \"temperature_centigrade\" type: GAUGE metric { gauge { value: 22.3 } }";
     GaugeSnapshot gauge =
@@ -418,13 +398,11 @@ class ExpositionFormatsTest {
   @Test
   public void testGaugeWithDots() throws IOException {
     String openMetricsText =
-        """
-        # TYPE U__my_2e_temperature_2e_celsius gauge
-        # UNIT U__my_2e_temperature_2e_celsius celsius
-        # HELP U__my_2e_temperature_2e_celsius Temperature
-        U__my_2e_temperature_2e_celsius{U__location_2e_id="data-center-1"} 23.0
-        # EOF
-        """;
+        "# TYPE U__my_2e_temperature_2e_celsius gauge\n"
+            + "# UNIT U__my_2e_temperature_2e_celsius celsius\n"
+            + "# HELP U__my_2e_temperature_2e_celsius Temperature\n"
+            + "U__my_2e_temperature_2e_celsius{U__location_2e_id=\"data-center-1\"} 23.0\n"
+            + "# EOF\n";
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_temperature_celsius gauge\n"
             + "# UNIT my_temperature_celsius celsius\n"
@@ -434,11 +412,9 @@ class ExpositionFormatsTest {
             + "\n"
             + "# EOF\n";
     String prometheusText =
-        """
-        # HELP my_temperature_celsius Temperature
-        # TYPE my_temperature_celsius gauge
-        my_temperature_celsius{location_id="data-center-1"} 23.0
-        """;
+        "# HELP my_temperature_celsius Temperature\n"
+            + "# TYPE my_temperature_celsius gauge\n"
+            + "my_temperature_celsius{location_id=\"data-center-1\"} 23.0\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"my_temperature_celsius\" "
@@ -474,12 +450,10 @@ class ExpositionFormatsTest {
   @Test
   public void testGaugeUTF8() throws IOException {
     String prometheusText =
-        """
-        # HELP "gauge.name" gauge\\ndoc\\nstr"ing
-        # TYPE "gauge.name" gauge
-        {"gauge.name","name.1"="Björn","name*2"="佖佥"} 3.14E42
-        {"gauge.name","name.1"="val with\\nnew line","name*2"="val with \\\\backslash and \\"quotes\\""} +Inf
-        """;
+        "# HELP \"gauge.name\" gauge\\ndoc\\nstr\"ing\n"
+            + "# TYPE \"gauge.name\" gauge\n"
+            + "{\"gauge.name\",\"name.1\"=\"Björn\",\"name*2\"=\"佖佥\"} 3.14E42\n"
+            + "{\"gauge.name\",\"name.1\"=\"val with\\nnew line\",\"name*2\"=\"val with \\\\backslash and \\\"quotes\\\"\"} +Inf\n";
     GaugeSnapshot gauge =
         GaugeSnapshot.builder()
             .name("gauge.name")
@@ -801,21 +775,17 @@ class ExpositionFormatsTest {
   @Test
   public void testSummaryWithoutQuantiles() throws IOException {
     String openMetricsText =
-        """
-        # TYPE latency_seconds summary
-        # UNIT latency_seconds seconds
-        # HELP latency_seconds latency
-        latency_seconds_count 3
-        latency_seconds_sum 1.2
-        # EOF
-        """;
+        "# TYPE latency_seconds summary\n"
+            + "# UNIT latency_seconds seconds\n"
+            + "# HELP latency_seconds latency\n"
+            + "latency_seconds_count 3\n"
+            + "latency_seconds_sum 1.2\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # HELP latency_seconds latency
-        # TYPE latency_seconds summary
-        latency_seconds_count 3
-        latency_seconds_sum 1.2
-        """;
+        "# HELP latency_seconds latency\n"
+            + "# TYPE latency_seconds summary\n"
+            + "latency_seconds_count 3\n"
+            + "latency_seconds_sum 1.2\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"latency_seconds\" "
@@ -845,16 +815,11 @@ class ExpositionFormatsTest {
   @Test
   public void testSummaryNoCountAndSum() throws IOException {
     String openMetricsText =
-        """
-        # TYPE latency_seconds summary
-        latency_seconds{quantile="0.95"} 200.0
-        # EOF
-        """;
+        "# TYPE latency_seconds summary\n"
+            + "latency_seconds{quantile=\"0.95\"} 200.0\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE latency_seconds summary
-        latency_seconds{quantile="0.95"} 200.0
-        """;
+        "# TYPE latency_seconds summary\n" + "latency_seconds{quantile=\"0.95\"} 200.0\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"latency_seconds\" "
@@ -883,16 +848,8 @@ class ExpositionFormatsTest {
   @Test
   public void testSummaryJustCount() throws IOException {
     String openMetricsText =
-        """
-        # TYPE latency_seconds summary
-        latency_seconds_count 1
-        # EOF
-        """;
-    String prometheusText =
-        """
-        # TYPE latency_seconds summary
-        latency_seconds_count 1
-        """;
+        "# TYPE latency_seconds summary\n" + "latency_seconds_count 1\n" + "# EOF\n";
+    String prometheusText = "# TYPE latency_seconds summary\n" + "latency_seconds_count 1\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"latency_seconds\" "
@@ -918,16 +875,8 @@ class ExpositionFormatsTest {
   @Test
   public void testSummaryJustSum() throws IOException {
     String openMetricsText =
-        """
-        # TYPE latency_seconds summary
-        latency_seconds_sum 12.3
-        # EOF
-        """;
-    String prometheusText =
-        """
-        # TYPE latency_seconds summary
-        latency_seconds_sum 12.3
-        """;
+        "# TYPE latency_seconds summary\n" + "latency_seconds_sum 12.3\n" + "# EOF\n";
+    String prometheusText = "# TYPE latency_seconds summary\n" + "latency_seconds_sum 12.3\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"latency_seconds\" "
@@ -971,18 +920,14 @@ class ExpositionFormatsTest {
   @Test
   public void testSummaryEmptyAndNonEmpty() throws IOException {
     String openMetricsText =
-        """
-        # TYPE latency_seconds summary
-        latency_seconds_count{path="/v2"} 2
-        latency_seconds_sum{path="/v2"} 10.7
-        # EOF
-        """;
+        "# TYPE latency_seconds summary\n"
+            + "latency_seconds_count{path=\"/v2\"} 2\n"
+            + "latency_seconds_sum{path=\"/v2\"} 10.7\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE latency_seconds summary
-        latency_seconds_count{path="/v2"} 2
-        latency_seconds_sum{path="/v2"} 10.7
-        """;
+        "# TYPE latency_seconds summary\n"
+            + "latency_seconds_count{path=\"/v2\"} 2\n"
+            + "latency_seconds_sum{path=\"/v2\"} 10.7\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"latency_seconds\" "
@@ -1017,14 +962,12 @@ class ExpositionFormatsTest {
   @Test
   public void testSummaryWithDots() throws IOException {
     String openMetricsText =
-        """
-        # TYPE U__my_2e_request_2e_duration_2e_seconds summary
-        # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
-        # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
-        U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 1
-        U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 0.03
-        # EOF
-        """;
+        "# TYPE U__my_2e_request_2e_duration_2e_seconds summary\n"
+            + "# UNIT U__my_2e_request_2e_duration_2e_seconds seconds\n"
+            + "# HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds\n"
+            + "U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path=\"/hello\"} 1\n"
+            + "U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path=\"/hello\"} 0.03\n"
+            + "# EOF\n";
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_request_duration_seconds summary\n"
             + "# UNIT my_request_duration_seconds seconds\n"
@@ -1035,12 +978,10 @@ class ExpositionFormatsTest {
             + "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.03\n"
             + "# EOF\n";
     String prometheusText =
-        """
-        # HELP my_request_duration_seconds Request duration in seconds
-        # TYPE my_request_duration_seconds summary
-        my_request_duration_seconds_count{http_path="/hello"} 1
-        my_request_duration_seconds_sum{http_path="/hello"} 0.03
-        """;
+        "# HELP my_request_duration_seconds Request duration in seconds\n"
+            + "# TYPE my_request_duration_seconds summary\n"
+            + "my_request_duration_seconds_count{http_path=\"/hello\"} 1\n"
+            + "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.03\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"my_request_duration_seconds\" "
@@ -1383,17 +1324,13 @@ class ExpositionFormatsTest {
     // In OpenMetrics a histogram can have a _count if and only if it has a _sum.
     // In Prometheus format, a histogram can have a _count without a _sum.
     String openMetricsText =
-        """
-        # TYPE request_latency_seconds histogram
-        request_latency_seconds_bucket{le="+Inf"} 2
-        # EOF
-        """;
+        "# TYPE request_latency_seconds histogram\n"
+            + "request_latency_seconds_bucket{le=\"+Inf\"} 2\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE request_latency_seconds histogram
-        request_latency_seconds_bucket{le="+Inf"} 2
-        request_latency_seconds_count 2
-        """;
+        "# TYPE request_latency_seconds histogram\n"
+            + "request_latency_seconds_bucket{le=\"+Inf\"} 2\n"
+            + "request_latency_seconds_count 2\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"request_latency_seconds\" "
@@ -1429,17 +1366,13 @@ class ExpositionFormatsTest {
   @Test
   public void testClassicHistogramMinimalWithDots() throws Exception {
     String openMetricsText =
-        """
-        # TYPE "request.latency_seconds" histogram
-        {"request.latency_seconds_bucket",le="+Inf"} 2
-        # EOF
-        """;
+        "# TYPE \"request.latency_seconds\" histogram\n"
+            + "{\"request.latency_seconds_bucket\",le=\"+Inf\"} 2\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE request_latency_seconds histogram
-        request_latency_seconds_bucket{le="+Inf"} 2
-        request_latency_seconds_count 2
-        """;
+        "# TYPE request_latency_seconds histogram\n"
+            + "request_latency_seconds_bucket{le=\"+Inf\"} 2\n"
+            + "request_latency_seconds_count 2\n";
     HistogramSnapshot histogram =
         HistogramSnapshot.builder()
             .name("request.latency_seconds")
@@ -1460,20 +1393,16 @@ class ExpositionFormatsTest {
   @Test
   public void testClassicHistogramCountAndSum() throws Exception {
     String openMetricsText =
-        """
-        # TYPE request_latency_seconds histogram
-        request_latency_seconds_bucket{le="+Inf"} 2
-        request_latency_seconds_count 2
-        request_latency_seconds_sum 3.2
-        # EOF
-        """;
+        "# TYPE request_latency_seconds histogram\n"
+            + "request_latency_seconds_bucket{le=\"+Inf\"} 2\n"
+            + "request_latency_seconds_count 2\n"
+            + "request_latency_seconds_sum 3.2\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE request_latency_seconds histogram
-        request_latency_seconds_bucket{le="+Inf"} 2
-        request_latency_seconds_count 2
-        request_latency_seconds_sum 3.2
-        """;
+        "# TYPE request_latency_seconds histogram\n"
+            + "request_latency_seconds_bucket{le=\"+Inf\"} 2\n"
+            + "request_latency_seconds_count 2\n"
+            + "request_latency_seconds_sum 3.2\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"request_latency_seconds\" "
@@ -1809,18 +1738,14 @@ class ExpositionFormatsTest {
     // In OpenMetrics a histogram can have a _count if and only if it has a _sum.
     // In Prometheus format, a histogram can have a _count without a _sum.
     String openMetricsText =
-        """
-        # TYPE queue_size_bytes gaugehistogram
-        queue_size_bytes_bucket{le="+Inf"} 130
-        # EOF
-        """;
+        "# TYPE queue_size_bytes gaugehistogram\n"
+            + "queue_size_bytes_bucket{le=\"+Inf\"} 130\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE queue_size_bytes histogram
-        queue_size_bytes_bucket{le="+Inf"} 130
-        # TYPE queue_size_bytes_gcount gauge
-        queue_size_bytes_gcount 130
-        """;
+        "# TYPE queue_size_bytes histogram\n"
+            + "queue_size_bytes_bucket{le=\"+Inf\"} 130\n"
+            + "# TYPE queue_size_bytes_gcount gauge\n"
+            + "queue_size_bytes_gcount 130\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"queue_size_bytes\" "
@@ -1857,22 +1782,18 @@ class ExpositionFormatsTest {
   @Test
   public void testClassicGaugeHistogramCountAndSum() throws IOException {
     String openMetricsText =
-        """
-        # TYPE queue_size_bytes gaugehistogram
-        queue_size_bytes_bucket{le="+Inf"} 130
-        queue_size_bytes_gcount 130
-        queue_size_bytes_gsum 27000.0
-        # EOF
-        """;
+        "# TYPE queue_size_bytes gaugehistogram\n"
+            + "queue_size_bytes_bucket{le=\"+Inf\"} 130\n"
+            + "queue_size_bytes_gcount 130\n"
+            + "queue_size_bytes_gsum 27000.0\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE queue_size_bytes histogram
-        queue_size_bytes_bucket{le="+Inf"} 130
-        # TYPE queue_size_bytes_gcount gauge
-        queue_size_bytes_gcount 130
-        # TYPE queue_size_bytes_gsum gauge
-        queue_size_bytes_gsum 27000.0
-        """;
+        "# TYPE queue_size_bytes histogram\n"
+            + "queue_size_bytes_bucket{le=\"+Inf\"} 130\n"
+            + "# TYPE queue_size_bytes_gcount gauge\n"
+            + "queue_size_bytes_gcount 130\n"
+            + "# TYPE queue_size_bytes_gsum gauge\n"
+            + "queue_size_bytes_gsum 27000.0\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"queue_size_bytes\" "
@@ -1911,15 +1832,13 @@ class ExpositionFormatsTest {
   @Test
   public void testClassicHistogramWithDots() throws IOException {
     String openMetricsText =
-        """
-      # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
-      # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
-      # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
-      U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 130 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
-      U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 130
-      U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 0.01
-      # EOF
-      """;
+        "# TYPE U__my_2e_request_2e_duration_2e_seconds histogram\n"
+            + "# UNIT U__my_2e_request_2e_duration_2e_seconds seconds\n"
+            + "# HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds\n"
+            + "U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path=\"/hello\",le=\"+Inf\"} 130 # {U__some_2e_exemplar_2e_key=\"some value\"} 3.0 1690298864.383\n"
+            + "U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path=\"/hello\"} 130\n"
+            + "U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path=\"/hello\"} 0.01\n"
+            + "# EOF\n";
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_request_duration_seconds histogram\n"
             + "# UNIT my_request_duration_seconds seconds\n"
@@ -1933,13 +1852,11 @@ class ExpositionFormatsTest {
             + "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.01\n"
             + "# EOF\n";
     String prometheusText =
-        """
-        # HELP my_request_duration_seconds Request duration in seconds
-        # TYPE my_request_duration_seconds histogram
-        my_request_duration_seconds_bucket{http_path="/hello",le="+Inf"} 130
-        my_request_duration_seconds_count{http_path="/hello"} 130
-        my_request_duration_seconds_sum{http_path="/hello"} 0.01
-        """;
+        "# HELP my_request_duration_seconds Request duration in seconds\n"
+            + "# TYPE my_request_duration_seconds histogram\n"
+            + "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 130\n"
+            + "my_request_duration_seconds_count{http_path=\"/hello\"} 130\n"
+            + "my_request_duration_seconds_sum{http_path=\"/hello\"} 0.01\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"my_request_duration_seconds\" "
@@ -2294,17 +2211,13 @@ class ExpositionFormatsTest {
   @Test
   public void testNativeHistogramMinimal() throws IOException {
     String openMetricsText =
-        """
-        # TYPE latency_seconds histogram
-        latency_seconds_bucket{le="+Inf"} 0
-        # EOF
-        """;
+        "# TYPE latency_seconds histogram\n"
+            + "latency_seconds_bucket{le=\"+Inf\"} 0\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # TYPE latency_seconds histogram
-        latency_seconds_bucket{le="+Inf"} 0
-        latency_seconds_count 0
-        """;
+        "# TYPE latency_seconds histogram\n"
+            + "latency_seconds_bucket{le=\"+Inf\"} 0\n"
+            + "latency_seconds_count 0\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"latency_seconds\" "
@@ -2332,15 +2245,13 @@ class ExpositionFormatsTest {
   @Test
   public void testNativeHistogramWithDots() throws IOException {
     String openMetricsText =
-        """
-      # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
-      # UNIT U__my_2e_request_2e_duration_2e_seconds seconds
-      # HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds
-      U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path="/hello",le="+Inf"} 4 # {U__some_2e_exemplar_2e_key="some value"} 3.0 1690298864.383
-      U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path="/hello"} 4
-      U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path="/hello"} 3.2
-      # EOF
-      """;
+        "# TYPE U__my_2e_request_2e_duration_2e_seconds histogram\n"
+            + "# UNIT U__my_2e_request_2e_duration_2e_seconds seconds\n"
+            + "# HELP U__my_2e_request_2e_duration_2e_seconds Request duration in seconds\n"
+            + "U__my_2e_request_2e_duration_2e_seconds_bucket{U__http_2e_path=\"/hello\",le=\"+Inf\"} 4 # {U__some_2e_exemplar_2e_key=\"some value\"} 3.0 1690298864.383\n"
+            + "U__my_2e_request_2e_duration_2e_seconds_count{U__http_2e_path=\"/hello\"} 4\n"
+            + "U__my_2e_request_2e_duration_2e_seconds_sum{U__http_2e_path=\"/hello\"} 3.2\n"
+            + "# EOF\n";
     String openMetricsTextWithExemplarsOnAllTimeSeries =
         "# TYPE my_request_duration_seconds histogram\n"
             + "# UNIT my_request_duration_seconds seconds\n"
@@ -2354,13 +2265,11 @@ class ExpositionFormatsTest {
             + "my_request_duration_seconds_sum{http_path=\"/hello\"} 3.2\n"
             + "# EOF\n";
     String prometheusText =
-        """
-        # HELP my_request_duration_seconds Request duration in seconds
-        # TYPE my_request_duration_seconds histogram
-        my_request_duration_seconds_bucket{http_path="/hello",le="+Inf"} 4
-        my_request_duration_seconds_count{http_path="/hello"} 4
-        my_request_duration_seconds_sum{http_path="/hello"} 3.2
-        """;
+        "# HELP my_request_duration_seconds Request duration in seconds\n"
+            + "# TYPE my_request_duration_seconds histogram\n"
+            + "my_request_duration_seconds_bucket{http_path=\"/hello\",le=\"+Inf\"} 4\n"
+            + "my_request_duration_seconds_count{http_path=\"/hello\"} 4\n"
+            + "my_request_duration_seconds_sum{http_path=\"/hello\"} 3.2\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"my_request_duration_seconds\" "
@@ -2411,18 +2320,14 @@ class ExpositionFormatsTest {
   @Test
   public void testInfo() throws IOException {
     String openMetrics =
-        """
-        # TYPE version info
-        # HELP version version information
-        version_info{version="1.2.3"} 1
-        # EOF
-        """;
+        "# TYPE version info\n"
+            + "# HELP version version information\n"
+            + "version_info{version=\"1.2.3\"} 1\n"
+            + "# EOF\n";
     String prometheus =
-        """
-        # HELP version_info version information
-        # TYPE version_info gauge
-        version_info{version="1.2.3"} 1
-        """;
+        "# HELP version_info version information\n"
+            + "# TYPE version_info gauge\n"
+            + "version_info{version=\"1.2.3\"} 1\n";
     InfoSnapshot info =
         InfoSnapshot.builder()
             .name("version")
@@ -2441,18 +2346,14 @@ class ExpositionFormatsTest {
   @Test
   public void testInfoWithDots() throws IOException {
     String openMetricsText =
-        """
-        # TYPE U__jvm_2e_status info
-        # HELP U__jvm_2e_status JVM status info
-        U__jvm_2e_status_info{U__jvm_2e_version="1.2.3"} 1
-        # EOF
-        """;
+        "# TYPE U__jvm_2e_status info\n"
+            + "# HELP U__jvm_2e_status JVM status info\n"
+            + "U__jvm_2e_status_info{U__jvm_2e_version=\"1.2.3\"} 1\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # HELP jvm_status_info JVM status info
-        # TYPE jvm_status_info gauge
-        jvm_status_info{jvm_version="1.2.3"} 1
-        """;
+        "# HELP jvm_status_info JVM status info\n"
+            + "# TYPE jvm_status_info gauge\n"
+            + "jvm_status_info{jvm_version=\"1.2.3\"} 1\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"jvm_status_info\" "
@@ -2538,18 +2439,12 @@ class ExpositionFormatsTest {
   @Test
   public void testStateSetMinimal() throws IOException {
     String openMetrics =
-        """
-        # TYPE state stateset
-        state{state="a"} 1
-        state{state="bb"} 0
-        # EOF
-        """;
+        "# TYPE state stateset\n"
+            + "state{state=\"a\"} 1\n"
+            + "state{state=\"bb\"} 0\n"
+            + "# EOF\n";
     String prometheus =
-        """
-        # TYPE state gauge
-        state{state="a"} 1
-        state{state="bb"} 0
-        """;
+        "# TYPE state gauge\n" + "state{state=\"a\"} 1\n" + "state{state=\"bb\"} 0\n";
     StateSetSnapshot stateSet =
         StateSetSnapshot.builder()
             .name("state")
@@ -2568,20 +2463,16 @@ class ExpositionFormatsTest {
   @Test
   public void testStateSetWithDots() throws IOException {
     String openMetricsText =
-        """
-        # TYPE U__my_2e_application_2e_state stateset
-        # HELP U__my_2e_application_2e_state My application state
-        U__my_2e_application_2e_state{U__data_2e_center="us east",U__my_2e_application_2e_state="feature.enabled"} 1
-        U__my_2e_application_2e_state{U__data_2e_center="us east",U__my_2e_application_2e_state="is.alpha.version"} 0
-        # EOF
-        """;
+        "# TYPE U__my_2e_application_2e_state stateset\n"
+            + "# HELP U__my_2e_application_2e_state My application state\n"
+            + "U__my_2e_application_2e_state{U__data_2e_center=\"us east\",U__my_2e_application_2e_state=\"feature.enabled\"} 1\n"
+            + "U__my_2e_application_2e_state{U__data_2e_center=\"us east\",U__my_2e_application_2e_state=\"is.alpha.version\"} 0\n"
+            + "# EOF\n";
     String prometheusText =
-        """
-        # HELP my_application_state My application state
-        # TYPE my_application_state gauge
-        my_application_state{data_center="us east",my_application_state="feature.enabled"} 1
-        my_application_state{data_center="us east",my_application_state="is.alpha.version"} 0
-        """;
+        "# HELP my_application_state My application state\n"
+            + "# TYPE my_application_state gauge\n"
+            + "my_application_state{data_center=\"us east\",my_application_state=\"feature.enabled\"} 1\n"
+            + "my_application_state{data_center=\"us east\",my_application_state=\"is.alpha.version\"} 0\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"my_application_state\" "
@@ -2680,17 +2571,8 @@ class ExpositionFormatsTest {
 
   @Test
   public void testUnknownMinimal() throws IOException {
-    String openMetrics =
-        """
-        # TYPE other unknown
-        other 22.3
-        # EOF
-        """;
-    String prometheus =
-        """
-        # TYPE other untyped
-        other 22.3
-        """;
+    String openMetrics = "# TYPE other unknown\n" + "other 22.3\n" + "# EOF\n";
+    String prometheus = "# TYPE other untyped\n" + "other 22.3\n";
     UnknownSnapshot unknown =
         UnknownSnapshot.builder()
             .name("other")
@@ -2705,13 +2587,11 @@ class ExpositionFormatsTest {
   @Test
   public void testUnknownWithDots() throws IOException {
     String openMetrics =
-        """
-        # TYPE U__some_2e_unknown_2e_metric__bytes unknown
-        # UNIT U__some_2e_unknown_2e_metric__bytes bytes
-        # HELP U__some_2e_unknown_2e_metric__bytes help message
-        U__some_2e_unknown_2e_metric__bytes{U__test_2e_env="7"} 0.7
-        # EOF
-        """;
+        "# TYPE U__some_2e_unknown_2e_metric__bytes unknown\n"
+            + "# UNIT U__some_2e_unknown_2e_metric__bytes bytes\n"
+            + "# HELP U__some_2e_unknown_2e_metric__bytes help message\n"
+            + "U__some_2e_unknown_2e_metric__bytes{U__test_2e_env=\"7\"} 0.7\n"
+            + "# EOF\n";
     String openMetricsWithExemplarsOnAllTimeSeries =
         "# TYPE some_unknown_metric_bytes unknown\n"
             + "# UNIT some_unknown_metric_bytes bytes\n"
@@ -2721,11 +2601,9 @@ class ExpositionFormatsTest {
             + "\n"
             + "# EOF\n";
     String prometheus =
-        """
-        # HELP some_unknown_metric_bytes help message
-        # TYPE some_unknown_metric_bytes untyped
-        some_unknown_metric_bytes{test_env="7"} 0.7
-        """;
+        "# HELP some_unknown_metric_bytes help message\n"
+            + "# TYPE some_unknown_metric_bytes untyped\n"
+            + "some_unknown_metric_bytes{test_env=\"7\"} 0.7\n";
     String prometheusProtobuf =
         // @formatter:off
         "name: \"some_unknown_metric_bytes\" "
@@ -2758,18 +2636,14 @@ class ExpositionFormatsTest {
   @Test
   public void testHelpEscape() throws IOException {
     String openMetrics =
-        """
-        # TYPE test counter
-        # HELP test Some text and \\n some \\" escaping
-        test_total 1.0
-        # EOF
-        """;
+        "# TYPE test counter\n"
+            + "# HELP test Some text and \\n some \\\" escaping\n"
+            + "test_total 1.0\n"
+            + "# EOF\n";
     String prometheus =
-        """
-        # HELP test_total Some text and \\n some " escaping
-        # TYPE test_total counter
-        test_total 1.0
-        """;
+        "# HELP test_total Some text and \\n some \" escaping\n"
+            + "# TYPE test_total counter\n"
+            + "test_total 1.0\n";
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("test")
@@ -2785,16 +2659,11 @@ class ExpositionFormatsTest {
   @Test
   public void testLabelValueEscape() throws IOException {
     String openMetrics =
-        """
-        # TYPE test counter
-        test_total{a="x",b="escaping\\" example \\n "} 1.0
-        # EOF
-        """;
+        "# TYPE test counter\n"
+            + "test_total{a=\"x\",b=\"escaping\\\" example \\n \"} 1.0\n"
+            + "# EOF\n";
     String prometheus =
-        """
-        # TYPE test_total counter
-        test_total{a="x",b="escaping\\" example \\n "} 1.0
-        """;
+        "# TYPE test_total counter\n" + "test_total{a=\"x\",b=\"escaping\\\" example \\n \"} 1.0\n";
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("test")
@@ -2843,11 +2712,7 @@ class ExpositionFormatsTest {
     byte[] out = buff.toByteArray();
     assertThat(out.length).isNotEqualTo(0);
 
-    String expected =
-        """
-      # TYPE foo_metric untyped
-      foo_metric 1.234
-      """;
+    String expected = "# TYPE foo_metric untyped\n" + "foo_metric 1.234\n";
 
     assertThat(new String(out, UTF_8)).hasToString(expected);
   }

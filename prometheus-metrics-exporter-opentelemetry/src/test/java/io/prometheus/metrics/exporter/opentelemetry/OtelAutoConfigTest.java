@@ -65,7 +65,7 @@ class OtelAutoConfigTest {
             "values from builder",
             new TestCase()
                 .expectedProperties(
-                    Map.of(
+                    ImmutableMap.of(
                         "otel.exporter.otlp.protocol",
                         Optional.of("http/protobuf"),
                         "otel.exporter.otlp.endpoint",
@@ -79,7 +79,7 @@ class OtelAutoConfigTest {
                         "otel.service.name",
                         Optional.of("builder-service")))
                 .expectedResourceAttributes(
-                    Map.of(
+                    ImmutableMap.of(
                         "key",
                         "builder-value",
                         "service.name",

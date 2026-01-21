@@ -22,7 +22,6 @@
   </description>
   <properties>
     <java.version>${test.java.version}</java.version>
-    <junit-jupiter.version>6.0.2</junit-jupiter.version>
   </properties>
 
   <dependencyManagement>

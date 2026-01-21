@@ -923,24 +923,22 @@ class HistogramTest {
             + "} }";
     String expectedTextFormat =
         // default classic buckets
-        """
-        # TYPE test histogram
-        test_bucket{le="0.005"} 0
-        test_bucket{le="0.01"} 0
-        test_bucket{le="0.025"} 0
-        test_bucket{le="0.05"} 0
-        test_bucket{le="0.1"} 0
-        test_bucket{le="0.25"} 0
-        test_bucket{le="0.5"} 1
-        test_bucket{le="1.0"} 1
-        test_bucket{le="2.5"} 1
-        test_bucket{le="5.0"} 1
-        test_bucket{le="10.0"} 1
-        test_bucket{le="+Inf"} 1
-        test_count 1
-        test_sum 0.5
-        # EOF
-        """;
+        "# TYPE test histogram\n"
+            + "test_bucket{le=\"0.005\"} 0\n"
+            + "test_bucket{le=\"0.01\"} 0\n"
+            + "test_bucket{le=\"0.025\"} 0\n"
+            + "test_bucket{le=\"0.05\"} 0\n"
+            + "test_bucket{le=\"0.1\"} 0\n"
+            + "test_bucket{le=\"0.25\"} 0\n"
+            + "test_bucket{le=\"0.5\"} 1\n"
+            + "test_bucket{le=\"1.0\"} 1\n"
+            + "test_bucket{le=\"2.5\"} 1\n"
+            + "test_bucket{le=\"5.0\"} 1\n"
+            + "test_bucket{le=\"10.0\"} 1\n"
+            + "test_bucket{le=\"+Inf\"} 1\n"
+            + "test_count 1\n"
+            + "test_sum 0.5\n"
+            + "# EOF\n";
 
     // protobuf
     Metrics.MetricFamily protobufData =

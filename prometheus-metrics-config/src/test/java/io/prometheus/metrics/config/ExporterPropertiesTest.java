@@ -11,30 +11,24 @@ class ExporterPropertiesTest {
 
   @Test
   void load() {
-    ExporterProperties properties =
-        load(
-            new HashMap<>(
-                Map.of(
-                    "io.prometheus.exporter.includeCreatedTimestamps", "true",
-                    "io.prometheus.exporter.exemplarsOnAllMetricTypes", "true")));
+    Map<String, String> props1 = new HashMap<>();
+    props1.put("io.prometheus.exporter.includeCreatedTimestamps", "true");
+    props1.put("io.prometheus.exporter.exemplarsOnAllMetricTypes", "true");
+    ExporterProperties properties = load(props1);
     assertThat(properties.getIncludeCreatedTimestamps()).isTrue();
     assertThat(properties.getExemplarsOnAllMetricTypes()).isTrue();
 
+    Map<String, String> props2 = new HashMap<>();
+    props2.put("io.prometheus.exporter.includeCreatedTimestamps", "invalid");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(
-            () ->
-                load(
-                    new HashMap<>(
-                        Map.of("io.prometheus.exporter.includeCreatedTimestamps", "invalid"))))
+        .isThrownBy(() -> load(props2))
         .withMessage(
             "io.prometheus.exporter.includeCreatedTimestamps: Expecting 'true' or 'false'. Found:"
                 + " invalid");
+    Map<String, String> props3 = new HashMap<>();
+    props3.put("io.prometheus.exporter.exemplarsOnAllMetricTypes", "invalid");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(
-            () ->
-                load(
-                    new HashMap<>(
-                        Map.of("io.prometheus.exporter.exemplarsOnAllMetricTypes", "invalid"))))
+        .isThrownBy(() -> load(props3))
         .withMessage(
             "io.prometheus.exporter.exemplarsOnAllMetricTypes: Expecting 'true' or 'false'. Found:"
                 + " invalid");

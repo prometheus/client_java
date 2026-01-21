@@ -11,13 +11,16 @@ import org.junit.jupiter.api.Test;
 class ExporterHttpServerPropertiesTest {
   @Test
   void load() {
-    ExporterHttpServerProperties properties =
-        load(Map.of("io.prometheus.exporter.httpServer.port", "1"));
+    Map<String, String> props1 = new HashMap<>();
+    props1.put("io.prometheus.exporter.httpServer.port", "1");
+    ExporterHttpServerProperties properties = load(props1);
     assertThat(properties.getPort()).isOne();
     assertThat(properties.isPreferUncompressedResponse()).isFalse();
 
+    Map<String, String> props2 = new HashMap<>();
+    props2.put("io.prometheus.exporter.httpServer.port", "0");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> load(Map.of("io.prometheus.exporter.httpServer.port", "0")))
+        .isThrownBy(() -> load(props2))
         .withMessage("io.prometheus.exporter.httpServer.port: Expecting value > 0. Found: 0");
   }
 

@@ -49,12 +49,10 @@ class DropwizardExportsTest {
   public void testCounter() {
     metricRegistry.counter("foo.bar").inc(1);
     String expected =
-"""
-# TYPE foo_bar counter
-# HELP foo_bar Generated from Dropwizard metric import (metric=foo.bar, type=com.codahale.metrics.Counter)
-foo_bar_total 1.0
-# EOF
-""";
+        "# TYPE foo_bar counter\n"
+            + "# HELP foo_bar Generated from Dropwizard metric import (metric=foo.bar, type=com.codahale.metrics.Counter)\n"
+            + "foo_bar_total 1.0\n"
+            + "# EOF\n";
 
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
@@ -105,24 +103,22 @@ foo_bar_total 1.0
     metricRegistry.register("boolean.gauge", booleanGauge);
 
     String expected =
-"""
-# TYPE boolean_gauge gauge
-# HELP boolean_gauge Generated from Dropwizard metric import (metric=boolean.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$5)
-boolean_gauge 1.0
-# TYPE double_gauge gauge
-# HELP double_gauge Generated from Dropwizard metric import (metric=double.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$2)
-double_gauge 1.234
-# TYPE float_gauge gauge
-# HELP float_gauge Generated from Dropwizard metric import (metric=float.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$4)
-float_gauge 0.1234000027179718
-# TYPE integer_gauge gauge
-# HELP integer_gauge Generated from Dropwizard metric import (metric=integer.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$1)
-integer_gauge 1234.0
-# TYPE long_gauge gauge
-# HELP long_gauge Generated from Dropwizard metric import (metric=long.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$3)
-long_gauge 1234.0
-# EOF
-""";
+        "# TYPE boolean_gauge gauge\n"
+            + "# HELP boolean_gauge Generated from Dropwizard metric import (metric=boolean.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$5)\n"
+            + "boolean_gauge 1.0\n"
+            + "# TYPE double_gauge gauge\n"
+            + "# HELP double_gauge Generated from Dropwizard metric import (metric=double.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$2)\n"
+            + "double_gauge 1.234\n"
+            + "# TYPE float_gauge gauge\n"
+            + "# HELP float_gauge Generated from Dropwizard metric import (metric=float.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$4)\n"
+            + "float_gauge 0.1234000027179718\n"
+            + "# TYPE integer_gauge gauge\n"
+            + "# HELP integer_gauge Generated from Dropwizard metric import (metric=integer.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$1)\n"
+            + "integer_gauge 1234.0\n"
+            + "# TYPE long_gauge gauge\n"
+            + "# HELP long_gauge Generated from Dropwizard metric import (metric=long.gauge, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$3)\n"
+            + "long_gauge 1234.0\n"
+            + "# EOF\n";
 
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
@@ -161,34 +157,30 @@ long_gauge 1234.0
 
     // The result should look like this
     String expected1 =
-"""
-# TYPE hist summary
-# HELP hist Generated from Dropwizard metric import (metric=hist, type=com.codahale.metrics.Histogram)
-hist{quantile="0.5"} 49.0
-hist{quantile="0.75"} 74.0
-hist{quantile="0.95"} 94.0
-hist{quantile="0.98"} 97.0
-hist{quantile="0.99"} 98.0
-hist{quantile="0.999"} 99.0
-hist_count 100
-# EOF
-""";
+        "# TYPE hist summary\n"
+            + "# HELP hist Generated from Dropwizard metric import (metric=hist, type=com.codahale.metrics.Histogram)\n"
+            + "hist{quantile=\"0.5\"} 49.0\n"
+            + "hist{quantile=\"0.75\"} 74.0\n"
+            + "hist{quantile=\"0.95\"} 94.0\n"
+            + "hist{quantile=\"0.98\"} 97.0\n"
+            + "hist{quantile=\"0.99\"} 98.0\n"
+            + "hist{quantile=\"0.999\"} 99.0\n"
+            + "hist_count 100\n"
+            + "# EOF\n";
 
     // However, Dropwizard uses a random reservoir sampling algorithm, so the values could as well
     // be off-by-one
     String expected2 =
-"""
-# TYPE hist summary
-# HELP hist Generated from Dropwizard metric import (metric=hist, type=com.codahale.metrics.Histogram)
-hist{quantile="0.5"} 50.0
-hist{quantile="0.75"} 75.0
-hist{quantile="0.95"} 95.0
-hist{quantile="0.98"} 98.0
-hist{quantile="0.99"} 99.0
-hist{quantile="0.999"} 99.0
-hist_count 100
-# EOF
-""";
+        "# TYPE hist summary\n"
+            + "# HELP hist Generated from Dropwizard metric import (metric=hist, type=com.codahale.metrics.Histogram)\n"
+            + "hist{quantile=\"0.5\"} 50.0\n"
+            + "hist{quantile=\"0.75\"} 75.0\n"
+            + "hist{quantile=\"0.95\"} 95.0\n"
+            + "hist{quantile=\"0.98\"} 98.0\n"
+            + "hist{quantile=\"0.99\"} 99.0\n"
+            + "hist{quantile=\"0.999\"} 99.0\n"
+            + "hist_count 100\n"
+            + "# EOF\n";
 
     // The following asserts the values matches either of the expected value.
     String textFormat = convertToOpenMetricsFormat(pmRegistry);
@@ -205,12 +197,10 @@ hist_count 100
     meter.mark();
 
     String expected =
-"""
-# TYPE meter counter
-# HELP meter Generated from Dropwizard metric import (metric=meter_total, type=com.codahale.metrics.Meter)
-meter_total 2.0
-# EOF
-""";
+        "# TYPE meter counter\n"
+            + "# HELP meter Generated from Dropwizard metric import (metric=meter_total, type=com.codahale.metrics.Meter)\n"
+            + "meter_total 2.0\n"
+            + "# EOF\n";
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 
@@ -247,36 +237,34 @@ meter_total 2.0
     metricRegistry.register("my.application.namedGauge1", new ExampleDoubleGauge());
 
     String expected =
-"""
-# TYPE my_application_namedCounter1 counter
-# HELP my_application_namedCounter1 Generated from Dropwizard metric import (metric=my.application.namedCounter1, type=com.codahale.metrics.Counter)
-my_application_namedCounter1_total 0.0
-# TYPE my_application_namedGauge1 gauge
-# HELP my_application_namedGauge1 Generated from Dropwizard metric import (metric=my.application.namedGauge1, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$ExampleDoubleGauge)
-my_application_namedGauge1 0.0
-# TYPE my_application_namedHistogram1 summary
-# HELP my_application_namedHistogram1 Generated from Dropwizard metric import (metric=my.application.namedHistogram1, type=com.codahale.metrics.Histogram)
-my_application_namedHistogram1{quantile="0.5"} 0.0
-my_application_namedHistogram1{quantile="0.75"} 0.0
-my_application_namedHistogram1{quantile="0.95"} 0.0
-my_application_namedHistogram1{quantile="0.98"} 0.0
-my_application_namedHistogram1{quantile="0.99"} 0.0
-my_application_namedHistogram1{quantile="0.999"} 0.0
-my_application_namedHistogram1_count 0
-# TYPE my_application_namedMeter1 counter
-# HELP my_application_namedMeter1 Generated from Dropwizard metric import (metric=my.application.namedMeter1_total, type=com.codahale.metrics.Meter)
-my_application_namedMeter1_total 0.0
-# TYPE my_application_namedTimer1 summary
-# HELP my_application_namedTimer1 Generated from Dropwizard metric import (metric=my.application.namedTimer1, type=com.codahale.metrics.Timer)
-my_application_namedTimer1{quantile="0.5"} 0.0
-my_application_namedTimer1{quantile="0.75"} 0.0
-my_application_namedTimer1{quantile="0.95"} 0.0
-my_application_namedTimer1{quantile="0.98"} 0.0
-my_application_namedTimer1{quantile="0.99"} 0.0
-my_application_namedTimer1{quantile="0.999"} 0.0
-my_application_namedTimer1_count 0
-# EOF
-""";
+        "# TYPE my_application_namedCounter1 counter\n"
+            + "# HELP my_application_namedCounter1 Generated from Dropwizard metric import (metric=my.application.namedCounter1, type=com.codahale.metrics.Counter)\n"
+            + "my_application_namedCounter1_total 0.0\n"
+            + "# TYPE my_application_namedGauge1 gauge\n"
+            + "# HELP my_application_namedGauge1 Generated from Dropwizard metric import (metric=my.application.namedGauge1, type=io.prometheus.metrics.instrumentation.dropwizard.DropwizardExportsTest$ExampleDoubleGauge)\n"
+            + "my_application_namedGauge1 0.0\n"
+            + "# TYPE my_application_namedHistogram1 summary\n"
+            + "# HELP my_application_namedHistogram1 Generated from Dropwizard metric import (metric=my.application.namedHistogram1, type=com.codahale.metrics.Histogram)\n"
+            + "my_application_namedHistogram1{quantile=\"0.5\"} 0.0\n"
+            + "my_application_namedHistogram1{quantile=\"0.75\"} 0.0\n"
+            + "my_application_namedHistogram1{quantile=\"0.95\"} 0.0\n"
+            + "my_application_namedHistogram1{quantile=\"0.98\"} 0.0\n"
+            + "my_application_namedHistogram1{quantile=\"0.99\"} 0.0\n"
+            + "my_application_namedHistogram1{quantile=\"0.999\"} 0.0\n"
+            + "my_application_namedHistogram1_count 0\n"
+            + "# TYPE my_application_namedMeter1 counter\n"
+            + "# HELP my_application_namedMeter1 Generated from Dropwizard metric import (metric=my.application.namedMeter1_total, type=com.codahale.metrics.Meter)\n"
+            + "my_application_namedMeter1_total 0.0\n"
+            + "# TYPE my_application_namedTimer1 summary\n"
+            + "# HELP my_application_namedTimer1 Generated from Dropwizard metric import (metric=my.application.namedTimer1, type=com.codahale.metrics.Timer)\n"
+            + "my_application_namedTimer1{quantile=\"0.5\"} 0.0\n"
+            + "my_application_namedTimer1{quantile=\"0.75\"} 0.0\n"
+            + "my_application_namedTimer1{quantile=\"0.95\"} 0.0\n"
+            + "my_application_namedTimer1{quantile=\"0.98\"} 0.0\n"
+            + "my_application_namedTimer1{quantile=\"0.99\"} 0.0\n"
+            + "my_application_namedTimer1{quantile=\"0.999\"} 0.0\n"
+            + "my_application_namedTimer1_count 0\n"
+            + "# EOF\n";
     assertThat(convertToOpenMetricsFormat()).isEqualTo(expected);
   }
 
@@ -284,11 +272,7 @@ my_application_namedTimer1_count 0
   void responseWhenRegistryIsEmpty() {
     var registry = new PrometheusRegistry();
     registry.register(DropwizardExports.builder().dropwizardRegistry(metricRegistry).build());
-    assertThat(convertToOpenMetricsFormat(registry))
-        .isEqualTo(
-"""
-# EOF
-""");
+    assertThat(convertToOpenMetricsFormat(registry)).isEqualTo("# EOF\n");
   }
 
   @Test
@@ -320,12 +304,10 @@ my_application_namedTimer1_count 0
         .register(registry);
     assertThat(convertToOpenMetricsFormat(registry))
         .isEqualTo(
-"""
-# TYPE my_application_namedCounter2 counter
-# HELP my_application_namedCounter2 Generated from Dropwizard metric import (metric=my.application.namedCounter2, type=com.codahale.metrics.Counter)
-my_application_namedCounter2_total 10.0
-# EOF
-""");
+            "# TYPE my_application_namedCounter2 counter\n"
+                + "# HELP my_application_namedCounter2 Generated from Dropwizard metric import (metric=my.application.namedCounter2, type=com.codahale.metrics.Counter)\n"
+                + "my_application_namedCounter2_total 10.0\n"
+                + "# EOF\n");
     assertThat(buf.toString())
         .contains("my.application.namedCounter1: -10.0: counters cannot have a negative value");
   }
