@@ -9,4 +9,4 @@ set -euo pipefail
 VERSION=${usage_tag#v}
 
 mise run set-version "$VERSION"
-mvn -B install -P 'release,!default' -DskipTests -Dgpg.skip=true
+mvn -B package -P 'release,!default,!examples-and-integration-tests' -Dmaven.test.skip=true -Dgpg.skip=true
