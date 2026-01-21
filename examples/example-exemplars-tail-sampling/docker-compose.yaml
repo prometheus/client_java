@@ -36,7 +36,7 @@ services:
       - -jar
       - /example-greeting-service.jar
   collector:
-    image: otel/opentelemetry-collector-contrib:0.143.1@sha256:f051aff195ad50ed5ad9d95bcdd51d7258200c937def3797cf830366ed62e034
+    image: otel/opentelemetry-collector-contrib:0.144.0@sha256:213886eb6407af91b87fa47551c3632be1a6419ff3a5114ef1e6fc364628496f
     network_mode: host
     volumes:
       - ./config/otelcol-config.yaml:/config.yaml
@@ -52,7 +52,7 @@ services:
       - --enable-feature=native-histograms
       - --config.file=/prometheus.yaml
   tempo:
-    image: grafana/tempo:2.9.0@sha256:65a5789759435f1ef696f1953258b9bbdb18eb571d5ce711ff812d2e128288a4
+    image: grafana/tempo:2.9.1@sha256:290414580eabd1bde91f22e4a4579242fe77377c425223f45d59b8ad1540ce3c
     network_mode: host
     volumes:
       - ./config/tempo-config.yaml:/config.yaml
