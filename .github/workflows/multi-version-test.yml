@@ -12,26 +12,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [8, 11, 17, 21, 25]
+        java: [17, 21, 25]
     steps:
       - name: Check out
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         with:
           persist-credentials: false
 
-      - name: Set up Java ${{ matrix.java }} for testing
-        id: setup-test-java
+      - name: Set up Java ${{ matrix.java }}
+        id: setup-java
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
         with:
           distribution: "temurin"
           java-version: ${{ matrix.java }}
-
-      - name: Set up Java 25 for Maven
-        id: setup-build-java
-        uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
-        with:
-          distribution: "temurin"
-          java-version: "25"
 
       - name: Cache local Maven repository
         uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
@@ -43,10 +36,4 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build and test on Java ${{ matrix.java }}
-        run: >-
-          ./mvnw clean install
-          -Djvm=${{ steps.setup-test-java.outputs.path }}/bin/java
-          -Dspotless.skip=true
-          -Dcheckstyle.skip=true
-          -Dwarnings=-nowarn
-          -Dcoverage.skip=true
+        run: ./mvnw clean install -Dtest.java.version=${{ matrix.java }} -Dspotless.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn -Dcoverage.skip=true
