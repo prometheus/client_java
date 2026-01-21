@@ -436,23 +436,54 @@
       <id>errorprone</id>
       <activation>
         <jdk>[21,)</jdk>
+        <property>
+          <name>!skipErrorProne</name>
+          <value>true</value>
+        </property>
       </activation>
       <build>
         <plugins>
           <plugin>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
-              <compilerArgs combine.children="append">
-                <arg>
-                  -Xplugin:ErrorProne
-                  -Xep:AlmostJavadoc:OFF
-                  -Xep:MissingSummary:OFF
-                  -Xep:LongDoubleConversion:OFF
-                  -Xep:StringSplitter:OFF
-                  -XepExcludedPaths:(.*/generated/.*|.*/src/test/java/.*|.*/examples/.*|.*/integration-tests/.*)
-                  -XepOpt:NullAway:AnnotatedPackages=io.prometheus.metrics
-                </arg>
+              <fork>true</fork>
+              <compilerArgs combine.children="replace">
+                <arg>-Xlint:all,-serial,-processing,-options</arg>
+                <arg>${warnings}</arg>
+                <arg>--should-stop=ifError=FLOW</arg>
+                <arg>-XDcompilePolicy=simple</arg>
+                <arg>-Xplugin:ErrorProne</arg>
+                <arg>-Xep:AlmostJavadoc:OFF</arg>
+                <arg>-Xep:MissingSummary:OFF</arg>
+                <arg>-Xep:LongDoubleConversion:OFF</arg>
+                <arg>-Xep:StringSplitter:OFF</arg>
+                <arg>-XepExcludedPaths:(.*/generated/.*|.*/src/test/java/.*|.*/examples/.*|.*/integration-tests/.*)</arg>
+                <arg>-XepOpt:NullAway:AnnotatedPackages=io.prometheus.metrics</arg>
               </compilerArgs>
+              <forkOptions>
+                <jvmArgs>
+                  <jvmArg>--add-exports</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</jvmArg>
+                  <jvmArg>--add-exports</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</jvmArg>
+                  <jvmArg>--add-exports</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</jvmArg>
+                  <jvmArg>--add-exports</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</jvmArg>
+                  <jvmArg>--add-exports</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</jvmArg>
+                  <jvmArg>--add-exports</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</jvmArg>
+                  <jvmArg>--add-exports</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</jvmArg>
+                  <jvmArg>--add-exports</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</jvmArg>
+                  <jvmArg>--add-opens</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</jvmArg>
+                  <jvmArg>--add-opens</jvmArg>
+                  <jvmArg>jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</jvmArg>
+                </jvmArgs>
+              </forkOptions>
               <annotationProcessorPaths>
                 <path>
                   <groupId>com.google.errorprone</groupId>
