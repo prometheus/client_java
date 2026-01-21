@@ -17,3 +17,6 @@ max_line_length = 120
 # checked by black
 indent_size = 4
 max_line_length = 120
+
+[.mise/tasks/build-release.sh]
+max_line_length = 110
