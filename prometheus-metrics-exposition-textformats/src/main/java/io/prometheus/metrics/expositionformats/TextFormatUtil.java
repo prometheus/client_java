@@ -36,21 +36,27 @@ public class TextFormatUtil {
    * only one HELP/TYPE declaration per metric family.
    */
   public static MetricSnapshots mergeDuplicates(MetricSnapshots metricSnapshots) {
-    Map<String, List<MetricSnapshot>> grouped = new LinkedHashMap<>();
-
-    // Group snapshots by Prometheus name
-    for (MetricSnapshot snapshot : metricSnapshots) {
-      String prometheusName = snapshot.getMetadata().getPrometheusName();
-      grouped.computeIfAbsent(prometheusName, k -> new ArrayList<>()).add(snapshot);
+    if (metricSnapshots.size() <= 1) {
+      return metricSnapshots;
     }
 
-    // Merge groups with multiple snapshots
+    Map<String, List<MetricSnapshot>> grouped = new LinkedHashMap<>();
+
+    for (MetricSnapshot snapshot : metricSnapshots) {
+      String prometheusName = snapshot.getMetadata().getPrometheusName();
+      List<MetricSnapshot> list = grouped.get(prometheusName);
+      if (list == null) {
+        list = new ArrayList<>();
+        grouped.put(prometheusName, list);
+      }
+      list.add(snapshot);
+    }
+
     MetricSnapshots.Builder builder = MetricSnapshots.builder();
     for (List<MetricSnapshot> group : grouped.values()) {
       if (group.size() == 1) {
         builder.metricSnapshot(group.get(0));
       } else {
-        // Merge multiple snapshots with same name
         MetricSnapshot merged = mergeSnapshots(group);
         builder.metricSnapshot(merged);
       }
@@ -212,7 +218,8 @@ public class TextFormatUtil {
   private static MetricSnapshot mergeSnapshots(List<MetricSnapshot> snapshots) {
     MetricSnapshot first = snapshots.get(0);
 
-    // Validate all snapshots are the same type
+    // Validate all snapshots are the same type and calculate total size
+    int totalDataPoints = 0;
     for (MetricSnapshot snapshot : snapshots) {
       if (snapshot.getClass() != first.getClass()) {
         throw new IllegalArgumentException(
@@ -221,9 +228,11 @@ public class TextFormatUtil {
                 + " and "
                 + snapshot.getClass().getName());
       }
+      totalDataPoints += snapshot.getDataPoints().size();
     }
 
-    List<DataPointSnapshot> allDataPoints = new ArrayList<>();
+    // Pre-size the list to avoid resizing
+    List<DataPointSnapshot> allDataPoints = new ArrayList<>(totalDataPoints);
     for (MetricSnapshot snapshot : snapshots) {
       allDataPoints.addAll(snapshot.getDataPoints());
     }
