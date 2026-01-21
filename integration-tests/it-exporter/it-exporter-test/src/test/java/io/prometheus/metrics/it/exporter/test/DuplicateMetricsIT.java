@@ -37,10 +37,10 @@ class DuplicateMetricsIT extends ExporterTest {
     Response response = scrape("GET", "");
     assertThat(response.status).isEqualTo(200);
     assertContentType(
-      "text/plain; version=0.0.4; charset=utf-8", response.getHeader("Content-Type"));
+        "text/plain; version=0.0.4; charset=utf-8", response.getHeader("Content-Type"));
 
     String expected =
-      """
+        """
     # HELP active_connections Active connections
     # TYPE active_connections gauge
     active_connections{pool="primary",type="read"} 30.0
@@ -66,15 +66,15 @@ class DuplicateMetricsIT extends ExporterTest {
   void testDuplicateMetricsInOpenMetricsTextFormat() throws IOException {
     start();
     Response response =
-      scrape("GET", "", "Accept", "application/openmetrics-text; version=1.0.0; charset=utf-8");
+        scrape("GET", "", "Accept", "application/openmetrics-text; version=1.0.0; charset=utf-8");
     assertThat(response.status).isEqualTo(200);
     assertContentType(
-      "application/openmetrics-text; version=1.0.0; charset=utf-8",
-      response.getHeader("Content-Type"));
+        "application/openmetrics-text; version=1.0.0; charset=utf-8",
+        response.getHeader("Content-Type"));
 
     // OpenMetrics format should have UNIT for unique_metric_bytes (base name without _total)
     String expected =
-      """
+        """
     # TYPE active_connections gauge
     # HELP active_connections Active connections
     active_connections{pool="primary",type="read"} 30.0
@@ -102,17 +102,17 @@ class DuplicateMetricsIT extends ExporterTest {
   void testDuplicateMetricsInPrometheusProtobufFormat() throws IOException {
     start();
     Response response =
-      scrape(
-        "GET",
-        "",
-        "Accept",
-        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
-          + " encoding=delimited");
+        scrape(
+            "GET",
+            "",
+            "Accept",
+            "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+                + " encoding=delimited");
     assertThat(response.status).isEqualTo(200);
     assertContentType(
-      "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
-        + " encoding=delimited",
-      response.getHeader("Content-Type"));
+        "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily;"
+            + " encoding=delimited",
+        response.getHeader("Content-Type"));
 
     List<Metrics.MetricFamily> metrics = response.protoBody();
 
@@ -181,8 +181,8 @@ class DuplicateMetricsIT extends ExporterTest {
     String body = response.stringBody();
 
     assertThat(body)
-      .contains("http_requests_total{method=\"GET\",status=\"success\"} 150.0")
-      .contains("http_requests_total{endpoint=\"/api\",status=\"error\"} 5.0");
+        .contains("http_requests_total{method=\"GET\",status=\"success\"} 150.0")
+        .contains("http_requests_total{endpoint=\"/api\",status=\"error\"} 5.0");
 
     // Should NOT contain active_connections or unique_metric_total
     assertThat(body).doesNotContain("active_connections").doesNotContain("unique_metric_total");
@@ -190,7 +190,7 @@ class DuplicateMetricsIT extends ExporterTest {
 
   private boolean hasLabel(List<Metrics.LabelPair> labels, String name, String value) {
     return labels.stream()
-      .anyMatch(label -> label.getName().equals(name) && label.getValue().equals(value));
+        .anyMatch(label -> label.getName().equals(name) && label.getValue().equals(value));
   }
 
   private String nameParam() {

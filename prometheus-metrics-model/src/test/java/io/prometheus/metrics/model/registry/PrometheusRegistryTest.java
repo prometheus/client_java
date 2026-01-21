@@ -357,12 +357,13 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void registerDuplicateMultiCollector_withoutTypeInfo_allowedForBackwardCompatibility() {
+  public void registerDuplicateMultiCollector_notAllowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
-    // multiCollector doesn't provide type/label info, so validation is skipped
     registry.register(multiCollector);
-    // This now succeeds for backward compatibility (validation skipped when type is null)
-    assertThatCode(() -> registry.register(multiCollector)).doesNotThrowAnyException();
+    // Registering the same instance twice should fail
+    assertThatThrownBy(() -> registry.register(multiCollector))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("already registered");
   }
 
   @Test

@@ -60,6 +60,11 @@ public class PrometheusRegistry {
   }
 
   public void register(Collector collector) {
+    // Check if this exact instance is already registered
+    if (collectors.contains(collector)) {
+      throw new IllegalArgumentException("Collector instance is already registered");
+    }
+
     String prometheusName = collector.getPrometheusName();
     MetricType metricType = collector.getMetricType();
     Set<String> labelNames = collector.getLabelNames();
@@ -103,6 +108,11 @@ public class PrometheusRegistry {
   }
 
   public void register(MultiCollector collector) {
+    // Check if this exact instance is already registered
+    if (multiCollectors.contains(collector)) {
+      throw new IllegalArgumentException("MultiCollector instance is already registered");
+    }
+
     List<String> names = collector.getPrometheusNames();
 
     for (String prometheusName : names) {
@@ -284,7 +294,6 @@ public class PrometheusRegistry {
    * identical label sets.
    */
   private void validateNoDuplicateLabelSchemas(List<MetricSnapshot> snapshots) {
-    // Group snapshots by prometheus name
     Map<String, List<MetricSnapshot>> snapshotsByName = new HashMap<>();
     for (MetricSnapshot snapshot : snapshots) {
       String name = snapshot.getMetadata().getPrometheusName();
@@ -295,7 +304,7 @@ public class PrometheusRegistry {
     for (Map.Entry<String, List<MetricSnapshot>> entry : snapshotsByName.entrySet()) {
       List<MetricSnapshot> group = entry.getValue();
       if (group.size() <= 1) {
-        continue; // No duplicates possible with only one snapshot
+        continue;
       }
 
       // Extract label schemas from each snapshot
@@ -303,7 +312,6 @@ public class PrometheusRegistry {
       for (MetricSnapshot snapshot : group) {
         Set<String> labelSchema = extractLabelSchema(snapshot);
         if (labelSchema != null) {
-          // Check if this label schema already exists
           if (labelSchemas.contains(labelSchema)) {
             throw new IllegalStateException(
                 snapshot.getMetadata().getPrometheusName()
@@ -320,6 +328,7 @@ public class PrometheusRegistry {
    * Extracts the label schema (set of label names) from a snapshot's data points. Returns null if
    * the snapshot has no data points or if data points have inconsistent label schemas.
    */
+  @Nullable
   private Set<String> extractLabelSchema(MetricSnapshot snapshot) {
     if (snapshot.getDataPoints().isEmpty()) {
       return null;

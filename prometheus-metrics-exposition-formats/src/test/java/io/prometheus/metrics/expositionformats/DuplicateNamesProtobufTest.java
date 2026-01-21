@@ -25,47 +25,47 @@ class DuplicateNamesProtobufTest {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     registry.register(
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder()
-            .name("api_responses")
-            .help("API responses")
-            .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                .value(100)
-                .build())
-            .build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("api_responses")
+                .help("API responses")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
+                        .value(100)
+                        .build())
+                .build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "api_responses_total";
-        }
-      });
+          @Override
+          public String getPrometheusName() {
+            return "api_responses_total";
+          }
+        });
 
     registry.register(
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder()
-            .name("api_responses")
-            .help("API responses")
-            .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                .labels(
-                  Labels.of("uri", "/hello", "outcome", "FAILURE", "error", "TIMEOUT"))
-                .value(10)
-                .build())
-            .build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("api_responses")
+                .help("API responses")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(
+                            Labels.of("uri", "/hello", "outcome", "FAILURE", "error", "TIMEOUT"))
+                        .value(10)
+                        .build())
+                .build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "api_responses_total";
-        }
-      });
+          @Override
+          public String getPrometheusName() {
+            return "api_responses_total";
+          }
+        });
     return registry;
   }
 
@@ -88,29 +88,29 @@ class DuplicateNamesProtobufTest {
     assertThat(family.getMetricCount()).isEqualTo(2);
 
     Metrics.Metric successMetric =
-      family.getMetricList().stream()
-        .filter(
-          m ->
-            m.getLabelList().stream()
-              .anyMatch(
-                l -> l.getName().equals("outcome") && l.getValue().equals("SUCCESS")))
-        .findFirst()
-        .orElseThrow(() -> new AssertionError("SUCCESS metric not found"));
+        family.getMetricList().stream()
+            .filter(
+                m ->
+                    m.getLabelList().stream()
+                        .anyMatch(
+                            l -> l.getName().equals("outcome") && l.getValue().equals("SUCCESS")))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("SUCCESS metric not found"));
     assertThat(successMetric.getCounter().getValue()).isEqualTo(100.0);
 
     Metrics.Metric failureMetric =
-      family.getMetricList().stream()
-        .filter(
-          m ->
-            m.getLabelList().stream()
-              .anyMatch(
-                l ->
-                  l.getName().equals("outcome") && l.getValue().equals("FAILURE"))
-              && m.getLabelList().stream()
-              .anyMatch(
-                l -> l.getName().equals("error") && l.getValue().equals("TIMEOUT")))
-        .findFirst()
-        .orElseThrow(() -> new AssertionError("FAILURE metric not found"));
+        family.getMetricList().stream()
+            .filter(
+                m ->
+                    m.getLabelList().stream()
+                            .anyMatch(
+                                l ->
+                                    l.getName().equals("outcome") && l.getValue().equals("FAILURE"))
+                        && m.getLabelList().stream()
+                            .anyMatch(
+                                l -> l.getName().equals("error") && l.getValue().equals("TIMEOUT")))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("FAILURE metric not found"));
     assertThat(failureMetric.getCounter().getValue()).isEqualTo(10.0);
   }
 
@@ -119,58 +119,58 @@ class DuplicateNamesProtobufTest {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     registry.register(
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder()
-            .name("api_responses")
-            .help("API responses")
-            .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                .value(100)
-                .build())
-            .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                .labels(Labels.of("uri", "/world", "outcome", "SUCCESS"))
-                .value(200)
-                .build())
-            .build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("api_responses")
+                .help("API responses")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
+                        .value(100)
+                        .build())
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(Labels.of("uri", "/world", "outcome", "SUCCESS"))
+                        .value(200)
+                        .build())
+                .build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "api_responses_total";
-        }
-      });
+          @Override
+          public String getPrometheusName() {
+            return "api_responses_total";
+          }
+        });
 
     registry.register(
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder()
-            .name("api_responses")
-            .help("API responses")
-            .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                .labels(
-                  Labels.of("uri", "/hello", "outcome", "FAILURE", "error", "TIMEOUT"))
-                .value(10)
-                .build())
-            .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                .labels(
-                  Labels.of("uri", "/world", "outcome", "FAILURE", "error", "NOT_FOUND"))
-                .value(5)
-                .build())
-            .build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("api_responses")
+                .help("API responses")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(
+                            Labels.of("uri", "/hello", "outcome", "FAILURE", "error", "TIMEOUT"))
+                        .value(10)
+                        .build())
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(
+                            Labels.of("uri", "/world", "outcome", "FAILURE", "error", "NOT_FOUND"))
+                        .value(5)
+                        .build())
+                .build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "api_responses_total";
-        }
-      });
+          @Override
+          public String getPrometheusName() {
+            return "api_responses_total";
+          }
+        });
 
     MetricSnapshots snapshots = registry.scrape();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -185,22 +185,22 @@ class DuplicateNamesProtobufTest {
     assertThat(family.getMetricCount()).isEqualTo(4);
 
     long successCount =
-      family.getMetricList().stream()
-        .filter(
-          m ->
-            m.getLabelList().stream()
-              .anyMatch(
-                l -> l.getName().equals("outcome") && l.getValue().equals("SUCCESS")))
-        .count();
+        family.getMetricList().stream()
+            .filter(
+                m ->
+                    m.getLabelList().stream()
+                        .anyMatch(
+                            l -> l.getName().equals("outcome") && l.getValue().equals("SUCCESS")))
+            .count();
 
     long failureCount =
-      family.getMetricList().stream()
-        .filter(
-          m ->
-            m.getLabelList().stream()
-              .anyMatch(
-                l -> l.getName().equals("outcome") && l.getValue().equals("FAILURE")))
-        .count();
+        family.getMetricList().stream()
+            .filter(
+                m ->
+                    m.getLabelList().stream()
+                        .anyMatch(
+                            l -> l.getName().equals("outcome") && l.getValue().equals("FAILURE")))
+            .count();
 
     assertThat(successCount).isEqualTo(2);
     assertThat(failureCount).isEqualTo(2);
@@ -242,52 +242,52 @@ class DuplicateNamesProtobufTest {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     registry.register(
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return CounterSnapshot.builder()
-            .name("http_requests")
-            .help("HTTP Request counter")
-            .dataPoint(
-              CounterSnapshot.CounterDataPointSnapshot.builder()
-                .labels(Labels.of("method", "GET"))
-                .value(100)
-                .build())
-            .build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("http_requests")
+                .help("HTTP Request counter")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(Labels.of("method", "GET"))
+                        .value(100)
+                        .build())
+                .build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "http_requests_total";
-        }
-      });
+          @Override
+          public String getPrometheusName() {
+            return "http_requests_total";
+          }
+        });
 
     registry.register(
-      new Collector() {
-        @Override
-        public MetricSnapshot collect() {
-          return GaugeSnapshot.builder()
-            .name("active_sessions")
-            .help("Active sessions gauge")
-            .dataPoint(
-              GaugeSnapshot.GaugeDataPointSnapshot.builder()
-                .labels(Labels.of("region", "us-east-1"))
-                .value(50)
-                .build())
-            .build();
-        }
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder()
+                .name("active_sessions")
+                .help("Active sessions gauge")
+                .dataPoint(
+                    GaugeSnapshot.GaugeDataPointSnapshot.builder()
+                        .labels(Labels.of("region", "us-east-1"))
+                        .value(50)
+                        .build())
+                .build();
+          }
 
-        @Override
-        public String getPrometheusName() {
-          return "active_sessions";
-        }
-      });
+          @Override
+          public String getPrometheusName() {
+            return "active_sessions";
+          }
+        });
 
     return registry.scrape();
   }
 
   private static List<Metrics.MetricFamily> parseProtobufOutput(ByteArrayOutputStream out)
-    throws IOException {
+      throws IOException {
     List<Metrics.MetricFamily> metricFamilies = new ArrayList<>();
     try (ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray())) {
       Metrics.MetricFamily family;
