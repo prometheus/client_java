@@ -8,22 +8,22 @@ set -euo pipefail
 
 # Use gsed and ggrep on macOS (requires: brew install gnu-sed grep)
 if [[ "$OSTYPE" == "darwin"* ]] && command -v gsed >/dev/null 2>&1; then
-  SED=gsed
+	SED='gsed'
 else
-  SED=sed
+	SED='sed'
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]] && command -v ggrep >/dev/null 2>&1; then
-  GREP=ggrep
+	GREP='ggrep'
 else
-  GREP=grep
+	GREP='grep'
 fi
 
 # Use mise-provided protoc if available
 if command -v mise >/dev/null 2>&1; then
-  PROTOC="mise exec -- protoc"
+	PROTOC="mise exec -- protoc"
 else
-  PROTOC=protoc
+	PROTOC='protoc'
 fi
 
 TARGET_DIR=$1
