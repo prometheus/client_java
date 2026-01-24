@@ -5,10 +5,10 @@ This document tracks code quality improvements for the Prometheus Java Client li
 ## High Priority
 
 ### 1. Add Missing Test Coverage for Exporter Modules
-- [ ] `prometheus-metrics-exporter-common` - base module, no tests
-- [ ] `prometheus-metrics-exporter-servlet-jakarta` - no tests
-- [ ] `prometheus-metrics-exporter-servlet-javax` - no tests
-- [ ] `prometheus-metrics-exporter-opentelemetry-otel-agent-resources` - no tests
+- [x] `prometheus-metrics-exporter-common` - base module, no tests
+- [x] `prometheus-metrics-exporter-servlet-jakarta` - no tests
+- [x] `prometheus-metrics-exporter-servlet-javax` - no tests
+- [x] `prometheus-metrics-exporter-opentelemetry-otel-agent-resources` - no tests
 
 ### 2. Eliminate Dropwizard Module Duplication
 - [ ] Create shared base class or use generics for `prometheus-metrics-instrumentation-dropwizard` and `prometheus-metrics-instrumentation-dropwizard5` (~297 lines each, nearly identical)
@@ -82,4 +82,4 @@ _Add notes here as items are completed:_
 
 | Date | Item | Notes |
 |------|------|-------|
-| | | |
+| 2026-01-24 | Missing Test Coverage for Exporter Modules | Added 55 tests across 4 modules: exporter-common (22 tests), servlet-jakarta (14 tests), servlet-javax (14 tests), otel-agent-resources (5 tests). All tests passing. |
