@@ -53,7 +53,10 @@ public abstract class MetricWithFixedMetadata extends Metric {
 
   @Override
   public Set<String> getLabelNames() {
-    Set<String> names = new HashSet<>(Arrays.asList(labelNames));
+    Set<String> names = new HashSet<>();
+    for (String labelName : labelNames) {
+      names.add(PrometheusNaming.prometheusName(labelName));
+    }
     for (Label label : constLabels) {
       names.add(PrometheusNaming.prometheusName(label.getName()));
     }

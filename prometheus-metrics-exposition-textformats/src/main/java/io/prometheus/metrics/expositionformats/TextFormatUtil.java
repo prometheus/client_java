@@ -218,7 +218,6 @@ public class TextFormatUtil {
   private static MetricSnapshot mergeSnapshots(List<MetricSnapshot> snapshots) {
     MetricSnapshot first = snapshots.get(0);
 
-    // Validate all snapshots are the same type and calculate total size
     int totalDataPoints = 0;
     for (MetricSnapshot snapshot : snapshots) {
       if (snapshot.getClass() != first.getClass()) {
@@ -231,13 +230,11 @@ public class TextFormatUtil {
       totalDataPoints += snapshot.getDataPoints().size();
     }
 
-    // Pre-size the list to avoid resizing
     List<DataPointSnapshot> allDataPoints = new ArrayList<>(totalDataPoints);
     for (MetricSnapshot snapshot : snapshots) {
       allDataPoints.addAll(snapshot.getDataPoints());
     }
 
-    // Create merged snapshot based on type
     if (first instanceof CounterSnapshot) {
       return new CounterSnapshot(
           first.getMetadata(),

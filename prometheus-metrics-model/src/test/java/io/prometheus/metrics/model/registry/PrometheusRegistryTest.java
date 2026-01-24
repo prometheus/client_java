@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.registry;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,7 +9,6 @@ import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,7 +79,7 @@ class PrometheusRegistryTest {
 
         @Override
         public List<String> getPrometheusNames() {
-          return Arrays.asList(gaugeA.getPrometheusName(), counterB.getPrometheusName());
+          return asList(gaugeA.getPrometheusName(), counterB.getPrometheusName());
         }
       };
 
@@ -162,7 +162,7 @@ class PrometheusRegistryTest {
 
           @Override
           public Set<String> getLabelNames() {
-            return new HashSet<>(Arrays.asList("path", "status"));
+            return new HashSet<>(asList("path", "status"));
           }
         };
 
@@ -185,7 +185,7 @@ class PrometheusRegistryTest {
 
           @Override
           public Set<String> getLabelNames() {
-            return new HashSet<>(Arrays.asList("region"));
+            return new HashSet<>(asList("region"));
           }
         };
 
@@ -218,7 +218,7 @@ class PrometheusRegistryTest {
 
           @Override
           public Set<String> getLabelNames() {
-            return new HashSet<>(Arrays.asList("path", "status"));
+            return new HashSet<>(asList("path", "status"));
           }
         };
 
@@ -241,7 +241,7 @@ class PrometheusRegistryTest {
 
           @Override
           public Set<String> getLabelNames() {
-            return new HashSet<>(Arrays.asList("path", "status"));
+            return new HashSet<>(asList("path", "status"));
           }
         };
 
@@ -250,7 +250,7 @@ class PrometheusRegistryTest {
     // Second collector has same name, type, and label schema - should fail
     assertThatThrownBy(() -> registry.register(counter2))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Duplicate label schema");
+        .hasMessageContaining("duplicate metric name with identical label schema");
   }
 
   @Test
@@ -321,7 +321,7 @@ class PrometheusRegistryTest {
 
           @Override
           public List<String> getPrometheusNames() {
-            return Arrays.asList("shared_metric");
+            return asList("shared_metric");
           }
 
           @Override
@@ -388,5 +388,253 @@ class PrometheusRegistryTest {
 
     registry.clear();
     assertThat(registry.scrape().size()).isZero();
+  }
+
+  @Test
+  public void unregister_shouldRemoveLabelSchemaFromRegistrationInfo() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector counterWithPathLabel =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests_total").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path", "status"));
+          }
+        };
+
+    Collector counterWithRegionLabel =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests_total").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(List.of("region"));
+          }
+        };
+
+    Collector counterWithPathLabelAgain =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests_total").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests_total";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path", "status"));
+          }
+        };
+
+    registry.register(counterWithPathLabel);
+    registry.register(counterWithRegionLabel);
+
+    registry.unregister(counterWithPathLabel);
+
+    assertThatCode(() -> registry.register(counterWithPathLabelAgain)).doesNotThrowAnyException();
+  }
+
+  @Test
+  public void scrape_withFilter_shouldValidateDuplicateLabelSchemas() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector collector1 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder()
+                .name("requests")
+                .dataPoint(
+                    GaugeSnapshot.GaugeDataPointSnapshot.builder()
+                        .value(100)
+                        .labels(io.prometheus.metrics.model.snapshots.Labels.of("path", "/api"))
+                        .build())
+                .build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+          // No getMetricType() or getLabelNames() - returns null by default
+        };
+
+    Collector collector2 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder()
+                .name("requests")
+                .dataPoint(
+                    GaugeSnapshot.GaugeDataPointSnapshot.builder()
+                        .value(200)
+                        .labels(io.prometheus.metrics.model.snapshots.Labels.of("path", "/home"))
+                        .build())
+                .build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+          // No getMetricType() or getLabelNames() - returns null by default
+        };
+
+    // Both collectors can register because they don't provide type/label info
+    registry.register(collector1);
+    registry.register(collector2);
+
+    assertThatThrownBy(registry::scrape)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("duplicate metric name with identical label schema");
+
+    // Filtered scrape should also detect duplicate label schemas
+    assertThatThrownBy(() -> registry.scrape(name -> name.equals("requests")))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("duplicate metric name with identical label schema");
+  }
+
+  @Test
+  public void register_withEmptyLabelSets_shouldDetectDuplicates() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector collector1 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+
+          // getLabelNames() returns null by default
+        };
+
+    // Register another collector with same name and type, also no labels
+    Collector collector2 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+
+          // getLabelNames() returns null by default
+        };
+
+    registry.register(collector1);
+
+    assertThatThrownBy(() -> registry.register(collector2))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("duplicate metric name with identical label schema");
+  }
+
+  @Test
+  public void register_withMixedNullAndEmptyLabelSets_shouldDetectDuplicates() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector collector1 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>();
+          }
+        };
+
+    Collector collector2 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.GAUGE;
+          }
+
+          // getLabelNames() returns null by default
+        };
+
+    registry.register(collector1);
+
+    // null and empty should be treated the same
+    assertThatThrownBy(() -> registry.register(collector2))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("duplicate metric name with identical label schema");
   }
 }

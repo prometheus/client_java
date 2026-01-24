@@ -9,17 +9,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/**
- * Integration test for duplicate metric names with different label sets.
- *
- * <p>This test validates that:
- *
- * <ul>
- *   <li>Multiple metrics with the same Prometheus name but different labels can be registered
- *   <li>All exposition formats (text, OpenMetrics, protobuf) correctly merge and expose them
- *   <li>The merged output is valid and scrapeable by Prometheus
- * </ul>
- */
 class DuplicateMetricsIT extends ExporterTest {
 
   public DuplicateMetricsIT() throws IOException, URISyntaxException {
@@ -111,8 +100,6 @@ class DuplicateMetricsIT extends ExporterTest {
 
     List<Metrics.MetricFamily> metrics = response.protoBody();
 
-    // Should have exactly 3 metric families (active_connections, http_requests_total,
-    // unique_metric_bytes_total)
     assertThat(metrics).hasSize(3);
 
     // Metrics are sorted by name

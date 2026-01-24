@@ -4,13 +4,13 @@ import io.prometheus.metrics.model.snapshots.DataPointSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
@@ -19,8 +19,8 @@ public class PrometheusRegistry {
   public static final PrometheusRegistry defaultRegistry = new PrometheusRegistry();
 
   private final Set<String> prometheusNames = ConcurrentHashMap.newKeySet();
-  private final List<Collector> collectors = new CopyOnWriteArrayList<>();
-  private final List<MultiCollector> multiCollectors = new CopyOnWriteArrayList<>();
+  private final Set<Collector> collectors = ConcurrentHashMap.newKeySet();
+  private final Set<MultiCollector> multiCollectors = ConcurrentHashMap.newKeySet();
   private final ConcurrentHashMap<String, RegistrationInfo> registered = new ConcurrentHashMap<>();
 
   /**
@@ -31,25 +31,35 @@ public class PrometheusRegistry {
     private final MetricType type;
     private final Set<Set<String>> labelSets;
 
-    RegistrationInfo(MetricType type, @Nullable Set<String> labelNames) {
+    private RegistrationInfo(MetricType type, Set<Set<String>> labelSets) {
       this.type = type;
-      this.labelSets = ConcurrentHashMap.newKeySet();
-      if (labelNames != null) {
-        this.labelSets.add(labelNames);
-      }
+      this.labelSets = labelSets;
+    }
+
+    static RegistrationInfo of(MetricType type, @Nullable Set<String> labelNames) {
+      Set<Set<String>> labelSets = ConcurrentHashMap.newKeySet();
+      Set<String> normalized =
+          (labelNames == null || labelNames.isEmpty()) ? Collections.emptySet() : labelNames;
+      labelSets.add(normalized);
+      return new RegistrationInfo(type, labelSets);
+    }
+
+    static RegistrationInfo withLabelSets(MetricType type, Set<Set<String>> labelSets) {
+      Set<Set<String>> newLabelSets = ConcurrentHashMap.newKeySet();
+      newLabelSets.addAll(labelSets);
+      return new RegistrationInfo(type, newLabelSets);
     }
 
     /**
      * Adds a new label schema to this registration.
      *
-     * @param labelNames the label names to add
+     * @param labelNames the label names to add (null or empty sets are normalized to empty set)
      * @return true if the label schema was added, false if it already exists
      */
     boolean addLabelSet(@Nullable Set<String> labelNames) {
-      if (labelNames == null) {
-        return true;
-      }
-      return labelSets.add(labelNames);
+      Set<String> normalized =
+          (labelNames == null || labelNames.isEmpty()) ? Collections.emptySet() : labelNames;
+      return labelSets.add(normalized);
     }
 
     MetricType getType() {
@@ -71,7 +81,7 @@ public class PrometheusRegistry {
           prometheusName,
           (name, existingInfo) -> {
             if (existingInfo == null) {
-              return new RegistrationInfo(metricType, labelNames);
+              return RegistrationInfo.of(metricType, labelNames);
             } else {
               if (existingInfo.getType() != metricType) {
                 throw new IllegalArgumentException(
@@ -82,14 +92,15 @@ public class PrometheusRegistry {
                         + metricType);
               }
 
-              // Check label schema uniqueness (if label names provided)
-              if (labelNames != null) {
-                if (!existingInfo.addLabelSet(labelNames)) {
-                  throw new IllegalArgumentException(
-                      prometheusName
-                          + ": Duplicate label schema. A metric with the same name, type, and label"
-                          + " names is already registered.");
-                }
+              if (!existingInfo.addLabelSet(labelNames)) {
+                Set<String> normalized =
+                    (labelNames == null || labelNames.isEmpty())
+                        ? Collections.emptySet()
+                        : labelNames;
+                throw new IllegalArgumentException(
+                    prometheusName
+                        + ": duplicate metric name with identical label schema "
+                        + normalized);
               }
 
               return existingInfo;
@@ -120,7 +131,7 @@ public class PrometheusRegistry {
             prometheusName,
             (name, existingInfo) -> {
               if (existingInfo == null) {
-                return new RegistrationInfo(metricType, labelNames);
+                return RegistrationInfo.of(metricType, labelNames);
               } else {
                 if (existingInfo.getType() != metricType) {
                   throw new IllegalArgumentException(
@@ -131,13 +142,15 @@ public class PrometheusRegistry {
                           + metricType);
                 }
 
-                if (labelNames != null) {
-                  if (!existingInfo.addLabelSet(labelNames)) {
-                    throw new IllegalArgumentException(
-                        prometheusName
-                            + ": Duplicate label schema. A metric with the same name, type, and"
-                            + " label names is already registered.");
-                  }
+                if (!existingInfo.addLabelSet(labelNames)) {
+                  Set<String> normalized =
+                      (labelNames == null || labelNames.isEmpty())
+                          ? Collections.emptySet()
+                          : labelNames;
+                  throw new IllegalArgumentException(
+                      prometheusName
+                          + ": duplicate metric name with identical label schema "
+                          + normalized);
                 }
 
                 return existingInfo;
@@ -169,25 +182,47 @@ public class PrometheusRegistry {
   }
 
   private void nameInUse(String prometheusName) {
-    boolean nameStillInUse = false;
+    List<Collector> remainingCollectors = new ArrayList<>();
     for (Collector c : collectors) {
       if (prometheusName.equals(c.getPrometheusName())) {
-        nameStillInUse = true;
-        break;
+        remainingCollectors.add(c);
       }
     }
-    if (!nameStillInUse) {
+
+    List<MultiCollector> remainingMultiCollectors = new ArrayList<>();
+    if (remainingCollectors.isEmpty()) {
       for (MultiCollector mc : multiCollectors) {
         if (mc.getPrometheusNames().contains(prometheusName)) {
-          nameStillInUse = true;
-          break;
+          remainingMultiCollectors.add(mc);
         }
       }
     }
-    if (!nameStillInUse) {
+
+    if (remainingCollectors.isEmpty() && remainingMultiCollectors.isEmpty()) {
       prometheusNames.remove(prometheusName);
       // Also remove from registered since no collectors use this name anymore
       registered.remove(prometheusName);
+    } else {
+      // Rebuild labelSets from remaining collectors
+      RegistrationInfo info = registered.get(prometheusName);
+      if (info != null) {
+        Set<Set<String>> newLabelSets = new HashSet<>();
+        for (Collector c : remainingCollectors) {
+          Set<String> labelNames = c.getLabelNames();
+          if (labelNames != null) {
+            newLabelSets.add(labelNames);
+          }
+        }
+        for (MultiCollector mc : remainingMultiCollectors) {
+          Set<String> labelNames = mc.getLabelNames(prometheusName);
+          if (labelNames != null) {
+            newLabelSets.add(labelNames);
+          }
+        }
+        // Replace the RegistrationInfo with updated labelSets
+        registered.put(
+            prometheusName, RegistrationInfo.withLabelSets(info.getType(), newLabelSets));
+      }
     }
   }
 
@@ -240,7 +275,7 @@ public class PrometheusRegistry {
     if (includedNames == null) {
       return scrape(scrapeRequest);
     }
-    MetricSnapshots.Builder result = MetricSnapshots.builder();
+    List<MetricSnapshot> allSnapshots = new ArrayList<>();
     for (Collector collector : collectors) {
       String prometheusName = collector.getPrometheusName();
       // prometheusName == null means the name is unknown, and we have to scrape to learn the name.
@@ -251,7 +286,7 @@ public class PrometheusRegistry {
                 ? collector.collect(includedNames)
                 : collector.collect(includedNames, scrapeRequest);
         if (snapshot != null) {
-          result.metricSnapshot(snapshot);
+          allSnapshots.add(snapshot);
         }
       }
     }
@@ -275,10 +310,17 @@ public class PrometheusRegistry {
                 : collector.collect(includedNames, scrapeRequest);
         for (MetricSnapshot snapshot : snapshots) {
           if (snapshot != null) {
-            result.metricSnapshot(snapshot);
+            allSnapshots.add(snapshot);
           }
         }
       }
+    }
+
+    validateNoDuplicateLabelSchemas(allSnapshots);
+
+    MetricSnapshots.Builder result = MetricSnapshots.builder();
+    for (MetricSnapshot snapshot : allSnapshots) {
+      result.metricSnapshot(snapshot);
     }
     return result.build();
   }
@@ -302,7 +344,6 @@ public class PrometheusRegistry {
         continue;
       }
 
-      // Extract label schemas from each snapshot
       List<Set<String>> labelSchemas = new ArrayList<>();
       for (MetricSnapshot snapshot : group) {
         Set<String> labelSchema = extractLabelSchema(snapshot);
@@ -329,7 +370,6 @@ public class PrometheusRegistry {
       return null;
     }
 
-    // Get label names from the first data point
     DataPointSnapshot firstDataPoint = snapshot.getDataPoints().get(0);
     Set<String> labelNames = new HashSet<>();
     for (int i = 0; i < firstDataPoint.getLabels().size(); i++) {
