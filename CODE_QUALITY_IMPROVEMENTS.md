@@ -11,7 +11,7 @@ This document tracks code quality improvements for the Prometheus Java Client li
 - [x] `prometheus-metrics-exporter-opentelemetry-otel-agent-resources` - no tests
 
 ### 2. Eliminate Dropwizard Module Duplication
-- [ ] Create shared base class or use generics for `prometheus-metrics-instrumentation-dropwizard` and `prometheus-metrics-instrumentation-dropwizard5` (~297 lines each, nearly identical)
+- [x] Create shared base class or use generics for `prometheus-metrics-instrumentation-dropwizard` and `prometheus-metrics-instrumentation-dropwizard5` (~297 lines each, nearly identical)
 
 ### 3. Address Technical Debt (TODOs)
 - [ ] `prometheus-metrics-core/src/main/java/io/prometheus/metrics/core/metrics/Histogram.java:965` - "reset interval isn't tested yet"
@@ -83,3 +83,4 @@ _Add notes here as items are completed:_
 | Date | Item | Notes |
 |------|------|-------|
 | 2026-01-24 | Missing Test Coverage for Exporter Modules | Added 55 tests across 4 modules: exporter-common (22 tests), servlet-jakarta (14 tests), servlet-javax (14 tests), otel-agent-resources (5 tests). All tests passing. |
+| 2026-01-24 | Eliminate Dropwizard Module Duplication | Created AbstractDropwizardExports base class (267 lines) with generic type parameters. Reduced dropwizard module from 297 to 209 lines (-88 lines, -30%), dropwizard5 module from 297 to 212 lines (-85 lines, -29%). All tests passing (32 tests dropwizard5, 13 tests dropwizard). |
