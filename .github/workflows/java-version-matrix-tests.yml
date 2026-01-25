@@ -59,7 +59,7 @@ jobs:
           mise exec -- ../mvnw install -DskipTests -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
             -Djava.version=${{ matrix.java-version }} \
             -Dmaven.compiler.release=${{ matrix.java-version }} \
-            -pl it-common,it-exporter,it-pushgateway
+            -pl it-common,it-exporter/it-exporter-httpserver-sample,it-exporter/it-exporter-servlet-tomcat-sample,it-exporter/it-exporter-servlet-jetty-sample,it-exporter/it-exporter-no-protobuf,it-pushgateway
 
       - name: Run integration tests
         env:
@@ -67,4 +67,4 @@ jobs:
         run: |
           cd integration-tests
           mise exec -- ../mvnw verify -T 2C -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
-            -pl it-exporter,it-pushgateway
+            -pl it-exporter/it-exporter-test,it-exporter/it-no-protobuf-test,it-pushgateway
