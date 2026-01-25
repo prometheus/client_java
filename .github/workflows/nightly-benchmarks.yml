@@ -76,40 +76,41 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
 
-      - name: Checkout or create benchmarks branch
+      - name: Commit and push results to benchmarks branch
         run: |
-          # Check if benchmarks branch exists
-          if git ls-remote --heads origin benchmarks | grep -q benchmarks; then
-            git fetch origin benchmarks
-            git checkout benchmarks
-            # Preserve history directory if it exists
-            if [ -d history ]; then
-              cp -r history benchmark-results/
-            fi
-          else
-            git checkout --orphan benchmarks
-            git rm -rf . 2>/dev/null || true
-          fi
+          # Save results to a temp location
+          mkdir -p /tmp/benchmark-output
+          cp -r benchmark-results/* /tmp/benchmark-output/
 
-      - name: Commit and push results
-        run: |
           # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Move results to root
-          cp -r benchmark-results/* .
-          rm -rf benchmark-results
+          # Checkout or create benchmarks branch
+          if git ls-remote --heads origin benchmarks | grep -q benchmarks; then
+            git fetch origin benchmarks
+            git checkout benchmarks
+            # Preserve existing history
+            if [ -d history ]; then
+              cp -r history /tmp/benchmark-output/
+            fi
+          else
+            git checkout --orphan benchmarks
+          fi
 
-          # Add all files
-          git add -A
+          # Clean working directory
+          git rm -rf . 2>/dev/null || true
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
 
-          # Commit with date
+          # Copy only the benchmark results
+          cp -r /tmp/benchmark-output/* .
+
+          git add README.md results.json history/
+
           DATE=$(date -u +"%Y-%m-%d")
           COMMIT_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
 
           git commit -m "Benchmark results for ${DATE} (${COMMIT_SHORT})" \
             -m "Automated benchmark run from commit ${{ github.sha }}" || echo "No changes to commit"
 
-          # Push to benchmarks branch
           git push origin benchmarks --force-with-lease || git push origin benchmarks
