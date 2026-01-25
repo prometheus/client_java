@@ -83,16 +83,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Checkout or create benchmarks branch
+          # Checkout or create benchmarks branch (use -- to disambiguate from benchmarks/ directory)
           if git ls-remote --heads origin benchmarks | grep -q benchmarks; then
             git fetch origin benchmarks
-            git checkout benchmarks
+            git switch benchmarks
             # Preserve existing history
             if [ -d history ]; then
               cp -r history /tmp/benchmark-output/
             fi
           else
-            git checkout --orphan benchmarks
+            git switch --orphan benchmarks
           fi
 
           # Clean working directory
