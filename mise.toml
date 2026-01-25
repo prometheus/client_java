@@ -83,3 +83,34 @@ run = [
   "hugo --gc --minify --baseURL ${BASE_URL}/",
   "echo 'ls ./public/api' && ls ./public/api"
 ]
+
+[tasks."benchmark:quick"]
+description = "Run benchmarks with reduced iterations (quick smoke test, ~10 min)"
+run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 1 -wi 1 -i 3'"
+
+[tasks."benchmark:standard"]
+description = "Run benchmarks with standard CI settings (~60 min)"
+run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 3 -wi 3 -i 5'"
+
+[tasks."benchmark:full"]
+description = "Run benchmarks with full JMH defaults (~2 hours)"
+run = "python3 ./.mise/tasks/update_benchmarks.py"
+
+[tasks."benchmark:test"]
+description = "Run minimal benchmark test (~1 min) and generate summary"
+run = [
+  "./mvnw -pl benchmarks -am -DskipTests package -q",
+  "java -jar ./benchmarks/target/benchmarks.jar -rf json -rff benchmark-results.json -f 1 -wi 1 -i 3 -r 1s",
+  "python3 ./.mise/tasks/generate_benchmark_summary.py --input benchmark-results.json --output-dir benchmark-results",
+  "echo ''",
+  "echo '=== Generated files ==='",
+  "ls -la benchmark-results/",
+  "ls -la benchmark-results/history/",
+  "echo ''",
+  "echo '=== README.md ==='",
+  "cat benchmark-results/README.md"
+]
+
+[tasks."benchmark:generate-summary"]
+description = "Generate summary from existing benchmark-results.json"
+run = "python3 ./.mise/tasks/generate_benchmark_summary.py --input benchmark-results.json --output-dir benchmark-results"

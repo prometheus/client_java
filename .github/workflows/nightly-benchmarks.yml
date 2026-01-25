@@ -1,0 +1,115 @@
+---
+name: Nightly Benchmarks
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      jmh_args:
+        description: "Additional JMH arguments (e.g., '-f 1 -wi 1 -i 3' for quick run)"
+        required: false
+        default: ""
+
+permissions: {}
+
+concurrency:
+  group: "benchmarks"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  benchmark:
+    # if: github.repository == 'prometheus/client_java'  # Uncomment for production
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
+        with:
+          version: v2026.1.4
+          sha256: 79c798e39b83f0dd80108eaa88c6ca63689695ae975fd6786e7a353ef9f87002
+
+      - name: Cache local Maven repository
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build benchmarks module
+        run: ./mvnw -pl benchmarks -am -DskipTests clean package
+
+      - name: Run JMH benchmarks
+        id: benchmarks
+        run: |
+          # 3 forks, 3 warmup, 5 measurement iterations (~60 min total)
+          DEFAULT_ARGS="-f 3 -wi 3 -i 5"
+          JMH_ARGS="${{ github.event.inputs.jmh_args }}"
+          JMH_ARGS="${JMH_ARGS:-$DEFAULT_ARGS}"
+
+          echo "Running benchmarks with args: $JMH_ARGS"
+
+          # Run benchmarks and output JSON (captures full results)
+          java -jar ./benchmarks/target/benchmarks.jar \
+            -rf json \
+            -rff benchmark-results.json \
+            $JMH_ARGS 2>&1 | tee benchmark-output.log
+
+      - name: Generate benchmark summary
+        run: |
+          python3 .mise/tasks/generate_benchmark_summary.py \
+            --input benchmark-results.json \
+            --output-dir benchmark-results \
+            --commit-sha "${{ github.sha }}"
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
+      - name: Checkout or create benchmarks branch
+        run: |
+          # Check if benchmarks branch exists
+          if git ls-remote --heads origin benchmarks | grep -q benchmarks; then
+            git fetch origin benchmarks
+            git checkout benchmarks
+            # Preserve history directory if it exists
+            if [ -d history ]; then
+              cp -r history benchmark-results/
+            fi
+          else
+            git checkout --orphan benchmarks
+            git rm -rf . 2>/dev/null || true
+          fi
+
+      - name: Commit and push results
+        run: |
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Move results to root
+          cp -r benchmark-results/* .
+          rm -rf benchmark-results
+
+          # Add all files
+          git add -A
+
+          # Commit with date
+          DATE=$(date -u +"%Y-%m-%d")
+          COMMIT_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          git commit -m "Benchmark results for ${DATE} (${COMMIT_SHORT})" \
+            -m "Automated benchmark run from commit ${{ github.sha }}" || echo "No changes to commit"
+
+          # Push to benchmarks branch
+          git push origin benchmarks --force-with-lease || git push origin benchmarks
