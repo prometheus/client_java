@@ -18,15 +18,12 @@ permissions: {}
 
 jobs:
   integration-tests:
-    name: Integration Tests (Java ${{ matrix.java-version }})
+    name: Java ${{ matrix.java-version }}
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         java-version: [8, 11, 17, 21, 25]
-        test-module:
-          - it-exporter
-          - it-pushgateway
     steps:
       - name: Check out
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -47,25 +44,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build project artifacts
-        run: mise exec -- ./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn
+      - name: Build core library artifacts
+        run: mise exec -- ./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn -pl '!integration-tests'
 
-      - name: Run integration tests for ${{ matrix.test-module }}
+      - name: Clean and rebuild sample apps targeting Java ${{ matrix.java-version }}
+        run: |
+          cd integration-tests
+          if [ "${{ matrix.java-version }}" = "8" ]; then
+            # Java 8 doesn't support --release flag, use source/target instead
+            mise exec -- ../mvnw clean install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
+              -Djava.version=8 \
+              -Dmaven.compiler.source=8 \
+              -Dmaven.compiler.target=8
+          else
+            # Java 9+ supports --release flag for better compatibility
+            mise exec -- ../mvnw clean install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
+              -Djava.version=${{ matrix.java-version }} \
+              -Dmaven.compiler.release=${{ matrix.java-version }}
+          fi
+
+      - name: Run integration tests in parallel
         env:
           TEST_JAVA_VERSION: ${{ matrix.java-version }}
         run: |
-          cd integration-tests/${{ matrix.test-module }}
-          mise exec -- ../../mvnw verify -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn
-
-  summary:
-    name: Matrix Test Summary
-    runs-on: ubuntu-24.04
-    needs: integration-tests
-    if: always()
-    steps:
-      - name: Check matrix results
-        run: |
-          if [ "${{ needs.integration-tests.result }}" == "failure" ]; then
-            echo "::error::One or more Java version matrix tests failed"
-            exit 1
-          fi
+          cd integration-tests
+          mise exec -- ../mvnw verify -T 2C -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn
