@@ -1,5 +1,5 @@
 ---
-name: Java Version Matrix Tests
+name: Integration Tests - Java Version Compatibility Matrix
 
 on:
   pull_request:
