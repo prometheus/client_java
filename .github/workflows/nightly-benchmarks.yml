@@ -23,7 +23,6 @@ defaults:
 
 jobs:
   benchmark:
-    # if: github.repository == 'prometheus/client_java'  # Uncomment for production
     runs-on: ubuntu-24.04
     permissions:
       contents: write

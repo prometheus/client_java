@@ -52,13 +52,11 @@ def get_system_info() -> Dict[str, str]:
 
     info = {}
 
-    # CPU cores
     try:
         info["cpu_cores"] = str(multiprocessing.cpu_count())
     except Exception:
         pass
 
-    # CPU model - try Linux first, then macOS
     try:
         with open("/proc/cpuinfo", "r") as f:
             for line in f:
@@ -78,7 +76,6 @@ def get_system_info() -> Dict[str, str]:
         except Exception:
             pass
 
-    # Memory - try Linux first, then macOS
     try:
         with open("/proc/meminfo", "r") as f:
             for line in f:
@@ -100,7 +97,6 @@ def get_system_info() -> Dict[str, str]:
         except Exception:
             pass
 
-    # OS
     info["os"] = f"{platform.system()} {platform.release()}"
 
     return info
@@ -111,7 +107,6 @@ def get_commit_sha(provided_sha: Optional[str]) -> str:
     if provided_sha:
         return provided_sha
 
-    # Try to get from git
     try:
         import subprocess
 
@@ -171,14 +166,12 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
     warmup_iters = first.get("warmupIterations", "?")
     measure_iters = first.get("measurementIterations", "?")
 
-    # Get system info
     sysinfo = get_system_info()
 
     md = []
     md.append("# Prometheus Java Client Benchmarks")
     md.append("")
 
-    # Run metadata
     md.append("## Run Information")
     md.append("")
     md.append(f"- **Date:** {datetime_str}")
@@ -189,7 +182,6 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
     md.append(f"- **JDK:** {jdk_version} ({vm_name})")
     md.append(f"- **Benchmark config:** {forks} fork(s), {warmup_iters} warmup, {measure_iters} measurement, {threads} threads")
 
-    # Hardware info
     hw_parts = []
     if sysinfo.get("cpu_model"):
         hw_parts.append(sysinfo["cpu_model"])
@@ -315,25 +307,21 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
 def main():
     args = parse_args()
 
-    # Check input file exists
     input_path = Path(args.input)
     if not input_path.exists():
         print(f"Error: Input file not found: {input_path}")
         sys.exit(1)
 
-    # Load JSON results
     print(f"Reading results from: {input_path}")
     with open(input_path, "r") as f:
         results = json.load(f)
 
     print(f"Found {len(results)} benchmark results")
 
-    # Get commit info
     commit_sha = get_commit_sha(args.commit_sha)
     commit_short = commit_sha[:7]
     repo = os.environ.get("GITHUB_REPOSITORY", "prometheus/client_java")
 
-    # Create output directory
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     history_dir = output_dir / "history"
