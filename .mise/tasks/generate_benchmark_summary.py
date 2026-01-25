@@ -180,7 +180,8 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
     else:
         md.append(f"- **Commit:** `{commit_short}` (local run)")
     md.append(f"- **JDK:** {jdk_version} ({vm_name})")
-    md.append(f"- **Benchmark config:** {forks} fork(s), {warmup_iters} warmup, {measure_iters} measurement, {threads} threads")
+    bench_cfg = f"{forks} fork(s), {warmup_iters} warmup, {measure_iters} measurement, {threads} threads"
+    md.append(f"- **Benchmark config:** {bench_cfg}")
 
     hw_parts = []
     if sysinfo.get("cpu_model"):
@@ -297,9 +298,17 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
     md.append("")
     md.append("| Benchmark | Description |")
     md.append("|:----------|:------------|")
-    md.append("| **CounterBenchmark** | Compares counter increment performance across Prometheus, OpenTelemetry, simpleclient (0.16.0), and Codahale Metrics |")
-    md.append("| **HistogramBenchmark** | Compares histogram observation performance (classic buckets vs native/exponential) |")
-    md.append("| **TextFormatUtilBenchmark** | Measures metric exposition format writing speed (Prometheus text vs OpenMetrics) |")
+    md.append(
+        "| **CounterBenchmark** | Counter increment performance: "
+        "Prometheus, OpenTelemetry, simpleclient, Codahale |"
+    )
+    md.append(
+        "| **HistogramBenchmark** | Histogram observation performance "
+        "(classic vs native/exponential) |"
+    )
+    md.append(
+        "| **TextFormatUtilBenchmark** | Metric exposition format writing speed |"
+    )
     md.append("")
     return "\n".join(md)
 
