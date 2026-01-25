@@ -33,8 +33,12 @@ public abstract class ExporterTest {
     this.sampleAppVolume =
         Volume.create("it-exporter")
             .copy("../../it-" + sampleApp + "/target/" + sampleApp + ".jar");
+    String javaVersion = System.getenv("TEST_JAVA_VERSION");
+    if (javaVersion == null || javaVersion.isEmpty()) {
+      javaVersion = "25";
+    }
     this.sampleAppContainer =
-        new GenericContainer<>("eclipse-temurin:25")
+        new GenericContainer<>("eclipse-temurin:" + javaVersion)
             .withFileSystemBind(sampleAppVolume.getHostPath(), "/app", BindMode.READ_ONLY)
             .withWorkingDirectory("/app")
             .withLogConsumer(LogConsumer.withPrefix(sampleApp))

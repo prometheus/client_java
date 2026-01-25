@@ -33,6 +33,10 @@ public class PushGatewayIT {
   public void setUp() throws IOException, URISyntaxException {
     Network network = Network.newNetwork();
     sampleAppVolume = Volume.create("it-pushgateway").copy("pushgateway-test-app.jar");
+    String javaVersion = System.getenv("TEST_JAVA_VERSION");
+    if (javaVersion == null || javaVersion.isEmpty()) {
+      javaVersion = "25";
+    }
     pushGatewayContainer =
         new GenericContainer<>("prom/pushgateway:v1.8.0")
             .withExposedPorts(9091)
@@ -41,7 +45,7 @@ public class PushGatewayIT {
             .withLogConsumer(LogConsumer.withPrefix("pushgateway"))
             .waitingFor(Wait.forListeningPort());
     sampleAppContainer =
-        new GenericContainer<>("eclipse-temurin:25")
+        new GenericContainer<>("eclipse-temurin:" + javaVersion)
             .withFileSystemBind(sampleAppVolume.getHostPath(), "/app", BindMode.READ_ONLY)
             .withNetwork(network)
             .withWorkingDirectory("/app")
