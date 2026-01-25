@@ -48,10 +48,12 @@ jobs:
       - name: Build core library artifacts
         run: mise exec -- ./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn -pl '!integration-tests'
 
-      - name: Install integration-tests parent POM
+      - name: Install parent POMs
         run: |
           cd integration-tests
           mise exec -- ../mvnw clean install -N -Dspotless.skip=true
+          cd it-exporter
+          mise exec -- ../../mvnw install -N -Dspotless.skip=true
 
       - name: Rebuild sample apps targeting Java ${{ matrix.java-version }}
         run: |

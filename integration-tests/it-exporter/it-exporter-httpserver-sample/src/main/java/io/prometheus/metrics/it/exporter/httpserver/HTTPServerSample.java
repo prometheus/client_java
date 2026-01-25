@@ -65,7 +65,7 @@ public class HTTPServerSample {
       PrometheusRegistry.defaultRegistry.register(failingCollector);
     }
 
-    HTTPServer server = HTTPServer.builder().metricsHandlerPath("/").port(port).buildAndStart();
+    HTTPServer server = HTTPServer.builder().port(port).buildAndStart();
 
     System.out.println(
         "HTTPServer listening on port http://localhost:" + server.getPort() + "/metrics");
