@@ -52,7 +52,6 @@ jobs:
         run: ./mvnw -pl benchmarks -am -DskipTests clean package
 
       - name: Run JMH benchmarks
-        id: benchmarks
         run: |
           # 3 forks, 3 warmup, 5 measurement iterations (~60 min total)
           DEFAULT_ARGS="-f 3 -wi 3 -i 5"
@@ -61,11 +60,10 @@ jobs:
 
           echo "Running benchmarks with args: $JMH_ARGS"
 
-          # Run benchmarks and output JSON (captures full results)
           java -jar ./benchmarks/target/benchmarks.jar \
             -rf json \
             -rff benchmark-results.json \
-            $JMH_ARGS 2>&1 | tee benchmark-output.log
+            $JMH_ARGS
 
       - name: Generate benchmark summary
         run: |
@@ -82,7 +80,6 @@ jobs:
           mkdir -p /tmp/benchmark-output
           cp -r benchmark-results/* /tmp/benchmark-output/
 
-          # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 

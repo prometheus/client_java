@@ -45,6 +45,67 @@ def parse_args():
     return parser.parse_args()
 
 
+def get_system_info() -> Dict[str, str]:
+    """Capture system hardware information."""
+    import platform
+    import multiprocessing
+
+    info = {}
+
+    # CPU cores
+    try:
+        info["cpu_cores"] = str(multiprocessing.cpu_count())
+    except Exception:
+        pass
+
+    # CPU model - try Linux first, then macOS
+    try:
+        with open("/proc/cpuinfo", "r") as f:
+            for line in f:
+                if line.startswith("model name"):
+                    info["cpu_model"] = line.split(":")[1].strip()
+                    break
+    except FileNotFoundError:
+        # macOS
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["sysctl", "-n", "machdep.cpu.brand_string"],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                info["cpu_model"] = result.stdout.strip()
+        except Exception:
+            pass
+
+    # Memory - try Linux first, then macOS
+    try:
+        with open("/proc/meminfo", "r") as f:
+            for line in f:
+                if line.startswith("MemTotal"):
+                    kb = int(line.split()[1])
+                    info["memory_gb"] = str(round(kb / 1024 / 1024))
+                    break
+    except FileNotFoundError:
+        # macOS
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["sysctl", "-n", "hw.memsize"],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                bytes_mem = int(result.stdout.strip())
+                info["memory_gb"] = str(round(bytes_mem / 1024 / 1024 / 1024))
+        except Exception:
+            pass
+
+    # OS
+    info["os"] = f"{platform.system()} {platform.release()}"
+
+    return info
+
+
 def get_commit_sha(provided_sha: Optional[str]) -> str:
     """Get commit SHA from argument, git, or return 'local'."""
     if provided_sha:
@@ -110,6 +171,9 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
     warmup_iters = first.get("warmupIterations", "?")
     measure_iters = first.get("measurementIterations", "?")
 
+    # Get system info
+    sysinfo = get_system_info()
+
     md = []
     md.append("# Prometheus Java Client Benchmarks")
     md.append("")
@@ -123,7 +187,21 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
     else:
         md.append(f"- **Commit:** `{commit_short}` (local run)")
     md.append(f"- **JDK:** {jdk_version} ({vm_name})")
-    md.append(f"- **Configuration:** {forks} fork(s), {warmup_iters} warmup, {measure_iters} measurement, {threads} threads")
+    md.append(f"- **Benchmark config:** {forks} fork(s), {warmup_iters} warmup, {measure_iters} measurement, {threads} threads")
+
+    # Hardware info
+    hw_parts = []
+    if sysinfo.get("cpu_model"):
+        hw_parts.append(sysinfo["cpu_model"])
+    if sysinfo.get("cpu_cores"):
+        hw_parts.append(f"{sysinfo['cpu_cores']} cores")
+    if sysinfo.get("memory_gb"):
+        hw_parts.append(f"{sysinfo['memory_gb']} GB RAM")
+    if hw_parts:
+        md.append(f"- **Hardware:** {', '.join(hw_parts)}")
+    if sysinfo.get("os"):
+        md.append(f"- **OS:** {sysinfo['os']}")
+
     md.append("")
 
     # Group by benchmark class
