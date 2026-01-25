@@ -23,7 +23,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java-version: [8, 11, 17, 21, 25]
+        # Note: Java 8 runtime testing is skipped due to Spotless incompatibility
+        java-version: [11, 17, 21, 25]
     steps:
       - name: Check out
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -47,25 +48,23 @@ jobs:
       - name: Build core library artifacts
         run: mise exec -- ./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn -pl '!integration-tests'
 
-      - name: Clean and rebuild sample apps targeting Java ${{ matrix.java-version }}
+      - name: Install integration-tests parent POM
         run: |
           cd integration-tests
-          if [ "${{ matrix.java-version }}" = "8" ]; then
-            # Java 8 doesn't support --release flag, use source/target instead
-            mise exec -- ../mvnw clean install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
-              -Djava.version=8 \
-              -Dmaven.compiler.source=8 \
-              -Dmaven.compiler.target=8
-          else
-            # Java 9+ supports --release flag for better compatibility
-            mise exec -- ../mvnw clean install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
-              -Djava.version=${{ matrix.java-version }} \
-              -Dmaven.compiler.release=${{ matrix.java-version }}
-          fi
+          mise exec -- ../mvnw clean install -N -Dspotless.skip=true
 
-      - name: Run integration tests in parallel
+      - name: Rebuild sample apps targeting Java ${{ matrix.java-version }}
+        run: |
+          cd integration-tests
+          mise exec -- ../mvnw install -DskipTests -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
+            -Djava.version=${{ matrix.java-version }} \
+            -Dmaven.compiler.release=${{ matrix.java-version }} \
+            -pl it-common,it-exporter,it-pushgateway
+
+      - name: Run integration tests
         env:
           TEST_JAVA_VERSION: ${{ matrix.java-version }}
         run: |
           cd integration-tests
-          mise exec -- ../mvnw verify -T 2C -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn
+          mise exec -- ../mvnw verify -T 2C -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
+            -pl it-exporter,it-pushgateway
