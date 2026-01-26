@@ -20,13 +20,13 @@ class CKMSQuantilesTest {
   private final Quantile qMax = new Quantile(1.0, 0.00);
 
   @Test
-  public void testGetOnEmptyValues() {
+  void testGetOnEmptyValues() {
     CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
     assertThat(Double.isNaN(ckms.get(q95.quantile))).isTrue();
   }
 
   @Test
-  public void testGet() {
+  void testGet() {
     Random random = new Random(0);
     CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
     List<Double> input = shuffledValues(100, random);
@@ -37,7 +37,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testBatchInsert() {
+  void testBatchInsert() {
     Random random = new Random(1);
     testInsertBatch(1, 1, 100, random);
     testInsertBatch(1, 10, 100, random);
@@ -87,7 +87,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testGetWithAMillionElements() {
+  void testGetWithAMillionElements() {
     Random random = new Random(2);
     List<Double> input = shuffledValues(1000 * 1000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, q99);
@@ -99,7 +99,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testMin() {
+  void testMin() {
     Random random = new Random(3);
     List<Double> input = shuffledValues(1000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(qMin);
@@ -112,7 +112,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testMax() {
+  void testMax() {
     Random random = new Random(4);
     List<Double> input = shuffledValues(1000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(qMax);
@@ -125,7 +125,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testMinMax() {
+  void testMinMax() {
     Random random = new Random(5);
     List<Double> input = shuffledValues(1000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(qMin, qMax);
@@ -138,7 +138,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testMinAndOthers() {
+  void testMinAndOthers() {
     Random random = new Random(6);
     List<Double> input = shuffledValues(1000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(q95, qMin);
@@ -150,7 +150,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testMaxAndOthers() {
+  void testMaxAndOthers() {
     Random random = new Random(7);
     List<Double> input = shuffledValues(10000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(q50, q95, qMax);
@@ -162,7 +162,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testMinMaxAndOthers() {
+  void testMinMaxAndOthers() {
     Random random = new Random(8);
     List<Double> input = shuffledValues(10000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(qMin, q50, q95, q99, qMax);
@@ -174,7 +174,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testExactQuantile() {
+  void testExactQuantile() {
     Random random = new Random(9);
     List<Double> input = shuffledValues(10000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(new Quantile(0.95, 0));
@@ -187,7 +187,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testExactAndOthers() {
+  void testExactAndOthers() {
     Random random = new Random(10);
     List<Double> input = shuffledValues(10000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(q50, new Quantile(0.95, 0), q99);
@@ -200,7 +200,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testExactAndMin() {
+  void testExactAndMin() {
     Random random = new Random(11);
     List<Double> input = shuffledValues(10000, random);
     CKMSQuantiles ckms = new CKMSQuantiles(qMin, q50, new Quantile(0.95, 0));
@@ -213,7 +213,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testMaxEpsilon() {
+  void testMaxEpsilon() {
     Random random = new Random(12);
     List<Double> input = shuffledValues(10000, random);
     // epsilon == 1 basically gives you random results, but it should still not throw an exception.
@@ -225,7 +225,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testGetGaussian() {
+  void testGetGaussian() {
     RandomGenerator rand = new JDKRandomGenerator();
     rand.setSeed(0);
 
@@ -284,7 +284,7 @@ class CKMSQuantilesTest {
   }
 
   @Test
-  public void testIllegalArgumentException() {
+  void testIllegalArgumentException() {
     try {
       new Quantile(-1, 0);
     } catch (IllegalArgumentException e) {

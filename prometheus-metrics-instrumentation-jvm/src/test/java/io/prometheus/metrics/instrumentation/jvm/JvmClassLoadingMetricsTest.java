@@ -20,14 +20,14 @@ class JvmClassLoadingMetricsTest {
   private final ClassLoadingMXBean mockClassLoadingBean = Mockito.mock(ClassLoadingMXBean.class);
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     when(mockClassLoadingBean.getLoadedClassCount()).thenReturn(1000);
     when(mockClassLoadingBean.getTotalLoadedClassCount()).thenReturn(2000L);
     when(mockClassLoadingBean.getUnloadedClassCount()).thenReturn(500L);
   }
 
   @Test
-  public void testGoodCase() throws IOException {
+  void testGoodCase() throws IOException {
     PrometheusRegistry registry = new PrometheusRegistry();
     JvmClassLoadingMetrics.builder().classLoadingBean(mockClassLoadingBean).register(registry);
     MetricSnapshots snapshots = registry.scrape();
@@ -50,7 +50,7 @@ jvm_classes_unloaded_total 500.0
   }
 
   @Test
-  public void testIgnoredMetricNotScraped() {
+  void testIgnoredMetricNotScraped() {
     MetricNameFilter filter =
         MetricNameFilter.builder().nameMustNotBeEqualTo("jvm_classes_currently_loaded").build();
 

@@ -24,13 +24,13 @@ class DropwizardExportsTest {
   private MetricRegistry metricRegistry;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     metricRegistry = new MetricRegistry();
     DropwizardExports.builder().dropwizardRegistry(metricRegistry).register(registry);
   }
 
   @Test
-  public void testCounter() {
+  void testCounter() {
     metricRegistry.counter("foo.bar").inc(1);
     String expected =
 """
@@ -44,7 +44,7 @@ foo_bar_total 1.0
   }
 
   @Test
-  public void testGauge() {
+  void testGauge() {
     // don't convert to lambda, as we need to test the type
     Gauge<Integer> integerGauge =
         new Gauge<Integer>() {
@@ -112,7 +112,7 @@ long_gauge 1234.0
   }
 
   @Test
-  public void testInvalidGaugeType() {
+  void testInvalidGaugeType() {
     Gauge<String> invalidGauge = () -> "foobar";
 
     metricRegistry.register(MetricName.parse("invalid_gauge"), invalidGauge);
@@ -122,7 +122,7 @@ long_gauge 1234.0
   }
 
   @Test
-  public void testGaugeReturningNullValue() {
+  void testGaugeReturningNullValue() {
     Gauge<String> invalidGauge = () -> null;
     metricRegistry.register(MetricName.parse("invalid_gauge"), invalidGauge);
     String expected = "# EOF\n";
@@ -130,7 +130,7 @@ long_gauge 1234.0
   }
 
   @Test
-  public void testHistogram() {
+  void testHistogram() {
     // just test the standard mapper
     final MetricRegistry metricRegistry = new MetricRegistry();
     PrometheusRegistry pmRegistry = new PrometheusRegistry();
@@ -204,7 +204,7 @@ long_gauge 1234.0
   }
 
   @Test
-  public void testMeter() {
+  void testMeter() {
     Meter meter = metricRegistry.meter("meter");
     meter.mark();
     meter.mark();
@@ -220,7 +220,7 @@ meter_total 2.0
   }
 
   @Test
-  public void testTimer() throws InterruptedException {
+  void testTimer() throws InterruptedException {
     final MetricRegistry metricRegistry = new MetricRegistry();
     DropwizardExports exports = new DropwizardExports(metricRegistry);
     Timer t = metricRegistry.timer("timer");
@@ -246,7 +246,7 @@ meter_total 2.0
   }
 
   @Test
-  public void testThatMetricHelpUsesOriginalDropwizardName() {
+  void testThatMetricHelpUsesOriginalDropwizardName() {
 
     metricRegistry.timer("my.application.namedTimer1");
     metricRegistry.counter("my.application.namedCounter1");

@@ -27,14 +27,14 @@ class GaugeTest {
   private SpanContext origSpanContext;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     noLabels = Gauge.builder().name("nolabels").build();
     labels = Gauge.builder().name("labels").labelNames("l").build();
     origSpanContext = SpanContextSupplier.getSpanContext();
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     SpanContextSupplier.setSpanContext(origSpanContext);
   }
 
@@ -50,7 +50,7 @@ class GaugeTest {
   }
 
   @Test
-  public void testIncrement() {
+  void testIncrement() {
     noLabels.inc();
     assertThat(getValue(noLabels)).isCloseTo(1.0, offset(.001));
     noLabels.inc(2);
@@ -62,7 +62,7 @@ class GaugeTest {
   }
 
   @Test
-  public void testDecrement() {
+  void testDecrement() {
     noLabels.dec();
     assertThat(getValue(noLabels)).isCloseTo(-1.0, offset(.001));
     noLabels.dec(2);
@@ -74,7 +74,7 @@ class GaugeTest {
   }
 
   @Test
-  public void testSet() {
+  void testSet() {
     noLabels.set(42);
     assertThat(getValue(noLabels)).isCloseTo(42, offset(.001));
     noLabels.set(7);
@@ -92,12 +92,12 @@ class GaugeTest {
   }
 
   @Test
-  public void noLabelsDefaultZeroValue() {
+  void noLabelsDefaultZeroValue() {
     assertThat(getValue(noLabels)).isCloseTo(0.0, offset(.001));
   }
 
   @Test
-  public void testLabels() {
+  void testLabels() {
     labels.labelValues("a").inc();
     labels.labelValues("b").inc(3);
     assertThat(getValue(labels, "l", "a")).isCloseTo(1.0, offset(.001));
@@ -105,7 +105,7 @@ class GaugeTest {
   }
 
   @Test
-  public void testExemplarSampler() throws Exception {
+  void testExemplarSampler() throws Exception {
     Exemplar exemplar1 = Exemplar.builder().value(2.0).traceId("abc").spanId("123").build();
     Exemplar exemplar2 = Exemplar.builder().value(6.5).traceId("def").spanId("456").build();
     Exemplar exemplar3 = Exemplar.builder().value(7.0).traceId("123").spanId("abc").build();
@@ -222,7 +222,7 @@ class GaugeTest {
   }
 
   @Test
-  public void testExemplarSamplerDisabled() {
+  void testExemplarSamplerDisabled() {
     Gauge gauge = Gauge.builder().name("test").withoutExemplars().build();
     gauge.setWithExemplar(3.0, Labels.of("a", "b"));
     assertThat(getData(gauge).getExemplar()).isNull();
@@ -231,7 +231,7 @@ class GaugeTest {
   }
 
   @Test
-  public void testExemplarSamplerDisabledByBuilder_enabledByPropertiesOnMetric() {
+  void testExemplarSamplerDisabledByBuilder_enabledByPropertiesOnMetric() {
     PrometheusProperties properties =
         PrometheusProperties.builder()
             .putMetricProperty("test", MetricsProperties.builder().exemplarsEnabled(true).build())

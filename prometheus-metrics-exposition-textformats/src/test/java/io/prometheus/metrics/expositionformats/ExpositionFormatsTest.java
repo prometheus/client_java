@@ -109,7 +109,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testCounterComplete() throws IOException {
+  void testCounterComplete() throws IOException {
     String openMetricsText =
         "# TYPE service:time_seconds counter\n"
             + "# UNIT service:time_seconds seconds\n"
@@ -239,7 +239,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testCounterMinimal() throws IOException {
+  void testCounterMinimal() throws IOException {
     String openMetricsText =
         """
         # TYPE my_counter counter
@@ -266,7 +266,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testCounterWithDots() throws IOException {
+  void testCounterWithDots() throws IOException {
     String openMetricsText =
         """
         # TYPE U__my_2e_request_2e_count counter
@@ -308,7 +308,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testGaugeComplete() throws IOException {
+  void testGaugeComplete() throws IOException {
     String openMetricsText =
         "# TYPE disk_usage_ratio gauge\n"
             + "# UNIT disk_usage_ratio ratio\n"
@@ -389,7 +389,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testGaugeMinimal() throws IOException {
+  void testGaugeMinimal() throws IOException {
     String openMetricsText =
         """
         # TYPE temperature_centigrade gauge
@@ -416,7 +416,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testGaugeWithDots() throws IOException {
+  void testGaugeWithDots() throws IOException {
     String openMetricsText =
         """
         # TYPE U__my_2e_temperature_2e_celsius gauge
@@ -472,7 +472,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testGaugeUTF8() throws IOException {
+  void testGaugeUTF8() throws IOException {
     String prometheusText =
         """
         # HELP "gauge.name" gauge\\ndoc\\nstr"ing
@@ -506,7 +506,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testSummaryComplete() throws IOException {
+  void testSummaryComplete() throws IOException {
     String openMetricsText =
         "# TYPE http_request_duration_seconds summary\n"
             + "# UNIT http_request_duration_seconds seconds\n"
@@ -799,7 +799,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testSummaryWithoutQuantiles() throws IOException {
+  void testSummaryWithoutQuantiles() throws IOException {
     String openMetricsText =
         """
         # TYPE latency_seconds summary
@@ -843,7 +843,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testSummaryNoCountAndSum() throws IOException {
+  void testSummaryNoCountAndSum() throws IOException {
     String openMetricsText =
         """
         # TYPE latency_seconds summary
@@ -881,7 +881,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testSummaryJustCount() throws IOException {
+  void testSummaryJustCount() throws IOException {
     String openMetricsText =
         """
         # TYPE latency_seconds summary
@@ -916,7 +916,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testSummaryJustSum() throws IOException {
+  void testSummaryJustSum() throws IOException {
     String openMetricsText =
         """
         # TYPE latency_seconds summary
@@ -951,7 +951,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testSummaryEmptyData() throws IOException {
+  void testSummaryEmptyData() throws IOException {
     // SummaryData can be present but empty (no count, no sum, no quantiles).
     // This should be treated like no data is present.
     SummarySnapshot summary =
@@ -969,7 +969,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testSummaryEmptyAndNonEmpty() throws IOException {
+  void testSummaryEmptyAndNonEmpty() throws IOException {
     String openMetricsText =
         """
         # TYPE latency_seconds summary
@@ -1015,7 +1015,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testSummaryWithDots() throws IOException {
+  void testSummaryWithDots() throws IOException {
     String openMetricsText =
         """
         # TYPE U__my_2e_request_2e_duration_2e_seconds summary
@@ -1073,7 +1073,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testClassicHistogramComplete() throws Exception {
+  void testClassicHistogramComplete() throws Exception {
     String openMetricsText =
         "# TYPE response_size_bytes histogram\n"
             + "# UNIT response_size_bytes bytes\n"
@@ -1379,7 +1379,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testClassicHistogramMinimal() throws Exception {
+  void testClassicHistogramMinimal() throws Exception {
     // In OpenMetrics a histogram can have a _count if and only if it has a _sum.
     // In Prometheus format, a histogram can have a _count without a _sum.
     String openMetricsText =
@@ -1427,7 +1427,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testClassicHistogramMinimalWithDots() throws Exception {
+  void testClassicHistogramMinimalWithDots() throws Exception {
     String openMetricsText =
         """
         # TYPE "request.latency_seconds" histogram
@@ -1458,7 +1458,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testClassicHistogramCountAndSum() throws Exception {
+  void testClassicHistogramCountAndSum() throws Exception {
     String openMetricsText =
         """
         # TYPE request_latency_seconds histogram
@@ -1509,7 +1509,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testClassicGaugeHistogramComplete() throws IOException {
+  void testClassicGaugeHistogramComplete() throws IOException {
     String openMetricsText =
         "# TYPE cache_size_bytes gaugehistogram\n"
             + "# UNIT cache_size_bytes bytes\n"
@@ -1805,7 +1805,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testClassicGaugeHistogramMinimal() throws IOException {
+  void testClassicGaugeHistogramMinimal() throws IOException {
     // In OpenMetrics a histogram can have a _count if and only if it has a _sum.
     // In Prometheus format, a histogram can have a _count without a _sum.
     String openMetricsText =
@@ -1855,7 +1855,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testClassicGaugeHistogramCountAndSum() throws IOException {
+  void testClassicGaugeHistogramCountAndSum() throws IOException {
     String openMetricsText =
         """
         # TYPE queue_size_bytes gaugehistogram
@@ -1909,7 +1909,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testClassicHistogramWithDots() throws IOException {
+  void testClassicHistogramWithDots() throws IOException {
     String openMetricsText =
         """
       # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
@@ -1981,7 +1981,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testNativeHistogramComplete() throws IOException {
+  void testNativeHistogramComplete() throws IOException {
     String openMetricsText =
         "# TYPE response_size_bytes histogram\n"
             + "# UNIT response_size_bytes bytes\n"
@@ -2292,7 +2292,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testNativeHistogramMinimal() throws IOException {
+  void testNativeHistogramMinimal() throws IOException {
     String openMetricsText =
         """
         # TYPE latency_seconds histogram
@@ -2330,7 +2330,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testNativeHistogramWithDots() throws IOException {
+  void testNativeHistogramWithDots() throws IOException {
     String openMetricsText =
         """
       # TYPE U__my_2e_request_2e_duration_2e_seconds histogram
@@ -2409,7 +2409,7 @@ class ExpositionFormatsTest {
   // TODO: Gauge Native Histogram
 
   @Test
-  public void testInfo() throws IOException {
+  void testInfo() throws IOException {
     String openMetrics =
         """
         # TYPE version info
@@ -2439,7 +2439,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testInfoWithDots() throws IOException {
+  void testInfoWithDots() throws IOException {
     String openMetricsText =
         """
         # TYPE U__jvm_2e_status info
@@ -2478,7 +2478,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testStateSetComplete() throws IOException {
+  void testStateSetComplete() throws IOException {
     String openMetrics =
         "# TYPE state stateset\n"
             + "# HELP state complete state set example\n"
@@ -2536,7 +2536,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testStateSetMinimal() throws IOException {
+  void testStateSetMinimal() throws IOException {
     String openMetrics =
         """
         # TYPE state stateset
@@ -2566,7 +2566,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testStateSetWithDots() throws IOException {
+  void testStateSetWithDots() throws IOException {
     String openMetricsText =
         """
         # TYPE U__my_2e_application_2e_state stateset
@@ -2614,7 +2614,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testUnknownComplete() throws IOException {
+  void testUnknownComplete() throws IOException {
     String openMetrics =
         "# TYPE my_special_thing_bytes unknown\n"
             + "# UNIT my_special_thing_bytes bytes\n"
@@ -2679,7 +2679,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testUnknownMinimal() throws IOException {
+  void testUnknownMinimal() throws IOException {
     String openMetrics =
         """
         # TYPE other unknown
@@ -2703,7 +2703,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testUnknownWithDots() throws IOException {
+  void testUnknownWithDots() throws IOException {
     String openMetrics =
         """
         # TYPE U__some_2e_unknown_2e_metric__bytes unknown
@@ -2756,7 +2756,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testHelpEscape() throws IOException {
+  void testHelpEscape() throws IOException {
     String openMetrics =
         """
         # TYPE test counter
@@ -2783,7 +2783,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testLabelValueEscape() throws IOException {
+  void testLabelValueEscape() throws IOException {
     String openMetrics =
         """
         # TYPE test counter
@@ -2826,7 +2826,7 @@ class ExpositionFormatsTest {
   }
 
   @Test
-  public void testWrite() throws IOException {
+  void testWrite() throws IOException {
     ByteArrayOutputStream buff = new ByteArrayOutputStream(new AtomicInteger(2 << 9).get() + 1024);
     ExpositionFormats expositionFormats = ExpositionFormats.init();
     UnknownSnapshot unknown =

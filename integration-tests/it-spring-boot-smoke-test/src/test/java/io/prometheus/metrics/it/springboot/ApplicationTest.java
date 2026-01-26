@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ApplicationTest {
   @Test
-  public void testPrometheusProtobufFormat() throws IOException {
+  void testPrometheusProtobufFormat() throws IOException {
     ExporterTest.Response response =
         ExporterTest.scrape(
             "GET",

@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-class TestUtil {
+public class TestUtil {
 
   static String convertToOpenMetricsFormat(MetricSnapshots snapshots) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();

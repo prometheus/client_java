@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 @SuppressWarnings("CheckReturnValue")
 class CacheMetricsCollectorTest {
   // This enum was added to simplify test parametrization on argument options.
-  public enum Options {
+  enum Options {
     LEGACY(false, false),
     COLLECT_EVICTION_WEIGHT_AS_COUNTER(true, false),
     COLLECT_WEIGHTED_SIZE(false, true),
@@ -205,7 +205,7 @@ caffeine_cache_eviction_weight{cache="users"} 31.0
 
   @SuppressWarnings("unchecked")
   @Test
-  public void loadingCacheExposesMetricsForLoadsAndExceptions() throws Exception {
+  void loadingCacheExposesMetricsForLoadsAndExceptions() throws Exception {
     final CacheLoader<String, String> loader = mock(CacheLoader.class);
     when(loader.load(anyString()))
         .thenReturn("First User")

@@ -23,14 +23,14 @@ class PrometheusMetricsServletTest {
   private Counter testCounter;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     registry = new PrometheusRegistry();
     testCounter = Counter.builder().name("test_counter").help("Test counter").register(registry);
     testCounter.inc(42);
   }
 
   @Test
-  public void testDoGetWritesMetrics() throws IOException {
+  void testDoGetWritesMetrics() throws IOException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -69,13 +69,13 @@ class PrometheusMetricsServletTest {
   }
 
   @Test
-  public void testServletUsesDefaultRegistry() {
+  void testServletUsesDefaultRegistry() {
     PrometheusMetricsServlet servlet = new PrometheusMetricsServlet();
     assertThat(servlet).isNotNull();
   }
 
   @Test
-  public void testServletWithCustomRegistry() {
+  void testServletWithCustomRegistry() {
     PrometheusMetricsServlet servlet = new PrometheusMetricsServlet(registry);
     assertThat(servlet).isNotNull();
   }

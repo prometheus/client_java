@@ -34,7 +34,7 @@ class InfoTest {
   }
 
   @Test
-  public void testAddAndRemove() {
+  void testAddAndRemove() {
     Info info = Info.builder().name("test_info").labelNames("a", "b").build();
     assertThat(info.collect().getDataPoints()).isEmpty();
     info.addLabelValues("val1", "val2");
@@ -58,7 +58,7 @@ class InfoTest {
   }
 
   @Test
-  public void testSet() throws IOException {
+  void testSet() throws IOException {
     Info info =
         Info.builder()
             .name("target_info")
@@ -88,7 +88,7 @@ class InfoTest {
   }
 
   @Test
-  public void testConstLabelsOnly() throws IOException {
+  void testConstLabelsOnly() throws IOException {
     Info info =
         Info.builder()
             .name("target_info")
@@ -106,14 +106,14 @@ class InfoTest {
   }
 
   @Test
-  public void testConstLabelsDuplicate1() {
+  void testConstLabelsDuplicate1() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () -> Info.builder().constLabels(Labels.of("a_1", "val1")).labelNames("a.1").build());
   }
 
   @Test
-  public void testConstLabelsDuplicate2() {
+  void testConstLabelsDuplicate2() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () -> Info.builder().labelNames("a_1").constLabels(Labels.of("a.1", "val1")).build());

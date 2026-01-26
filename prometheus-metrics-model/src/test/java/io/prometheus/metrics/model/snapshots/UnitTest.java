@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 class UnitTest {
 
   @Test
-  public void testEmpty() {
+  void testEmpty() {
     assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> new Unit(" "));
   }
 
   @Test
-  public void testEquals1() {
+  void testEquals1() {
     Unit unit1 = Unit.BYTES;
     Unit unit2 = new Unit("bytes");
 
@@ -21,7 +21,7 @@ class UnitTest {
   }
 
   @Test
-  public void testEquals2() {
+  void testEquals2() {
     Unit unit1 = new Unit("bytes ");
     Unit unit2 = new Unit("bytes");
 
@@ -29,7 +29,7 @@ class UnitTest {
   }
 
   @Test
-  public void testEquals3() {
+  void testEquals3() {
     Unit unit1 = new Unit(" bytes");
     Unit unit2 = new Unit("bytes");
 
@@ -37,7 +37,7 @@ class UnitTest {
   }
 
   @Test
-  public void testEquals4() {
+  void testEquals4() {
     Unit unit1 = new Unit(" bytes ");
     Unit unit2 = new Unit("bytes");
 

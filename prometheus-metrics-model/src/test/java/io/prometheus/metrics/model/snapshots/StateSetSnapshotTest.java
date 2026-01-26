@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class StateSetSnapshotTest {
 
   @Test
-  public void testCompleteGoodCase() {
+  void testCompleteGoodCase() {
     long scrapeTimestamp = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
     StateSetSnapshot snapshot =
         StateSetSnapshot.builder()
@@ -49,7 +49,7 @@ class StateSetSnapshotTest {
   }
 
   @Test
-  public void testStateSetDataSorted() {
+  void testStateSetDataSorted() {
     StateSetSnapshot.StateSetDataPointSnapshot data =
         StateSetSnapshot.StateSetDataPointSnapshot.builder()
             .state("b", true)
@@ -69,14 +69,14 @@ class StateSetSnapshotTest {
   }
 
   @Test
-  public void testMustHaveState() {
+  void testMustHaveState() {
     // Must have at least one state.
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> StateSetSnapshot.StateSetDataPointSnapshot.builder().build());
   }
 
   @Test
-  public void testMinimal() {
+  void testMinimal() {
     StateSetSnapshot snapshot =
         StateSetSnapshot.builder()
             .name("my_flag")
@@ -87,13 +87,13 @@ class StateSetSnapshotTest {
   }
 
   @Test
-  public void testEmpty() {
+  void testEmpty() {
     StateSetSnapshot snapshot = StateSetSnapshot.builder().name("my_flag").build();
     assertThat(snapshot.dataPoints).isEmpty();
   }
 
   @Test
-  public void testDataImmutable() {
+  void testDataImmutable() {
     StateSetSnapshot.StateSetDataPointSnapshot data =
         StateSetSnapshot.StateSetDataPointSnapshot.builder()
             .state("a", true)
@@ -111,7 +111,7 @@ class StateSetSnapshotTest {
   }
 
   @Test
-  public void testDuplicateState() {
+  void testDuplicateState() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
@@ -123,13 +123,13 @@ class StateSetSnapshotTest {
   }
 
   @Test
-  public void noUnit() {
+  void noUnit() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> StateSetSnapshot.builder().name("flags").unit(Unit.BYTES).build());
   }
 
   @Test
-  public void testStateSetImmutable() {
+  void testStateSetImmutable() {
     StateSetSnapshot snapshot =
         StateSetSnapshot.builder()
             .name("flags")
@@ -151,7 +151,7 @@ class StateSetSnapshotTest {
   }
 
   @Test
-  public void testLabelsUnique() {
+  void testLabelsUnique() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->

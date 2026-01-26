@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class QuantilesTest {
 
   @Test
-  public void testSort() {
+  void testSort() {
     Quantiles quantiles =
         Quantiles.builder().quantile(0.99, 0.23).quantile(0.5, 0.2).quantile(0.95, 0.22).build();
     assertThat(quantiles.size()).isEqualTo(3);
@@ -22,7 +22,7 @@ class QuantilesTest {
   }
 
   @Test
-  public void testImmutable() {
+  void testImmutable() {
     Quantiles quantiles =
         Quantiles.builder().quantile(0.99, 0.23).quantile(0.5, 0.2).quantile(0.95, 0.22).build();
     Iterator<Quantile> iterator = quantiles.iterator();
@@ -31,12 +31,12 @@ class QuantilesTest {
   }
 
   @Test
-  public void testEmpty() {
+  void testEmpty() {
     assertThat(Quantiles.EMPTY.size()).isZero();
   }
 
   @Test
-  public void testDuplicate() {
+  void testDuplicate() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->

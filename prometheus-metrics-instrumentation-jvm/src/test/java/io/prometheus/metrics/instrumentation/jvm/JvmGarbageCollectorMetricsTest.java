@@ -23,7 +23,7 @@ class JvmGarbageCollectorMetricsTest {
   private final GarbageCollectorMXBean mockGcBean2 = Mockito.mock(GarbageCollectorMXBean.class);
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     when(mockGcBean1.getName()).thenReturn("MyGC1");
     when(mockGcBean1.getCollectionCount()).thenReturn(100L);
     when(mockGcBean1.getCollectionTime()).thenReturn(TimeUnit.SECONDS.toMillis(10));
@@ -33,7 +33,7 @@ class JvmGarbageCollectorMetricsTest {
   }
 
   @Test
-  public void testGoodCase() throws IOException {
+  void testGoodCase() throws IOException {
     PrometheusRegistry registry = new PrometheusRegistry();
     JvmGarbageCollectorMetrics.builder()
         .garbageCollectorBeans(Arrays.asList(mockGcBean1, mockGcBean2))
@@ -56,7 +56,7 @@ class JvmGarbageCollectorMetricsTest {
   }
 
   @Test
-  public void testIgnoredMetricNotScraped() {
+  void testIgnoredMetricNotScraped() {
     MetricNameFilter filter =
         MetricNameFilter.builder().nameMustNotBeEqualTo("jvm_gc_collection_seconds").build();
 

@@ -52,24 +52,24 @@ class ExemplarSamplerTest {
   }
 
   @Test
-  public void testCustomExemplarsBuckets() throws Exception {
+  void testCustomExemplarsBuckets() throws Exception {
     // TODO
   }
 
   private io.prometheus.metrics.tracer.common.SpanContext origContext;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     origContext = SpanContextSupplier.getSpanContext();
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     SpanContextSupplier.setSpanContext(origContext);
   }
 
   @Test
-  public void testIsSampled() throws Exception {
+  void testIsSampled() throws Exception {
     SpanContext context = new SpanContext();
     context.isSampled = false;
     ExemplarSampler sampler = new ExemplarSampler(makeConfig(), context);
@@ -79,7 +79,7 @@ class ExemplarSamplerTest {
   }
 
   @Test
-  public void testDefaultConfigHasFourExemplars() throws Exception {
+  void testDefaultConfigHasFourExemplars() throws Exception {
     ExemplarSampler sampler = new ExemplarSampler(makeConfig(), new SpanContext());
     Thread.sleep(tick); // t = 1 tick
     sampler.observe(0.3);
@@ -96,7 +96,7 @@ class ExemplarSamplerTest {
   }
 
   @Test
-  public void testEmptyBuckets() throws Exception {
+  void testEmptyBuckets() throws Exception {
     ExemplarSampler sampler =
         new ExemplarSampler(makeConfig(Double.POSITIVE_INFINITY), new SpanContext());
     Thread.sleep(tick); // t = 1 tick
@@ -108,7 +108,7 @@ class ExemplarSamplerTest {
   }
 
   @Test
-  public void testDefaultExemplarsBuckets() throws Exception {
+  void testDefaultExemplarsBuckets() throws Exception {
     ExemplarSampler sampler =
         new ExemplarSampler(
             makeConfig(0.2, 0.4, 0.6, 0.8, 1.0, Double.POSITIVE_INFINITY), new SpanContext());
@@ -136,12 +136,12 @@ class ExemplarSamplerTest {
   }
 
   @Test
-  public void testCustomExemplarsNoBuckets() throws Exception {
+  void testCustomExemplarsNoBuckets() throws Exception {
     // TODO
   }
 
   @Test
-  public void testDefaultExemplarsNoBuckets() throws Exception {
+  void testDefaultExemplarsNoBuckets() throws Exception {
     ExemplarSampler sampler = new ExemplarSampler(makeConfig(), new SpanContext());
     Scheduler.awaitInitialization();
     Thread.sleep(tick); // t = 1 tick

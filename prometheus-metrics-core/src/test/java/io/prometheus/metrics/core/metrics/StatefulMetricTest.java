@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class StatefulMetricTest {
 
   @Test
-  public void testLabelRemoveWhileCollecting() throws Exception {
+  void testLabelRemoveWhileCollecting() throws Exception {
     Counter counter = Counter.builder().name("test").labelNames("label1", "label2").build();
     Field data = counter.getClass().getSuperclass().getDeclaredField("data");
     data.setAccessible(true);
@@ -61,7 +61,7 @@ class StatefulMetricTest {
   }
 
   @Test
-  public void testClear() {
+  void testClear() {
     Counter counter = Counter.builder().name("test").labelNames("label1", "label2").build();
     counter.labelValues("a", "b").inc(3.0);
     counter.labelValues("c", "d").inc(3.0);
@@ -76,7 +76,7 @@ class StatefulMetricTest {
   }
 
   @Test
-  public void testClearNoLabels() {
+  void testClearNoLabels() {
     Counter counter = Counter.builder().name("test").build();
     counter.inc();
     assertThat(counter.collect().getDataPoints()).hasSize(1);
@@ -95,7 +95,7 @@ class StatefulMetricTest {
   }
 
   @Test
-  public void testNullLabel() {
+  void testNullLabel() {
     Counter counter = Counter.builder().name("test").labelNames("l1", "l2").build();
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> counter.labelValues("l1", null))

@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 class MetricSnapshotsTest {
 
   @Test
-  public void testEmpty() {
+  void testEmpty() {
     MetricSnapshots snapshots = MetricSnapshots.builder().build();
     assertThat(snapshots.stream().findAny()).isNotPresent();
   }
 
   @Test
-  public void testSort() {
+  void testSort() {
     CounterSnapshot c1 =
         CounterSnapshot.builder()
             .name("counter1")
@@ -39,7 +39,7 @@ class MetricSnapshotsTest {
   }
 
   @Test
-  public void testDuplicateName() {
+  void testDuplicateName() {
     // Q: What if you have a counter named "foo" and a gauge named "foo"?
     // A: Great question. You might think this is a valid scenario, because the counter will produce
     //    the values "foo_total" and "foo_created" while the gauge will produce the value "foo".
@@ -62,7 +62,7 @@ class MetricSnapshotsTest {
   }
 
   @Test
-  public void testBuilder() {
+  void testBuilder() {
     CounterSnapshot counter =
         CounterSnapshot.builder()
             .name("my_metric")
@@ -75,7 +75,7 @@ class MetricSnapshotsTest {
   }
 
   @Test
-  public void testImmutable() {
+  void testImmutable() {
     CounterSnapshot c1 =
         CounterSnapshot.builder()
             .name("counter1")

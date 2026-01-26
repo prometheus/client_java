@@ -14,7 +14,7 @@ class NoProtobufIT extends ExporterTest {
   }
 
   @Test
-  public void testPrometheusProtobufDebugFormat() throws IOException {
+  void testPrometheusProtobufDebugFormat() throws IOException {
     start();
     assertThat(scrape("GET", "debug=text").status).isEqualTo(200);
     // protobuf is not supported

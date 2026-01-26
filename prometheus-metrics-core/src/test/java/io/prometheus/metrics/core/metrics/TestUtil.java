@@ -6,7 +6,7 @@ import static org.assertj.core.data.Offset.offset;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Label;
 
-class TestUtil {
+public class TestUtil {
 
   public static void assertExemplarEquals(Exemplar expected, Exemplar actual) {
     // ignore timestamp

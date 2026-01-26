@@ -23,7 +23,7 @@ class PrometheusScrapeHandlerTest {
   private Counter testCounter;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     registry = new PrometheusRegistry();
     handler = new PrometheusScrapeHandler(registry);
     testCounter = Counter.builder().name("test_counter").help("Test counter").register(registry);
@@ -31,7 +31,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testBasicScrape() throws IOException {
+  void testBasicScrape() throws IOException {
     TestHttpExchange exchange = new TestHttpExchange("GET", null);
     handler.handleRequest(exchange);
 
@@ -41,7 +41,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testOpenMetricsFormat() throws IOException {
+  void testOpenMetricsFormat() throws IOException {
     TestHttpExchange exchange =
         new TestHttpExchange("GET", null).withHeader("Accept", "application/openmetrics-text");
     handler.handleRequest(exchange);
@@ -53,7 +53,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testPrometheusTextFormat() throws IOException {
+  void testPrometheusTextFormat() throws IOException {
     TestHttpExchange exchange =
         new TestHttpExchange("GET", null).withHeader("Accept", "text/plain");
     handler.handleRequest(exchange);
@@ -64,7 +64,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testGzipCompression() throws IOException {
+  void testGzipCompression() throws IOException {
     TestHttpExchange exchange =
         new TestHttpExchange("GET", null).withHeader("Accept-Encoding", "gzip");
     handler.handleRequest(exchange);
@@ -79,7 +79,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testMultipleAcceptEncodingHeaders() throws IOException {
+  void testMultipleAcceptEncodingHeaders() throws IOException {
     TestHttpExchange exchange =
         new TestHttpExchange("GET", null)
             .withHeader("Accept-Encoding", "deflate")
@@ -91,7 +91,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testHeadRequest() throws IOException {
+  void testHeadRequest() throws IOException {
     TestHttpExchange exchange = new TestHttpExchange("HEAD", null);
     handler.handleRequest(exchange);
 
@@ -102,7 +102,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testDebugOpenMetrics() throws IOException {
+  void testDebugOpenMetrics() throws IOException {
     TestHttpExchange exchange = new TestHttpExchange("GET", "debug=openmetrics");
     handler.handleRequest(exchange);
 
@@ -113,7 +113,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testDebugText() throws IOException {
+  void testDebugText() throws IOException {
     TestHttpExchange exchange = new TestHttpExchange("GET", "debug=text");
     handler.handleRequest(exchange);
 
@@ -122,7 +122,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testDebugInvalidParameter() throws IOException {
+  void testDebugInvalidParameter() throws IOException {
     TestHttpExchange exchange = new TestHttpExchange("GET", "debug=invalid");
     handler.handleRequest(exchange);
 
@@ -131,7 +131,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testMetricNameFilter() throws IOException {
+  void testMetricNameFilter() throws IOException {
     Counter anotherCounter =
         Counter.builder().name("another_counter").help("Another counter").register(registry);
     anotherCounter.inc(10);
@@ -145,7 +145,7 @@ class PrometheusScrapeHandlerTest {
   }
 
   @Test
-  public void testMultipleMetricNameFilters() throws IOException {
+  void testMultipleMetricNameFilters() throws IOException {
     Counter counter1 = Counter.builder().name("metric_one").help("Metric one").register(registry);
     Counter counter2 = Counter.builder().name("metric_two").help("Metric two").register(registry);
     Counter counter3 =

@@ -26,7 +26,7 @@ class PushGatewayTest {
   Gauge gauge;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     mockServerClient = ClientAndServer.startClientAndServer(0);
     registry = new PrometheusRegistry();
     gauge = Gauge.builder().name("g").help("help").build();
@@ -38,7 +38,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testInvalidURLThrowsRuntimeException() {
+  void testInvalidURLThrowsRuntimeException() {
     assertThatExceptionOfType(RuntimeException.class)
         .isThrownBy(
             () -> {
@@ -49,8 +49,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testMultipleSlashesAreStrippedFromURL()
-      throws NoSuchFieldException, IllegalAccessException {
+  void testMultipleSlashesAreStrippedFromURL() throws NoSuchFieldException, IllegalAccessException {
     final PushGateway pushGateway =
         PushGateway.builder().address("example.com:1234/context///path//").job("test").build();
     assertThat(getUrl(pushGateway))
@@ -64,7 +63,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPush() throws IOException {
+  void testPush() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j"))
         .respond(response().withStatusCode(202));
@@ -78,7 +77,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPush200Response() throws IOException {
+  void testPush200Response() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j"))
         .respond(response().withStatusCode(200));
@@ -92,7 +91,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testNon202ResponseThrows() {
+  void testNon202ResponseThrows() {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j"))
         .respond(response().withStatusCode(500));
@@ -114,7 +113,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushCollector() throws IOException {
+  void testPushCollector() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j"))
         .respond(response().withStatusCode(202));
@@ -128,7 +127,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushWithGroupingKey() throws IOException {
+  void testPushWithGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/l/v"))
         .respond(response().withStatusCode(202));
@@ -143,7 +142,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushWithEscapedGroupingKey() throws IOException {
+  void testPushWithEscapedGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/U__l_2e_1/v1"))
         .respond(response().withStatusCode(202));
@@ -158,7 +157,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushWithMultiGroupingKey() throws IOException {
+  void testPushWithMultiGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/l/v/l2/v2"))
         .respond(response().withStatusCode(202));
@@ -174,7 +173,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushWithMultiEscapedGroupingKey() throws IOException {
+  void testPushWithMultiEscapedGroupingKey() throws IOException {
 
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/U__l_2e_1/v1/U__l_2e_2/v2"))
@@ -191,7 +190,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushWithEmptyLabelGroupingKey() throws IOException {
+  void testPushWithEmptyLabelGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/l/v/l2@base64/="))
         .respond(response().withStatusCode(202));
@@ -207,7 +206,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushWithGroupingKeyWithSlashes() throws IOException {
+  void testPushWithGroupingKeyWithSlashes() throws IOException {
     mockServerClient
         .when(
             request().withMethod("PUT").withPath("/metrics/job@base64/YS9i/l/v/l2@base64/75-_Lw=="))
@@ -224,7 +223,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushCollectorWithGroupingKey() throws IOException {
+  void testPushCollectorWithGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/l/v"))
         .respond(response().withStatusCode(202));
@@ -239,7 +238,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushCollectorWithEscapedGroupingKey() throws IOException {
+  void testPushCollectorWithEscapedGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("PUT").withPath("/metrics/job/j/U__l_2e_1/v1"))
         .respond(response().withStatusCode(202));
@@ -254,7 +253,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushAdd() throws IOException {
+  void testPushAdd() throws IOException {
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j"))
         .respond(response().withStatusCode(202));
@@ -268,7 +267,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushAddCollector() throws IOException {
+  void testPushAddCollector() throws IOException {
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j"))
         .respond(response().withStatusCode(202));
@@ -278,7 +277,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushAddWithGroupingKey() throws IOException {
+  void testPushAddWithGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j/l/v"))
         .respond(response().withStatusCode(202));
@@ -293,7 +292,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushAddWithEscapedGroupingKey() throws IOException {
+  void testPushAddWithEscapedGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j/U__l_2e_1/v1"))
         .respond(response().withStatusCode(202));
@@ -308,7 +307,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushAddCollectorWithGroupingKey() throws IOException {
+  void testPushAddCollectorWithGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j/l/v"))
         .respond(response().withStatusCode(202));
@@ -323,7 +322,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testPushAddCollectorWithEscapedGroupingKey() throws IOException {
+  void testPushAddCollectorWithEscapedGroupingKey() throws IOException {
 
     mockServerClient
         .when(request().withMethod("POST").withPath("/metrics/job/j/U__l_2e_1/v1"))
@@ -339,7 +338,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testDelete() throws IOException {
+  void testDelete() throws IOException {
     mockServerClient
         .when(request().withMethod("DELETE").withPath("/metrics/job/j"))
         .respond(response().withStatusCode(202));
@@ -349,7 +348,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testDeleteWithGroupingKey() throws IOException {
+  void testDeleteWithGroupingKey() throws IOException {
     mockServerClient
         .when(request().withMethod("DELETE").withPath("/metrics/job/j/l/v"))
         .respond(response().withStatusCode(202));
@@ -363,7 +362,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testDeleteWithEscapedGroupingKey() throws IOException {
+  void testDeleteWithEscapedGroupingKey() throws IOException {
 
     mockServerClient
         .when(request().withMethod("DELETE").withPath("/metrics/job/j/U__l_2e_1/v1"))
@@ -378,7 +377,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testInstanceIpGroupingKey() throws IOException {
+  void testInstanceIpGroupingKey() throws IOException {
     String ip = InetAddress.getLocalHost().getHostAddress();
     assertThat(ip).isNotEmpty();
     mockServerClient
@@ -395,7 +394,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testInstanceIpEscapedGroupingKey() throws IOException {
+  void testInstanceIpEscapedGroupingKey() throws IOException {
 
     String ip = InetAddress.getLocalHost().getHostAddress();
     assertThat(ip).isNotEmpty();
@@ -416,7 +415,7 @@ class PushGatewayTest {
   }
 
   @Test
-  public void testEscapingSchemeDefaultValue() throws IllegalAccessException, NoSuchFieldException {
+  void testEscapingSchemeDefaultValue() throws IllegalAccessException, NoSuchFieldException {
     PushGateway pg =
         PushGateway.builder()
             .address("localhost:" + mockServerClient.getPort())

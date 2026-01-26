@@ -30,7 +30,7 @@ class SummaryTest {
   private Summary noLabelsAndQuantiles;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     registry = new PrometheusRegistry();
     noLabels =
         Summary.builder().name("nolabels").unit(Unit.SECONDS).help("help").register(registry);
@@ -63,7 +63,7 @@ class SummaryTest {
   }
 
   @Test
-  public void testObserve() {
+  void testObserve() {
     noLabels.observe(2);
     assertThat(noLabels.getCount()).isOne();
     assertThat(noLabels.getSum()).isCloseTo(2.0, offset(.0));
@@ -86,7 +86,7 @@ class SummaryTest {
   }
 
   @Test
-  public void testNegativeAmount() {
+  void testNegativeAmount() {
     noLabels.observe(-1);
     noLabels.observe(-3);
     assertThat(getCount(noLabels, Labels.EMPTY)).isEqualTo(2);
@@ -94,7 +94,7 @@ class SummaryTest {
   }
 
   @Test
-  public void testQuantiles() {
+  void testQuantiles() {
     int nSamples = 1000000; // simulate one million samples
 
     for (int i = 1; i <= nSamples; i++) {
@@ -119,7 +119,7 @@ class SummaryTest {
   }
 
   @Test
-  public void testMaxAge() throws InterruptedException {
+  void testMaxAge() throws InterruptedException {
     Summary summary =
         Summary.builder()
             .quantile(0.99, 0.001)
@@ -138,7 +138,7 @@ class SummaryTest {
   }
 
   @Test
-  public void testTimer() {
+  void testTimer() {
     int result = noLabels.time(() -> 123);
     assertThat(result).isEqualTo(123);
     assertThat(getCount(noLabels, Labels.EMPTY)).isOne();
@@ -150,31 +150,31 @@ class SummaryTest {
   }
 
   @Test
-  public void noLabelsDefaultZeroValue() {
+  void noLabelsDefaultZeroValue() {
     assertThat(getCount(noLabels, Labels.EMPTY)).isZero();
     assertThat(getSum(noLabels, Labels.EMPTY)).isCloseTo(0.0, offset(.001));
   }
 
   @Test
-  public void testBuilderInvalidNumberOfAgeBuckets() {
+  void testBuilderInvalidNumberOfAgeBuckets() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> Summary.builder().name("name").numberOfAgeBuckets(-1).build());
   }
 
   @Test
-  public void testBuilderInvalidMaxAge() {
+  void testBuilderInvalidMaxAge() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> Summary.builder().name("name").maxAgeSeconds(-1).build());
   }
 
   @Test
-  public void testBuilderInvalidQuantile() {
+  void testBuilderInvalidQuantile() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> Summary.builder().name("name").quantile(42).build());
   }
 
   @Test
-  public void testBuilderInvalidQuantileError() {
+  void testBuilderInvalidQuantileError() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> Summary.builder().name("name").quantile(0.5, 20).build());
   }

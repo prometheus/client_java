@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class PrometheusPropertiesTest {
 
   @Test
-  public void testPrometheusConfig() {
+  void testPrometheusConfig() {
     PrometheusProperties result = PrometheusProperties.get();
     assertThat(result.getDefaultMetricProperties().getHistogramClassicUpperBounds()).hasSize(11);
     assertThat(result.getMetricProperties("http_duration_seconds").getHistogramClassicUpperBounds())
@@ -20,7 +20,7 @@ class PrometheusPropertiesTest {
   }
 
   @Test
-  public void testEmptyUpperBounds() throws IOException {
+  void testEmptyUpperBounds() throws IOException {
     Properties properties = new Properties();
     try (InputStream stream =
         Thread.currentThread()
@@ -34,7 +34,7 @@ class PrometheusPropertiesTest {
   }
 
   @Test
-  public void testBuilder() {
+  void testBuilder() {
     PrometheusProperties defaults = PrometheusPropertiesLoader.load(new HashMap<>());
     PrometheusProperties.Builder builder = PrometheusProperties.builder();
     builder.defaultMetricsProperties(defaults.getDefaultMetricProperties());

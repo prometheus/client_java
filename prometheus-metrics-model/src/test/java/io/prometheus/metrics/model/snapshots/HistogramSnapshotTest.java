@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class HistogramSnapshotTest {
 
   @Test
-  public void testGoodCaseComplete() {
+  void testGoodCaseComplete() {
     long createdTimestamp = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
     long scrapeTimestamp = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2);
     long exemplarTimestamp = System.currentTimeMillis();
@@ -170,7 +170,7 @@ class HistogramSnapshotTest {
   }
 
   @Test
-  public void testEmptyHistogram() {
+  void testEmptyHistogram() {
     assertThat(HistogramSnapshot.builder().name("empty_histogram").build().getDataPoints())
         .isEmpty();
     HistogramSnapshot snapshot =
@@ -181,7 +181,7 @@ class HistogramSnapshotTest {
   }
 
   @Test
-  public void testMinimalClassicHistogram() {
+  void testMinimalClassicHistogram() {
     HistogramSnapshot snapshot =
         HistogramSnapshot.builder()
             .name("minimal_histogram")
@@ -198,7 +198,7 @@ class HistogramSnapshotTest {
   }
 
   @Test
-  public void testMinimalNativeHistogram() {
+  void testMinimalNativeHistogram() {
     HistogramSnapshot snapshot =
         HistogramSnapshot.builder()
             .name("hist")
@@ -218,7 +218,7 @@ class HistogramSnapshotTest {
   }
 
   @Test
-  public void testClassicCount() {
+  void testClassicCount() {
     HistogramSnapshot snapshot =
         HistogramSnapshot.builder()
             .name("test_histogram")
@@ -239,21 +239,21 @@ class HistogramSnapshotTest {
   }
 
   @Test
-  public void testEmptyData() {
+  void testEmptyData() {
     // This will fail because one of nativeSchema and classicHistogramBuckets is required
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> HistogramDataPointSnapshot.builder().build());
   }
 
   @Test
-  public void testEmptyNativeData() {
+  void testEmptyNativeData() {
     HistogramDataPointSnapshot data = HistogramDataPointSnapshot.builder().nativeSchema(5).build();
     assertThat(data.getNativeBucketsForNegativeValues().size()).isZero();
     assertThat(data.getNativeBucketsForPositiveValues().size()).isZero();
   }
 
   @Test
-  public void testDataImmutable() {
+  void testDataImmutable() {
     HistogramSnapshot snapshot =
         HistogramSnapshot.builder()
             .name("test_histogram")
@@ -278,7 +278,7 @@ class HistogramSnapshotTest {
   }
 
   @Test
-  public void testEmptyClassicBuckets() {
+  void testEmptyClassicBuckets() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
@@ -287,7 +287,7 @@ class HistogramSnapshotTest {
   }
 
   @Test
-  public void testMinimalNativeData() {
+  void testMinimalNativeData() {
     new HistogramDataPointSnapshot(
         ClassicHistogramBuckets.EMPTY,
         0,
@@ -302,7 +302,7 @@ class HistogramSnapshotTest {
   }
 
   @Test
-  public void testMinimalClassicData() {
+  void testMinimalClassicData() {
     ClassicHistogramBuckets buckets =
         ClassicHistogramBuckets.builder().bucket(Double.POSITIVE_INFINITY, 0).build();
     new HistogramDataPointSnapshot(

@@ -82,7 +82,7 @@ class PrometheusRegistryTest {
       };
 
   @Test
-  public void registerNoName() {
+  void registerNoName() {
     PrometheusRegistry registry = new PrometheusRegistry();
     // If the collector does not have a name at registration time, there is no conflict during
     // registration.
@@ -96,7 +96,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void registerDuplicateName() {
+  void registerDuplicateName() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counterA1);
     assertThatExceptionOfType(IllegalStateException.class)
@@ -104,7 +104,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void registerOk() {
+  void registerOk() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counterA1);
     registry.register(counterB);
@@ -122,7 +122,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void registerDuplicateMultiCollector() {
+  void registerDuplicateMultiCollector() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(multiCollector);
     assertThatExceptionOfType(IllegalStateException.class)
@@ -130,7 +130,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void registerOkMultiCollector() {
+  void registerOkMultiCollector() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(multiCollector);
     MetricSnapshots snapshots = registry.scrape();
@@ -142,7 +142,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void clearOk() {
+  void clearOk() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counterA1);
     registry.register(counterB);

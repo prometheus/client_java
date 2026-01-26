@@ -10,20 +10,20 @@ import org.junit.jupiter.api.Test;
 
 class MapperConfigTest {
   @Test
-  public void setMatch_WHEN_ExpressionMatchesPattern_AllGood() {
+  void setMatch_WHEN_ExpressionMatchesPattern_AllGood() {
     final MapperConfig mapperConfig = new MapperConfig();
     mapperConfig.setMatch("com.company.meter.*");
     assertThat(mapperConfig.getMatch()).isEqualTo("com.company.meter.*");
   }
 
   @Test
-  public void setMatch_WHEN_ExpressionDoesnNotMatchPattern_ThrowException() {
+  void setMatch_WHEN_ExpressionDoesnNotMatchPattern_ThrowException() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> new MapperConfig().setMatch("com.company.meter.**.yay"));
   }
 
   @Test
-  public void setLabels_WHEN_ExpressionMatchesPattern_AllGood() {
+  void setLabels_WHEN_ExpressionMatchesPattern_AllGood() {
     final MapperConfig mapperConfig = new MapperConfig();
     final Map<String, String> labels = new HashMap<>();
     labels.put("valid", "${0}");
@@ -32,7 +32,7 @@ class MapperConfigTest {
   }
 
   @Test
-  public void setLabels_WHEN_ExpressionDoesnNotMatchPattern_ThrowException() {
+  void setLabels_WHEN_ExpressionDoesnNotMatchPattern_ThrowException() {
     final MapperConfig mapperConfig = new MapperConfig();
     final Map<String, String> labels = new HashMap<>();
     labels.put("valid", "${0}");
@@ -42,13 +42,13 @@ class MapperConfigTest {
   }
 
   @Test
-  public void toString_WHEN_EmptyConfig_AllGood() {
+  void toString_WHEN_EmptyConfig_AllGood() {
     final MapperConfig mapperConfig = new MapperConfig();
     assertThat(mapperConfig).hasToString("MapperConfig{match=null, name=null, labels={}}");
   }
 
   @Test
-  public void toString_WHEN_FullyConfigured_AllGood() {
+  void toString_WHEN_FullyConfigured_AllGood() {
     final MapperConfig mapperConfig = new MapperConfig();
     mapperConfig.setMatch("com.company.meter.*.foo");
     mapperConfig.setName("foo");

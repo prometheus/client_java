@@ -22,7 +22,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testOpenMetricsTextFormat() throws IOException {
+  void testOpenMetricsTextFormat() throws IOException {
     start();
     Response response =
         scrape("GET", "", "Accept", "application/openmetrics-text; version=1.0.0; charset=utf-8");
@@ -44,7 +44,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testPrometheusTextFormat() throws IOException {
+  void testPrometheusTextFormat() throws IOException {
     start();
     Response response = scrape("GET", "");
     assertThat(response.status).isEqualTo(200);
@@ -64,7 +64,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testPrometheusProtobufFormat() throws IOException {
+  void testPrometheusProtobufFormat() throws IOException {
     start();
     Response response =
         scrape(
@@ -121,7 +121,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testCompression() throws IOException {
+  void testCompression() throws IOException {
     start();
     Response response =
         scrape(
@@ -149,7 +149,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testErrorHandling() throws IOException {
+  void testErrorHandling() throws IOException {
     start("error");
     Response response = scrape("GET", "");
     assertThat(response.status).isEqualTo(500);
@@ -157,7 +157,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testHeadRequest() throws IOException {
+  void testHeadRequest() throws IOException {
     start();
     Response fullResponse = scrape("GET", "");
     int size = fullResponse.body.length;
@@ -169,7 +169,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testDebug() throws IOException {
+  void testDebug() throws IOException {
     start();
     Response response = scrape("GET", "debug=openmetrics");
     assertThat(response.status).isEqualTo(200);
@@ -180,7 +180,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testNameFilter() throws IOException {
+  void testNameFilter() throws IOException {
     start();
     Response response =
         scrape(
@@ -199,7 +199,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testEmptyResponseOpenMetrics() throws IOException {
+  void testEmptyResponseOpenMetrics() throws IOException {
     start();
     Response response =
         scrape(
@@ -217,7 +217,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testEmptyResponseText() throws IOException {
+  void testEmptyResponseText() throws IOException {
     start();
     Response response = scrape("GET", nameParam("none_existing"));
     assertThat(response.status).isEqualTo(200);
@@ -231,7 +231,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testEmptyResponseProtobuf() throws IOException {
+  void testEmptyResponseProtobuf() throws IOException {
     start();
     Response response =
         scrape(
@@ -249,7 +249,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testEmptyResponseGzipOpenMetrics() throws IOException {
+  void testEmptyResponseGzipOpenMetrics() throws IOException {
     start();
     Response response =
         scrape(
@@ -265,7 +265,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testEmptyResponseGzipText() throws IOException {
+  void testEmptyResponseGzipText() throws IOException {
     start();
     Response response = scrape("GET", nameParam("none_existing"), "Accept-Encoding", "gzip");
     assertThat(response.status).isEqualTo(200);
@@ -278,7 +278,7 @@ abstract class ExporterIT extends ExporterTest {
   }
 
   @Test
-  public void testDebugUnknown() throws IOException {
+  void testDebugUnknown() throws IOException {
     start();
     Response response = scrape("GET", "debug=unknown");
     assertThat(response.status).isEqualTo(500);

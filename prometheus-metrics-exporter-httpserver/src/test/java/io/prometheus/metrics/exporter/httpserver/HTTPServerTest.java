@@ -24,7 +24,7 @@ import javax.net.ssl.SSLContext;
 import javax.security.auth.Subject;
 import org.junit.jupiter.api.Test;
 
-public class HTTPServerTest {
+class HTTPServerTest {
 
   @Test
   @SuppressWarnings({"removal"})
