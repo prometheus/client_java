@@ -10,26 +10,42 @@ import com.sun.net.httpserver.HttpPrincipal;
 import com.sun.net.httpserver.HttpsConfigurator;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.registry.PrometheusScrapeRequest;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot;
+import io.prometheus.metrics.model.snapshots.CounterSnapshot.CounterDataPointSnapshot;
+import io.prometheus.metrics.model.snapshots.Labels;
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.security.Principal;
+import java.util.List;
 import java.util.concurrent.Executors;
 import javax.net.ssl.SSLContext;
 import javax.security.auth.Subject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class HTTPServerTest {
 
-  @Test
-  @SuppressWarnings({"removal"})
-  public void testSubjectDoAs() throws Exception {
+  private PrometheusRegistry registry;
 
+  @BeforeEach
+  void setUp() {
+    final MetricMetadata metadata = new MetricMetadata("my-counter");
+    final CounterDataPointSnapshot dataPointSnapshot =
+        new CounterDataPointSnapshot(1.0, Labels.EMPTY, null, System.currentTimeMillis());
+
+    registry = new PrometheusRegistry();
+    registry.register(() -> new CounterSnapshot(metadata, List.of(dataPointSnapshot)));
+  }
+
+  @Test
+  public void testSubjectDoAs() throws Exception {
     final String user = "joe";
     final Subject subject = new Subject();
     subject.getPrincipals().add(() -> user);
@@ -66,61 +82,61 @@ class HTTPServerTest {
             .authenticatedSubjectAttributeName("aa")
             .buildAndStart();
 
-    run(server, "204", "/");
-  }
-
-  private static void run(HTTPServer server, String expected, String path) throws IOException {
-    try (Socket socket = new Socket()) {
-      socket.connect(new InetSocketAddress("localhost", server.getPort()));
-
-      socket
-          .getOutputStream()
-          .write(("GET " + path + " HTTP/1.1 \r\n").getBytes(StandardCharsets.UTF_8));
-      socket.getOutputStream().write("HOST: localhost \r\n\r\n".getBytes(StandardCharsets.UTF_8));
-      socket.getOutputStream().flush();
-
-      String actualResponse = "";
-      byte[] resp = new byte[500];
-      int read = socket.getInputStream().read(resp, 0, resp.length);
-      if (read > 0) {
-        actualResponse = new String(resp, 0, read, StandardCharsets.UTF_8);
-      }
-      assertThat(actualResponse).contains(expected);
-    }
+    run(server, "/", 204, "");
   }
 
   @Test
-  void defaultHandler() throws IOException {
-    run(HTTPServer.builder().port(0).buildAndStart(), "200", "/");
+  void defaultHandler() throws Exception {
+    run(
+        HTTPServer.builder().port(0).buildAndStart(),
+        "/",
+        200,
+        "<title>Prometheus Java Client</title>");
   }
 
   @Test
-  void metrics() throws IOException {
+  void metrics() throws Exception {
     run(
         HTTPServer.builder()
             .port(0)
-            .registry(new PrometheusRegistry())
+            .registry(registry)
             .executorService(Executors.newFixedThreadPool(1))
             .buildAndStart(),
-        "200",
-        "/metrics");
+        "/metrics",
+        200,
+        "my_counter_total 1.0");
   }
 
   @Test
-  void metricsCustomPath() throws IOException {
+  void metricsCustomPath() throws Exception {
     run(
         HTTPServer.builder()
             .port(0)
-            .registry(new PrometheusRegistry())
+            .registry(registry)
             .metricsHandlerPath("/my-metrics")
             .executorService(Executors.newFixedThreadPool(1))
             .buildAndStart(),
-        "200",
-        "/my-metrics");
+        "/my-metrics",
+        200,
+        "my_counter_total 1.0");
   }
 
   @Test
-  void registryThrows() throws IOException {
+  void metricsCustomRootPath() throws Exception {
+    run(
+        HTTPServer.builder()
+            .port(0)
+            .registry(registry)
+            .metricsHandlerPath("/")
+            .executorService(Executors.newFixedThreadPool(1))
+            .buildAndStart(),
+        "/",
+        200,
+        "my_counter_total 1.0");
+  }
+
+  @Test
+  void registryThrows() throws Exception {
     HTTPServer server =
         HTTPServer.builder()
             .port(0)
@@ -132,11 +148,12 @@ class HTTPServerTest {
                   }
                 })
             .buildAndStart();
-    run(server, "500", "/metrics");
+    run(server, "/metrics", 500, "An Exception occurred while scraping metrics");
   }
 
   @Test
-  void config() throws NoSuchAlgorithmException, IOException {
+  @SuppressWarnings("resource")
+  void config() {
     assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(
             () ->
@@ -147,23 +164,27 @@ class HTTPServerTest {
                     .buildAndStart())
         .withMessage("cannot configure 'inetAddress' and 'hostname' at the same time");
 
-    // ssl doesn't work without in tests
-    run(
-        HTTPServer.builder()
-            .port(0)
-            .httpsConfigurator(new HttpsConfigurator(SSLContext.getDefault()))
-            .buildAndStart(),
-        "",
-        "/");
+    // SSL doesn't work in this simple test configuration
+    assertThatExceptionOfType(IOException.class)
+        .isThrownBy(
+            () ->
+                run(
+                    HTTPServer.builder()
+                        .port(0)
+                        .httpsConfigurator(new HttpsConfigurator(SSLContext.getDefault()))
+                        .buildAndStart(),
+                    "/",
+                    0,
+                    "ignored"));
   }
 
   @Test
-  void health() throws IOException {
-    run(HTTPServer.builder().port(0).buildAndStart(), "200", "/-/healthy");
+  void health() throws Exception {
+    run(HTTPServer.builder().port(0).buildAndStart(), "/-/healthy", 200, "Exporter is healthy.");
   }
 
   @Test
-  void healthEnabled() throws IOException {
+  void healthEnabled() throws Exception {
     HttpHandler handler = exchange -> exchange.sendResponseHeaders(204, -1);
     run(
         HTTPServer.builder()
@@ -171,12 +192,13 @@ class HTTPServerTest {
             .defaultHandler(handler)
             .registerHealthHandler(true)
             .buildAndStart(),
-        "200",
-        "/-/healthy");
+        "/-/healthy",
+        200,
+        "Exporter is healthy.");
   }
 
   @Test
-  void healthDisabled() throws IOException {
+  void healthDisabled() throws Exception {
     HttpHandler handler = exchange -> exchange.sendResponseHeaders(204, -1);
     run(
         HTTPServer.builder()
@@ -184,8 +206,28 @@ class HTTPServerTest {
             .defaultHandler(handler)
             .registerHealthHandler(false)
             .buildAndStart(),
-        "204",
-        "/-/healthy");
+        "/-/healthy",
+        204,
+        "");
+  }
+
+  private static void run(
+      HTTPServer server, String path, int expectedStatusCode, String expectedBody)
+      throws Exception {
+    // we cannot use try-with-resources or even client.close(), or the test will fail with Java 17
+    @SuppressWarnings("resource")
+    final HttpClient client = HttpClient.newBuilder().build();
+    try {
+      final URI uri = URI.create("http://localhost:%s%s".formatted(server.getPort(), path));
+      final HttpRequest request = HttpRequest.newBuilder().uri(uri).GET().build();
+
+      final HttpResponse<String> response =
+          client.send(request, HttpResponse.BodyHandlers.ofString());
+      assertThat(response.statusCode()).isEqualTo(expectedStatusCode);
+      assertThat(response.body()).contains(expectedBody);
+    } finally {
+      server.stop();
+    }
   }
 
   /**

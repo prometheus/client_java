@@ -66,11 +66,21 @@ public class HTTPServer implements Closeable {
     this.server = httpServer;
     this.executorService = executorService;
     String metricsPath = getMetricsPath(metricsHandlerPath);
+    try {
+      server.removeContext("/");
+    } catch (IllegalArgumentException e) {
+      // context "/" not registered yet, ignore
+    }
     registerHandler(
         "/",
         defaultHandler == null ? new DefaultHandler(metricsPath) : defaultHandler,
         authenticator,
         authenticatedSubjectAttributeName);
+    try {
+      server.removeContext(metricsPath);
+    } catch (IllegalArgumentException e) {
+      // context metricsPath not registered yet, ignore
+    }
     registerHandler(
         metricsPath,
         new MetricsHandler(config, registry),
