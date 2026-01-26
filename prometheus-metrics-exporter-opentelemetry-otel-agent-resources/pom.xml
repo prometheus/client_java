@@ -21,6 +21,8 @@
     <automatic.module.name>io.prometheus.otel.resource.attributes</automatic.module.name>
     <!-- don't update with dependabot, the Otel agent can handle older versions -->
     <otel-dynamic-load.version>1.29.0</otel-dynamic-load.version>
+    <!-- Lower coverage threshold: OTel agent integration requires runtime agent attachment -->
+    <jacoco.line-coverage>0.50</jacoco.line-coverage>
   </properties>
 
   <build>
