@@ -1,6 +1,7 @@
 package io.prometheus.metrics.model.registry;
 
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
@@ -76,6 +77,39 @@ public interface Collector {
    */
   @Nullable
   default String getPrometheusName() {
+    return null;
+  }
+
+  /**
+   * Returns the metric type for registration-time validation.
+   *
+   * <p>This is used to prevent different metric types (e.g., Counter and Gauge) from sharing the
+   * same name. Returning {@code null} means type validation is skipped for this collector.
+   *
+   * @return the metric type, or {@code null} to skip validation
+   */
+  @Nullable
+  default MetricType getMetricType() {
+    return null;
+  }
+
+  /**
+   * Returns the complete set of label names for this metric.
+   *
+   * <p>This includes both dynamic label names (specified in {@code labelNames()}) and constant
+   * label names (specified in {@code constLabels()}). Label names are normalized using Prometheus
+   * naming conventions.
+   *
+   * <p>This is used for registration-time validation to prevent duplicate label schemas for the
+   * same metric name. Two collectors with the same name and type can coexist if they have different
+   * label name sets.
+   *
+   * <p>Returning {@code null} means label schema validation is skipped for this collector.
+   *
+   * @return the set of all label names, or {@code null} to skip validation
+   */
+  @Nullable
+  default Set<String> getLabelNames() {
     return null;
   }
 }
