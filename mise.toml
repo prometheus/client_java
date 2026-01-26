@@ -88,10 +88,19 @@ run = [
 description = "Run benchmarks with reduced iterations (quick smoke test, ~10 min)"
 run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 1 -wi 1 -i 3'"
 
-[tasks."benchmark:full"]
-description = "Run benchmarks with full JMH defaults (~2 hours)"
-run = "python3 ./.mise/tasks/update_benchmarks.py"
+[tasks."benchmark:ci"]
+description = "Run benchmarks with CI configuration (3 forks, 3 warmup, 5 measurement iterations (~60 min total)"
+run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 3 -wi 3 -i 5'"
+
+[tasks."benchmark:ci-json"]
+description = "Run benchmarks with CI configuration and JSON output (for workflow/testing)"
+run = """
+./mvnw -pl benchmarks -am -DskipTests clean package
+JMH_ARGS="${JMH_ARGS:--f 3 -wi 3 -i 5}"
+echo "Running benchmarks with args: $JMH_ARGS"
+java -jar ./benchmarks/target/benchmarks.jar -rf json -rff benchmark-results.json $JMH_ARGS
+"""
 
 [tasks."benchmark:generate-summary"]
 description = "Generate summary from existing benchmark-results.json"
-run = "python3 ./.mise/tasks/generate_benchmark_summary.py --input benchmark-results.json --output-dir benchmark-results"
+run = "python3 ./.mise/tasks/generate_benchmark_summary.py"

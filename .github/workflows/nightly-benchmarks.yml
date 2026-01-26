@@ -47,28 +47,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build benchmarks module
-        run: ./mvnw -pl benchmarks -am -DskipTests clean package
-
       - name: Run JMH benchmarks
-        run: |
-          # 3 forks, 3 warmup, 5 measurement iterations (~60 min total)
-          DEFAULT_ARGS="-f 3 -wi 3 -i 5"
-          JMH_ARGS="${INPUT_JMH_ARGS:-$DEFAULT_ARGS}"
-
-          echo "Running benchmarks with args: $JMH_ARGS"
-
-          # shellcheck disable=SC2086 # Intentional word splitting for JMH args
-          java -jar ./benchmarks/target/benchmarks.jar \
-            -rf json \
-            -rff benchmark-results.json \
-            $JMH_ARGS
+        run: mise run benchmark:ci-json
         env:
-          INPUT_JMH_ARGS: ${{ github.event.inputs.jmh_args }}
+          JMH_ARGS: ${{ github.event.inputs.jmh_args }}
 
       - name: Generate benchmark summary
         run: |
-          python3 .mise/tasks/generate_benchmark_summary.py \
+          mise run benchmark:generate-summary \
             --input benchmark-results.json \
             --output-dir benchmark-results \
             --commit-sha "${{ github.sha }}"
