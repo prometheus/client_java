@@ -1,49 +1,73 @@
 {
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:best-practices", "config:recommended"],
-  platformCommit: "enabled",
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
+    'config:recommended',
+  ],
+  platformCommit: 'enabled',
   automerge: true,
   ignorePaths: [
-    "**/simpleclient-archive/**",
-    // old projects
-    // agent resources packages an OTel API that is the minimum required API version
-    "**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml",
+    '**/simpleclient-archive/**',
+    '**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml',
   ],
-  labels: ["dependencies"],
+  labels: [
+    'dependencies',
+  ],
   packageRules: [
     {
-      matchPackageNames: ["jdx/mise"],
-      groupName: "mise",
-      schedule: ["before 4am on monday"],
+      matchPackageNames: [
+        'jdx/mise',
+      ],
+      groupName: 'mise',
+      schedule: [
+        'before 4am on monday',
+      ],
     },
     {
-      matchFileNames: ["mise.toml"],
-      matchDepNames: ["java"],
-      groupName: "java temurin",
-      additionalBranchPrefix: "temurin-",
+      matchFileNames: [
+        'mise.toml',
+      ],
+      matchDepNames: [
+        'java',
+      ],
+      groupName: 'java temurin',
+      additionalBranchPrefix: 'temurin-',
     },
     {
-      matchFileNames: [".mise/envs/native/mise.toml"],
-      matchDepNames: ["java"],
-      groupName: "java graalvm",
-      additionalBranchPrefix: "graalvm-",
+      matchFileNames: [
+        '.mise/envs/native/mise.toml',
+      ],
+      matchDepNames: [
+        'java',
+      ],
+      groupName: 'java graalvm',
+      additionalBranchPrefix: 'graalvm-',
     },
   ],
   customManagers: [
     {
-      customType: "regex",
-      description: "update mise",
-      managerFilePatterns: ["/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/", "/(^|/)action\\.ya?ml$/"],
-      datasourceTemplate: "github-release-attachments",
-      packageNameTemplate: "jdx/mise",
-      depNameTemplate: "mise",
-      matchStrings: ["jdx/mise-action.*\\n\\s*with:\\s*\\n\\s*version: [\"']?(?<currentValue>v[.\\d]+)[\"']?\\s*\\n\\s*sha256: [\"']?(?<currentDigest>\\w+)[\"']?"],
+      customType: 'regex',
+      description: 'update mise',
+      managerFilePatterns: [
+        '/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/',
+        '/(^|/)action\\.ya?ml$/',
+      ],
+      datasourceTemplate: 'github-release-attachments',
+      packageNameTemplate: 'jdx/mise',
+      depNameTemplate: 'mise',
+      matchStrings: [
+        'jdx/mise-action.*\\n\\s*with:\\s*\\n\\s*version: ["\']?(?<currentValue>v[.\\d]+)["\']?\\s*\\n\\s*sha256: ["\']?(?<currentDigest>\\w+)["\']?',
+      ],
     },
     {
-      customType: "regex",
-      description: "update super-linter in mise tasks",
-      fileMatch: ["^\\.mise/tasks/.+\\.sh$"],
-      matchStrings: ['# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\S+_VERSION="(?<currentValue>v\\d+\\.\\d+\\.\\d+)@(?<currentDigest>sha256:[a-f0-9]+)"'],
+      customType: 'regex',
+      description: 'update super-linter in mise tasks',
+      managerFilePatterns: [
+        '/^\\.mise/tasks/.+\\.sh$/',
+      ],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\S+_VERSION="(?<currentValue>v\\d+\\.\\d+\\.\\d+)@(?<currentDigest>sha256:[a-f0-9]+)"',
+      ],
     },
   ],
 }
