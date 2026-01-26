@@ -12,7 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.Predicate;
 
 /** Temporary directory in ./target/ to be mounted as a volume in Docker containers. */
-class Volume {
+public class Volume {
 
   private final Path tmpDir; // will be created in the ./target/ directory
 
