@@ -18,8 +18,8 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
         with:
-          version: v2026.1.4
-          sha256: 79c798e39b83f0dd80108eaa88c6ca63689695ae975fd6786e7a353ef9f87002
+          version: v2026.1.7
+          sha256: d98523f15392ab17909a55560244667aa81122766209b816d9a9b9585109bfea
       - name: Cache local Maven repository
         uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
@@ -27,6 +27,8 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Build Javadoc
+        run: mise run javadoc
       - name: Build release version
         run: mise run build-release
         env:

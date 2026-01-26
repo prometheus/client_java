@@ -16,6 +16,18 @@
       groupName: "mise",
       schedule: ["before 4am on monday"],
     },
+    {
+      matchFileNames: ["mise.toml"],
+      matchDepNames: ["java"],
+      groupName: "java temurin",
+      additionalBranchPrefix: "temurin-",
+    },
+    {
+      matchFileNames: [".mise/envs/native/mise.toml"],
+      matchDepNames: ["java"],
+      groupName: "java graalvm",
+      additionalBranchPrefix: "graalvm-",
+    },
   ],
   customManagers: [
     {
@@ -26,6 +38,12 @@
       packageNameTemplate: "jdx/mise",
       depNameTemplate: "mise",
       matchStrings: ["jdx/mise-action.*\\n\\s*with:\\s*\\n\\s*version: [\"']?(?<currentValue>v[.\\d]+)[\"']?\\s*\\n\\s*sha256: [\"']?(?<currentDigest>\\w+)[\"']?"],
+    },
+    {
+      customType: "regex",
+      description: "update super-linter in mise tasks",
+      managerFilePatterns: ["/^\\.mise/tasks/.+\\.sh$/"],
+      matchStrings: ['# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\S+_VERSION="(?<currentValue>v\\d+\\.\\d+\\.\\d+)@(?<currentDigest>sha256:[a-f0-9]+)"'],
     },
   ],
 }

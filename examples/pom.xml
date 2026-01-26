@@ -19,6 +19,7 @@
 
   <properties>
     <coverage.skip>true</coverage.skip>
+    <javadoc.skip>true</javadoc.skip>
   </properties>
 
   <modules>

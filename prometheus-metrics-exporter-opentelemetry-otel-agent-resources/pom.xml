@@ -21,6 +21,8 @@
     <automatic.module.name>io.prometheus.otel.resource.attributes</automatic.module.name>
     <!-- don't update with dependabot, the Otel agent can handle older versions -->
     <otel-dynamic-load.version>1.29.0</otel-dynamic-load.version>
+    <!-- Lower coverage threshold: OTel agent integration requires runtime agent attachment -->
+    <jacoco.line-coverage>0.50</jacoco.line-coverage>
   </properties>
 
   <build>
@@ -58,6 +60,40 @@
             </artifactItem>
           </artifactItems>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/io/opentelemetry/**</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>CLASS</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>${jacoco.line-coverage}</minimum>
+                    </limit>
+                  </limits>
+                  <excludes>
+                    <exclude>io.opentelemetry.**</exclude>
+                  </excludes>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
