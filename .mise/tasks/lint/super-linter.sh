@@ -4,11 +4,14 @@
 
 set -euo pipefail
 
-docker pull ghcr.io/super-linter/super-linter:latest
+# renovate: datasource=docker depName=ghcr.io/super-linter/super-linter
+SUPER_LINTER_VERSION="v8.3.2@sha256:e9d1895a1bdc1f9d9df41f688b27aa891743f23f9fae0f22a3e25eeda8f102db"
+
+docker pull --platform linux/amd64 "ghcr.io/super-linter/super-linter:${SUPER_LINTER_VERSION}"
 
 docker run --rm \
 	-e RUN_LOCAL=true \
 	-e DEFAULT_BRANCH=main \
 	--env-file ".github/super-linter.env" \
 	-v "$(pwd)":/tmp/lint \
-	ghcr.io/super-linter/super-linter:latest
+	"ghcr.io/super-linter/super-linter:${SUPER_LINTER_VERSION}"
