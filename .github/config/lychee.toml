@@ -1,0 +1,34 @@
+# Lychee configuration file
+# See https://lychee.cli.rs/config/
+
+timeout = 30
+retry_wait_time = 5
+max_retries = 6
+max_concurrency = 4
+
+# Check link anchors
+include_fragments = true
+
+remap = [
+  # workaround for https://github.com/lycheeverse/lychee/issues/1729
+  "https://github.com/(.*?)/(.*?)/blob/(.*?)/(.*#.*)$ https://raw.githubusercontent.com/$1/$2/$3/$4"
+]
+
+exclude = [
+  # excluding links to pull requests and issues is done for performance
+  "^https://github.com/prometheus/client_java/(issues|pull)/\\d+$",
+
+  # exclude localhost URLs as they require running services
+  "^http://localhost",
+  "^https://localhost",
+
+  # exclude root-relative URLs that are for the built site
+  "^/client_java/",
+
+  # exclude Hugo template variables
+  "\\{\\{",
+  "%7B%7B",
+
+  # exclude private GitHub settings pages
+  "^https://github.com/prometheus/client_java/settings/",
+]
