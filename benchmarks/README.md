@@ -10,6 +10,17 @@ Run benchmarks and update the results in the Javadoc of the benchmark classes:
 mise run update-benchmarks
 ```
 
+### Different benchmark configurations
+
+The full benchmark suite takes approximately 2 hours with JMH defaults.
+For faster iterations, use these preset configurations:
+
+| Command                       | Duration | Use Case                                 |
+| ----------------------------- | -------- | ---------------------------------------- |
+| `mise run benchmark:quick`    | ~10 min  | Quick smoke test during development      |
+| `mise run benchmark:standard` | ~60 min  | CI/nightly runs with good accuracy       |
+| `mise run benchmark:full`     | ~2 hours | Full JMH defaults for release validation |
+
 ### Running benchmarks manually
 
 ```shell
@@ -21,6 +32,26 @@ Run only one specific benchmark:
 ```shell
 java -jar ./benchmarks/target/benchmarks.jar CounterBenchmark
 ```
+
+### Custom JMH arguments
+
+You can pass custom JMH arguments:
+
+```shell
+# Quick run: 1 fork, 1 warmup iteration, 3 measurement iterations
+mise run update-benchmarks -- --jmh-args "-f 1 -wi 1 -i 3"
+
+# Standard CI: 3 forks, 3 warmup iterations, 5 measurement iterations
+mise run update-benchmarks -- --jmh-args "-f 3 -wi 3 -i 5"
+```
+
+JMH parameter reference:
+
+- `-f N`: Number of forks (JVM restarts)
+- `-wi N`: Number of warmup iterations
+- `-i N`: Number of measurement iterations
+- `-w Ns`: Warmup iteration time (default: 10s)
+- `-r Ns`: Measurement iteration time (default: 10s)
 
 ## Results
 
