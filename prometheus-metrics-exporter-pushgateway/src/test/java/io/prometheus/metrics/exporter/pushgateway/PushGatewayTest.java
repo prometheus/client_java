@@ -49,8 +49,7 @@ class PushGatewayTest {
   }
 
   @Test
-  void testMultipleSlashesAreStrippedFromURL()
-      throws NoSuchFieldException, IllegalAccessException {
+  void testMultipleSlashesAreStrippedFromURL() throws NoSuchFieldException, IllegalAccessException {
     final PushGateway pushGateway =
         PushGateway.builder().address("example.com:1234/context///path//").job("test").build();
     assertThat(getUrl(pushGateway))
