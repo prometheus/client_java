@@ -334,6 +334,12 @@
           <rulesUri>file://${project.basedir}/version-rules.xml</rulesUri>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <skip>${javadoc.skip}</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -409,6 +415,7 @@
           <plugin>
             <artifactId>maven-javadoc-plugin</artifactId>
             <configuration>
+              <skip>${javadoc.skip}</skip>
               <encoding>UTF-8</encoding>
               <docencoding>UTF-8</docencoding>
               <linksource>true</linksource>

@@ -23,6 +23,7 @@
     <simpleclient.version>0.16.0</simpleclient.version>
     <codahale.version>3.0.2</codahale.version>
     <coverage.skip>true</coverage.skip>
+    <javadoc.skip>true</javadoc.skip>
   </properties>
 
   <dependencyManagement>
