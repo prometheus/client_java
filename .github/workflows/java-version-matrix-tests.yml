@@ -58,7 +58,7 @@ jobs:
       - name: Rebuild sample apps targeting Java ${{ matrix.java-version }}
         run: |
           cd integration-tests
-          mise exec -- ../mvnw install -DskipTests -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
+          mise exec -- ../mvnw clean install -DskipTests -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
             -Djava.version=${{ matrix.java-version }} \
             -Dmaven.compiler.release=${{ matrix.java-version }} \
             -pl it-common,it-exporter/it-exporter-httpserver-sample,it-exporter/it-exporter-servlet-tomcat-sample,it-exporter/it-exporter-servlet-jetty-sample,it-exporter/it-exporter-no-protobuf,it-pushgateway
