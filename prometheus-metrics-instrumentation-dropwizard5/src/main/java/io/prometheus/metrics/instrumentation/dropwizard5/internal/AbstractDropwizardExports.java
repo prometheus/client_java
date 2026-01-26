@@ -24,30 +24,29 @@ import javax.annotation.Nullable;
  * converting Dropwizard metrics to Prometheus metrics. Subclasses only need to implement {@link
  * #collectMetricSnapshots()} to handle version-specific registry APIs.
  *
- * @param <TRegistry> The Dropwizard MetricRegistry type
- * @param <TFilter> The Dropwizard MetricFilter type
- * @param <TCounter> The Dropwizard Counter type
- * @param <TGauge> The Dropwizard Gauge type
- * @param <THistogram> The Dropwizard Histogram type
- * @param <TTimer> The Dropwizard Timer type
- * @param <TMeter> The Dropwizard Meter type
- * @param <TMetric> The Dropwizard Metric base type
- * @param <TSnapshot> The Dropwizard Snapshot type
+ * @param <R> The Dropwizard MetricRegistry type
+ * @param <F> The Dropwizard MetricFilter type
+ * @param <C> The Dropwizard Counter type
+ * @param <G> The Dropwizard Gauge type
+ * @param <H> The Dropwizard Histogram type
+ * @param <T> The Dropwizard Timer type
+ * @param <M> The Dropwizard Meter type
+ * @param <B> The Dropwizard Metric base type
+ * @param <S> The Dropwizard Snapshot type
  */
-public abstract class AbstractDropwizardExports<
-        TRegistry, TFilter, TCounter, TGauge, THistogram, TTimer, TMeter, TMetric, TSnapshot>
+public abstract class AbstractDropwizardExports<R, F, C, G, H, T, M, B, S>
     implements MultiCollector {
 
   private static final Logger logger = Logger.getLogger(AbstractDropwizardExports.class.getName());
 
-  protected final TRegistry registry;
-  protected final TFilter metricFilter;
+  protected final R registry;
+  protected final F metricFilter;
   @Nullable protected final CustomLabelMapper labelMapper;
   protected final InvalidMetricHandler invalidMetricHandler;
 
   protected AbstractDropwizardExports(
-      TRegistry registry,
-      TFilter metricFilter,
+      R registry,
+      F metricFilter,
       @Nullable CustomLabelMapper labelMapper,
       InvalidMetricHandler invalidMetricHandler) {
     this.registry = registry;
@@ -62,7 +61,7 @@ public abstract class AbstractDropwizardExports<
         metricName, metric.getClass().getName());
   }
 
-  protected MetricMetadata getMetricMetaData(String metricName, TMetric metric) {
+  protected MetricMetadata getMetricMetaData(String metricName, B metric) {
     String name = labelMapper != null ? labelMapper.getName(metricName) : metricName;
     return new MetricMetadata(
         PrometheusNaming.sanitizeMetricName(name), getHelpMessage(metricName, metric));
@@ -73,9 +72,9 @@ public abstract class AbstractDropwizardExports<
    * href="https://prometheus.io/docs/concepts/metric_types/#gauge">Gauge</a>.
    */
   @SuppressWarnings("unchecked")
-  protected MetricSnapshot fromCounter(String dropwizardName, TCounter counter) {
+  protected MetricSnapshot fromCounter(String dropwizardName, C counter) {
     long count = getCounterCount(counter);
-    MetricMetadata metadata = getMetricMetaData(dropwizardName, (TMetric) counter);
+    MetricMetadata metadata = getMetricMetaData(dropwizardName, (B) counter);
     CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder =
         CounterSnapshot.CounterDataPointSnapshot.builder().value(Long.valueOf(count).doubleValue());
     if (labelMapper != null) {
@@ -88,7 +87,7 @@ public abstract class AbstractDropwizardExports<
   /** Export gauge as a prometheus gauge. */
   @SuppressWarnings("unchecked")
   @Nullable
-  protected MetricSnapshot fromGauge(String dropwizardName, TGauge gauge) {
+  protected MetricSnapshot fromGauge(String dropwizardName, G gauge) {
     Object obj = getGaugeValue(gauge);
     double value;
     if (obj instanceof Number) {
@@ -104,7 +103,7 @@ public abstract class AbstractDropwizardExports<
               obj == null ? "null" : obj.getClass().getName()));
       return null;
     }
-    MetricMetadata metadata = getMetricMetaData(dropwizardName, (TMetric) gauge);
+    MetricMetadata metadata = getMetricMetaData(dropwizardName, (B) gauge);
     GaugeSnapshot.GaugeDataPointSnapshot.Builder dataPointBuilder =
         GaugeSnapshot.GaugeDataPointSnapshot.builder().value(value);
     if (labelMapper != null) {
@@ -123,7 +122,7 @@ public abstract class AbstractDropwizardExports<
    * @param factor a factor to apply to histogram values.
    */
   protected MetricSnapshot fromSnapshotAndCount(
-      String dropwizardName, TSnapshot snapshot, long count, double factor, String helpMessage) {
+      String dropwizardName, S snapshot, long count, double factor, String helpMessage) {
     Quantiles quantiles =
         Quantiles.builder()
             .quantile(0.5, getMedian(snapshot) * factor)
@@ -147,16 +146,16 @@ public abstract class AbstractDropwizardExports<
   }
 
   /** Convert histogram snapshot. */
-  protected MetricSnapshot fromHistogram(String dropwizardName, THistogram histogram) {
-    TSnapshot snapshot = getHistogramSnapshot(histogram);
+  protected MetricSnapshot fromHistogram(String dropwizardName, H histogram) {
+    S snapshot = getHistogramSnapshot(histogram);
     long count = getHistogramCount(histogram);
     return fromSnapshotAndCount(
         dropwizardName, snapshot, count, 1.0, getHelpMessage(dropwizardName, histogram));
   }
 
   /** Export Dropwizard Timer as a histogram. Use TIME_UNIT as time unit. */
-  protected MetricSnapshot fromTimer(String dropwizardName, TTimer timer) {
-    TSnapshot snapshot = getTimerSnapshot(timer);
+  protected MetricSnapshot fromTimer(String dropwizardName, T timer) {
+    S snapshot = getTimerSnapshot(timer);
     long count = getTimerCount(timer);
     return fromSnapshotAndCount(
         dropwizardName,
@@ -168,8 +167,8 @@ public abstract class AbstractDropwizardExports<
 
   /** Export a Meter as a prometheus COUNTER. */
   @SuppressWarnings("unchecked")
-  protected MetricSnapshot fromMeter(String dropwizardName, TMeter meter) {
-    MetricMetadata metadata = getMetricMetaData(dropwizardName + "_total", (TMetric) meter);
+  protected MetricSnapshot fromMeter(String dropwizardName, M meter) {
+    MetricMetadata metadata = getMetricMetaData(dropwizardName + "_total", (B) meter);
     CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder =
         CounterSnapshot.CounterDataPointSnapshot.builder().value(getMeterCount(meter));
     if (labelMapper != null) {
@@ -209,29 +208,29 @@ public abstract class AbstractDropwizardExports<
   /** Collect all metric snapshots from the registry. */
   protected abstract MetricSnapshots collectMetricSnapshots();
 
-  protected abstract long getCounterCount(TCounter counter);
+  protected abstract long getCounterCount(C counter);
 
-  protected abstract Object getGaugeValue(TGauge gauge);
+  protected abstract Object getGaugeValue(G gauge);
 
-  protected abstract TSnapshot getHistogramSnapshot(THistogram histogram);
+  protected abstract S getHistogramSnapshot(H histogram);
 
-  protected abstract long getHistogramCount(THistogram histogram);
+  protected abstract long getHistogramCount(H histogram);
 
-  protected abstract TSnapshot getTimerSnapshot(TTimer timer);
+  protected abstract S getTimerSnapshot(T timer);
 
-  protected abstract long getTimerCount(TTimer timer);
+  protected abstract long getTimerCount(T timer);
 
-  protected abstract long getMeterCount(TMeter meter);
+  protected abstract long getMeterCount(M meter);
 
-  protected abstract double getMedian(TSnapshot snapshot);
+  protected abstract double getMedian(S snapshot);
 
-  protected abstract double get75thPercentile(TSnapshot snapshot);
+  protected abstract double get75thPercentile(S snapshot);
 
-  protected abstract double get95thPercentile(TSnapshot snapshot);
+  protected abstract double get95thPercentile(S snapshot);
 
-  protected abstract double get98thPercentile(TSnapshot snapshot);
+  protected abstract double get98thPercentile(S snapshot);
 
-  protected abstract double get99thPercentile(TSnapshot snapshot);
+  protected abstract double get99thPercentile(S snapshot);
 
-  protected abstract double get999thPercentile(TSnapshot snapshot);
+  protected abstract double get999thPercentile(S snapshot);
 }

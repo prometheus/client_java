@@ -76,8 +76,9 @@ Pre-built instrumentations: `prometheus-metrics-instrumentation-jvm`, `-caffeine
 - **Assertions in tests**: Use static imports from AssertJ (`import static org.assertj.core.api.Assertions.assertThat`)
 - **Empty catch blocks**: Use `ignored` as the exception variable name
 
-## Linting
+## Linting and Validation
 
+- **IMPORTANT**: Always run `mise run build` after modifying Java files to ensure all lints, code formatting (Spotless), static analysis (Error Prone), and checkstyle checks pass
 - **IMPORTANT**: Always run `mise run lint:super-linter` after modifying non-Java files (YAML, Markdown, shell scripts, JSON, etc.)
 - Super-linter is configured to only show ERROR-level messages via `LOG_LEVEL=ERROR` in `.github/super-linter.env`
 - Local super-linter version is pinned to match CI (see `.mise/tasks/lint/super-linter.sh`)
