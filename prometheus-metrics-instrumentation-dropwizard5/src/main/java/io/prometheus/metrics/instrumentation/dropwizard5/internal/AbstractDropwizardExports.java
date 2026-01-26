@@ -72,6 +72,7 @@ public abstract class AbstractDropwizardExports<
    * Export counter as Prometheus <a
    * href="https://prometheus.io/docs/concepts/metric_types/#gauge">Gauge</a>.
    */
+  @SuppressWarnings("unchecked")
   protected MetricSnapshot fromCounter(String dropwizardName, TCounter counter) {
     long count = getCounterCount(counter);
     MetricMetadata metadata = getMetricMetaData(dropwizardName, (TMetric) counter);
@@ -85,6 +86,7 @@ public abstract class AbstractDropwizardExports<
   }
 
   /** Export gauge as a prometheus gauge. */
+  @SuppressWarnings("unchecked")
   @Nullable
   protected MetricSnapshot fromGauge(String dropwizardName, TGauge gauge) {
     Object obj = getGaugeValue(gauge);
@@ -165,6 +167,7 @@ public abstract class AbstractDropwizardExports<
   }
 
   /** Export a Meter as a prometheus COUNTER. */
+  @SuppressWarnings("unchecked")
   protected MetricSnapshot fromMeter(String dropwizardName, TMeter meter) {
     MetricMetadata metadata = getMetricMetaData(dropwizardName + "_total", (TMetric) meter);
     CounterSnapshot.CounterDataPointSnapshot.Builder dataPointBuilder =
