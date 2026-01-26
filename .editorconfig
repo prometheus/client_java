@@ -18,5 +18,5 @@ max_line_length = 120
 indent_size = 4
 max_line_length = 120
 
-[{.mise/tasks/build-release.sh,.mise/tasks/lint/super-linter.sh,.github/workflows/multi-version-test.yml}]
+[{.mise/tasks/build-release.sh,.mise/tasks/lint/super-linter.sh,.mise/tasks/lint/links-in-modified-files.sh,.github/workflows/multi-version-test.yml,.github/workflows/lint-rest.yml}]
 max_line_length = 200
