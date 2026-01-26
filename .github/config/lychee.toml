@@ -9,6 +9,9 @@ max_concurrency = 4
 # Check link anchors
 include_fragments = true
 
+base_url = "https://prometheus.github.io"
+exclude_path = ["docs/themes"]
+
 remap = [
   # workaround for https://github.com/lycheeverse/lychee/issues/1729
   "https://github.com/(.*?)/(.*?)/blob/(.*?)/(.*#.*)$ https://raw.githubusercontent.com/$1/$2/$3/$4"
@@ -22,12 +25,10 @@ exclude = [
   "^http://localhost",
   "^https://localhost",
 
-  # exclude root-relative URLs that are for the built site
-  "^/client_java/",
-
-  # exclude Hugo template variables
-  "\\{\\{",
-  "%7B%7B",
+  '#',
+  'CONTRIBUTING.md',
+  'LICENSE',
+  'MAINTAINERS.md',
 
   # exclude private GitHub settings pages
   "^https://github.com/prometheus/client_java/settings/",
