@@ -1,5 +1,5 @@
 [tools]
-java = "oracle-graalvm-25.0.1"
+java = "oracle-graalvm-25.0.2+10.0.LTS"
 
 [tasks.native-test]
 depends = "build"
