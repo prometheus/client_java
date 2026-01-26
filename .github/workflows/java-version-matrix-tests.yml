@@ -58,15 +58,27 @@ jobs:
       - name: Rebuild sample apps targeting Java ${{ matrix.java-version }}
         run: |
           cd integration-tests
+          # Note: Jetty 12 and Tomcat 11 require Java 17+, so servlet samples are skipped for Java 11
+          if [ "${{ matrix.java-version }}" = "11" ]; then
+            MODULES="it-common,it-exporter/it-exporter-httpserver-sample,it-exporter/it-exporter-no-protobuf,it-pushgateway"
+          else
+            MODULES="it-common,it-exporter/it-exporter-httpserver-sample,it-exporter/it-exporter-servlet-tomcat-sample,it-exporter/it-exporter-servlet-jetty-sample,it-exporter/it-exporter-no-protobuf,it-pushgateway"
+          fi
           mise exec -- ../mvnw clean install -DskipTests -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
             -Djava.version=${{ matrix.java-version }} \
             -Dmaven.compiler.release=${{ matrix.java-version }} \
-            -pl it-common,it-exporter/it-exporter-httpserver-sample,it-exporter/it-exporter-servlet-tomcat-sample,it-exporter/it-exporter-servlet-jetty-sample,it-exporter/it-exporter-no-protobuf,it-pushgateway
+            -pl $MODULES
 
       - name: Run integration tests
         env:
           TEST_JAVA_VERSION: ${{ matrix.java-version }}
         run: |
           cd integration-tests
+          # Note: Servlet tests require Java 17+ (due to Jetty 12 and Tomcat 11)
+          if [ "${{ matrix.java-version }}" = "11" ]; then
+            TEST_MODULES="it-exporter/it-no-protobuf-test,it-pushgateway"
+          else
+            TEST_MODULES="it-exporter/it-exporter-test,it-exporter/it-no-protobuf-test,it-pushgateway"
+          fi
           mise exec -- ../mvnw verify -T 2C -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
-            -pl it-exporter/it-exporter-test,it-exporter/it-no-protobuf-test,it-pushgateway
+            -pl $TEST_MODULES
