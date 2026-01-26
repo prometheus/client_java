@@ -26,7 +26,9 @@ from typing import Dict, List, Optional
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Generate benchmark summary from JMH JSON")
+    parser = argparse.ArgumentParser(
+        description="Generate benchmark summary from JMH JSON"
+    )
     parser.add_argument(
         "--input",
         default="benchmark-results.json",
@@ -47,8 +49,8 @@ def parse_args():
 
 def get_system_info() -> Dict[str, str]:
     """Capture system hardware information."""
-    import platform
     import multiprocessing
+    import platform
 
     info = {}
 
@@ -67,9 +69,12 @@ def get_system_info() -> Dict[str, str]:
         # macOS
         try:
             import subprocess
+
             result = subprocess.run(
                 ["sysctl", "-n", "machdep.cpu.brand_string"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             if result.returncode == 0:
                 info["cpu_model"] = result.stdout.strip()
@@ -87,9 +92,12 @@ def get_system_info() -> Dict[str, str]:
         # macOS
         try:
             import subprocess
+
             result = subprocess.run(
                 ["sysctl", "-n", "hw.memsize"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             if result.returncode == 0:
                 bytes_mem = int(result.stdout.strip())
@@ -176,7 +184,9 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
     md.append("")
     md.append(f"- **Date:** {datetime_str}")
     if commit_sha != "local":
-        md.append(f"- **Commit:** [`{commit_short}`](https://github.com/{repo}/commit/{commit_sha})")
+        md.append(
+            f"- **Commit:** [`{commit_short}`](https://github.com/{repo}/commit/{commit_sha})"
+        )
     else:
         md.append(f"- **Commit:** `{commit_short}` (local run)")
     md.append(f"- **JDK:** {jdk_version} ({vm_name})")
@@ -222,13 +232,17 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
         sorted_benchmarks = sorted(
             benchmarks,
             key=lambda x: x.get("primaryMetric", {}).get("score", 0),
-            reverse=True
+            reverse=True,
         )
 
         md.append("| Benchmark | Score | Error | Units | |")
         md.append("|:----------|------:|------:|:------|:---|")
 
-        best_score = sorted_benchmarks[0].get("primaryMetric", {}).get("score", 1) if sorted_benchmarks else 1
+        best_score = (
+            sorted_benchmarks[0].get("primaryMetric", {}).get("score", 1)
+            if sorted_benchmarks
+            else 1
+        )
 
         for i, b in enumerate(sorted_benchmarks):
             name = b.get("benchmark", "").split(".")[-1]
@@ -252,14 +266,18 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
             except (ValueError, TypeError, ZeroDivisionError):
                 relative_fmt = ""
 
-            md.append(f"| {name} | {score_fmt} | {error_fmt} | {unit} | {relative_fmt} |")
+            md.append(
+                f"| {name} | {score_fmt} | {error_fmt} | {unit} | {relative_fmt} |"
+            )
 
         md.append("")
 
     md.append("### Raw Results")
     md.append("")
     md.append("```")
-    md.append(f"{'Benchmark':<50} {'Mode':>6} {'Cnt':>4} {'Score':>14} {'Error':>12}  Units")
+    md.append(
+        f"{'Benchmark':<50} {'Mode':>6} {'Cnt':>4} {'Score':>14} {'Error':>12}  Units"
+    )
 
     for b in sorted(results, key=lambda x: x.get("benchmark", "")):
         name = b.get("benchmark", "").replace("io.prometheus.metrics.benchmarks.", "")
@@ -283,7 +301,9 @@ def generate_markdown(results: List, commit_sha: str, repo: str) -> str:
         except (ValueError, TypeError):
             error_str = ""
 
-        md.append(f"{name:<50} {mode:>6} {cnt:>4} {score_str:>14} {error_str:>12}  {unit}")
+        md.append(
+            f"{name:<50} {mode:>6} {cnt:>4} {score_str:>14} {error_str:>12}  {unit}"
+        )
 
     md.append("```")
     md.append("")

@@ -58,6 +58,7 @@ jobs:
 
           echo "Running benchmarks with args: $JMH_ARGS"
 
+          # shellcheck disable=SC2086 # Intentional word splitting for JMH args
           java -jar ./benchmarks/target/benchmarks.jar \
             -rf json \
             -rff benchmark-results.json \
@@ -107,7 +108,9 @@ jobs:
           DATE=$(date -u +"%Y-%m-%d")
           COMMIT_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
 
-          git commit -m "Benchmark results for ${DATE} (${COMMIT_SHORT})" \
-            -m "Automated benchmark run from commit ${{ github.sha }}" || echo "No changes to commit"
+          git commit \
+            -m "Benchmark results for ${DATE} (${COMMIT_SHORT})" \
+            -m "From commit ${{ github.sha }}" \
+            || echo "No changes to commit"
 
           git push origin benchmarks --force-with-lease || git push origin benchmarks

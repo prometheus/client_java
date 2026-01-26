@@ -15,11 +15,11 @@ mise run update-benchmarks
 The full benchmark suite takes approximately 2 hours with JMH defaults.
 For faster iterations, use these preset configurations:
 
-| Command | Duration | Use Case |
-|---------|----------|----------|
-| `mise run benchmark:quick` | ~10 min | Quick smoke test during development |
-| `mise run benchmark:standard` | ~60 min | CI/nightly runs with good accuracy |
-| `mise run benchmark:full` | ~2 hours | Full JMH defaults for release validation |
+| Command                       | Duration | Use Case                                 |
+| ----------------------------- | -------- | ---------------------------------------- |
+| `mise run benchmark:quick`    | ~10 min  | Quick smoke test during development      |
+| `mise run benchmark:standard` | ~60 min  | CI/nightly runs with good accuracy       |
+| `mise run benchmark:full`     | ~2 hours | Full JMH defaults for release validation |
 
 ### Running benchmarks manually
 
@@ -46,6 +46,7 @@ mise run update-benchmarks -- --jmh-args "-f 3 -wi 3 -i 5"
 ```
 
 JMH parameter reference:
+
 - `-f N`: Number of forks (JVM restarts)
 - `-wi N`: Number of warmup iterations
 - `-i N`: Number of measurement iterations
