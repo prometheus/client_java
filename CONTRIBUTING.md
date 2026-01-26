@@ -19,6 +19,10 @@ the code.
 
 Run `./mvnw spotless:apply` to format the code (only changed files) before committing.
 
+Or run all the linters:
+
+`mise run lint:super-linter`
+
 ## Running Tests
 
 If you're getting errors when running tests:
