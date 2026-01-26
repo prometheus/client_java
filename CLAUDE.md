@@ -1,0 +1,96 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Build Commands
+
+This project uses Maven with mise for task automation. The Maven wrapper (`./mvnw`) is used for all builds.
+
+```bash
+# Full CI build (clean + install + all checks)
+mise run ci
+
+# Quick compile without tests or checks (fastest for development)
+mise run compile
+
+# Run unit tests only (skips formatting/coverage/checkstyle checks)
+mise run test
+
+# Run all tests including integration tests
+mise run test-all
+
+# Format code with Google Java Format
+mise run format
+# or directly: ./mvnw spotless:apply
+
+# Run a single test class
+./mvnw test -Dtest=CounterTest -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true
+
+# Run a single test method
+./mvnw test -Dtest=CounterTest#testIncrement -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true
+
+# Run tests in a specific module
+./mvnw test -pl prometheus-metrics-core -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true
+
+# Regenerate protobuf classes (after protobuf dependency update)
+mise run generate
+```
+
+## Architecture
+
+The library follows a layered architecture where metrics flow from core types through a registry to exporters:
+
+```
+prometheus-metrics-core (user-facing API)
+         │
+         ▼ collect()
+prometheus-metrics-model (immutable snapshots)
+         │
+         ▼
+prometheus-metrics-exposition-formats (text/protobuf/OpenMetrics)
+         │
+         ▼
+Exporters (httpserver, servlet, pushgateway, opentelemetry)
+```
+
+### Key Modules
+
+- **prometheus-metrics-core**: User-facing metric types (Counter, Gauge, Histogram, Summary, Info, StateSet). All metrics implement the `Collector` interface with a `collect()` method.
+- **prometheus-metrics-model**: Internal read-only immutable snapshot types returned by `collect()`. Contains `PrometheusRegistry` for metric registration.
+- **prometheus-metrics-config**: Runtime configuration via properties files or system properties.
+- **prometheus-metrics-exposition-formats**: Converts snapshots to Prometheus exposition formats.
+- **prometheus-metrics-tracer**: Exemplar support with OpenTelemetry tracing integration.
+- **prometheus-metrics-simpleclient-bridge**: Allows legacy simpleclient 0.16.0 metrics to work with the new registry.
+
+### Instrumentation Modules
+
+Pre-built instrumentations: `prometheus-metrics-instrumentation-jvm`, `-caffeine`, `-guava`, `-dropwizard`, `-dropwizard5`.
+
+## Code Style
+
+- **Formatter**: Google Java Format (enforced via Spotless)
+- **Line length**: 100 characters
+- **Indentation**: 2 spaces
+- **Static analysis**: Error Prone with NullAway (`io.prometheus.metrics` package)
+- **Logger naming**: Logger fields must be named `logger` (not `log`, `LOG`, or `LOGGER`)
+- **Assertions in tests**: Use static imports from AssertJ (`import static org.assertj.core.api.Assertions.assertThat`)
+- **Empty catch blocks**: Use `ignored` as the exception variable name
+
+## Linting and Validation
+
+- **IMPORTANT**: Always run `mise run build` after modifying Java files to ensure all lints, code formatting (Spotless), static analysis (Error Prone), and checkstyle checks pass
+- **IMPORTANT**: Always run `mise run lint:super-linter` after modifying non-Java files (YAML, Markdown, shell scripts, JSON, etc.)
+- Super-linter is configured to only show ERROR-level messages via `LOG_LEVEL=ERROR` in `.github/super-linter.env`
+- Local super-linter version is pinned to match CI (see `.mise/tasks/lint/super-linter.sh`)
+
+## Testing
+
+- JUnit 5 (Jupiter) with `@Test` annotations
+- AssertJ for fluent assertions
+- Mockito for mocking
+- Integration tests are in `integration-tests/` and run during `verify` phase
+- Acceptance tests use OATs framework: `mise run acceptance-test`
+
+## Java Version
+
+Source compatibility: Java 8. Tests run on Java 25 (configured in `mise.toml`).
