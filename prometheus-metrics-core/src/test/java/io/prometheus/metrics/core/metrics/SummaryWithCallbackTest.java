@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class SummaryWithCallbackTest {
 
   @Test
-  public void testGauge() {
+  void testGauge() {
     final AtomicInteger count = new AtomicInteger(1);
     final AtomicInteger sum = new AtomicInteger(1);
     final Quantiles quantiles = Quantiles.of(new Quantile(0.5, 10));
@@ -49,7 +49,7 @@ class SummaryWithCallbackTest {
   }
 
   @Test
-  public void testSummaryNoCallback() {
+  void testSummaryNoCallback() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () -> SummaryWithCallback.builder().name("summary").labelNames("l1", "l2").build());

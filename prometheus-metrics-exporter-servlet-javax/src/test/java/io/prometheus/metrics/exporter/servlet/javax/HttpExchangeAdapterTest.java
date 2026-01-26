@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 class HttpExchangeAdapterTest {
 
   @Test
-  public void testRequestGetQueryString() {
+  void testRequestGetQueryString() {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
     when(servletRequest.getQueryString()).thenReturn("name[]=test");
@@ -31,7 +31,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testRequestGetHeaders() {
+  void testRequestGetHeaders() {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
     when(servletRequest.getHeaders("Accept"))
@@ -44,7 +44,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testRequestGetMethod() {
+  void testRequestGetMethod() {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
     when(servletRequest.getMethod()).thenReturn("GET");
@@ -56,7 +56,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testRequestGetRequestPath() {
+  void testRequestGetRequestPath() {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
     when(servletRequest.getContextPath()).thenReturn("/app");
@@ -70,7 +70,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testRequestGetRequestPathWithPathInfo() {
+  void testRequestGetRequestPathWithPathInfo() {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
     when(servletRequest.getContextPath()).thenReturn("/app");
@@ -84,7 +84,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testResponseSetHeader() {
+  void testResponseSetHeader() {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
 
@@ -96,7 +96,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testResponseSendHeadersAndGetBody() throws IOException {
+  void testResponseSendHeadersAndGetBody() throws IOException {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
     ServletOutputStream outputStream =
@@ -125,7 +125,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testResponseSendHeadersWithContentLengthAlreadySet() throws IOException {
+  void testResponseSendHeadersWithContentLengthAlreadySet() throws IOException {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
     ServletOutputStream outputStream =
@@ -154,7 +154,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testHandleIOException() {
+  void testHandleIOException() {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
 
@@ -167,7 +167,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testHandleRuntimeException() {
+  void testHandleRuntimeException() {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
 
@@ -180,7 +180,7 @@ class HttpExchangeAdapterTest {
   }
 
   @Test
-  public void testClose() {
+  void testClose() {
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     HttpServletResponse servletResponse = mock(HttpServletResponse.class);
 

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class GaugeWithCallbackTest {
 
   @Test
-  public void testGauge() {
+  void testGauge() {
     final AtomicInteger value = new AtomicInteger(1);
     List<String> labelValues = Arrays.asList("v1", "v2");
     GaugeWithCallback gauge =
@@ -38,7 +38,7 @@ class GaugeWithCallbackTest {
   }
 
   @Test
-  public void testGaugeNoCallback() {
+  void testGaugeNoCallback() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> GaugeWithCallback.builder().name("gauge").labelNames("l1", "l2").build());
   }

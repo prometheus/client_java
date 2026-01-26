@@ -22,7 +22,7 @@ class JvmBufferPoolMetricsTest {
   private final BufferPoolMXBean mappedBuffer = Mockito.mock(BufferPoolMXBean.class);
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     when(directBuffer.getName()).thenReturn("direct");
     when(directBuffer.getCount()).thenReturn(2L);
     when(directBuffer.getMemoryUsed()).thenReturn(1234L);
@@ -34,7 +34,7 @@ class JvmBufferPoolMetricsTest {
   }
 
   @Test
-  public void testGoodCase() throws IOException {
+  void testGoodCase() throws IOException {
     PrometheusRegistry registry = new PrometheusRegistry();
     JvmBufferPoolMetrics.builder()
         .bufferPoolBeans(Arrays.asList(mappedBuffer, directBuffer))
@@ -64,7 +64,7 @@ class JvmBufferPoolMetricsTest {
   }
 
   @Test
-  public void testIgnoredMetricNotScraped() {
+  void testIgnoredMetricNotScraped() {
     MetricNameFilter filter =
         MetricNameFilter.builder().nameMustNotBeEqualTo("jvm_buffer_pool_used_bytes").build();
 

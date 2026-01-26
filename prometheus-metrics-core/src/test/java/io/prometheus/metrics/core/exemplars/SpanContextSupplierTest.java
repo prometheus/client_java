@@ -51,12 +51,12 @@ class SpanContextSupplierTest {
           );
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     origSpanContext = SpanContextSupplier.getSpanContext();
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     SpanContextSupplier.setSpanContext(origSpanContext);
   }
 
@@ -66,7 +66,7 @@ class SpanContextSupplierTest {
    * SpanContextSupplier}.
    */
   @Test
-  public void testConstructorInjection() {
+  void testConstructorInjection() {
     ExemplarsProperties properties = ExemplarsProperties.builder().build();
     ExemplarSamplerConfig config = new ExemplarSamplerConfig(properties, 1);
     ExemplarSampler exemplarSampler = new ExemplarSampler(config, spanContextA);
@@ -86,7 +86,7 @@ class SpanContextSupplierTest {
    * ExemplarSampler}).
    */
   @Test
-  public void testUpdateSpanContext() throws InterruptedException {
+  void testUpdateSpanContext() throws InterruptedException {
     ExemplarSampler exemplarSampler = new ExemplarSampler(config);
 
     SpanContextSupplier.setSpanContext(spanContextB);

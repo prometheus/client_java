@@ -88,6 +88,7 @@ Pre-built instrumentations: `prometheus-metrics-instrumentation-jvm`, `-caffeine
 - JUnit 5 (Jupiter) with `@Test` annotations
 - AssertJ for fluent assertions
 - Mockito for mocking
+- **Test visibility**: Test classes and test methods must be package-protected (no `public` modifier)
 - Integration tests are in `integration-tests/` and run during `verify` phase
 - Acceptance tests use OATs framework: `mise run acceptance-test`
 

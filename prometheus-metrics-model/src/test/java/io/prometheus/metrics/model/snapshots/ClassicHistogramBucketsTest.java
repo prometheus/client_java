@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class ClassicHistogramBucketsTest {
 
   @Test
-  public void testGoodCase() {
+  void testGoodCase() {
     ClassicHistogramBuckets buckets =
         ClassicHistogramBuckets.builder()
             .bucket(Double.NEGATIVE_INFINITY, 0)
@@ -23,7 +23,7 @@ class ClassicHistogramBucketsTest {
   }
 
   @Test
-  public void testSort() {
+  void testSort() {
     ClassicHistogramBuckets buckets =
         ClassicHistogramBuckets.builder()
             .bucket(7, 2)
@@ -40,21 +40,21 @@ class ClassicHistogramBucketsTest {
   }
 
   @Test
-  public void testMinimalBuckets() {
+  void testMinimalBuckets() {
     ClassicHistogramBuckets buckets =
         ClassicHistogramBuckets.builder().bucket(Double.POSITIVE_INFINITY, 0).build();
     assertThat(buckets.size()).isOne();
   }
 
   @Test
-  public void testInfBucketMissing() {
+  void testInfBucketMissing() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () -> ClassicHistogramBuckets.builder().bucket(Double.NEGATIVE_INFINITY, 0).build());
   }
 
   @Test
-  public void testNegativeCount() {
+  void testNegativeCount() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
@@ -65,7 +65,7 @@ class ClassicHistogramBucketsTest {
   }
 
   @Test
-  public void testNaNBoundary() {
+  void testNaNBoundary() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
@@ -77,7 +77,7 @@ class ClassicHistogramBucketsTest {
   }
 
   @Test
-  public void testDuplicateBoundary() {
+  void testDuplicateBoundary() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
@@ -90,13 +90,13 @@ class ClassicHistogramBucketsTest {
   }
 
   @Test
-  public void testEmptyBuckets() {
+  void testEmptyBuckets() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> ClassicHistogramBuckets.builder().build());
   }
 
   @Test
-  public void testDifferentLength() {
+  void testDifferentLength() {
     double[] upperBounds = new double[] {0.7, 1.3, Double.POSITIVE_INFINITY};
     long[] counts = new long[] {13, 178, 1024, 3000};
     assertThatExceptionOfType(IllegalArgumentException.class)
@@ -104,7 +104,7 @@ class ClassicHistogramBucketsTest {
   }
 
   @Test
-  public void testImmutable() {
+  void testImmutable() {
     ClassicHistogramBuckets buckets =
         ClassicHistogramBuckets.builder()
             .bucket(1.0, 7)
@@ -117,7 +117,7 @@ class ClassicHistogramBucketsTest {
   }
 
   @Test
-  public void compare() {
+  void compare() {
     ClassicHistogramBuckets buckets =
         ClassicHistogramBuckets.builder()
             .bucket(1.0, 7)

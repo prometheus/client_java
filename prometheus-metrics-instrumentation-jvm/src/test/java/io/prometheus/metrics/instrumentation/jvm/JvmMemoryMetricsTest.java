@@ -32,7 +32,7 @@ class JvmMemoryMetricsTest {
 
   @SuppressWarnings("deprecation")
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     when(mockMemoryBean.getHeapMemoryUsage()).thenReturn(memoryUsageHeap);
     when(mockMemoryBean.getNonHeapMemoryUsage()).thenReturn(memoryUsageNonHeap);
 
@@ -80,7 +80,7 @@ class JvmMemoryMetricsTest {
   }
 
   @Test
-  public void testGoodCase() throws IOException {
+  void testGoodCase() throws IOException {
     PrometheusRegistry registry = new PrometheusRegistry();
     JvmMemoryMetrics.builder()
         .withMemoryBean(mockMemoryBean)
@@ -160,7 +160,7 @@ jvm_memory_used_bytes{area="nonheap"} 6.0
   }
 
   @Test
-  public void testIgnoredMetricNotScraped() {
+  void testIgnoredMetricNotScraped() {
     MetricNameFilter filter =
         MetricNameFilter.builder().nameMustNotBeEqualTo("jvm_memory_pool_used_bytes").build();
 

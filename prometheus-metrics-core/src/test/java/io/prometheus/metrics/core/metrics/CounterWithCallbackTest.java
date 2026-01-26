@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class CounterWithCallbackTest {
 
   @Test
-  public void testCounter() {
+  void testCounter() {
     final AtomicInteger value = new AtomicInteger(1);
     List<String> labelValues = Arrays.asList("v1", "v2");
     CounterWithCallback counter =
@@ -38,7 +38,7 @@ class CounterWithCallbackTest {
   }
 
   @Test
-  public void testCounterNoCallback() {
+  void testCounterNoCallback() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () -> CounterWithCallback.builder().name("counter").labelNames("l1", "l2").build());

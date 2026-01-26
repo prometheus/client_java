@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 class JvmMemoryPoolAllocationMetricsTest {
 
   @Test
-  public void testListenerLogic() {
+  void testListenerLogic() {
     PrometheusRegistry registry = new PrometheusRegistry();
     Counter counter = Counter.builder().name("test").labelNames("pool").register(registry);
     AllocationCountingNotificationListener listener =

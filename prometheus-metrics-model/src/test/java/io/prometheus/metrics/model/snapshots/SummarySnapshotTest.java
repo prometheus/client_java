@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class SummarySnapshotTest {
 
   @Test
-  public void testCompleteGoodCase() {
+  void testCompleteGoodCase() {
     long createdTimestamp = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
     long scrapeTimestamp = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2);
     long exemplarTimestamp = System.currentTimeMillis();
@@ -82,7 +82,7 @@ class SummarySnapshotTest {
   }
 
   @Test
-  public void testMinimal() {
+  void testMinimal() {
     SummarySnapshot snapshot =
         SummarySnapshot.builder()
             .name("size_bytes")
@@ -95,13 +95,13 @@ class SummarySnapshotTest {
   }
 
   @Test
-  public void testEmptySnapshot() {
+  void testEmptySnapshot() {
     SummarySnapshot snapshot = SummarySnapshot.builder().name("empty_summary").build();
     assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
   @Test
-  public void testEmptyData() {
+  void testEmptyData() {
     SummarySnapshot.SummaryDataPointSnapshot data =
         SummarySnapshot.SummaryDataPointSnapshot.builder().build();
     assertThat(data.getQuantiles().size()).isZero();

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class ExemplarTest {
 
   @Test
-  public void testGoodCaseComplete() {
+  void testGoodCaseComplete() {
     long timestamp = System.currentTimeMillis();
     Exemplar exemplar =
         Exemplar.builder()
@@ -36,13 +36,13 @@ class ExemplarTest {
   }
 
   @Test
-  public void testValueMissing() {
+  void testValueMissing() {
     assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(() -> Exemplar.builder().build());
   }
 
   @Test
-  public void testMinimal() {
+  void testMinimal() {
     Exemplar exemplar = Exemplar.builder().value(0.0).build();
     assertThat(exemplar.getValue()).isEqualTo(0.0);
     assertLabels(exemplar.getLabels()).isEqualTo(Labels.EMPTY);
@@ -50,7 +50,7 @@ class ExemplarTest {
   }
 
   @Test
-  public void testLabelsMergeTraceId() {
+  void testLabelsMergeTraceId() {
     Exemplar exemplar =
         Exemplar.builder().value(0.0).labels(Labels.of("a", "b")).traceId("abc").build();
     assertLabels(exemplar.getLabels()).isEqualTo(Labels.of("a", "b", "trace_id", "abc"));
@@ -61,14 +61,14 @@ class ExemplarTest {
   }
 
   @Test
-  public void testLabelsMergeSpanId() {
+  void testLabelsMergeSpanId() {
     Exemplar exemplar =
         Exemplar.builder().value(0.0).labels(Labels.of("a", "b")).spanId("abc").build();
     assertLabels(exemplar.getLabels()).isEqualTo(Labels.of("a", "b", "span_id", "abc"));
   }
 
   @Test
-  public void testLabelsMergeTraceIdAndSpanId() {
+  void testLabelsMergeTraceIdAndSpanId() {
     Exemplar exemplar =
         Exemplar.builder()
             .value(0.0)
@@ -81,7 +81,7 @@ class ExemplarTest {
   }
 
   @Test
-  public void testLabelsMergeNone() {
+  void testLabelsMergeNone() {
     Exemplar exemplar = Exemplar.builder().value(0.0).labels(Labels.of("a", "b")).build();
     assertLabels(exemplar.getLabels()).isEqualTo(Labels.of("a", "b"));
   }

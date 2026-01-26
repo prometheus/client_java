@@ -51,7 +51,7 @@ class MultiCollectorNameFilterTest {
   }
 
   @Test
-  public void testPartialFilter() {
+  void testPartialFilter() {
     Registry registry = new Registry(Collections.emptyList());
     MetricSnapshots snapshots = registry.scrape(name -> name.equals("counter_1"));
     assertThat(registry.collectCalled()).isTrue();
@@ -60,7 +60,7 @@ class MultiCollectorNameFilterTest {
   }
 
   @Test
-  public void testPartialFilterWithPrometheusNames() {
+  void testPartialFilterWithPrometheusNames() {
     Registry registry = new Registry(Arrays.asList("counter_1", "gauge_2"));
 
     MetricSnapshots snapshots = registry.scrape(name -> name.equals("counter_1"));
@@ -70,7 +70,7 @@ class MultiCollectorNameFilterTest {
   }
 
   @Test
-  public void testCompleteFilter_CollectCalled() {
+  void testCompleteFilter_CollectCalled() {
     Registry registry = new Registry(Collections.emptyList());
     MetricSnapshots snapshots =
         registry.scrape(name -> !name.equals("counter_1") && !name.equals("gauge_2"));
@@ -79,7 +79,7 @@ class MultiCollectorNameFilterTest {
   }
 
   @Test
-  public void testCompleteFilter_CollectNotCalled() {
+  void testCompleteFilter_CollectNotCalled() {
     Registry registry = new Registry(Arrays.asList("counter_1", "gauge_2"));
     MetricSnapshots snapshots =
         registry.scrape(name -> !name.equals("counter_1") && !name.equals("gauge_2"));

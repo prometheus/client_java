@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import org.testcontainers.containers.output.OutputFrame;
 
 /** Print Docker logs from TestContainers to stdout or stderr. */
-public class LogConsumer implements Consumer<OutputFrame> {
+class LogConsumer implements Consumer<OutputFrame> {
 
   private final String prefix;
 

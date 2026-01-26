@@ -20,18 +20,18 @@ class CustomLabelMapperTest {
   private MetricRegistry metricRegistry;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     metricRegistry = new MetricRegistry();
   }
 
   @Test
-  public void test_WHEN_EmptyConfig_THEN_Fail() {
+  void test_WHEN_EmptyConfig_THEN_Fail() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> new CustomLabelMapper(Collections.emptyList()));
   }
 
   @Test
-  public void test_WHEN_NoMatches_THEN_ShouldReturnDefaultSample() {
+  void test_WHEN_NoMatches_THEN_ShouldReturnDefaultSample() {
     final List<MapperConfig> mapperConfigs =
         Arrays.asList(
             new MapperConfig("client-nope.*.*.*"),
@@ -56,7 +56,7 @@ app_okhttpclient_client_HttpClient_service_total 1.0
   }
 
   @Test
-  public void test_WHEN_OneMatch_THEN_ShouldReturnConverted() {
+  void test_WHEN_OneMatch_THEN_ShouldReturnConverted() {
     final Map<String, String> labels = new HashMap<String, String>();
     labels.put("service", "${0}");
     final MapperConfig mapperConfig =
@@ -86,7 +86,7 @@ app_okhttpclient_client_HttpClient_total{service="greatService"} 1.0
   }
 
   @Test
-  public void test_WHEN_MoreMatches_THEN_ShouldReturnFirstOne() {
+  void test_WHEN_MoreMatches_THEN_ShouldReturnFirstOne() {
     final Map<String, String> labels = new HashMap<>();
     labels.put("service", "${0}");
     final MapperConfig mapperConfig =
@@ -117,7 +117,7 @@ app_okhttpclient_client_HttpClient_total{service="greatService"} 1.0
   }
 
   @Test
-  public void test_WHEN_MoreMatchesReverseOrder_THEN_ShouldReturnFirstOne() {
+  void test_WHEN_MoreMatchesReverseOrder_THEN_ShouldReturnFirstOne() {
     final Map<String, String> labels = new LinkedHashMap<>();
     labels.put("service", "${0}");
     labels.put("status", "${1}");
@@ -154,7 +154,7 @@ app_okhttpclient_client_HttpClient_total{service="greatService",status="400"} 1.
   }
 
   @Test
-  public void test_WHEN_MoreToFormatInLabelsAndName_THEN_ShouldReturnCorrectSample() {
+  void test_WHEN_MoreToFormatInLabelsAndName_THEN_ShouldReturnCorrectSample() {
     final Map<String, String> labels = new LinkedHashMap<>();
     labels.put("service", "${0}_${1}");
     labels.put("status", "s_${1}");
@@ -187,7 +187,7 @@ app_okhttpclient_client_HttpClient_greatService_total{service="greatService_400"
   }
 
   @Test
-  public void test_WHEN_AdditionalLabels_THEN_ShouldReturnCorrectSample() {
+  void test_WHEN_AdditionalLabels_THEN_ShouldReturnCorrectSample() {
     final Map<String, String> labels = new LinkedHashMap<>();
     labels.put("service", "${0}");
     labels.put("status", "s_${1}");

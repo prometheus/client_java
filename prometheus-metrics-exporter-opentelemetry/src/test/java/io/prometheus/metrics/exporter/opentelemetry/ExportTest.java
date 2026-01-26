@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public class ExportTest {
+class ExportTest {
 
   private static final Attributes ATTRIBUTES =
       Attributes.of(AttributeKey.stringKey("label"), "val", AttributeKey.stringKey("key"), "value");

@@ -21,7 +21,7 @@ class BearerTokenPushGatewayTest {
   PushGateway pushGateway;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     mockServerClient = ClientAndServer.startClientAndServer(0);
     registry = new PrometheusRegistry();
     gauge = Gauge.builder().name("g").help("help").build();
@@ -40,7 +40,7 @@ class BearerTokenPushGatewayTest {
   }
 
   @Test
-  public void testAuthorizedPush() throws IOException {
+  void testAuthorizedPush() throws IOException {
     mockServerClient
         .when(
             request()

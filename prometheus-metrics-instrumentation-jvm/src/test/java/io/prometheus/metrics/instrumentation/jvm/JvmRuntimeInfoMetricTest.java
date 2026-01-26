@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class JvmRuntimeInfoMetricTest {
 
   @Test
-  public void testGoodCase() throws IOException {
+  void testGoodCase() throws IOException {
     PrometheusRegistry registry = new PrometheusRegistry();
     JvmRuntimeInfoMetric.builder()
         .version("1.8.0_382-b05")

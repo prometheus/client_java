@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class NativeHistogramBucketsTest {
 
   @Test
-  public void testGoodCase() {
+  void testGoodCase() {
     NativeHistogramBuckets buckets =
         NativeHistogramBuckets.builder().bucket(-10, 12).bucket(120, 17).build();
     assertThat(buckets.size()).isEqualTo(2);
@@ -20,13 +20,13 @@ class NativeHistogramBucketsTest {
   }
 
   @Test
-  public void testEmpty() {
+  void testEmpty() {
     NativeHistogramBuckets buckets = NativeHistogramBuckets.builder().build();
     assertThat(buckets.size()).isZero();
   }
 
   @Test
-  public void testSort() {
+  void testSort() {
     NativeHistogramBuckets buckets =
         NativeHistogramBuckets.builder().bucket(7, 4).bucket(2, 0).bucket(5, 3).build();
     assertThat(buckets.size()).isEqualTo(3);
@@ -39,7 +39,7 @@ class NativeHistogramBucketsTest {
   }
 
   @Test
-  public void testDifferentLength() {
+  void testDifferentLength() {
     int[] bucketIndexes = new int[] {0, 1, 2};
     long[] cumulativeCounts = new long[] {13, 178, 1024, 3000};
     assertThatExceptionOfType(IllegalArgumentException.class)
@@ -47,7 +47,7 @@ class NativeHistogramBucketsTest {
   }
 
   @Test
-  public void testImmutable() {
+  void testImmutable() {
     NativeHistogramBuckets buckets =
         NativeHistogramBuckets.builder().bucket(1, 1).bucket(2, 1).build();
     Iterator<NativeHistogramBucket> iterator = buckets.iterator();

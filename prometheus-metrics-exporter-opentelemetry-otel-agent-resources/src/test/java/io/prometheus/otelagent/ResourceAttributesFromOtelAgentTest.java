@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class ResourceAttributesFromOtelAgentTest {
 
   @Test
-  public void testGetResourceAttributesWithoutOtelAgent() {
+  void testGetResourceAttributesWithoutOtelAgent() {
     // When OTel agent is not attached, should return empty map
     Map<String, String> attributes =
         ResourceAttributesFromOtelAgent.getResourceAttributes("test-scope");
@@ -16,7 +16,7 @@ class ResourceAttributesFromOtelAgentTest {
   }
 
   @Test
-  public void testGetResourceAttributesWithDifferentInstrumentationScopes() {
+  void testGetResourceAttributesWithDifferentInstrumentationScopes() {
     // Test with different scope names to ensure temp directory creation works
     Map<String, String> attributes1 =
         ResourceAttributesFromOtelAgent.getResourceAttributes("scope-one");
@@ -28,7 +28,7 @@ class ResourceAttributesFromOtelAgentTest {
   }
 
   @Test
-  public void testGetResourceAttributesHandlesExceptions() {
+  void testGetResourceAttributesHandlesExceptions() {
     // Test with special characters that might cause issues in temp directory names
     Map<String, String> attributes =
         ResourceAttributesFromOtelAgent.getResourceAttributes("test/scope");
@@ -37,7 +37,7 @@ class ResourceAttributesFromOtelAgentTest {
   }
 
   @Test
-  public void testGetResourceAttributesReturnsImmutableMap() {
+  void testGetResourceAttributesReturnsImmutableMap() {
     Map<String, String> attributes =
         ResourceAttributesFromOtelAgent.getResourceAttributes("test-scope");
 
@@ -57,7 +57,7 @@ class ResourceAttributesFromOtelAgentTest {
   }
 
   @Test
-  public void testGetResourceAttributesWithNullKey() {
+  void testGetResourceAttributesWithNullKey() {
     // Test the null handling in the attribute map processing
     // Without OTel agent, this returns empty map, but tests the null check logic
     Map<String, String> attributes =

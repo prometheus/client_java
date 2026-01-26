@@ -9,71 +9,71 @@ import org.junit.jupiter.api.Test;
 class PrometheusHttpRequestTest {
 
   @Test
-  public void testGetHeaderReturnsFirstValue() {
+  void testGetHeaderReturnsFirstValue() {
     PrometheusHttpRequest request =
         new TestPrometheusHttpRequest("name[]=metric1&name[]=metric2", "gzip");
     assertThat(request.getHeader("Accept-Encoding")).isEqualTo("gzip");
   }
 
   @Test
-  public void testGetHeaderReturnsNullWhenNoHeaders() {
+  void testGetHeaderReturnsNullWhenNoHeaders() {
     PrometheusHttpRequest request = new TestPrometheusHttpRequest("", null);
     assertThat(request.getHeader("Accept-Encoding")).isNull();
   }
 
   @Test
-  public void testGetParameterReturnsFirstValue() {
+  void testGetParameterReturnsFirstValue() {
     PrometheusHttpRequest request = new TestPrometheusHttpRequest("name[]=metric1&name[]=metric2");
     assertThat(request.getParameter("name[]")).isEqualTo("metric1");
   }
 
   @Test
-  public void testGetParameterReturnsNullWhenNotPresent() {
+  void testGetParameterReturnsNullWhenNotPresent() {
     PrometheusHttpRequest request = new TestPrometheusHttpRequest("other=value");
     assertThat(request.getParameter("name[]")).isNull();
   }
 
   @Test
-  public void testGetParameterValuesReturnsMultipleValues() {
+  void testGetParameterValuesReturnsMultipleValues() {
     PrometheusHttpRequest request = new TestPrometheusHttpRequest("name[]=metric1&name[]=metric2");
     String[] values = request.getParameterValues("name[]");
     assertThat(values).containsExactly("metric1", "metric2");
   }
 
   @Test
-  public void testGetParameterValuesReturnsNullWhenNotPresent() {
+  void testGetParameterValuesReturnsNullWhenNotPresent() {
     PrometheusHttpRequest request = new TestPrometheusHttpRequest("other=value");
     assertThat(request.getParameterValues("name[]")).isNull();
   }
 
   @Test
-  public void testGetParameterValuesWithEmptyQueryString() {
+  void testGetParameterValuesWithEmptyQueryString() {
     PrometheusHttpRequest request = new TestPrometheusHttpRequest("");
     assertThat(request.getParameterValues("name[]")).isNull();
   }
 
   @Test
-  public void testGetParameterValuesWithNullQueryString() {
+  void testGetParameterValuesWithNullQueryString() {
     PrometheusHttpRequest request = new TestPrometheusHttpRequest(null);
     assertThat(request.getParameterValues("name[]")).isNull();
   }
 
   @Test
-  public void testGetParameterValuesWithUrlEncodedValues() {
+  void testGetParameterValuesWithUrlEncodedValues() {
     PrometheusHttpRequest request = new TestPrometheusHttpRequest("name=hello%20world");
     String[] values = request.getParameterValues("name");
     assertThat(values).containsExactly("hello world");
   }
 
   @Test
-  public void testGetParameterValuesWithSpecialCharacters() {
+  void testGetParameterValuesWithSpecialCharacters() {
     PrometheusHttpRequest request = new TestPrometheusHttpRequest("name=%2Ffoo%2Fbar");
     String[] values = request.getParameterValues("name");
     assertThat(values).containsExactly("/foo/bar");
   }
 
   @Test
-  public void testGetParameterValuesIgnoresParametersWithoutEquals() {
+  void testGetParameterValuesIgnoresParametersWithoutEquals() {
     PrometheusHttpRequest request =
         new TestPrometheusHttpRequest("name[]=value1&invalid&name[]=value2");
     String[] values = request.getParameterValues("name[]");

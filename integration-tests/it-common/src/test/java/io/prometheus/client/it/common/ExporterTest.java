@@ -53,7 +53,7 @@ public abstract class ExporterTest {
   }
 
   @AfterEach
-  public void tearDown() throws IOException {
+  void tearDown() throws IOException {
     sampleAppContainer.stop();
     sampleAppVolume.remove();
   }

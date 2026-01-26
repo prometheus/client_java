@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class CounterSnapshotTest {
 
   @Test
-  public void testCompleteGoodCase() {
+  void testCompleteGoodCase() {
     long createdTimestamp1 = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
     long createdTimestamp2 = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(2);
     long exemplarTimestamp = System.currentTimeMillis();
@@ -68,7 +68,7 @@ class CounterSnapshotTest {
   }
 
   @Test
-  public void testMinimalGoodCase() {
+  void testMinimalGoodCase() {
     CounterSnapshot snapshot =
         CounterSnapshot.builder()
             .name("events")
@@ -85,25 +85,25 @@ class CounterSnapshotTest {
   }
 
   @Test
-  public void testEmptyCounter() {
+  void testEmptyCounter() {
     CounterSnapshot snapshot = CounterSnapshot.builder().name("events").build();
     assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
   @Test
-  public void testTotalSuffixPresent() {
+  void testTotalSuffixPresent() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> CounterSnapshot.builder().name("test_total").build());
   }
 
   @Test
-  public void testValueMissing() {
+  void testValueMissing() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> CounterDataPointSnapshot.builder().build());
   }
 
   @Test
-  public void testDataImmutable() {
+  void testDataImmutable() {
     CounterSnapshot snapshot =
         CounterSnapshot.builder()
             .name("events")

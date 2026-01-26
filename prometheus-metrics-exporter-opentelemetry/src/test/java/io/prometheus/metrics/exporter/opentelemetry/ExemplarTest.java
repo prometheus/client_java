@@ -45,7 +45,7 @@ class ExemplarTest {
   private OpenTelemetryExporter openTelemetryExporter;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     openTelemetryExporter =
         OpenTelemetryExporter.builder()
             .endpoint("http://localhost:4317")
@@ -64,7 +64,7 @@ class ExemplarTest {
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     PrometheusRegistry.defaultRegistry.unregister(testCounter);
     openTelemetryExporter.close();
   }
