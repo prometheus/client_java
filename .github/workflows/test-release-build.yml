@@ -27,6 +27,8 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Build Javadoc
+        run: mise run javadoc
       - name: Build release version
         run: mise run build-release
         env:
