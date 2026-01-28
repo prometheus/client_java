@@ -28,6 +28,10 @@
       groupName: "java graalvm",
       additionalBranchPrefix: "graalvm-",
     },
+    {
+      matchPackageNames: ["/^(ghcr.io/)?super-linter/super-linter$/"],
+      groupName: "super-linter",
+    },
   ],
   customManagers: [
     {
