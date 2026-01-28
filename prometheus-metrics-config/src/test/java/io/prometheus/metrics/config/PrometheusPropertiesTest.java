@@ -31,8 +31,7 @@ class PrometheusPropertiesTest {
     }
     assertThat(properties).hasSize(1);
     Map<Object, Object> regularProperties = new HashMap<>(properties);
-    PropertySource propertySource =
-        new PropertySource(new HashMap<>(), new HashMap<>(), regularProperties);
+    PropertySource propertySource = new PropertySource(regularProperties);
     MetricsProperties.load("io.prometheus.metrics", propertySource);
     assertThat(regularProperties).isEmpty();
   }
