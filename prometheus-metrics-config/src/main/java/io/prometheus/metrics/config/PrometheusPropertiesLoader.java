@@ -101,8 +101,8 @@ public class PrometheusPropertiesLoader {
     System.getProperties().stringPropertyNames().stream()
         .filter(key -> key.startsWith("io.prometheus"))
         .forEach(key -> properties.put(key, System.getProperty(key)));
+    properties.putAll(loadPropertiesFromEnvironment()); // overriding with environment variables
     properties.putAll(externalProperties); // overriding all the entries above
-    // TODO: Add environment variables like EXEMPLARS_ENABLED.
     return properties;
   }
 
@@ -134,5 +134,102 @@ public class PrometheusPropertiesLoader {
       }
     }
     return properties;
+  }
+
+  /**
+   * Load properties from environment variables.
+   *
+   * <p>Environment variables are converted to property keys by converting to lowercase and
+   * replacing underscores with dots. For example, the environment variable
+   * IO_PROMETHEUS_METRICS_EXEMPLARS_ENABLED becomes io.prometheus.metrics.exemplarsEnabled.
+   *
+   * <p>Only environment variables starting with IO_PROMETHEUS are considered.
+   *
+   * @return properties loaded from environment variables
+   */
+  private static Map<Object, Object> loadPropertiesFromEnvironment() {
+    Map<Object, Object> properties = new HashMap<>();
+    System.getenv().forEach(
+        (key, value) -> {
+          if (key.startsWith("IO_PROMETHEUS")) {
+            String propertyKey = convertEnvVarToPropertyKey(key);
+            properties.put(propertyKey, value);
+          }
+        });
+    return properties;
+  }
+
+  /**
+   * Convert an environment variable name to a property key.
+   *
+   * <p>For example: IO_PROMETHEUS_METRICS_EXEMPLARS_ENABLED →
+   * io.prometheus.metrics.exemplarsEnabled
+   *
+   * <p>The conversion follows these rules:
+   *
+   * <ul>
+   *   <li>Convert to lowercase
+   *   <li>Replace underscores with dots
+   *   <li>Apply camelCase for the last segment after dots (e.g., EXEMPLARS_ENABLED →
+   *       exemplarsEnabled)
+   * </ul>
+   *
+   * @param envVar the environment variable name
+   * @return the property key
+   */
+  static String convertEnvVarToPropertyKey(String envVar) {
+    // Convert to lowercase and split by underscore
+    String lower = envVar.toLowerCase(java.util.Locale.ROOT);
+    String[] parts = lower.split("_");
+
+    // Find the index where camelCase should start
+    // This is the index of the first property-specific part after the prefix
+    // Examples:
+    // - io.prometheus.metrics.PROPERTY_NAME -> start camelCase at index 3
+    // - io.prometheus.exporter.PROPERTY_NAME -> start camelCase at index 3
+    // - io.prometheus.exporter.opentelemetry.PROPERTY_NAME -> start camelCase at index 4
+    // - io.prometheus.exporter.filter.PROPERTY_NAME -> start camelCase at index 4
+    int camelCaseStartIndex = findCamelCaseStartIndex(parts);
+
+    StringBuilder result = new StringBuilder();
+    for (int i = 0; i < parts.length; i++) {
+      if (i == 0) {
+        result.append(parts[i]);
+      } else if (i < camelCaseStartIndex) {
+        result.append('.').append(parts[i]);
+      } else if (i == camelCaseStartIndex) {
+        // First camelCase word - add dot and lowercase
+        result.append('.').append(parts[i]);
+      } else {
+        // Subsequent camelCase words - capitalize first letter
+        result.append(Character.toUpperCase(parts[i].charAt(0)));
+        if (parts[i].length() > 1) {
+          result.append(parts[i].substring(1));
+        }
+      }
+    }
+    return result.toString();
+  }
+
+  private static int findCamelCaseStartIndex(String[] parts) {
+    // Known prefixes that use dots:
+    // - io.prometheus.metrics
+    // - io.prometheus.exporter.opentelemetry
+    // - io.prometheus.exporter.filter
+    // - io.prometheus.exporter.httpServer
+    // - io.prometheus.exporter.pushgateway
+    // - io.prometheus.exemplars
+    if (parts.length >= 4
+        && parts[0].equals("io")
+        && parts[1].equals("prometheus")
+        && parts[2].equals("exporter")
+        && (parts[3].equals("opentelemetry")
+            || parts[3].equals("filter")
+            || parts[3].equals("httpserver")
+            || parts[3].equals("pushgateway"))) {
+      return 4;
+    }
+    // Default case: io.prometheus.metrics or io.prometheus.exporter or io.prometheus.exemplars
+    return 3;
   }
 }

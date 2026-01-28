@@ -57,4 +57,44 @@ class PrometheusPropertiesLoaderTest {
     assertThat(prometheusProperties.getExporterProperties().getExemplarsOnAllMetricTypes())
         .isFalse();
   }
+
+  @Test
+  void convertEnvVarToPropertyKey_simpleMetricsProperty() {
+    String result =
+        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+            "IO_PROMETHEUS_METRICS_EXEMPLARS_ENABLED");
+    assertThat(result).isEqualTo("io.prometheus.metrics.exemplarsEnabled");
+  }
+
+  @Test
+  void convertEnvVarToPropertyKey_exporterProperty() {
+    String result =
+        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+            "IO_PROMETHEUS_EXPORTER_EXEMPLARS_ON_ALL_METRIC_TYPES");
+    assertThat(result).isEqualTo("io.prometheus.exporter.exemplarsOnAllMetricTypes");
+  }
+
+  @Test
+  void convertEnvVarToPropertyKey_histogramBounds() {
+    String result =
+        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+            "IO_PROMETHEUS_METRICS_HISTOGRAM_CLASSIC_UPPER_BOUNDS");
+    assertThat(result).isEqualTo("io.prometheus.metrics.histogramClassicUpperBounds");
+  }
+
+  @Test
+  void convertEnvVarToPropertyKey_openTelemetryProperty() {
+    String result =
+        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+            "IO_PROMETHEUS_EXPORTER_OPENTELEMETRY_ENDPOINT");
+    assertThat(result).isEqualTo("io.prometheus.exporter.opentelemetry.endpoint");
+  }
+
+  @Test
+  void convertEnvVarToPropertyKey_filterProperty() {
+    String result =
+        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+            "IO_PROMETHEUS_EXPORTER_FILTER_ALLOWED_METRIC_NAMES");
+    assertThat(result).isEqualTo("io.prometheus.exporter.filter.allowedMetricNames");
+  }
 }
