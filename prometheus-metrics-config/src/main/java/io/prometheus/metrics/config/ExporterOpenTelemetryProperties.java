@@ -38,14 +38,14 @@ public class ExporterOpenTelemetryProperties {
   private static final String PROTOCOL = "protocol"; // otel.exporter.otlp.protocol
   private static final String ENDPOINT = "endpoint"; // otel.exporter.otlp.endpoint
   private static final String HEADERS = "headers"; // otel.exporter.otlp.headers
-  private static final String INTERVAL_SECONDS = "intervalSeconds"; // otel.metric.export.interval
-  private static final String TIMEOUT_SECONDS = "timeoutSeconds"; // otel.exporter.otlp.timeout
-  private static final String SERVICE_NAME = "serviceName"; // otel.service.name
-  private static final String SERVICE_NAMESPACE = "serviceNamespace";
-  private static final String SERVICE_INSTANCE_ID = "serviceInstanceId";
-  private static final String SERVICE_VERSION = "serviceVersion";
+  private static final String INTERVAL_SECONDS = "interval_seconds"; // otel.metric.export.interval
+  private static final String TIMEOUT_SECONDS = "timeout_seconds"; // otel.exporter.otlp.timeout
+  private static final String SERVICE_NAME = "service_name"; // otel.service.name
+  private static final String SERVICE_NAMESPACE = "service_namespace";
+  private static final String SERVICE_INSTANCE_ID = "service_instance_id";
+  private static final String SERVICE_VERSION = "service_version";
   private static final String RESOURCE_ATTRIBUTES =
-      "resourceAttributes"; // otel.resource.attributes
+      "resource_attributes"; // otel.resource.attributes
   private static final String PREFIX = "io.prometheus.exporter.opentelemetry";
 
   @Nullable private final String endpoint;

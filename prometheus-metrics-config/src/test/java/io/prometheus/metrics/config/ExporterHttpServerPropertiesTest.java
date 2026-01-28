@@ -12,13 +12,13 @@ class ExporterHttpServerPropertiesTest {
   @Test
   void load() {
     ExporterHttpServerProperties properties =
-        load(Map.of("io.prometheus.exporter.httpServer.port", "1"));
+        load(Map.of("io.prometheus.exporter.http_server.port", "1"));
     assertThat(properties.getPort()).isOne();
     assertThat(properties.isPreferUncompressedResponse()).isFalse();
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> load(Map.of("io.prometheus.exporter.httpServer.port", "0")))
-        .withMessage("io.prometheus.exporter.httpServer.port: Expecting value > 0. Found: 0");
+        .isThrownBy(() -> load(Map.of("io.prometheus.exporter.http_server.port", "0")))
+        .withMessage("io.prometheus.exporter.http_server.port: Expecting value > 0. Found: 0");
   }
 
   @Test

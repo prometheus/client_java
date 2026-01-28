@@ -6,10 +6,10 @@ import javax.annotation.Nullable;
 /** Properties starting with io.prometheus.exporter */
 public class ExporterProperties {
 
-  private static final String INCLUDE_CREATED_TIMESTAMPS = "includeCreatedTimestamps";
+  private static final String INCLUDE_CREATED_TIMESTAMPS = "include_created_timestamps";
   // milliseconds is the default - we only provide a boolean flag to avoid a breaking change
-  private static final String PROMETHEUS_TIMESTAMPS_IN_MS = "prometheusTimestampsInMs";
-  private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplarsOnAllMetricTypes";
+  private static final String PROMETHEUS_TIMESTAMPS_IN_MS = "prometheus_timestamps_in_ms";
+  private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplars_on_all_metric_types";
   private static final String PREFIX = "io.prometheus.exporter";
 
   @Nullable private final Boolean includeCreatedTimestamps;

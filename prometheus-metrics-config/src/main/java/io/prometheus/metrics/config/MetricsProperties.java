@@ -11,23 +11,23 @@ import javax.annotation.Nullable;
 /** Properties starting with io.prometheus.metrics */
 public class MetricsProperties {
 
-  private static final String EXEMPLARS_ENABLED = "exemplarsEnabled";
-  private static final String HISTOGRAM_NATIVE_ONLY = "histogramNativeOnly";
-  private static final String HISTOGRAM_CLASSIC_ONLY = "histogramClassicOnly";
-  private static final String HISTOGRAM_CLASSIC_UPPER_BOUNDS = "histogramClassicUpperBounds";
-  private static final String HISTOGRAM_NATIVE_INITIAL_SCHEMA = "histogramNativeInitialSchema";
+  private static final String EXEMPLARS_ENABLED = "exemplars_enabled";
+  private static final String HISTOGRAM_NATIVE_ONLY = "histogram_native_only";
+  private static final String HISTOGRAM_CLASSIC_ONLY = "histogram_classic_only";
+  private static final String HISTOGRAM_CLASSIC_UPPER_BOUNDS = "histogram_classic_upper_bounds";
+  private static final String HISTOGRAM_NATIVE_INITIAL_SCHEMA = "histogram_native_initial_schema";
   private static final String HISTOGRAM_NATIVE_MIN_ZERO_THRESHOLD =
-      "histogramNativeMinZeroThreshold";
+      "histogram_native_min_zero_threshold";
   private static final String HISTOGRAM_NATIVE_MAX_ZERO_THRESHOLD =
-      "histogramNativeMaxZeroThreshold";
+      "histogram_native_max_zero_threshold";
   private static final String HISTOGRAM_NATIVE_MAX_NUMBER_OF_BUCKETS =
-      "histogramNativeMaxNumberOfBuckets"; // 0 means unlimited number of buckets
+      "histogram_native_max_number_of_buckets"; // 0 means unlimited number of buckets
   private static final String HISTOGRAM_NATIVE_RESET_DURATION_SECONDS =
-      "histogramNativeResetDurationSeconds"; // 0 means no reset
-  private static final String SUMMARY_QUANTILES = "summaryQuantiles";
-  private static final String SUMMARY_QUANTILE_ERRORS = "summaryQuantileErrors";
-  private static final String SUMMARY_MAX_AGE_SECONDS = "summaryMaxAgeSeconds";
-  private static final String SUMMARY_NUMBER_OF_AGE_BUCKETS = "summaryNumberOfAgeBuckets";
+      "histogram_native_reset_duration_seconds"; // 0 means no reset
+  private static final String SUMMARY_QUANTILES = "summary_quantiles";
+  private static final String SUMMARY_QUANTILE_ERRORS = "summary_quantile_errors";
+  private static final String SUMMARY_MAX_AGE_SECONDS = "summary_max_age_seconds";
+  private static final String SUMMARY_NUMBER_OF_AGE_BUCKETS = "summary_number_of_age_buckets";
 
   @Nullable private final Boolean exemplarsEnabled;
   @Nullable private final Boolean histogramNativeOnly;

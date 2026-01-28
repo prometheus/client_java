@@ -40,11 +40,11 @@ class PrometheusPropertiesLoaderTest {
   @Test
   void externalPropertiesShouldOverridePropertiesFile() {
     Properties properties = new Properties();
-    properties.setProperty("io.prometheus.metrics.histogramClassicUpperBounds", ".005, .01");
+    properties.setProperty("io.prometheus.metrics.histogram_classic_upper_bounds", ".005, .01");
     properties.setProperty(
-        "io.prometheus.metrics.http_duration_seconds.histogramClassicUpperBounds",
+        "io.prometheus.metrics.http_duration_seconds.histogram_classic_upper_bounds",
         ".005, .01, .015");
-    properties.setProperty("io.prometheus.exporter.exemplarsOnAllMetricTypes", "false");
+    properties.setProperty("io.prometheus.exporter.exemplars_on_all_metric_types", "false");
 
     PrometheusProperties prometheusProperties = PrometheusPropertiesLoader.load(properties);
     assertThat(prometheusProperties.getDefaultMetricProperties().getHistogramClassicUpperBounds())
@@ -59,42 +59,42 @@ class PrometheusPropertiesLoaderTest {
   }
 
   @Test
-  void convertEnvVarToPropertyKey_simpleMetricsProperty() {
+  void normalizeEnvironmentVariableKey_simpleMetricsProperty() {
     String result =
-        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
             "IO_PROMETHEUS_METRICS_EXEMPLARS_ENABLED");
-    assertThat(result).isEqualTo("io.prometheus.metrics.exemplarsEnabled");
+    assertThat(result).isEqualTo("io.prometheus.metrics.exemplars_enabled");
   }
 
   @Test
-  void convertEnvVarToPropertyKey_exporterProperty() {
+  void normalizeEnvironmentVariableKey_exporterProperty() {
     String result =
-        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
             "IO_PROMETHEUS_EXPORTER_EXEMPLARS_ON_ALL_METRIC_TYPES");
-    assertThat(result).isEqualTo("io.prometheus.exporter.exemplarsOnAllMetricTypes");
+    assertThat(result).isEqualTo("io.prometheus.exporter.exemplars_on_all_metric_types");
   }
 
   @Test
-  void convertEnvVarToPropertyKey_histogramBounds() {
+  void normalizeEnvironmentVariableKey_histogramBounds() {
     String result =
-        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
             "IO_PROMETHEUS_METRICS_HISTOGRAM_CLASSIC_UPPER_BOUNDS");
-    assertThat(result).isEqualTo("io.prometheus.metrics.histogramClassicUpperBounds");
+    assertThat(result).isEqualTo("io.prometheus.metrics.histogram_classic_upper_bounds");
   }
 
   @Test
-  void convertEnvVarToPropertyKey_openTelemetryProperty() {
+  void normalizeEnvironmentVariableKey_openTelemetryProperty() {
     String result =
-        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
             "IO_PROMETHEUS_EXPORTER_OPENTELEMETRY_ENDPOINT");
     assertThat(result).isEqualTo("io.prometheus.exporter.opentelemetry.endpoint");
   }
 
   @Test
-  void convertEnvVarToPropertyKey_filterProperty() {
+  void normalizeEnvironmentVariableKey_filterProperty() {
     String result =
-        PrometheusPropertiesLoader.convertEnvVarToPropertyKey(
+        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
             "IO_PROMETHEUS_EXPORTER_FILTER_ALLOWED_METRIC_NAMES");
-    assertThat(result).isEqualTo("io.prometheus.exporter.filter.allowedMetricNames");
+    assertThat(result).isEqualTo("io.prometheus.exporter.filter.allowed_metric_names");
   }
 }

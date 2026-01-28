@@ -94,16 +94,25 @@ public class PrometheusPropertiesLoader {
 
   private static Map<Object, Object> loadProperties(Map<Object, Object> externalProperties) {
     Map<Object, Object> properties = new HashMap<>();
-    properties.putAll(loadPropertiesFromClasspath());
-    properties.putAll(loadPropertiesFromFile()); // overriding the entries from the classpath file
+    // Normalize all properties at load time to handle camelCase in files for backward compatibility
+    normalizeAndPutAll(properties, loadPropertiesFromClasspath());
+    normalizeAndPutAll(
+        properties, loadPropertiesFromFile()); // overriding the entries from the classpath file
     // overriding the entries from the properties file
     // copy System properties to avoid ConcurrentModificationException
+    // normalize camelCase system properties to snake_case for backward compatibility
     System.getProperties().stringPropertyNames().stream()
         .filter(key -> key.startsWith("io.prometheus"))
-        .forEach(key -> properties.put(key, System.getProperty(key)));
+        .forEach(key -> properties.put(normalizePropertyKey(key), System.getProperty(key)));
     properties.putAll(loadPropertiesFromEnvironment()); // overriding with environment variables
-    properties.putAll(externalProperties); // overriding all the entries above
+    // normalize external properties for backward compatibility with camelCase
+    externalProperties.forEach(
+        (key, value) -> properties.put(normalizePropertyKey(key.toString()), value));
     return properties;
+  }
+
+  private static void normalizeAndPutAll(Map<Object, Object> target, Map<Object, Object> source) {
+    source.forEach((key, value) -> target.put(normalizePropertyKey(key.toString()), value));
   }
 
   private static Properties loadPropertiesFromClasspath() {
@@ -141,7 +150,7 @@ public class PrometheusPropertiesLoader {
    *
    * <p>Environment variables are converted to property keys by converting to lowercase and
    * replacing underscores with dots. For example, the environment variable
-   * IO_PROMETHEUS_METRICS_EXEMPLARS_ENABLED becomes io.prometheus.metrics.exemplarsEnabled.
+   * IO_PROMETHEUS_METRICS_EXEMPLARS_ENABLED becomes io.prometheus.metrics.exemplars_enabled.
    *
    * <p>Only environment variables starting with IO_PROMETHEUS are considered.
    *
@@ -149,87 +158,73 @@ public class PrometheusPropertiesLoader {
    */
   private static Map<Object, Object> loadPropertiesFromEnvironment() {
     Map<Object, Object> properties = new HashMap<>();
-    System.getenv().forEach(
-        (key, value) -> {
-          if (key.startsWith("IO_PROMETHEUS")) {
-            String propertyKey = convertEnvVarToPropertyKey(key);
-            properties.put(propertyKey, value);
-          }
-        });
+    System.getenv()
+        .forEach(
+            (key, value) -> {
+              if (key.startsWith("IO_PROMETHEUS")) {
+                String propertyKey = normalizeEnvironmentVariableKey(key);
+                properties.put(propertyKey, value);
+              }
+            });
     return properties;
   }
 
   /**
-   * Convert an environment variable name to a property key.
+   * Normalize an environment variable key to a property key.
+   *
+   * <p>Converts environment variables to lowercase and replaces underscores with dots in the prefix
+   * part, but keeps underscores in the property name for snake_case format.
    *
    * <p>For example: IO_PROMETHEUS_METRICS_EXEMPLARS_ENABLED →
-   * io.prometheus.metrics.exemplarsEnabled
-   *
-   * <p>The conversion follows these rules:
-   *
-   * <ul>
-   *   <li>Convert to lowercase
-   *   <li>Replace underscores with dots
-   *   <li>Apply camelCase for the last segment after dots (e.g., EXEMPLARS_ENABLED →
-   *       exemplarsEnabled)
-   * </ul>
+   * io.prometheus.metrics.exemplars_enabled
    *
    * @param envVar the environment variable name
-   * @return the property key
+   * @return the normalized property key
    */
-  static String convertEnvVarToPropertyKey(String envVar) {
-    // Convert to lowercase and split by underscore
+  static String normalizeEnvironmentVariableKey(String envVar) {
     String lower = envVar.toLowerCase(java.util.Locale.ROOT);
-    String[] parts = lower.split("_");
-
-    // Find the index where camelCase should start
-    // This is the index of the first property-specific part after the prefix
-    // Examples:
-    // - io.prometheus.metrics.PROPERTY_NAME -> start camelCase at index 3
-    // - io.prometheus.exporter.PROPERTY_NAME -> start camelCase at index 3
-    // - io.prometheus.exporter.opentelemetry.PROPERTY_NAME -> start camelCase at index 4
-    // - io.prometheus.exporter.filter.PROPERTY_NAME -> start camelCase at index 4
-    int camelCaseStartIndex = findCamelCaseStartIndex(parts);
-
-    StringBuilder result = new StringBuilder();
-    for (int i = 0; i < parts.length; i++) {
-      if (i == 0) {
-        result.append(parts[i]);
-      } else if (i < camelCaseStartIndex) {
-        result.append('.').append(parts[i]);
-      } else if (i == camelCaseStartIndex) {
-        // First camelCase word - add dot and lowercase
-        result.append('.').append(parts[i]);
-      } else {
-        // Subsequent camelCase words - capitalize first letter
-        result.append(Character.toUpperCase(parts[i].charAt(0)));
-        if (parts[i].length() > 1) {
-          result.append(parts[i].substring(1));
-        }
-      }
+    // Replace underscores with dots only in known prefixes
+    // Try longest prefixes first to handle nested namespaces correctly
+    if (lower.startsWith("io_prometheus_exporter_opentelemetry_")) {
+      return lower.replace(
+          "io_prometheus_exporter_opentelemetry_", "io.prometheus.exporter.opentelemetry.");
+    } else if (lower.startsWith("io_prometheus_exporter_filter_")) {
+      return lower.replace("io_prometheus_exporter_filter_", "io.prometheus.exporter.filter.");
+    } else if (lower.startsWith("io_prometheus_exporter_httpserver_")
+        || lower.startsWith("io_prometheus_exporter_http_server_")) {
+      return lower
+          .replace("io_prometheus_exporter_httpserver_", "io.prometheus.exporter.http_server.")
+          .replace("io_prometheus_exporter_http_server_", "io.prometheus.exporter.http_server.");
+    } else if (lower.startsWith("io_prometheus_exporter_pushgateway_")) {
+      return lower.replace(
+          "io_prometheus_exporter_pushgateway_", "io.prometheus.exporter.pushgateway.");
+    } else if (lower.startsWith("io_prometheus_metrics_")) {
+      return lower.replace("io_prometheus_metrics_", "io.prometheus.metrics.");
+    } else if (lower.startsWith("io_prometheus_exporter_")) {
+      return lower.replace("io_prometheus_exporter_", "io.prometheus.exporter.");
+    } else if (lower.startsWith("io_prometheus_exemplars_")) {
+      return lower.replace("io_prometheus_exemplars_", "io.prometheus.exemplars.");
+    } else {
+      // Fallback for unknown prefixes
+      return lower.replace("io_prometheus_", "io.prometheus.");
     }
-    return result.toString();
   }
 
-  private static int findCamelCaseStartIndex(String[] parts) {
-    // Known prefixes that use dots:
-    // - io.prometheus.metrics
-    // - io.prometheus.exporter.opentelemetry
-    // - io.prometheus.exporter.filter
-    // - io.prometheus.exporter.httpServer
-    // - io.prometheus.exporter.pushgateway
-    // - io.prometheus.exemplars
-    if (parts.length >= 4
-        && parts[0].equals("io")
-        && parts[1].equals("prometheus")
-        && parts[2].equals("exporter")
-        && (parts[3].equals("opentelemetry")
-            || parts[3].equals("filter")
-            || parts[3].equals("httpserver")
-            || parts[3].equals("pushgateway"))) {
-      return 4;
-    }
-    // Default case: io.prometheus.metrics or io.prometheus.exporter or io.prometheus.exemplars
-    return 3;
+  /**
+   * Normalize a property key for consistent lookup.
+   *
+   * <p>Converts camelCase property keys to snake_case. This allows both snake_case (preferred) and
+   * camelCase (deprecated) property names to be used.
+   *
+   * <p>For example: exemplarsEnabled → exemplars_enabled exemplars_enabled → exemplars_enabled
+   * (unchanged)
+   *
+   * @param key the property key
+   * @return the normalized property key
+   */
+  static String normalizePropertyKey(String key) {
+    // Insert underscores before uppercase letters to convert camelCase to snake_case
+    String withUnderscores = key.replaceAll("([a-z])([A-Z])", "$1_$2");
+    return withUnderscores.toLowerCase(java.util.Locale.ROOT);
   }
 }

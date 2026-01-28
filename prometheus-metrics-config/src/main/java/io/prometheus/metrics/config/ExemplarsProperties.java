@@ -7,9 +7,9 @@ import javax.annotation.Nullable;
 public class ExemplarsProperties {
 
   private static final String PREFIX = "io.prometheus.exemplars";
-  private static final String MIN_RETENTION_PERIOD_SECONDS = "minRetentionPeriodSeconds";
-  private static final String MAX_RETENTION_PERIOD_SECONDS = "maxRetentionPeriodSeconds";
-  private static final String SAMPLE_INTERVAL_MILLISECONDS = "sampleIntervalMilliseconds";
+  private static final String MIN_RETENTION_PERIOD_SECONDS = "min_retention_period_seconds";
+  private static final String MAX_RETENTION_PERIOD_SECONDS = "max_retention_period_seconds";
+  private static final String SAMPLE_INTERVAL_MILLISECONDS = "sample_interval_milliseconds";
 
   @Nullable private final Integer minRetentionPeriodSeconds;
   @Nullable private final Integer maxRetentionPeriodSeconds;
