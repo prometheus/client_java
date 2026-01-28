@@ -10,10 +10,10 @@ import javax.annotation.Nullable;
 /** Properties starting with io.prometheus.exporter.filter */
 public class ExporterFilterProperties {
 
-  public static final String METRIC_NAME_MUST_BE_EQUAL_TO = "metricNameMustBeEqualTo";
-  public static final String METRIC_NAME_MUST_NOT_BE_EQUAL_TO = "metricNameMustNotBeEqualTo";
-  public static final String METRIC_NAME_MUST_START_WITH = "metricNameMustStartWith";
-  public static final String METRIC_NAME_MUST_NOT_START_WITH = "metricNameMustNotStartWith";
+  public static final String METRIC_NAME_MUST_BE_EQUAL_TO = "metric_name_must_be_equal_to";
+  public static final String METRIC_NAME_MUST_NOT_BE_EQUAL_TO = "metric_name_must_not_be_equal_to";
+  public static final String METRIC_NAME_MUST_START_WITH = "metric_name_must_start_with";
+  public static final String METRIC_NAME_MUST_NOT_START_WITH = "metric_name_must_not_start_with";
   private static final String PREFIX = "io.prometheus.exporter.filter";
 
   @Nullable private final List<String> allowedNames;

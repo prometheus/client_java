@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 public class ExporterHttpServerProperties {
 
   private static final String PORT = "port";
-  private static final String PREFER_UNCOMPRESSED_RESPONSE = "preferUncompressedResponse";
-  private static final String PREFIX = "io.prometheus.exporter.httpServer";
+  private static final String PREFER_UNCOMPRESSED_RESPONSE = "prefer_uncompressed_response";
+  private static final String PREFIX = "io.prometheus.exporter.http_server";
   @Nullable private final Integer port;
   private final boolean preferUncompressedResponse;
 

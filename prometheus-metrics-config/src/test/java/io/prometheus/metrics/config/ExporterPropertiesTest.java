@@ -15,8 +15,8 @@ class ExporterPropertiesTest {
         load(
             new HashMap<>(
                 Map.of(
-                    "io.prometheus.exporter.includeCreatedTimestamps", "true",
-                    "io.prometheus.exporter.exemplarsOnAllMetricTypes", "true")));
+                    "io.prometheus.exporter.include_created_timestamps", "true",
+                    "io.prometheus.exporter.exemplars_on_all_metric_types", "true")));
     assertThat(properties.getIncludeCreatedTimestamps()).isTrue();
     assertThat(properties.getExemplarsOnAllMetricTypes()).isTrue();
 
@@ -25,18 +25,18 @@ class ExporterPropertiesTest {
             () ->
                 load(
                     new HashMap<>(
-                        Map.of("io.prometheus.exporter.includeCreatedTimestamps", "invalid"))))
+                        Map.of("io.prometheus.exporter.include_created_timestamps", "invalid"))))
         .withMessage(
-            "io.prometheus.exporter.includeCreatedTimestamps: Expecting 'true' or 'false'. Found:"
+            "io.prometheus.exporter.include_created_timestamps: Expecting 'true' or 'false'. Found:"
                 + " invalid");
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
             () ->
                 load(
                     new HashMap<>(
-                        Map.of("io.prometheus.exporter.exemplarsOnAllMetricTypes", "invalid"))))
+                        Map.of("io.prometheus.exporter.exemplars_on_all_metric_types", "invalid"))))
         .withMessage(
-            "io.prometheus.exporter.exemplarsOnAllMetricTypes: Expecting 'true' or 'false'. Found:"
+            "io.prometheus.exporter.exemplars_on_all_metric_types: Expecting 'true' or 'false'. Found:"
                 + " invalid");
   }
 
