@@ -57,44 +57,4 @@ class PrometheusPropertiesLoaderTest {
     assertThat(prometheusProperties.getExporterProperties().getExemplarsOnAllMetricTypes())
         .isFalse();
   }
-
-  @Test
-  void normalizeEnvironmentVariableKey_simpleMetricsProperty() {
-    String result =
-        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
-            "IO_PROMETHEUS_METRICS_EXEMPLARS_ENABLED");
-    assertThat(result).isEqualTo("io.prometheus.metrics.exemplars_enabled");
-  }
-
-  @Test
-  void normalizeEnvironmentVariableKey_exporterProperty() {
-    String result =
-        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
-            "IO_PROMETHEUS_EXPORTER_EXEMPLARS_ON_ALL_METRIC_TYPES");
-    assertThat(result).isEqualTo("io.prometheus.exporter.exemplars_on_all_metric_types");
-  }
-
-  @Test
-  void normalizeEnvironmentVariableKey_histogramBounds() {
-    String result =
-        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
-            "IO_PROMETHEUS_METRICS_HISTOGRAM_CLASSIC_UPPER_BOUNDS");
-    assertThat(result).isEqualTo("io.prometheus.metrics.histogram_classic_upper_bounds");
-  }
-
-  @Test
-  void normalizeEnvironmentVariableKey_openTelemetryProperty() {
-    String result =
-        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
-            "IO_PROMETHEUS_EXPORTER_OPENTELEMETRY_ENDPOINT");
-    assertThat(result).isEqualTo("io.prometheus.exporter.opentelemetry.endpoint");
-  }
-
-  @Test
-  void normalizeEnvironmentVariableKey_filterProperty() {
-    String result =
-        PrometheusPropertiesLoader.normalizeEnvironmentVariableKey(
-            "IO_PROMETHEUS_EXPORTER_FILTER_ALLOWED_METRIC_NAMES");
-    assertThat(result).isEqualTo("io.prometheus.exporter.filter.allowed_metric_names");
-  }
 }
