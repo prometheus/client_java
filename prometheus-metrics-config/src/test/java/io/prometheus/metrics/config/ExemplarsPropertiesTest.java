@@ -1,11 +1,12 @@
 package io.prometheus.metrics.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class ExemplarsPropertiesTest {
 
@@ -40,7 +41,10 @@ class ExemplarsPropertiesTest {
   }
 
   private static ExemplarsProperties load(Map<String, String> map) {
-    return ExemplarsProperties.load(new HashMap<>(map));
+    Map<Object, Object> regularProperties = new HashMap<>(map);
+    PropertySource propertySource =
+        new PropertySource(new HashMap<>(), new HashMap<>(), regularProperties);
+    return ExemplarsProperties.load(propertySource);
   }
 
   @Test

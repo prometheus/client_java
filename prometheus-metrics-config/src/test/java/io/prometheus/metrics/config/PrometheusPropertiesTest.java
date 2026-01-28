@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
@@ -29,8 +30,11 @@ class PrometheusPropertiesTest {
       properties.load(stream);
     }
     assertThat(properties).hasSize(1);
-    MetricsProperties.load("io.prometheus.metrics", properties);
-    assertThat(properties).isEmpty();
+    Map<Object, Object> regularProperties = new HashMap<>(properties);
+    PropertySource propertySource =
+        new PropertySource(new HashMap<>(), new HashMap<>(), regularProperties);
+    MetricsProperties.load("io.prometheus.metrics", propertySource);
+    assertThat(regularProperties).isEmpty();
   }
 
   @Test
