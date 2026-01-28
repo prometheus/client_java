@@ -42,8 +42,7 @@ class ExemplarsPropertiesTest {
 
   private static ExemplarsProperties load(Map<String, String> map) {
     Map<Object, Object> regularProperties = new HashMap<>(map);
-    PropertySource propertySource =
-        new PropertySource(new HashMap<>(), new HashMap<>(), regularProperties);
+    PropertySource propertySource = new PropertySource(regularProperties);
     return ExemplarsProperties.load(propertySource);
   }
 
