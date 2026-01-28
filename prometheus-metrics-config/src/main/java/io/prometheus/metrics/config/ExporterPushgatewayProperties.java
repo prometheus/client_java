@@ -9,9 +9,9 @@ public class ExporterPushgatewayProperties {
   private static final String ADDRESS = "address";
   private static final String JOB = "job";
   private static final String SCHEME = "scheme";
-  private static final String ESCAPING_SCHEME = "escapingScheme";
-  private static final String READ_TIMEOUT = "readTimeoutSeconds";
-  private static final String CONNECT_TIMEOUT = "connectTimeoutSeconds";
+  private static final String ESCAPING_SCHEME = "escaping_scheme";
+  private static final String READ_TIMEOUT = "read_timeout_seconds";
+  private static final String CONNECT_TIMEOUT = "connect_timeout_seconds";
   private static final String PREFIX = "io.prometheus.exporter.pushgateway";
   @Nullable private final String scheme;
   @Nullable private final String address;

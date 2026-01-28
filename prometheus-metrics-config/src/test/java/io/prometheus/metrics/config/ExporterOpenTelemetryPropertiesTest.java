@@ -16,13 +16,13 @@ class ExporterOpenTelemetryPropertiesTest {
                 "io.prometheus.exporter.opentelemetry.protocol", "grpc",
                 "io.prometheus.exporter.opentelemetry.endpoint", "http://localhost:8080",
                 "io.prometheus.exporter.opentelemetry.headers", "key1=value1,key2=value2",
-                "io.prometheus.exporter.opentelemetry.intervalSeconds", "10",
-                "io.prometheus.exporter.opentelemetry.timeoutSeconds", "5",
-                "io.prometheus.exporter.opentelemetry.serviceName", "serviceName",
-                "io.prometheus.exporter.opentelemetry.serviceNamespace", "serviceNamespace",
-                "io.prometheus.exporter.opentelemetry.serviceInstanceId", "serviceInstanceId",
-                "io.prometheus.exporter.opentelemetry.serviceVersion", "serviceVersion",
-                "io.prometheus.exporter.opentelemetry.resourceAttributes",
+                "io.prometheus.exporter.opentelemetry.interval_seconds", "10",
+                "io.prometheus.exporter.opentelemetry.timeout_seconds", "5",
+                "io.prometheus.exporter.opentelemetry.service_name", "serviceName",
+                "io.prometheus.exporter.opentelemetry.service_namespace", "serviceNamespace",
+                "io.prometheus.exporter.opentelemetry.service_instance_id", "serviceInstanceId",
+                "io.prometheus.exporter.opentelemetry.service_version", "serviceVersion",
+                "io.prometheus.exporter.opentelemetry.resource_attributes",
                     "key1=value1,key2=value2"));
 
     assertValues(properties);
