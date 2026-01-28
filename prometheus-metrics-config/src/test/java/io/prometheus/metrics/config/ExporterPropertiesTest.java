@@ -41,7 +41,10 @@ class ExporterPropertiesTest {
   }
 
   private static ExporterProperties load(Map<String, String> map) {
-    return ExporterProperties.load(new HashMap<>(map));
+    Map<Object, Object> regularProperties = new HashMap<>(map);
+    PropertySource propertySource =
+        new PropertySource(new HashMap<>(), new HashMap<>(), regularProperties);
+    return ExporterProperties.load(propertySource);
   }
 
   @Test

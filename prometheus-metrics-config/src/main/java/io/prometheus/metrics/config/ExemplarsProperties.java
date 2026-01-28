@@ -1,6 +1,5 @@
 package io.prometheus.metrics.config;
 
-import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exemplars */
@@ -57,17 +56,17 @@ public class ExemplarsProperties {
   }
 
   /**
-   * Note that this will remove entries from {@code properties}. This is because we want to know if
-   * there are unused properties remaining after all properties have been loaded.
+   * Note that this will remove entries from {@code propertySource}. This is because we want to know
+   * if there are unused properties remaining after all properties have been loaded.
    */
-  static ExemplarsProperties load(Map<Object, Object> properties)
+  static ExemplarsProperties load(PropertySource propertySource)
       throws PrometheusPropertiesException {
     Integer minRetentionPeriodSeconds =
-        Util.loadInteger(PREFIX + "." + MIN_RETENTION_PERIOD_SECONDS, properties);
+        Util.loadInteger(PREFIX, MIN_RETENTION_PERIOD_SECONDS, propertySource);
     Integer maxRetentionPeriodSeconds =
-        Util.loadInteger(PREFIX + "." + MAX_RETENTION_PERIOD_SECONDS, properties);
+        Util.loadInteger(PREFIX, MAX_RETENTION_PERIOD_SECONDS, propertySource);
     Integer sampleIntervalMilliseconds =
-        Util.loadInteger(PREFIX + "." + SAMPLE_INTERVAL_MILLISECONDS, properties);
+        Util.loadInteger(PREFIX, SAMPLE_INTERVAL_MILLISECONDS, propertySource);
 
     Util.assertValue(
         minRetentionPeriodSeconds,

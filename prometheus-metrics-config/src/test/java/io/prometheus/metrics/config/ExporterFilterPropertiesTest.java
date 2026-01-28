@@ -24,7 +24,10 @@ class ExporterFilterPropertiesTest {
   }
 
   private static ExporterFilterProperties load(Map<String, String> map) {
-    return ExporterFilterProperties.load(new HashMap<>(map));
+    Map<Object, Object> regularProperties = new HashMap<>(map);
+    PropertySource propertySource =
+        new PropertySource(new HashMap<>(), new HashMap<>(), regularProperties);
+    return ExporterFilterProperties.load(propertySource);
   }
 
   @Test

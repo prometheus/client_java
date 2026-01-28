@@ -34,6 +34,9 @@ class ExporterHttpServerPropertiesTest {
   }
 
   private static ExporterHttpServerProperties load(Map<String, String> map) {
-    return ExporterHttpServerProperties.load(new HashMap<>(map));
+    Map<Object, Object> regularProperties = new HashMap<>(map);
+    PropertySource propertySource =
+        new PropertySource(new HashMap<>(), new HashMap<>(), regularProperties);
+    return ExporterHttpServerProperties.load(propertySource);
   }
 }
