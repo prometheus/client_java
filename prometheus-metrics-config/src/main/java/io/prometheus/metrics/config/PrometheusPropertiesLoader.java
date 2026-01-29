@@ -27,7 +27,7 @@ public class PrometheusPropertiesLoader {
   public static PrometheusProperties load(Map<Object, Object> externalProperties)
       throws PrometheusPropertiesException {
     PropertySource propertySource = loadProperties(externalProperties);
-    Map<String, MetricsProperties> metricsConfigs = loadMetricsConfigs(propertySource);
+    PrometheusProperties.MetricPropertiesMap metricsConfigs = loadMetricsConfigs(propertySource);
     MetricsProperties defaultMetricsProperties =
         MetricsProperties.load("io.prometheus.metrics", propertySource);
     ExemplarsProperties exemplarConfig = ExemplarsProperties.load(propertySource);
@@ -53,8 +53,10 @@ public class PrometheusPropertiesLoader {
   }
 
   // This will remove entries from propertySource when they are processed.
-  static Map<String, MetricsProperties> loadMetricsConfigs(PropertySource propertySource) {
-    Map<String, MetricsProperties> result = new HashMap<>();
+  static PrometheusProperties.MetricPropertiesMap loadMetricsConfigs(
+      PropertySource propertySource) {
+    PrometheusProperties.MetricPropertiesMap result =
+        new PrometheusProperties.MetricPropertiesMap();
     // Note that the metric name in the properties file must be as exposed in the Prometheus
     // exposition formats,
     // i.e. all dots replaced with underscores.
@@ -89,7 +91,7 @@ public class PrometheusPropertiesLoader {
         }
       }
 
-      if (metricName != null && !result.containsKey(metricName)) {
+      if (metricName != null && result.get(metricName) == null) {
         result.put(
             metricName,
             MetricsProperties.load("io.prometheus.metrics." + metricName, propertySource));
