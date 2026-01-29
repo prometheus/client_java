@@ -9,6 +9,8 @@ import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
+
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,17 +86,13 @@ class PrometheusRegistryTest {
       };
 
   @Test
-  void registerDuplicateName_withoutTypeInfo_allowedForBackwardCompatibility() {
+  void register_duplicateName_withoutTypeInfo_notAllowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
-    // If the collector does not have a name at registration time, there is no conflict during
-    // registration.
+
     registry.register(noName);
-    registry.register(noName);
-    // However, at scrape time the collector has to provide a metric name, and then we'll get a
-    // duplicate name error.
-    assertThatCode(registry::scrape)
-        .hasMessageContaining("duplicate")
-        .hasMessageContaining("no_name_gauge");
+
+    assertThatThrownBy(() -> registry.register(noName))
+        .hasMessageContaining("Collector instance is already registered");
   }
 
   @Test
