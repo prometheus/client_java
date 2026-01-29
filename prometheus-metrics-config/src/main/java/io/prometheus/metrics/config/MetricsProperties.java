@@ -28,6 +28,7 @@ public class MetricsProperties {
   private static final String SUMMARY_QUANTILE_ERRORS = "summaryQuantileErrors";
   private static final String SUMMARY_MAX_AGE_SECONDS = "summaryMaxAgeSeconds";
   private static final String SUMMARY_NUMBER_OF_AGE_BUCKETS = "summaryNumberOfAgeBuckets";
+  private static final String USE_OTEL_METRICS = "useOtelMetrics";
 
   @Nullable private final Boolean exemplarsEnabled;
   @Nullable private final Boolean histogramNativeOnly;
@@ -42,6 +43,7 @@ public class MetricsProperties {
   @Nullable private final List<Double> summaryQuantileErrors;
   @Nullable private final Long summaryMaxAgeSeconds;
   @Nullable private final Integer summaryNumberOfAgeBuckets;
+  @Nullable private final Boolean useOtelMetrics;
 
   public MetricsProperties(
       @Nullable Boolean exemplarsEnabled,
@@ -56,7 +58,8 @@ public class MetricsProperties {
       @Nullable List<Double> summaryQuantiles,
       @Nullable List<Double> summaryQuantileErrors,
       @Nullable Long summaryMaxAgeSeconds,
-      @Nullable Integer summaryNumberOfAgeBuckets) {
+      @Nullable Integer summaryNumberOfAgeBuckets,
+      @Nullable Boolean useOtelMetrics) {
     this(
         exemplarsEnabled,
         histogramNativeOnly,
@@ -71,6 +74,7 @@ public class MetricsProperties {
         summaryQuantileErrors,
         summaryMaxAgeSeconds,
         summaryNumberOfAgeBuckets,
+        useOtelMetrics,
         "");
   }
 
@@ -88,6 +92,7 @@ public class MetricsProperties {
       @Nullable List<Double> summaryQuantileErrors,
       @Nullable Long summaryMaxAgeSeconds,
       @Nullable Integer summaryNumberOfAgeBuckets,
+      @Nullable Boolean useOtelMetrics,
       String configPropertyPrefix) {
     this.exemplarsEnabled = exemplarsEnabled;
     this.histogramNativeOnly = isHistogramNativeOnly(histogramClassicOnly, histogramNativeOnly);
@@ -109,6 +114,7 @@ public class MetricsProperties {
             : unmodifiableList(new ArrayList<>(summaryQuantileErrors));
     this.summaryMaxAgeSeconds = summaryMaxAgeSeconds;
     this.summaryNumberOfAgeBuckets = summaryNumberOfAgeBuckets;
+    this.useOtelMetrics = useOtelMetrics;
     validate(configPropertyPrefix);
   }
 
@@ -334,6 +340,12 @@ public class MetricsProperties {
     return summaryNumberOfAgeBuckets;
   }
 
+  /** See {@code Summary.Builder.useOtelMetrics()} */
+  @Nullable
+  public Boolean useOtelMetrics() {
+    return useOtelMetrics;
+  }
+
   /**
    * Note that this will remove entries from {@code properties}. This is because we want to know if
    * there are unused properties remaining after all properties have been loaded.
@@ -354,6 +366,7 @@ public class MetricsProperties {
         Util.loadDoubleList(prefix + "." + SUMMARY_QUANTILE_ERRORS, properties),
         Util.loadLong(prefix + "." + SUMMARY_MAX_AGE_SECONDS, properties),
         Util.loadInteger(prefix + "." + SUMMARY_NUMBER_OF_AGE_BUCKETS, properties),
+        Util.loadBoolean(prefix + "." + USE_OTEL_METRICS, properties),
         prefix);
   }
 
@@ -375,6 +388,7 @@ public class MetricsProperties {
     @Nullable private List<Double> summaryQuantileErrors;
     @Nullable private Long summaryMaxAgeSeconds;
     @Nullable private Integer summaryNumberOfAgeBuckets;
+    @Nullable private Boolean useOtelMetrics;
 
     private Builder() {}
 
@@ -392,7 +406,8 @@ public class MetricsProperties {
           summaryQuantiles,
           summaryQuantileErrors,
           summaryMaxAgeSeconds,
-          summaryNumberOfAgeBuckets);
+          summaryNumberOfAgeBuckets,
+          useOtelMetrics);
     }
 
     /** See {@link MetricsProperties#getExemplarsEnabled()} */
@@ -474,6 +489,12 @@ public class MetricsProperties {
     /** See {@link MetricsProperties#getSummaryNumberOfAgeBuckets()} */
     public Builder summaryNumberOfAgeBuckets(@Nullable Integer summaryNumberOfAgeBuckets) {
       this.summaryNumberOfAgeBuckets = summaryNumberOfAgeBuckets;
+      return this;
+    }
+
+    /** See {@link MetricsProperties#useOtelMetrics()} */
+    public Builder useOtelMetrics(@Nullable Boolean useOtelMetrics) {
+      this.useOtelMetrics = useOtelMetrics;
       return this;
     }
   }

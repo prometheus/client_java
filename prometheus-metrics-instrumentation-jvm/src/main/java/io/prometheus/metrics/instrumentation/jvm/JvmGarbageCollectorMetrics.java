@@ -55,7 +55,14 @@ public class JvmGarbageCollectorMetrics {
   }
 
   private void register(PrometheusRegistry registry) {
+    if (Boolean.TRUE.equals(config.getDefaultMetricProperties().useOtelMetrics())) {
+      registerGCDurationHistogram(registry);
+    } else {
+      registerGCDurationSummary(registry);
+    }
+  }
 
+  private void registerGCDurationSummary(PrometheusRegistry registry) {
     SummaryWithCallback.builder(config)
         .name(JVM_GC_COLLECTION_SECONDS)
         .help("Time spent in a given JVM garbage collector in seconds.")
@@ -72,8 +79,6 @@ public class JvmGarbageCollectorMetrics {
               }
             })
         .register(registry);
-
-    registerGCDurationHistogram(registry);
   }
 
   private void registerGCDurationHistogram(PrometheusRegistry registry) {
