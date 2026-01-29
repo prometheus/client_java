@@ -1526,6 +1526,50 @@ class HistogramTest {
     assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
   }
 
+  @Test
+  public void testNativeResetDuration() {
+    // Test that nativeResetDuration can be configured
+    Histogram histogram =
+        Histogram.builder()
+            .name("test_histogram_with_reset")
+            .nativeOnly()
+            .nativeResetDuration(24, TimeUnit.HOURS)
+            .build();
+
+    histogram.observe(1.0);
+    histogram.observe(2.0);
+
+    HistogramSnapshot snapshot = histogram.collect();
+    assertThat(snapshot.getDataPoints()).hasSize(1);
+    assertThat(snapshot.getDataPoints().get(0).hasNativeHistogramData()).isTrue();
+  }
+
+  @Test
+  public void testNativeResetDurationNegativeValue() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                Histogram.builder()
+                    .name("test_histogram")
+                    .nativeOnly()
+                    .nativeResetDuration(-1, TimeUnit.HOURS)
+                    .build())
+        .withMessageContaining("value > 0 expected");
+  }
+
+  @Test
+  public void testNativeResetDurationZeroValue() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                Histogram.builder()
+                    .name("test_histogram")
+                    .nativeOnly()
+                    .nativeResetDuration(0, TimeUnit.HOURS)
+                    .build())
+        .withMessageContaining("value > 0 expected");
+  }
+
   private HistogramSnapshot.HistogramDataPointSnapshot getData(
       Histogram histogram, String... labels) {
     return histogram.collect().getDataPoints().stream()
