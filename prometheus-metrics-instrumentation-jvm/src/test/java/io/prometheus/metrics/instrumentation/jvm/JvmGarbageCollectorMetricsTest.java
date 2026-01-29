@@ -216,7 +216,9 @@ class JvmGarbageCollectorMetricsTest {
             "GarbageCollectionNotificationInfo",
             new String[] {"gcAction", "gcName", "gcCause", "gcInfo"},
             new String[] {"gcAction", "gcName", "gcCause", "gcInfo"},
-            new OpenType<?>[] {SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, gcInfoType});
+            new OpenType<?>[] {
+              SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, gcInfoType
+            });
 
     Map<String, Object> notifMap = new HashMap<>();
     notifMap.put("gcAction", "end of minor GC");
