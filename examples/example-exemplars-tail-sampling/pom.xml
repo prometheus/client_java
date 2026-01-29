@@ -15,7 +15,7 @@
 
   <name>Example - Exemplars with OpenTelemetry's Tail Sampling</name>
   <description>
-    Example project showing Examplars with OpenTelemetry's Tail Sampling.
+    Example project showing Exemplars with OpenTelemetry's Tail Sampling.
   </description>
 
   <properties>

@@ -71,7 +71,7 @@ browser:
    static_configs:
      - targets: ["localhost:8080"]
    ```
-4. Run with native histograms and examplars enabled:
+4. Run with native histograms and exemplars enabled:
    ```shell
    ./prometheus --enable-feature=native-histograms --enable-feature=exemplar-storage
    ```
