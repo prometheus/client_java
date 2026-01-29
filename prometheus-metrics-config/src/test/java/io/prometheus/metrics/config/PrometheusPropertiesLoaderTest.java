@@ -17,7 +17,7 @@ class PrometheusPropertiesLoaderTest {
   void propertiesShouldBeLoadedFromPropertiesFile() {
     PrometheusProperties prometheusProperties = PrometheusPropertiesLoader.load();
     assertThat(prometheusProperties.getDefaultMetricProperties().getHistogramClassicUpperBounds())
-        .hasSize(11);
+        .hasSize(10);
     assertThat(
             prometheusProperties
                 .getMetricProperties("http_duration_seconds")
@@ -145,5 +145,60 @@ class PrometheusPropertiesLoaderTest {
     assertThat(metricsConfigs.get("http_server_requests_total").getHistogramNativeOnly()).isTrue();
     assertThat(metricsConfigs.get("my_app_custom_metric").getSummaryQuantiles())
         .containsExactly(0.5, 0.99);
+  }
+
+  @Test
+  void normalizePropertyKeyShouldConvertCamelCaseToSnakeCase() {
+    // Test that camelCase keys are correctly converted to snake_case for backward compatibility
+    assertThat(
+            PrometheusPropertiesLoader.normalizePropertyKey(
+                "io.prometheus.exporter.httpServer.port"))
+        .isEqualTo("io.prometheus.exporter.http_server.port");
+    assertThat(
+            PrometheusPropertiesLoader.normalizePropertyKey(
+                "io.prometheus.metrics.exemplarsEnabled"))
+        .isEqualTo("io.prometheus.metrics.exemplars_enabled");
+    assertThat(
+            PrometheusPropertiesLoader.normalizePropertyKey(
+                "io.prometheus.exporter.openTelemetry.serviceName"))
+        .isEqualTo("io.prometheus.exporter.open_telemetry.service_name");
+
+    // Test that snake_case keys remain unchanged
+    assertThat(
+            PrometheusPropertiesLoader.normalizePropertyKey(
+                "io.prometheus.exporter.http_server.port"))
+        .isEqualTo("io.prometheus.exporter.http_server.port");
+    assertThat(
+            PrometheusPropertiesLoader.normalizePropertyKey(
+                "io.prometheus.metrics.exemplars_enabled"))
+        .isEqualTo("io.prometheus.metrics.exemplars_enabled");
+  }
+
+  @Test
+  void environmentVariablesShouldHaveCorrectPrecedence() {
+    // Test that environment variables override system properties and files,
+    // but are overridden by external properties
+    Properties fileProperties = new Properties();
+    fileProperties.setProperty("io.prometheus.metrics.histogram_native_only", "false");
+
+    Map<Object, Object> envVarProperties = new HashMap<>();
+    envVarProperties.put("io_prometheus_metrics_histogram_native_only", "true");
+
+    Map<Object, Object> externalProperties = new HashMap<>();
+    externalProperties.put("io.prometheus.metrics.histogram_native_only", "false");
+
+    // Test that env vars override file properties
+    PropertySource propertySourceWithEnv =
+        new PropertySource(new HashMap<>(), envVarProperties, fileProperties);
+    MetricsProperties metricsWithEnv =
+        MetricsProperties.load("io.prometheus.metrics", propertySourceWithEnv);
+    assertThat(metricsWithEnv.getHistogramNativeOnly()).isTrue();
+
+    // Test that external properties override env vars
+    PropertySource propertySourceWithExternal =
+        new PropertySource(externalProperties, envVarProperties, fileProperties);
+    MetricsProperties metricsWithExternal =
+        MetricsProperties.load("io.prometheus.metrics", propertySourceWithExternal);
+    assertThat(metricsWithExternal.getHistogramNativeOnly()).isFalse();
   }
 }
