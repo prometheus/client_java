@@ -1,0 +1,5 @@
+[codespell]
+# Ignore words that are valid technical terms:
+# - vertx: Vert.x reactive framework
+# - errorprone: Error Prone static analysis tool
+ignore-words-list = vertx,errorprone
