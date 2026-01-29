@@ -160,7 +160,11 @@ class CacheMetricsCollectorTest {
 
   private String convertToOpenMetricsFormat(PrometheusRegistry registry) {
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    final OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
+    final OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder()
+            .setCreatedTimestampsEnabled(true)
+            .setExemplarsOnAllMetricTypesEnabled(true)
+            .build();
     try {
       writer.write(out, registry.scrape(), EscapingScheme.ALLOW_UTF8);
       return out.toString(StandardCharsets.UTF_8);
