@@ -40,11 +40,11 @@ class PrometheusPropertiesLoaderTest {
   @Test
   void externalPropertiesShouldOverridePropertiesFile() {
     Properties properties = new Properties();
-    properties.setProperty("io.prometheus.metrics.histogramClassicUpperBounds", ".005, .01");
+    properties.setProperty("io.prometheus.metrics.histogram_classic_upper_bounds", ".005, .01");
     properties.setProperty(
-        "io.prometheus.metrics.http_duration_seconds.histogramClassicUpperBounds",
+        "io.prometheus.metrics.http_duration_seconds.histogram_classic_upper_bounds",
         ".005, .01, .015");
-    properties.setProperty("io.prometheus.exporter.exemplarsOnAllMetricTypes", "false");
+    properties.setProperty("io.prometheus.exporter.exemplars_on_all_metric_types", "false");
 
     PrometheusProperties prometheusProperties = PrometheusPropertiesLoader.load(properties);
     assertThat(prometheusProperties.getDefaultMetricProperties().getHistogramClassicUpperBounds())
