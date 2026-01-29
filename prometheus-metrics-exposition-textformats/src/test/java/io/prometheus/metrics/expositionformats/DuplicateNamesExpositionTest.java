@@ -2,7 +2,6 @@ package io.prometheus.metrics.expositionformats;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.prometheus.metrics.model.registry.Collector;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
@@ -180,58 +179,5 @@ class DuplicateNamesExpositionTest {
     # EOF
     """;
     assertThat(output).isEqualTo(expected);
-  }
-
-  @Test
-  void testDuplicateNames_sameLabels_throwsException() {
-    PrometheusRegistry registry = new PrometheusRegistry();
-
-    registry.register(
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder()
-                .name("api_responses")
-                .help("API responses")
-                .dataPoint(
-                    CounterSnapshot.CounterDataPointSnapshot.builder()
-                        .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                        .value(100)
-                        .build())
-                .build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "api_responses_total";
-          }
-        });
-
-    registry.register(
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder()
-                .name("api_responses")
-                .help("API responses")
-                .dataPoint(
-                    CounterSnapshot.CounterDataPointSnapshot.builder()
-                        .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
-                        .value(50)
-                        .build())
-                .build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "api_responses_total";
-          }
-        });
-
-    // Scrape should throw exception due to duplicate time series (same name + same labels)
-    assertThatThrownBy(registry::scrape)
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("duplicate metric name with identical label schema [uri, outcome]")
-        .hasMessageContaining("api_responses");
   }
 }

@@ -276,3 +276,6 @@ in the `prometheus-metrics-core` API.
 However, `prometheus-metrics-model` implements the underlying data model for these types.
 To use these types, you need to implement your own `Collector` where the `collect()` method returns
 an `UnknownSnapshot` or a `HistogramSnapshot` with `.gaugeHistogram(true)`.
+If your custom collector does not implement `getMetricType()` and `getLabelNames()`, ensure it does
+not produce the same metric name and label set as another collector, or the exposition may contain
+duplicate time series.

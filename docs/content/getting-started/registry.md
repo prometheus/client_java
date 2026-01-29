@@ -78,6 +78,17 @@ Counter eventsTotal2 = Counter.builder()
     .register(); // IllegalArgumentException, because a metric with that name is already registered
 ```
 
+## Validation at registration only
+
+Validation of duplicate metric names and label schemas happens at registration time only.
+Built-in metrics (Counter, Gauge, Histogram, etc.) participate in this validation.
+
+Custom collectors that implement the `Collector` or `MultiCollector` interface can optionally
+implement `getMetricType()` and `getLabelNames()` (or the MultiCollector per-name variants) so the
+registry can enforce consistency. If those methods return `null`, the registry does not validate
+that collector. If two such collectors produce the same metric name and same label set at scrape
+time, the exposition output may contain duplicate time series and be invalid for Prometheus.
+
 ## Unregistering a Metric
 
 There is no automatic expiry of unused metrics (yet), once a metric is registered it will remain

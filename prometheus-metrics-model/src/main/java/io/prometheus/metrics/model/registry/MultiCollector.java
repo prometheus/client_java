@@ -78,6 +78,10 @@ public interface MultiCollector {
    * <p>This is used for per-name type validation during registration. Returning {@code null} means
    * type validation is skipped for that specific metric name.
    *
+   * <p>Validation is performed only at registration time. If this method returns {@code null}, no
+   * type validation is performed for that name, and duplicate or conflicting metrics may result in
+   * invalid exposition output.
+   *
    * @param prometheusName the Prometheus metric name
    * @return the metric type for the given name, or {@code null} to skip validation
    */
@@ -97,6 +101,11 @@ public interface MultiCollector {
    *
    * <p>Returning {@code null} means label schema validation is skipped for that specific metric
    * name.
+   *
+   * <p>Validation is performed only at registration time. If this method returns {@code null}, no
+   * label-schema validation is performed for that name. If such a collector produces the same
+   * metric name and label schema as another at scrape time, the exposition may contain duplicate
+   * time series, which is invalid in Prometheus.
    *
    * @param prometheusName the Prometheus metric name
    * @return the set of all label names for the given name, or {@code null} to skip validation

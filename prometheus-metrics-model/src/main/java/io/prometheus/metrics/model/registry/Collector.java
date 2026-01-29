@@ -86,6 +86,10 @@ public interface Collector {
    * <p>This is used to prevent different metric types (e.g., Counter and Gauge) from sharing the
    * same name. Returning {@code null} means type validation is skipped for this collector.
    *
+   * <p>Validation is performed only at registration time. If this method returns {@code null}, no
+   * type validation is performed for this collector, and duplicate or conflicting metrics may
+   * result in invalid exposition output.
+   *
    * @return the metric type, or {@code null} to skip validation
    */
   @Nullable
@@ -105,6 +109,11 @@ public interface Collector {
    * label name sets.
    *
    * <p>Returning {@code null} means label schema validation is skipped for this collector.
+   *
+   * <p>Validation is performed only at registration time. If this method returns {@code null}, no
+   * label-schema validation is performed for this collector. If such a collector produces the same
+   * metric name and label schema as another at scrape time, the exposition may contain duplicate
+   * time series, which is invalid in Prometheus.
    *
    * @return the set of all label names, or {@code null} to skip validation
    */
