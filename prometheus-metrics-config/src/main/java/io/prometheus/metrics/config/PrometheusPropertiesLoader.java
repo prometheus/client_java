@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * The Properties Loader is early stages.
@@ -55,24 +53,46 @@ public class PrometheusPropertiesLoader {
   }
 
   // This will remove entries from propertySource when they are processed.
-  private static Map<String, MetricsProperties> loadMetricsConfigs(PropertySource propertySource) {
+  static Map<String, MetricsProperties> loadMetricsConfigs(PropertySource propertySource) {
     Map<String, MetricsProperties> result = new HashMap<>();
     // Note that the metric name in the properties file must be as exposed in the Prometheus
     // exposition formats,
     // i.e. all dots replaced with underscores.
-    Pattern pattern = Pattern.compile("io\\.prometheus\\.metrics\\.([^.]+)\\.");
+
     // Get a snapshot of all keys for pattern matching. Entries will be removed
     // when MetricsProperties.load(...) is called.
     Set<String> propertyNames = propertySource.getAllKeys();
     for (String propertyName : propertyNames) {
-      Matcher matcher = pattern.matcher(propertyName);
-      if (matcher.find()) {
-        String metricName = matcher.group(1).replace(".", "_");
-        if (!result.containsKey(metricName)) {
-          result.put(
-              metricName,
-              MetricsProperties.load("io.prometheus.metrics." + metricName, propertySource));
+      String metricName = null;
+
+      if (propertyName.startsWith("io.prometheus.metrics.")) {
+        // Dot-separated format (from regular properties, system properties, or files)
+        String remainder = propertyName.substring("io.prometheus.metrics.".length());
+        // Try to match against known property suffixes
+        for (String suffix : MetricsProperties.PROPERTY_SUFFIXES) {
+          if (remainder.endsWith("." + suffix)) {
+            // Metric name in dot format, convert dots to underscores for exposition format
+            metricName =
+                remainder.substring(0, remainder.length() - suffix.length() - 1).replace(".", "_");
+            break;
+          }
         }
+      } else if (propertyName.startsWith("io_prometheus_metrics_")) {
+        // Underscore-separated format (from environment variables)
+        String remainder = propertyName.substring("io_prometheus_metrics_".length());
+        // Try to match against known property suffixes
+        for (String suffix : MetricsProperties.PROPERTY_SUFFIXES) {
+          if (remainder.endsWith("_" + suffix)) {
+            metricName = remainder.substring(0, remainder.length() - suffix.length() - 1);
+            break;
+          }
+        }
+      }
+
+      if (metricName != null && !result.containsKey(metricName)) {
+        result.put(
+            metricName,
+            MetricsProperties.load("io.prometheus.metrics." + metricName, propertySource));
       }
     }
     return result;

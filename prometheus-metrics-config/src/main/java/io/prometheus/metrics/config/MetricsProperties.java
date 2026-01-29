@@ -28,6 +28,27 @@ public class MetricsProperties {
   private static final String SUMMARY_MAX_AGE_SECONDS = "summary_max_age_seconds";
   private static final String SUMMARY_NUMBER_OF_AGE_BUCKETS = "summary_number_of_age_buckets";
 
+  /**
+   * All known property suffixes that can be configured for metrics.
+   *
+   * <p>This list is used to parse metric-specific configuration keys from environment variables.
+   */
+  static final String[] PROPERTY_SUFFIXES = {
+    EXEMPLARS_ENABLED,
+    HISTOGRAM_NATIVE_ONLY,
+    HISTOGRAM_CLASSIC_ONLY,
+    HISTOGRAM_CLASSIC_UPPER_BOUNDS,
+    HISTOGRAM_NATIVE_INITIAL_SCHEMA,
+    HISTOGRAM_NATIVE_MIN_ZERO_THRESHOLD,
+    HISTOGRAM_NATIVE_MAX_ZERO_THRESHOLD,
+    HISTOGRAM_NATIVE_MAX_NUMBER_OF_BUCKETS,
+    HISTOGRAM_NATIVE_RESET_DURATION_SECONDS,
+    SUMMARY_QUANTILES,
+    SUMMARY_QUANTILE_ERRORS,
+    SUMMARY_MAX_AGE_SECONDS,
+    SUMMARY_NUMBER_OF_AGE_BUCKETS
+  };
+
   @Nullable private final Boolean exemplarsEnabled;
   @Nullable private final Boolean histogramNativeOnly;
   @Nullable private final Boolean histogramClassicOnly;

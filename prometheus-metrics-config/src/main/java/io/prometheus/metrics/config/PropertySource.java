@@ -32,7 +32,7 @@ class PropertySource {
    *
    * @param externalProperties properties passed explicitly (e.g., from application code)
    * @param envVarProperties properties from environment variables (keys in env var format with
-   *     underscores)
+   *     underscores, lowercase)
    * @param regularProperties properties from system properties, files, and classpath (keys
    *     normalized to snake_case)
    */
@@ -117,23 +117,23 @@ class PropertySource {
   /**
    * Returns all keys from all three property sources.
    *
-   * <p>For environment variable keys, transforms them from underscore format to dot format (e.g.,
-   * "io_prometheus_metrics_exemplars_enabled" becomes "io.prometheus.metrics.exemplars_enabled").
+   * <p>Keys are returned in the format they are stored in each source: external and regular
+   * properties typically use dot-separated keys, while environment variables are exposed in their
+   * underscore form (e.g., "io_prometheus_metrics_exemplars_enabled").
    *
    * <p>This is used for pattern matching to find metric-specific configurations.
    *
-   * @return a set of all property keys in normalized dot format
+   * @return a set of all property keys
    */
   Set<String> getAllKeys() {
     Set<String> allKeys = new HashSet<>();
     for (Object key : externalProperties.keySet()) {
       allKeys.add(key.toString());
     }
-    // Transform env var keys from underscore to dot format
+    // Include env var keys as stored (underscore-separated, lowercase)
     for (Object key : envVarProperties.keySet()) {
       String envKey = key.toString();
-      String normalizedKey = envKey.replace("_", ".");
-      allKeys.add(normalizedKey);
+      allKeys.add(envKey);
     }
     for (Object key : regularProperties.keySet()) {
       allKeys.add(key.toString());
