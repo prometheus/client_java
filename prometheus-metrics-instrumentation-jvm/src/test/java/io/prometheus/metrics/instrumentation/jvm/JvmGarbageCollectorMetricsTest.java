@@ -9,6 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.prometheus.metrics.config.MetricsProperties;
+import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.model.registry.MetricNameFilter;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -84,6 +86,23 @@ class JvmGarbageCollectorMetricsTest {
   }
 
   @Test
+  public void testNonOtelMetricsAbsentWhenUseOtelEnabled() {
+
+    PrometheusRegistry registry = new PrometheusRegistry();
+    PrometheusProperties properties =
+        PrometheusProperties.builder()
+            .defaultMetricsProperties(MetricsProperties.builder().useOtelMetrics(true).build())
+            .build();
+    JvmGarbageCollectorMetrics.builder(properties)
+        .garbageCollectorBeans(Arrays.asList(mockGcBean1, mockGcBean2))
+        .register(registry);
+    registry.scrape();
+
+    verify(mockGcBean1, times(0)).getCollectionTime();
+    verify(mockGcBean1, times(0)).getCollectionCount();
+  }
+
+  @Test
   @SuppressWarnings("rawtypes")
   public void testGCDurationHistogramLabels() throws Exception {
     GarbageCollectorMXBean mockGcBean =
@@ -92,8 +111,13 @@ class JvmGarbageCollectorMetricsTest {
             withSettings().extraInterfaces(NotificationEmitter.class));
     when(mockGcBean.getName()).thenReturn("MyGC");
 
+    PrometheusProperties properties =
+        PrometheusProperties.builder()
+            .defaultMetricsProperties(MetricsProperties.builder().useOtelMetrics(true).build())
+            .build();
+
     PrometheusRegistry registry = new PrometheusRegistry();
-    JvmGarbageCollectorMetrics.builder()
+    JvmGarbageCollectorMetrics.builder(properties)
         .garbageCollectorBeans(Collections.singletonList(mockGcBean))
         .register(registry);
 
@@ -117,7 +141,7 @@ class JvmGarbageCollectorMetricsTest {
             new String[] {
               "id", "startTime", "endTime", "duration", "memoryUsageBeforeGc", "memoryUsageAfterGc"
             },
-            new OpenType[] {
+            new OpenType<?>[] {
               SimpleType.LONG,
               SimpleType.LONG,
               SimpleType.LONG,
@@ -168,7 +192,7 @@ class JvmGarbageCollectorMetricsTest {
             "MemoryUsage",
             new String[] {"init", "used", "committed", "max"},
             new String[] {"init", "used", "committed", "max"},
-            new OpenType[] {SimpleType.LONG, SimpleType.LONG, SimpleType.LONG, SimpleType.LONG});
+            new OpenType<?>[] {SimpleType.LONG, SimpleType.LONG, SimpleType.LONG, SimpleType.LONG});
 
     CompositeType memoryUsageEntryType =
         new CompositeType(
@@ -176,7 +200,7 @@ class JvmGarbageCollectorMetricsTest {
             "memoryUsageEntry",
             new String[] {"key", "value"},
             new String[] {"key", "value"},
-            new OpenType[] {SimpleType.STRING, memoryUsageType});
+            new OpenType<?>[] {SimpleType.STRING, memoryUsageType});
 
     return new TabularType(
         "memoryUsageTabular", "memoryUsageTabular", memoryUsageEntryType, new String[] {"key"});
