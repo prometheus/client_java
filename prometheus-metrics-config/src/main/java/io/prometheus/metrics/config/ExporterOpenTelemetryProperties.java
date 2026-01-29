@@ -227,11 +227,11 @@ public class ExporterOpenTelemetryProperties {
     }
 
     /**
-     * The interval between the start of two export attempts. Default is 60000.
+     * The interval between the start of two export attempts. Default is 60 seconds.
      *
      * <p>Like OpenTelemetry's <a
-     * href="https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#periodic-metric-reader">OTEL_METRIC_EXPORT_INTERVAL</a>,
-     * but in seconds rather than milliseconds.
+     * href="https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md#periodic-metric-reader">OTEL_METRIC_EXPORT_INTERVAL</a>
+     * (which defaults to 60000 milliseconds), but specified in seconds rather than milliseconds.
      */
     public Builder intervalSeconds(int intervalSeconds) {
       if (intervalSeconds <= 0) {

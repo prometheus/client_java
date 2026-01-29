@@ -1528,7 +1528,9 @@ class HistogramTest {
 
   @Test
   public void testNativeResetDuration() {
-    // Test that nativeResetDuration can be configured
+    // Test that nativeResetDuration can be configured without error and the histogram
+    // functions correctly. The reset duration schedules internal reset behavior but
+    // is not directly observable in the snapshot.
     Histogram histogram =
         Histogram.builder()
             .name("test_histogram_with_reset")
@@ -1538,10 +1540,14 @@ class HistogramTest {
 
     histogram.observe(1.0);
     histogram.observe(2.0);
+    histogram.observe(3.0);
 
     HistogramSnapshot snapshot = histogram.collect();
     assertThat(snapshot.getDataPoints()).hasSize(1);
-    assertThat(snapshot.getDataPoints().get(0).hasNativeHistogramData()).isTrue();
+    HistogramSnapshot.HistogramDataPointSnapshot dataPoint = snapshot.getDataPoints().get(0);
+    assertThat(dataPoint.hasNativeHistogramData()).isTrue();
+    assertThat(dataPoint.getCount()).isEqualTo(3);
+    assertThat(dataPoint.getSum()).isEqualTo(6.0);
   }
 
   @Test
@@ -1568,6 +1574,20 @@ class HistogramTest {
                     .nativeResetDuration(0, TimeUnit.HOURS)
                     .build())
         .withMessageContaining("value > 0 expected");
+  }
+
+  @Test
+  public void testNativeResetDurationSubSecond() {
+    // Sub-second durations should be rejected as they truncate to 0 seconds
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                Histogram.builder()
+                    .name("test_histogram")
+                    .nativeOnly()
+                    .nativeResetDuration(500, TimeUnit.MILLISECONDS)
+                    .build())
+        .withMessageContaining("duration must be at least 1 second");
   }
 
   private HistogramSnapshot.HistogramDataPointSnapshot getData(
