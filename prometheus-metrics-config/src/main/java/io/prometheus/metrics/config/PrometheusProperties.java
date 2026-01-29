@@ -1,8 +1,8 @@
 package io.prometheus.metrics.config;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * The Prometheus Java client library can be configured at runtime (e.g. using a properties file).
