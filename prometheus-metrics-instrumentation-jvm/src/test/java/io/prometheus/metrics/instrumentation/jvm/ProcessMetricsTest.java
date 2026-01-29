@@ -30,7 +30,7 @@ class ProcessMetricsTest {
   private final RuntimeMXBean runtimeBean = Mockito.mock(RuntimeMXBean.class);
 
   @BeforeEach
-  public void setUp() throws IOException {
+  void setUp() throws IOException {
     when(sunOsBean.getProcessCpuTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(72));
     when(sunOsBean.getOpenFileDescriptorCount()).thenReturn(127L);
     when(sunOsBean.getMaxFileDescriptorCount()).thenReturn(244L);
@@ -42,7 +42,7 @@ class ProcessMetricsTest {
   }
 
   @Test
-  public void testGoodCase() throws IOException {
+  void testGoodCase() throws IOException {
     PrometheusRegistry registry = new PrometheusRegistry();
     ProcessMetrics.builder()
         .osBean(sunOsBean)
@@ -97,7 +97,7 @@ class ProcessMetricsTest {
   }
 
   @Test
-  public void testMinimal() throws IOException {
+  void testMinimal() throws IOException {
     PrometheusRegistry registry = new PrometheusRegistry();
     ProcessMetrics.builder()
         .osBean(javaOsBean)
@@ -119,7 +119,7 @@ class ProcessMetricsTest {
   }
 
   @Test
-  public void testIgnoredMetricNotScraped() {
+  void testIgnoredMetricNotScraped() {
     MetricNameFilter filter =
         MetricNameFilter.builder().nameMustNotBeEqualTo("process_max_fds").build();
 

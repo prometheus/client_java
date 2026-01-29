@@ -20,3 +20,7 @@ dependency-reduced-pom.xml
 **/.settings/
 docs/public
 .lycheecache
+
+benchmark-results/
+benchmark-results.json
+benchmark-output.log

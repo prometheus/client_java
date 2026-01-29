@@ -20,7 +20,7 @@ class JvmMetricsTest {
   }
 
   @Test
-  public void testRegisterIdempotent() {
+  void testRegisterIdempotent() {
     PrometheusRegistry registry = new PrometheusRegistry();
     assertThat(registry.scrape().size()).isZero();
     JvmMetrics.builder().register(registry);

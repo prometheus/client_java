@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class InfoSnapshotTest {
 
   @Test
-  public void testCompleteGoodCase() {
+  void testCompleteGoodCase() {
     InfoSnapshot snapshot =
         InfoSnapshot.builder()
             .name("target")
@@ -33,13 +33,13 @@ class InfoSnapshotTest {
   }
 
   @Test
-  public void testEmptyInfo() {
+  void testEmptyInfo() {
     InfoSnapshot snapshot = InfoSnapshot.builder().name("target").build();
     assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
   @Test
-  public void testDataImmutable() {
+  void testDataImmutable() {
     InfoSnapshot snapshot =
         InfoSnapshot.builder()
             .name("target")
@@ -60,13 +60,13 @@ class InfoSnapshotTest {
   }
 
   @Test
-  public void testNameMustNotIncludeSuffix() {
+  void testNameMustNotIncludeSuffix() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> InfoSnapshot.builder().name("jvm_info").build());
   }
 
   @Test
-  public void testNameMustNotIncludeSuffixDot() {
+  void testNameMustNotIncludeSuffixDot() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> InfoSnapshot.builder().name("jvm.info").build());
   }

@@ -1,7 +1,7 @@
 [tools]
-"go:github.com/gohugoio/hugo" = "v0.154.5"
+"go:github.com/gohugoio/hugo" = "v0.155.0"
 "go:github.com/grafana/oats" = "0.6.0"
-java = "temurin-25.0.1+8.0.LTS"
+java = "temurin-25.0.2+10.0.LTS"
 lychee = "0.22.0"
 protoc = "33.4"
 
@@ -43,10 +43,6 @@ run = "./mvnw verify"
 description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 
-[tasks."lint:links"]
-description = "Lint markdown links"
-run = "lychee --include-fragments ."
-
 [tasks."lint:rest"]
 description = "All lints not covered by super linter"
 depends = ["lint:links", "lint:bom"]
@@ -83,3 +79,24 @@ run = [
   "hugo --gc --minify --baseURL ${BASE_URL}/",
   "echo 'ls ./public/api' && ls ./public/api"
 ]
+
+[tasks."benchmark:quick"]
+description = "Run benchmarks with reduced iterations (quick smoke test, ~10 min)"
+run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 1 -wi 1 -i 3'"
+
+[tasks."benchmark:ci"]
+description = "Run benchmarks with CI configuration (3 forks, 3 warmup, 5 measurement iterations (~60 min total)"
+run = "python3 ./.mise/tasks/update_benchmarks.py --jmh-args '-f 3 -wi 3 -i 5'"
+
+[tasks."benchmark:ci-json"]
+description = "Run benchmarks with CI configuration and JSON output (for workflow/testing)"
+run = """
+./mvnw -pl benchmarks -am -DskipTests clean package
+JMH_ARGS="${JMH_ARGS:--f 3 -wi 3 -i 5}"
+echo "Running benchmarks with args: $JMH_ARGS"
+java -jar ./benchmarks/target/benchmarks.jar -rf json -rff benchmark-results.json $JMH_ARGS
+"""
+
+[tasks."benchmark:generate-summary"]
+description = "Generate summary from existing benchmark-results.json"
+run = "python3 ./.mise/tasks/generate_benchmark_summary.py"

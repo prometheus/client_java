@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class GaugeSnapshotTest {
 
   @Test
-  public void testCompleteGoodCase() {
+  void testCompleteGoodCase() {
     long exemplarTimestamp = System.currentTimeMillis();
     GaugeSnapshot snapshot =
         GaugeSnapshot.builder()
@@ -63,7 +63,7 @@ class GaugeSnapshotTest {
   }
 
   @Test
-  public void testMinimalGoodCase() {
+  void testMinimalGoodCase() {
     GaugeSnapshot snapshot =
         GaugeSnapshot.builder()
             .name("temperature")
@@ -80,31 +80,31 @@ class GaugeSnapshotTest {
   }
 
   @Test
-  public void testEmptyGauge() {
+  void testEmptyGauge() {
     GaugeSnapshot snapshot = GaugeSnapshot.builder().name("temperature").build();
     assertThat(snapshot.getDataPoints().size()).isZero();
   }
 
   @Test
-  public void testTotalSuffixPresent() {
+  void testTotalSuffixPresent() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> CounterSnapshot.builder().name("test_total").build());
   }
 
   @Test
-  public void testTotalSuffixPresentDot() {
+  void testTotalSuffixPresentDot() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> CounterSnapshot.builder().name("test.total").build());
   }
 
   @Test
-  public void testValueMissing() {
+  void testValueMissing() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> CounterDataPointSnapshot.builder().build());
   }
 
   @Test
-  public void testDataImmutable() {
+  void testDataImmutable() {
     GaugeSnapshot snapshot =
         GaugeSnapshot.builder()
             .name("gauge")

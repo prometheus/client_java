@@ -1,0 +1,39 @@
+---
+name: Java-Version Compatibility Tests
+
+on: [pull_request]
+
+permissions: {}
+
+jobs:
+  compatibility-test:
+    name: Test on Java ${{ matrix.java }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [17, 21, 25]
+    steps:
+      - name: Check out
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Java ${{ matrix.java }}
+        id: setup-java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: "temurin"
+          java-version: ${{ matrix.java }}
+
+      - name: Cache local Maven repository
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-java${{ matrix.java }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-java${{ matrix.java }}-
+            ${{ runner.os }}-maven-
+
+      - name: Build and test on Java ${{ matrix.java }}
+        run: ./mvnw clean install -Dtest.java.version=${{ matrix.java }} -Dspotless.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn -Dcoverage.skip=true

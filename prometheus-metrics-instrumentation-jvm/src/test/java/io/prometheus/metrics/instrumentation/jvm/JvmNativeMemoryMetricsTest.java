@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 class JvmNativeMemoryMetricsTest {
 
   @Test
-  public void testNativeMemoryTrackingFail() throws IOException {
+  void testNativeMemoryTrackingFail() throws IOException {
     JvmNativeMemoryMetrics.isEnabled.set(true);
 
     JvmNativeMemoryMetrics.PlatformMBeanServerAdapter adapter =
@@ -39,7 +39,7 @@ class JvmNativeMemoryMetricsTest {
   }
 
   @Test
-  public void testNativeMemoryTrackingEmpty() throws IOException {
+  void testNativeMemoryTrackingEmpty() throws IOException {
     JvmNativeMemoryMetrics.isEnabled.set(true);
 
     JvmNativeMemoryMetrics.PlatformMBeanServerAdapter adapter =
@@ -56,7 +56,7 @@ class JvmNativeMemoryMetricsTest {
   }
 
   @Test
-  public void testNativeMemoryTrackingDisabled() throws IOException {
+  void testNativeMemoryTrackingDisabled() throws IOException {
     JvmNativeMemoryMetrics.isEnabled.set(true);
 
     JvmNativeMemoryMetrics.PlatformMBeanServerAdapter adapter =
@@ -74,7 +74,7 @@ class JvmNativeMemoryMetricsTest {
   }
 
   @Test
-  public void testNativeMemoryTrackingEnabled() throws IOException {
+  void testNativeMemoryTrackingEnabled() throws IOException {
     JvmNativeMemoryMetrics.isEnabled.set(true);
 
     JvmNativeMemoryMetrics.PlatformMBeanServerAdapter adapter =

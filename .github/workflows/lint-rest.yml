@@ -1,9 +1,14 @@
 ---
 name: Lint What Super Linter Can't
 
-on: [pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -12,10 +17,20 @@ jobs:
       - name: Check out
         with:
           persist-credentials: false
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - uses: jdx/mise-action@c53b9236f0b3370f31520f8b142f141256d839c6 # v3.6.0
+          fetch-depth: 0 # needed for merge-base used in lint:links-in-modified-files
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
         with:
-          version: v2026.1.4
-          sha256: 79c798e39b83f0dd80108eaa88c6ca63689695ae975fd6786e7a353ef9f87002
-      - name: Lint
-        run: mise run lint:rest
+          version: v2026.1.7
+          sha256: d98523f15392ab17909a55560244667aa81122766209b816d9a9b9585109bfea
+
+      - name: Lint for pull requests
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mise run lint:bom
+          mise run lint:local-links
+          mise run lint:links-in-modified-files --base origin/"${GITHUB_BASE_REF}" --head "${GITHUB_HEAD_SHA}"

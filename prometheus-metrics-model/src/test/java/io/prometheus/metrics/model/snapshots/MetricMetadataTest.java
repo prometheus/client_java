@@ -9,19 +9,19 @@ import org.junit.jupiter.api.Test;
 class MetricMetadataTest {
 
   @Test
-  public void testEmptyName() {
+  void testEmptyName() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> new MetricMetadata(""));
   }
 
   @Test
-  public void testNullName() {
+  void testNullName() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> new MetricMetadata(null));
   }
 
   @Test
-  public void testSanitizationIllegalCharacters() {
+  void testSanitizationIllegalCharacters() {
     MetricMetadata metadata =
         new MetricMetadata(
             sanitizeMetricName("my_namespace/http.server.duration", Unit.SECONDS),
@@ -34,42 +34,42 @@ class MetricMetadataTest {
   }
 
   @Test
-  public void testSanitizationCounter() {
+  void testSanitizationCounter() {
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("my_events_total"));
     assertThat(metadata.getName()).isEqualTo("my_events");
   }
 
   @Test
-  public void testSanitizationInfo() {
+  void testSanitizationInfo() {
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("target_info"));
     assertThat(metadata.getName()).isEqualTo("target");
   }
 
   @Test
-  public void testSanitizationWeirdCornerCase() {
+  void testSanitizationWeirdCornerCase() {
     MetricMetadata metadata = new MetricMetadata(sanitizeMetricName("_total_created"));
     assertThat(metadata.getName()).isEqualTo("total");
   }
 
   @Test
-  public void testSanitizeEmptyString() {
+  void testSanitizeEmptyString() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> sanitizeMetricName(""));
   }
 
   @Test
-  public void testUnitSuffixRequired() {
+  void testUnitSuffixRequired() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> new MetricMetadata("my_counter", "help", Unit.SECONDS));
   }
 
   @Test
-  public void testUnitSuffixAdded() {
+  void testUnitSuffixAdded() {
     new MetricMetadata(sanitizeMetricName("my_counter", Unit.SECONDS), "help", Unit.SECONDS);
   }
 
   @Test
-  public void testUnitNotDuplicated() {
+  void testUnitNotDuplicated() {
     assertThat(sanitizeMetricName("my_counter_bytes", Unit.BYTES)).isEqualTo("my_counter_bytes");
   }
 }

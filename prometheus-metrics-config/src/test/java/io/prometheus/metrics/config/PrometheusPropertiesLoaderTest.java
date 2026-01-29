@@ -11,7 +11,7 @@ import org.junitpioneer.jupiter.SetSystemProperty;
 class PrometheusPropertiesLoaderTest {
 
   @Test
-  public void propertiesShouldBeLoadedFromPropertiesFile() {
+  void propertiesShouldBeLoadedFromPropertiesFile() {
     PrometheusProperties prometheusProperties = PrometheusPropertiesLoader.load();
     assertThat(prometheusProperties.getDefaultMetricProperties().getHistogramClassicUpperBounds())
         .hasSize(11);
@@ -38,7 +38,7 @@ class PrometheusPropertiesLoaderTest {
   }
 
   @Test
-  public void externalPropertiesShouldOverridePropertiesFile() {
+  void externalPropertiesShouldOverridePropertiesFile() {
     Properties properties = new Properties();
     properties.setProperty("io.prometheus.metrics.histogramClassicUpperBounds", ".005, .01");
     properties.setProperty(

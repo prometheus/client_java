@@ -27,7 +27,7 @@ class StateSetTest {
   }
 
   @Test
-  public void testEnumStateSet() {
+  void testEnumStateSet() {
     StateSet stateSet =
         StateSet.builder()
             .name("feature_flags")
@@ -51,7 +51,7 @@ class StateSetTest {
   }
 
   @Test
-  public void testDefaultFalse() {
+  void testDefaultFalse() {
     StateSet stateSet =
         StateSet.builder().name("test").states("state1", "state2", "state3").build();
     assertThat(getData(stateSet).size()).isEqualTo(3);
@@ -83,7 +83,7 @@ class StateSetTest {
   }
 
   @Test
-  public void testStatesCannotBeEmpty() {
+  void testStatesCannotBeEmpty() {
     assertThatExceptionOfType(IllegalStateException.class)
         .isThrownBy(() -> StateSet.builder().name("invalid").build());
   }

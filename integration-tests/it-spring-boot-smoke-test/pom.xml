@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -90,94 +90,107 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.graalvm.buildtools</groupId>
-        <artifactId>native-maven-plugin</artifactId>
-        <configuration>
-          <!-- editorconfig-checker-disable -->
-          <buildArgs>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.api.DisplayNameGenerator$IndicativeSentences
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor$ClassInfo
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor$LifecycleMethods
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ClassTemplateInvocationTestDescriptor
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ClassTemplateTestDescriptor
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.descriptor.DynamicDescendantFilter$Mode
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ExclusiveResourceCollector$1
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.descriptor.MethodBasedTestDescriptor$MethodInfo
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.discovery.ClassSelectorResolver$DummyClassTemplateInvocationContext
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.platform.engine.support.store.NamespacedHierarchicalStore$EvaluatedValue
-            </buildArg>
-            <buildArg>--initialize-at-build-time=org.junit.platform.launcher.core.DiscoveryIssueNotifier
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.platform.launcher.core.HierarchicalOutputDirectoryProvider
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.platform.launcher.core.LauncherDiscoveryResult$EngineResultInfo
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.platform.suite.engine.SuiteTestDescriptor$LifecycleMethods
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.platform.commons.logging.LoggerFactory$DelegatingLogger
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.execution.ConditionEvaluator
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.execution.InterceptingExecutableInvoker
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.api.extension.ConditionEvaluationResult
-            </buildArg>
-            <buildArg>
-              --initialize-at-build-time=org.junit.jupiter.engine.execution.InvocationInterceptorChain
-            </buildArg>
-          </buildArgs>
-          <!-- editorconfig-checker-enable -->
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>com.diffplug.spotless</groupId>
-        <artifactId>spotless-maven-plugin</artifactId>
-        <version>3.1.0</version>
-        <configuration>
-          <java>
-            <googleJavaFormat/>
-          </java>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>java17-plus</id>
+      <activation>
+        <jdk>[17,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <configuration>
+              <!-- editorconfig-checker-disable -->
+              <buildArgs>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.api.DisplayNameGenerator$IndicativeSentences
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor$ClassInfo
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor$LifecycleMethods
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ClassTemplateInvocationTestDescriptor
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ClassTemplateTestDescriptor
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.descriptor.DynamicDescendantFilter$Mode
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.descriptor.ExclusiveResourceCollector$1
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.descriptor.MethodBasedTestDescriptor$MethodInfo
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.discovery.ClassSelectorResolver$DummyClassTemplateInvocationContext
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.platform.engine.support.store.NamespacedHierarchicalStore$EvaluatedValue
+                </buildArg>
+                <buildArg>--initialize-at-build-time=org.junit.platform.launcher.core.DiscoveryIssueNotifier
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.platform.launcher.core.HierarchicalOutputDirectoryProvider
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.platform.launcher.core.LauncherDiscoveryResult$EngineResultInfo
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.platform.suite.engine.SuiteTestDescriptor$LifecycleMethods
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.platform.commons.logging.LoggerFactory$DelegatingLogger
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.execution.ConditionEvaluator
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.execution.InterceptingExecutableInvoker
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.api.extension.ConditionEvaluationResult
+                </buildArg>
+                <buildArg>
+                  --initialize-at-build-time=org.junit.jupiter.engine.execution.InvocationInterceptorChain
+                </buildArg>
+              </buildArgs>
+              <!-- editorconfig-checker-enable -->
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>com.diffplug.spotless</groupId>
+            <artifactId>spotless-maven-plugin</artifactId>
+            <version>3.2.1</version>
+            <configuration>
+              <java>
+                <googleJavaFormat/>
+              </java>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

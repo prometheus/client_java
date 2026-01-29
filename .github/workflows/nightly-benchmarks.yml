@@ -1,0 +1,102 @@
+---
+name: Nightly Benchmarks
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      jmh_args:
+        description: "Additional JMH arguments (e.g., '-f 1 -wi 1 -i 3' for quick run)"
+        required: false
+        default: ""
+
+permissions: {}
+
+concurrency:
+  group: "benchmarks"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Setup mise
+        uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
+        with:
+          version: v2026.1.4
+          sha256: 79c798e39b83f0dd80108eaa88c6ca63689695ae975fd6786e7a353ef9f87002
+
+      - name: Cache local Maven repository
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run JMH benchmarks
+        run: mise run benchmark:ci-json
+        env:
+          JMH_ARGS: ${{ github.event.inputs.jmh_args }}
+
+      - name: Generate benchmark summary
+        run: |
+          mise run benchmark:generate-summary \
+            --input benchmark-results.json \
+            --output-dir benchmark-results \
+            --commit-sha "${{ github.sha }}"
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
+      - name: Commit and push results to benchmarks branch
+        run: |
+          # Save results to a temp location
+          mkdir -p /tmp/benchmark-output
+          cp -r benchmark-results/* /tmp/benchmark-output/
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Checkout or create benchmarks branch (use -- to disambiguate from benchmarks/ directory)
+          if git ls-remote --heads origin benchmarks | grep -q benchmarks; then
+            git fetch origin benchmarks
+            git switch benchmarks
+            # Preserve existing history
+            if [ -d history ]; then
+              cp -r history /tmp/benchmark-output/
+            fi
+          else
+            git switch --orphan benchmarks
+          fi
+
+          # Clean working directory
+          git rm -rf . 2>/dev/null || true
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+          # Copy only the benchmark results
+          cp -r /tmp/benchmark-output/* .
+
+          git add README.md results.json history/
+
+          DATE=$(date -u +"%Y-%m-%d")
+          COMMIT_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          git commit \
+            -m "Benchmark results for ${DATE} (${COMMIT_SHORT})" \
+            -m "From commit ${{ github.sha }}" \
+            || echo "No changes to commit"
+
+          git push origin benchmarks --force-with-lease || git push origin benchmarks

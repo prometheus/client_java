@@ -1,0 +1,84 @@
+---
+name: Integration Tests - Java Version Compatibility Matrix
+
+on:
+  pull_request:
+    paths:
+      - 'integration-tests/**'
+      - 'prometheus-metrics-core/**'
+      - 'prometheus-metrics-exporter-*/**'
+      - 'prometheus-metrics-exposition-*/**'
+      - '.github/workflows/java-version-matrix-tests.yml'
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  integration-tests:
+    name: Java ${{ matrix.java-version }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Note: Java 8 runtime testing is skipped due to Spotless incompatibility
+        java-version: [11, 17, 21, 25]
+    steps:
+      - name: Check out
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up mise
+        uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
+        with:
+          version: v2026.1.4
+          sha256: 79c798e39b83f0dd80108eaa88c6ca63689695ae975fd6786e7a353ef9f87002
+
+      - name: Cache local Maven repository
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build core library artifacts
+        run: mise exec -- ./mvnw install -DskipTests -Dspotless.check.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn -pl '!integration-tests'
+
+      - name: Install parent POMs
+        run: |
+          cd integration-tests
+          mise exec -- ../mvnw clean install -N -Dspotless.skip=true
+          cd it-exporter
+          mise exec -- ../../mvnw install -N -Dspotless.skip=true
+
+      - name: Rebuild sample apps targeting Java ${{ matrix.java-version }}
+        run: |
+          cd integration-tests
+          # Note: Jetty 12 and Tomcat 11 require Java 17+, so servlet samples are skipped for Java 11
+          if [ "${{ matrix.java-version }}" = "11" ]; then
+            MODULES="it-common,it-exporter/it-exporter-httpserver-sample,it-exporter/it-exporter-no-protobuf,it-pushgateway"
+          else
+            MODULES="it-common,it-exporter/it-exporter-httpserver-sample,it-exporter/it-exporter-servlet-tomcat-sample,it-exporter/it-exporter-servlet-jetty-sample,it-exporter/it-exporter-no-protobuf,it-pushgateway"
+          fi
+          mise exec -- ../mvnw clean install -DskipTests -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
+            -Djava.version=${{ matrix.java-version }} \
+            -Dmaven.compiler.release=${{ matrix.java-version }} \
+            -pl $MODULES
+
+      - name: Run integration tests
+        env:
+          TEST_JAVA_VERSION: ${{ matrix.java-version }}
+        run: |
+          cd integration-tests
+          # Note: Servlet tests require Java 17+ (due to Jetty 12 and Tomcat 11)
+          if [ "${{ matrix.java-version }}" = "11" ]; then
+            TEST_MODULES="it-exporter/it-no-protobuf-test,it-pushgateway"
+          else
+            TEST_MODULES="it-exporter/it-exporter-test,it-exporter/it-no-protobuf-test,it-pushgateway"
+          fi
+          mise exec -- ../mvnw verify -T 2C -Dspotless.skip=true -Dcoverage.skip=true -Dcheckstyle.skip=true -Dwarnings=-nowarn \
+            -pl $TEST_MODULES

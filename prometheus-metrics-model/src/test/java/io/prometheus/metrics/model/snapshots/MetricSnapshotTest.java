@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class MetricSnapshotTest {
 
   @Test
-  public void testDuplicateLabels() {
+  void testDuplicateLabels() {
     assertThatExceptionOfType(DuplicateLabelsException.class)
         .isThrownBy(
             () ->
@@ -39,13 +39,13 @@ class MetricSnapshotTest {
   }
 
   @Test
-  public void testNoData() {
+  void testNoData() {
     MetricSnapshot snapshot = CounterSnapshot.builder().name("test").build();
     assertThat(snapshot.getDataPoints().size()).isEqualTo(0);
   }
 
   @Test
-  public void testNullData() {
+  void testNullData() {
     assertThatExceptionOfType(NullPointerException.class)
         .isThrownBy(() -> new CounterSnapshot(new MetricMetadata("test"), null));
   }

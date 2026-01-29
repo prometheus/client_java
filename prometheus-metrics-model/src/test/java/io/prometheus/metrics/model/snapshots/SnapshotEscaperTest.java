@@ -15,7 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class SnapshotEscaperTest {
 
   @Test
-  public void testEscapeMetricSnapshotEmpty() {
+  void testEscapeMetricSnapshotEmpty() {
     MetricSnapshot original = CounterSnapshot.builder().name("empty").build();
     MetricSnapshot got = escapeMetricSnapshot(original, EscapingScheme.VALUE_ENCODING_ESCAPING);
     assertThat(Objects.requireNonNull(got).getMetadata().getName()).isEqualTo("empty");
@@ -23,7 +23,7 @@ class SnapshotEscaperTest {
   }
 
   @Test
-  public void testEscapeMetricSnapshotSimpleNoEscapingNeeded() {
+  void testEscapeMetricSnapshotSimpleNoEscapingNeeded() {
     testEscapeMetricSnapshot(
         "my_metric",
         "some_label",
@@ -36,7 +36,7 @@ class SnapshotEscaperTest {
   }
 
   @Test
-  public void testEscapeMetricSnapshotLabelNameEscapingNeeded() {
+  void testEscapeMetricSnapshotLabelNameEscapingNeeded() {
     testEscapeMetricSnapshot(
         "my_metric",
         "some.label",
@@ -49,7 +49,7 @@ class SnapshotEscaperTest {
   }
 
   @Test
-  public void testEscapeMetricSnapshotCounterEscapingNeeded() {
+  void testEscapeMetricSnapshotCounterEscapingNeeded() {
     testEscapeMetricSnapshot(
         "my.metric",
         "some?label",
@@ -62,7 +62,7 @@ class SnapshotEscaperTest {
   }
 
   @Test
-  public void testEscapeMetricSnapshotGaugeEscapingNeeded() {
+  void testEscapeMetricSnapshotGaugeEscapingNeeded() {
     testEscapeMetricSnapshot(
         "unicode.and.dots.花火",
         "some_label",

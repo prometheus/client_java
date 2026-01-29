@@ -37,7 +37,7 @@ class CounterTest {
   private SpanContext origSpanContext;
 
   @BeforeEach
-  public void setUp() throws NoSuchFieldException, IllegalAccessException {
+  void setUp() throws NoSuchFieldException, IllegalAccessException {
     noLabels = Counter.builder().name("nolabels").build();
     labels =
         Counter.builder().name("labels").help("help").unit(Unit.SECONDS).labelNames("l").build();
@@ -49,7 +49,7 @@ class CounterTest {
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     SpanContextSupplier.setSpanContext(origSpanContext);
   }
 
@@ -72,7 +72,7 @@ class CounterTest {
   }
 
   @Test
-  public void testIncrement() {
+  void testIncrement() {
     noLabels.inc();
     assertThat(getValue(noLabels)).isCloseTo(1.0, offset(.001));
     noLabels.inc(2);
@@ -84,20 +84,20 @@ class CounterTest {
   }
 
   @Test
-  public void testNegativeIncrementFails() {
+  void testNegativeIncrementFails() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> noLabels.inc(-1))
         .withMessage("Negative increment -1 is illegal for Counter metrics.");
   }
 
   @Test
-  public void testEmptyCountersHaveNoLabels() {
+  void testEmptyCountersHaveNoLabels() {
     assertThat(getNumberOfLabels(noLabels)).isOne();
     assertThat(getNumberOfLabels(labels)).isZero();
   }
 
   @Test
-  public void testLabels() {
+  void testLabels() {
     assertThat(getNumberOfLabels(labels)).isZero();
     labels.labelValues("a").inc();
     assertThat(getNumberOfLabels(labels)).isOne();
@@ -126,7 +126,7 @@ class CounterTest {
   }
 
   @Test
-  public void testSnapshotComplete() {
+  void testSnapshotComplete() {
     long before = System.currentTimeMillis();
     Counter counter =
         Counter.builder()
@@ -181,7 +181,7 @@ class CounterTest {
   }
 
   @Test
-  public void testIncWithExemplar() throws Exception {
+  void testIncWithExemplar() throws Exception {
     noLabels.incWithExemplar(Labels.of("key", "value"));
     assertExemplar(noLabels, 1.0, "key", "value");
 
@@ -203,7 +203,7 @@ class CounterTest {
   }
 
   @Test
-  public void testExemplarSampler() throws Exception {
+  void testExemplarSampler() throws Exception {
     Exemplar exemplar1 = Exemplar.builder().value(2.0).traceId("abc").spanId("123").build();
     Exemplar exemplar2 = Exemplar.builder().value(1.0).traceId("def").spanId("456").build();
     Exemplar exemplar3 = Exemplar.builder().value(1.0).traceId("123").spanId("abc").build();
@@ -321,7 +321,7 @@ class CounterTest {
   }
 
   @Test
-  public void testExemplarSamplerDisabled() {
+  void testExemplarSamplerDisabled() {
     Counter counter = Counter.builder().name("count_total").withoutExemplars().build();
     counter.incWithExemplar(3.0, Labels.of("a", "b"));
     assertThat(getData(counter).getExemplar()).isNull();
@@ -330,7 +330,7 @@ class CounterTest {
   }
 
   @Test
-  public void testExemplarSamplerDisabled_enabledByDefault() {
+  void testExemplarSamplerDisabled_enabledByDefault() {
     PrometheusProperties properties =
         PrometheusProperties.builder()
             .defaultMetricsProperties(MetricsProperties.builder().exemplarsEnabled(true).build())
@@ -343,7 +343,7 @@ class CounterTest {
   }
 
   @Test
-  public void testExemplarSamplerDisabledInBuilder_enabledByPropertiesOnMetric() {
+  void testExemplarSamplerDisabledInBuilder_enabledByPropertiesOnMetric() {
     PrometheusProperties properties =
         PrometheusProperties.builder()
             .putMetricProperty("count", MetricsProperties.builder().exemplarsEnabled(true).build())
@@ -356,7 +356,7 @@ class CounterTest {
   }
 
   @Test
-  public void testConstLabelsFirst() {
+  void testConstLabelsFirst() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
@@ -368,7 +368,7 @@ class CounterTest {
   }
 
   @Test
-  public void testConstLabelsSecond() {
+  void testConstLabelsSecond() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->

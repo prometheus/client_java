@@ -20,13 +20,13 @@ class JvmCompilationMetricsTest {
   private final CompilationMXBean mockCompilationBean = Mockito.mock(CompilationMXBean.class);
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     when(mockCompilationBean.getTotalCompilationTime()).thenReturn(10000L);
     when(mockCompilationBean.isCompilationTimeMonitoringSupported()).thenReturn(true);
   }
 
   @Test
-  public void testGoodCase() throws IOException {
+  void testGoodCase() throws IOException {
     PrometheusRegistry registry = new PrometheusRegistry();
     JvmCompilationMetrics.builder().compilationBean(mockCompilationBean).register(registry);
     MetricSnapshots snapshots = registry.scrape();
@@ -44,7 +44,7 @@ jvm_compilation_time_seconds_total 10.0
   }
 
   @Test
-  public void testIgnoredMetricNotScraped() {
+  void testIgnoredMetricNotScraped() {
     MetricNameFilter filter =
         MetricNameFilter.builder()
             .nameMustNotBeEqualTo("jvm_compilation_time_seconds_total")

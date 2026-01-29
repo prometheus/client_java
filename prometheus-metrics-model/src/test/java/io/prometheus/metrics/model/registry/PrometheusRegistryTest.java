@@ -79,21 +79,26 @@ class PrometheusRegistryTest {
 
         @Override
         public List<String> getPrometheusNames() {
-          return asList(gaugeA.getPrometheusName(), counterB.getPrometheusName());
+          return Arrays.asList(gaugeA.getPrometheusName(), counterB.getPrometheusName());
         }
       };
 
   @Test
-  public void registerDuplicateName_withoutTypeInfo_allowedForBackwardCompatibility() {
+  void registerDuplicateName_withoutTypeInfo_allowedForBackwardCompatibility() {
     PrometheusRegistry registry = new PrometheusRegistry();
-    // counterA1 and counterA2 don't provide type/label info, so validation is skipped
-    registry.register(counterA1);
-    // This now succeeds for backward compatibility (validation skipped when type is null)
-    assertThatCode(() -> registry.register(counterA2)).doesNotThrowAnyException();
+    // If the collector does not have a name at registration time, there is no conflict during
+    // registration.
+    registry.register(noName);
+    registry.register(noName);
+    // However, at scrape time the collector has to provide a metric name, and then we'll get a
+    // duplicate name error.
+    assertThatCode(registry::scrape)
+        .hasMessageContaining("duplicate")
+        .hasMessageContaining("no_name_gauge");
   }
 
   @Test
-  public void register_duplicateName_differentTypes_notAllowed() {
+  void register_duplicateName_differentTypes_notAllowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector counterA1 =
@@ -339,7 +344,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void registerOk() {
+  void registerOk() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counterA1);
     registry.register(counterB);
@@ -357,7 +362,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void registerDuplicateMultiCollector_notAllowed() {
+  void registerDuplicateMultiCollector() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(multiCollector);
     // Registering the same instance twice should fail
@@ -367,7 +372,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void registerOkMultiCollector() {
+  void registerOkMultiCollector() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(multiCollector);
     MetricSnapshots snapshots = registry.scrape();

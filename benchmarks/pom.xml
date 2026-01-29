@@ -23,6 +23,7 @@
     <simpleclient.version>0.16.0</simpleclient.version>
     <codahale.version>3.0.2</codahale.version>
     <coverage.skip>true</coverage.skip>
+    <javadoc.skip>true</javadoc.skip>
   </properties>
 
   <dependencyManagement>
@@ -85,8 +86,8 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
-          <compilerArgs>
-            <!-- need to add parameters to prevent inheritance -->
+          <compilerArgs combine.self="override">
+            <!-- Override parent to prevent ErrorProne inheritance -->
             <arg>-parameters</arg>
           </compilerArgs>
           <annotationProcessorPaths>

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class UnknownSnapshotTest {
 
   @Test
-  public void testCompleteGoodCase() {
+  void testCompleteGoodCase() {
     long exemplarTimestamp = System.currentTimeMillis();
     UnknownSnapshot snapshot =
         UnknownSnapshot.builder()
@@ -46,7 +46,7 @@ class UnknownSnapshotTest {
   }
 
   @Test
-  public void testMinimal() {
+  void testMinimal() {
     UnknownSnapshot snapshot =
         UnknownSnapshot.builder()
             .name("test")
@@ -56,25 +56,25 @@ class UnknownSnapshotTest {
   }
 
   @Test
-  public void testEmpty() {
+  void testEmpty() {
     UnknownSnapshot snapshot = UnknownSnapshot.builder().name("test").build();
     assertThat(snapshot.getDataPoints()).isEmpty();
   }
 
   @Test
-  public void testNameMissing() {
+  void testNameMissing() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> UnknownSnapshot.builder().build());
   }
 
   @Test
-  public void testValueMissing() {
+  void testValueMissing() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> UnknownSnapshot.UnknownDataPointSnapshot.builder().build());
   }
 
   @Test
-  public void testUnknownDataPointSnapshot() {
+  void testUnknownDataPointSnapshot() {
     Labels labels = Labels.of("k1", "v1");
     Exemplar exemplar = Exemplar.builder().value(2.0).build();
 

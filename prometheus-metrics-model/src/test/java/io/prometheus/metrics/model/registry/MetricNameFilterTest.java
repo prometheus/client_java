@@ -13,7 +13,7 @@ class MetricNameFilterTest {
   private final PrometheusRegistry registry = new PrometheusRegistry();
 
   @Test
-  public void testCounter() {
+  void testCounter() {
     registry.register(
         () ->
             CounterSnapshot.builder()

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 class CacheMetricsCollectorTest {
 
   @Test
-  public void cacheExposesMetricsForHitMissAndEviction() {
+  void cacheExposesMetricsForHitMissAndEviction() {
     final Cache<String, String> cache =
         CacheBuilder.newBuilder().maximumSize(2).recordStats().build();
 
@@ -73,7 +73,7 @@ class CacheMetricsCollectorTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void loadingCacheExposesMetricsForLoadsAndExceptions() throws Exception {
+  void loadingCacheExposesMetricsForLoadsAndExceptions() throws Exception {
     final CacheLoader<String, String> loader = mock(CacheLoader.class);
     when(loader.load(anyString()))
         .thenReturn("First User")
@@ -112,7 +112,7 @@ class CacheMetricsCollectorTest {
   }
 
   @Test
-  public void getPrometheusNamesHasSameSizeAsMetricSizeWhenScraping() {
+  void getPrometheusNamesHasSameSizeAsMetricSizeWhenScraping() {
     final CacheMetricsCollector collector = new CacheMetricsCollector();
 
     final PrometheusRegistry registry = new PrometheusRegistry();
@@ -125,7 +125,7 @@ class CacheMetricsCollectorTest {
   }
 
   @Test
-  public void collectedMetricNamesAreKnownPrometheusNames() {
+  void collectedMetricNamesAreKnownPrometheusNames() {
     final CacheMetricsCollector collector = new CacheMetricsCollector();
 
     final PrometheusRegistry registry = new PrometheusRegistry();

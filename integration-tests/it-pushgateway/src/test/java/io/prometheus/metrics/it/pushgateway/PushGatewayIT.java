@@ -22,7 +22,7 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
 
-public class PushGatewayIT {
+class PushGatewayIT {
 
   private GenericContainer<?> sampleAppContainer;
   private GenericContainer<?> pushGatewayContainer;
@@ -30,9 +30,13 @@ public class PushGatewayIT {
   private Volume sampleAppVolume;
 
   @BeforeEach
-  public void setUp() throws IOException, URISyntaxException {
+  void setUp() throws IOException, URISyntaxException {
     Network network = Network.newNetwork();
     sampleAppVolume = Volume.create("it-pushgateway").copy("pushgateway-test-app.jar");
+    String javaVersion = System.getenv("TEST_JAVA_VERSION");
+    if (javaVersion == null || javaVersion.isEmpty()) {
+      javaVersion = "25";
+    }
     pushGatewayContainer =
         new GenericContainer<>("prom/pushgateway:v1.8.0")
             .withExposedPorts(9091)
@@ -41,7 +45,7 @@ public class PushGatewayIT {
             .withLogConsumer(LogConsumer.withPrefix("pushgateway"))
             .waitingFor(Wait.forListeningPort());
     sampleAppContainer =
-        new GenericContainer<>("eclipse-temurin:25")
+        new GenericContainer<>("eclipse-temurin:" + javaVersion)
             .withFileSystemBind(sampleAppVolume.getHostPath(), "/app", BindMode.READ_ONLY)
             .withNetwork(network)
             .withWorkingDirectory("/app")
@@ -56,7 +60,7 @@ public class PushGatewayIT {
   }
 
   @AfterEach
-  public void tearDown() throws IOException {
+  void tearDown() throws IOException {
     prometheusContainer.stop();
     pushGatewayContainer.stop();
     sampleAppContainer.stop();
@@ -66,7 +70,7 @@ public class PushGatewayIT {
   final OkHttpClient client = new OkHttpClient();
 
   @Test
-  public void testSimple() throws IOException, InterruptedException {
+  void testSimple() throws IOException, InterruptedException {
     pushGatewayContainer.start();
     sampleAppContainer
         .withCommand(
@@ -86,7 +90,7 @@ public class PushGatewayIT {
   }
 
   @Test
-  public void testTextFormat() throws IOException, InterruptedException {
+  void testTextFormat() throws IOException, InterruptedException {
     pushGatewayContainer.start();
     sampleAppContainer
         .withCommand(
@@ -106,7 +110,7 @@ public class PushGatewayIT {
   }
 
   @Test
-  public void testBasicAuth() throws IOException, InterruptedException {
+  void testBasicAuth() throws IOException, InterruptedException {
     pushGatewayContainer
         .withCopyFileToContainer(
             MountableFile.forClasspathResource("/pushgateway-basicauth.yaml"),
@@ -131,7 +135,7 @@ public class PushGatewayIT {
   }
 
   @Test
-  public void testSsl() throws InterruptedException, IOException {
+  void testSsl() throws InterruptedException, IOException {
     pushGatewayContainer
         .withCopyFileToContainer(
             MountableFile.forClasspathResource("/pushgateway-ssl.yaml"),
@@ -156,7 +160,7 @@ public class PushGatewayIT {
   }
 
   @Test
-  public void testProtobuf() throws IOException, InterruptedException {
+  void testProtobuf() throws IOException, InterruptedException {
     pushGatewayContainer.start();
     sampleAppContainer
         .withCommand(
