@@ -1,13 +1,14 @@
 package io.prometheus.metrics.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.SetSystemProperty;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.junit.jupiter.api.Test;
-import org.junitpioneer.jupiter.SetSystemProperty;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /** Tests for {@link PrometheusPropertiesLoader}. */
 class PrometheusPropertiesLoaderTest {
@@ -68,7 +69,7 @@ class PrometheusPropertiesLoaderTest {
 
     PropertySource propertySource =
         new PropertySource(new HashMap<>(), envVarProperties, new HashMap<>());
-    Map<String, MetricsProperties> metricsConfigs =
+    PrometheusProperties.MetricPropertiesMap metricsConfigs =
         PrometheusPropertiesLoader.loadMetricsConfigs(propertySource);
 
     assertThat(metricsConfigs.get("http_duration_seconds").getHistogramClassicUpperBounds())
@@ -88,7 +89,7 @@ class PrometheusPropertiesLoaderTest {
 
     PropertySource propertySource =
         new PropertySource(new HashMap<>(), envVarProperties, new HashMap<>());
-    Map<String, MetricsProperties> metricsConfigs =
+    PrometheusProperties.MetricPropertiesMap metricsConfigs =
         PrometheusPropertiesLoader.loadMetricsConfigs(propertySource);
 
     assertThat(metricsConfigs.get("http_server").getHistogramNativeOnly()).isTrue();
@@ -102,7 +103,7 @@ class PrometheusPropertiesLoaderTest {
 
     PropertySource propertySource =
         new PropertySource(new HashMap<>(), envVarProperties, new HashMap<>());
-    Map<String, MetricsProperties> metricsConfigs =
+    PrometheusProperties.MetricPropertiesMap metricsConfigs =
         PrometheusPropertiesLoader.loadMetricsConfigs(propertySource);
 
     assertThat(metricsConfigs.get("my_custom_metric").getHistogramNativeOnly()).isTrue();
@@ -119,7 +120,7 @@ class PrometheusPropertiesLoaderTest {
 
     PropertySource propertySource =
         new PropertySource(new HashMap<>(), envVarProperties, new HashMap<>());
-    Map<String, MetricsProperties> metricsConfigs =
+    PrometheusProperties.MetricPropertiesMap metricsConfigs =
         PrometheusPropertiesLoader.loadMetricsConfigs(propertySource);
 
     assertThat(metricsConfigs.get("my_summary_metric").getHistogramNativeOnly()).isTrue();
@@ -138,7 +139,7 @@ class PrometheusPropertiesLoaderTest {
         "io.prometheus.metrics.my_app_custom_metric.summary_quantiles", "0.5, 0.99");
 
     PropertySource propertySource = new PropertySource(properties);
-    Map<String, MetricsProperties> metricsConfigs =
+    PrometheusProperties.MetricPropertiesMap metricsConfigs =
         PrometheusPropertiesLoader.loadMetricsConfigs(propertySource);
 
     assertThat(metricsConfigs.get("http_server_requests_total").getHistogramNativeOnly()).isTrue();
