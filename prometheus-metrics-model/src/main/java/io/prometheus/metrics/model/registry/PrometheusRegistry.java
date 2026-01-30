@@ -29,12 +29,10 @@ public class PrometheusRegistry {
   /** Stores the registration details for a Collector at registration time. */
   private static class CollectorRegistration {
     final String prometheusName;
-    final MetricType metricType;
     final Set<String> labelNames;
 
-    CollectorRegistration(String prometheusName, MetricType metricType, Set<String> labelNames) {
+    CollectorRegistration(String prometheusName, @Nullable Set<String> labelNames) {
       this.prometheusName = prometheusName;
-      this.metricType = metricType;
       this.labelNames =
           (labelNames == null || labelNames.isEmpty()) ? Collections.emptySet() : labelNames;
     }
@@ -46,13 +44,10 @@ public class PrometheusRegistry {
    */
   private static class MultiCollectorRegistration {
     final String prometheusName;
-    final MetricType metricType;
     final Set<String> labelNames;
 
-    MultiCollectorRegistration(
-        String prometheusName, MetricType metricType, Set<String> labelNames) {
+    MultiCollectorRegistration(String prometheusName, @Nullable Set<String> labelNames) {
       this.prometheusName = prometheusName;
-      this.metricType = metricType;
       this.labelNames =
           (labelNames == null || labelNames.isEmpty()) ? Collections.emptySet() : labelNames;
     }
@@ -138,16 +133,6 @@ public class PrometheusRegistry {
     MetricType getType() {
       return type;
     }
-
-    @Nullable
-    String getHelp() {
-      return help;
-    }
-
-    @Nullable
-    Unit getUnit() {
-      return unit;
-    }
   }
 
   public void register(Collector collector) {
@@ -195,8 +180,7 @@ public class PrometheusRegistry {
             }
           });
 
-      collectorMetadata.put(
-          collector, new CollectorRegistration(prometheusName, metricType, labelNames));
+      collectorMetadata.put(collector, new CollectorRegistration(prometheusName, labelNames));
     }
 
     if (prometheusName != null) {
@@ -256,7 +240,7 @@ public class PrometheusRegistry {
               }
             });
 
-        registrations.add(new MultiCollectorRegistration(prometheusName, metricType, labelNames));
+        registrations.add(new MultiCollectorRegistration(prometheusName, labelNames));
       }
 
       prometheusNames.add(prometheusName);
