@@ -5,6 +5,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.GaugeDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
+import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -92,6 +93,11 @@ public class Gauge extends StatefulMetric<GaugeDataPoint, Gauge.DataPoint>
       dataPointSnapshots.add(metricData.get(i).collect(labels.get(i)));
     }
     return new GaugeSnapshot(getMetadata(), dataPointSnapshots);
+  }
+
+  @Override
+  public MetricType getMetricType() {
+    return MetricType.GAUGE;
   }
 
   @Override

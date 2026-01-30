@@ -28,23 +28,33 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    * #builder()}.
    *
    * @param snapshots the constructor creates a sorted copy of snapshots.
-   * @throws IllegalArgumentException if snapshots contains duplicate metric names. To avoid
-   *     duplicate metric names use {@link #builder()} and check {@link
-   *     Builder#containsMetricName(String)} before calling {@link
-   *     Builder#metricSnapshot(MetricSnapshot)}.
+   * @throws IllegalArgumentException if snapshots contain conflicting metric types (same name but
+   *     different metric types like Counter vs Gauge).
    */
   public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
     List<MetricSnapshot> list = new ArrayList<>(snapshots);
     list.sort(comparing(s -> s.getMetadata().getPrometheusName()));
-    for (int i = 0; i < snapshots.size() - 1; i++) {
-      if (list.get(i)
-          .getMetadata()
-          .getPrometheusName()
-          .equals(list.get(i + 1).getMetadata().getPrometheusName())) {
-        throw new IllegalArgumentException(
-            list.get(i).getMetadata().getPrometheusName() + ": duplicate metric name");
+
+    // Validate no conflicting metric types
+    for (int i = 0; i < list.size() - 1; i++) {
+      String name1 = list.get(i).getMetadata().getPrometheusName();
+      String name2 = list.get(i + 1).getMetadata().getPrometheusName();
+
+      if (name1.equals(name2)) {
+        Class<?> type1 = list.get(i).getClass();
+        Class<?> type2 = list.get(i + 1).getClass();
+
+        if (!type1.equals(type2)) {
+          throw new IllegalArgumentException(
+              name1
+                  + ": conflicting metric types: "
+                  + type1.getSimpleName()
+                  + " and "
+                  + type2.getSimpleName());
+        }
       }
     }
+
     this.snapshots = unmodifiableList(list);
   }
 

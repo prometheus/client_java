@@ -24,3 +24,5 @@ docs/public
 benchmark-results/
 benchmark-results.json
 benchmark-output.log
+
+*.DS_Store

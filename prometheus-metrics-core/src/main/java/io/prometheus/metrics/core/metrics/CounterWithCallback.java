@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +49,11 @@ public class CounterWithCallback extends CallbackMetric {
                   value, makeLabels(labelValues), null, 0L));
         });
     return new CounterSnapshot(getMetadata(), dataPoints);
+  }
+
+  @Override
+  public MetricType getMetricType() {
+    return MetricType.COUNTER;
   }
 
   public static Builder builder() {
