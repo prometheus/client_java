@@ -11,40 +11,46 @@ import org.junit.jupiter.api.Test;
 class UtilTest {
   @Test
   void loadOptionalDuration_positive() {
-    Map<Object, Object> properties = new HashMap<>(Map.of("foo", "5"));
+    Map<Object, Object> regularProperties = new HashMap<>(Map.of("foo", "5"));
+    PropertySource propertySource = new PropertySource(regularProperties);
 
-    assertThat(Util.loadOptionalDuration("foo", properties)).isEqualTo(Duration.ofSeconds(5));
+    assertThat(Util.loadOptionalDuration("", "foo", propertySource))
+        .isEqualTo(Duration.ofSeconds(5));
   }
 
   @Test
   void loadOptionalDuration_zero() {
-    Map<Object, Object> properties = new HashMap<>(Map.of("foo", "0"));
+    Map<Object, Object> regularProperties = new HashMap<>(Map.of("foo", "0"));
+    PropertySource propertySource = new PropertySource(regularProperties);
 
-    assertThat(Util.loadOptionalDuration("foo", properties)).isNull();
+    assertThat(Util.loadOptionalDuration("", "foo", propertySource)).isNull();
   }
 
   @Test
   void loadOptionalDuration_missing() {
-    Map<Object, Object> properties = new HashMap<>();
+    Map<Object, Object> regularProperties = new HashMap<>();
+    PropertySource propertySource = new PropertySource(regularProperties);
 
-    assertThat(Util.loadOptionalDuration("foo", properties)).isNull();
+    assertThat(Util.loadOptionalDuration("", "foo", propertySource)).isNull();
   }
 
   @Test
   void loadOptionalDuration_negative_throws() {
-    Map<Object, Object> properties = new HashMap<>(Map.of("foo", "-1"));
+    Map<Object, Object> regularProperties = new HashMap<>(Map.of("foo", "-1"));
+    PropertySource propertySource = new PropertySource(regularProperties);
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> Util.loadOptionalDuration("foo", properties))
+        .isThrownBy(() -> Util.loadOptionalDuration("", "foo", propertySource))
         .withMessage("foo: Expecting value >= 0. Found: -1");
   }
 
   @Test
   void loadOptionalDuration_invalidNumber_throws() {
-    Map<Object, Object> properties = new HashMap<>(Map.of("foo", "abc"));
+    Map<Object, Object> regularProperties = new HashMap<>(Map.of("foo", "abc"));
+    PropertySource propertySource = new PropertySource(regularProperties);
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
-        .isThrownBy(() -> Util.loadOptionalDuration("foo", properties))
+        .isThrownBy(() -> Util.loadOptionalDuration("", "foo", propertySource))
         .withMessage("foo=abc: Expecting long value");
   }
 }

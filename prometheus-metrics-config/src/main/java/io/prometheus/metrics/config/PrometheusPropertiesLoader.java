@@ -5,12 +5,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * The Properties Loader is early stages.
@@ -29,20 +26,21 @@ public class PrometheusPropertiesLoader {
 
   public static PrometheusProperties load(Map<Object, Object> externalProperties)
       throws PrometheusPropertiesException {
-    Map<Object, Object> properties = loadProperties(externalProperties);
-    Map<String, MetricsProperties> metricsConfigs = loadMetricsConfigs(properties);
+    PropertySource propertySource = loadProperties(externalProperties);
+    PrometheusProperties.MetricPropertiesMap metricsConfigs = loadMetricsConfigs(propertySource);
     MetricsProperties defaultMetricsProperties =
-        MetricsProperties.load("io.prometheus.metrics", properties);
-    ExemplarsProperties exemplarConfig = ExemplarsProperties.load(properties);
-    ExporterProperties exporterProperties = ExporterProperties.load(properties);
-    ExporterFilterProperties exporterFilterProperties = ExporterFilterProperties.load(properties);
+        MetricsProperties.load("io.prometheus.metrics", propertySource);
+    ExemplarsProperties exemplarConfig = ExemplarsProperties.load(propertySource);
+    ExporterProperties exporterProperties = ExporterProperties.load(propertySource);
+    ExporterFilterProperties exporterFilterProperties =
+        ExporterFilterProperties.load(propertySource);
     ExporterHttpServerProperties exporterHttpServerProperties =
-        ExporterHttpServerProperties.load(properties);
+        ExporterHttpServerProperties.load(propertySource);
     ExporterPushgatewayProperties exporterPushgatewayProperties =
-        ExporterPushgatewayProperties.load(properties);
+        ExporterPushgatewayProperties.load(propertySource);
     ExporterOpenTelemetryProperties exporterOpenTelemetryProperties =
-        ExporterOpenTelemetryProperties.load(properties);
-    validateAllPropertiesProcessed(properties);
+        ExporterOpenTelemetryProperties.load(propertySource);
+    validateAllPropertiesProcessed(propertySource);
     return new PrometheusProperties(
         defaultMetricsProperties,
         metricsConfigs,
@@ -54,28 +52,49 @@ public class PrometheusPropertiesLoader {
         exporterOpenTelemetryProperties);
   }
 
-  // This will remove entries from properties when they are processed.
-  private static Map<String, MetricsProperties> loadMetricsConfigs(Map<Object, Object> properties) {
-    Map<String, MetricsProperties> result = new HashMap<>();
+  // This will remove entries from propertySource when they are processed.
+  static PrometheusProperties.MetricPropertiesMap loadMetricsConfigs(
+      PropertySource propertySource) {
+    PrometheusProperties.MetricPropertiesMap result =
+        new PrometheusProperties.MetricPropertiesMap();
     // Note that the metric name in the properties file must be as exposed in the Prometheus
     // exposition formats,
     // i.e. all dots replaced with underscores.
-    Pattern pattern = Pattern.compile("io\\.prometheus\\.metrics\\.([^.]+)\\.");
-    // Create a copy of the keySet() for iterating. We cannot iterate directly over keySet()
-    // because entries are removed when MetricsConfig.load(...) is called.
-    Set<String> propertyNames = new HashSet<>();
-    for (Object key : properties.keySet()) {
-      propertyNames.add(key.toString());
-    }
+
+    // Get a snapshot of all keys for pattern matching. Entries will be removed
+    // when MetricsProperties.load(...) is called.
+    Set<String> propertyNames = propertySource.getAllKeys();
     for (String propertyName : propertyNames) {
-      Matcher matcher = pattern.matcher(propertyName);
-      if (matcher.find()) {
-        String metricName = matcher.group(1).replace(".", "_");
-        if (!result.containsKey(metricName)) {
-          result.put(
-              metricName,
-              MetricsProperties.load("io.prometheus.metrics." + metricName, properties));
+      String metricName = null;
+
+      if (propertyName.startsWith("io.prometheus.metrics.")) {
+        // Dot-separated format (from regular properties, system properties, or files)
+        String remainder = propertyName.substring("io.prometheus.metrics.".length());
+        // Try to match against known property suffixes
+        for (String suffix : MetricsProperties.PROPERTY_SUFFIXES) {
+          if (remainder.endsWith("." + suffix)) {
+            // Metric name in dot format, convert dots to underscores for exposition format
+            metricName =
+                remainder.substring(0, remainder.length() - suffix.length() - 1).replace(".", "_");
+            break;
+          }
         }
+      } else if (propertyName.startsWith("io_prometheus_metrics_")) {
+        // Underscore-separated format (from environment variables)
+        String remainder = propertyName.substring("io_prometheus_metrics_".length());
+        // Try to match against known property suffixes
+        for (String suffix : MetricsProperties.PROPERTY_SUFFIXES) {
+          if (remainder.endsWith("_" + suffix)) {
+            metricName = remainder.substring(0, remainder.length() - suffix.length() - 1);
+            break;
+          }
+        }
+      }
+
+      if (metricName != null && result.get(metricName) == null) {
+        result.put(
+            metricName,
+            MetricsProperties.load("io.prometheus.metrics." + metricName, propertySource));
       }
     }
     return result;
@@ -84,26 +103,43 @@ public class PrometheusPropertiesLoader {
   // If there are properties left starting with io.prometheus it's likely a typo,
   // because we didn't use that property.
   // Throw a config error to let the user know that this property doesn't exist.
-  private static void validateAllPropertiesProcessed(Map<Object, Object> properties) {
-    for (Object key : properties.keySet()) {
-      if (key.toString().startsWith("io.prometheus")) {
+  private static void validateAllPropertiesProcessed(PropertySource propertySource) {
+    for (String key : propertySource.getRemainingKeys()) {
+      if (key.startsWith("io.prometheus") || key.startsWith("io_prometheus")) {
         throw new PrometheusPropertiesException(key + ": Unknown property");
       }
     }
   }
 
-  private static Map<Object, Object> loadProperties(Map<Object, Object> externalProperties) {
-    Map<Object, Object> properties = new HashMap<>();
-    properties.putAll(loadPropertiesFromClasspath());
-    properties.putAll(loadPropertiesFromFile()); // overriding the entries from the classpath file
+  private static PropertySource loadProperties(Map<Object, Object> externalProperties) {
+    // Regular properties (lowest priority): classpath, file, system properties
+    Map<Object, Object> regularProperties = new HashMap<>();
+    // Normalize all properties at load time to handle camelCase in files for backward compatibility
+    normalizeAndPutAll(regularProperties, loadPropertiesFromClasspath());
+    normalizeAndPutAll(
+        regularProperties,
+        loadPropertiesFromFile()); // overriding the entries from the classpath file
     // overriding the entries from the properties file
     // copy System properties to avoid ConcurrentModificationException
+    // normalize camelCase system properties to snake_case for backward compatibility
     System.getProperties().stringPropertyNames().stream()
         .filter(key -> key.startsWith("io.prometheus"))
-        .forEach(key -> properties.put(key, System.getProperty(key)));
-    properties.putAll(externalProperties); // overriding all the entries above
-    // TODO: Add environment variables like EXEMPLARS_ENABLED.
-    return properties;
+        .forEach(key -> regularProperties.put(normalizePropertyKey(key), System.getProperty(key)));
+
+    // Environment variables (second priority): just lowercase, keep underscores
+    Map<Object, Object> envVarProperties = loadPropertiesFromEnvironment();
+
+    // External properties (highest priority): normalize camelCase for backward compatibility
+    Map<Object, Object> normalizedExternalProperties = new HashMap<>();
+    externalProperties.forEach(
+        (key, value) ->
+            normalizedExternalProperties.put(normalizePropertyKey(key.toString()), value));
+
+    return new PropertySource(normalizedExternalProperties, envVarProperties, regularProperties);
+  }
+
+  private static void normalizeAndPutAll(Map<Object, Object> target, Map<Object, Object> source) {
+    source.forEach((key, value) -> target.put(normalizePropertyKey(key.toString()), value));
   }
 
   private static Properties loadPropertiesFromClasspath() {
@@ -134,5 +170,49 @@ public class PrometheusPropertiesLoader {
       }
     }
     return properties;
+  }
+
+  /**
+   * Load properties from environment variables.
+   *
+   * <p>Environment variables are converted to lowercase but keep underscores as-is. For example,
+   * the environment variable IO_PROMETHEUS_METRICS_EXEMPLARS_ENABLED becomes
+   * io_prometheus_metrics_exemplars_enabled.
+   *
+   * <p>The transformation to dot notation happens at access time in PropertySource.
+   *
+   * <p>Only environment variables starting with IO_PROMETHEUS are considered.
+   *
+   * @return properties loaded from environment variables (with lowercase keys and underscores)
+   */
+  private static Map<Object, Object> loadPropertiesFromEnvironment() {
+    Map<Object, Object> properties = new HashMap<>();
+    System.getenv()
+        .forEach(
+            (key, value) -> {
+              if (key.startsWith("IO_PROMETHEUS")) {
+                String normalizedKey = key.toLowerCase(java.util.Locale.ROOT);
+                properties.put(normalizedKey, value);
+              }
+            });
+    return properties;
+  }
+
+  /**
+   * Normalize a property key for consistent lookup.
+   *
+   * <p>Converts camelCase property keys to snake_case. This allows both snake_case (preferred) and
+   * camelCase (deprecated) property names to be used.
+   *
+   * <p>For example: exemplarsEnabled → exemplars_enabled exemplars_enabled → exemplars_enabled
+   * (unchanged)
+   *
+   * @param key the property key
+   * @return the normalized property key
+   */
+  static String normalizePropertyKey(String key) {
+    // Insert underscores before uppercase letters to convert camelCase to snake_case
+    String withUnderscores = key.replaceAll("([a-z])([A-Z])", "$1_$2");
+    return withUnderscores.toLowerCase(java.util.Locale.ROOT);
   }
 }

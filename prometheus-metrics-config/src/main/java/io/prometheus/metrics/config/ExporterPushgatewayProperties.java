@@ -1,7 +1,6 @@
 package io.prometheus.metrics.config;
 
 import java.time.Duration;
-import java.util.Map;
 import javax.annotation.Nullable;
 
 public class ExporterPushgatewayProperties {
@@ -9,9 +8,9 @@ public class ExporterPushgatewayProperties {
   private static final String ADDRESS = "address";
   private static final String JOB = "job";
   private static final String SCHEME = "scheme";
-  private static final String ESCAPING_SCHEME = "escapingScheme";
-  private static final String READ_TIMEOUT = "readTimeoutSeconds";
-  private static final String CONNECT_TIMEOUT = "connectTimeoutSeconds";
+  private static final String ESCAPING_SCHEME = "escaping_scheme";
+  private static final String READ_TIMEOUT = "read_timeout_seconds";
+  private static final String CONNECT_TIMEOUT = "connect_timeout_seconds";
   private static final String PREFIX = "io.prometheus.exporter.pushgateway";
   @Nullable private final String scheme;
   @Nullable private final String address;
@@ -78,17 +77,17 @@ public class ExporterPushgatewayProperties {
   }
 
   /**
-   * Note that this will remove entries from {@code properties}. This is because we want to know if
-   * there are unused properties remaining after all properties have been loaded.
+   * Note that this will remove entries from {@code propertySource}. This is because we want to know
+   * if there are unused properties remaining after all properties have been loaded.
    */
-  static ExporterPushgatewayProperties load(Map<Object, Object> properties)
+  static ExporterPushgatewayProperties load(PropertySource propertySource)
       throws PrometheusPropertiesException {
-    String address = Util.loadString(PREFIX + "." + ADDRESS, properties);
-    String job = Util.loadString(PREFIX + "." + JOB, properties);
-    String scheme = Util.loadString(PREFIX + "." + SCHEME, properties);
-    String escapingScheme = Util.loadString(PREFIX + "." + ESCAPING_SCHEME, properties);
-    Duration connectTimeout = Util.loadOptionalDuration(PREFIX + "." + CONNECT_TIMEOUT, properties);
-    Duration readTimeout = Util.loadOptionalDuration(PREFIX + "." + READ_TIMEOUT, properties);
+    String address = Util.loadString(PREFIX, ADDRESS, propertySource);
+    String job = Util.loadString(PREFIX, JOB, propertySource);
+    String scheme = Util.loadString(PREFIX, SCHEME, propertySource);
+    String escapingScheme = Util.loadString(PREFIX, ESCAPING_SCHEME, propertySource);
+    Duration connectTimeout = Util.loadOptionalDuration(PREFIX, CONNECT_TIMEOUT, propertySource);
+    Duration readTimeout = Util.loadOptionalDuration(PREFIX, READ_TIMEOUT, propertySource);
 
     if (scheme != null) {
       if (!scheme.equals("http") && !scheme.equals("https")) {

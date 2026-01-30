@@ -5,29 +5,49 @@ import static java.util.Collections.unmodifiableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.metrics */
 public class MetricsProperties {
 
-  private static final String EXEMPLARS_ENABLED = "exemplarsEnabled";
-  private static final String HISTOGRAM_NATIVE_ONLY = "histogramNativeOnly";
-  private static final String HISTOGRAM_CLASSIC_ONLY = "histogramClassicOnly";
-  private static final String HISTOGRAM_CLASSIC_UPPER_BOUNDS = "histogramClassicUpperBounds";
-  private static final String HISTOGRAM_NATIVE_INITIAL_SCHEMA = "histogramNativeInitialSchema";
+  private static final String EXEMPLARS_ENABLED = "exemplars_enabled";
+  private static final String HISTOGRAM_NATIVE_ONLY = "histogram_native_only";
+  private static final String HISTOGRAM_CLASSIC_ONLY = "histogram_classic_only";
+  private static final String HISTOGRAM_CLASSIC_UPPER_BOUNDS = "histogram_classic_upper_bounds";
+  private static final String HISTOGRAM_NATIVE_INITIAL_SCHEMA = "histogram_native_initial_schema";
   private static final String HISTOGRAM_NATIVE_MIN_ZERO_THRESHOLD =
-      "histogramNativeMinZeroThreshold";
+      "histogram_native_min_zero_threshold";
   private static final String HISTOGRAM_NATIVE_MAX_ZERO_THRESHOLD =
-      "histogramNativeMaxZeroThreshold";
+      "histogram_native_max_zero_threshold";
   private static final String HISTOGRAM_NATIVE_MAX_NUMBER_OF_BUCKETS =
-      "histogramNativeMaxNumberOfBuckets"; // 0 means unlimited number of buckets
+      "histogram_native_max_number_of_buckets"; // 0 means unlimited number of buckets
   private static final String HISTOGRAM_NATIVE_RESET_DURATION_SECONDS =
-      "histogramNativeResetDurationSeconds"; // 0 means no reset
-  private static final String SUMMARY_QUANTILES = "summaryQuantiles";
-  private static final String SUMMARY_QUANTILE_ERRORS = "summaryQuantileErrors";
-  private static final String SUMMARY_MAX_AGE_SECONDS = "summaryMaxAgeSeconds";
-  private static final String SUMMARY_NUMBER_OF_AGE_BUCKETS = "summaryNumberOfAgeBuckets";
+      "histogram_native_reset_duration_seconds"; // 0 means no reset
+  private static final String SUMMARY_QUANTILES = "summary_quantiles";
+  private static final String SUMMARY_QUANTILE_ERRORS = "summary_quantile_errors";
+  private static final String SUMMARY_MAX_AGE_SECONDS = "summary_max_age_seconds";
+  private static final String SUMMARY_NUMBER_OF_AGE_BUCKETS = "summary_number_of_age_buckets";
+
+  /**
+   * All known property suffixes that can be configured for metrics.
+   *
+   * <p>This list is used to parse metric-specific configuration keys from environment variables.
+   */
+  static final String[] PROPERTY_SUFFIXES = {
+    EXEMPLARS_ENABLED,
+    HISTOGRAM_NATIVE_ONLY,
+    HISTOGRAM_CLASSIC_ONLY,
+    HISTOGRAM_CLASSIC_UPPER_BOUNDS,
+    HISTOGRAM_NATIVE_INITIAL_SCHEMA,
+    HISTOGRAM_NATIVE_MIN_ZERO_THRESHOLD,
+    HISTOGRAM_NATIVE_MAX_ZERO_THRESHOLD,
+    HISTOGRAM_NATIVE_MAX_NUMBER_OF_BUCKETS,
+    HISTOGRAM_NATIVE_RESET_DURATION_SECONDS,
+    SUMMARY_QUANTILES,
+    SUMMARY_QUANTILE_ERRORS,
+    SUMMARY_MAX_AGE_SECONDS,
+    SUMMARY_NUMBER_OF_AGE_BUCKETS
+  };
 
   @Nullable private final Boolean exemplarsEnabled;
   @Nullable private final Boolean histogramNativeOnly;
@@ -226,17 +246,16 @@ public class MetricsProperties {
                 + SUMMARY_QUANTILES);
       }
       if (summaryQuantileErrors.size() != summaryQuantiles.size()) {
+        String fullKey =
+            prefix.isEmpty() ? SUMMARY_QUANTILE_ERRORS : prefix + "." + SUMMARY_QUANTILE_ERRORS;
         throw new PrometheusPropertiesException(
-            prefix
-                + "."
-                + SUMMARY_QUANTILE_ERRORS
-                + ": must have the same length as "
-                + SUMMARY_QUANTILES);
+            fullKey + ": must have the same length as " + SUMMARY_QUANTILES);
       }
       for (double error : summaryQuantileErrors) {
         if (error < 0 || error > 1) {
-          throw new PrometheusPropertiesException(
-              prefix + "." + SUMMARY_QUANTILE_ERRORS + ": Expecting 0.0 <= error <= 1.0");
+          String fullKey =
+              prefix.isEmpty() ? SUMMARY_QUANTILE_ERRORS : prefix + "." + SUMMARY_QUANTILE_ERRORS;
+          throw new PrometheusPropertiesException(fullKey + ": Expecting 0.0 <= error <= 1.0");
         }
       }
     }
@@ -335,25 +354,25 @@ public class MetricsProperties {
   }
 
   /**
-   * Note that this will remove entries from {@code properties}. This is because we want to know if
-   * there are unused properties remaining after all properties have been loaded.
+   * Note that this will remove entries from {@code propertySource}. This is because we want to know
+   * if there are unused properties remaining after all properties have been loaded.
    */
-  static MetricsProperties load(String prefix, Map<Object, Object> properties)
+  static MetricsProperties load(String prefix, PropertySource propertySource)
       throws PrometheusPropertiesException {
     return new MetricsProperties(
-        Util.loadBoolean(prefix + "." + EXEMPLARS_ENABLED, properties),
-        Util.loadBoolean(prefix + "." + HISTOGRAM_NATIVE_ONLY, properties),
-        Util.loadBoolean(prefix + "." + HISTOGRAM_CLASSIC_ONLY, properties),
-        Util.loadDoubleList(prefix + "." + HISTOGRAM_CLASSIC_UPPER_BOUNDS, properties),
-        Util.loadInteger(prefix + "." + HISTOGRAM_NATIVE_INITIAL_SCHEMA, properties),
-        Util.loadDouble(prefix + "." + HISTOGRAM_NATIVE_MIN_ZERO_THRESHOLD, properties),
-        Util.loadDouble(prefix + "." + HISTOGRAM_NATIVE_MAX_ZERO_THRESHOLD, properties),
-        Util.loadInteger(prefix + "." + HISTOGRAM_NATIVE_MAX_NUMBER_OF_BUCKETS, properties),
-        Util.loadLong(prefix + "." + HISTOGRAM_NATIVE_RESET_DURATION_SECONDS, properties),
-        Util.loadDoubleList(prefix + "." + SUMMARY_QUANTILES, properties),
-        Util.loadDoubleList(prefix + "." + SUMMARY_QUANTILE_ERRORS, properties),
-        Util.loadLong(prefix + "." + SUMMARY_MAX_AGE_SECONDS, properties),
-        Util.loadInteger(prefix + "." + SUMMARY_NUMBER_OF_AGE_BUCKETS, properties),
+        Util.loadBoolean(prefix, EXEMPLARS_ENABLED, propertySource),
+        Util.loadBoolean(prefix, HISTOGRAM_NATIVE_ONLY, propertySource),
+        Util.loadBoolean(prefix, HISTOGRAM_CLASSIC_ONLY, propertySource),
+        Util.loadDoubleList(prefix, HISTOGRAM_CLASSIC_UPPER_BOUNDS, propertySource),
+        Util.loadInteger(prefix, HISTOGRAM_NATIVE_INITIAL_SCHEMA, propertySource),
+        Util.loadDouble(prefix, HISTOGRAM_NATIVE_MIN_ZERO_THRESHOLD, propertySource),
+        Util.loadDouble(prefix, HISTOGRAM_NATIVE_MAX_ZERO_THRESHOLD, propertySource),
+        Util.loadInteger(prefix, HISTOGRAM_NATIVE_MAX_NUMBER_OF_BUCKETS, propertySource),
+        Util.loadLong(prefix, HISTOGRAM_NATIVE_RESET_DURATION_SECONDS, propertySource),
+        Util.loadDoubleList(prefix, SUMMARY_QUANTILES, propertySource),
+        Util.loadDoubleList(prefix, SUMMARY_QUANTILE_ERRORS, propertySource),
+        Util.loadLong(prefix, SUMMARY_MAX_AGE_SECONDS, propertySource),
+        Util.loadInteger(prefix, SUMMARY_NUMBER_OF_AGE_BUCKETS, propertySource),
         prefix);
   }
 
