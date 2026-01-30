@@ -116,7 +116,7 @@ class CounterTest {
         "my_counter",
         "my_counter_seconds",
       })
-  public void testTotalStrippedFromName(String name) {
+  void testTotalStrippedFromName(String name) {
     Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
     Metrics.MetricFamily protobufData =
         new PrometheusProtobufWriterImpl().convert(counter.collect(), EscapingScheme.ALLOW_UTF8);
@@ -380,7 +380,7 @@ class CounterTest {
   }
 
   @Test
-  public void testLabelNormalizationInRegistration() {
+  void testLabelNormalizationInRegistration() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Counter.builder().name("requests").labelNames("request.count").register(registry);

@@ -39,7 +39,7 @@ class TextFormatUtilTest {
   }
 
   @Test
-  public void testMergeDuplicates_sameName_mergesDataPoints() {
+  void testMergeDuplicates_sameName_mergesDataPoints() {
     CounterSnapshot counter1 =
         CounterSnapshot.builder()
             .name("api_responses")
@@ -81,7 +81,7 @@ class TextFormatUtilTest {
   }
 
   @Test
-  public void testMergeDuplicates_multipleDataPoints_allMerged() {
+  void testMergeDuplicates_multipleDataPoints_allMerged() {
     CounterSnapshot counter1 =
         CounterSnapshot.builder()
             .name("api_responses")
@@ -120,7 +120,7 @@ class TextFormatUtilTest {
   }
 
   @Test
-  public void testMergeDuplicates_emptySnapshots_returnsEmpty() {
+  void testMergeDuplicates_emptySnapshots_returnsEmpty() {
     MetricSnapshots snapshots = MetricSnapshots.builder().build();
     MetricSnapshots result = TextFormatUtil.mergeDuplicates(snapshots);
 
