@@ -710,4 +710,214 @@ class PrometheusRegistryTest {
     registry.register(withPath);
     assertThatCode(() -> registry.register(withStatus)).doesNotThrowAnyException();
   }
+
+  @Test
+  public void register_sameName_oneNullHelp_allowed() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector withHelp =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").help("Total requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "Total requests", null);
+          }
+        };
+
+    Collector withoutHelp =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("status"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", null, null);
+          }
+        };
+
+    registry.register(withHelp);
+    // One has help, one doesn't - should be allowed
+    assertThatCode(() -> registry.register(withoutHelp)).doesNotThrowAnyException();
+  }
+
+  @Test
+  public void unregister_lastCollector_removesPrometheusName() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector counter1 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path"));
+          }
+        };
+
+    Collector counter2 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("status"));
+          }
+        };
+
+    registry.register(counter1);
+    registry.register(counter2);
+
+    // Unregister first collector - name should still be registered
+    registry.unregister(counter1);
+    MetricSnapshots snapshots = registry.scrape();
+    assertThat(snapshots.size()).isEqualTo(1);
+
+    // Unregister second collector - name should be removed
+    registry.unregister(counter2);
+    snapshots = registry.scrape();
+    assertThat(snapshots.size()).isEqualTo(0);
+
+    // Should be able to register again with same name
+    assertThatCode(() -> registry.register(counter1)).doesNotThrowAnyException();
+  }
+
+  @Test
+  public void unregister_multiCollector_removesAllLabelSchemas() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    MultiCollector multi =
+        new MultiCollector() {
+          @Override
+          public MetricSnapshots collect() {
+            return new MetricSnapshots(
+                CounterSnapshot.builder().name("requests").build(),
+                GaugeSnapshot.builder().name("connections").build());
+          }
+
+          @Override
+          public List<String> getPrometheusNames() {
+            return asList("requests", "connections");
+          }
+
+          @Override
+          public MetricType getMetricType(String prometheusName) {
+            return prometheusName.equals("requests") ? MetricType.COUNTER : MetricType.GAUGE;
+          }
+        };
+
+    registry.register(multi);
+    assertThat(registry.scrape().size()).isEqualTo(2);
+
+    registry.unregister(multi);
+    assertThat(registry.scrape().size()).isEqualTo(0);
+
+    // Should be able to register collectors with same names again
+    Collector counter =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+        };
+
+    assertThatCode(() -> registry.register(counter)).doesNotThrowAnyException();
+  }
+
+  @Test
+  public void unregister_legacyCollector_noErrors() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector legacy =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return GaugeSnapshot.builder().name("legacy_metric").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "legacy_metric";
+          }
+          // No getMetricType() - returns null
+        };
+
+    registry.register(legacy);
+    assertThat(registry.scrape().size()).isEqualTo(1);
+
+    // Unregister should work without errors even for legacy collectors
+    assertThatCode(() -> registry.unregister(legacy)).doesNotThrowAnyException();
+    assertThat(registry.scrape().size()).isEqualTo(0);
+  }
 }
