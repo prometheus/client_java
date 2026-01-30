@@ -257,11 +257,11 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_nullTypeAndLabels_fallbackToCollect_validatesFromSnapshot() {
+  public void register_nullType_skipsValidation() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
-    // Collector without getMetricType() and getLabelNames() - returns null (default).
-    // Registry falls back to collect() and derives type/labels from snapshot.
+    // Collectors without getMetricType() skip registration-time validation.
+    // This allows legacy collectors to work without implementing all getters.
     Collector legacyCollector1 =
         new Collector() {
           @Override
@@ -288,11 +288,9 @@ class PrometheusRegistryTest {
           }
         };
 
-    registry.register(legacyCollector1);
-    // Second collector has same name but different type (from snapshot) - should fail
-    assertThatThrownBy(() -> registry.register(legacyCollector2))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Conflicting metric types");
+    // Both collectors can register successfully since validation is skipped
+    assertThatCode(() -> registry.register(legacyCollector1)).doesNotThrowAnyException();
+    assertThatCode(() -> registry.register(legacyCollector2)).doesNotThrowAnyException();
   }
 
   @Test

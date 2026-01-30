@@ -26,9 +26,7 @@ public class PrometheusRegistry {
   private final ConcurrentHashMap<MultiCollector, List<MultiCollectorRegistration>>
       multiCollectorMetadata = new ConcurrentHashMap<>();
 
-  /**
-   * Stores the registration details for a Collector at registration time.
-   */
+  /** Stores the registration details for a Collector at registration time. */
   private static class CollectorRegistration {
     final String prometheusName;
     final MetricType metricType;
@@ -62,8 +60,8 @@ public class PrometheusRegistry {
 
   /**
    * Tracks registration information for each metric name to enable validation of type consistency,
-   * label schema uniqueness, and help/unit consistency. Stores metadata to enable O(1) unregistration
-   * without iterating through all collectors.
+   * label schema uniqueness, and help/unit consistency. Stores metadata to enable O(1)
+   * unregistration without iterating through all collectors.
    */
   private static class RegistrationInfo {
     private final MetricType type;
@@ -164,32 +162,8 @@ public class PrometheusRegistry {
     String help = metadata != null ? metadata.getHelp() : null;
     Unit unit = metadata != null ? metadata.getUnit() : null;
 
-    // When getters return null, fall back to one collect() to derive type/labels/metadata.
-    // Collectors whose collect() has side effects (e.g. callbacks) should implement the getters.
-    if (metricType == null && prometheusName != null) {
-      MetricSnapshot snapshot = collector.collect();
-      if (snapshot != null) {
-        prometheusName = snapshot.getMetadata().getPrometheusName();
-        metricType = SnapshotRegistrationExtractor.metricTypeFromSnapshot(snapshot);
-        labelNames = SnapshotRegistrationExtractor.labelNamesFromSnapshot(snapshot);
-        MetricMetadata snapshotMetadata =
-            SnapshotRegistrationExtractor.metadataFromSnapshot(snapshot);
-        help = snapshotMetadata.getHelp();
-        unit = snapshotMetadata.getUnit();
-      }
-    } else if (metricType == null && prometheusName == null) {
-      MetricSnapshot snapshot = collector.collect();
-      if (snapshot != null) {
-        prometheusName = snapshot.getMetadata().getPrometheusName();
-        metricType = SnapshotRegistrationExtractor.metricTypeFromSnapshot(snapshot);
-        labelNames = SnapshotRegistrationExtractor.labelNamesFromSnapshot(snapshot);
-        MetricMetadata snapshotMetadata =
-            SnapshotRegistrationExtractor.metadataFromSnapshot(snapshot);
-        help = snapshotMetadata.getHelp();
-        unit = snapshotMetadata.getUnit();
-      }
-    }
-
+    // Only perform validation if collector provides sufficient metadata.
+    // Collectors that don't implement getPrometheusName()/getMetricType() will skip validation.
     if (prometheusName != null && metricType != null) {
       final String name = prometheusName;
       final MetricType type = metricType;
