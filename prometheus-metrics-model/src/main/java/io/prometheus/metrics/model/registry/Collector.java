@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.registry;
 
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -119,6 +120,20 @@ public interface Collector {
    */
   @Nullable
   default Set<String> getLabelNames() {
+    return null;
+  }
+
+  /**
+   * Returns the metric metadata (name, help, unit) for registration-time validation.
+   *
+   * <p>When non-null, the registry uses this to validate that metrics with the same name have
+   * consistent help and unit. Returning {@code null} means help/unit validation is skipped for this
+   * collector.
+   *
+   * @return the metric metadata, or {@code null} to skip help/unit validation
+   */
+  @Nullable
+  default MetricMetadata getMetadata() {
     return null;
   }
 }

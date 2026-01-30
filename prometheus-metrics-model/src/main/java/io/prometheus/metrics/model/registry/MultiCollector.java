@@ -1,5 +1,6 @@
 package io.prometheus.metrics.model.registry;
 
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.Collections;
@@ -112,6 +113,21 @@ public interface MultiCollector {
    */
   @Nullable
   default Set<String> getLabelNames(String prometheusName) {
+    return null;
+  }
+
+  /**
+   * Returns the metric metadata (name, help, unit) for the given Prometheus name.
+   *
+   * <p>When non-null, the registry uses this to validate that metrics with the same name have
+   * consistent help and unit. Returning {@code null} means help/unit validation is skipped for that
+   * name.
+   *
+   * @param prometheusName the Prometheus metric name
+   * @return the metric metadata for that name, or {@code null} to skip help/unit validation
+   */
+  @Nullable
+  default MetricMetadata getMetadata(String prometheusName) {
     return null;
   }
 }

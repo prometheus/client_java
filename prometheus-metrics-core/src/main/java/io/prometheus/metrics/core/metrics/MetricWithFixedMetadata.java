@@ -30,7 +30,8 @@ public abstract class MetricWithFixedMetadata extends Metric {
     this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
   }
 
-  protected MetricMetadata getMetadata() {
+  @Override
+  public MetricMetadata getMetadata() {
     return metadata;
   }
 

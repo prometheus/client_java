@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.GaugeSnapshot;
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import java.util.Arrays;
@@ -256,10 +257,11 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_backwardCompatibility_nullTypeAndLabels_skipsValidation() {
+  public void register_nullTypeAndLabels_fallbackToCollect_validatesFromSnapshot() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
-    // Collector without getMetricType() and getLabelNames() - returns null (default)
+    // Collector without getMetricType() and getLabelNames() - returns null (default).
+    // Registry falls back to collect() and derives type/labels from snapshot.
     Collector legacyCollector1 =
         new Collector() {
           @Override
@@ -286,10 +288,11 @@ class PrometheusRegistryTest {
           }
         };
 
-    // Both collectors have the same name but no type/label info
-    // Should succeed because validation is skipped
     registry.register(legacyCollector1);
-    assertThatCode(() -> registry.register(legacyCollector2)).doesNotThrowAnyException();
+    // Second collector has same name but different type (from snapshot) - should fail
+    assertThatThrownBy(() -> registry.register(legacyCollector2))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Conflicting metric types");
   }
 
   @Test
@@ -578,5 +581,135 @@ class PrometheusRegistryTest {
     assertThatThrownBy(() -> registry.register(collector2))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("duplicate metric name with identical label schema");
+  }
+
+  @Test
+  public void register_sameName_differentHelp_notAllowed() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector withHelpOne =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").help("First help").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "First help", null);
+          }
+        };
+
+    Collector withHelpTwo =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").help("Second help").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("status"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "Second help", null);
+          }
+        };
+
+    registry.register(withHelpOne);
+    assertThatThrownBy(() -> registry.register(withHelpTwo))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Conflicting help strings");
+  }
+
+  @Test
+  public void register_sameName_sameHelpAndUnit_allowed() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector withPath =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").help("Total requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "Total requests", null);
+          }
+        };
+
+    Collector withStatus =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").help("Total requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("status"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "Total requests", null);
+          }
+        };
+
+    registry.register(withPath);
+    assertThatCode(() -> registry.register(withStatus)).doesNotThrowAnyException();
   }
 }
