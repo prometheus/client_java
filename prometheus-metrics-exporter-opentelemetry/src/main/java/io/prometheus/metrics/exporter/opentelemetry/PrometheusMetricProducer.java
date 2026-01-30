@@ -41,8 +41,14 @@ class PrometheusMetricProducer implements CollectionRegistration {
 
   @Override
   public Collection<MetricData> collectAllMetrics() {
-    // TODO: We could add a filter configuration for the OpenTelemetry exporter and call
-    // registry.scrape(filter) if a filter is configured, like in the Servlet exporter.
+    // Note: Currently all metrics from the registry are exported. To add metric filtering
+    // similar to the Servlet exporter, one could:
+    // 1. Add filter properties to ExporterOpenTelemetryProperties (allowedNames, excludedNames,
+    // etc.)
+    // 2. Convert these properties to a Predicate<String> using MetricNameFilter.builder()
+    // 3. Call registry.scrape(filter) instead of registry.scrape()
+    // OpenTelemetry also provides its own Views API for filtering and aggregation, which may be
+    // preferred for OpenTelemetry-specific deployments.
     MetricSnapshots snapshots = registry.scrape();
     Resource resourceWithTargetInfo = resource.merge(resourceFromTargetInfo(snapshots));
     InstrumentationScopeInfo scopeFromInfo = instrumentationScopeFromOtelScopeInfo(snapshots);
