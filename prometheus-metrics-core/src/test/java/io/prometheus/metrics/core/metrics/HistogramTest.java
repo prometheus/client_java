@@ -1029,10 +1029,11 @@ class HistogramTest {
     await()
         .atMost(2, SECONDS)
         .until(
-            () ->
-                getExemplar(histogram.collect(), Double.POSITIVE_INFINITY, "path", "/hello") != null
-                    && getExemplar(histogram.collect(), Double.POSITIVE_INFINITY, "path", "/world")
-                        != null);
+            () -> {
+              HistogramSnapshot s = histogram.collect();
+              return getExemplar(s, Double.POSITIVE_INFINITY, "path", "/hello") != null
+                  && getExemplar(s, Double.POSITIVE_INFINITY, "path", "/world") != null;
+            });
     snapshot = histogram.collect();
     assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
     assertExemplarEquals(ex1b, getExemplar(snapshot, 1.0, "path", "/world"));
