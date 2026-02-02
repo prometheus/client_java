@@ -6,6 +6,7 @@ import io.prometheus.metrics.model.snapshots.MetricSnapshots;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -135,6 +136,18 @@ public class PrometheusRegistry {
     }
   }
 
+  /**
+   * Returns an immutable set of label names for storage. Defends against mutation of the set
+   * returned by {@code Collector.getLabelNames()} after registration, which would break duplicate
+   * detection and unregistration.
+   */
+  private static Set<String> immutableLabelNames(@Nullable Set<String> labelNames) {
+    if (labelNames == null || labelNames.isEmpty()) {
+      return Collections.emptySet();
+    }
+    return Collections.unmodifiableSet(new HashSet<>(labelNames));
+  }
+
   public void register(Collector collector) {
     if (collectors.contains(collector)) {
       throw new IllegalArgumentException("Collector instance is already registered");
@@ -142,7 +155,7 @@ public class PrometheusRegistry {
 
     String prometheusName = collector.getPrometheusName();
     MetricType metricType = collector.getMetricType();
-    Set<String> labelNames = collector.getLabelNames();
+    Set<String> normalizedLabels = immutableLabelNames(collector.getLabelNames());
     MetricMetadata metadata = collector.getMetadata();
     String help = metadata != null ? metadata.getHelp() : null;
     Unit unit = metadata != null ? metadata.getUnit() : null;
@@ -152,7 +165,7 @@ public class PrometheusRegistry {
     if (prometheusName != null && metricType != null) {
       final String name = prometheusName;
       final MetricType type = metricType;
-      final Set<String> names = labelNames;
+      final Set<String> names = normalizedLabels;
       final String helpForValidation = help;
       final Unit unitForValidation = unit;
       registered.compute(
@@ -171,16 +184,14 @@ public class PrometheusRegistry {
               }
               existingInfo.validateMetadata(helpForValidation, unitForValidation);
               if (!existingInfo.addLabelSet(names)) {
-                Set<String> normalized =
-                    (names == null || names.isEmpty()) ? Collections.emptySet() : names;
                 throw new IllegalArgumentException(
-                    name + ": duplicate metric name with identical label schema " + normalized);
+                    name + ": duplicate metric name with identical label schema " + names);
               }
               return existingInfo;
             }
           });
 
-      collectorMetadata.put(collector, new CollectorRegistration(prometheusName, labelNames));
+      collectorMetadata.put(collector, new CollectorRegistration(prometheusName, normalizedLabels));
     }
 
     if (prometheusName != null) {
@@ -197,57 +208,67 @@ public class PrometheusRegistry {
 
     List<String> prometheusNamesList = collector.getPrometheusNames();
     List<MultiCollectorRegistration> registrations = new ArrayList<>();
+    Set<String> namesOnlyInPrometheusNames = new HashSet<>();
 
-    for (String prometheusName : prometheusNamesList) {
-      MetricType metricType = collector.getMetricType(prometheusName);
-      Set<String> labelNames = collector.getLabelNames(prometheusName);
-      MetricMetadata metadata = collector.getMetadata(prometheusName);
-      String help = metadata != null ? metadata.getHelp() : null;
-      Unit unit = metadata != null ? metadata.getUnit() : null;
+    try {
+      for (String prometheusName : prometheusNamesList) {
+        MetricType metricType = collector.getMetricType(prometheusName);
+        Set<String> normalizedLabels = immutableLabelNames(collector.getLabelNames(prometheusName));
+        MetricMetadata metadata = collector.getMetadata(prometheusName);
+        String help = metadata != null ? metadata.getHelp() : null;
+        Unit unit = metadata != null ? metadata.getUnit() : null;
 
-      if (metricType != null) {
-        final MetricType type = metricType;
-        final Set<String> labelNamesForValidation = labelNames;
-        final String helpForValidation = help;
-        final Unit unitForValidation = unit;
-        registered.compute(
-            prometheusName,
-            (name, existingInfo) -> {
-              if (existingInfo == null) {
-                return RegistrationInfo.of(
-                    type, labelNamesForValidation, helpForValidation, unitForValidation);
-              } else {
-                if (existingInfo.getType() != type) {
-                  throw new IllegalArgumentException(
-                      prometheusName
-                          + ": Conflicting metric types. Existing: "
-                          + existingInfo.getType()
-                          + ", new: "
-                          + type);
+        if (metricType != null) {
+          final MetricType type = metricType;
+          final Set<String> labelNamesForValidation = normalizedLabels;
+          final String helpForValidation = help;
+          final Unit unitForValidation = unit;
+          registered.compute(
+              prometheusName,
+              (name, existingInfo) -> {
+                if (existingInfo == null) {
+                  return RegistrationInfo.of(
+                      type, labelNamesForValidation, helpForValidation, unitForValidation);
+                } else {
+                  if (existingInfo.getType() != type) {
+                    throw new IllegalArgumentException(
+                        prometheusName
+                            + ": Conflicting metric types. Existing: "
+                            + existingInfo.getType()
+                            + ", new: "
+                            + type);
+                  }
+                  existingInfo.validateMetadata(helpForValidation, unitForValidation);
+                  if (!existingInfo.addLabelSet(labelNamesForValidation)) {
+                    throw new IllegalArgumentException(
+                        prometheusName
+                            + ": duplicate metric name with identical label schema "
+                            + labelNamesForValidation);
+                  }
+                  return existingInfo;
                 }
-                existingInfo.validateMetadata(helpForValidation, unitForValidation);
-                if (!existingInfo.addLabelSet(labelNamesForValidation)) {
-                  Set<String> normalized =
-                      (labelNamesForValidation == null || labelNamesForValidation.isEmpty())
-                          ? Collections.emptySet()
-                          : labelNamesForValidation;
-                  throw new IllegalArgumentException(
-                      prometheusName
-                          + ": duplicate metric name with identical label schema "
-                          + normalized);
-                }
-                return existingInfo;
-              }
-            });
+              });
 
-        registrations.add(new MultiCollectorRegistration(prometheusName, labelNames));
+          registrations.add(new MultiCollectorRegistration(prometheusName, normalizedLabels));
+        }
+
+        boolean addedToPrometheusNames = prometheusNames.add(prometheusName);
+        if (addedToPrometheusNames && metricType == null) {
+          namesOnlyInPrometheusNames.add(prometheusName);
+        }
       }
 
-      prometheusNames.add(prometheusName);
+      multiCollectorMetadata.put(collector, registrations);
+      multiCollectors.add(collector);
+    } catch (Exception e) {
+      for (MultiCollectorRegistration registration : registrations) {
+        unregisterLabelSchema(registration.prometheusName, registration.labelNames);
+      }
+      for (String name : namesOnlyInPrometheusNames) {
+        prometheusNames.remove(name);
+      }
+      throw e;
     }
-
-    multiCollectorMetadata.put(collector, registrations);
-    multiCollectors.add(collector);
   }
 
   public void unregister(Collector collector) {

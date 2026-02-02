@@ -6,17 +6,15 @@ set -euo pipefail
 # I could not figure out how to use a protoc Maven plugin to use the shaded module,
 # so I ran this command to generate the sources manually.
 
-# Use gsed and ggrep on macOS (requires: brew install gnu-sed grep)
+# Use gsed on macOS (requires: brew install gnu-sed) for in-place edits
+# BSD sed requires -i '' for in-place with no backup; GNU sed uses -i alone.
 if [[ "$OSTYPE" == "darwin"* ]] && command -v gsed >/dev/null 2>&1; then
 	SED='gsed'
+	SED_I=(-i)
 else
 	SED='sed'
-fi
-
-if [[ "$OSTYPE" == "darwin"* ]] && command -v ggrep >/dev/null 2>&1; then
-	GREP='ggrep'
-else
-	GREP='grep'
+	# BSD sed: -i requires backup extension; '' = no backup
+	[[ "$OSTYPE" == "darwin"* ]] && SED_I=(-i '') || SED_I=(-i)
 fi
 
 # Use mise-provided protoc if available
@@ -43,17 +41,18 @@ PACKAGE="io.prometheus.metrics.expositionformats.generated.com_google_protobuf_$
 
 if [[ $OLD_PACKAGE != "$PACKAGE" ]]; then
 	echo "Replacing package $OLD_PACKAGE with $PACKAGE in all java files"
-	find .. -type f -name "*.java" -exec $SED -i "s/$OLD_PACKAGE/$PACKAGE/g" {} +
+	find .. -type f -name "*.java" -exec "${SED}" "${SED_I[@]}" "s/$OLD_PACKAGE/$PACKAGE/g" {} +
 fi
 
 curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/prometheus/client/metrics.proto -o $PROTO_DIR/metrics.proto
 
-$SED -i "s/java_package = \"io.prometheus.client\"/java_package = \"$PACKAGE\"/" $PROTO_DIR/metrics.proto
+"${SED}" "${SED_I[@]}" "s/java_package = \"io.prometheus.client\"/java_package = \"$PACKAGE\"/" $PROTO_DIR/metrics.proto
 $PROTOC --java_out "$TARGET_DIR" $PROTO_DIR/metrics.proto
-$SED -i '1 i\//CHECKSTYLE:OFF: checkstyle' "$(find src/main/generated/io -type f)"
-$SED -i -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' "$(find src/main/generated/io -type f)"
+for f in $(find src/main/generated/io -type f); do "${SED}" "${SED_I[@]}" '1 i\
+//CHECKSTYLE:OFF: checkstyle' "$f"; done
+for f in $(find src/main/generated/io -type f); do "${SED}" "${SED_I[@]}" -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' "$f"; done
 
-GENERATED_WITH=$($GREP -oP '\/\/ Protobuf Java Version: \K.*' "$TARGET_DIR/${PACKAGE//\.//}"/Metrics.java)
+GENERATED_WITH=$($SED -n 's/.*\/\/ Protobuf Java Version: \(.*\)/\1/p' "$TARGET_DIR/${PACKAGE//\.//}"/Metrics.java)
 
 function help() {
 	echo "Please use https://mise.jdx.dev/ - this will use the version specified in mise.toml"

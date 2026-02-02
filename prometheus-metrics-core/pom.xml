@@ -38,10 +38,10 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- test dependencies -->
+    <!-- test dependencies: use no-protobuf so tests get com.google.protobuf, not shaded -->
     <dependency>
       <groupId>io.prometheus</groupId>
-      <artifactId>prometheus-metrics-exposition-formats</artifactId>
+      <artifactId>prometheus-metrics-exposition-formats-no-protobuf</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

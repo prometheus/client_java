@@ -23,6 +23,13 @@
   </properties>
 
   <dependencies>
+    <!-- Ensures reactor builds exposition-formats first so generated protobuf sources exist before copy -->
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>prometheus-metrics-exposition-formats-no-protobuf</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>io.prometheus</groupId>
       <artifactId>prometheus-metrics-exposition-textformats</artifactId>
@@ -69,22 +76,26 @@
         <executions>
           <execution>
             <id>copy-metrics-exposition-formats-main</id>
-            <phase>validate</phase>
+            <phase>generate-sources</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
               <outputDirectory>target/metrics-exposition-formats/src/main</outputDirectory>
+              <overwrite>true</overwrite>
               <resources>
                 <resource>
                   <directory>../prometheus-metrics-exposition-formats/src/main</directory>
+                  <includes>
+                    <include>**/*</include>
+                  </includes>
                 </resource>
               </resources>
             </configuration>
           </execution>
           <execution>
             <id>copy-metrics-exposition-formats-test</id>
-            <phase>validate</phase>
+            <phase>generate-sources</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
