@@ -48,9 +48,9 @@ curl -sL https://raw.githubusercontent.com/prometheus/client_model/master/io/pro
 
 "${SED}" "${SED_I[@]}" "s/java_package = \"io.prometheus.client\"/java_package = \"$PACKAGE\"/" $PROTO_DIR/metrics.proto
 $PROTOC --java_out "$TARGET_DIR" $PROTO_DIR/metrics.proto
-for f in $(find src/main/generated/io -type f); do "${SED}" "${SED_I[@]}" '1 i\
-//CHECKSTYLE:OFF: checkstyle' "$f"; done
-for f in $(find src/main/generated/io -type f); do "${SED}" "${SED_I[@]}" -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' "$f"; done
+find src/main/generated/io -type f -exec "${SED}" "${SED_I[@]}" '1 i\
+//CHECKSTYLE:OFF: checkstyle' {} \;
+find src/main/generated/io -type f -exec "${SED}" "${SED_I[@]}" -e $'$a\\\n//CHECKSTYLE:ON: checkstyle' {} \;
 
 GENERATED_WITH=$($SED -n 's/.*\/\/ Protobuf Java Version: \(.*\)/\1/p' "$TARGET_DIR/${PACKAGE//\.//}"/Metrics.java)
 
