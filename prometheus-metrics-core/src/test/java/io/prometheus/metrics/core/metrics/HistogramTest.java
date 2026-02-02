@@ -1103,17 +1103,14 @@ class HistogramTest {
         .until(
             () -> {
               Exemplar actual = getExemplar(histogram.collect(), 4.0, "path", "/hello");
-              return actual != null && Math.abs(actual.getValue() - 3.4) < 0.0001;
+              return actual != null && Math.abs(actual.getValue() - 3.4) < 0.00001;
             });
     snapshot = histogram.collect();
     // custom exemplars have preference, so the automatic exemplar is replaced
     assertExemplarEquals(custom, getExemplar(snapshot, 4.0, "path", "/hello"));
   }
 
-  /**
-   * Waits for the exemplar sampler's rate limit window so the next observation is accepted. Uses a
-   * deterministic delay (2x sample interval) so the scheduler is ready.
-   */
+  /** Waits for the exemplar sampler's rate limit window so the next observation is accepted. */
   private static void waitForSampleInterval(long sampleIntervalMillis) {
     try {
       Thread.sleep(2 * sampleIntervalMillis);
