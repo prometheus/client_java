@@ -227,6 +227,14 @@ public class TextFormatUtil {
                 + " and "
                 + snapshot.getClass().getName());
       }
+      if (first instanceof HistogramSnapshot) {
+        HistogramSnapshot histogramFirst = (HistogramSnapshot) first;
+        HistogramSnapshot histogramSnapshot = (HistogramSnapshot) snapshot;
+        if (histogramFirst.isGaugeHistogram() != histogramSnapshot.isGaugeHistogram()) {
+          throw new IllegalArgumentException(
+              "Cannot merge histograms: gauge histogram and classic histogram");
+        }
+      }
       totalDataPoints += snapshot.getDataPoints().size();
     }
 
@@ -244,7 +252,9 @@ public class TextFormatUtil {
           first.getMetadata(),
           (Collection<GaugeSnapshot.GaugeDataPointSnapshot>) (Object) allDataPoints);
     } else if (first instanceof HistogramSnapshot) {
+      HistogramSnapshot histFirst = (HistogramSnapshot) first;
       return new HistogramSnapshot(
+          histFirst.isGaugeHistogram(),
           first.getMetadata(),
           (Collection<HistogramSnapshot.HistogramDataPointSnapshot>) (Object) allDataPoints);
     } else if (first instanceof SummarySnapshot) {

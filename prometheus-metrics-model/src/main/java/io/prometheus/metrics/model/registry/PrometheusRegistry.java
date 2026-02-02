@@ -34,8 +34,7 @@ public class PrometheusRegistry {
 
     CollectorRegistration(String prometheusName, @Nullable Set<String> labelNames) {
       this.prometheusName = prometheusName;
-      this.labelNames =
-          (labelNames == null || labelNames.isEmpty()) ? Collections.emptySet() : labelNames;
+      this.labelNames = immutableLabelNames(labelNames);
     }
   }
 
@@ -49,8 +48,7 @@ public class PrometheusRegistry {
 
     MultiCollectorRegistration(String prometheusName, @Nullable Set<String> labelNames) {
       this.prometheusName = prometheusName;
-      this.labelNames =
-          (labelNames == null || labelNames.isEmpty()) ? Collections.emptySet() : labelNames;
+      this.labelNames = immutableLabelNames(labelNames);
     }
   }
 
@@ -62,8 +60,8 @@ public class PrometheusRegistry {
   private static class RegistrationInfo {
     private final MetricType type;
     private final Set<Set<String>> labelSchemas;
-    @Nullable private final String help;
-    @Nullable private final Unit unit;
+    @Nullable private String help;
+    @Nullable private Unit unit;
 
     private RegistrationInfo(
         MetricType type,
@@ -89,8 +87,9 @@ public class PrometheusRegistry {
     }
 
     /**
-     * Validates that the given help and unit are consistent with this registration. Throws if both
-     * sides have non-null help/unit and they differ.
+     * Validates that the given help and unit are consistent with this registration. Throws if
+     * non-null values conflict. When stored help/unit is null and the new value is non-null,
+     * captures the first non-null so subsequent registrations are validated consistently.
      */
     void validateMetadata(@Nullable String newHelp, @Nullable Unit newUnit) {
       if (help != null && newHelp != null && !Objects.equals(help, newHelp)) {
@@ -100,6 +99,12 @@ public class PrometheusRegistry {
       if (unit != null && newUnit != null && !Objects.equals(unit, newUnit)) {
         throw new IllegalArgumentException(
             "Conflicting unit. Existing: " + unit + ", new: " + newUnit);
+      }
+      if (help == null && newHelp != null) {
+        this.help = newHelp;
+      }
+      if (unit == null && newUnit != null) {
+        this.unit = newUnit;
       }
     }
 

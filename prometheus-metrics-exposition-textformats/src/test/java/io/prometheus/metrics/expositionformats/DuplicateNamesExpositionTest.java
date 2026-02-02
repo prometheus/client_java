@@ -180,4 +180,79 @@ class DuplicateNamesExpositionTest {
     """;
     assertThat(output).isEqualTo(expected);
   }
+
+  @Test
+  void testDuplicateNames_withCreatedTimestamps_emitsSingleHelpTypeAndNoDuplicateCreatedSeries()
+      throws IOException {
+    long createdTs = 1672850385800L;
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    registry.register(
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("api_responses")
+                .help("API responses")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(Labels.of("uri", "/hello", "outcome", "SUCCESS"))
+                        .value(100)
+                        .createdTimestampMillis(createdTs)
+                        .build())
+                .build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "api_responses_total";
+          }
+        });
+
+    registry.register(
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder()
+                .name("api_responses")
+                .help("API responses")
+                .dataPoint(
+                    CounterSnapshot.CounterDataPointSnapshot.builder()
+                        .labels(
+                            Labels.of("uri", "/hello", "outcome", "FAILURE", "error", "TIMEOUT"))
+                        .value(10)
+                        .createdTimestampMillis(createdTs + 1000)
+                        .build())
+                .build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "api_responses_total";
+          }
+        });
+
+    MetricSnapshots snapshots = registry.scrape();
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    PrometheusTextFormatWriter writer =
+        PrometheusTextFormatWriter.builder().setIncludeCreatedTimestamps(true).build();
+    writer.write(out, snapshots);
+    String output = out.toString(UTF_8);
+
+    // Merged snapshots: one metric family with two data points. Created-timestamp section uses
+    // merged snapshots too, so single HELP/TYPE for _created and one _created line per label set.
+    String expected =
+        """
+    # HELP api_responses_total API responses
+    # TYPE api_responses_total counter
+    api_responses_total{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 10.0
+    api_responses_total{outcome="SUCCESS",uri="/hello"} 100.0
+    # HELP api_responses_created API responses
+    # TYPE api_responses_created gauge
+    api_responses_created{error="TIMEOUT",outcome="FAILURE",uri="/hello"} 1672850386800
+    api_responses_created{outcome="SUCCESS",uri="/hello"} 1672850385800
+    """;
+
+    assertThat(output).isEqualTo(expected);
+  }
 }

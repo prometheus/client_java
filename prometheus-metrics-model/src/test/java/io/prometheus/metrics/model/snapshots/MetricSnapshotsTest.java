@@ -62,6 +62,34 @@ class MetricSnapshotsTest {
   }
 
   @Test
+  void testDuplicateName_histogramGaugeVsClassic_throws() {
+    HistogramSnapshot classic =
+        HistogramSnapshot.builder()
+            .name("my_histogram")
+            .dataPoint(
+                HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                    .classicHistogramBuckets(
+                        ClassicHistogramBuckets.of(
+                            new double[] {Double.POSITIVE_INFINITY}, new long[] {0}))
+                    .build())
+            .build();
+    HistogramSnapshot gauge =
+        HistogramSnapshot.builder()
+            .name("my_histogram")
+            .gaugeHistogram(true)
+            .dataPoint(
+                HistogramSnapshot.HistogramDataPointSnapshot.builder()
+                    .classicHistogramBuckets(
+                        ClassicHistogramBuckets.of(
+                            new double[] {Double.POSITIVE_INFINITY}, new long[] {0}))
+                    .build())
+            .build();
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new MetricSnapshots(classic, gauge))
+        .withMessageContaining("conflicting histogram types");
+  }
+
+  @Test
   void testBuilder() {
     CounterSnapshot counter =
         CounterSnapshot.builder()

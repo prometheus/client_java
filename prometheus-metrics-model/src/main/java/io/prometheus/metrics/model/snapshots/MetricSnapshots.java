@@ -41,8 +41,10 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
       String name2 = list.get(i + 1).getMetadata().getPrometheusName();
 
       if (name1.equals(name2)) {
-        Class<?> type1 = list.get(i).getClass();
-        Class<?> type2 = list.get(i + 1).getClass();
+        MetricSnapshot s1 = list.get(i);
+        MetricSnapshot s2 = list.get(i + 1);
+        Class<?> type1 = s1.getClass();
+        Class<?> type2 = s2.getClass();
 
         if (!type1.equals(type2)) {
           throw new IllegalArgumentException(
@@ -51,6 +53,16 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
                   + type1.getSimpleName()
                   + " and "
                   + type2.getSimpleName());
+        }
+
+        // HistogramSnapshot: gauge histogram vs classic histogram are semantically different
+        if (s1 instanceof HistogramSnapshot) {
+          HistogramSnapshot h1 = (HistogramSnapshot) s1;
+          HistogramSnapshot h2 = (HistogramSnapshot) s2;
+          if (h1.isGaugeHistogram() != h2.isGaugeHistogram()) {
+            throw new IllegalArgumentException(
+                name1 + ": conflicting histogram types: gauge histogram and classic histogram");
+          }
         }
       }
     }

@@ -143,7 +143,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_sameName_sameType_differentLabelSchemas_allowed() {
+  void register_sameName_sameType_differentLabelSchemas_allowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector counterWithPathLabel =
@@ -199,7 +199,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_sameName_sameType_sameLabelSchema_notAllowed() {
+  void register_sameName_sameType_sameLabelSchema_notAllowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector counter1 =
@@ -257,7 +257,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_nullType_skipsValidation() {
+  void register_nullType_skipsValidation() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     // Collectors without getMetricType() skip registration-time validation.
@@ -294,7 +294,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_multiCollector_withTypeValidation() {
+  void register_multiCollector_withTypeValidation() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector counter =
@@ -382,7 +382,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void clearOk() {
+  void clearOk() {
     PrometheusRegistry registry = new PrometheusRegistry();
     registry.register(counterA1);
     registry.register(counterB);
@@ -394,7 +394,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void unregister_shouldRemoveLabelSchemaFromRegistrationInfo() {
+  void unregister_shouldRemoveLabelSchemaFromRegistrationInfo() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector counterWithPathLabel =
@@ -475,7 +475,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_withEmptyLabelSets_shouldDetectDuplicates() {
+  void register_withEmptyLabelSets_shouldDetectDuplicates() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector collector1 =
@@ -527,7 +527,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_withMixedNullAndEmptyLabelSets_shouldDetectDuplicates() {
+  void register_withMixedNullAndEmptyLabelSets_shouldDetectDuplicates() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector collector1 =
@@ -582,7 +582,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_sameName_differentHelp_notAllowed() {
+  void register_sameName_differentHelp_notAllowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector withHelpOne =
@@ -648,7 +648,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_sameName_sameHelpAndUnit_allowed() {
+  void register_sameName_sameHelpAndUnit_allowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector withPath =
@@ -712,7 +712,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void register_sameName_oneNullHelp_allowed() {
+  void register_sameName_oneNullHelp_allowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector withHelp =
@@ -777,7 +777,98 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void unregister_lastCollector_removesPrometheusName() {
+  void register_firstOmitsHelp_secondProvidesHelp_thirdWithDifferentHelp_throws() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector withoutHelp =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path"));
+          }
+        };
+
+    Collector withHelpTotal =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").help("Total requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("status"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "Total requests", null);
+          }
+        };
+
+    Collector withHelpOther =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").help("Other help").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("method"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "Other help", null);
+          }
+        };
+
+    registry.register(withoutHelp);
+    registry.register(withHelpTotal);
+    // First had no help, second provided "Total requests" (captured). Third conflicts.
+    assertThatThrownBy(() -> registry.register(withHelpOther))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Conflicting help strings");
+  }
+
+  @Test
+  void unregister_lastCollector_removesPrometheusName() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector counter1 =
@@ -844,7 +935,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void unregister_multiCollector_removesAllLabelSchemas() {
+  void unregister_multiCollector_removesAllLabelSchemas() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     MultiCollector multi =
@@ -896,7 +987,7 @@ class PrometheusRegistryTest {
   }
 
   @Test
-  public void unregister_legacyCollector_noErrors() {
+  void unregister_legacyCollector_noErrors() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     Collector legacy =

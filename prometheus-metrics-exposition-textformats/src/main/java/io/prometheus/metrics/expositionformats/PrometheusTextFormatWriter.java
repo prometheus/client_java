@@ -137,7 +137,7 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       }
     }
     if (writeCreatedTimestamps) {
-      for (MetricSnapshot s : metricSnapshots) {
+      for (MetricSnapshot s : merged) {
         MetricSnapshot snapshot = escapeMetricSnapshot(s, scheme);
         if (!snapshot.getDataPoints().isEmpty()) {
           if (snapshot instanceof CounterSnapshot) {
