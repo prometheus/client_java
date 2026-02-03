@@ -226,7 +226,7 @@ public class CacheMetricsCollector implements MultiCollector {
                 .labels(labels)
                 .value(stats.evictionWeight())
                 .build());
-      } catch (Exception e) {
+      } catch (UnsupportedOperationException e) {
         // EvictionWeight metric is unavailable, newer version of Caffeine is needed.
       }
 

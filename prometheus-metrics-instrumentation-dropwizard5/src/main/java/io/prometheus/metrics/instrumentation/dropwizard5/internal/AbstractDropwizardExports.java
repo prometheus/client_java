@@ -195,7 +195,7 @@ public abstract class AbstractDropwizardExports<R, F, C, G, H, T, M, B, S>
         if (snapshot != null) {
           builder.metricSnapshot(snapshot);
         }
-      } catch (Exception e) {
+      } catch (RuntimeException e) {
         if (!invalidMetricHandler.suppressException(metricName, e)) {
           throw e;
         }

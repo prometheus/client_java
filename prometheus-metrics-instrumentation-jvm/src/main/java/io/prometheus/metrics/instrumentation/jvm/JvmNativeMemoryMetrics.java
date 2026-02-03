@@ -163,8 +163,8 @@ public class JvmNativeMemoryMetrics {
       } else {
         return summary;
       }
-    } catch (Exception ex) {
-      // ignore errors
+    } catch (RuntimeException ex) {
+      // ignore errors (native memory tracking not enabled or other runtime failures)
       isEnabled.set(false);
       return "";
     }
