@@ -90,7 +90,7 @@ unavailable:** if `getPrometheusName()` or `getMetricType()` returns `null`, the
 validate that collector. If two such collectors produce the same metric name and same label set at
 scrape time, the exposition output may contain duplicate time series and be invalid for Prometheus.
 
-When validation *is* performed (name and type are non-null), **null label names are treated as an
+When validation _is_ performed (name and type are non-null), **null label names are treated as an
 empty label schema:** `getLabelNames()` returning `null` is normalized to `Collections.emptySet()`
 and full label-schema validation and duplicate detection still apply. A collector that returns a
 non-null type but leaves `getLabelNames()` as `null` is still validated, with its labels treated as
