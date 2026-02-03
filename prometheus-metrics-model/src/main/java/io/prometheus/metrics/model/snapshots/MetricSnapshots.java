@@ -29,7 +29,8 @@ public class MetricSnapshots implements Iterable<MetricSnapshot> {
    *
    * @param snapshots the constructor creates a sorted copy of snapshots.
    * @throws IllegalArgumentException if snapshots contain conflicting metric types (same name but
-   *     different metric types like Counter vs Gauge).
+   *     different metric types like Counter vs Gauge), or if two HistogramSnapshots share a name
+   *     but differ in gauge histogram vs classic histogram.
    */
   public MetricSnapshots(Collection<MetricSnapshot> snapshots) {
     List<MetricSnapshot> list = new ArrayList<>(snapshots);

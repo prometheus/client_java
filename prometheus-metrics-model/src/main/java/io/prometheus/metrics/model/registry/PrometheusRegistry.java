@@ -154,63 +154,69 @@ public class PrometheusRegistry {
   }
 
   public void register(Collector collector) {
-    if (collectors.contains(collector)) {
+    if (!collectors.add(collector)) {
       throw new IllegalArgumentException("Collector instance is already registered");
     }
+    try {
+      String prometheusName = collector.getPrometheusName();
+      MetricType metricType = collector.getMetricType();
+      Set<String> normalizedLabels = immutableLabelNames(collector.getLabelNames());
+      MetricMetadata metadata = collector.getMetadata();
+      String help = metadata != null ? metadata.getHelp() : null;
+      Unit unit = metadata != null ? metadata.getUnit() : null;
 
-    String prometheusName = collector.getPrometheusName();
-    MetricType metricType = collector.getMetricType();
-    Set<String> normalizedLabels = immutableLabelNames(collector.getLabelNames());
-    MetricMetadata metadata = collector.getMetadata();
-    String help = metadata != null ? metadata.getHelp() : null;
-    Unit unit = metadata != null ? metadata.getUnit() : null;
-
-    // Only perform validation if collector provides sufficient metadata.
-    // Collectors that don't implement getPrometheusName()/getMetricType() will skip validation.
-    if (prometheusName != null && metricType != null) {
-      final String name = prometheusName;
-      final MetricType type = metricType;
-      final Set<String> names = normalizedLabels;
-      final String helpForValidation = help;
-      final Unit unitForValidation = unit;
-      registered.compute(
-          prometheusName,
-          (n, existingInfo) -> {
-            if (existingInfo == null) {
-              return RegistrationInfo.of(type, names, helpForValidation, unitForValidation);
-            } else {
-              if (existingInfo.getType() != type) {
-                throw new IllegalArgumentException(
-                    name
-                        + ": Conflicting metric types. Existing: "
-                        + existingInfo.getType()
-                        + ", new: "
-                        + type);
+      // Only perform validation if collector provides sufficient metadata.
+      // Collectors that don't implement getPrometheusName()/getMetricType() will skip validation.
+      if (prometheusName != null && metricType != null) {
+        final String name = prometheusName;
+        final MetricType type = metricType;
+        final Set<String> names = normalizedLabels;
+        final String helpForValidation = help;
+        final Unit unitForValidation = unit;
+        registered.compute(
+            prometheusName,
+            (n, existingInfo) -> {
+              if (existingInfo == null) {
+                return RegistrationInfo.of(type, names, helpForValidation, unitForValidation);
+              } else {
+                if (existingInfo.getType() != type) {
+                  throw new IllegalArgumentException(
+                      name
+                          + ": Conflicting metric types. Existing: "
+                          + existingInfo.getType()
+                          + ", new: "
+                          + type);
+                }
+                existingInfo.validateMetadata(helpForValidation, unitForValidation);
+                if (!existingInfo.addLabelSet(names)) {
+                  throw new IllegalArgumentException(
+                      name + ": duplicate metric name with identical label schema " + names);
+                }
+                return existingInfo;
               }
-              existingInfo.validateMetadata(helpForValidation, unitForValidation);
-              if (!existingInfo.addLabelSet(names)) {
-                throw new IllegalArgumentException(
-                    name + ": duplicate metric name with identical label schema " + names);
-              }
-              return existingInfo;
-            }
-          });
+            });
 
-      collectorMetadata.put(collector, new CollectorRegistration(prometheusName, normalizedLabels));
+        collectorMetadata.put(
+            collector, new CollectorRegistration(prometheusName, normalizedLabels));
+      }
+
+      if (prometheusName != null) {
+        prometheusNames.add(prometheusName);
+      }
+    } catch (Exception e) {
+      collectors.remove(collector);
+      CollectorRegistration reg = collectorMetadata.remove(collector);
+      if (reg != null && reg.prometheusName != null) {
+        unregisterLabelSchema(reg.prometheusName, reg.labelNames);
+      }
+      throw e;
     }
-
-    if (prometheusName != null) {
-      prometheusNames.add(prometheusName);
-    }
-
-    collectors.add(collector);
   }
 
   public void register(MultiCollector collector) {
-    if (multiCollectors.contains(collector)) {
+    if (!multiCollectors.add(collector)) {
       throw new IllegalArgumentException("MultiCollector instance is already registered");
     }
-
     List<String> prometheusNamesList = collector.getPrometheusNames();
     List<MultiCollectorRegistration> registrations = new ArrayList<>();
     Set<String> namesOnlyInPrometheusNames = new HashSet<>();
@@ -264,8 +270,8 @@ public class PrometheusRegistry {
       }
 
       multiCollectorMetadata.put(collector, registrations);
-      multiCollectors.add(collector);
     } catch (Exception e) {
+      multiCollectors.remove(collector);
       for (MultiCollectorRegistration registration : registrations) {
         unregisterLabelSchema(registration.prometheusName, registration.labelNames);
       }

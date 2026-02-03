@@ -109,14 +109,13 @@ public interface Collector {
    * same metric name. Two collectors with the same name and type can coexist if they have different
    * label name sets.
    *
-   * <p>Returning {@code null} means label schema validation is skipped for this collector.
+   * <p>Returning {@code null} is treated as an empty label set: the registry normalizes it to
+   * {@code Collections.emptySet()} and performs full label-schema validation and duplicate
+   * detection. Two collectors with the same name, type, and {@code null} (or empty) label names are
+   * considered duplicate and registration of the second will fail.
    *
-   * <p>Validation is performed only at registration time. If this method returns {@code null}, no
-   * label-schema validation is performed for this collector. If such a collector produces the same
-   * metric name and label schema as another at scrape time, the exposition may contain duplicate
-   * time series, which is invalid in Prometheus.
-   *
-   * @return the set of all label names, or {@code null} to skip validation
+   * @return the set of all label names, or {@code null} (treated as empty) for a metric with no
+   *     labels
    */
   @Nullable
   default Set<String> getLabelNames() {

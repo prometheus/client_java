@@ -257,6 +257,68 @@ class PrometheusRegistryTest {
   }
 
   @Test
+  void register_duplicateLabelSchema_rollsBackCollectorOnFailure() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector counter1 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("http_requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "http_requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path", "status"));
+          }
+        };
+
+    Collector counter2 =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("http_requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "http_requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path", "status"));
+          }
+        };
+
+    registry.register(counter1);
+
+    // Second collector has same name and label schema - registration fails during metadata
+    // validation. The failed collector must be rolled back (not present in the registry).
+    assertThatThrownBy(() -> registry.register(counter2))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("duplicate metric name with identical label schema");
+
+    // Only the first collector should be in the registry; counter2 was removed on rollback.
+    assertThat(registry.scrape().size()).isEqualTo(1);
+  }
+
+  @Test
   void register_nullType_skipsValidation() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
