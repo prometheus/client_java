@@ -22,7 +22,6 @@ class PrometheusInstrumentationScopeTest {
             () ->
                 PrometheusInstrumentationScope.loadInstrumentationScopeInfo(
                     "instrumentationScope.properties", "name", "version"))
-        .havingRootCause()
         .withMessage(
             "Prometheus metrics library initialization error: name not found in"
                 + " instrumentationScope.properties in classpath.");
@@ -32,7 +31,6 @@ class PrometheusInstrumentationScopeTest {
             () ->
                 PrometheusInstrumentationScope.loadInstrumentationScopeInfo(
                     "instrumentationScope.properties", "instrumentationScope.name", "version"))
-        .havingRootCause()
         .withMessage(
             "Prometheus metrics library initialization error: version not found in"
                 + " instrumentationScope.properties in classpath.");
