@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nullable;
 
 /**
@@ -234,6 +235,21 @@ public class TextFormatUtil {
           throw new IllegalArgumentException(
               "Cannot merge histograms: gauge histogram and classic histogram");
         }
+      }
+      // Validate metadata consistency so we don't silently pick one help/unit when they differ.
+      if (!Objects.equals(
+          first.getMetadata().getPrometheusName(), snapshot.getMetadata().getPrometheusName())) {
+        throw new IllegalArgumentException("Cannot merge snapshots: inconsistent metric name");
+      }
+      if (!Objects.equals(first.getMetadata().getHelp(), snapshot.getMetadata().getHelp())) {
+        throw new IllegalArgumentException(
+            "Cannot merge snapshots: conflicting help for metric "
+                + first.getMetadata().getPrometheusName());
+      }
+      if (!Objects.equals(first.getMetadata().getUnit(), snapshot.getMetadata().getUnit())) {
+        throw new IllegalArgumentException(
+            "Cannot merge snapshots: conflicting unit for metric "
+                + first.getMetadata().getPrometheusName());
       }
       totalDataPoints += snapshot.getDataPoints().size();
     }

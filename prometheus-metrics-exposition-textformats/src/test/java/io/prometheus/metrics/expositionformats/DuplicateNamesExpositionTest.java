@@ -35,7 +35,7 @@ class DuplicateNamesExpositionTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
 
@@ -57,7 +57,7 @@ class DuplicateNamesExpositionTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
     return registry;
@@ -110,7 +110,7 @@ class DuplicateNamesExpositionTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
 
@@ -138,7 +138,7 @@ class DuplicateNamesExpositionTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
 
@@ -205,7 +205,7 @@ class DuplicateNamesExpositionTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
 
@@ -228,7 +228,7 @@ class DuplicateNamesExpositionTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
 

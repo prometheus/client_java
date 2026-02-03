@@ -41,7 +41,7 @@ class DuplicateNamesProtobufTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
 
@@ -63,7 +63,7 @@ class DuplicateNamesProtobufTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
     return registry;
@@ -140,7 +140,7 @@ class DuplicateNamesProtobufTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
 
@@ -168,7 +168,7 @@ class DuplicateNamesProtobufTest {
 
           @Override
           public String getPrometheusName() {
-            return "api_responses_total";
+            return "api_responses";
           }
         });
 
@@ -258,7 +258,7 @@ class DuplicateNamesProtobufTest {
 
           @Override
           public String getPrometheusName() {
-            return "http_requests_total";
+            return "http_requests";
           }
         });
 

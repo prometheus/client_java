@@ -18,7 +18,6 @@ public class PrometheusRegistry {
 
   public static final PrometheusRegistry defaultRegistry = new PrometheusRegistry();
 
-  private final Set<String> prometheusNames = ConcurrentHashMap.newKeySet();
   private final Set<Collector> collectors = ConcurrentHashMap.newKeySet();
   private final Set<MultiCollector> multiCollectors = ConcurrentHashMap.newKeySet();
   private final ConcurrentHashMap<String, RegistrationInfo> registered = new ConcurrentHashMap<>();
@@ -187,21 +186,18 @@ public class PrometheusRegistry {
                           + ", new: "
                           + type);
                 }
-                existingInfo.validateMetadata(helpForValidation, unitForValidation);
+                // Check label set first; only mutate help/unit after validation passes.
                 if (!existingInfo.addLabelSet(names)) {
                   throw new IllegalArgumentException(
                       name + ": duplicate metric name with identical label schema " + names);
                 }
+                existingInfo.validateMetadata(helpForValidation, unitForValidation);
                 return existingInfo;
               }
             });
 
         collectorMetadata.put(
             collector, new CollectorRegistration(prometheusName, normalizedLabels));
-      }
-
-      if (prometheusName != null) {
-        prometheusNames.add(prometheusName);
       }
     } catch (Exception e) {
       collectors.remove(collector);
@@ -219,7 +215,6 @@ public class PrometheusRegistry {
     }
     List<String> prometheusNamesList = collector.getPrometheusNames();
     List<MultiCollectorRegistration> registrations = new ArrayList<>();
-    Set<String> namesOnlyInPrometheusNames = new HashSet<>();
 
     try {
       for (String prometheusName : prometheusNamesList) {
@@ -249,23 +244,19 @@ public class PrometheusRegistry {
                             + ", new: "
                             + type);
                   }
-                  existingInfo.validateMetadata(helpForValidation, unitForValidation);
+                  // Check label set first; only mutate help/unit after validation passes.
                   if (!existingInfo.addLabelSet(labelNamesForValidation)) {
                     throw new IllegalArgumentException(
                         prometheusName
                             + ": duplicate metric name with identical label schema "
                             + labelNamesForValidation);
                   }
+                  existingInfo.validateMetadata(helpForValidation, unitForValidation);
                   return existingInfo;
                 }
               });
 
           registrations.add(new MultiCollectorRegistration(prometheusName, normalizedLabels));
-        }
-
-        boolean addedToPrometheusNames = prometheusNames.add(prometheusName);
-        if (addedToPrometheusNames && metricType == null) {
-          namesOnlyInPrometheusNames.add(prometheusName);
         }
       }
 
@@ -274,9 +265,6 @@ public class PrometheusRegistry {
       multiCollectors.remove(collector);
       for (MultiCollectorRegistration registration : registrations) {
         unregisterLabelSchema(registration.prometheusName, registration.labelNames);
-      }
-      for (String name : namesOnlyInPrometheusNames) {
-        prometheusNames.remove(name);
       }
       throw e;
     }
@@ -303,8 +291,8 @@ public class PrometheusRegistry {
   }
 
   /**
-   * Decrements the reference count for a label schema and removes the metric name entirely if no
-   * schemas remain.
+   * Removes the label schema for the given metric name. If no label schemas remain for that name,
+   * removes the metric name entirely from the registry.
    */
   private void unregisterLabelSchema(String prometheusName, Set<String> labelNames) {
     registered.computeIfPresent(
@@ -312,18 +300,15 @@ public class PrometheusRegistry {
         (name, info) -> {
           info.removeLabelSet(labelNames);
           if (info.isEmpty()) {
-            // No more label schemas for this name, remove it entirely
-            prometheusNames.remove(prometheusName);
             return null; // remove from registered map
           }
-          return info; // keep the RegistrationInfo, just with decremented count
+          return info;
         });
   }
 
   public void clear() {
     collectors.clear();
     multiCollectors.clear();
-    prometheusNames.clear();
     registered.clear();
     collectorMetadata.clear();
     multiCollectorMetadata.clear();
