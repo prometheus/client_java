@@ -9,7 +9,7 @@ import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_4.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_5.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
