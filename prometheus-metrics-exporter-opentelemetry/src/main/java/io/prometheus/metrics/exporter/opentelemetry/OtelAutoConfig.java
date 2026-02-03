@@ -112,7 +112,7 @@ public class OtelAutoConfig {
       Method method = AutoConfiguredOpenTelemetrySdk.class.getDeclaredMethod("getResource");
       method.setAccessible(true);
       return (Resource) method.invoke(sdk);
-    } catch (Exception e) {
+    } catch (ReflectiveOperationException e) {
       throw new RuntimeException(e);
     }
   }

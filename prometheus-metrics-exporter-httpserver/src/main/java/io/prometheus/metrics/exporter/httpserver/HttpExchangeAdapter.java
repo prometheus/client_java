@@ -112,7 +112,7 @@ public class HttpExchangeAdapter implements PrometheusHttpExchange {
         httpExchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
         httpExchange.sendResponseHeaders(500, stackTrace.length);
         httpExchange.getResponseBody().write(stackTrace);
-      } catch (Exception errorWriterException) {
+      } catch (IOException errorWriterException) {
         // We want to avoid logging so that we don't mess with application logs when the HTTPServer
         // is used in a Java agent.
         // However, if we can't even send an error response to the client there's nothing we can do

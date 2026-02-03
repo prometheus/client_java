@@ -1,6 +1,8 @@
 package io.prometheus.metrics.exporter.opentelemetry;
 
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 class PrometheusInstrumentationScope {
@@ -21,8 +23,15 @@ class PrometheusInstrumentationScope {
       String path, String nameKey, String versionKey) {
     try {
       Properties properties = new Properties();
-      properties.load(
-          PrometheusInstrumentationScope.class.getClassLoader().getResourceAsStream(path));
+      InputStream stream =
+          PrometheusInstrumentationScope.class.getClassLoader().getResourceAsStream(path);
+      if (stream == null) {
+        throw new IllegalStateException(
+            "Prometheus metrics library initialization error: Failed to read "
+                + path
+                + " from classpath.");
+      }
+      properties.load(stream);
       String instrumentationScopeName = properties.getProperty(nameKey);
       if (instrumentationScopeName == null) {
         throw new IllegalStateException(
@@ -44,7 +53,7 @@ class PrometheusInstrumentationScope {
       return InstrumentationScopeInfo.builder(instrumentationScopeName)
           .setVersion(instrumentationScopeVersion)
           .build();
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new IllegalStateException(
           "Prometheus metrics library initialization error: Failed to read "
               + path
