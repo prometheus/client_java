@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.io.Resources;
 import io.prometheus.client.it.common.ExporterTest;
-import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_4.Metrics;
+import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_5.Metrics;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
