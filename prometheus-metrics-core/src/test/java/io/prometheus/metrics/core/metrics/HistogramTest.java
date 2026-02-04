@@ -1,9 +1,11 @@
 package io.prometheus.metrics.core.metrics;
 
 import static io.prometheus.metrics.core.metrics.TestUtil.assertExemplarEquals;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.data.Offset.offset;
+import static org.awaitility.Awaitility.await;
 
 import io.prometheus.metrics.config.EscapingScheme;
 import io.prometheus.metrics.config.MetricsProperties;
@@ -1020,10 +1022,18 @@ class HistogramTest {
     assertThat(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello")).isNull();
     assertThat(getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world")).isNull();
 
-    Thread.sleep(sampleIntervalMillis + 1);
+    waitForSampleInterval(sampleIntervalMillis);
     histogram.labelValues("/hello").observe(4.5);
     histogram.labelValues("/world").observe(4.5);
 
+    await()
+        .atMost(2, SECONDS)
+        .until(
+            () -> {
+              HistogramSnapshot s = histogram.collect();
+              return getExemplar(s, Double.POSITIVE_INFINITY, "path", "/hello") != null
+                  && getExemplar(s, Double.POSITIVE_INFINITY, "path", "/world") != null;
+            });
     snapshot = histogram.collect();
     assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
     assertExemplarEquals(ex1b, getExemplar(snapshot, 1.0, "path", "/world"));
@@ -1036,16 +1046,28 @@ class HistogramTest {
     assertExemplarEquals(ex2a, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/hello"));
     assertExemplarEquals(ex2b, getExemplar(snapshot, Double.POSITIVE_INFINITY, "path", "/world"));
 
-    Thread.sleep(sampleIntervalMillis + 1);
+    waitForSampleInterval(sampleIntervalMillis);
     histogram.labelValues("/hello").observe(1.5);
     histogram.labelValues("/world").observe(1.5);
-    Thread.sleep(sampleIntervalMillis + 1);
+    waitForSampleInterval(sampleIntervalMillis);
     histogram.labelValues("/hello").observe(2.5);
     histogram.labelValues("/world").observe(2.5);
-    Thread.sleep(sampleIntervalMillis + 1);
+    waitForSampleInterval(sampleIntervalMillis);
     histogram.labelValues("/hello").observe(3.5);
     histogram.labelValues("/world").observe(3.5);
 
+    await()
+        .atMost(2, SECONDS)
+        .until(
+            () -> {
+              HistogramSnapshot s = histogram.collect();
+              return getExemplar(s, 2.0, "path", "/hello") != null
+                  && getExemplar(s, 2.0, "path", "/world") != null
+                  && getExemplar(s, 3.0, "path", "/hello") != null
+                  && getExemplar(s, 3.0, "path", "/world") != null
+                  && getExemplar(s, 4.0, "path", "/hello") != null
+                  && getExemplar(s, 4.0, "path", "/world") != null;
+            });
     snapshot = histogram.collect();
     assertExemplarEquals(ex1a, getExemplar(snapshot, 1.0, "path", "/hello"));
     assertExemplarEquals(ex1b, getExemplar(snapshot, 1.0, "path", "/world"));
@@ -1072,13 +1094,30 @@ class HistogramTest {
                     "span_id",
                     "spanId-11"))
             .build();
-    Thread.sleep(sampleIntervalMillis + 1);
+    waitForSampleInterval(sampleIntervalMillis);
     histogram
         .labelValues("/hello")
         .observeWithExemplar(3.4, Labels.of("key1", "value1", "key2", "value2"));
+    await()
+        .atMost(2, SECONDS)
+        .until(
+            () -> {
+              Exemplar actual = getExemplar(histogram.collect(), 4.0, "path", "/hello");
+              return actual != null && Math.abs(actual.getValue() - 3.4) < 0.00001;
+            });
     snapshot = histogram.collect();
     // custom exemplars have preference, so the automatic exemplar is replaced
     assertExemplarEquals(custom, getExemplar(snapshot, 4.0, "path", "/hello"));
+  }
+
+  /** Waits for the exemplar sampler's rate limit window so the next observation is accepted. */
+  private static void waitForSampleInterval(long sampleIntervalMillis) {
+    try {
+      Thread.sleep(2 * sampleIntervalMillis);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new AssertionError("Interrupted while waiting for sample interval", e);
+    }
   }
 
   private Exemplar getExemplar(HistogramSnapshot snapshot, double le, String... labels) {

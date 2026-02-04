@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           persist-credentials: false
+          fetch-tags: "true"
+          fetch-depth: 0
       - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
         with:
           version: v2026.2.0
@@ -27,8 +29,10 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Build Javadoc
-        run: mise run javadoc
+      - name: Build GitHub Pages
+        run: mise run build-gh-pages
+        env:
+          BASE_URL: "/client_java"
       - name: Build release version
         run: mise run build-release
         env:
