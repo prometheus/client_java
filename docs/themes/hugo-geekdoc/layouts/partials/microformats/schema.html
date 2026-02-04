@@ -15,7 +15,22 @@
   </script>
 {{- else if $isPage }}
   {{- $title := partial "utils/title" . }}
-  {{- $schema := dict "@context" "http://schema.org" "@type" "TechArticle" "articleSection" (.Section | humanize | title) "name" $title "url" .Permalink "headline" $title "wordCount" (string .WordCount) "inLanguage" .Lang "isFamilyFriendly" "true" "copyrightHolder" .Site.Title "copyrightYear" (.Date.Format "2006") "dateCreated" (.Date.Format "2006-01-02T15:04:05.00Z") "datePublished" (.PublishDate.Format "2006-01-02T15:04:05.00Z") "dateModified" (.Lastmod.Format "2006-01-02T15:04:05.00Z") }}
+  {{- $schema := dict
+      "@context" "http://schema.org"
+      "@type" "TechArticle"
+      "articleSection" (.Section | humanize | title)
+      "name" $title
+      "url" .Permalink
+      "headline" $title
+      "wordCount" (string .WordCount)
+      "inLanguage" .Lang
+      "isFamilyFriendly" "true"
+      "copyrightHolder" .Site.Title
+      "copyrightYear" (.Date.Format "2006")
+      "dateCreated" (.Date.Format "2006-01-02T15:04:05.00Z")
+      "datePublished" (.PublishDate.Format "2006-01-02T15:04:05.00Z")
+      "dateModified" (.Lastmod.Format "2006-01-02T15:04:05.00Z")
+    }}
   {{- with .Params.lead }}
     {{- $schema = merge $schema (dict "alternativeHeadline" .) }}
   {{- end }}
