@@ -162,6 +162,9 @@ docker-compose down
 
 ## Further Reading
 
+<!-- editorconfig-checker-disable -->
+<!-- markdownlint-disable MD013 -->
+
 - [Prometheus Native Histograms Specification](https://prometheus.io/docs/specs/native_histograms/)
 - [Prometheus Java Client Documentation](https://prometheus.github.io/client_java/)
 - [OpenTelemetry Exponential Histograms](https://opentelemetry.io/docs/specs/otel/metrics/data-model/#exponentialhistogram)
