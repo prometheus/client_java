@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Load super-linter configuration
-        run: grep -v '^#' .github/super-linter.env | grep -v 'FIX_' >> "$GITHUB_ENV"
+        run: grep -v '^#' .github/config/super-linter.env | grep -v 'FIX_' >> "$GITHUB_ENV"
 
       - name: Super-linter
         uses: super-linter/super-linter@12562e48d7059cf666c43a4ecb0d3b5a2b31bd9e # v8.4.0
