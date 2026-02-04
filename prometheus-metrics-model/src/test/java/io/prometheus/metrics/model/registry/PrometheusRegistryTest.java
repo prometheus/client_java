@@ -86,7 +86,7 @@ class PrometheusRegistryTest {
       };
 
   @Test
-  void register_duplicateName_withoutTypeInfo_notAllowed() {
+  void register_sameInstanceTwice_notAllowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
     registry.register(noName);
@@ -316,6 +316,110 @@ class PrometheusRegistryTest {
 
     // Only the first collector should be in the registry; counter2 was removed on rollback.
     assertThat(registry.scrape().size()).isEqualTo(1);
+  }
+
+  @Test
+  void register_metadataValidationFailure_rollsBackLabelSchema() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector counterWithHelpOne =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "First help", null);
+          }
+        };
+
+    Collector counterWithHelpTwo =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("status"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "Second help", null);
+          }
+        };
+
+    Collector counterWithCorrectHelp =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("status"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "First help", null);
+          }
+        };
+
+    registry.register(counterWithHelpOne);
+
+    // Second collector has conflicting help - should fail and roll back its label schema
+    assertThatThrownBy(() -> registry.register(counterWithHelpTwo))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Conflicting help strings");
+
+    // Third collector has same label schema as second (which failed), but correct help.
+    // If label schema wasn't rolled back, this would fail with "duplicate label schema".
+    // If rollback worked, this should succeed.
+    assertThatCode(() -> registry.register(counterWithCorrectHelp)).doesNotThrowAnyException();
+
+    // Verify both collectors are in the registry
+    assertThat(registry.scrape().size()).isEqualTo(2);
   }
 
   @Test
@@ -710,6 +814,72 @@ class PrometheusRegistryTest {
   }
 
   @Test
+  void register_sameName_nullVsNonNullHelp_notAllowed() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Collector withHelp =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").help("Total requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("path"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", "Total requests", null);
+          }
+        };
+
+    Collector withoutHelp =
+        new Collector() {
+          @Override
+          public MetricSnapshot collect() {
+            return CounterSnapshot.builder().name("requests").build();
+          }
+
+          @Override
+          public String getPrometheusName() {
+            return "requests";
+          }
+
+          @Override
+          public MetricType getMetricType() {
+            return MetricType.COUNTER;
+          }
+
+          @Override
+          public Set<String> getLabelNames() {
+            return new HashSet<>(asList("status"));
+          }
+
+          @Override
+          public MetricMetadata getMetadata() {
+            return new MetricMetadata("requests", null, null);
+          }
+        };
+
+    registry.register(withHelp);
+    assertThatThrownBy(() -> registry.register(withoutHelp))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Conflicting help strings");
+  }
+
+  @Test
   void register_sameName_sameHelpAndUnit_allowed() {
     PrometheusRegistry registry = new PrometheusRegistry();
 
@@ -771,162 +941,6 @@ class PrometheusRegistryTest {
 
     registry.register(withPath);
     assertThatCode(() -> registry.register(withStatus)).doesNotThrowAnyException();
-  }
-
-  @Test
-  void register_sameName_oneNullHelp_allowed() {
-    PrometheusRegistry registry = new PrometheusRegistry();
-
-    Collector withHelp =
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder().name("requests").help("Total requests").build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "requests";
-          }
-
-          @Override
-          public MetricType getMetricType() {
-            return MetricType.COUNTER;
-          }
-
-          @Override
-          public Set<String> getLabelNames() {
-            return new HashSet<>(asList("path"));
-          }
-
-          @Override
-          public MetricMetadata getMetadata() {
-            return new MetricMetadata("requests", "Total requests", null);
-          }
-        };
-
-    Collector withoutHelp =
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder().name("requests").build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "requests";
-          }
-
-          @Override
-          public MetricType getMetricType() {
-            return MetricType.COUNTER;
-          }
-
-          @Override
-          public Set<String> getLabelNames() {
-            return new HashSet<>(asList("status"));
-          }
-
-          @Override
-          public MetricMetadata getMetadata() {
-            return new MetricMetadata("requests", null, null);
-          }
-        };
-
-    registry.register(withHelp);
-    // One has help, one doesn't - should be allowed
-    assertThatCode(() -> registry.register(withoutHelp)).doesNotThrowAnyException();
-  }
-
-  @Test
-  void register_firstOmitsHelp_secondProvidesHelp_thirdWithDifferentHelp_throws() {
-    PrometheusRegistry registry = new PrometheusRegistry();
-
-    Collector withoutHelp =
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder().name("requests").build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "requests";
-          }
-
-          @Override
-          public MetricType getMetricType() {
-            return MetricType.COUNTER;
-          }
-
-          @Override
-          public Set<String> getLabelNames() {
-            return new HashSet<>(asList("path"));
-          }
-        };
-
-    Collector withHelpTotal =
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder().name("requests").help("Total requests").build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "requests";
-          }
-
-          @Override
-          public MetricType getMetricType() {
-            return MetricType.COUNTER;
-          }
-
-          @Override
-          public Set<String> getLabelNames() {
-            return new HashSet<>(asList("status"));
-          }
-
-          @Override
-          public MetricMetadata getMetadata() {
-            return new MetricMetadata("requests", "Total requests", null);
-          }
-        };
-
-    Collector withHelpOther =
-        new Collector() {
-          @Override
-          public MetricSnapshot collect() {
-            return CounterSnapshot.builder().name("requests").help("Other help").build();
-          }
-
-          @Override
-          public String getPrometheusName() {
-            return "requests";
-          }
-
-          @Override
-          public MetricType getMetricType() {
-            return MetricType.COUNTER;
-          }
-
-          @Override
-          public Set<String> getLabelNames() {
-            return new HashSet<>(asList("method"));
-          }
-
-          @Override
-          public MetricMetadata getMetadata() {
-            return new MetricMetadata("requests", "Other help", null);
-          }
-        };
-
-    registry.register(withoutHelp);
-    registry.register(withHelpTotal);
-    // First had no help, second provided "Total requests" (captured). Third conflicts.
-    assertThatThrownBy(() -> registry.register(withHelpOther))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Conflicting help strings");
   }
 
   @Test

@@ -1,5 +1,7 @@
 package io.prometheus.metrics.model.registry;
 
+import static java.util.Collections.emptySet;
+
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
 import io.prometheus.metrics.model.snapshots.MetricSnapshots;
@@ -53,8 +55,7 @@ public class PrometheusRegistry {
 
   /**
    * Tracks registration information for each metric name to enable validation of type consistency,
-   * label schema uniqueness, and help/unit consistency. Stores metadata to enable O(1)
-   * unregistration without iterating through all collectors.
+   * label schema uniqueness, and help/unit consistency.
    */
   private static class RegistrationInfo {
     private final MetricType type;
@@ -80,30 +81,24 @@ public class PrometheusRegistry {
         @Nullable Unit unit) {
       Set<Set<String>> labelSchemas = ConcurrentHashMap.newKeySet();
       Set<String> normalized =
-          (labelNames == null || labelNames.isEmpty()) ? Collections.emptySet() : labelNames;
+          (labelNames == null || labelNames.isEmpty()) ? emptySet() : labelNames;
       labelSchemas.add(normalized);
       return new RegistrationInfo(type, labelSchemas, help, unit);
     }
 
     /**
-     * Validates that the given help and unit are consistent with this registration. Throws if
-     * non-null values conflict. When stored help/unit is null and the new value is non-null,
-     * captures the first non-null so subsequent registrations are validated consistently.
+     * Validates that the given help and unit are exactly equal to this registration. Throws if
+     * values differ, including when one is null and the other is non-null. This ensures consistent
+     * metadata across all collectors sharing the same metric name.
      */
     void validateMetadata(@Nullable String newHelp, @Nullable Unit newUnit) {
-      if (help != null && newHelp != null && !Objects.equals(help, newHelp)) {
+      if (!Objects.equals(help, newHelp)) {
         throw new IllegalArgumentException(
             "Conflicting help strings. Existing: \"" + help + "\", new: \"" + newHelp + "\"");
       }
-      if (unit != null && newUnit != null && !Objects.equals(unit, newUnit)) {
+      if (!Objects.equals(unit, newUnit)) {
         throw new IllegalArgumentException(
             "Conflicting unit. Existing: " + unit + ", new: " + newUnit);
-      }
-      if (help == null && newHelp != null) {
-        this.help = newHelp;
-      }
-      if (unit == null && newUnit != null) {
-        this.unit = newUnit;
       }
     }
 
@@ -115,7 +110,7 @@ public class PrometheusRegistry {
      */
     boolean addLabelSet(@Nullable Set<String> labelNames) {
       Set<String> normalized =
-          (labelNames == null || labelNames.isEmpty()) ? Collections.emptySet() : labelNames;
+          (labelNames == null || labelNames.isEmpty()) ? emptySet() : labelNames;
       return labelSchemas.add(normalized);
     }
 
@@ -126,7 +121,7 @@ public class PrometheusRegistry {
      */
     void removeLabelSet(@Nullable Set<String> labelNames) {
       Set<String> normalized =
-          (labelNames == null || labelNames.isEmpty()) ? Collections.emptySet() : labelNames;
+          (labelNames == null || labelNames.isEmpty()) ? emptySet() : labelNames;
       labelSchemas.remove(normalized);
     }
 
@@ -147,9 +142,54 @@ public class PrometheusRegistry {
    */
   private static Set<String> immutableLabelNames(@Nullable Set<String> labelNames) {
     if (labelNames == null || labelNames.isEmpty()) {
-      return Collections.emptySet();
+      return emptySet();
     }
     return Collections.unmodifiableSet(new HashSet<>(labelNames));
+  }
+
+  /**
+   * Validates the registration of a metric with the given parameters. Ensures type consistency,
+   * label schema uniqueness, and help/unit consistency.
+   */
+  private void validateRegistration(
+      String prometheusName,
+      MetricType metricType,
+      Set<String> normalizedLabels,
+      @Nullable String help,
+      @Nullable Unit unit) {
+    final MetricType type = metricType;
+    final Set<String> names = normalizedLabels;
+    final String helpForValidation = help;
+    final Unit unitForValidation = unit;
+    registered.compute(
+        prometheusName,
+        (n, existingInfo) -> {
+          if (existingInfo == null) {
+            return RegistrationInfo.of(type, names, helpForValidation, unitForValidation);
+          } else {
+            if (existingInfo.getType() != type) {
+              throw new IllegalArgumentException(
+                  prometheusName
+                      + ": Conflicting metric types. Existing: "
+                      + existingInfo.getType()
+                      + ", new: "
+                      + type);
+            }
+            // Check label set first; only mutate help/unit after validation passes.
+            if (!existingInfo.addLabelSet(names)) {
+              throw new IllegalArgumentException(
+                  prometheusName + ": duplicate metric name with identical label schema " + names);
+            }
+            // Roll back label schema if metadata validation fails
+            try {
+              existingInfo.validateMetadata(helpForValidation, unitForValidation);
+            } catch (IllegalArgumentException e) {
+              existingInfo.removeLabelSet(names);
+              throw e;
+            }
+            return existingInfo;
+          }
+        });
   }
 
   public void register(Collector collector) {
@@ -167,35 +207,7 @@ public class PrometheusRegistry {
       // Only perform validation if collector provides sufficient metadata.
       // Collectors that don't implement getPrometheusName()/getMetricType() will skip validation.
       if (prometheusName != null && metricType != null) {
-        final String name = prometheusName;
-        final MetricType type = metricType;
-        final Set<String> names = normalizedLabels;
-        final String helpForValidation = help;
-        final Unit unitForValidation = unit;
-        registered.compute(
-            prometheusName,
-            (n, existingInfo) -> {
-              if (existingInfo == null) {
-                return RegistrationInfo.of(type, names, helpForValidation, unitForValidation);
-              } else {
-                if (existingInfo.getType() != type) {
-                  throw new IllegalArgumentException(
-                      name
-                          + ": Conflicting metric types. Existing: "
-                          + existingInfo.getType()
-                          + ", new: "
-                          + type);
-                }
-                // Check label set first; only mutate help/unit after validation passes.
-                if (!existingInfo.addLabelSet(names)) {
-                  throw new IllegalArgumentException(
-                      name + ": duplicate metric name with identical label schema " + names);
-                }
-                existingInfo.validateMetadata(helpForValidation, unitForValidation);
-                return existingInfo;
-              }
-            });
-
+        validateRegistration(prometheusName, metricType, normalizedLabels, help, unit);
         collectorMetadata.put(
             collector, new CollectorRegistration(prometheusName, normalizedLabels));
       }
@@ -225,37 +237,7 @@ public class PrometheusRegistry {
         Unit unit = metadata != null ? metadata.getUnit() : null;
 
         if (metricType != null) {
-          final MetricType type = metricType;
-          final Set<String> labelNamesForValidation = normalizedLabels;
-          final String helpForValidation = help;
-          final Unit unitForValidation = unit;
-          registered.compute(
-              prometheusName,
-              (name, existingInfo) -> {
-                if (existingInfo == null) {
-                  return RegistrationInfo.of(
-                      type, labelNamesForValidation, helpForValidation, unitForValidation);
-                } else {
-                  if (existingInfo.getType() != type) {
-                    throw new IllegalArgumentException(
-                        prometheusName
-                            + ": Conflicting metric types. Existing: "
-                            + existingInfo.getType()
-                            + ", new: "
-                            + type);
-                  }
-                  // Check label set first; only mutate help/unit after validation passes.
-                  if (!existingInfo.addLabelSet(labelNamesForValidation)) {
-                    throw new IllegalArgumentException(
-                        prometheusName
-                            + ": duplicate metric name with identical label schema "
-                            + labelNamesForValidation);
-                  }
-                  existingInfo.validateMetadata(helpForValidation, unitForValidation);
-                  return existingInfo;
-                }
-              });
-
+          validateRegistration(prometheusName, metricType, normalizedLabels, help, unit);
           registrations.add(new MultiCollectorRegistration(prometheusName, normalizedLabels));
         }
       }
@@ -300,7 +282,7 @@ public class PrometheusRegistry {
         (name, info) -> {
           info.removeLabelSet(labelNames);
           if (info.isEmpty()) {
-            return null; // remove from registered map
+            return null;
           }
           return info;
         });
