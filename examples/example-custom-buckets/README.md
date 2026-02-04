@@ -145,12 +145,12 @@ Consider using custom buckets (and NHCB) when:
 
 ## Differences from Standard Native Histograms
 
-| Feature           | Standard Native Histograms            | NHCB (Schema -53)                      |
-| ----------------- | ------------------------------------- | -------------------------------------- |
-| Bucket boundaries | Exponential (base 2^(2^-scale))       | Custom boundaries                      |
-| Use case          | General-purpose                       | Specific distributions                 |
-| Mergeability      | Can merge histograms with same schema | Cannot merge with different boundaries |
-| Configuration     | Schema level (0-8)                    | Explicit boundary list                 |
+| Feature           | Standard Native Histograms      | NHCB (Schema -53)                 |
+| ----------------- | ------------------------------- | --------------------------------- |
+| Bucket boundaries | Exponential (base 2^(2^-scale)) | Custom boundaries                 |
+| Use case          | General-purpose                 | Specific distributions            |
+| Mergeability      | Can merge with same schema      | Cannot merge different boundaries |
+| Configuration     | Schema level (0-8)              | Explicit boundary list            |
 
 ## Cleanup
 
