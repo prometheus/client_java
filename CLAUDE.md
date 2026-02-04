@@ -69,19 +69,46 @@ Pre-built instrumentations: `prometheus-metrics-instrumentation-jvm`, `-caffeine
 ## Code Style
 
 - **Formatter**: Google Java Format (enforced via Spotless)
-- **Line length**: 100 characters
+- **Line length**: 100 characters (enforced for ALL files including Markdown, Java, YAML, etc.)
 - **Indentation**: 2 spaces
 - **Static analysis**: Error Prone with NullAway (`io.prometheus.metrics` package)
 - **Logger naming**: Logger fields must be named `logger` (not `log`, `LOG`, or `LOGGER`)
 - **Assertions in tests**: Use static imports from AssertJ (`import static org.assertj.core.api.Assertions.assertThat`)
 - **Empty catch blocks**: Use `ignored` as the exception variable name
+- **Markdown code blocks**: Always specify language (e.g., ` ```java`, ` ```bash`, ` ```text`)
 
 ## Linting and Validation
 
-- **IMPORTANT**: Always run `mise run build` after modifying Java files to ensure all lints, code formatting (Spotless), static analysis (Error Prone), and checkstyle checks pass
-- **IMPORTANT**: Always run `mise run lint:super-linter` after modifying non-Java files (YAML, Markdown, shell scripts, JSON, etc.)
-- Super-linter is configured to only show ERROR-level messages via `LOG_LEVEL=ERROR` in `.github/super-linter.env`
-- Local super-linter version is pinned to match CI (see `.mise/tasks/lint/super-linter.sh`)
+**CRITICAL**: These checks MUST be run before creating any commits. CI will fail if these checks fail.
+
+### Java Files
+
+- **ALWAYS** run `mise run build` after modifying Java files to ensure:
+  - Code formatting (Spotless with Google Java Format)
+  - Static analysis (Error Prone with NullAway)
+  - Checkstyle validation
+  - All tests pass
+
+### Non-Java Files (Markdown, YAML, JSON, shell scripts, etc.)
+
+- **ALWAYS** run `mise run lint:super-linter` after modifying non-Java files
+- Super-linter will **auto-fix** many issues (formatting, trailing whitespace, etc.)
+- It only reports ERROR-level issues (configured via `LOG_LEVEL=ERROR` in `.github/super-linter.env`)
+- Common issues caught:
+  - Lines exceeding 100 characters in Markdown files
+  - Missing language tags in fenced code blocks
+  - Table formatting issues
+  - YAML/JSON syntax errors
+
+### Running Linters
+
+```bash
+# After modifying Java files (run BEFORE committing)
+mise run build
+
+# After modifying non-Java files (run BEFORE committing)
+mise run lint:super-linter
+```
 
 ## Testing
 

@@ -7,6 +7,7 @@ Prometheus converts them to native histograms with schema -53.
 ## What are Native Histograms with Custom Buckets?
 
 Native Histograms with Custom Buckets (NHCB) is a Prometheus feature that combines the benefits of:
+
 - **Custom bucket boundaries**: Precisely defined buckets optimized for your specific use case
 - **Native histograms**: Efficient storage and querying capabilities of native histograms
 
@@ -88,7 +89,7 @@ The Prometheus configuration enables NHCB conversion:
 ```yaml
 scrape_configs:
   - job_name: "custom-buckets-demo"
-    scrape_protocols: ['PrometheusProto']
+    scrape_protocols: ["PrometheusProto"]
     convert_classic_histograms_to_nhcb: true
     scrape_classic_histograms: true
 ```
@@ -111,6 +112,7 @@ api_request_duration_seconds
 ### 3. View in Grafana
 
 The Grafana dashboard at [http://localhost:3000](http://localhost:3000) shows:
+
 - p95 and p50 latencies for API endpoints (arbitrary custom buckets)
 - Queue size distribution (linear buckets)
 - Response size distribution (exponential buckets)
@@ -143,12 +145,12 @@ Consider using custom buckets (and NHCB) when:
 
 ## Differences from Standard Native Histograms
 
-| Feature | Standard Native Histograms | NHCB (Schema -53) |
-|---------|---------------------------|-------------------|
-| Bucket boundaries | Exponential (base 2^(2^-scale)) | Custom boundaries |
-| Use case | General-purpose | Specific distributions |
-| Mergeability | Can merge histograms with same schema | Cannot merge with different boundaries |
-| Configuration | Schema level (0-8) | Explicit boundary list |
+| Feature           | Standard Native Histograms            | NHCB (Schema -53)                      |
+| ----------------- | ------------------------------------- | -------------------------------------- |
+| Bucket boundaries | Exponential (base 2^(2^-scale))       | Custom boundaries                      |
+| Use case          | General-purpose                       | Specific distributions                 |
+| Mergeability      | Can merge histograms with same schema | Cannot merge with different boundaries |
+| Configuration     | Schema level (0-8)                    | Explicit boundary list                 |
 
 ## Cleanup
 
