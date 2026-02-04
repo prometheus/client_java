@@ -32,7 +32,7 @@ jobs:
       - name: Build GitHub Pages
         run: mise run build-gh-pages
         env:
-          BASE_URL: "/client_java/"
+          BASE_URL: "/client_java"
       - name: Build release version
         run: mise run build-release
         env:
