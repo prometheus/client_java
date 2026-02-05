@@ -51,9 +51,30 @@ run = "./mvnw install -DskipTests -Dcoverage.skip=true"
 description = "Run Super-Linter with auto-fix on the repository"
 file = "https://raw.githubusercontent.com/grafana/docker-otel-lgtm/main/.mise/tasks/lint/super-linter.sh"
 
+[tasks."lint:links"]
+file = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/refs/heads/main/.mise/tasks/lint/links.sh"
+
+[tasks."lint:local-links"]
+file = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/refs/heads/main/.mise/tasks/lint/local-links.sh"
+
+[tasks."lint:links-in-modified-files"]
+file = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-contrib/refs/heads/main/.mise/tasks/lint/links-in-modified-files.sh"
+
+[tasks."lint:links-in-modified-files-ci"]
+description = "Lint links in modified files (CI configuration)"
+run = "mise run lint:links-in-modified-files --base origin/$GITHUB_BASE_REF --head $GITHUB_HEAD_SHA"
+
+[tasks."lint:links-in-modified-files-local"]
+description = "Lint links in modified files (local configuration)"
+run = "mise run lint:links-in-modified-files --base origin/main --head HEAD"
+
 [tasks."lint:rest"]
 description = "All lints not covered by super linter"
-depends = ["lint:links", "lint:bom"]
+depends = ["lint:bom", "lint:local-links", "lint:links-in-modified-files-local"]
+
+[tasks."lint:rest-ci"]
+description = "All lints not covered by super linter (CI configuration)"
+depends = ["lint:bom", "lint:local-links", "lint:links-in-modified-files-ci"]
 
 [tasks."lint:all"]
 description = "All lints"
