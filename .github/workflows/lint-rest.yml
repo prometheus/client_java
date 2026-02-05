@@ -27,7 +27,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_BASE_REF: ${{ github.base_ref }}
           GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          mise run lint:bom
-          mise run lint:local-links
-          mise run lint:links-in-modified-files --base origin/"${GITHUB_BASE_REF}" --head "${GITHUB_HEAD_SHA}"
+        run: mise run lint:rest-ci
