@@ -211,7 +211,8 @@ public class PrometheusRegistry {
         collectorMetadata.put(
             collector, new CollectorRegistration(prometheusName, normalizedLabels));
       }
-    } catch (Exception e) {
+
+    } catch (RuntimeException e) {
       collectors.remove(collector);
       CollectorRegistration reg = collectorMetadata.remove(collector);
       if (reg != null && reg.prometheusName != null) {
@@ -243,7 +244,7 @@ public class PrometheusRegistry {
       }
 
       multiCollectorMetadata.put(collector, registrations);
-    } catch (Exception e) {
+    } catch (RuntimeException e) {
       multiCollectors.remove(collector);
       for (MultiCollectorRegistration registration : registrations) {
         unregisterLabelSchema(registration.prometheusName, registration.labelNames);
