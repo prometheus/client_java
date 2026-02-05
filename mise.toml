@@ -5,6 +5,10 @@ java = "temurin-25.0.2+10.0.LTS"
 lychee = "0.22.0"
 protoc = "33.5"
 
+[env]
+# renovate: datasource=docker depName=ghcr.io/super-linter/super-linter
+SUPER_LINTER_VERSION="v8.4.0@sha256:c5e3307932203ff9e1e8acfe7e92e894add6266605b5d7fb525fb371a59a26f4"
+
 [tasks.ci]
 description = "CI Build"
 run = "./mvnw clean install"
@@ -42,6 +46,10 @@ run = "./mvnw verify"
 [tasks.build]
 description = "build all modules without tests"
 run = "./mvnw install -DskipTests -Dcoverage.skip=true"
+
+[tasks."lint:super-linter"]
+description = "Run Super-Linter with auto-fix on the repository"
+file = "https://raw.githubusercontent.com/grafana/docker-otel-lgtm/main/.mise/tasks/lint/super-linter.sh"
 
 [tasks."lint:rest"]
 description = "All lints not covered by super linter"

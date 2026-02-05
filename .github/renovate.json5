@@ -12,11 +12,6 @@
   labels: ["dependencies"],
   packageRules: [
     {
-      matchPackageNames: ["jdx/mise"],
-      groupName: "mise",
-      schedule: ["before 4am on monday"],
-    },
-    {
       matchFileNames: ["mise.toml"],
       matchDepNames: ["java"],
       groupName: "java temurin",
@@ -28,26 +23,13 @@
       groupName: "java graalvm",
       additionalBranchPrefix: "graalvm-",
     },
-    {
-      matchPackageNames: ["/^(ghcr.io/)?super-linter/super-linter$/"],
-      groupName: "super-linter",
-    },
   ],
   customManagers: [
     {
       customType: "regex",
-      description: "update mise",
-      managerFilePatterns: ["/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/", "/(^|/)action\\.ya?ml$/"],
-      datasourceTemplate: "github-release-attachments",
-      packageNameTemplate: "jdx/mise",
-      depNameTemplate: "mise",
-      matchStrings: ["jdx/mise-action.*\\n\\s*with:\\s*\\n\\s*version: [\"']?(?<currentValue>v[.\\d]+)[\"']?\\s*\\n\\s*sha256: [\"']?(?<currentDigest>\\w+)[\"']?"],
-    },
-    {
-      customType: "regex",
-      description: "update super-linter in mise tasks",
-      managerFilePatterns: ["/^\\.mise/tasks/.+\\.sh$/"],
-      matchStrings: ['# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\S+_VERSION="(?<currentValue>v\\d+\\.\\d+\\.\\d+)@(?<currentDigest>sha256:[a-f0-9]+)"'],
+      description: "Update _VERSION variables in mise.toml",
+      managerFilePatterns: ["/^mise\\.toml$/"],
+      matchStrings: ['# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION="?(?<currentValue>[^@"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"?\\s'],
     },
   ],
 }

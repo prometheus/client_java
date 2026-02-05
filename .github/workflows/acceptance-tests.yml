@@ -14,8 +14,5 @@ jobs:
           persist-credentials: false
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3.6.1
-        with:
-          version: v2026.2.0
-          sha256: 7e1cd2dc33f6ebc9f33c1911013ed92bf724cf63ece21f284aaa4b34987e5002
       - name: Run acceptance tests
         run: mise run acceptance-test
