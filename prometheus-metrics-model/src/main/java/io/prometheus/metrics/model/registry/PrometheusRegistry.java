@@ -211,7 +211,9 @@ public class PrometheusRegistry {
         collectorMetadata.put(
             collector, new CollectorRegistration(prometheusName, normalizedLabels));
       }
-
+      // Catch RuntimeException broadly because collector methods (getPrometheusName, getMetricType,
+      // etc.) are user-implemented and could throw any RuntimeException. Ensures cleanup on
+      // failure.
     } catch (RuntimeException e) {
       collectors.remove(collector);
       CollectorRegistration reg = collectorMetadata.remove(collector);
@@ -244,6 +246,9 @@ public class PrometheusRegistry {
       }
 
       multiCollectorMetadata.put(collector, registrations);
+      // Catch RuntimeException broadly because collector methods (getPrometheusNames,
+      // getMetricType, etc.) are user-implemented and could throw any RuntimeException.
+      // Ensures cleanup on failure.
     } catch (RuntimeException e) {
       multiCollectors.remove(collector);
       for (MultiCollectorRegistration registration : registrations) {
