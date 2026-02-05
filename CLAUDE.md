@@ -87,7 +87,7 @@ Pre-built instrumentations: `prometheus-metrics-instrumentation-jvm`, `-caffeine
   - Code formatting (Spotless with Google Java Format)
   - Static analysis (Error Prone with NullAway)
   - Checkstyle validation
-  - All tests pass
+  - Build succeeds (tests are skipped; run `mise run test` or `mise run test-all` to execute tests)
 
 ### Non-Java Files (Markdown, YAML, JSON, shell scripts, etc.)
 
