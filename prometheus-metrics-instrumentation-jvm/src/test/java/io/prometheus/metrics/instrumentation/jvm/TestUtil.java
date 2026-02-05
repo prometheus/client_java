@@ -11,7 +11,11 @@ public class TestUtil {
 
   static String convertToOpenMetricsFormat(MetricSnapshots snapshots) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
+    OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder()
+            .setCreatedTimestampsEnabled(true)
+            .setExemplarsOnAllMetricTypesEnabled(true)
+            .build();
     writer.write(out, snapshots, EscapingScheme.ALLOW_UTF8);
     return out.toString(StandardCharsets.UTF_8);
   }

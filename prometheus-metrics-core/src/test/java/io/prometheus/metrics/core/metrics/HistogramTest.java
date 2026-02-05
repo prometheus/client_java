@@ -951,7 +951,7 @@ class HistogramTest {
 
     // text
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(false, true);
+    OpenMetricsTextFormatWriter writer = OpenMetricsTextFormatWriter.create();
     writer.write(out, MetricSnapshots.of(snapshot), EscapingScheme.ALLOW_UTF8);
     assertThat(out).hasToString(expectedTextFormat);
   }

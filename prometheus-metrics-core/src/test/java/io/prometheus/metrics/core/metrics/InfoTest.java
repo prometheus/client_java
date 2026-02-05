@@ -120,11 +120,15 @@ class InfoTest {
   }
 
   private void assertTextFormat(String expected, Info info) throws IOException {
-    OpenMetricsTextFormatWriter writer = new OpenMetricsTextFormatWriter(true, true);
+    OpenMetricsTextFormatWriter writer =
+        OpenMetricsTextFormatWriter.builder()
+            .setCreatedTimestampsEnabled(true)
+            .setExemplarsOnAllMetricTypesEnabled(true)
+            .build();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     writer.write(
         outputStream, MetricSnapshots.of(info.collect()), EscapingScheme.UNDERSCORE_ESCAPING);
-    String result = outputStream.toString(StandardCharsets.UTF_8.name());
+    String result = outputStream.toString(StandardCharsets.UTF_8);
     if (!result.contains(expected)) {
       throw new AssertionError(expected + " is not contained in the following output:\n" + result);
     }

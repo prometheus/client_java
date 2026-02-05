@@ -44,10 +44,12 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
 
   private final boolean writeCreatedTimestamps;
   private final boolean timestampsInMs;
+  private final boolean addSuffixesToMetricNames;
 
   public static class Builder {
     boolean includeCreatedTimestamps;
     boolean timestampsInMs = true;
+    private boolean addSuffixesToMetricNames = true;
 
     private Builder() {}
 
@@ -65,8 +67,19 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       return this;
     }
 
+    /**
+     * @param addSuffixesToMetricNames whether to add the conventional suffixes to metric names,
+     *     like _total for counters, _bucket for histogram buckets, _count and _sum for histograms
+     *     and summaries, _info for info metrics. This is enabled by default.
+     */
+    public Builder setAddSuffixesToMetricNames(boolean addSuffixesToMetricNames) {
+      this.addSuffixesToMetricNames = addSuffixesToMetricNames;
+      return this;
+    }
+
     public PrometheusTextFormatWriter build() {
-      return new PrometheusTextFormatWriter(includeCreatedTimestamps, timestampsInMs);
+      return new PrometheusTextFormatWriter(
+          includeCreatedTimestamps, timestampsInMs, addSuffixesToMetricNames);
     }
   }
 
@@ -78,12 +91,14 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
    */
   @Deprecated
   public PrometheusTextFormatWriter(boolean writeCreatedTimestamps) {
-    this(writeCreatedTimestamps, false);
+    this(writeCreatedTimestamps, false, true);
   }
 
-  private PrometheusTextFormatWriter(boolean writeCreatedTimestamps, boolean timestampsInMs) {
+  private PrometheusTextFormatWriter(
+      boolean writeCreatedTimestamps, boolean timestampsInMs, boolean addSuffixesToMetricNames) {
     this.writeCreatedTimestamps = writeCreatedTimestamps;
     this.timestampsInMs = timestampsInMs;
+    this.addSuffixesToMetricNames = addSuffixesToMetricNames;
   }
 
   public static PrometheusTextFormatWriter.Builder builder() {
@@ -400,7 +415,8 @@ public class PrometheusTextFormatWriter implements ExpositionFormatWriter {
       metricInsideBraces = true;
       writer.write('{');
     }
-    writeName(writer, name + (suffix != null ? suffix : ""), NameType.Metric);
+    writeName(
+        writer, name + (suffix != null && addSuffixesToMetricNames ? suffix : ""), NameType.Metric);
     if (!labels.isEmpty() || additionalLabelName != null) {
       writeLabels(
           writer, labels, additionalLabelName, additionalLabelValue, metricInsideBraces, scheme);
