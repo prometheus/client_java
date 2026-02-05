@@ -13,6 +13,13 @@ class PrometheusProtobufWriterTest {
   @Test
   void accepts() {
     assertThat(writer.accepts(null)).isFalse();
+    assertThat(writer.accepts("text/plain")).isFalse();
+    assertThat(writer.accepts("application/vnd.google.protobuf")).isFalse();
+    assertThat(writer.accepts("proto=io.prometheus.client.MetricFamily")).isFalse();
+    assertThat(
+            writer.accepts(
+                "application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily"))
+        .isTrue();
   }
 
   @Test
@@ -33,5 +40,10 @@ class PrometheusProtobufWriterTest {
   void toDebugString() {
     assertThatCode(() -> writer.toDebugString(null, EscapingScheme.ALLOW_UTF8))
         .isInstanceOf(UnsupportedOperationException.class);
+  }
+
+  @Test
+  void isAvailable() {
+    assertThat(writer.isAvailable()).isFalse();
   }
 }

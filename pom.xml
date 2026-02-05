@@ -234,6 +234,8 @@
           <excludes>
             <exclude>**/generated/**</exclude>
             <exclude>**/*BlockingRejectedExecutionHandler*</exclude>
+            <exclude>**/*AllocationCountingNotificationListener*</exclude>
+            <exclude>**/*MapperConfig*</exclude>
           </excludes>
         </configuration>
         <executions>

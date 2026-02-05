@@ -30,6 +30,50 @@ class ExporterPushgatewayPropertiesTest {
                 + " Found: foo");
   }
 
+  @Test
+  void loadWithHttps() {
+    ExporterPushgatewayProperties properties =
+        load(Map.of("io.prometheus.exporter.pushgateway.scheme", "https"));
+    assertThat(properties.getScheme()).isEqualTo("https");
+  }
+
+  @Test
+  void loadWithEscapingSchemes() {
+    ExporterPushgatewayProperties properties =
+        load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "allow-utf-8"));
+    assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.ALLOW_UTF8);
+
+    properties = load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "values"));
+    assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.VALUE_ENCODING_ESCAPING);
+
+    properties = load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "underscores"));
+    assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.UNDERSCORE_ESCAPING);
+
+    properties = load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "dots"));
+    assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.DOTS_ESCAPING);
+  }
+
+  @Test
+  void loadWithInvalidEscapingScheme() {
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(
+            () -> load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "invalid")))
+        .withMessage(
+            "io.prometheus.exporter.pushgateway.escapingScheme: Illegal value. Expecting"
+                + " 'allow-utf-8', 'values', 'underscores', or 'dots'. Found: invalid");
+  }
+
+  @Test
+  void loadWithTimeouts() {
+    ExporterPushgatewayProperties properties =
+        load(
+            Map.of(
+                "io.prometheus.exporter.pushgateway.connectTimeoutSeconds", "5",
+                "io.prometheus.exporter.pushgateway.readTimeoutSeconds", "10"));
+    assertThat(properties.getConnectTimeout()).isEqualTo(Duration.ofSeconds(5));
+    assertThat(properties.getReadTimeout()).isEqualTo(Duration.ofSeconds(10));
+  }
+
   private static ExporterPushgatewayProperties load(Map<String, String> map) {
     Map<Object, Object> regularProperties = new HashMap<>(map);
     PropertySource propertySource = new PropertySource(regularProperties);

@@ -1,6 +1,7 @@
 package io.prometheus.metrics.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,5 +68,41 @@ class ExporterOpenTelemetryPropertiesTest {
             .resourceAttribute("key2", "value2")
             .build();
     assertValues(properties);
+  }
+
+  @Test
+  void builderWithHttpProtobuf() {
+    ExporterOpenTelemetryProperties properties =
+        ExporterOpenTelemetryProperties.builder().protocol("http/protobuf").build();
+    assertThat(properties.getProtocol()).isEqualTo("http/protobuf");
+  }
+
+  @Test
+  void builderWithInvalidProtocol() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> ExporterOpenTelemetryProperties.builder().protocol("invalid"))
+        .withMessage("invalid: Unsupported protocol. Expecting grpc or http/protobuf");
+  }
+
+  @Test
+  void builderWithInvalidIntervalSeconds() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> ExporterOpenTelemetryProperties.builder().intervalSeconds(0))
+        .withMessage("0: Expecting intervalSeconds > 0");
+
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> ExporterOpenTelemetryProperties.builder().intervalSeconds(-1))
+        .withMessage("-1: Expecting intervalSeconds > 0");
+  }
+
+  @Test
+  void builderWithInvalidTimeoutSeconds() {
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> ExporterOpenTelemetryProperties.builder().timeoutSeconds(0))
+        .withMessage("0: Expecting timeoutSeconds > 0");
+
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> ExporterOpenTelemetryProperties.builder().timeoutSeconds(-1))
+        .withMessage("-1: Expecting timeoutSeconds > 0");
   }
 }
