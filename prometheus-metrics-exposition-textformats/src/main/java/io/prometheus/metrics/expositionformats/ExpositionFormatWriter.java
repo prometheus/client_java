@@ -20,6 +20,8 @@ public interface ExpositionFormatWriter {
   }
 
   /** Converts the metric snapshots to a debug string using the specified escaping scheme. */
+  // toString with Charset is only available in Java 10+, but we want to support Java 8
+  @SuppressWarnings("JdkObsolete")
   default String toDebugString(MetricSnapshots metricSnapshots, EscapingScheme escapingScheme) {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     try {

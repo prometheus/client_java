@@ -253,6 +253,8 @@ public class PushGateway {
     }
   }
 
+  // toString with Charset is only available in Java 10+, but we want to support Java 8
+  @SuppressWarnings("JdkObsolete")
   private static String readFromStream(InputStream is) throws IOException {
     ByteArrayOutputStream result = new ByteArrayOutputStream();
     byte[] buffer = new byte[1024];
@@ -497,6 +499,8 @@ public class PushGateway {
       return Format.PROMETHEUS_PROTOBUF;
     }
 
+    // encode with Charset is only available in Java 10+, but we want to support Java 8
+    @SuppressWarnings("JdkObsolete")
     private URL makeUrl(@Nullable ExporterPushgatewayProperties properties)
         throws UnsupportedEncodingException, MalformedURLException {
       StringBuilder url =
