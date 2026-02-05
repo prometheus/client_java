@@ -56,7 +56,8 @@ public class PrometheusProperties {
       return map.get(normalize(metricName));
     }
 
-    // copied from PrometheusNaming - but we can't reuse that class here because it's in a module that
+    // copied from PrometheusNaming - but we can't reuse that class here because it's in a module
+    // that
     // depends on PrometheusProperties, which would create a circular dependency.
     private static String normalize(String name) {
       StringBuilder escaped = new StringBuilder();
@@ -76,10 +77,10 @@ public class PrometheusProperties {
 
   private static boolean isValidLegacyChar(int c, int i) {
     return (c >= 'a' && c <= 'z')
-      || (c >= 'A' && c <= 'Z')
-      || c == '_'
-      || c == ':'
-      || (c >= '0' && c <= '9' && i > 0);
+        || (c >= 'A' && c <= 'Z')
+        || c == '_'
+        || c == ':'
+        || (c >= '0' && c <= '9' && i > 0);
   }
 
   /**
@@ -103,14 +104,14 @@ public class PrometheusProperties {
 
   // Package-private constructor for PrometheusPropertiesLoader and Builder
   PrometheusProperties(
-    MetricsProperties defaultMetricsProperties,
-    MetricPropertiesMap metricProperties,
-    ExemplarsProperties exemplarProperties,
-    ExporterProperties exporterProperties,
-    ExporterFilterProperties exporterFilterProperties,
-    ExporterHttpServerProperties httpServerConfig,
-    ExporterPushgatewayProperties pushgatewayProperties,
-    ExporterOpenTelemetryProperties otelConfig) {
+      MetricsProperties defaultMetricsProperties,
+      MetricPropertiesMap metricProperties,
+      ExemplarsProperties exemplarProperties,
+      ExporterProperties exporterProperties,
+      ExporterFilterProperties exporterFilterProperties,
+      ExporterHttpServerProperties httpServerConfig,
+      ExporterPushgatewayProperties pushgatewayProperties,
+      ExporterOpenTelemetryProperties otelConfig) {
     this.defaultMetricsProperties = defaultMetricsProperties;
     this.metricProperties = metricProperties;
     this.exemplarProperties = exemplarProperties;
@@ -135,7 +136,7 @@ public class PrometheusProperties {
    * configured for a metric name.
    *
    * @param metricName the metric name (dots will be automatically converted to underscores to match
-   *                   exposition format)
+   *     exposition format)
    */
   @Nullable
   public MetricsProperties getMetricProperties(String metricName) {
@@ -172,16 +173,15 @@ public class PrometheusProperties {
     private ExemplarsProperties exemplarProperties = ExemplarsProperties.builder().build();
     private ExporterProperties exporterProperties = ExporterProperties.builder().build();
     private ExporterFilterProperties exporterFilterProperties =
-      ExporterFilterProperties.builder().build();
+        ExporterFilterProperties.builder().build();
     private ExporterHttpServerProperties exporterHttpServerProperties =
-      ExporterHttpServerProperties.builder().build();
+        ExporterHttpServerProperties.builder().build();
     private ExporterPushgatewayProperties pushgatewayProperties =
-      ExporterPushgatewayProperties.builder().build();
+        ExporterPushgatewayProperties.builder().build();
     private ExporterOpenTelemetryProperties otelConfig =
-      ExporterOpenTelemetryProperties.builder().build();
+        ExporterOpenTelemetryProperties.builder().build();
 
-    private Builder() {
-    }
+    private Builder() {}
 
     public Builder defaultMetricsProperties(MetricsProperties defaultMetricsProperties) {
       this.defaultMetricsProperties = defaultMetricsProperties;
@@ -193,9 +193,7 @@ public class PrometheusProperties {
       return this;
     }
 
-    /**
-     * Convenience for adding a single named MetricsProperties
-     */
+    /** Convenience for adding a single named MetricsProperties */
     public Builder putMetricProperty(String name, MetricsProperties props) {
       this.metricProperties.put(name, props);
       return this;
@@ -217,7 +215,7 @@ public class PrometheusProperties {
     }
 
     public Builder exporterHttpServerProperties(
-      ExporterHttpServerProperties exporterHttpServerProperties) {
+        ExporterHttpServerProperties exporterHttpServerProperties) {
       this.exporterHttpServerProperties = exporterHttpServerProperties;
       return this;
     }
@@ -228,21 +226,21 @@ public class PrometheusProperties {
     }
 
     public Builder exporterOpenTelemetryProperties(
-      ExporterOpenTelemetryProperties exporterOpenTelemetryProperties) {
+        ExporterOpenTelemetryProperties exporterOpenTelemetryProperties) {
       this.otelConfig = exporterOpenTelemetryProperties;
       return this;
     }
 
     public PrometheusProperties build() {
       return new PrometheusProperties(
-        defaultMetricsProperties,
-        metricProperties,
-        exemplarProperties,
-        exporterProperties,
-        exporterFilterProperties,
-        exporterHttpServerProperties,
-        pushgatewayProperties,
-        otelConfig);
+          defaultMetricsProperties,
+          metricProperties,
+          exemplarProperties,
+          exporterProperties,
+          exporterFilterProperties,
+          exporterHttpServerProperties,
+          pushgatewayProperties,
+          otelConfig);
     }
   }
 }
