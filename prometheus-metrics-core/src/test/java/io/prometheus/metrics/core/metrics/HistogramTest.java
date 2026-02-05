@@ -1384,7 +1384,7 @@ class HistogramTest {
 
   @Test
   // See https://github.com/prometheus/client_java/issues/646
-  public void testNegativeAmount() {
+  void testNegativeAmount() {
     Histogram histogram =
         Histogram.builder()
             .name("histogram")
@@ -1527,7 +1527,7 @@ class HistogramTest {
   }
 
   @Test
-  public void testNativeResetDuration() {
+  void testNativeResetDuration() {
     // Test that nativeResetDuration can be configured without error and the histogram
     // functions correctly. The reset duration schedules internal reset behavior but
     // is not directly observable in the snapshot.
@@ -1551,7 +1551,7 @@ class HistogramTest {
   }
 
   @Test
-  public void testNativeResetDurationNegativeValue() {
+  void testNativeResetDurationNegativeValue() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
@@ -1564,7 +1564,7 @@ class HistogramTest {
   }
 
   @Test
-  public void testNativeResetDurationZeroValue() {
+  void testNativeResetDurationZeroValue() {
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
             () ->
@@ -1577,7 +1577,7 @@ class HistogramTest {
   }
 
   @Test
-  public void testNativeResetDurationSubSecond() {
+  void testNativeResetDurationSubSecond() {
     // Sub-second durations should be rejected as they truncate to 0 seconds
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
