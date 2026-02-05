@@ -962,11 +962,18 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
      * <p>Default is no reset.
      */
     public Builder nativeResetDuration(long duration, TimeUnit unit) {
-      // TODO: reset interval isn't tested yet
       if (duration <= 0) {
         throw new IllegalArgumentException(duration + ": value > 0 expected");
       }
-      nativeResetDurationSeconds = unit.toSeconds(duration);
+      long seconds = unit.toSeconds(duration);
+      if (seconds == 0) {
+        throw new IllegalArgumentException(
+            duration
+                + " "
+                + unit
+                + ": duration must be at least 1 second. Sub-second durations are not supported.");
+      }
+      nativeResetDurationSeconds = seconds;
       return this;
     }
 

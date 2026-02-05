@@ -15,8 +15,16 @@ import java.util.function.Supplier;
  * <p>It is implemented in a generic way so that 3rd party libraries can use it for implementing
  * sliding windows.
  *
- * <p>TODO: The current implementation is {@code synchronized}. There is likely room for
- * optimization.
+ * <p><b>Thread Safety:</b> This class uses coarse-grained {@code synchronized} methods for
+ * simplicity and correctness. All public methods ({@link #current()} and {@link #observe(double)})
+ * are synchronized, which ensures thread-safe access to the ring buffer and rotation logic.
+ *
+ * <p><b>Performance Note:</b> The synchronized approach may cause contention under high-frequency
+ * observations.
+ *
+ * <p>However, given that Summary metrics are less commonly used (Histogram is generally preferred),
+ * and the observation frequency is typically lower than Counter increments, the current
+ * implementation provides an acceptable trade-off between simplicity and performance.
  */
 public class SlidingWindow<T> {
 
