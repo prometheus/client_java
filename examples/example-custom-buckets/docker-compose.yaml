@@ -1,0 +1,26 @@
+version: "3"
+services:
+  example-application:
+    image: eclipse-temurin:25.0.1_8-jre@sha256:9d1d3068b16f2c4127be238ca06439012ff14a8fdf38f8f62472160f9058464a
+    network_mode: host
+    volumes:
+      - ./target/example-custom-buckets.jar:/example-custom-buckets.jar
+    command:
+      - /opt/java/openjdk/bin/java
+      - -jar
+      - /example-custom-buckets.jar
+  prometheus:
+    image: prom/prometheus:v3.9.1@sha256:1f0f50f06acaceb0f5670d2c8a658a599affe7b0d8e78b898c1035653849a702
+    network_mode: host
+    volumes:
+      - ./docker-compose/prometheus.yml:/prometheus.yml
+    command:
+      - --enable-feature=native-histograms
+      - --config.file=/prometheus.yml
+  grafana:
+    image: grafana/grafana:12.3.2@sha256:ba93c9d192e58b23e064c7f501d453426ccf4a85065bf25b705ab1e98602bfb1
+    network_mode: host
+    volumes:
+      - ./docker-compose/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/grafana-datasources.yaml
+      - ./docker-compose/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/grafana-dashboards.yaml
+      - ./docker-compose/grafana-dashboard-custom-buckets.json:/etc/grafana/grafana-dashboard-custom-buckets.json

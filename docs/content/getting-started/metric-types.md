@@ -121,6 +121,94 @@ for [Histogram.Builder](/client_java/api/io/prometheus/metrics/core/metrics/Hist
 for a complete list of options. Some options can be configured at runtime,
 see [config]({{< relref "../config/config.md" >}}).
 
+### Custom Bucket Boundaries
+
+The default bucket boundaries are designed for measuring request durations in seconds. For other
+use cases, you may want to define custom bucket boundaries. The histogram builder provides three
+methods for this:
+
+**1. Arbitrary Custom Boundaries**
+
+Use `classicUpperBounds(...)` to specify arbitrary bucket boundaries:
+
+```java
+Histogram responseSize = Histogram.builder()
+    .name("http_response_size_bytes")
+    .help("HTTP response size in bytes")
+    .classicUpperBounds(100, 1000, 10000, 100000, 1000000) // bytes
+    .register();
+```
+
+**2. Linear Boundaries**
+
+Use `classicLinearUpperBounds(start, width, count)` for equal-width buckets:
+
+```java
+Histogram queueSize = Histogram.builder()
+    .name("queue_size")
+    .help("Number of items in queue")
+    .classicLinearUpperBounds(10, 10, 10) // 10, 20, 30, ..., 100
+    .register();
+```
+
+**3. Exponential Boundaries**
+
+Use `classicExponentialUpperBounds(start, factor, count)` for exponential growth:
+
+```java
+Histogram dataSize = Histogram.builder()
+    .name("data_size_bytes")
+    .help("Data size in bytes")
+    .classicExponentialUpperBounds(100, 10, 5) // 100, 1k, 10k, 100k, 1M
+    .register();
+```
+
+### Native Histograms with Custom Buckets (NHCB)
+
+Prometheus supports a special mode called Native Histograms with Custom Buckets (NHCB) that uses
+schema -53. In this mode, custom bucket boundaries from classic histograms are preserved when
+converting to native histograms.
+
+The Java client library automatically supports NHCB:
+
+1. By default, histograms maintain both classic (with custom buckets) and native representations
+2. The classic representation with custom buckets is exposed to Prometheus
+3. Prometheus servers can convert these to NHCB upon ingestion when configured with the
+   `convert_classic_histograms_to_nhcb` scrape option
+
+Example:
+
+```java
+// This histogram will work seamlessly with NHCB
+Histogram apiLatency = Histogram.builder()
+    .name("api_request_duration_seconds")
+    .help("API request duration")
+    .classicUpperBounds(0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0) // custom boundaries
+    .register();
+```
+
+On the Prometheus side, configure the scrape job:
+
+```yaml
+scrape_configs:
+  - job_name: "my-app"
+    scrape_protocols: ["PrometheusProto"]
+    convert_classic_histograms_to_nhcb: true
+    static_configs:
+      - targets: ["localhost:9400"]
+```
+
+{{< hint type=note >}}
+NHCB is useful when:
+
+- You need precise bucket boundaries for your specific use case
+- You're migrating from classic histograms and want to preserve bucket boundaries
+- Exponential bucketing from standard native histograms isn't a good fit for your distribution
+  {{< /hint >}}
+
+See [examples/example-custom-buckets](https://github.com/prometheus/client_java/tree/main/examples/example-custom-buckets) <!-- editorconfig-checker-disable-line -->
+for a complete example with Prometheus and Grafana.
+
 Histograms and summaries are both used for observing distributions. Therefore, the both implement
 the `DistributionDataPoint` interface. Using the `DistributionDataPoint` interface directly gives
 you the option to switch between histograms and summaries later with minimal code changes.

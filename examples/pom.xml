@@ -30,6 +30,7 @@
     <module>example-exporter-opentelemetry</module>
     <module>example-simpleclient-bridge</module>
     <module>example-native-histogram</module>
+    <module>example-custom-buckets</module>
     <module>example-prometheus-properties</module>
   </modules>
 
