@@ -33,7 +33,8 @@ public class PrometheusProperties {
   static class MetricPropertiesMap {
     private final Map<String, MetricsProperties> map = new HashMap<>();
 
-    void putAll(Map<String, MetricsProperties> properties) {
+    void set(Map<String, MetricsProperties> properties) {
+      map.clear();
       properties.forEach(this::put);
     }
 
@@ -188,7 +189,7 @@ public class PrometheusProperties {
     }
 
     public Builder metricProperties(Map<String, MetricsProperties> metricProperties) {
-      this.metricProperties.putAll(metricProperties);
+      this.metricProperties.set(metricProperties);
       return this;
     }
 

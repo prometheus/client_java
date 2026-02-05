@@ -2,7 +2,7 @@ package io.prometheus.metrics.config;
 
 import javax.annotation.Nullable;
 
-/** Properties starting with io.prometheus.exporter.httpServer */
+/** Properties starting with io.prometheus.exporter.http_server */
 public class ExporterHttpServerProperties {
 
   private static final String PORT = "port";

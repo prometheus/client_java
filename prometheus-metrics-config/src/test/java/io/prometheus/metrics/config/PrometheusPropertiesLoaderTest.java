@@ -16,7 +16,7 @@ class PrometheusPropertiesLoaderTest {
   void propertiesShouldBeLoadedFromPropertiesFile() {
     PrometheusProperties prometheusProperties = PrometheusPropertiesLoader.load();
     assertThat(prometheusProperties.getDefaultMetricProperties().getHistogramClassicUpperBounds())
-        .hasSize(10);
+        .hasSize(11);
     assertThat(
             prometheusProperties
                 .getMetricProperties("http_duration_seconds")
