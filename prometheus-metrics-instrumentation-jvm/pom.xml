@@ -19,7 +19,7 @@
 
   <properties>
     <automatic.module.name>io.prometheus.metrics.instrumentation.jvm</automatic.module.name>
-    <jacoco.line-coverage>0.55</jacoco.line-coverage>
+    <jacoco.line-coverage>0.60</jacoco.line-coverage>
   </properties>
 
   <dependencies>

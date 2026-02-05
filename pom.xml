@@ -264,6 +264,11 @@
                       <value>COVEREDRATIO</value>
                       <minimum>${jacoco.line-coverage}</minimum>
                     </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.50</minimum>
+                    </limit>
                   </limits>
                 </rule>
               </rules>
