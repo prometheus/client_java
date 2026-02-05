@@ -20,13 +20,7 @@ import java.util.function.Supplier;
  * are synchronized, which ensures thread-safe access to the ring buffer and rotation logic.
  *
  * <p><b>Performance Note:</b> The synchronized approach may cause contention under high-frequency
- * observations. Potential optimizations include:
- *
- * <ul>
- *   <li>Using {@link java.util.concurrent.locks.ReadWriteLock} to allow concurrent observations
- *   <li>Using lock-free data structures with {@link java.util.concurrent.atomic atomic} operations
- *   <li>Implementing a lock-free ring buffer with striped buckets
- * </ul>
+ * observations.
  *
  * <p>However, given that Summary metrics are less commonly used (Histogram is generally preferred),
  * and the observation frequency is typically lower than Counter increments, the current
