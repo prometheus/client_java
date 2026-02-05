@@ -6,7 +6,7 @@ weight: 2
 In order to expose metrics, you need to register them with a `PrometheusRegistry`. We are using a
 counter as an example here, but the `register()` method is the same for all metric types.
 
-## Registering a Metrics with the Default Registry
+## Registering a Metric with the Default Registry
 
 ```java
 Counter eventsTotal = Counter.builder()
@@ -18,7 +18,7 @@ Counter eventsTotal = Counter.builder()
 The `register()` call above builds the counter and registers it with the global static
 `PrometheusRegistry.defaultRegistry`. Using the default registry is recommended.
 
-## Registering a Metrics with a Custom Registry
+## Registering a Metric with a Custom Registry
 
 You can also register your metric with a custom registry:
 
@@ -78,12 +78,30 @@ Counter eventsTotal2 = Counter.builder()
     .register(); // IllegalArgumentException, because a metric with that name is already registered
 ```
 
+## Validation at registration only
+
+Validation of duplicate metric names and label schemas happens at registration time only.
+Built-in metrics (Counter, Gauge, Histogram, etc.) participate in this validation.
+
+Custom collectors that implement the `Collector` or `MultiCollector` interface can optionally
+implement `getPrometheusName()` and `getMetricType()` (and the MultiCollector per-name variants) so
+the registry can enforce consistency. **Validation is skipped when metric name or type is
+unavailable:** if `getPrometheusName()` or `getMetricType()` returns `null`, the registry does not
+validate that collector. If two such collectors produce the same metric name and same label set at
+scrape time, the exposition output may contain duplicate time series and be invalid for Prometheus.
+
+When validation _is_ performed (name and type are non-null), **null label names are treated as an
+empty label schema:** `getLabelNames()` returning `null` is normalized to `Collections.emptySet()`
+and full label-schema validation and duplicate detection still apply. A collector that returns a
+non-null type but leaves `getLabelNames()` as `null` is still validated, with its labels treated as
+empty.
+
 ## Unregistering a Metric
 
 There is no automatic expiry of unused metrics (yet), once a metric is registered it will remain
 registered forever.
 
-However, you can programmatically unregistered an obsolete metric like this:
+However, you can programmatically unregister an obsolete metric like this:
 
 ```java
 PrometheusRegistry.defaultRegistry.unregister(eventsTotal);

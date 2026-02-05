@@ -7,6 +7,7 @@ import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
+import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.Quantile;
@@ -116,6 +117,11 @@ public class Summary extends StatefulMetric<DistributionDataPoint, Summary.DataP
       data.add(metricData.get(i).collect(labels.get(i)));
     }
     return new SummarySnapshot(getMetadata(), data);
+  }
+
+  @Override
+  public MetricType getMetricType() {
+    return MetricType.SUMMARY;
   }
 
   @Override

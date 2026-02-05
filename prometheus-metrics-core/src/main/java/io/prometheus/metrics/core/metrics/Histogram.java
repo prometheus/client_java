@@ -7,6 +7,7 @@ import io.prometheus.metrics.core.datapoints.DistributionDataPoint;
 import io.prometheus.metrics.core.exemplars.ExemplarSampler;
 import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfig;
 import io.prometheus.metrics.core.util.Scheduler;
+import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.ClassicHistogramBuckets;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.HistogramSnapshot;
@@ -647,6 +648,11 @@ public class Histogram extends StatefulMetric<DistributionDataPoint, Histogram.D
       data.add(metricData.get(i).collect(labels.get(i)));
     }
     return new HistogramSnapshot(getMetadata(), data);
+  }
+
+  @Override
+  public MetricType getMetricType() {
+    return MetricType.HISTOGRAM;
   }
 
   @Override

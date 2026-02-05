@@ -1,12 +1,15 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.snapshots.Label;
 import io.prometheus.metrics.model.snapshots.Labels;
 import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.PrometheusNaming;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 
 /**
@@ -27,7 +30,8 @@ public abstract class MetricWithFixedMetadata extends Metric {
     this.labelNames = Arrays.copyOf(builder.labelNames, builder.labelNames.length);
   }
 
-  protected MetricMetadata getMetadata() {
+  @Override
+  public MetricMetadata getMetadata() {
     return metadata;
   }
 
@@ -46,6 +50,18 @@ public abstract class MetricWithFixedMetadata extends Metric {
   @Override
   public String getPrometheusName() {
     return metadata.getPrometheusName();
+  }
+
+  @Override
+  public Set<String> getLabelNames() {
+    Set<String> names = new HashSet<>();
+    for (String labelName : labelNames) {
+      names.add(PrometheusNaming.prometheusName(labelName));
+    }
+    for (Label label : constLabels) {
+      names.add(PrometheusNaming.prometheusName(label.getName()));
+    }
+    return names;
   }
 
   public abstract static class Builder<B extends Builder<B, M>, M extends MetricWithFixedMetadata>

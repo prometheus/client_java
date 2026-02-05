@@ -1,6 +1,8 @@
 package io.prometheus.metrics.model.registry;
 
+import io.prometheus.metrics.model.snapshots.MetricMetadata;
 import io.prometheus.metrics.model.snapshots.MetricSnapshot;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
@@ -76,6 +78,61 @@ public interface Collector {
    */
   @Nullable
   default String getPrometheusName() {
+    return null;
+  }
+
+  /**
+   * Returns the metric type for registration-time validation.
+   *
+   * <p>This is used to prevent different metric types (e.g., Counter and Gauge) from sharing the
+   * same name. Returning {@code null} means type validation is skipped for this collector.
+   *
+   * <p>Validation is performed only at registration time. If this method returns {@code null}, no
+   * type validation is performed for this collector, and duplicate or conflicting metrics may
+   * result in invalid exposition output.
+   *
+   * @return the metric type, or {@code null} to skip validation
+   */
+  @Nullable
+  default MetricType getMetricType() {
+    return null;
+  }
+
+  /**
+   * Returns the complete set of label names for this metric.
+   *
+   * <p>This includes both dynamic label names (specified in {@code labelNames()}) and constant
+   * label names (specified in {@code constLabels()}). Label names are normalized using Prometheus
+   * naming conventions.
+   *
+   * <p>This is used for registration-time validation to prevent duplicate label schemas for the
+   * same metric name. Two collectors with the same name and type can coexist if they have different
+   * label name sets.
+   *
+   * <p>Returning {@code null} is treated as an empty label set: the registry normalizes it to
+   * {@code Collections.emptySet()} and performs full label-schema validation and duplicate
+   * detection. Two collectors with the same name, type, and {@code null} (or empty) label names are
+   * considered duplicate and registration of the second will fail.
+   *
+   * @return the set of all label names, or {@code null} (treated as empty) for a metric with no
+   *     labels
+   */
+  @Nullable
+  default Set<String> getLabelNames() {
+    return null;
+  }
+
+  /**
+   * Returns the metric metadata (name, help, unit) for registration-time validation.
+   *
+   * <p>When non-null, the registry uses this to validate that metrics with the same name have
+   * consistent help and unit. Returning {@code null} means help/unit validation is skipped for this
+   * collector.
+   *
+   * @return the metric metadata, or {@code null} to skip help/unit validation
+   */
+  @Nullable
+  default MetricMetadata getMetadata() {
     return null;
   }
 }

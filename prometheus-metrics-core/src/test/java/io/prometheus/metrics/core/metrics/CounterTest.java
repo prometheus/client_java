@@ -12,6 +12,7 @@ import io.prometheus.metrics.core.exemplars.ExemplarSamplerConfigTestUtil;
 import io.prometheus.metrics.expositionformats.generated.com_google_protobuf_4_33_5.Metrics;
 import io.prometheus.metrics.expositionformats.internal.PrometheusProtobufWriterImpl;
 import io.prometheus.metrics.expositionformats.internal.ProtobufUtil;
+import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.CounterSnapshot;
 import io.prometheus.metrics.model.snapshots.Exemplar;
 import io.prometheus.metrics.model.snapshots.Label;
@@ -115,7 +116,7 @@ class CounterTest {
         "my_counter",
         "my_counter_seconds",
       })
-  public void testTotalStrippedFromName(String name) {
+  void testTotalStrippedFromName(String name) {
     Counter counter = Counter.builder().name(name).unit(Unit.SECONDS).build();
     Metrics.MetricFamily protobufData =
         new PrometheusProtobufWriterImpl().convert(counter.collect(), EscapingScheme.ALLOW_UTF8);
@@ -376,5 +377,18 @@ class CounterTest {
                     .labelNames("const.a")
                     .constLabels(Labels.of("const_a", "const_b"))
                     .build());
+  }
+
+  @Test
+  void testLabelNormalizationInRegistration() {
+    PrometheusRegistry registry = new PrometheusRegistry();
+
+    Counter.builder().name("requests").labelNames("request.count").register(registry);
+
+    // request.count and request_count normalize to the same name
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () -> Counter.builder().name("requests").labelNames("request_count").register(registry))
+        .withMessageContaining("duplicate metric name with identical label schema");
   }
 }

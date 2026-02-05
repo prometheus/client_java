@@ -1,6 +1,7 @@
 package io.prometheus.metrics.core.metrics;
 
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.model.registry.MetricType;
 import io.prometheus.metrics.model.snapshots.Exemplars;
 import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.SummarySnapshot;
@@ -61,6 +62,11 @@ public class SummaryWithCallback extends CallbackMetric {
                   count, sum, quantiles, makeLabels(labelValues), Exemplars.EMPTY, 0L));
         });
     return new SummarySnapshot(getMetadata(), dataPoints);
+  }
+
+  @Override
+  public MetricType getMetricType() {
+    return MetricType.SUMMARY;
   }
 
   public static Builder builder() {
