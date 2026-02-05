@@ -4,10 +4,10 @@ root = true
 max_line_length = 100
 indent_size = 2
 
-[{version-rules.xml,maven-wrapper.properties,checkstyle.xml,docker-compose.yaml,docker-compose.yml,Dockerfile,example_target_info.json,mise.toml,mvnm,mvnw.cmd,generate-protobuf.sh,.gitleaksignore,*.json5}]
+[{version-rules.xml,maven-wrapper.properties,checkstyle.xml,docker-compose.yaml,docker-compose.yml,Dockerfile,example_target_info.json,mise.toml,mvnm,mvnw.cmd,generate-protobuf.sh,.gitleaksignore}]
 max_line_length = 200
 
-[{grafana-dashboard-*.json,.editorconfig,super-linter.env}]
+[{grafana-dashboard-*.json,.editorconfig,super-linter.env,renovate.json5}]
 max_line_length = 300
 
 [pom.xml]
