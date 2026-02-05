@@ -18,6 +18,14 @@ import java.util.function.Supplier;
 class Buffer {
 
   private static final long bufferActiveBit = 1L << 63;
+  // Tracking observation counts requires an AtomicLong for coordination between recording and
+  // collecting. AtomicLong does much worse under contention than the LongAdder instances used
+  // elsewhere to hold aggregated state. To improve, we stripe the AtomicLong into N instances,
+  // where N is the number of available processors. Each record operation chooses the appropriate
+  // instance to use based on the modulo of its thread id and N. This is a more naive / simple
+  // implementation compared to the striping used under the hood in java.util.concurrent classes
+  // like LongAdder - contention and hot spots can still occur if recording thread ids happen to
+  // resolve to the same index. Further improvement is possible.
   private final AtomicLong[] stripedObservationCounts;
   private double[] observationBuffer = new double[0];
   private int bufferPos = 0;
@@ -35,9 +43,8 @@ class Buffer {
   }
 
   boolean append(double value) {
-    AtomicLong observationCountForThread =
-        stripedObservationCounts[
-            ((int) Thread.currentThread().getId()) % stripedObservationCounts.length];
+    int index = Math.abs((int) Thread.currentThread().getId()) % stripedObservationCounts.length;
+    AtomicLong observationCountForThread = stripedObservationCounts[index];
     long count = observationCountForThread.incrementAndGet();
     if ((count & bufferActiveBit) == 0) {
       return false; // sign bit not set -> buffer not active.
@@ -79,7 +86,7 @@ class Buffer {
     runLock.lock();
     try {
       // Signal that the buffer is active.
-      Long expectedCount = 0L;
+      long expectedCount = 0L;
       for (AtomicLong observationCount : stripedObservationCounts) {
         expectedCount += observationCount.getAndAdd(bufferActiveBit);
       }
@@ -97,12 +104,12 @@ class Buffer {
       long expectedBufferSize = 0;
       if (reset) {
         for (AtomicLong observationCount : stripedObservationCounts) {
-          expectedBufferSize += (int) (observationCount.getAndSet(0) & ~bufferActiveBit);
+          expectedBufferSize += observationCount.getAndSet(0) & ~bufferActiveBit;
         }
         reset = false;
       } else {
         for (AtomicLong observationCount : stripedObservationCounts) {
-          expectedBufferSize += (int) observationCount.addAndGet(bufferActiveBit);
+          expectedBufferSize += observationCount.addAndGet(bufferActiveBit);
         }
       }
       expectedBufferSize -= expectedCount;
