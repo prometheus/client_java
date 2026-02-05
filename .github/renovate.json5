@@ -1,9 +1,6 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: [
-    "config:best-practices",
-    "config:recommended"
-  ],
+  extends: ["config:best-practices", "config:recommended"],
   platformCommit: "enabled",
   automerge: true,
   ignorePaths: [
@@ -12,27 +9,17 @@
     // agent resources packages an OTel API that is the minimum required API version
     "**/prometheus-metrics-exporter-opentelemetry-otel-agent-resources/pom.xml",
   ],
-  labels: [
-    "dependencies"
-  ],
+  labels: ["dependencies"],
   packageRules: [
     {
-      matchFileNames: [
-        "mise.toml"
-      ],
-      matchDepNames: [
-        "java"
-      ],
+      matchFileNames: ["mise.toml"],
+      matchDepNames: ["java"],
       groupName: "java temurin",
       additionalBranchPrefix: "temurin-",
     },
     {
-      matchFileNames: [
-        ".mise/envs/native/mise.toml"
-      ],
-      matchDepNames: [
-        "java"
-      ],
+      matchFileNames: [".mise/envs/native/mise.toml"],
+      matchDepNames: ["java"],
       groupName: "java graalvm",
       additionalBranchPrefix: "graalvm-",
     },
@@ -42,7 +29,9 @@
       customType: "regex",
       description: "Update _VERSION variables in mise.toml",
       managerFilePatterns: ["/^mise\\.toml$/"],
-      matchStrings: ['# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION="?(?<currentValue>[^@"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"?\\s'],
-    }
-  ]
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?(?: packageName=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s.+?_VERSION="?(?<currentValue>[^@"]+?)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"?\\s',
+      ],
+    },
+  ],
 }
