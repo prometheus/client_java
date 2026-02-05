@@ -43,6 +43,8 @@ public interface PrometheusHttpRequest extends PrometheusScrapeRequest {
   /** See {@code jakarta.servlet.ServletRequest.getParameterValues(String)} */
   @Override
   @Nullable
+  // decode with Charset is only available in Java 10+, but we want to support Java 8
+  @SuppressWarnings("JdkObsolete")
   default String[] getParameterValues(String name) {
     try {
       ArrayList<String> result = new ArrayList<>();
