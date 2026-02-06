@@ -40,16 +40,16 @@ class ExporterPushgatewayPropertiesTest {
   @Test
   void loadWithEscapingSchemes() {
     ExporterPushgatewayProperties properties =
-        load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "allow-utf-8"));
+        load(Map.of("io.prometheus.exporter.pushgateway.escaping_scheme", "allow-utf-8"));
     assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.ALLOW_UTF8);
 
-    properties = load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "values"));
+    properties = load(Map.of("io.prometheus.exporter.pushgateway.escaping_scheme", "values"));
     assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.VALUE_ENCODING_ESCAPING);
 
-    properties = load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "underscores"));
+    properties = load(Map.of("io.prometheus.exporter.pushgateway.escaping_scheme", "underscores"));
     assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.UNDERSCORE_ESCAPING);
 
-    properties = load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "dots"));
+    properties = load(Map.of("io.prometheus.exporter.pushgateway.escaping_scheme", "dots"));
     assertThat(properties.getEscapingScheme()).isEqualTo(EscapingScheme.DOTS_ESCAPING);
   }
 
@@ -57,9 +57,9 @@ class ExporterPushgatewayPropertiesTest {
   void loadWithInvalidEscapingScheme() {
     assertThatExceptionOfType(PrometheusPropertiesException.class)
         .isThrownBy(
-            () -> load(Map.of("io.prometheus.exporter.pushgateway.escapingScheme", "invalid")))
+            () -> load(Map.of("io.prometheus.exporter.pushgateway.escaping_scheme", "invalid")))
         .withMessage(
-            "io.prometheus.exporter.pushgateway.escapingScheme: Illegal value. Expecting"
+            "io.prometheus.exporter.pushgateway.escaping_scheme: Illegal value. Expecting"
                 + " 'allow-utf-8', 'values', 'underscores', or 'dots'. Found: invalid");
   }
 
@@ -68,8 +68,8 @@ class ExporterPushgatewayPropertiesTest {
     ExporterPushgatewayProperties properties =
         load(
             Map.of(
-                "io.prometheus.exporter.pushgateway.connectTimeoutSeconds", "5",
-                "io.prometheus.exporter.pushgateway.readTimeoutSeconds", "10"));
+                "io.prometheus.exporter.pushgateway.connect_timeout_seconds", "5",
+                "io.prometheus.exporter.pushgateway.read_timeout_seconds", "10"));
     assertThat(properties.getConnectTimeout()).isEqualTo(Duration.ofSeconds(5));
     assertThat(properties.getReadTimeout()).isEqualTo(Duration.ofSeconds(10));
   }

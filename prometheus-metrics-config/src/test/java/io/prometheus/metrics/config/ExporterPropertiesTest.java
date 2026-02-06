@@ -74,7 +74,7 @@ class ExporterPropertiesTest {
     assertThat(properties.getPrometheusTimestampsInMs()).isTrue();
 
     properties =
-        load(new HashMap<>(Map.of("io.prometheus.exporter.prometheusTimestampsInMs", "true")));
+        load(new HashMap<>(Map.of("io.prometheus.exporter.prometheus_timestamps_in_ms", "true")));
     assertThat(properties.getPrometheusTimestampsInMs()).isTrue();
 
     assertThatExceptionOfType(PrometheusPropertiesException.class)
@@ -82,9 +82,9 @@ class ExporterPropertiesTest {
             () ->
                 load(
                     new HashMap<>(
-                        Map.of("io.prometheus.exporter.prometheusTimestampsInMs", "invalid"))))
+                        Map.of("io.prometheus.exporter.prometheus_timestamps_in_ms", "invalid"))))
         .withMessage(
-            "io.prometheus.exporter.prometheusTimestampsInMs: Expecting 'true' or 'false'. Found:"
+            "io.prometheus.exporter.prometheus_timestamps_in_ms: Expecting 'true' or 'false'. Found:"
                 + " invalid");
   }
 }
