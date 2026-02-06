@@ -168,14 +168,15 @@ public class PrometheusProperties {
     return exporterOpenTelemetryProperties;
   }
 
-  public boolean useOtelMetrics(String prometheusMetric, String otelMetric) {
-    Boolean useByPrometheusMetric = usesOtelMetric(prometheusMetric);
-    if (Boolean.FALSE.equals(useByPrometheusMetric)) return false;
+  public boolean useOtelMetrics(String otelMetric) {
     Boolean useByOtelMetric = usesOtelMetric(otelMetric);
-    if (Boolean.FALSE.equals(useByOtelMetric)) return false;
+    if (useByOtelMetric != null) {
+      return useByOtelMetric;
+    }
     return Boolean.TRUE.equals(getDefaultMetricProperties().useOtelMetrics());
   }
 
+  @Nullable
   private Boolean usesOtelMetric(String metric) {
     return Optional.ofNullable(getMetricProperties(metric))
         .map(MetricsProperties::useOtelMetrics)

@@ -130,31 +130,23 @@ class PrometheusPropertiesTest {
   }
 
   @Test
-  void useOtelMetricsSupportsNegativeOverride() {
-    Map<String, MetricsProperties> metricMap = new HashMap<>();
-    metricMap.put("prom_metric", otelProperties(false));
-    PrometheusProperties props = buildProperties(true, metricMap);
-    assertThat(props.useOtelMetrics("prom_metric", "any_otel_metric")).isFalse();
-  }
-
-  @Test
   void useOtelMetricsDisablesByMetricName() {
     Map<String, MetricsProperties> metricMap = new HashMap<>();
     metricMap.put("otel_metric", otelProperties(false));
     PrometheusProperties props = buildProperties(true, metricMap);
-    assertThat(props.useOtelMetrics("some_prom_metric", "otel_metric")).isFalse();
+    assertThat(props.useOtelMetrics("otel_metric")).isFalse();
   }
 
   @Test
   void useOtelMetricsRespectsDefaultIfNoOverride() {
     PrometheusProperties props = buildProperties(true, Collections.emptyMap());
-    assertThat(props.useOtelMetrics("prom_x", "otel_y")).isTrue();
+    assertThat(props.useOtelMetrics("otel_y")).isTrue();
   }
 
   @Test
   void noOverridesReturnsFalse() {
     PrometheusProperties props = PrometheusProperties.get();
-    assertThat(props.useOtelMetrics("prom_x", "otel_y")).isFalse();
+    assertThat(props.useOtelMetrics("otel_y")).isFalse();
   }
 
   private static PrometheusProperties buildProperties(

@@ -27,8 +27,6 @@ import javax.management.NotificationListener;
 import javax.management.openmbean.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 
 class JvmGarbageCollectorMetricsTest {
@@ -116,8 +114,7 @@ class JvmGarbageCollectorMetricsTest {
     PrometheusProperties properties =
         PrometheusProperties.builder()
             .defaultMetricsProperties(MetricsProperties.builder().useOtelMetrics(true).build())
-            .metricProperties(
-                Map.of("jvm_gc_duration", MetricsProperties.builder().otelOptIn(true).build()))
+            .metricProperties(Map.of("jvm_gc_duration", MetricsProperties.builder().build()))
             .build();
 
     PrometheusRegistry registry = new PrometheusRegistry();
@@ -152,64 +149,6 @@ class JvmGarbageCollectorMetricsTest {
     {"jvm.gc.duration_seconds_count","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC"} 1
     {"jvm.gc.duration_seconds_sum","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC"} 0.1
     """;
-
-    String metrics = convertToOpenMetricsFormat(snapshots);
-
-    assertThat(metrics).contains(expected);
-  }
-
-  @SuppressWarnings("rawtypes")
-  @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  public void testGCDurationHistogramLabelsWithNoOptIn(boolean nullOptIn) throws Exception {
-    GarbageCollectorMXBean mockGcBean =
-        mock(
-            GarbageCollectorMXBean.class,
-            withSettings().extraInterfaces(NotificationEmitter.class));
-    when(mockGcBean.getName()).thenReturn("MyGC");
-
-    PrometheusProperties.Builder builder =
-        PrometheusProperties.builder()
-            .defaultMetricsProperties(MetricsProperties.builder().useOtelMetrics(true).build());
-    if (!nullOptIn) {
-      builder =
-          builder.metricProperties(
-              Map.of("jvm.gc.duration", MetricsProperties.builder().otelOptIn(true).build()));
-    }
-    PrometheusProperties properties = builder.build();
-
-    PrometheusRegistry registry = new PrometheusRegistry();
-    JvmGarbageCollectorMetrics.builder(properties)
-        .garbageCollectorBeans(Collections.singletonList(mockGcBean))
-        .register(registry);
-
-    NotificationListener listener;
-    ArgumentCaptor<NotificationListener> captor = forClass(NotificationListener.class);
-    verify((NotificationEmitter) mockGcBean)
-        .addNotificationListener(captor.capture(), isNull(), isNull());
-    listener = captor.getValue();
-
-    CompositeData notificationData = getNotificationData();
-
-    Notification notification =
-        new Notification(
-            GARBAGE_COLLECTION_NOTIFICATION, mockGcBean, 1, System.currentTimeMillis(), "gc");
-    notification.setUserData(notificationData);
-
-    listener.handleNotification(notification, null);
-
-    MetricSnapshots snapshots = registry.scrape();
-
-    String expected =
-        """
-  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="0.01"} 0
-  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="0.1"} 1
-  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="1.0"} 1
-  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="10.0"} 1
-  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="+Inf"} 1
-  {"jvm.gc.duration_seconds_count","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC"} 1
-  {"jvm.gc.duration_seconds_sum","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC"} 0.1
-  """;
 
     String metrics = convertToOpenMetricsFormat(snapshots);
 

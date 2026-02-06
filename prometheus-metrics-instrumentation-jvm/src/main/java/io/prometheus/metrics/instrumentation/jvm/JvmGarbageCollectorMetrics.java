@@ -1,7 +1,6 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
-import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.core.metrics.SummaryWithCallback;
@@ -11,9 +10,7 @@ import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.management.NotificationEmitter;
 import javax.management.openmbean.CompositeData;
@@ -26,14 +23,14 @@ import javax.management.openmbean.CompositeData;
  * JvmMetrics.builder().register();
  * }</pre>
  *
- * However, if you want only the {@link JvmGarbageCollectorMetrics} you can also register them
+ * <p>However, if you want only the {@link JvmGarbageCollectorMetrics} you can also register them
  * directly:
  *
  * <pre>{@code
  * JvmGarbageCollectorMetrics.builder().register();
  * }</pre>
  *
- * Example metrics being exported:
+ * <p>Example metrics being exported:
  *
  * <pre>
  * # HELP jvm_gc_collection_seconds Time spent in a given JVM garbage collector in seconds.
@@ -63,14 +60,14 @@ public class JvmGarbageCollectorMetrics {
   }
 
   private void register(PrometheusRegistry registry) {
-    if (config.useOtelMetrics(JVM_GC_COLLECTION_SECONDS, JVM_GC_DURATION)) {
-      registerGCDurationHistogram(registry);
+    if (config.useOtelMetrics(JVM_GC_DURATION)) {
+      registerOtel(registry);
     } else {
-      registerGCDurationSummary(registry);
+      registerPrometheus(registry);
     }
   }
 
-  private void registerGCDurationSummary(PrometheusRegistry registry) {
+  private void registerPrometheus(PrometheusRegistry registry) {
     SummaryWithCallback.builder(config)
         .name(JVM_GC_COLLECTION_SECONDS)
         .help("Time spent in a given JVM garbage collector in seconds.")
@@ -90,31 +87,22 @@ public class JvmGarbageCollectorMetrics {
         .register(registry);
   }
 
-  private void registerGCDurationHistogram(PrometheusRegistry registry) {
+  private void registerOtel(PrometheusRegistry registry) {
     double[] buckets = {0.01, 0.1, 1, 10};
-
-    List<String> labels = new ArrayList<>(List.of("jvm.gc.action", "jvm.gc.name"));
-    boolean otelOptIn =
-        Optional.ofNullable(config.getMetricProperties(JVM_GC_DURATION))
-            .map(MetricsProperties::isOtelOptIn)
-            .orElse(false);
-    if (otelOptIn) {
-      labels.add("jvm.gc.cause");
-    }
 
     Histogram gcDurationHistogram =
         Histogram.builder(config)
             .name(JVM_GC_DURATION)
             .unit(Unit.SECONDS)
             .help("Duration of JVM garbage collection actions.")
-            .labelNames(labels.toArray(String[]::new))
+            .labelNames("jvm.gc.action", "jvm.gc.name", "jvm.gc.cause")
             .classicUpperBounds(buckets)
             .register(registry);
 
-    registerNotificationListener(gcDurationHistogram, otelOptIn);
+    registerNotificationListener(gcDurationHistogram);
   }
 
-  private void registerNotificationListener(Histogram gcDurationHistogram, boolean otelOptIn) {
+  private void registerNotificationListener(Histogram gcDurationHistogram) {
     for (GarbageCollectorMXBean gcBean : garbageCollectorBeans) {
 
       if (!(gcBean instanceof NotificationEmitter)) {
@@ -133,25 +121,18 @@ public class JvmGarbageCollectorMetrics {
                     GarbageCollectionNotificationInfo.from(
                         (CompositeData) notification.getUserData());
 
-                observe(gcDurationHistogram, otelOptIn, info);
+                observe(gcDurationHistogram, info);
               },
               null,
               null);
     }
   }
 
-  private void observe(
-      Histogram gcDurationHistogram, boolean otelOptIn, GarbageCollectionNotificationInfo info) {
+  private void observe(Histogram gcDurationHistogram, GarbageCollectionNotificationInfo info) {
     double observedDuration = Unit.millisToSeconds(info.getGcInfo().getDuration());
-    if (otelOptIn) {
-      gcDurationHistogram
-          .labelValues(info.getGcAction(), info.getGcName(), info.getGcCause())
-          .observe(observedDuration);
-    } else {
-      gcDurationHistogram
-          .labelValues(info.getGcAction(), info.getGcName())
-          .observe(observedDuration);
-    }
+    gcDurationHistogram
+        .labelValues(info.getGcAction(), info.getGcName(), info.getGcCause())
+        .observe(observedDuration);
   }
 
   public static Builder builder() {

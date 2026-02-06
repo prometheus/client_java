@@ -89,7 +89,8 @@ When the same property is defined in multiple sources, the following precedence 
 | io.prometheus.metrics.summary_quantile_errors                 | [Summary.Builder.quantile(double, double)](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#quantile(double,double)>)                                  | (5)     |
 | io.prometheus.metrics.summary_max_age_seconds                 | [Summary.Builder.maxAgeSeconds()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#maxAgeSeconds(long)>)                                               |         |
 | io.prometheus.metrics.summary_number_of_age_buckets           | [Summary.Builder.numberOfAgeBuckets()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#numberOfAgeBuckets(int)>)                                      |         |
-| io.prometheus.metrics.otel_opt_in                             | [MetricsProperties.isOtelOptIn()](</client_java/api/io/prometheus/metrics/config/MetricsProperties.html#isOtelOptIn()>)                                                         | (2)     |
+| io.prometheus.metrics.use_otel_metrics                        | [MetricsProperties.useOtelMetrics()](</client_java/api/io/prometheus/metrics/config/MetricsProperties.html#useOtelMetrics()>)                                                   | (2)     |
+
 
 <!-- editorconfig-checker-enable -->
 

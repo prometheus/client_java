@@ -27,6 +27,7 @@ public class MetricsProperties {
   private static final String SUMMARY_QUANTILE_ERRORS = "summary_quantile_errors";
   private static final String SUMMARY_MAX_AGE_SECONDS = "summary_max_age_seconds";
   private static final String SUMMARY_NUMBER_OF_AGE_BUCKETS = "summary_number_of_age_buckets";
+  private static final String USE_OTEL_METRICS = "use_otel_metrics";
 
   /**
    * All known property suffixes that can be configured for metrics.
@@ -46,10 +47,9 @@ public class MetricsProperties {
     SUMMARY_QUANTILES,
     SUMMARY_QUANTILE_ERRORS,
     SUMMARY_MAX_AGE_SECONDS,
-    SUMMARY_NUMBER_OF_AGE_BUCKETS
+    SUMMARY_NUMBER_OF_AGE_BUCKETS,
+    USE_OTEL_METRICS
   };
-  private static final String USE_OTEL_METRICS = "useOtelMetrics";
-  private static final String OTEL_OPT_IN = "otelOptIn";
 
   @Nullable private final Boolean exemplarsEnabled;
   @Nullable private final Boolean histogramNativeOnly;
@@ -65,7 +65,6 @@ public class MetricsProperties {
   @Nullable private final Long summaryMaxAgeSeconds;
   @Nullable private final Integer summaryNumberOfAgeBuckets;
   @Nullable private final Boolean useOtelMetrics;
-  @Nullable private final Boolean otelOptIn;
 
   public MetricsProperties(
       @Nullable Boolean exemplarsEnabled,
@@ -80,9 +79,7 @@ public class MetricsProperties {
       @Nullable List<Double> summaryQuantiles,
       @Nullable List<Double> summaryQuantileErrors,
       @Nullable Long summaryMaxAgeSeconds,
-      @Nullable Integer summaryNumberOfAgeBuckets,
-      @Nullable Boolean useOtelMetrics,
-      Boolean otelOptIn) {
+      @Nullable Integer summaryNumberOfAgeBuckets) {
     this(
         exemplarsEnabled,
         histogramNativeOnly,
@@ -97,8 +94,7 @@ public class MetricsProperties {
         summaryQuantileErrors,
         summaryMaxAgeSeconds,
         summaryNumberOfAgeBuckets,
-        useOtelMetrics,
-        otelOptIn,
+        false,
         "");
   }
 
@@ -117,10 +113,8 @@ public class MetricsProperties {
       @Nullable Long summaryMaxAgeSeconds,
       @Nullable Integer summaryNumberOfAgeBuckets,
       @Nullable Boolean useOtelMetrics,
-      @Nullable Boolean otelOptIn,
       String configPropertyPrefix) {
     this.exemplarsEnabled = exemplarsEnabled;
-    this.otelOptIn = otelOptIn;
     this.histogramNativeOnly = isHistogramNativeOnly(histogramClassicOnly, histogramNativeOnly);
     this.histogramClassicOnly = isHistogramClassicOnly(histogramClassicOnly, histogramNativeOnly);
     this.histogramClassicUpperBounds =
@@ -375,12 +369,6 @@ public class MetricsProperties {
     return useOtelMetrics;
   }
 
-  /** Where applicable, if using otel metrics, allow usage of opt-in labels */
-  @Nullable
-  public Boolean isOtelOptIn() {
-    return otelOptIn;
-  }
-
   /**
    * Note that this will remove entries from {@code propertySource}. This is because we want to know
    * if there are unused properties remaining after all properties have been loaded.
@@ -401,8 +389,7 @@ public class MetricsProperties {
         Util.loadDoubleList(prefix, SUMMARY_QUANTILE_ERRORS, propertySource),
         Util.loadLong(prefix, SUMMARY_MAX_AGE_SECONDS, propertySource),
         Util.loadInteger(prefix, SUMMARY_NUMBER_OF_AGE_BUCKETS, propertySource),
-        Util.loadBoolean(prefix + "." + USE_OTEL_METRICS, properties),
-        Util.loadBoolean(prefix + "." + OTEL_OPT_IN, properties),
+        Util.loadBoolean(prefix, USE_OTEL_METRICS, propertySource),
         prefix);
   }
 
@@ -425,7 +412,6 @@ public class MetricsProperties {
     @Nullable private Long summaryMaxAgeSeconds;
     @Nullable private Integer summaryNumberOfAgeBuckets;
     @Nullable private Boolean useOtelMetrics;
-    @Nullable private Boolean otelOptIn;
 
     private Builder() {}
 
@@ -445,7 +431,7 @@ public class MetricsProperties {
           summaryMaxAgeSeconds,
           summaryNumberOfAgeBuckets,
           useOtelMetrics,
-          otelOptIn);
+          "");
     }
 
     /** See {@link MetricsProperties#getExemplarsEnabled()} */
@@ -533,12 +519,6 @@ public class MetricsProperties {
     /** See {@link MetricsProperties#useOtelMetrics()} */
     public Builder useOtelMetrics(@Nullable Boolean useOtelMetrics) {
       this.useOtelMetrics = useOtelMetrics;
-      return this;
-    }
-
-    /** See {@link MetricsProperties#isOtelOptIn()} */
-    public Builder otelOptIn(@Nullable Boolean otelOptIn) {
-      this.otelOptIn = otelOptIn;
       return this;
     }
   }
