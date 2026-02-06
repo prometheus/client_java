@@ -128,4 +128,44 @@ class PrometheusPropertiesTest {
     assertThat(result.getMetricProperties("123metric")).isSameAs(customProps);
     assertThat(result.getMetricProperties("_23metric")).isSameAs(customProps);
   }
+
+  @Test
+  void useOtelMetricsSupportsNegativeOverride() {
+    Map<String, MetricsProperties> metricMap = new HashMap<>();
+    metricMap.put("prom_metric", otelProperties(false));
+    PrometheusProperties props = buildProperties(true, metricMap);
+    assertThat(props.useOtelMetrics("prom_metric", "any_otel_metric")).isFalse();
+  }
+
+  @Test
+  void useOtelMetricsDisablesByMetricName() {
+    Map<String, MetricsProperties> metricMap = new HashMap<>();
+    metricMap.put("otel_metric", otelProperties(false));
+    PrometheusProperties props = buildProperties(true, metricMap);
+    assertThat(props.useOtelMetrics("some_prom_metric", "otel_metric")).isFalse();
+  }
+
+  @Test
+  void useOtelMetricsRespectsDefaultIfNoOverride() {
+    PrometheusProperties props = buildProperties(true, Collections.emptyMap());
+    assertThat(props.useOtelMetrics("prom_x", "otel_y")).isTrue();
+  }
+
+  @Test
+  void noOverridesReturnsFalse() {
+    PrometheusProperties props = PrometheusProperties.get();
+    assertThat(props.useOtelMetrics("prom_x", "otel_y")).isFalse();
+  }
+
+  private static PrometheusProperties buildProperties(
+      Boolean defaultUse, Map<String, MetricsProperties> metricProps) {
+    return PrometheusProperties.builder()
+        .defaultMetricsProperties(otelProperties(defaultUse))
+        .metricProperties(new HashMap<>(metricProps))
+        .build();
+  }
+
+  private static MetricsProperties otelProperties(Boolean useOtel) {
+    return MetricsProperties.builder().useOtelMetrics(useOtel).build();
+  }
 }

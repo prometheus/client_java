@@ -49,6 +49,7 @@ public class MetricsProperties {
     SUMMARY_NUMBER_OF_AGE_BUCKETS
   };
   private static final String USE_OTEL_METRICS = "useOtelMetrics";
+  private static final String OTEL_OPT_IN = "otelOptIn";
 
   @Nullable private final Boolean exemplarsEnabled;
   @Nullable private final Boolean histogramNativeOnly;
@@ -64,6 +65,7 @@ public class MetricsProperties {
   @Nullable private final Long summaryMaxAgeSeconds;
   @Nullable private final Integer summaryNumberOfAgeBuckets;
   @Nullable private final Boolean useOtelMetrics;
+  @Nullable private final Boolean otelOptIn;
 
   public MetricsProperties(
       @Nullable Boolean exemplarsEnabled,
@@ -79,7 +81,8 @@ public class MetricsProperties {
       @Nullable List<Double> summaryQuantileErrors,
       @Nullable Long summaryMaxAgeSeconds,
       @Nullable Integer summaryNumberOfAgeBuckets,
-      @Nullable Boolean useOtelMetrics) {
+      @Nullable Boolean useOtelMetrics,
+      Boolean otelOptIn) {
     this(
         exemplarsEnabled,
         histogramNativeOnly,
@@ -95,6 +98,7 @@ public class MetricsProperties {
         summaryMaxAgeSeconds,
         summaryNumberOfAgeBuckets,
         useOtelMetrics,
+        otelOptIn,
         "");
   }
 
@@ -113,8 +117,10 @@ public class MetricsProperties {
       @Nullable Long summaryMaxAgeSeconds,
       @Nullable Integer summaryNumberOfAgeBuckets,
       @Nullable Boolean useOtelMetrics,
+      @Nullable Boolean otelOptIn,
       String configPropertyPrefix) {
     this.exemplarsEnabled = exemplarsEnabled;
+    this.otelOptIn = otelOptIn;
     this.histogramNativeOnly = isHistogramNativeOnly(histogramClassicOnly, histogramNativeOnly);
     this.histogramClassicOnly = isHistogramClassicOnly(histogramClassicOnly, histogramNativeOnly);
     this.histogramClassicUpperBounds =
@@ -359,10 +365,20 @@ public class MetricsProperties {
     return summaryNumberOfAgeBuckets;
   }
 
-  /** See {@code Summary.Builder.useOtelMetrics()} */
+  /**
+   * Where applicable, metrics are registered in accordance with OpenTelemetry Semantic Conventions.
+   * Implementation should respect opt-in requirements and ensure no data duplication occurs with
+   * existing Prometheus metrics.
+   */
   @Nullable
   public Boolean useOtelMetrics() {
     return useOtelMetrics;
+  }
+
+  /** Where applicable, if using otel metrics, allow usage of opt-in labels */
+  @Nullable
+  public Boolean isOtelOptIn() {
+    return otelOptIn;
   }
 
   /**
@@ -386,6 +402,7 @@ public class MetricsProperties {
         Util.loadLong(prefix, SUMMARY_MAX_AGE_SECONDS, propertySource),
         Util.loadInteger(prefix, SUMMARY_NUMBER_OF_AGE_BUCKETS, propertySource),
         Util.loadBoolean(prefix + "." + USE_OTEL_METRICS, properties),
+        Util.loadBoolean(prefix + "." + OTEL_OPT_IN, properties),
         prefix);
   }
 
@@ -408,6 +425,7 @@ public class MetricsProperties {
     @Nullable private Long summaryMaxAgeSeconds;
     @Nullable private Integer summaryNumberOfAgeBuckets;
     @Nullable private Boolean useOtelMetrics;
+    @Nullable private Boolean otelOptIn;
 
     private Builder() {}
 
@@ -426,7 +444,8 @@ public class MetricsProperties {
           summaryQuantileErrors,
           summaryMaxAgeSeconds,
           summaryNumberOfAgeBuckets,
-          useOtelMetrics);
+          useOtelMetrics,
+          otelOptIn);
     }
 
     /** See {@link MetricsProperties#getExemplarsEnabled()} */
@@ -514,6 +533,12 @@ public class MetricsProperties {
     /** See {@link MetricsProperties#useOtelMetrics()} */
     public Builder useOtelMetrics(@Nullable Boolean useOtelMetrics) {
       this.useOtelMetrics = useOtelMetrics;
+      return this;
+    }
+
+    /** See {@link MetricsProperties#isOtelOptIn()} */
+    public Builder otelOptIn(@Nullable Boolean otelOptIn) {
+      this.otelOptIn = otelOptIn;
       return this;
     }
   }

@@ -1,6 +1,7 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
+import io.prometheus.metrics.config.MetricsProperties;
 import io.prometheus.metrics.config.PrometheusProperties;
 import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.core.metrics.SummaryWithCallback;
@@ -10,7 +11,9 @@ import io.prometheus.metrics.model.snapshots.Quantiles;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.management.NotificationEmitter;
 import javax.management.openmbean.CompositeData;
@@ -60,7 +63,7 @@ public class JvmGarbageCollectorMetrics {
   }
 
   private void register(PrometheusRegistry registry) {
-    if (Boolean.TRUE.equals(config.getDefaultMetricProperties().useOtelMetrics())) {
+    if (config.useOtelMetrics(JVM_GC_COLLECTION_SECONDS, JVM_GC_DURATION)) {
       registerGCDurationHistogram(registry);
     } else {
       registerGCDurationSummary(registry);
@@ -90,14 +93,28 @@ public class JvmGarbageCollectorMetrics {
   private void registerGCDurationHistogram(PrometheusRegistry registry) {
     double[] buckets = {0.01, 0.1, 1, 10};
 
+    List<String> labels = new ArrayList<>(List.of("jvm.gc.action", "jvm.gc.name"));
+    boolean otelOptIn =
+        Optional.ofNullable(config.getMetricProperties(JVM_GC_DURATION))
+            .map(MetricsProperties::isOtelOptIn)
+            .orElse(false);
+    if (otelOptIn) {
+      labels.add("jvm.gc.cause");
+    }
+
     Histogram gcDurationHistogram =
         Histogram.builder(config)
             .name(JVM_GC_DURATION)
+            .unit(Unit.SECONDS)
             .help("Duration of JVM garbage collection actions.")
-            .labelNames("jvm.gc.action", "jvm.gc.name", "jvm.gc.cause")
+            .labelNames(labels.toArray(String[]::new))
             .classicUpperBounds(buckets)
             .register(registry);
 
+    registerNotificationListener(gcDurationHistogram, otelOptIn);
+  }
+
+  private void registerNotificationListener(Histogram gcDurationHistogram, boolean otelOptIn) {
     for (GarbageCollectorMXBean gcBean : garbageCollectorBeans) {
 
       if (!(gcBean instanceof NotificationEmitter)) {
@@ -116,12 +133,24 @@ public class JvmGarbageCollectorMetrics {
                     GarbageCollectionNotificationInfo.from(
                         (CompositeData) notification.getUserData());
 
-                gcDurationHistogram
-                    .labelValues(info.getGcAction(), info.getGcName(), info.getGcCause())
-                    .observe(Unit.millisToSeconds(info.getGcInfo().getDuration()));
+                observe(gcDurationHistogram, otelOptIn, info);
               },
               null,
               null);
+    }
+  }
+
+  private void observe(
+      Histogram gcDurationHistogram, boolean otelOptIn, GarbageCollectionNotificationInfo info) {
+    double observedDuration = Unit.millisToSeconds(info.getGcInfo().getDuration());
+    if (otelOptIn) {
+      gcDurationHistogram
+          .labelValues(info.getGcAction(), info.getGcName(), info.getGcCause())
+          .observe(observedDuration);
+    } else {
+      gcDurationHistogram
+          .labelValues(info.getGcAction(), info.getGcName())
+          .observe(observedDuration);
     }
   }
 

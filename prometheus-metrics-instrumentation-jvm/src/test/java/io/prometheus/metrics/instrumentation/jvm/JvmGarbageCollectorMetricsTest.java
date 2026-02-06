@@ -27,6 +27,8 @@ import javax.management.NotificationListener;
 import javax.management.openmbean.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 
 class JvmGarbageCollectorMetricsTest {
@@ -114,6 +116,8 @@ class JvmGarbageCollectorMetricsTest {
     PrometheusProperties properties =
         PrometheusProperties.builder()
             .defaultMetricsProperties(MetricsProperties.builder().useOtelMetrics(true).build())
+            .metricProperties(
+                Map.of("jvm_gc_duration", MetricsProperties.builder().otelOptIn(true).build()))
             .build();
 
     PrometheusRegistry registry = new PrometheusRegistry();
@@ -127,38 +131,7 @@ class JvmGarbageCollectorMetricsTest {
         .addNotificationListener(captor.capture(), isNull(), isNull());
     listener = captor.getValue();
 
-    TabularType memoryTabularType = getMemoryTabularType();
-    TabularData memoryBefore = new TabularDataSupport(memoryTabularType);
-    TabularData memoryAfter = new TabularDataSupport(memoryTabularType);
-
-    CompositeType gcInfoType =
-        new CompositeType(
-            "sun.management.BaseGcInfoCompositeType",
-            "gcInfo",
-            new String[] {
-              "id", "startTime", "endTime", "duration", "memoryUsageBeforeGc", "memoryUsageAfterGc"
-            },
-            new String[] {
-              "id", "startTime", "endTime", "duration", "memoryUsageBeforeGc", "memoryUsageAfterGc"
-            },
-            new OpenType<?>[] {
-              SimpleType.LONG,
-              SimpleType.LONG,
-              SimpleType.LONG,
-              SimpleType.LONG,
-              memoryTabularType,
-              memoryTabularType
-            });
-
-    java.util.Map<String, Object> gcInfoMap = new HashMap<>();
-    gcInfoMap.put("id", 0L);
-    gcInfoMap.put("startTime", 100L);
-    gcInfoMap.put("endTime", 200L);
-    gcInfoMap.put("duration", 100L);
-    gcInfoMap.put("memoryUsageBeforeGc", memoryBefore);
-    gcInfoMap.put("memoryUsageAfterGc", memoryAfter);
-
-    CompositeData notificationData = getGcNotificationData(gcInfoType, gcInfoMap);
+    CompositeData notificationData = getNotificationData();
 
     Notification notification =
         new Notification(
@@ -171,18 +144,129 @@ class JvmGarbageCollectorMetricsTest {
 
     String expected =
         """
-    {"jvm.gc.duration_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="0.01"} 0
-    {"jvm.gc.duration_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="0.1"} 1
-    {"jvm.gc.duration_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="1.0"} 1
-    {"jvm.gc.duration_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="10.0"} 1
-    {"jvm.gc.duration_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="+Inf"} 1
-    {"jvm.gc.duration_count","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC"} 1
-    {"jvm.gc.duration_sum","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC"} 0.1
+    {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="0.01"} 0
+    {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="0.1"} 1
+    {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="1.0"} 1
+    {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="10.0"} 1
+    {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC",le="+Inf"} 1
+    {"jvm.gc.duration_seconds_count","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC"} 1
+    {"jvm.gc.duration_seconds_sum","jvm.gc.action"="end of minor GC","jvm.gc.cause"="testCause","jvm.gc.name"="MyGC"} 0.1
     """;
 
     String metrics = convertToOpenMetricsFormat(snapshots);
 
     assertThat(metrics).contains(expected);
+  }
+
+  @SuppressWarnings("rawtypes")
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  public void testGCDurationHistogramLabelsWithNoOptIn(boolean nullOptIn) throws Exception {
+    GarbageCollectorMXBean mockGcBean =
+        mock(
+            GarbageCollectorMXBean.class,
+            withSettings().extraInterfaces(NotificationEmitter.class));
+    when(mockGcBean.getName()).thenReturn("MyGC");
+
+    PrometheusProperties.Builder builder =
+        PrometheusProperties.builder()
+            .defaultMetricsProperties(MetricsProperties.builder().useOtelMetrics(true).build());
+    if (!nullOptIn) {
+      builder =
+          builder.metricProperties(
+              Map.of("jvm.gc.duration", MetricsProperties.builder().otelOptIn(true).build()));
+    }
+    PrometheusProperties properties = builder.build();
+
+    PrometheusRegistry registry = new PrometheusRegistry();
+    JvmGarbageCollectorMetrics.builder(properties)
+        .garbageCollectorBeans(Collections.singletonList(mockGcBean))
+        .register(registry);
+
+    NotificationListener listener;
+    ArgumentCaptor<NotificationListener> captor = forClass(NotificationListener.class);
+    verify((NotificationEmitter) mockGcBean)
+        .addNotificationListener(captor.capture(), isNull(), isNull());
+    listener = captor.getValue();
+
+    CompositeData notificationData = getNotificationData();
+
+    Notification notification =
+        new Notification(
+            GARBAGE_COLLECTION_NOTIFICATION, mockGcBean, 1, System.currentTimeMillis(), "gc");
+    notification.setUserData(notificationData);
+
+    listener.handleNotification(notification, null);
+
+    MetricSnapshots snapshots = registry.scrape();
+
+    String expected =
+        """
+  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="0.01"} 0
+  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="0.1"} 1
+  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="1.0"} 1
+  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="10.0"} 1
+  {"jvm.gc.duration_seconds_bucket","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC",le="+Inf"} 1
+  {"jvm.gc.duration_seconds_count","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC"} 1
+  {"jvm.gc.duration_seconds_sum","jvm.gc.action"="end of minor GC","jvm.gc.name"="MyGC"} 0.1
+  """;
+
+    String metrics = convertToOpenMetricsFormat(snapshots);
+
+    assertThat(metrics).contains(expected);
+  }
+
+  private CompositeData getNotificationData() throws OpenDataException {
+    TabularType memoryTabularType = getMemoryTabularType();
+    TabularData memoryBefore = new TabularDataSupport(memoryTabularType);
+    TabularData memoryAfter = new TabularDataSupport(memoryTabularType);
+
+    CompositeData notificationData =
+        getGCNotificationData(memoryTabularType, memoryBefore, memoryAfter);
+    return notificationData;
+  }
+
+  private CompositeData getGCNotificationData(
+      TabularType memoryTabularType, TabularData memoryBefore, TabularData memoryAfter)
+      throws OpenDataException {
+    CompositeType gcInfoType = getGCInfoCompositeType(memoryTabularType);
+
+    Map<String, Object> gcInfoMap = getGcInfoMap(memoryBefore, memoryAfter);
+
+    CompositeData notificationData = getGcNotificationData(gcInfoType, gcInfoMap);
+    return notificationData;
+  }
+
+  private Map<String, Object> getGcInfoMap(TabularData memoryBefore, TabularData memoryAfter) {
+    Map<String, Object> gcInfoMap = new HashMap<>();
+    gcInfoMap.put("id", 0L);
+    gcInfoMap.put("startTime", 100L);
+    gcInfoMap.put("endTime", 200L);
+    gcInfoMap.put("duration", 100L);
+    gcInfoMap.put("memoryUsageBeforeGc", memoryBefore);
+    gcInfoMap.put("memoryUsageAfterGc", memoryAfter);
+    return gcInfoMap;
+  }
+
+  private CompositeType getGCInfoCompositeType(TabularType memoryTabularType)
+      throws OpenDataException {
+    return new CompositeType(
+        "sun.management.BaseGcInfoCompositeType",
+        "gcInfo",
+        new String[] {
+          "id", "startTime", "endTime", "duration", "memoryUsageBeforeGc", "memoryUsageAfterGc"
+        },
+        new String[] {
+          "id", "startTime", "endTime", "duration", "memoryUsageBeforeGc", "memoryUsageAfterGc"
+        },
+        new OpenType<?>[] {
+          SimpleType.LONG,
+          SimpleType.LONG,
+          SimpleType.LONG,
+          SimpleType.LONG,
+          memoryTabularType,
+          memoryTabularType
+        });
   }
 
   private TabularType getMemoryTabularType() throws OpenDataException {
