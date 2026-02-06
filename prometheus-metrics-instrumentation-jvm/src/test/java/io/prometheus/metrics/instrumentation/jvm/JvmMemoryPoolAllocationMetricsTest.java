@@ -47,6 +47,10 @@ class JvmMemoryPoolAllocationMetricsTest {
     // Decrease to 17, then increase by 3
     listener.handleMemoryPool("TestPool", 17, 20);
     assertThat(getCountByPool("test", "TestPool", registry.scrape())).isEqualTo(153);
+
+    // Edge case: before < last (tests diff1 < 0 branch)
+    listener.handleMemoryPool("TestPool", 10, 15);
+    assertThat(getCountByPool("test", "TestPool", registry.scrape())).isEqualTo(158);
   }
 
   private double getCountByPool(String metricName, String poolName, MetricSnapshots snapshots) {

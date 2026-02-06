@@ -9,6 +9,8 @@ class SchemeTest {
 
   @Test
   void fromString() {
+    assertThat(Scheme.fromString("http")).isEqualTo(Scheme.HTTP);
+    assertThat(Scheme.fromString("https")).isEqualTo(Scheme.HTTPS);
     assertThat(Scheme.HTTP).hasToString("http");
     assertThat(Scheme.HTTPS).hasToString("https");
     assertThatExceptionOfType(IllegalArgumentException.class)

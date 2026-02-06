@@ -234,6 +234,8 @@
           <excludes>
             <exclude>**/generated/**</exclude>
             <exclude>**/*BlockingRejectedExecutionHandler*</exclude>
+            <exclude>**/*AllocationCountingNotificationListener*</exclude>
+            <exclude>**/*MapperConfig*</exclude>
           </excludes>
         </configuration>
         <executions>
@@ -263,6 +265,11 @@
                       <counter>LINE</counter>
                       <value>COVEREDRATIO</value>
                       <minimum>${jacoco.line-coverage}</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.50</minimum>
                     </limit>
                   </limits>
                 </rule>

@@ -86,6 +86,29 @@ class HTTPServerTest {
   }
 
   @Test
+  void testSubjectDoAsWithInvalidSubject() throws Exception {
+    Authenticator authenticator =
+        new Authenticator() {
+          @Override
+          public Result authenticate(HttpExchange exchange) {
+            exchange.setAttribute("aa", "not-a-subject");
+            return new Success(new HttpPrincipal("user", "/"));
+          }
+        };
+
+    HttpHandler handler = exchange -> exchange.sendResponseHeaders(204, -1);
+    HTTPServer server =
+        HTTPServer.builder()
+            .port(0)
+            .authenticator(authenticator)
+            .defaultHandler(handler)
+            .authenticatedSubjectAttributeName("aa")
+            .buildAndStart();
+
+    run(server, "/", 403, "");
+  }
+
+  @Test
   void defaultHandler() throws Exception {
     run(
         HTTPServer.builder().port(0).buildAndStart(),

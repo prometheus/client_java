@@ -5,5 +5,20 @@
   "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-    <suppress checks="Javadoc" files="."/>
+  <!-- Suppress Javadoc paragraph formatting (empty line before <p> tag) globally. This is a
+       stylistic check that would require fixing hundreds of locations. We still enforce that
+       public APIs have documentation via other Javadoc checks. -->
+  <suppress checks="JavadocParagraph" files="."/>
+
+  <!-- Suppress all Javadoc checks for internal implementation packages -->
+  <suppress checks="Javadoc" files=".*[/\\]internal[/\\].*"/>
+
+  <!-- Suppress all Javadoc checks for example code -->
+  <suppress checks="Javadoc" files=".*[/\\]examples[/\\].*"/>
+
+  <!-- Suppress all Javadoc checks for benchmark code -->
+  <suppress checks="Javadoc" files=".*[/\\]benchmarks[/\\].*"/>
+
+  <!-- Suppress all Javadoc checks for integration tests -->
+  <suppress checks="Javadoc" files=".*[/\\]integration-tests[/\\].*"/>
 </suppressions>

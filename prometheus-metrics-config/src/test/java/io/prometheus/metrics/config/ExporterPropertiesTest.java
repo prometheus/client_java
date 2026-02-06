@@ -56,5 +56,35 @@ class ExporterPropertiesTest {
             .build();
     assertThat(properties.getIncludeCreatedTimestamps()).isTrue();
     assertThat(properties.getExemplarsOnAllMetricTypes()).isTrue();
+    assertThat(properties.getPrometheusTimestampsInMs()).isFalse();
+  }
+
+  @Test
+  void defaultValues() {
+    ExporterProperties properties = ExporterProperties.builder().build();
+    assertThat(properties.getIncludeCreatedTimestamps()).isFalse();
+    assertThat(properties.getExemplarsOnAllMetricTypes()).isFalse();
+    assertThat(properties.getPrometheusTimestampsInMs()).isFalse();
+  }
+
+  @Test
+  void prometheusTimestampsInMs() {
+    ExporterProperties properties =
+        ExporterProperties.builder().prometheusTimestampsInMs(true).build();
+    assertThat(properties.getPrometheusTimestampsInMs()).isTrue();
+
+    properties =
+        load(new HashMap<>(Map.of("io.prometheus.exporter.prometheus_timestamps_in_ms", "true")));
+    assertThat(properties.getPrometheusTimestampsInMs()).isTrue();
+
+    assertThatExceptionOfType(PrometheusPropertiesException.class)
+        .isThrownBy(
+            () ->
+                load(
+                    new HashMap<>(
+                        Map.of("io.prometheus.exporter.prometheus_timestamps_in_ms", "invalid"))))
+        .withMessage(
+            "io.prometheus.exporter.prometheus_timestamps_in_ms: Expecting 'true' or 'false'. Found:"
+                + " invalid");
   }
 }

@@ -27,7 +27,7 @@ public class PrometheusNaming {
    *   <li>OpenTelemetry: {@code process_runtime_jvm_buffer_count}
    * </ul>
    *
-   * We do not treat {@code _count} and {@code _sum} as reserved suffixes here for compatibility
+   * <p>We do not treat {@code _count} and {@code _sum} as reserved suffixes here for compatibility
    * with these libraries. However, there is a risk of name conflict if someone creates a gauge
    * named {@code my_data_count} and a histogram or summary named {@code my_data}, because the
    * histogram or summary will implicitly have a sample named {@code my_data_count}.
@@ -47,9 +47,9 @@ public class PrometheusNaming {
    *   <li>The name MUST NOT end with one of the {@link #RESERVED_METRIC_NAME_SUFFIXES}.
    * </ul>
    *
-   * If a metric has a {@link Unit}, the metric name SHOULD end with the unit as a suffix. Note that
-   * <a href="https://openmetrics.io/">OpenMetrics</a> requires metric names to have their unit as
-   * suffix, and we implement this in {@code prometheus-metrics-core}. However, {@code
+   * <p>If a metric has a {@link Unit}, the metric name SHOULD end with the unit as a suffix. Note
+   * that <a href="https://openmetrics.io/">OpenMetrics</a> requires metric names to have their unit
+   * as suffix, and we implement this in {@code prometheus-metrics-core}. However, {@code
    * prometheus-metrics-model} does not enforce Unit suffixes.
    *
    * <p>Example: If you create a Counter for a processing time with Unit {@link Unit#SECONDS
