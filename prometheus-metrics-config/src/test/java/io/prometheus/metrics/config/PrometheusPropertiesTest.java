@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
@@ -66,5 +67,45 @@ class PrometheusPropertiesTest {
             MetricsProperties.builder().histogramClassicUpperBounds(0.1, 0.2, 0.5, 1.0).build());
     assertThat(result.getMetricProperties("unknown_metric")).isNull();
     assertThat(result.getExporterProperties()).isSameAs(defaults.getExporterProperties());
+  }
+
+  @Test
+  void useOtelMetricsSupportsNegativeOverride() {
+    Map<String, MetricsProperties> metricMap = new HashMap<>();
+    metricMap.put("prom_metric", otelProperties(false));
+    PrometheusProperties props = buildProperties(true, metricMap);
+    assertThat(props.useOtelMetrics("prom_metric", "any_otel_metric")).isFalse();
+  }
+
+  @Test
+  void useOtelMetricsDisablesByMetricName() {
+    Map<String, MetricsProperties> metricMap = new HashMap<>();
+    metricMap.put("otel_metric", otelProperties(false));
+    PrometheusProperties props = buildProperties(true, metricMap);
+    assertThat(props.useOtelMetrics("some_prom_metric", "otel_metric")).isFalse();
+  }
+
+  @Test
+  void useOtelMetricsRespectsDefaultIfNoOverride() {
+    PrometheusProperties props = buildProperties(true, Collections.emptyMap());
+    assertThat(props.useOtelMetrics("prom_x", "otel_y")).isTrue();
+  }
+
+  @Test
+  void noOverridesReturnsFalse() {
+    PrometheusProperties props = PrometheusProperties.get();
+    assertThat(props.useOtelMetrics("prom_x", "otel_y")).isFalse();
+  }
+
+  private static PrometheusProperties buildProperties(
+      Boolean defaultUse, Map<String, MetricsProperties> metricProps) {
+    return PrometheusProperties.builder()
+        .defaultMetricsProperties(otelProperties(defaultUse))
+        .metricProperties(new HashMap<>(metricProps))
+        .build();
+  }
+
+  private static MetricsProperties otelProperties(Boolean useOtel) {
+    return MetricsProperties.builder().useOtelMetrics(useOtel).build();
   }
 }

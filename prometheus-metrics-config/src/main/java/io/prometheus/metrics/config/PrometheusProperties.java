@@ -2,6 +2,7 @@ package io.prometheus.metrics.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
@@ -100,6 +101,20 @@ public class PrometheusProperties {
 
   public ExporterOpenTelemetryProperties getExporterOpenTelemetryProperties() {
     return exporterOpenTelemetryProperties;
+  }
+
+  public boolean useOtelMetrics(String prometheusMetric, String otelMetric) {
+    Boolean useByPrometheusMetric = usesOtelMetric(prometheusMetric);
+    if (Boolean.FALSE.equals(useByPrometheusMetric)) return false;
+    Boolean useByOtelMetric = usesOtelMetric(otelMetric);
+    if (Boolean.FALSE.equals(useByOtelMetric)) return false;
+    return Boolean.TRUE.equals(getDefaultMetricProperties().useOtelMetrics());
+  }
+
+  private Boolean usesOtelMetric(String metric) {
+    return Optional.ofNullable(getMetricProperties(metric))
+        .map(MetricsProperties::useOtelMetrics)
+        .orElse(null);
   }
 
   public static class Builder {

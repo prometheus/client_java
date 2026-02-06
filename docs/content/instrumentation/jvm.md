@@ -123,6 +123,21 @@ jvm_gc_collection_seconds_count{gc="PS Scavenge"} 0
 jvm_gc_collection_seconds_sum{gc="PS Scavenge"} 0.0
 ```
 
+For more detailed GC metrics, enable the [useOtelMetrics](https://prometheus.github.io/client_java/config/config/#metrics-properties) configuration option. This replaces the standard metric with a 
+histogram implemented according to the [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmgcduration).
+
+```text
+# HELP jvm_gc_duration_seconds Duration of JVM garbage collection actions.
+# TYPE jvm_gc_duration_seconds histogram
+jvm_gc_duration_seconds_bucket{jvm_gc_action="end of minor GC",jvm_gc_name="G1 Young Generation",le="0.01"} 4
+jvm_gc_duration_seconds_bucket{jvm_gc_action="end of minor GC",jvm_gc_name="G1 Young Generation",le="0.1"} 4
+jvm_gc_duration_seconds_bucket{jvm_gc_action="end of minor GC",jvm_gc_name="G1 Young Generation",le="1.0"} 4
+jvm_gc_duration_seconds_bucket{jvm_gc_action="end of minor GC",jvm_gc_name="G1 Young Generation",le="10.0"} 4
+jvm_gc_duration_seconds_bucket{jvm_gc_action="end of minor GC",jvm_gc_name="G1 Young Generation",le="+Inf"} 4
+jvm_gc_duration_seconds_count{jvm_gc_action="end of minor GC",jvm_gc_name="G1 Young Generation"} 4
+jvm_gc_duration_seconds_sum{jvm_gc_action="end of minor GC",jvm_gc_name="G1 Young Generation"} 0.029
+```
+
 ## JVM Memory Metrics
 
 JVM memory metrics are provided by
