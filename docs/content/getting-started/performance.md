@@ -60,13 +60,13 @@ or you use the corresponding [config options]({{< relref "../config/config.md" >
 One way to do this is with system properties in the command line when you start your application
 
 ```sh
-java -Dio.prometheus.metrics.histogramClassicOnly=true my-app.jar
+java -Dio.prometheus.metrics.histogram_classic_only=true my-app.jar
 ```
 
 or
 
 ```sh
-java -Dio.prometheus.metrics.histogramNativeOnly=true my-app.jar
+java -Dio.prometheus.metrics.histogram_native_only=true my-app.jar
 ```
 
 If you don't want to add a command line parameter every time you start your application, you can add
@@ -75,13 +75,13 @@ that it gets packed into your JAR file). The `prometheus.properties` file should
 line:
 
 ```properties
-io.prometheus.metrics.histogramClassicOnly=true
+io.prometheus.metrics.histogram_classic_only=true
 ```
 
 or
 
 ```properties
-io.prometheus.metrics.histogramNativeOnly=true
+io.prometheus.metrics.histogram_native_only=true
 ```
 
 Future releases will add more configuration options, like support for configuration via environment

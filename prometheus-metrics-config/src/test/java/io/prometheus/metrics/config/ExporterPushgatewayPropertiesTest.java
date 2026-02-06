@@ -31,7 +31,9 @@ class ExporterPushgatewayPropertiesTest {
   }
 
   private static ExporterPushgatewayProperties load(Map<String, String> map) {
-    return ExporterPushgatewayProperties.load(new HashMap<>(map));
+    Map<Object, Object> regularProperties = new HashMap<>(map);
+    PropertySource propertySource = new PropertySource(regularProperties);
+    return ExporterPushgatewayProperties.load(propertySource);
   }
 
   @Test

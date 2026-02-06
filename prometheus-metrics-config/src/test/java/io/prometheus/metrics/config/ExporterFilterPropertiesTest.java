@@ -13,10 +13,10 @@ class ExporterFilterPropertiesTest {
     ExporterFilterProperties properties =
         load(
             Map.of(
-                "io.prometheus.exporter.filter.metricNameMustBeEqualTo", "a,b,c",
-                "io.prometheus.exporter.filter.metricNameMustNotBeEqualTo", "d,e,f",
-                "io.prometheus.exporter.filter.metricNameMustStartWith", "g,h,i",
-                "io.prometheus.exporter.filter.metricNameMustNotStartWith", "j,k,l"));
+                "io.prometheus.exporter.filter.metric_name_must_be_equal_to", "a,b,c",
+                "io.prometheus.exporter.filter.metric_name_must_not_be_equal_to", "d,e,f",
+                "io.prometheus.exporter.filter.metric_name_must_start_with", "g,h,i",
+                "io.prometheus.exporter.filter.metric_name_must_not_start_with", "j,k,l"));
     assertThat(properties.getAllowedMetricNames()).containsExactly("a", "b", "c");
     assertThat(properties.getExcludedMetricNames()).containsExactly("d", "e", "f");
     assertThat(properties.getAllowedMetricNamePrefixes()).containsExactly("g", "h", "i");
@@ -24,7 +24,9 @@ class ExporterFilterPropertiesTest {
   }
 
   private static ExporterFilterProperties load(Map<String, String> map) {
-    return ExporterFilterProperties.load(new HashMap<>(map));
+    Map<Object, Object> regularProperties = new HashMap<>(map);
+    PropertySource propertySource = new PropertySource(regularProperties);
+    return ExporterFilterProperties.load(propertySource);
   }
 
   @Test

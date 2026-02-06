@@ -40,4 +40,4 @@ You can find an example of authentication and SSL in the
 
 See _config_ section (_todo_) on runtime configuration options.
 
-- `io.prometheus.exporter.httpServer.port`: The port to bind to.
+- `io.prometheus.exporter.http_server.port`: The port to bind to.

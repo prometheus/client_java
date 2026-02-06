@@ -1,15 +1,14 @@
 package io.prometheus.metrics.config;
 
-import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exemplars */
 public class ExemplarsProperties {
 
   private static final String PREFIX = "io.prometheus.exemplars";
-  private static final String MIN_RETENTION_PERIOD_SECONDS = "minRetentionPeriodSeconds";
-  private static final String MAX_RETENTION_PERIOD_SECONDS = "maxRetentionPeriodSeconds";
-  private static final String SAMPLE_INTERVAL_MILLISECONDS = "sampleIntervalMilliseconds";
+  private static final String MIN_RETENTION_PERIOD_SECONDS = "min_retention_period_seconds";
+  private static final String MAX_RETENTION_PERIOD_SECONDS = "max_retention_period_seconds";
+  private static final String SAMPLE_INTERVAL_MILLISECONDS = "sample_interval_milliseconds";
 
   @Nullable private final Integer minRetentionPeriodSeconds;
   @Nullable private final Integer maxRetentionPeriodSeconds;
@@ -57,17 +56,17 @@ public class ExemplarsProperties {
   }
 
   /**
-   * Note that this will remove entries from {@code properties}. This is because we want to know if
-   * there are unused properties remaining after all properties have been loaded.
+   * Note that this will remove entries from {@code propertySource}. This is because we want to know
+   * if there are unused properties remaining after all properties have been loaded.
    */
-  static ExemplarsProperties load(Map<Object, Object> properties)
+  static ExemplarsProperties load(PropertySource propertySource)
       throws PrometheusPropertiesException {
     Integer minRetentionPeriodSeconds =
-        Util.loadInteger(PREFIX + "." + MIN_RETENTION_PERIOD_SECONDS, properties);
+        Util.loadInteger(PREFIX, MIN_RETENTION_PERIOD_SECONDS, propertySource);
     Integer maxRetentionPeriodSeconds =
-        Util.loadInteger(PREFIX + "." + MAX_RETENTION_PERIOD_SECONDS, properties);
+        Util.loadInteger(PREFIX, MAX_RETENTION_PERIOD_SECONDS, propertySource);
     Integer sampleIntervalMilliseconds =
-        Util.loadInteger(PREFIX + "." + SAMPLE_INTERVAL_MILLISECONDS, properties);
+        Util.loadInteger(PREFIX, SAMPLE_INTERVAL_MILLISECONDS, propertySource);
 
     Util.assertValue(
         minRetentionPeriodSeconds,

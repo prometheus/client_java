@@ -14,13 +14,74 @@ public class PrometheusProperties {
   private static final PrometheusProperties instance = PrometheusPropertiesLoader.load();
 
   private final MetricsProperties defaultMetricsProperties;
-  private final Map<String, MetricsProperties> metricProperties = new HashMap<>();
+  private final MetricPropertiesMap metricProperties;
   private final ExemplarsProperties exemplarProperties;
   private final ExporterProperties exporterProperties;
   private final ExporterFilterProperties exporterFilterProperties;
   private final ExporterHttpServerProperties exporterHttpServerProperties;
   private final ExporterOpenTelemetryProperties exporterOpenTelemetryProperties;
   private final ExporterPushgatewayProperties exporterPushgatewayProperties;
+
+  /**
+   * Map that stores metric-specific properties keyed by metric name in exposition format
+   * (underscores instead of dots).
+   *
+   * <p>This wrapper makes it explicit that metric names are normalized to underscore format for
+   * storage, so that environment variables and properties with dots in metric names can be
+   * correctly looked up using normalized names.
+   */
+  static class MetricPropertiesMap {
+    private final Map<String, MetricsProperties> map = new HashMap<>();
+
+    void set(Map<String, MetricsProperties> properties) {
+      map.clear();
+      properties.forEach(this::put);
+    }
+
+    void put(String metricName, MetricsProperties properties) {
+      map.put(normalize(metricName), properties);
+    }
+
+    /**
+     * Get metric properties by metric name.
+     *
+     * <p>Accepts metric names in any format (with dots or underscores) and automatically converts
+     * them to the normalized underscore format used for storage.
+     *
+     * @param metricName the metric name (dots will be converted to underscores)
+     * @return the metric properties, or null if not configured
+     */
+    @Nullable
+    MetricsProperties get(String metricName) {
+      return map.get(normalize(metricName));
+    }
+
+    // copied from PrometheusNaming - but we can't reuse that class here because it's in a module
+    // that
+    // depends on PrometheusProperties, which would create a circular dependency.
+    private static String normalize(String name) {
+      StringBuilder escaped = new StringBuilder();
+
+      for (int i = 0; i < name.length(); ) {
+        int c = name.codePointAt(i);
+        if (isValidLegacyChar(c, i)) {
+          escaped.appendCodePoint(c);
+        } else {
+          escaped.append('_');
+        }
+        i += Character.charCount(c);
+      }
+      return escaped.toString();
+    }
+  }
+
+  private static boolean isValidLegacyChar(int c, int i) {
+    return (c >= 'a' && c <= 'z')
+        || (c >= 'A' && c <= 'Z')
+        || c == '_'
+        || c == ':'
+        || (c >= '0' && c <= '9' && i > 0);
+  }
 
   /**
    * Get the properties instance. When called for the first time, {@code get()} loads the properties
@@ -41,9 +102,10 @@ public class PrometheusProperties {
     return new Builder();
   }
 
-  public PrometheusProperties(
+  // Package-private constructor for PrometheusPropertiesLoader and Builder
+  PrometheusProperties(
       MetricsProperties defaultMetricsProperties,
-      Map<String, MetricsProperties> metricProperties,
+      MetricPropertiesMap metricProperties,
       ExemplarsProperties exemplarProperties,
       ExporterProperties exporterProperties,
       ExporterFilterProperties exporterFilterProperties,
@@ -51,7 +113,7 @@ public class PrometheusProperties {
       ExporterPushgatewayProperties pushgatewayProperties,
       ExporterOpenTelemetryProperties otelConfig) {
     this.defaultMetricsProperties = defaultMetricsProperties;
-    this.metricProperties.putAll(metricProperties);
+    this.metricProperties = metricProperties;
     this.exemplarProperties = exemplarProperties;
     this.exporterProperties = exporterProperties;
     this.exporterFilterProperties = exporterFilterProperties;
@@ -72,10 +134,13 @@ public class PrometheusProperties {
    * Properties specific for one metric. Should be merged with {@link
    * #getDefaultMetricProperties()}. May return {@code null} if no metric-specific properties are
    * configured for a metric name.
+   *
+   * @param metricName the metric name (dots will be automatically converted to underscores to match
+   *     exposition format)
    */
   @Nullable
   public MetricsProperties getMetricProperties(String metricName) {
-    return metricProperties.get(metricName.replace(".", "_"));
+    return metricProperties.get(metricName);
   }
 
   public ExemplarsProperties getExemplarProperties() {
@@ -104,7 +169,7 @@ public class PrometheusProperties {
 
   public static class Builder {
     private MetricsProperties defaultMetricsProperties = MetricsProperties.builder().build();
-    private Map<String, MetricsProperties> metricProperties = new HashMap<>();
+    private final MetricPropertiesMap metricProperties = new MetricPropertiesMap();
     private ExemplarsProperties exemplarProperties = ExemplarsProperties.builder().build();
     private ExporterProperties exporterProperties = ExporterProperties.builder().build();
     private ExporterFilterProperties exporterFilterProperties =
@@ -124,7 +189,7 @@ public class PrometheusProperties {
     }
 
     public Builder metricProperties(Map<String, MetricsProperties> metricProperties) {
-      this.metricProperties = metricProperties;
+      this.metricProperties.set(metricProperties);
       return this;
     }
 

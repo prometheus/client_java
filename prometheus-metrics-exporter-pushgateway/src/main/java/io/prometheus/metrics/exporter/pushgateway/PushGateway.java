@@ -396,7 +396,7 @@ public class PushGateway {
 
     /**
      * Use milliseconds for timestamps in text format? Default is {@code false}. Can be overwritten
-     * at runtime with the {@code io.prometheus.exporter.timestampsInMs} property.
+     * at runtime with the {@code io.prometheus.exporter.timestamps_in_ms} property.
      */
     public Builder prometheusTimestampsInMs(boolean prometheusTimestampsInMs) {
       this.prometheusTimestampsInMs = prometheusTimestampsInMs;

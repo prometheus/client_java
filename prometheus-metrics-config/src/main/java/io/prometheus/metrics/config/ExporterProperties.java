@@ -1,15 +1,14 @@
 package io.prometheus.metrics.config;
 
-import java.util.Map;
 import javax.annotation.Nullable;
 
 /** Properties starting with io.prometheus.exporter */
 public class ExporterProperties {
 
-  private static final String INCLUDE_CREATED_TIMESTAMPS = "includeCreatedTimestamps";
+  private static final String INCLUDE_CREATED_TIMESTAMPS = "include_created_timestamps";
   // milliseconds is the default - we only provide a boolean flag to avoid a breaking change
-  private static final String PROMETHEUS_TIMESTAMPS_IN_MS = "prometheusTimestampsInMs";
-  private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplarsOnAllMetricTypes";
+  private static final String PROMETHEUS_TIMESTAMPS_IN_MS = "prometheus_timestamps_in_ms";
+  private static final String EXEMPLARS_ON_ALL_METRIC_TYPES = "exemplars_on_all_metric_types";
   private static final String PREFIX = "io.prometheus.exporter";
 
   @Nullable private final Boolean includeCreatedTimestamps;
@@ -44,17 +43,16 @@ public class ExporterProperties {
   }
 
   /**
-   * Note that this will remove entries from {@code properties}. This is because we want to know if
-   * there are unused properties remaining after all properties have been loaded.
+   * Note that this will remove entries from {@code propertySource}. This is because we want to know
+   * if there are unused properties remaining after all properties have been loaded.
    */
-  static ExporterProperties load(Map<Object, Object> properties)
+  static ExporterProperties load(PropertySource propertySource)
       throws PrometheusPropertiesException {
     Boolean includeCreatedTimestamps =
-        Util.loadBoolean(PREFIX + "." + INCLUDE_CREATED_TIMESTAMPS, properties);
-    Boolean timestampsInMs =
-        Util.loadBoolean(PREFIX + "." + PROMETHEUS_TIMESTAMPS_IN_MS, properties);
+        Util.loadBoolean(PREFIX, INCLUDE_CREATED_TIMESTAMPS, propertySource);
+    Boolean timestampsInMs = Util.loadBoolean(PREFIX, PROMETHEUS_TIMESTAMPS_IN_MS, propertySource);
     Boolean exemplarsOnAllMetricTypes =
-        Util.loadBoolean(PREFIX + "." + EXEMPLARS_ON_ALL_METRIC_TYPES, properties);
+        Util.loadBoolean(PREFIX, EXEMPLARS_ON_ALL_METRIC_TYPES, propertySource);
     return new ExporterProperties(
         includeCreatedTimestamps, timestampsInMs, exemplarsOnAllMetricTypes);
   }
