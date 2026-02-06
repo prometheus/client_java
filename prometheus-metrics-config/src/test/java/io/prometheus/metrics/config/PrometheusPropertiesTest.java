@@ -70,4 +70,62 @@ class PrometheusPropertiesTest {
     assertThat(result.getMetricProperties("unknown_metric")).isNull();
     assertThat(result.getExporterProperties()).isSameAs(defaults.getExporterProperties());
   }
+
+  @Test
+  void testMetricNameNormalization() {
+    PrometheusProperties.Builder builder = PrometheusProperties.builder();
+    MetricsProperties customProps =
+        MetricsProperties.builder().histogramClassicUpperBounds(0.1, 0.5).build();
+
+    // Test that metric names with dots are normalized to underscores
+    builder.putMetricProperty("my.metric.name", customProps);
+    PrometheusProperties result = builder.build();
+
+    // Should be able to retrieve with dots
+    assertThat(result.getMetricProperties("my.metric.name")).isSameAs(customProps);
+    // Should also be able to retrieve with underscores
+    assertThat(result.getMetricProperties("my_metric_name")).isSameAs(customProps);
+  }
+
+  @Test
+  void testMetricNameWithInvalidCharacters() {
+    PrometheusProperties.Builder builder = PrometheusProperties.builder();
+    MetricsProperties customProps =
+        MetricsProperties.builder().histogramClassicUpperBounds(0.1, 0.5).build();
+
+    // Test that invalid characters are converted to underscores
+    builder.putMetricProperty("metric-name@with#invalid$chars", customProps);
+    PrometheusProperties result = builder.build();
+
+    // Should normalize invalid characters to underscores
+    assertThat(result.getMetricProperties("metric-name@with#invalid$chars")).isSameAs(customProps);
+    assertThat(result.getMetricProperties("metric_name_with_invalid_chars")).isSameAs(customProps);
+  }
+
+  @Test
+  void testMetricNameWithValidCharacters() {
+    PrometheusProperties.Builder builder = PrometheusProperties.builder();
+    MetricsProperties customProps =
+        MetricsProperties.builder().histogramClassicUpperBounds(0.1, 0.5).build();
+
+    // Test valid characters: letters, numbers (not at start), underscore, colon
+    builder.putMetricProperty("my_metric:name123", customProps);
+    PrometheusProperties result = builder.build();
+
+    assertThat(result.getMetricProperties("my_metric:name123")).isSameAs(customProps);
+  }
+
+  @Test
+  void testMetricNameStartingWithNumber() {
+    PrometheusProperties.Builder builder = PrometheusProperties.builder();
+    MetricsProperties customProps =
+        MetricsProperties.builder().histogramClassicUpperBounds(0.1, 0.5).build();
+
+    // First digit is invalid (i=0), but subsequent digits are valid (i>0)
+    builder.putMetricProperty("123metric", customProps);
+    PrometheusProperties result = builder.build();
+
+    assertThat(result.getMetricProperties("123metric")).isSameAs(customProps);
+    assertThat(result.getMetricProperties("_23metric")).isSameAs(customProps);
+  }
 }
