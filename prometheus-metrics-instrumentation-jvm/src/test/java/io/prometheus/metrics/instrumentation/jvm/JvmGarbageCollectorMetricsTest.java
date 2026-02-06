@@ -91,7 +91,7 @@ class JvmGarbageCollectorMetricsTest {
     PrometheusRegistry registry = new PrometheusRegistry();
     PrometheusProperties properties =
         PrometheusProperties.builder()
-            .defaultMetricsProperties(MetricsProperties.builder().useOtelMetrics(true).build())
+            .defaultMetricsProperties(MetricsProperties.builder().useOtelSemconv("*").build())
             .build();
     JvmGarbageCollectorMetrics.builder(properties)
         .garbageCollectorBeans(Arrays.asList(mockGcBean1, mockGcBean2))
@@ -113,8 +113,7 @@ class JvmGarbageCollectorMetricsTest {
 
     PrometheusProperties properties =
         PrometheusProperties.builder()
-            .defaultMetricsProperties(MetricsProperties.builder().useOtelMetrics(true).build())
-            .metricProperties(Map.of("jvm_gc_duration", MetricsProperties.builder().build()))
+            .defaultMetricsProperties(MetricsProperties.builder().useOtelSemconv("*").build())
             .build();
 
     PrometheusRegistry registry = new PrometheusRegistry();

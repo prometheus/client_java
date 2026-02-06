@@ -60,7 +60,7 @@ public class JvmGarbageCollectorMetrics {
   }
 
   private void register(PrometheusRegistry registry) {
-    if (config.useOtelMetrics(JVM_GC_DURATION)) {
+    if (config.useOtelSemconv(JVM_GC_DURATION)) {
       registerOtel(registry);
     } else {
       registerPrometheus(registry);

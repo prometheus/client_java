@@ -130,34 +130,34 @@ class PrometheusPropertiesTest {
   }
 
   @Test
-  void useOtelMetricsDisablesByMetricName() {
-    Map<String, MetricsProperties> metricMap = new HashMap<>();
-    metricMap.put("otel_metric", otelProperties(false));
-    PrometheusProperties props = buildProperties(true, metricMap);
-    assertThat(props.useOtelMetrics("otel_metric")).isFalse();
+  void useOtelSemconvReturnsFalseForMetricNotInList() {
+    PrometheusProperties props = buildProperties("jvm.gc.duration");
+    assertThat(props.useOtelSemconv("other.metric")).isFalse();
   }
 
   @Test
-  void useOtelMetricsRespectsDefaultIfNoOverride() {
-    PrometheusProperties props = buildProperties(true, Collections.emptyMap());
-    assertThat(props.useOtelMetrics("otel_y")).isTrue();
+  void useOtelSemconvWildcardEnablesAll() {
+    PrometheusProperties props = buildProperties("*");
+    assertThat(props.useOtelSemconv("any.metric")).isTrue();
   }
 
   @Test
-  void noOverridesReturnsFalse() {
+  void useOtelSemconvNullListReturnsFalse() {
     PrometheusProperties props = PrometheusProperties.get();
-    assertThat(props.useOtelMetrics("otel_y")).isFalse();
+    assertThat(props.useOtelSemconv("otel_y")).isFalse();
   }
 
-  private static PrometheusProperties buildProperties(
-      Boolean defaultUse, Map<String, MetricsProperties> metricProps) {
+  @Test
+  void useOtelSemconvSpecificMetricReturnsTrueForMatch() {
+    PrometheusProperties props = buildProperties("jvm.gc.duration", "jvm.memory.used");
+    assertThat(props.useOtelSemconv("jvm.gc.duration")).isTrue();
+    assertThat(props.useOtelSemconv("jvm.memory.used")).isTrue();
+    assertThat(props.useOtelSemconv("other.metric")).isFalse();
+  }
+
+  private static PrometheusProperties buildProperties(String... otelSemconv) {
     return PrometheusProperties.builder()
-        .defaultMetricsProperties(otelProperties(defaultUse))
-        .metricProperties(new HashMap<>(metricProps))
+        .defaultMetricsProperties(MetricsProperties.builder().useOtelSemconv(otelSemconv).build())
         .build();
-  }
-
-  private static MetricsProperties otelProperties(Boolean useOtel) {
-    return MetricsProperties.builder().useOtelMetrics(useOtel).build();
   }
 }

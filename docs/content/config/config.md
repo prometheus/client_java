@@ -75,7 +75,7 @@ When the same property is defined in multiple sources, the following precedence 
 <!-- editorconfig-checker-disable -->
 
 | Name                                                          | Javadoc                                                                                                                                                                         | Note    |
-|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | io.prometheus.metrics.exemplars_enabled                       | [Counter.Builder.withExemplars()](</client_java/api/io/prometheus/metrics/core/metrics/Counter.Builder.html#withExemplars()>)                                                   | (1) (2) |
 | io.prometheus.metrics.histogram_native_only                   | [Histogram.Builder.nativeOnly()](</client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#nativeOnly()>)                                                     | (2)     |
 | io.prometheus.metrics.histogram_classic_only                  | [Histogram.Builder.classicOnly()](</client_java/api/io/prometheus/metrics/core/metrics/Histogram.Builder.html#classicOnly()>)                                                   | (2)     |
@@ -89,8 +89,7 @@ When the same property is defined in multiple sources, the following precedence 
 | io.prometheus.metrics.summary_quantile_errors                 | [Summary.Builder.quantile(double, double)](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#quantile(double,double)>)                                  | (5)     |
 | io.prometheus.metrics.summary_max_age_seconds                 | [Summary.Builder.maxAgeSeconds()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#maxAgeSeconds(long)>)                                               |         |
 | io.prometheus.metrics.summary_number_of_age_buckets           | [Summary.Builder.numberOfAgeBuckets()](</client_java/api/io/prometheus/metrics/core/metrics/Summary.Builder.html#numberOfAgeBuckets(int)>)                                      |         |
-| io.prometheus.metrics.use_otel_metrics                        | [MetricsProperties.useOtelMetrics()](</client_java/api/io/prometheus/metrics/config/MetricsProperties.html#useOtelMetrics()>)                                                   | (2)     |
-
+| io.prometheus.metrics.use_otel_semconv                        | [MetricsProperties.useOtelSemconv()](</client_java/api/io/prometheus/metrics/config/MetricsProperties.html#useOtelSemconv()>)                                                   | (6)     |
 
 <!-- editorconfig-checker-enable -->
 
@@ -102,7 +101,9 @@ not just for counters<br>
 (3) Comma-separated list. Example: `.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10`.<br>
 (4) Comma-separated list. Example: `0.5, 0.95, 0.99`.<br>
 (5) Comma-separated list. If specified, the list must have the same length as
-`io.prometheus.metrics.summary_quantiles`. Example: `0.01, 0.005, 0.005`.
+`io.prometheus.metrics.summary_quantiles`. Example: `0.01, 0.005, 0.005`.<br>
+(6) Comma-separated list of OTel metric names. Use `*` to enable all.
+Example: `jvm.gc.duration` or `*`.
 
 There's one special feature about metric properties: You can set a property for one specific
 metric only by specifying the metric name. Example:

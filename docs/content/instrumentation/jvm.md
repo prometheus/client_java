@@ -123,8 +123,12 @@ jvm_gc_collection_seconds_count{gc="PS Scavenge"} 0
 jvm_gc_collection_seconds_sum{gc="PS Scavenge"} 0.0
 ```
 
-For more detailed GC metrics, enable the [use_otel_metrics](https://prometheus.github.io/client_java/config/config/#metrics-properties) configuration option. This replaces the standard metric with a 
-histogram implemented according to the [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmgcduration).
+For more detailed GC metrics, enable the
+[use_otel_semconv](https://prometheus.github.io/client_java/config/config/#metrics-properties)
+configuration option by specifying `jvm.gc.duration` or `*` (for all
+OTel metrics). This replaces the standard metric with a histogram
+implemented according to the
+[OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmgcduration). <!-- editorconfig-checker-disable-line -->
 
 ```text
 # HELP jvm_gc_duration_seconds Duration of JVM garbage collection actions.
