@@ -7,7 +7,7 @@ protoc = "33.5"
 
 [env]
 # renovate: datasource=docker depName=ghcr.io/super-linter/super-linter
-SUPER_LINTER_VERSION="v8.4.0@sha256:c5e3307932203ff9e1e8acfe7e92e894add6266605b5d7fb525fb371a59a26f4"
+SUPER_LINTER_VERSION="v8.5.0@sha256:6831c0a801d353b510e4e468a3209a8a48bf0102e193d5c7e94e57667fdf64eb"
 
 [tasks.ci]
 description = "CI Build"
