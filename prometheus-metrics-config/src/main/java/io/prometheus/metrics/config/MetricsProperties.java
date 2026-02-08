@@ -27,6 +27,7 @@ public class MetricsProperties {
   private static final String SUMMARY_QUANTILE_ERRORS = "summary_quantile_errors";
   private static final String SUMMARY_MAX_AGE_SECONDS = "summary_max_age_seconds";
   private static final String SUMMARY_NUMBER_OF_AGE_BUCKETS = "summary_number_of_age_buckets";
+  private static final String USE_OTEL_SEMCONV = "use_otel_semconv";
 
   /**
    * All known property suffixes that can be configured for metrics.
@@ -46,7 +47,8 @@ public class MetricsProperties {
     SUMMARY_QUANTILES,
     SUMMARY_QUANTILE_ERRORS,
     SUMMARY_MAX_AGE_SECONDS,
-    SUMMARY_NUMBER_OF_AGE_BUCKETS
+    SUMMARY_NUMBER_OF_AGE_BUCKETS,
+    USE_OTEL_SEMCONV
   };
 
   @Nullable private final Boolean exemplarsEnabled;
@@ -62,6 +64,7 @@ public class MetricsProperties {
   @Nullable private final List<Double> summaryQuantileErrors;
   @Nullable private final Long summaryMaxAgeSeconds;
   @Nullable private final Integer summaryNumberOfAgeBuckets;
+  @Nullable private final List<String> useOtelSemconv;
 
   public MetricsProperties(
       @Nullable Boolean exemplarsEnabled,
@@ -91,6 +94,7 @@ public class MetricsProperties {
         summaryQuantileErrors,
         summaryMaxAgeSeconds,
         summaryNumberOfAgeBuckets,
+        null,
         "");
   }
 
@@ -108,6 +112,7 @@ public class MetricsProperties {
       @Nullable List<Double> summaryQuantileErrors,
       @Nullable Long summaryMaxAgeSeconds,
       @Nullable Integer summaryNumberOfAgeBuckets,
+      @Nullable List<String> useOtelSemconv,
       String configPropertyPrefix) {
     this.exemplarsEnabled = exemplarsEnabled;
     this.histogramNativeOnly = isHistogramNativeOnly(histogramClassicOnly, histogramNativeOnly);
@@ -129,6 +134,8 @@ public class MetricsProperties {
             : unmodifiableList(new ArrayList<>(summaryQuantileErrors));
     this.summaryMaxAgeSeconds = summaryMaxAgeSeconds;
     this.summaryNumberOfAgeBuckets = summaryNumberOfAgeBuckets;
+    this.useOtelSemconv =
+        useOtelSemconv == null ? null : unmodifiableList(new ArrayList<>(useOtelSemconv));
     validate(configPropertyPrefix);
   }
 
@@ -354,6 +361,15 @@ public class MetricsProperties {
   }
 
   /**
+   * List of OTel metric names for which OpenTelemetry Semantic Conventions should be used. Use
+   * {@code "*"} to enable for all metrics. Returns {@code null} if not configured.
+   */
+  @Nullable
+  public List<String> useOtelSemconv() {
+    return useOtelSemconv;
+  }
+
+  /**
    * Note that this will remove entries from {@code propertySource}. This is because we want to know
    * if there are unused properties remaining after all properties have been loaded.
    */
@@ -373,6 +389,7 @@ public class MetricsProperties {
         Util.loadDoubleList(prefix, SUMMARY_QUANTILE_ERRORS, propertySource),
         Util.loadLong(prefix, SUMMARY_MAX_AGE_SECONDS, propertySource),
         Util.loadInteger(prefix, SUMMARY_NUMBER_OF_AGE_BUCKETS, propertySource),
+        Util.loadStringList(prefix, USE_OTEL_SEMCONV, propertySource),
         prefix);
   }
 
@@ -394,6 +411,7 @@ public class MetricsProperties {
     @Nullable private List<Double> summaryQuantileErrors;
     @Nullable private Long summaryMaxAgeSeconds;
     @Nullable private Integer summaryNumberOfAgeBuckets;
+    @Nullable private List<String> useOtelSemconv;
 
     private Builder() {}
 
@@ -411,7 +429,9 @@ public class MetricsProperties {
           summaryQuantiles,
           summaryQuantileErrors,
           summaryMaxAgeSeconds,
-          summaryNumberOfAgeBuckets);
+          summaryNumberOfAgeBuckets,
+          useOtelSemconv,
+          "");
     }
 
     /** See {@link MetricsProperties#getExemplarsEnabled()} */
@@ -493,6 +513,12 @@ public class MetricsProperties {
     /** See {@link MetricsProperties#getSummaryNumberOfAgeBuckets()} */
     public Builder summaryNumberOfAgeBuckets(@Nullable Integer summaryNumberOfAgeBuckets) {
       this.summaryNumberOfAgeBuckets = summaryNumberOfAgeBuckets;
+      return this;
+    }
+
+    /** See {@link MetricsProperties#useOtelSemconv()} */
+    public Builder useOtelSemconv(String... useOtelSemconv) {
+      this.useOtelSemconv = Util.toStringList(useOtelSemconv);
       return this;
     }
   }

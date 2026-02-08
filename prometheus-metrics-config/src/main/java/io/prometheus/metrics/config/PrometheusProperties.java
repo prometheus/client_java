@@ -1,6 +1,7 @@
 package io.prometheus.metrics.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 
@@ -165,6 +166,17 @@ public class PrometheusProperties {
 
   public ExporterOpenTelemetryProperties getExporterOpenTelemetryProperties() {
     return exporterOpenTelemetryProperties;
+  }
+
+  public boolean useOtelSemconv(String otelMetric) {
+    List<String> list = getDefaultMetricProperties().useOtelSemconv();
+    if (list == null || list.isEmpty()) {
+      return false;
+    }
+    if (list.contains("*")) {
+      return true;
+    }
+    return list.contains(otelMetric);
   }
 
   public static class Builder {

@@ -32,6 +32,14 @@ class Util {
   }
 
   @Nullable
+  static List<String> toStringList(@Nullable String... values) {
+    if (values == null) {
+      return null;
+    }
+    return Arrays.asList(values);
+  }
+
+  @Nullable
   static List<Double> toList(@Nullable double... values) {
     if (values == null) {
       return null;

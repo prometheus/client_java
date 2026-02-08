@@ -1,6 +1,8 @@
 package io.prometheus.metrics.instrumentation.jvm;
 
+import com.sun.management.GarbageCollectionNotificationInfo;
 import io.prometheus.metrics.config.PrometheusProperties;
+import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.core.metrics.SummaryWithCallback;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import io.prometheus.metrics.model.snapshots.Labels;
@@ -10,6 +12,8 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import javax.annotation.Nullable;
+import javax.management.NotificationEmitter;
+import javax.management.openmbean.CompositeData;
 
 /**
  * JVM Garbage Collector metrics. The {@link JvmGarbageCollectorMetrics} are registered as part of
@@ -19,14 +23,14 @@ import javax.annotation.Nullable;
  * JvmMetrics.builder().register();
  * }</pre>
  *
- * However, if you want only the {@link JvmGarbageCollectorMetrics} you can also register them
+ * <p>However, if you want only the {@link JvmGarbageCollectorMetrics} you can also register them
  * directly:
  *
  * <pre>{@code
  * JvmGarbageCollectorMetrics.builder().register();
  * }</pre>
  *
- * Example metrics being exported:
+ * <p>Example metrics being exported:
  *
  * <pre>
  * # HELP jvm_gc_collection_seconds Time spent in a given JVM garbage collector in seconds.
@@ -40,6 +44,7 @@ import javax.annotation.Nullable;
 public class JvmGarbageCollectorMetrics {
 
   private static final String JVM_GC_COLLECTION_SECONDS = "jvm_gc_collection_seconds";
+  private static final String JVM_GC_DURATION = "jvm.gc.duration";
 
   private final PrometheusProperties config;
   private final List<GarbageCollectorMXBean> garbageCollectorBeans;
@@ -55,7 +60,14 @@ public class JvmGarbageCollectorMetrics {
   }
 
   private void register(PrometheusRegistry registry) {
+    if (config.useOtelSemconv(JVM_GC_DURATION)) {
+      registerOtel(registry);
+    } else {
+      registerPrometheus(registry);
+    }
+  }
 
+  private void registerPrometheus(PrometheusRegistry registry) {
     SummaryWithCallback.builder(config)
         .name(JVM_GC_COLLECTION_SECONDS)
         .help("Time spent in a given JVM garbage collector in seconds.")
@@ -73,6 +85,54 @@ public class JvmGarbageCollectorMetrics {
             })
         .constLabels(constLabels)
         .register(registry);
+  }
+
+  private void registerOtel(PrometheusRegistry registry) {
+    double[] buckets = {0.01, 0.1, 1, 10};
+
+    Histogram gcDurationHistogram =
+        Histogram.builder(config)
+            .name(JVM_GC_DURATION)
+            .unit(Unit.SECONDS)
+            .help("Duration of JVM garbage collection actions.")
+            .labelNames("jvm.gc.action", "jvm.gc.name", "jvm.gc.cause")
+            .classicUpperBounds(buckets)
+            .register(registry);
+
+    registerNotificationListener(gcDurationHistogram);
+  }
+
+  private void registerNotificationListener(Histogram gcDurationHistogram) {
+    for (GarbageCollectorMXBean gcBean : garbageCollectorBeans) {
+
+      if (!(gcBean instanceof NotificationEmitter)) {
+        continue;
+      }
+
+      ((NotificationEmitter) gcBean)
+          .addNotificationListener(
+              (notification, handback) -> {
+                if (!GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION.equals(
+                    notification.getType())) {
+                  return;
+                }
+
+                GarbageCollectionNotificationInfo info =
+                    GarbageCollectionNotificationInfo.from(
+                        (CompositeData) notification.getUserData());
+
+                observe(gcDurationHistogram, info);
+              },
+              null,
+              null);
+    }
+  }
+
+  private void observe(Histogram gcDurationHistogram, GarbageCollectionNotificationInfo info) {
+    double observedDuration = Unit.millisToSeconds(info.getGcInfo().getDuration());
+    gcDurationHistogram
+        .labelValues(info.getGcAction(), info.getGcName(), info.getGcCause())
+        .observe(observedDuration);
   }
 
   public static Builder builder() {

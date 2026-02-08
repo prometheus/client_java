@@ -128,4 +128,36 @@ class PrometheusPropertiesTest {
     assertThat(result.getMetricProperties("123metric")).isSameAs(customProps);
     assertThat(result.getMetricProperties("_23metric")).isSameAs(customProps);
   }
+
+  @Test
+  void useOtelSemconvReturnsFalseForMetricNotInList() {
+    PrometheusProperties props = buildProperties("jvm.gc.duration");
+    assertThat(props.useOtelSemconv("other.metric")).isFalse();
+  }
+
+  @Test
+  void useOtelSemconvWildcardEnablesAll() {
+    PrometheusProperties props = buildProperties("*");
+    assertThat(props.useOtelSemconv("any.metric")).isTrue();
+  }
+
+  @Test
+  void useOtelSemconvNullListReturnsFalse() {
+    PrometheusProperties props = PrometheusProperties.get();
+    assertThat(props.useOtelSemconv("otel_y")).isFalse();
+  }
+
+  @Test
+  void useOtelSemconvSpecificMetricReturnsTrueForMatch() {
+    PrometheusProperties props = buildProperties("jvm.gc.duration", "jvm.memory.used");
+    assertThat(props.useOtelSemconv("jvm.gc.duration")).isTrue();
+    assertThat(props.useOtelSemconv("jvm.memory.used")).isTrue();
+    assertThat(props.useOtelSemconv("other.metric")).isFalse();
+  }
+
+  private static PrometheusProperties buildProperties(String... otelSemconv) {
+    return PrometheusProperties.builder()
+        .defaultMetricsProperties(MetricsProperties.builder().useOtelSemconv(otelSemconv).build())
+        .build();
+  }
 }
