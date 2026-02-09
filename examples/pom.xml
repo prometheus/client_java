@@ -32,7 +32,7 @@
     <module>example-native-histogram</module>
     <module>example-custom-buckets</module>
     <module>example-prometheus-properties</module>
-/    <module>example-otel-jvm-runtime-metrics</module>
+    <module>example-otel-jvm-runtime-metrics</module>
   </modules>
 
 </project>
