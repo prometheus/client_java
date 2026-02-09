@@ -23,6 +23,10 @@
       groupName: "java graalvm",
       additionalBranchPrefix: "graalvm-",
     },
+    {
+      matchPackageNames: ["io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"],
+      ignoreUnstable: false,
+    },
   ],
   customManagers: [
     {
