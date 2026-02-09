@@ -93,7 +93,13 @@ OpenTelemetrySdk openTelemetry =
                 .build())
         .build();
 
-RuntimeMetrics.builder(openTelemetry).build();
+RuntimeMetrics runtimeMetrics =
+    RuntimeMetrics.builder(openTelemetry).build();
+
+// Close on shutdown to stop JMX metric collection
+Runtime.getRuntime()
+    .addShutdownHook(new Thread(runtimeMetrics::close));
+
 // Scrape at http://localhost:9464/metrics
 ```
 
@@ -134,7 +140,10 @@ OpenTelemetrySdk openTelemetry =
                 .build())
         .build();
 
-RuntimeMetrics.builder(openTelemetry).build();
+RuntimeMetrics runtimeMetrics =
+    RuntimeMetrics.builder(openTelemetry).build();
+Runtime.getRuntime()
+    .addShutdownHook(new Thread(runtimeMetrics::close));
 
 // Expose everything on one endpoint
 HTTPServer.builder()

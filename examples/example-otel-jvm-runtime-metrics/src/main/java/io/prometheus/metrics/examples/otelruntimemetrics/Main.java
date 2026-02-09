@@ -50,9 +50,13 @@ public class Main {
     //    - captureGcCause() adds a jvm.gc.cause attribute to jvm.gc.duration
     //    - emitExperimentalTelemetry() enables buffer pools, extended CPU,
     //      extended memory pools, and file descriptor metrics
-    RuntimeMetrics.builder(openTelemetry).captureGcCause().emitExperimentalTelemetry().build();
+    RuntimeMetrics runtimeMetrics =
+        RuntimeMetrics.builder(openTelemetry).captureGcCause().emitExperimentalTelemetry().build();
 
-    // 5. Expose both Prometheus and OTel metrics on a single endpoint.
+    // 5. Close RuntimeMetrics on shutdown to stop JMX metric collection.
+    Runtime.getRuntime().addShutdownHook(new Thread(runtimeMetrics::close));
+
+    // 6. Expose both Prometheus and OTel metrics on a single endpoint.
     HTTPServer server = HTTPServer.builder().port(9400).registry(registry).buildAndStart();
 
     System.out.println(
