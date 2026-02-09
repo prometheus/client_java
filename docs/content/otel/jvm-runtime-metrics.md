@@ -19,8 +19,8 @@ Key advantages:
 
 Since OpenTelemetry's `opentelemetry-exporter-prometheus`
 already depends on this library's `PrometheusRegistry`,
-no additional code is needed in prom_client_java2 — only
-the OTel SDK wiring shown below.
+no additional code is needed in this library — only the
+OTel SDK wiring shown below.
 
 ## Dependencies
 
@@ -72,7 +72,7 @@ implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry
 ## Standalone Setup
 
 If you **only** want OTel runtime metrics exposed as
-Prometheus, without any prom_client_java2 metrics:
+Prometheus, without any Prometheus Java client metrics:
 
 ```java
 import io.opentelemetry.exporter.prometheus.PrometheusHttpServer;
@@ -97,9 +97,9 @@ RuntimeMetrics.builder(openTelemetry).build();
 // Scrape at http://localhost:9464/metrics
 ```
 
-## Combined with prom_client_java2 Metrics
+## Combined with Prometheus Java Client Metrics
 
-If you already have prom_client_java2 metrics and want to
+If you already have Prometheus Java client metrics and want to
 add OTel runtime metrics to the **same** `/metrics`
 endpoint, use `PrometheusMetricReader` to bridge OTel
 metrics into a `PrometheusRegistry`:
@@ -143,6 +143,56 @@ HTTPServer.builder()
     .buildAndStart();
 ```
 
+The [examples/example-otel-jvm-runtime-metrics](https://github.com/prometheus/client_java/tree/main/examples/example-otel-jvm-runtime-metrics) <!-- editorconfig-checker-disable-line -->
+directory has a complete runnable example.
+
+## Configuration
+
+The `RuntimeMetricsBuilder` supports two configuration
+options:
+
+### `captureGcCause()`
+
+Adds a `jvm.gc.cause` attribute to the `jvm.gc.duration`
+metric, indicating why the garbage collection occurred
+(e.g. `G1 Evacuation Pause`, `System.gc()`):
+
+```java
+RuntimeMetrics.builder(openTelemetry)
+    .captureGcCause()
+    .build();
+```
+
+### `emitExperimentalTelemetry()`
+
+Enables additional experimental metrics beyond the stable
+set. These are not yet part of the OTel semantic conventions
+and may change in future releases:
+
+- Buffer pool metrics (direct and mapped byte buffers)
+- Extended CPU metrics
+- Extended memory pool metrics
+- File descriptor metrics
+
+```java
+RuntimeMetrics.builder(openTelemetry)
+    .emitExperimentalTelemetry()
+    .build();
+```
+
+Both options can be combined:
+
+```java
+RuntimeMetrics.builder(openTelemetry)
+    .captureGcCause()
+    .emitExperimentalTelemetry()
+    .build();
+```
+
+Selective per-metric registration is not supported by the
+runtime-telemetry API — it is all-or-nothing with these
+two toggles.
+
 ## Java 17 JFR Support
 
 The `opentelemetry-runtime-telemetry-java17` variant adds
@@ -165,8 +215,8 @@ RuntimeMetrics.builder(openTelemetry)
 OTel metric names are converted to Prometheus format by
 the exporter. Examples:
 
-| OTel name                     | Prometheus name                    |
-|-------------------------------|------------------------------------|
+| OTel name                    | Prometheus name                    |
+| ---------------------------- | ---------------------------------- |
 | `jvm.memory.used`            | `jvm_memory_used_bytes`            |
 | `jvm.gc.duration`            | `jvm_gc_duration_seconds`          |
 | `jvm.thread.count`           | `jvm_thread_count`                 |
