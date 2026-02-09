@@ -24,9 +24,7 @@
       additionalBranchPrefix: "graalvm-",
     },
     {
-      matchPackageNames: [
-        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha",
-      ],
+      matchPackageNames: ["io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"],
       ignoreUnstable: false,
     },
   ],
