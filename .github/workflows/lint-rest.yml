@@ -4,11 +4,12 @@ name: Lint What Super Linter Can't
 on:
   pull_request:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   lint:
+    permissions:
+      contents: read
     runs-on: ubuntu-24.04
     steps:
       - name: Check out
