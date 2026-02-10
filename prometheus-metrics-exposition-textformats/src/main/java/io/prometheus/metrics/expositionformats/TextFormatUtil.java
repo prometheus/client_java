@@ -241,11 +241,6 @@ public class TextFormatUtil {
           first.getMetadata().getPrometheusName(), snapshot.getMetadata().getPrometheusName())) {
         throw new IllegalArgumentException("Cannot merge snapshots: inconsistent metric name");
       }
-      if (!Objects.equals(first.getMetadata().getHelp(), snapshot.getMetadata().getHelp())) {
-        throw new IllegalArgumentException(
-            "Cannot merge snapshots: conflicting help for metric "
-                + first.getMetadata().getPrometheusName());
-      }
       if (!Objects.equals(first.getMetadata().getUnit(), snapshot.getMetadata().getUnit())) {
         throw new IllegalArgumentException(
             "Cannot merge snapshots: conflicting unit for metric "
