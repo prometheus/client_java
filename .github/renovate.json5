@@ -27,6 +27,11 @@
       matchPackageNames: ["io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"],
       ignoreUnstable: false,
     },
+    {
+      enabled: false,
+      description: "Ignore internal project modules",
+      matchPackageNames: ["/^io\\.prometheus:(examples|example-.+|integration-tests|it-.+)$/"],
+    },
   ],
   customManagers: [
     {
