@@ -96,6 +96,27 @@ and full label-schema validation and duplicate detection still apply. A collecto
 non-null type but leaves `getLabelNames()` as `null` is still validated, with its labels treated as
 empty.
 
+## Filtering Metrics
+
+You can set a registry-level metric name filter that applies to all scrape operations.
+Only metrics whose names match the filter predicate will be included in scrape results:
+
+```java
+PrometheusRegistry.defaultRegistry.setMetricFilter(name -> !name.startsWith("debug_"));
+```
+
+The registry filter is AND-combined with any scrape-time `includedNames` predicate passed to
+`scrape(Predicate)`. For example, if the registry filter allows `counter_*` and the scrape-time
+filter allows `counter_a`, only `counter_a` will be included.
+
+To remove the filter, set it to `null`:
+
+```java
+PrometheusRegistry.defaultRegistry.setMetricFilter(null);
+```
+
+Note that `clear()` does not reset the metric filter -- it only removes registered collectors.
+
 ## Unregistering a Metric
 
 There is no automatic expiry of unused metrics (yet), once a metric is registered it will remain
